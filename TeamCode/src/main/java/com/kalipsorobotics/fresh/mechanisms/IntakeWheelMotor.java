@@ -5,7 +5,7 @@ import com.kalipsorobotics.fresh.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-public class IntakeWheelMotor{
+public class IntakeWheelMotor {
     private final DcMotor intake;
     private IntakeWheelMotor(DcMotor intake) {
         this.intake = intake;
