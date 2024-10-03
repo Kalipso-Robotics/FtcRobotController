@@ -1285,7 +1285,7 @@ public class Robot {
             //set motor power ONLY if a value has changed. else, use previous value.
             if (fLeftPowerPrev != fLeftPower || fRightPowerPrev != fRightPower
                     || bLeftPowerPrev != bLeftPower || bRightPowerPrev != bRightPower) {
-                drivetrain.setMotorPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
+                drivetrain.setMotorPower(fLeftPower/2, fRightPower/2, bLeftPower/2, bRightPower/2);
 
                 fLeftPowerPrev = fLeftPower;
                 fRightPowerPrev = fRightPower;
