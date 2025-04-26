@@ -118,7 +118,6 @@ public class CheckStuckRobot {
     }
     private double prevHeading = 0;
 
-    private double prevHeading = 0;
 
     private boolean checkRobotSpinning(double xDelta, double yDelta, double thetaDelta, Position currentPos, long currentTimeMs) {
         double currentHeading = currentPos.getTheta();
