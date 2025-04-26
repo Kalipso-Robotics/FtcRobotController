@@ -118,15 +118,17 @@ public class CheckStuckRobot {
     }
     private double prevHeading = 0;
 
-    private boolean checkRobotSpinning(double xVel, double yVel, double thetaVel, Position currentPos, double currentTimeMs) {
+    private double prevHeading = 0;
+
+    private boolean checkRobotSpinning(double xDelta, double yDelta, double thetaDelta, Position currentPos, long currentTimeMs) {
         double currentHeading = currentPos.getTheta();
         double headingDelta = Math.abs(currentHeading - prevHeading);
         prevHeading = currentHeading;
 
         boolean isSpinningNow =
-                Math.abs(xVel) < X_DELTA_MIN_THRESHOLD &&
-                        Math.abs(yVel) < Y_DELTA_MIN_THRESHOLD &&
-                        Math.abs(thetaVel) < THETA_DELTA_MIN_THRESHOLD &&
+                Math.abs(xDelta) < X_DELTA_MIN_THRESHOLD &&
+                        Math.abs(yDelta) < Y_DELTA_MIN_THRESHOLD &&
+                        Math.abs(thetaDelta) < THETA_DELTA_MIN_THRESHOLD &&
                         headingDelta < 1;  // degrees
 
         if (isSpinningNow) {
@@ -145,6 +147,7 @@ public class CheckStuckRobot {
 
         return false;
     }
+
 
     private boolean checkIfOnPath(/*Path path,*/ int timeInMillis) {
         //return checkXY.isPositionOnPath(path, timeInMillis);
