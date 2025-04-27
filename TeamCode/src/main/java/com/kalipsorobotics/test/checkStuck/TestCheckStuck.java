@@ -6,6 +6,7 @@ import android.util.Log;
 import com.kalipsorobotics.actions.CheckStuckRobot;
 import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.localization.SparkfunOdometry;
 import com.kalipsorobotics.localization.WheelOdometry;
 import com.kalipsorobotics.math.Path;
 import com.kalipsorobotics.math.Position;
@@ -27,22 +28,24 @@ public class TestCheckStuck extends LinearOpMode {
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry, 0, 0);
         DriveAction driveAction = new DriveAction(driveTrain);
         CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, purePursuitAction);
+        SparkfunOdometry sparkfunOdometry = new SparkfunOdometry(driveTrain, opModeUtilities, 0, 0, 0);
         waitForStart();
         while(opModeIsActive()) {
             Path path = null; //TODO find way to get path AND IMPLEMENT INTO CHECKXY
-            if (checkStuck.isStuck()) {
+            sparkfunOdometry.updatePosition();
+            if (checkStuck.isStuck(sparkfunOdometry.getCurrentPosition())) {
                 telemetry.addLine("robot is stuck");
                 //Log.d("check stucks", "ROBOT STUCK");
             } else {
                 //Log.d("check stucks", "ROBOT NOT STUCK");
                 telemetry.addLine("robot is fine");
             }
-            Log.d("check stucks", "x delta: " + checkStuck.getXDelta(SharedData.getOdometryPosition()) +
+            Log.d("check stuks", "x delta: " + checkStuck.getXDelta(SharedData.getOdometryPosition()) +
                     " y delta: " + checkStuck.getYDelta(SharedData.getOdometryPosition()) +
                     " theta delta: " + checkStuck.getThetaDelta(SharedData.getOdometryPosition()));
             driveAction.move(gamepad1);
             telemetry.update();
-            //TODO fix shared data thing
+            //TODO make check stuck check every second
         }
     }
 }

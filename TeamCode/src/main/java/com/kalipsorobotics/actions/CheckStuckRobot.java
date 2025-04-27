@@ -151,8 +151,8 @@ public class CheckStuckRobot {
 
     // change from out of void when method finished
     // if delta x, y, and theta are too low ( make threshold large ) then check the path and current pos
-    public boolean isStuck() {
-        Position currentPos = SharedData.getOdometryPosition();
+    public boolean isStuck(Position currentPosition) {
+        Position currentPos = currentPosition;
         long currentTime = SystemClock.uptimeMillis();
 
         double xDelta = getXDelta(currentPos);
