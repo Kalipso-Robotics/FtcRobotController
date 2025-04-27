@@ -117,30 +117,31 @@ public class CheckStuckRobot {
     private boolean checkRobotSpinning(double xDelta, double yDelta, double thetaDelta, Position currentPos, long currentTimeMs) {
         double currentHeading = currentPos.getTheta();
         double headingDelta = Math.abs(currentHeading - prevHeading);
-        prevHeading = currentHeading;
 
-        boolean isSpinningNow =
+        boolean isCurrentlySpinning =
                 Math.abs(xDelta) < X_DELTA_MIN_THRESHOLD &&
                         Math.abs(yDelta) < Y_DELTA_MIN_THRESHOLD &&
                         Math.abs(thetaDelta) < THETA_DELTA_MIN_THRESHOLD &&
-                        headingDelta < 1;  // degrees
+                        headingDelta < 1; // degrees
 
-        if (isSpinningNow) {
+        if (isCurrentlySpinning) {
             if (!wasSpinning) {
                 wasSpinning = true;
                 spinningStartTime = currentTimeMs;
-            } else {
-                if ((currentTimeMs - spinningStartTime) >= SPINNING_TIMEOUT_MS) {
-                    return true;  // spinning "forever"
-                }
+            } else if (currentTimeMs - spinningStartTime >= SPINNING_TIMEOUT_MS) {
+                prevHeading = currentHeading;  // <- only update heading when actually spinning
+                return true;  // spinning too long = stuck
             }
         } else {
             wasSpinning = false;
             spinningStartTime = 0;
         }
 
+        prevHeading = currentHeading;  // move to end to avoid race conditions
+
         return false;
     }
+
 
 
     private boolean checkIfOnPath(/*Path path,*/ int timeInMillis) {
