@@ -22,8 +22,12 @@ public class PositionHistory {
 
     public void setCurrentVelocity(Velocity relativeDelta, double timeElapsed) {
         this.relativeDelta = relativeDelta;
-        Velocity currentVelocity = this.currentVelocity.divide(timeElapsed);
+        Velocity currentVelocity = this.relativeDelta.divide(timeElapsed);
         this.currentVelocity = currentVelocity;
+    }
+
+    public static String toNullString() {
+        return "null, null, null, null";
     }
 
     public String toStringCSV() {

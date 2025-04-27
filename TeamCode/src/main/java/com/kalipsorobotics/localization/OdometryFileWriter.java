@@ -1,5 +1,7 @@
 package com.kalipsorobotics.localization;
 
+import android.util.Log;
+
 import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -16,14 +18,43 @@ public class OdometryFileWriter extends KFileWriter {
 
 
     private void writeOdometryHeader() {
-        super.writeLine("Time Stamp, Path, Gobilda, Wheel, Wheel+IMU, Wheel + IMU Fuse, Wheel + Spark, " +
-                "Wheel + Spark Fuse, Wheel + IMU + Spark Fuse");
-        super.writeLine(" , , X, Y, Theta, DeltaTheta, , X, Y, Theta, DeltaTheta, , X, Y, Theta, DeltaTheta, , X, Y, Theta, DeltaTheta" +
-                " , X, Y, Theta, DeltaTheta , X, Y, Theta, DeltaTheta , X, Y, Theta, DeltaTheta , X, Y, Theta, DeltaTheta");
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append("Time");
+        stringBuilder.append(",");
+        for (Odometry key : Odometry.values()) {
+            stringBuilder.append(key.toString());
+            stringBuilder.append(",");
+            stringBuilder.append(key + "_X,");
+            stringBuilder.append(key + "_Y,");
+            stringBuilder.append(key + "_Theta,");
+            stringBuilder.append(key + "_DeltaTheta,");
+
+        }
+        super.writeLine(stringBuilder.toString());
     }
 
     public void writeOdometryPositionHistory(HashMap<Odometry, PositionHistory> positionHistoryHashMap) {
-        positionHistoryHashMap.forEach((key, value) -> {super.writeLine(value.toStringCSV());});
+        Log.d("odometryData", "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(System.currentTimeMillis());
+        stringBuilder.append(",");
+
+        for (Odometry key : Odometry.values()) {
+
+            stringBuilder.append(key.toString());
+            stringBuilder.append(",");
+
+            if (positionHistoryHashMap.get(key) == null) {
+                stringBuilder.append(PositionHistory.toNullString());
+            } else {
+                stringBuilder.append(positionHistoryHashMap.get(key).toStringCSV());
+            }
+
+            stringBuilder.append(",");
+
+        }
+        super.writeLine(stringBuilder.toString());
     }
     public void close() {
         super.close();

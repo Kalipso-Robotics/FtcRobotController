@@ -53,10 +53,6 @@ public class KFileWriter {
     }
 
     public void writeLine(String string) {
-
-
-
-
         try {
             writer.write(string);
             writer.newLine();

@@ -7,6 +7,7 @@ import com.kalipsorobotics.actions.intake.IntakeCounterWeight;
 import com.kalipsorobotics.actions.intake.IntakeTransferReady;
 import com.kalipsorobotics.actions.outtake.DistanceDetectionAction;
 import com.kalipsorobotics.actions.outtake.WallPickupDistanceSensorAction;
+import com.kalipsorobotics.localization.OdometryFileWriter;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.actions.SetAutoDelayAction;
 import com.kalipsorobotics.actions.autoActions.FirstWallToBarHangAction;
@@ -201,13 +202,14 @@ public class AutoSpecimen2Pre extends LinearOpMode {
 
 
         //===============do not touch -- essential for auto 0_0======================/
+        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoSpecimen", opModeUtilities);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         redAutoSpecimen.printWithDependentActions();
         waitForStart();
         OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
         while (opModeIsActive()) {
 
-
+            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
 //            maintainLS.setIsDone(false);
 //            maintainLS.setTargetTicks(MoveLSAction.getGlobalLinearSlideMaintainTicks());
 //            maintainLS.updateCheckDone();
@@ -231,7 +233,7 @@ public class AutoSpecimen2Pre extends LinearOpMode {
 //            telemetry.update();
 
         }
-
+        odometryFileWriter.close();
         OpModeUtilities.shutdownExecutorService(executorService);
 
     }

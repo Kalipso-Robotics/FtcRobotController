@@ -1,6 +1,7 @@
 package com.kalipsorobotics.utilities;
 
 import android.os.Process;
+import android.util.Log;
 
 import com.kalipsorobotics.localization.WheelOdometry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -45,13 +46,19 @@ public class OpModeUtilities {
             executorService.submit(() -> {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
                 while (!Thread.currentThread().isInterrupted()) {
+                    Log.d("ExcecutorService", "running");
                     wheelOdometry.updatePositionAll();
+                    Log.d("ExcecutorService", "running after update");
+
                 }
 
             });
+        } catch (RuntimeException e) {
+            Log.e("ExecutorService", "A Runtime Exception occurred",e);
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
+            Log.e("ExecutorService", "An exception occurred",e);
             Thread.currentThread().interrupt();
         }
     }
-
 }

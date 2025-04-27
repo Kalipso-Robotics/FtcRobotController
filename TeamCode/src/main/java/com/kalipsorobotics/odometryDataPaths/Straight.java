@@ -1,6 +1,9 @@
 package com.kalipsorobotics.odometryDataPaths;
 
+import android.util.Log;
+
 import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
+import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.OdometryFileWriter;
 import com.kalipsorobotics.localization.WheelOdometry;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -26,6 +29,9 @@ public class Straight extends LinearOpMode {
         DriveTrain.setInstanceNull();
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
 
+        DriveAction driveAction = new DriveAction(driveTrain);
+
+
         IMUModule.setInstanceNull();
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         sleep(1000);
@@ -35,21 +41,26 @@ public class Straight extends LinearOpMode {
         SharedData.resetOdometryPosition();
 
 
+
         PurePursuitAction moveStraight600MM = new PurePursuitAction(driveTrain, wheelOdometry);
         moveStraight600MM.addPoint(600, 0, 0);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
-
 
         waitForStart();
+        OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
         while (opModeIsActive()) {
 
-            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
-            moveStraight600MM.updateCheckDone();
+            if(gamepad1.left_stick_y != 0 || gamepad1.right_stick_x != 0 || gamepad1.left_stick_x != 0) {
+                driveAction.move(gamepad1);
+            }
 
-            //Log.d("odometryData", "currentPos" + SharedData.getOdometryPosition().toString());
+            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
+            //moveStraight600MM.updateCheckDone();
+
+            Log.d("odometryData", "currentPos" + SharedData.getOdometryPosition());
         }
+        Log.d("File", "closing");
         odometryFileWriter.close();
         OpModeUtilities.shutdownExecutorService(executorService);
     }

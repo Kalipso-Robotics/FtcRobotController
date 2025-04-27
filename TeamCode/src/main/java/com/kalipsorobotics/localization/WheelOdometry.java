@@ -1,6 +1,7 @@
 package com.kalipsorobotics.localization;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.math.MathFunctions;
@@ -339,8 +340,8 @@ public class WheelOdometry {
         Velocity wheelRelDelta = calculateRelativeDeltaWheel(rightDistanceMM, leftDistanceMM,
                 backDistanceMM, timeElapsedSeconds * 1000);
         wheelRelDelta = linearToArcDelta(wheelRelDelta);
-        wheelPositionHistory.setCurrentPosition(calculateGlobal(wheelRelDelta,
-                wheelPositionHistory.getCurrentPosition()));
+        Position globalPosition = calculateGlobal(wheelRelDelta, wheelPositionHistory.getCurrentPosition());
+        wheelPositionHistory.setCurrentPosition(globalPosition);
         wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds);
         odometryPositionHistoryHashMap.put(Odometry.WHEEL, wheelPositionHistory);
     }
@@ -350,8 +351,8 @@ public class WheelOdometry {
         Velocity wheelIMURelDelta = calculateRelativeDeltaWheelIMU(rightDistanceMM, leftDistanceMM, backDistanceMM,
                 timeElapsedSeconds * 1000);
         wheelIMURelDelta = linearToArcDelta(wheelIMURelDelta);
-        wheelIMUPositionHistory.setCurrentPosition(calculateGlobal(wheelIMURelDelta,
-                wheelIMUPositionHistory.getCurrentPosition()));
+        Position globalPosition = calculateGlobal(wheelIMURelDelta, wheelIMUPositionHistory.getCurrentPosition());
+        wheelIMUPositionHistory.setCurrentPosition(globalPosition);
         wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds);
         odometryPositionHistoryHashMap.put(Odometry.WHEEL_IMU, wheelIMUPositionHistory);
 
@@ -362,8 +363,8 @@ public class WheelOdometry {
         Velocity wheelIMUFuseRelDelta = calculateRelativeDeltaWheelIMUFuse(rightDistanceMM, leftDistanceMM,
                 backDistanceMM, timeElapsedSeconds * 1000);
         wheelIMUFuseRelDelta = linearToArcDelta(wheelIMUFuseRelDelta);
-        wheelIMUFusePositionHistory.setCurrentPosition(calculateGlobal(wheelIMUFuseRelDelta,
-                wheelIMUFusePositionHistory.getCurrentPosition()));
+        Position globalPosition = calculateGlobal(wheelIMUFuseRelDelta, wheelIMUFusePositionHistory.getCurrentPosition());
+        wheelIMUFusePositionHistory.setCurrentPosition(globalPosition);
         wheelIMUFusePositionHistory.setCurrentVelocity(wheelIMUFuseRelDelta, timeElapsedSeconds);
         odometryPositionHistoryHashMap.put(Odometry.WHEEL_IMU_FUSE, wheelIMUFusePositionHistory);
 
@@ -374,8 +375,8 @@ public class WheelOdometry {
         Velocity wheelSparkRelDelta = calculateRelativeDeltaWheelSpark(rightDistanceMM, leftDistanceMM,
                 backDistanceMM, timeElapsedSeconds * 1000);
         wheelSparkRelDelta = linearToArcDelta(wheelSparkRelDelta);
-        wheelSparkPositionHistory.setCurrentPosition(calculateGlobal(wheelSparkRelDelta,
-                wheelSparkPositionHistory.getCurrentPosition()));
+        Position globalPosition = calculateGlobal(wheelSparkRelDelta, wheelSparkPositionHistory.getCurrentPosition());
+        wheelSparkPositionHistory.setCurrentPosition(globalPosition);
         wheelSparkPositionHistory.setCurrentVelocity(wheelSparkRelDelta, timeElapsedSeconds);
         odometryPositionHistoryHashMap.put(Odometry.WHEEL_SPARK, wheelSparkPositionHistory);
 
@@ -386,8 +387,8 @@ public class WheelOdometry {
         Velocity wheelSparkFuseRelDelta = calculateRelativeDeltaWheelSparkFuse(rightDistanceMM, leftDistanceMM,
                 backDistanceMM, timeElapsedSeconds * 1000);
         wheelSparkFuseRelDelta = linearToArcDelta(wheelSparkFuseRelDelta);
-        wheelSparkFusePositionHistory.setCurrentPosition(calculateGlobal(wheelSparkFuseRelDelta,
-                wheelSparkFusePositionHistory.getCurrentPosition()));
+        Position globalPosition = calculateGlobal(wheelSparkFuseRelDelta, wheelSparkFusePositionHistory.getCurrentPosition());
+        wheelSparkFusePositionHistory.setCurrentPosition(globalPosition);
         wheelSparkFusePositionHistory.setCurrentVelocity(wheelSparkFuseRelDelta, timeElapsedSeconds);
         odometryPositionHistoryHashMap.put(Odometry.WHEEl_SPARK_FUSE, wheelSparkFusePositionHistory);
 
@@ -399,13 +400,14 @@ public class WheelOdometry {
         Velocity wheelIMUSparkFuseRelDelta = calculateRelativeDeltaWheelIMUSparkFuse(rightDistanceMM, leftDistanceMM,
                 backDistanceMM, timeElapsedSeconds * 1000);
         wheelIMUSparkFuseRelDelta = linearToArcDelta(wheelIMUSparkFuseRelDelta);
-        wheelIMUSparkFusePositionHistory.setCurrentPosition(calculateGlobal(wheelIMUSparkFuseRelDelta,
-                wheelIMUSparkFusePositionHistory.getCurrentPosition()));
+        Position globalPosition = calculateGlobal(wheelIMUSparkFuseRelDelta, wheelIMUSparkFusePositionHistory.getCurrentPosition());
+        wheelIMUSparkFusePositionHistory.setCurrentPosition(globalPosition);
         wheelIMUSparkFusePositionHistory.setCurrentVelocity(wheelIMUSparkFuseRelDelta, timeElapsedSeconds);
         odometryPositionHistoryHashMap.put(Odometry.WHEEL_IMU_SPARK_FUSE, wheelIMUSparkFusePositionHistory);
 
     }
     public HashMap<Odometry, PositionHistory> updatePositionAll() {
+        Log.d("updatepos", "updatepos");
         double rightDistanceMM = countRight();
         double leftDistanceMM = countLeft();
         double backDistanceMM = countBack();
@@ -418,11 +420,17 @@ public class WheelOdometry {
         double timeElapsedSeconds = (currentTime - prevTime) / 1000.0;
 
         updateWheelPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
+        Log.d("updatepos", "updatepos after wheel");
         updateWheelIMUPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
+        Log.d("updatepos", "updatepos after wheelIMU");
         updateWheelIMUFusePos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
+        Log.d("updatepos", "updatepos after wheelIMUFuse");
         updateWheelSparkPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
+        Log.d("updatepos", "updatepos after wheelSpark");
         updateWheelSparkFusePos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
+        Log.d("updatepos", "updatepos after wheelSparkFuse");
         updateWheelIMUSparkFuse(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
+        Log.d("updatepos", "updatepos after wheelIMUSparkFuse");
 
 
 
@@ -437,6 +445,7 @@ public class WheelOdometry {
         prevSparkImuHeading = currentSparkImuHeading;
         SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(Odometry.WHEEL_IMU_SPARK_FUSE).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
+        Log.d("updatepos", "updatepos done");
         return odometryPositionHistoryHashMap;
     }
 
