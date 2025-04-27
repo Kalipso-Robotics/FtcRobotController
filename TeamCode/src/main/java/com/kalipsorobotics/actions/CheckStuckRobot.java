@@ -107,15 +107,10 @@ public class CheckStuckRobot {
 //        return false;
 //    }
 
-    private boolean checkRobotNotMoving(double currentXVelocity, double currentYVelocity, double currentTimeInMs) {
-        if (currentYVelocity < 0.05 || currentXVelocity < 0.05) {
-            return true;
-        }
-        if (getXDelta(SharedData.getOdometryPosition()) < X_DELTA_MIN_THRESHOLD && getYDelta(SharedData.getOdometryPosition()) < Y_DELTA_MIN_THRESHOLD) {
-            return true;
-        }
-        return false;
+    private boolean checkRobotNotMoving(double xDelta, double yDelta) {
+        return (Math.abs(xDelta) < X_DELTA_MIN_THRESHOLD && Math.abs(yDelta) < Y_DELTA_MIN_THRESHOLD);
     }
+
     private double prevHeading = 0;
 
 
@@ -155,87 +150,52 @@ public class CheckStuckRobot {
 
     // change from out of void when method finished
     // if delta x, y, and theta are too low ( make threshold large ) then check the path and current pos
-    public boolean isStuck(/*Path path,*/ int timeInMillis) {
+    public boolean isStuck() {
         Position currentPos = SharedData.getOdometryPosition();
-        Position intendedPos = currentPos;
+        long currentTime = SystemClock.uptimeMillis();
 
-        //TODO add intended pos
-        double currentX = currentPos.getX();
-        double currentY = currentPos.getY();
-        double currentTheta = currentPos.getTheta();
+        double xDelta = getXDelta(currentPos);
+        double yDelta = getYDelta(currentPos);
+        double thetaDelta = getThetaDelta(currentPos);
 
-//        double currentThetaVelocity = wheelOdometry.getCurrentVelocity().getTheta();
-//        double deltaThetaVelocity = abs(prevThetaVelocity - currentThetaVelocity);
-//
-//        double currentYVelocity = wheelOdometry.getCurrentVelocity().getY();
-//        double deltaYVelocity = abs(prevYVelocity - currentYVelocity);
-//
-//        double currentXVelocity = wheelOdometry.
-//        double deltaXVelocity = abs(prevXVelocity - currentXVelocity);
+        if (currentTime - lastStuckCheckTime >= 1000) { // check once per second
+            lastStuckCheckTime = currentTime;
 
-        //TODO Fix the time encrements
-        // Declare and initialize this somewhere outside the method, so it persists across calls:
-// long lastStuckCheckTime = 0;
+            boolean notMoving = checkRobotNotMoving(xDelta, yDelta);
+            boolean spinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPos, currentTime);
 
-        if (timeInMillis - lastStuckCheckTime >= 1000) {
-            lastStuckCheckTime = timeInMillis;  // reset the timer
-
-            if (/*checkRobotSpinning(
-                    getXDelta(currentPos),
-                    getYDelta(currentPos),
-                    getThetaDelta(currentPos),
-                    currentPos,
-                    currentPos.getTheta(),
-                    timeInMillis) ||*/
-                    checkRobotNotMoving(
-                            getXDelta(currentPos),
-                            getYDelta(currentPos),
-                            timeInMillis)) {
-
+            if (notMoving || spinning) {
                 Log.d("check stuck", "---ROBOT IS STUCK---");
-                if (checkRobotSpinning(
-                        getXDelta(currentPos),
-                        getYDelta(currentPos),
-                        getThetaDelta(currentPos),
-                        currentPos,
-                        timeInMillis)) {
-                    //robot is spinning, unstuck
-                }
-                if (checkRobotNotMoving(
-                        getXDelta(currentPos),
-                        getYDelta(currentPos),
-                        timeInMillis)) {
-                    //move backwards to unstuck
-                }
+
+                // Take action!
+                unstuckRobot(driveTrain);
+
                 return true;
             }
-
             Log.d("check stuck", "---robot is not stuck---");
         }
-
         return false;
-
     }
 
-    private void unstuckRobot(DriveTrain driveTrain, int timeInMillis){
+
+    private void unstuckRobot(DriveTrain driveTrain){
         purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry);
         purePursuitAction.setMaxTimeOutMS(500);
+
         Position currentPos = new Position(wheelOdometry.countLeft(), wheelOdometry.countBack(), wheelOdometry.getCurrentImuHeading());
-        //TODO replace 10 with something
-        Position possiblePos1 = new Position(currentPos.getX() - 10, currentPos.getY(), currentPos.getTheta());
-        Position possiblePos2 = new Position(currentPos.getX() + 10, currentPos.getY(), currentPos.getTheta());
-        Position possiblePos3 = new Position(currentPos.getX(), currentPos.getY() - 10, currentPos.getTheta());
-        Position possiblePos4 = new Position(currentPos.getX(), currentPos.getY() + 10, currentPos.getTheta());
-        if (!checkIfOnPath(/*path*/timeInMillis)) {
-            purePursuitAction.addPoint(possiblePos1.getX(), possiblePos1.getY(), possiblePos1.getTheta());
-            purePursuitAction.addPoint(possiblePos2.getX(), possiblePos2.getY(), possiblePos2.getTheta());
-            purePursuitAction.addPoint(possiblePos3.getX(), possiblePos3.getY(), possiblePos3.getTheta());
-            purePursuitAction.addPoint(possiblePos4.getX(), possiblePos4.getY(), possiblePos4.getTheta());
-            return;
+
+        double offset = 10; // mm
+        Position[] positions = {
+                new Position(currentPos.getX() - offset, currentPos.getY(), currentPos.getTheta()),
+                new Position(currentPos.getX() + offset, currentPos.getY(), currentPos.getTheta()),
+                new Position(currentPos.getX(), currentPos.getY() - offset, currentPos.getTheta()),
+                new Position(currentPos.getX(), currentPos.getY() + offset, currentPos.getTheta())
+        };
+
+        for (Position pos : positions) {
+            purePursuitAction.addPoint(pos.getX(), pos.getY(), pos.getTheta());
         }
-        //moves in all four directions
-        //TODO replace with something that actually gets the robot unstuck
-        return;
     }
+
 
 }
