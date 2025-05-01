@@ -140,13 +140,13 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     //enum that captures the direction the encoders are set to
     public enum EncoderDirection{
         FORWARD,
-        REVERSED;
+        REVERSED
     }
 
     //enum that captures the kind of goBILDA odometry pods, if goBILDA pods are used
     public enum GoBildaOdometryPods {
         goBILDA_SWINGARM_POD,
-        goBILDA_4_BAR_POD;
+        goBILDA_4_BAR_POD
     }
     //enum that captures a limited scope of read data. More options may be added in future update
     public enum readData {

@@ -20,35 +20,29 @@ import java.util.HashMap;
 
 
 public class WheelOdometry {
-    private static WheelOdometry single_instance = null;
-    OpModeUtilities opModeUtilities;
-    HashMap<Odometry, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
-
-    IMUModule imuModule;
-
-    SparkFunOTOS sparkFunOTOS;
-
-    SensorFusion sensorFusion;
-
-    private double wheelHeadingWeight = 0;
-    private double imuHeadingWeight = 1;
     final static private double TRACK_WIDTH_MM = 297;
     //maybe double check BACK Distance
     static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
-
-    //200-182 offset compare to line between parallel odo pods
-    //negative if robot center behind parallel wheels
-    //final private static double ROBOT_CENTER_OFFSET_MM = -18;
-    private DcMotor rightEncoder;
-    private DcMotor leftEncoder;
-    private DcMotor backEncoder;
+    private static WheelOdometry single_instance = null;
     final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUFusePositionHistory = new PositionHistory();
     final private PositionHistory wheelSparkPositionHistory = new PositionHistory();
     final private PositionHistory wheelSparkFusePositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUSparkFusePositionHistory = new PositionHistory();
-
+    OpModeUtilities opModeUtilities;
+    HashMap<Odometry, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
+    IMUModule imuModule;
+    SparkFunOTOS sparkFunOTOS;
+    SensorFusion sensorFusion;
+    private double wheelHeadingWeight = 0;
+    private double imuHeadingWeight = 1;
+    //200-182 offset compare to line between parallel odo pods
+    //negative if robot center behind parallel wheels
+    //final private static double ROBOT_CENTER_OFFSET_MM = -18;
+    private DcMotor rightEncoder;
+    private DcMotor leftEncoder;
+    private DcMotor backEncoder;
     private volatile double prevRightDistanceMM;
     private volatile double prevLeftDistanceMM;
     volatile private double prevBackDistanceMM;
@@ -148,8 +142,7 @@ public class WheelOdometry {
     }
 
 
-    private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
-                                                              double deltaTimeMS) {
+    private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
@@ -165,8 +158,7 @@ public class WheelOdometry {
     }
 
 
-    private Velocity calculateRelativeDeltaWheelIMU(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
-                                                    double deltaTimeMS) {
+    private Velocity calculateRelativeDeltaWheelIMU(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
@@ -185,8 +177,7 @@ public class WheelOdometry {
 
 
     private Velocity calculateRelativeDeltaWheelIMUFuse(double rightDistanceMM, double leftDistanceMM,
-                                                    double backDistanceMM,
-                         double deltaTimeMS) {
+                                                    double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
@@ -206,8 +197,7 @@ public class WheelOdometry {
 
 
     private Velocity calculateRelativeDeltaWheelSpark(double rightDistanceMM, double leftDistanceMM,
-                                                    double backDistanceMM,
-                         double deltaTimeMS) {
+                                                      double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
@@ -224,8 +214,7 @@ public class WheelOdometry {
 
 
     private Velocity calculateRelativeDeltaWheelSparkFuse(double rightDistanceMM, double leftDistanceMM,
-                                                    double backDistanceMM,
-                          double deltaTimeMS) {
+                                                    double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;

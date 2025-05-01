@@ -45,7 +45,7 @@ public class Mecanum extends LinearOpMode {
 
             mecanum600.updateCheckDone();
 
-            Log.d("odometryData", "currentPos" + SharedData.getOdometryPosition().toString());
+            Log.d("odometryData", "currentPos" + SharedData.getOdometryPosition());
 
         }
         OpModeUtilities.shutdownExecutorService(executorService);

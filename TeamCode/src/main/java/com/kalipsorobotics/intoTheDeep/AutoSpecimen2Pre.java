@@ -104,7 +104,7 @@ public class AutoSpecimen2Pre extends LinearOpMode {
 
         //================begin of second specimen=============//
         WallToBarMoveHang wallToBarMoveHang = new WallToBarMoveHang(driveTrain, wheelOdometry,
-                outtake, firstHangPos + hangSpacing*1);
+                outtake, firstHangPos + hangSpacing);
         wallToBarMoveHang.setName("wallToBarHangRoundTripPre2");
         //wallToBarMoveHang.setTelemetry(telemetry);
         wallToBarMoveHang.setDependentActions(firstWallToBarRoundTrip);

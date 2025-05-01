@@ -19,6 +19,7 @@ import com.kalipsorobotics.actions.intake.SampleIntakeReady;
 import com.kalipsorobotics.actions.outtake.MoveLSAction;
 import com.kalipsorobotics.actions.outtake.BasketReadyAction;
 import com.kalipsorobotics.actions.outtake.OuttakeTransferReady;
+import com.kalipsorobotics.localization.OdometryFileWriter;
 import com.kalipsorobotics.localization.WheelOdometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -313,13 +314,14 @@ public class AutoBasketFunnel extends LinearOpMode {
         telemetry.update();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-
+        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasket", opModeUtilities);
 
         waitForStart();
 
         OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
 
         while (opModeIsActive()) {
+            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
 
             //wheelOdometry.updatePosition();
 
@@ -330,6 +332,7 @@ public class AutoBasketFunnel extends LinearOpMode {
             redAutoBasket.updateCheckDone();
 
         }
+        odometryFileWriter.close();
         Log.d("executor service", "before shutdown" + SharedData.getOdometryPosition());
         OpModeUtilities.shutdownExecutorService(executorService);
         Log.d("executor service",
