@@ -7,7 +7,6 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @Disabled//(name="pptest")
 public class NewTestPurePursuit extends LinearOpMode {
@@ -33,7 +32,7 @@ public class NewTestPurePursuit extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
-            wheelOdometry.updatePosition();
+            wheelOdometry.updateDefaultPosition();
 
             test.update();
 

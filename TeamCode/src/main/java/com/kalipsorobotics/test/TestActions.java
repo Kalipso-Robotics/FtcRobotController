@@ -621,7 +621,7 @@ public class TestActions extends LinearOpMode {
                 cameraCapture.capture();
             }
 
-            wheelOdometry.updatePosition();
+            wheelOdometry.updateDefaultPosition();
 
         }
     }

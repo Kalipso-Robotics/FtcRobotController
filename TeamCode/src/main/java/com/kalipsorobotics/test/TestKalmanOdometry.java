@@ -2,8 +2,6 @@ package com.kalipsorobotics.test;
 
 
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.linearOpMode;
-
 import android.util.Log;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
@@ -16,7 +14,6 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.opencv.core.Point;
 
@@ -39,7 +36,7 @@ public class TestKalmanOdometry extends LinearOpMode {
 //
         while (opModeIsActive()) {
             driveAction.move(gamepad1);
-            Point noisyMeasurement1 = new Point((odometrySpark.sparkUpdateData().getX() + wheelOdometry.updatePosition().getX())/2,(odometrySpark.sparkUpdateData().getY() + wheelOdometry.updatePosition().getY())/2);
+            Point noisyMeasurement1 = new Point((odometrySpark.sparkUpdateData().getX() + wheelOdometry.updateDefaultPosition().getX())/2,(odometrySpark.sparkUpdateData().getY() + wheelOdometry.updateDefaultPosition().getY())/2);
             //Point noisyMeasurement2 =  new Point(, );
             Point filteredPoint1 = kalmanFilter.update(noisyMeasurement1);
             //Point filteredPoint2 = kalmanFilter.update(noisyMeasurement2);

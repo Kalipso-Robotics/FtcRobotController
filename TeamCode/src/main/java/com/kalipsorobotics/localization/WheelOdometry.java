@@ -432,29 +432,40 @@ public class WheelOdometry {
 
         prevImuHeading = currentImuHeading;
         prevSparkImuHeading = currentSparkImuHeading;
-        SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(Odometry.WHEEL_IMU_SPARK_FUSE).getCurrentPosition());
+        SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(Odometry.WHEEL_SPARK).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
         Log.d("updatepos", "updatepos done");
         return odometryPositionHistoryHashMap;
     }
 
-    public Position updatePosition() {
+//    public Position updatePosition() {
+//        HashMap<Odometry, PositionHistory> positionHistoryHashMap = updatePositionAll();
+//        PositionHistory positionHistory = positionHistoryHashMap.get(Odometry.WHEEL_IMU_SPARK_FUSE);
+//        if (positionHistory == null) {
+//            throw new RuntimeException("WHEEL_IMU_SPARK_FUSE Position History Null");
+//        }
+//        return positionHistory.getCurrentPosition();
+//    }
+
+
+    public Position updateDefaultPosition() {
+        //SparkFun IMU
         HashMap<Odometry, PositionHistory> positionHistoryHashMap = updatePositionAll();
-        PositionHistory positionHistory = positionHistoryHashMap.get(Odometry.WHEEL_IMU_SPARK_FUSE);
+        PositionHistory positionHistory = positionHistoryHashMap.get(Odometry.WHEEL_SPARK);
         if (positionHistory == null) {
-            throw new RuntimeException("WHEEL_IMU_SPARK_FUSE Position History Null");
+            throw new RuntimeException("WHEEL_SPARK Position History Null");
         }
-        return positionHistory.getCurrentPosition();
+        return  positionHistory.getCurrentPosition();
     }
 
-    public void run() throws InterruptedException{
-        while (true) {
-            updatePosition();
-            if (Thread.interrupted()) {
-                throw new InterruptedException();
-            }
-        }
-    }
+//    public void run() throws InterruptedException{
+//        while (true) {
+//            updatePosition();
+//            if (Thread.interrupted()) {
+//                throw new InterruptedException();
+//            }
+//        }
+//    }
 
     public double getIMUHeading() {
         return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());

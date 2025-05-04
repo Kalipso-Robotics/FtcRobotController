@@ -39,7 +39,7 @@ public class TestPurePursuitAction extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            wheelOdometry.updatePosition();
+            wheelOdometry.updateDefaultPosition();
             Log.d("purepursaction_debug_odo_wheel global", SharedData.getOdometryPosition().toString());
 
 //            purePursuitAction.update();

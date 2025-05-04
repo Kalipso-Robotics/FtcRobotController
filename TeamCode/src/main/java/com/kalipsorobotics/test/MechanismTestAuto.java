@@ -2,7 +2,6 @@ package com.kalipsorobotics.test;
 
 import com.kalipsorobotics.actions.KActionSet;
 import com.kalipsorobotics.actions.WaitAction;
-import com.kalipsorobotics.actions.autoActions.InitAuto;
 import com.kalipsorobotics.actions.autoActions.KServoAutoAction;
 import com.kalipsorobotics.actions.outtake.MoveLSAction;
 import com.kalipsorobotics.actions.outtake.SpecimenWallReady;
@@ -12,7 +11,6 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Outtake;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -92,7 +90,7 @@ public class MechanismTestAuto extends LinearOpMode {
             maintenanceLS.setIsDone(false);
             maintenanceLS.setTargetTicks(MoveLSAction.getGlobalLinearSlideMaintainTicks());
             maintenanceLS.updateCheckDone();
-            wheelOdometry.updatePosition();
+            wheelOdometry.updateDefaultPosition();
             redAutoSpecimen.updateCheckDone();
 
         }
