@@ -180,7 +180,8 @@ public class AutoBasketFunnel extends LinearOpMode {
         //move basket to sample 3
 //        moveToSample3.addPoint(-440, 1030, 180-29.6);
         moveToSample3.setFinalAngleLockingThreshholdDeg(0.5);
-        moveToSample3.addPoint(INTAKE_SAMPLE_X - 100, 750, 90, PurePursuitAction.P_XY, //increase to go right decrease
+        moveToSample3.addPoint(INTAKE_SAMPLE_X - 40
+                , 765, 90, PurePursuitAction.P_XY, //increase to go right decrease
                 // to go left
                 PurePursuitAction.P_ANGLE); //x = INtAKE_SAMPLE_X - 80, y = 760
 //        moveToSample3.setMaxCheckDoneCounter(15);
