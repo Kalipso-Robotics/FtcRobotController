@@ -21,6 +21,7 @@ public class CheckStuckRobot {
     private double prevYPos = 0;
     private double prevThetaPos = 0;
     private boolean wasSpinning = false;
+    private boolean wasNotMovingLastCycle = false;
     private double spinningStartTime = 0;
     private static final long SPINNING_TIMEOUT_MS = 2000; // 2 seconds
     private long lastStuckCheckTime;
@@ -152,31 +153,47 @@ public class CheckStuckRobot {
     // change from out of void when method finished
     // if delta x, y, and theta are too low ( make threshold large ) then check the path and current pos
     public boolean isStuck(Position currentPosition) {
-        Position currentPos = currentPosition;
         long currentTime = SystemClock.uptimeMillis();
 
-        double xDelta = getXDelta(currentPos);
-        double yDelta = getYDelta(currentPos);
-        double thetaDelta = getThetaDelta(currentPos);
-
-        if (currentTime - lastStuckCheckTime >= 1000) { // check once per second
-            lastStuckCheckTime = currentTime;
-
-            boolean notMoving = checkRobotNotMoving(xDelta, yDelta);
-            boolean spinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPos, currentTime);
-
-            if (notMoving || spinning) {
-                Log.d("check stuck", "---ROBOT IS STUCK---");
-
-                // Take action!
-                unstuckRobot(driveTrain);
-
-                return true;
-            }
-            Log.d("check stuck", "---robot is not stuck---");
+        // Only run this check once every second
+        if (currentTime - lastStuckCheckTime < 1000) {
+            return false;
         }
+        lastStuckCheckTime = currentTime;
+
+        // Compute deltas
+        double xDelta = getXDelta(currentPosition);
+        double yDelta = getYDelta(currentPosition);
+        double thetaDelta = getThetaDelta(currentPosition);
+
+        // Log deltas for debugging
+        Log.d("check stuck", "ΔX: " + xDelta + ", ΔY: " + yDelta + ", Δθ: " + thetaDelta);
+
+        // Check movement state
+        boolean isSpinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPosition, currentTime);
+        boolean isNotMoving = checkRobotNotMoving(xDelta, yDelta);
+
+        if (isNotMoving || isSpinning) {
+            Log.d("check stuck", "---ROBOT IS STUCK---");
+
+            // Only call unstuck once per stuck event
+            if (!wasSpinning && !wasNotMovingLastCycle) {
+                unstuckRobot(driveTrain);
+            }
+
+            wasSpinning = isSpinning;
+            wasNotMovingLastCycle = isNotMoving;
+
+            return true;
+        }
+
+        // Robot is not stuck
+        Log.d("check stuck", "---robot is not stuck---");
+        wasSpinning = false;
+        wasNotMovingLastCycle = false;
         return false;
     }
+
 
 
     private void unstuckRobot(DriveTrain driveTrain){
