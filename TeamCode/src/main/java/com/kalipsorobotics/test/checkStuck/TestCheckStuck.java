@@ -30,22 +30,25 @@ public class TestCheckStuck extends LinearOpMode {
         CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, purePursuitAction);
         SparkfunOdometry sparkfunOdometry = new SparkfunOdometry(driveTrain, opModeUtilities, 0, 0, 0);
         waitForStart();
-        while(opModeIsActive()) {
-            Path path = null; //TODO find way to get path AND IMPLEMENT INTO CHECKXY
+        while (opModeIsActive()) {
             sparkfunOdometry.updatePosition();
-            if (checkStuck.isStuck(sparkfunOdometry.getCurrentPosition())) {
+            Position currentPos = sparkfunOdometry.getCurrentPosition();
+
+            // Compute deltas ONCE per loop
+            double xDelta = checkStuck.getXDelta(currentPos);
+            double yDelta = checkStuck.getYDelta(currentPos);
+            double thetaDelta = checkStuck.getThetaDelta(currentPos);
+
+            if (checkStuck.isStuck(currentPos, xDelta, yDelta, thetaDelta)) {
                 telemetry.addLine("robot is stuck");
-                //Log.d("check stucks", "ROBOT STUCK");
             } else {
-                //Log.d("check stucks", "ROBOT NOT STUCK");
                 telemetry.addLine("robot is fine");
             }
-            Log.d("check stuks", "x delta: " + checkStuck.getXDelta(SharedData.getOdometryPosition()) +
-                    " y delta: " + checkStuck.getYDelta(SharedData.getOdometryPosition()) +
-                    " theta delta: " + checkStuck.getThetaDelta(SharedData.getOdometryPosition()));
+
+            Log.d("check stuks", "x delta: " + xDelta + " y delta: " + yDelta + " theta delta: " + thetaDelta);
             driveAction.move(gamepad1);
             telemetry.update();
-            //TODO make check stuck check every second
         }
+
     }
 }
