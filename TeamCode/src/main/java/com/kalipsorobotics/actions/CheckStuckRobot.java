@@ -196,24 +196,33 @@ public class CheckStuckRobot {
 
 
 
-    private void unstuckRobot(DriveTrain driveTrain){
+    private void unstuckRobot(DriveTrain driveTrain) {
         purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry);
         purePursuitAction.setMaxTimeOutMS(500);
 
-        Position currentPos = new Position(wheelOdometry.countLeft(), wheelOdometry.countBack(), wheelOdometry.getCurrentImuHeading());
+        Position currentPos = new Position(
+                wheelOdometry.countLeft(),
+                wheelOdometry.countBack(),
+                wheelOdometry.getCurrentImuHeading()
+        );
 
-        double offset = 10; // mm
-        Position[] positions = {
-                new Position(currentPos.getX() - offset, currentPos.getY(), currentPos.getTheta()),
-                new Position(currentPos.getX() + offset, currentPos.getY(), currentPos.getTheta()),
-                new Position(currentPos.getX(), currentPos.getY() - offset, currentPos.getTheta()),
-                new Position(currentPos.getX(), currentPos.getY() + offset, currentPos.getTheta())
+        double offset = 100; // distance in mm to try moving
+
+        Position[] escapePositions = new Position[] {
+                new Position(currentPos.getX() - offset, currentPos.getY(), currentPos.getTheta()), // move left
+                new Position(currentPos.getX() + offset, currentPos.getY(), currentPos.getTheta()), // move right
+                new Position(currentPos.getX(), currentPos.getY() - offset, currentPos.getTheta()), // move backward
+                new Position(currentPos.getX(), currentPos.getY() + offset, currentPos.getTheta())  // move forward
         };
 
-        for (Position pos : positions) {
-            purePursuitAction.addPoint(pos.getX(), pos.getY(), pos.getTheta());
+        // Add all directions to path (could refine this to pick based on space later)
+        for (Position escapePos : escapePositions) {
+            purePursuitAction.addPoint(escapePos.getX(), escapePos.getY(), escapePos.getTheta());
         }
+
+        Log.d("unstuck", "Trying to move in multiple directions to escape.");
     }
+
 
 
 }
