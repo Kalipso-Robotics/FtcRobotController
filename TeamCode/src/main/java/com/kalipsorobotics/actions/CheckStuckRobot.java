@@ -152,47 +152,27 @@ public class CheckStuckRobot {
 
     // change from out of void when method finished
     // if delta x, y, and theta are too low ( make threshold large ) then check the path and current pos
-    public boolean isStuck(Position currentPosition) {
+    public boolean isStuck(Position currentPosition, double xDelta, double yDelta, double thetaDelta) {
         long currentTime = SystemClock.uptimeMillis();
 
-        // Only run this check once every second
-        if (currentTime - lastStuckCheckTime < 1000) {
-            return false;
-        }
-        lastStuckCheckTime = currentTime;
+        boolean spinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPosition, currentTime);
+        boolean notMoving = checkRobotNotMoving(xDelta, yDelta);
 
-        // Compute deltas
-        double xDelta = getXDelta(currentPosition);
-        double yDelta = getYDelta(currentPosition);
-        double thetaDelta = getThetaDelta(currentPosition);
+        if (currentTime - lastStuckCheckTime >= 1000) {
+            lastStuckCheckTime = currentTime;
 
-        // Log deltas for debugging
-        Log.d("check stuck", "ΔX: " + xDelta + ", ΔY: " + yDelta + ", Δθ: " + thetaDelta);
-
-        // Check movement state
-        boolean isSpinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPosition, currentTime);
-        boolean isNotMoving = checkRobotNotMoving(xDelta, yDelta);
-
-        if (isNotMoving || isSpinning) {
-            Log.d("check stuck", "---ROBOT IS STUCK---");
-
-            // Only call unstuck once per stuck event
-            if (!wasSpinning && !wasNotMovingLastCycle) {
+            if (notMoving || spinning) {
+                Log.d("check stuck", "---ROBOT IS STUCK---");
                 unstuckRobot(driveTrain);
+                return true;
             }
 
-            wasSpinning = isSpinning;
-            wasNotMovingLastCycle = isNotMoving;
-
-            return true;
+            Log.d("check stuck", "---robot is not stuck---");
         }
 
-        // Robot is not stuck
-        Log.d("check stuck", "---robot is not stuck---");
-        wasSpinning = false;
-        wasNotMovingLastCycle = false;
         return false;
     }
+
 
 
 
