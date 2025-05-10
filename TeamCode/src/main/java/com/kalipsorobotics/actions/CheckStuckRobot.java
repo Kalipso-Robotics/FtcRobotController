@@ -31,13 +31,13 @@ public class CheckStuckRobot {
     /**
      * mm per second
      * */
-    final private double X_DELTA_MIN_THRESHOLD = 0.1; // to be calc
+    final private double X_DELTA_MIN_THRESHOLD = 3; // to be calc
     private double prevYVelocity = 0;
-    final private double Y_DELTA_MIN_THRESHOLD = 0.1; // to be calc
+    final private double Y_DELTA_MIN_THRESHOLD = 3; // to be calc
 
     private double prevThetaVelocity = 0;
 
-    final private double THETA_DELTA_MIN_THRESHOLD = 0.1; // to be calc
+    final private double THETA_DELTA_MIN_THRESHOLD = 2; // to be calc
 
     private final WheelOdometry wheelOdometry;
     private final DriveTrain driveTrain;
@@ -124,6 +124,7 @@ public class CheckStuckRobot {
                         Math.abs(yDelta) < Y_DELTA_MIN_THRESHOLD &&
                         Math.abs(thetaDelta) < THETA_DELTA_MIN_THRESHOLD &&
                         headingDelta < 1; // degrees
+
 
         if (isCurrentlySpinning) {
             if (!wasSpinning) {
