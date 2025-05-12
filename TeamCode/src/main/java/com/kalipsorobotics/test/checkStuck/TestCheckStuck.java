@@ -32,7 +32,7 @@ public class TestCheckStuck extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             sparkfunOdometry.updatePosition();
-            Position currentPos = sparkfunOdometry.getCurrentPosition();
+            Position currentPos = wheelOdometry.updateDefaultPosition();
 
             // Compute deltas ONCE per loop
             double xDelta = checkStuck.getXDelta(currentPos);
