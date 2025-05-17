@@ -38,7 +38,10 @@ public class CheckStuckRobot {
     private double prevThetaVelocity = 0;
 
     final private double THETA_DELTA_MIN_THRESHOLD = 1; // to be calc
-
+    private double fLeftPower;
+    private double fRightPower;
+    private double bLeftPower;
+    private double bRightPower;
     private final WheelOdometry wheelOdometry;
     private final DriveTrain driveTrain;
     private final OpModeUtilities opModeUtilities;
@@ -109,7 +112,11 @@ public class CheckStuckRobot {
 //    }
 
     private boolean checkRobotNotMoving(double xDelta, double yDelta) {
-        return (Math.abs(xDelta) < X_DELTA_MIN_THRESHOLD && Math.abs(yDelta) < Y_DELTA_MIN_THRESHOLD);
+        if (driveTrain.getbLeft().getPower() > 0 || driveTrain.getfLeft().getPower() > 0 || driveTrain.getfRight().getPower() > 0 || driveTrain.getbRight().getPower() > 0) {
+            return (Math.abs(xDelta) < X_DELTA_MIN_THRESHOLD && Math.abs(yDelta) < Y_DELTA_MIN_THRESHOLD); //making suer the robot is trying to move
+        } else {
+            return false;
+        }
     }
 
     private double prevHeading = 0;
@@ -153,8 +160,12 @@ public class CheckStuckRobot {
 
     // change from out of void when method finished
     // if delta x, y, and theta are too low ( make threshold large ) then check the path and current pos
-    public boolean isStuck(Position currentPosition, double xDelta, double yDelta, double thetaDelta) {
+    public boolean isStuck(Position currentPos) {
         long currentTime = SystemClock.uptimeMillis();
+        Position currentPosition = currentPos;
+        double xDelta = getXDelta(currentPosition);
+        double yDelta = getYDelta(currentPosition);
+        double thetaDelta = getThetaDelta(currentPosition);
 
         boolean spinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPosition, currentTime);
         boolean notMoving = checkRobotNotMoving(xDelta, yDelta);
@@ -164,7 +175,11 @@ public class CheckStuckRobot {
 
             if (notMoving || spinning) {
                 Log.d("check stuck", "---ROBOT IS STUCK---");
-                unstuckRobot(driveTrain);
+                bLeftPower = driveTrain.getbLeft().getPower();
+                fLeftPower = driveTrain.getfLeft().getPower();
+                bRightPower = driveTrain.getbRight().getPower();
+                fRightPower = driveTrain.getfRight().getPower();
+                unstuckRobot(driveTrain, currentPosition);
                 return true;
             }
 
@@ -177,23 +192,28 @@ public class CheckStuckRobot {
 
 
 
-    private void unstuckRobot(DriveTrain driveTrain) {
+    private void unstuckRobot(DriveTrain driveTrain, Position currentPos) {
         purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry);
         purePursuitAction.setMaxTimeOutMS(500);
 
-        Position currentPos = new Position(
-                wheelOdometry.countLeft(),
-                wheelOdometry.countBack(),
-                wheelOdometry.getCurrentImuHeading()
-        );
+        Position currentPosition = currentPos;
+//
+//        if (isStuck(currentPosition)) {
+//            driveTrain.setBRightPower(-bRightPower);
+//            driveTrain.setFRightPower(-fRightPower);
+//            driveTrain.setFLeftPower(-fLeftPower);
+//            driveTrain.setBLeftPower(-bLeftPower);
+//            unstuckRobot(driveTrain, currentPos);
+//        } else {
+//
 
         double offset = 100; // distance in mm to try moving
 
         Position[] escapePositions = new Position[] {
-                new Position(currentPos.getX() - offset, currentPos.getY(), currentPos.getTheta()), // move left
-                new Position(currentPos.getX() + offset, currentPos.getY(), currentPos.getTheta()), // move right
-                new Position(currentPos.getX(), currentPos.getY() - offset, currentPos.getTheta()), // move backward
-                new Position(currentPos.getX(), currentPos.getY() + offset, currentPos.getTheta())  // move forward
+                new Position(currentPosition.getX() - offset, currentPosition.getY(), currentPosition.getTheta()), // move left
+                new Position(currentPosition.getX() + offset, currentPosition.getY(), currentPosition.getTheta()), // move right
+                new Position(currentPosition.getX(), currentPosition.getY() - offset, currentPosition.getTheta()), // move backward
+                new Position(currentPosition.getX(), currentPosition.getY() + offset, currentPosition.getTheta())  // move forward
         };
 
         // Add all directions to path (could refine this to pick based on space later)
