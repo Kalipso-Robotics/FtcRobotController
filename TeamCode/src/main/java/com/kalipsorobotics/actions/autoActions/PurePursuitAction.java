@@ -207,13 +207,15 @@ public class PurePursuitAction extends Action {
     public boolean checkDoneCondition() {
         return isDone;
     }
-        @Override
-        public void setIsDone(boolean isDone) {
-            this.isDone = isDone;
-            if (isDone) {
-                driveTrain.setPower(0);
-            }
+
+    @Override
+    public void setIsDone(boolean isDone) {
+        this.isDone = isDone;
+        if (isDone) {
+            driveTrain.setPower(0);
         }
+    }
+
     @Override
     public void update() {
         if (isDone) {
@@ -247,6 +249,7 @@ public class PurePursuitAction extends Action {
         if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
             currentLookAheadRadius = lastSearchRadius;
         }
+
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
         if (follow.isPresent()) {
