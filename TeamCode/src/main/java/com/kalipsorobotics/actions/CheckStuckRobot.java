@@ -197,15 +197,7 @@ public class CheckStuckRobot {
         purePursuitAction.setMaxTimeOutMS(500);
 
         Position currentPosition = currentPos;
-//
-//        if (isStuck(currentPosition)) {
-//            driveTrain.setBRightPower(-bRightPower);
-//            driveTrain.setFRightPower(-fRightPower);
-//            driveTrain.setFLeftPower(-fLeftPower);
-//            driveTrain.setBLeftPower(-bLeftPower);
-//            unstuckRobot(driveTrain, currentPos);
-//        } else {
-//
+
 
         double offset = 100; // distance in mm to try moving
 
