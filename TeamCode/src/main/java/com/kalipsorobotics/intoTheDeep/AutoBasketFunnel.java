@@ -289,6 +289,12 @@ public class AutoBasketFunnel extends LinearOpMode {
         pivotOuttakeToBar.setDependentActions(lsTouchBar, pivotOuttakeHalfwayToBar, park);
         redAutoBasket.addAction(pivotOuttakeToBar);
 
+
+        OuttakeTransferReady outtakeTransferReady = new OuttakeTransferReady(outtake);
+        outtakeTransferReady.setName("outtakeTransferReady");
+        outtakeTransferReady.setDependentActions(pivotOuttakeToBar);
+        redAutoBasket.addAction(outtakeTransferReady);
+
         //bar to sample 1
 
         //intake sample 1

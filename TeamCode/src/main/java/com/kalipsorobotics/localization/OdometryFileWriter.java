@@ -10,7 +10,13 @@ import java.util.HashMap;
 
 public class OdometryFileWriter extends KFileWriter {
 
-
+    /**
+     * Creates a new OdometryFileWriter <p>
+     * name is at beginning of file <p>
+     * .csv is always appended to name <p>
+     * Write using writeOdometryPositionHistory() <p></p>
+     * Close using close() <p>
+     */
     public OdometryFileWriter(String name, OpModeUtilities opModeUtilities) {
         super(name, opModeUtilities);
         writeOdometryHeader();
