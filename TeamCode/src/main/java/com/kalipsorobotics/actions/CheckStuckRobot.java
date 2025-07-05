@@ -174,11 +174,14 @@ public class CheckStuckRobot {
             lastStuckCheckTime = currentTime;
 
             if (notMoving || spinning) {
-                Log.d("check stuck", "---ROBOT IS STUCK---");
                 bLeftPower = driveTrain.getbLeft().getPower();
                 fLeftPower = driveTrain.getfLeft().getPower();
                 bRightPower = driveTrain.getbRight().getPower();
                 fRightPower = driveTrain.getfRight().getPower();
+//                if (bLeftPower > 0 || fLeftPower > 0 || bRightPower > 0 || fRightPower > 0) {
+//
+//                }
+                Log.d("check stuck", "---ROBOT IS STUCK---");
                 unstuckRobot(driveTrain, currentPosition);
                 return true;
             }
