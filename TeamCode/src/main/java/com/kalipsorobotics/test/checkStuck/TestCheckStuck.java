@@ -39,7 +39,7 @@ public class TestCheckStuck extends LinearOpMode {
             double yDelta = checkStuck.getYDelta(currentPos);
             double thetaDelta = checkStuck.getThetaDelta(currentPos);
 
-            if (checkStuck.isStuck(currentPos, xDelta, yDelta, thetaDelta)) {
+            if (checkStuck.isStuck(currentPos)) {
                 telemetry.addLine("robot is stuck");
             } else {
                 telemetry.addLine("robot is fine");

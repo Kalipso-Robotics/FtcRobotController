@@ -289,6 +289,28 @@ public class AutoBasketFunnel extends LinearOpMode {
         pivotOuttakeToBar.setDependentActions(lsTouchBar, pivotOuttakeHalfwayToBar, park);
         redAutoBasket.addAction(pivotOuttakeToBar);
 
+
+        OuttakeTransferReady outtakeTransferReady = new OuttakeTransferReady(outtake);
+        outtakeTransferReady.setName("outtakeTransferReady");
+        outtakeTransferReady.setDependentActions(pivotOuttakeToBar);
+        redAutoBasket.addAction(outtakeTransferReady);
+
+        PurePursuitAction home = new PurePursuitAction(driveTrain, wheelOdometry);
+        home.setName("home");
+        home.setDependentActions(outtakeTransferReady);
+        home.addPoint(-1325, 765, 180);
+        home.addPoint(-3000, 765, 180, PurePursuitAction.P_XY_SLOW, PurePursuitAction.P_ANGLE_SLOW);
+        home.addPoint(-3000, 2000, 180, PurePursuitAction.P_XY_SLOW, PurePursuitAction.P_ANGLE_SLOW);
+        home.setMaxTimeOutMS(9000);
+        redAutoBasket.addAction(home);
+
+        PurePursuitAction home2 = new PurePursuitAction(driveTrain, wheelOdometry);
+        home2.setName("home2");
+        home2.setDependentActions(home);
+        home2.addPoint(-4000, 2000, 180, PurePursuitAction.P_XY_SLOW, PurePursuitAction.P_ANGLE_SLOW);
+        home2.setMaxTimeOutMS(4000);
+        redAutoBasket.addAction(home2);
+
         //bar to sample 1
 
         //intake sample 1
@@ -315,14 +337,14 @@ public class AutoBasketFunnel extends LinearOpMode {
         telemetry.update();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        //OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasket", opModeUtilities);
+        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasket", opModeUtilities);
 
         waitForStart();
 
         OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
 
         while (opModeIsActive()) {
-            //odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
+            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
 
             //wheelOdometry.updatePosition();
 
@@ -331,9 +353,11 @@ public class AutoBasketFunnel extends LinearOpMode {
 //            maintainLS.updateCheckDone();
 
             redAutoBasket.updateCheckDone();
+            Log.d("homePos", SharedData.getOdometryPosition().toString());
+            Log.d("homePosMap", SharedData.getOdometryPositionMap().toString());
 
         }
-        //odometryFileWriter.close();
+        odometryFileWriter.close();
         //Log.d("executor service", "before shutdown" + SharedData.getOdometryPosition());
         OpModeUtilities.shutdownExecutorService(executorService);
         //Log.d("executor service",

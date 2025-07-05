@@ -101,6 +101,7 @@ public class AdaptivePurePursuitAction extends Action {
 
         if (!hasStarted) {
             path = new Path(pathPoints);
+            path = new Path(injectPoints(path));
             hasStarted = true;
         }
 
@@ -131,7 +132,7 @@ public class AdaptivePurePursuitAction extends Action {
         driveTrain.setPower(0);
     }
 
-    public void injectPoints(Path path) {
+    public List<Position> injectPoints(Path path) {
         int spacingMM = 150;
         List<Position> injectedPathPoints = new ArrayList<Position>();
 
@@ -144,6 +145,29 @@ public class AdaptivePurePursuitAction extends Action {
             }
         }
         injectedPathPoints.add(path.getLastPoint());
+
+        return injectedPathPoints;
+    }
+
+    public Path smoother(Path path, double a, double b, double tolerance) {
+
+        Path newPath = path;
+
+        double change = tolerance;
+
+        while (change >= tolerance) {
+            change  = 0.0;
+            for (int i=1; i<path.numPoints()-1; i++) {
+                for (int j=0; j<path.getPoint(i); j++) {
+
+
+
+                }
+            }
+        }
+
+        return newPath;
+
     }
 
 }

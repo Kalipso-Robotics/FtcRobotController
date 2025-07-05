@@ -84,6 +84,16 @@ public class WheelOdometry {
     }
 
     public static synchronized WheelOdometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
+                                                         IMUModule imuModule) {
+        if (single_instance == null) {
+            single_instance = new WheelOdometry(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
+        } else {
+            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
+        }
+        return single_instance;
+    }
+
+    public static synchronized WheelOdometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
                                                          IMUModule imuModule, Position startPosMMRAD) {
         if (single_instance == null) {
             single_instance = new WheelOdometry(opModeUtilities, driveTrain, imuModule, startPosMMRAD);

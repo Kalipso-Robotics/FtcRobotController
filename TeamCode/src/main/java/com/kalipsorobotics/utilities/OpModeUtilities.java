@@ -41,6 +41,13 @@ public class OpModeUtilities {
         executorService.awaitTermination(1, TimeUnit.SECONDS);
     }
 
+    /**
+     * Runs the odometry in a separate thread <p>
+     * Executor Service Parameter -> ExecutorService executorService = Executors.newSingleThreadExecutor(); <p>
+     * Run shutdown after opMode ends
+     * @param executorService
+     * @param wheelOdometry
+     */
     public static void runOdometryExecutorService(ExecutorService executorService, WheelOdometry wheelOdometry) {
         try {
             executorService.submit(() -> {
