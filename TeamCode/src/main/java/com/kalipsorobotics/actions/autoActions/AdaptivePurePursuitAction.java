@@ -157,11 +157,17 @@ public class AdaptivePurePursuitAction extends Action {
 
         while (change >= tolerance) {
             change  = 0.0;
-            for (int i=1; i<path.numPoints()-1; i++) {
-                for (int j=0; j<path.getPoint(i); j++) {
-
-
-
+            for (int i=0; i<=path.numPoints()-1; i++) {
+                for (int j=0; j<=1; j++) {
+                    if (j==0) {
+                        double aux = newPath.getPoint(i).getX();
+                        newPath.getPoint(i).addX(a * (path.getPoint(i).getX() - newPath.getPoint(i).getX()) + b * (newPath.getPoint(i-1).getX() + newPath.getPoint(i+1).getX() - (2.0 * newPath.getPoint(i).getX())));
+                        change += Math.abs(aux - newPath.getPoint(i).getX());
+                    } else {
+                        double aux = newPath.getPoint(i).getY();
+                        newPath.getPoint(i).addY(a * (path.getPoint(i).getY() - newPath.getPoint(i).getY()) + b * (newPath.getPoint(i-1).getY() + newPath.getPoint(i+1).getY() - (2.0 * newPath.getPoint(i).getY())));
+                        change += Math.abs(aux - newPath.getPoint(i).getY());
+                    }
                 }
             }
         }

@@ -105,6 +105,14 @@ public class Position {
         return pidAngle;
     }
 
+    public void addX(double add) {
+        x += add;
+    }
+
+    public void addY(double add) {
+        y += add;
+    }
+
     public void reset(Position position) {
         this.x = position.getX();
         this.y = position.getY();
