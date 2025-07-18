@@ -35,6 +35,9 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double finalAngleLockingThreshholdDeg = 1.5;
 
+    private double pathMaxVelocity = 100; //todo figuer this out
+    private final double K = 1; // 1-5, based on how slow you want the robot to go around turns
+
     public AdaptivePurePursuitAction(DriveTrain driveTrain, WheelOdometry wheelOdometry) {
         this.driveTrain = driveTrain;
         this.wheelOdometry = wheelOdometry;
@@ -100,8 +103,7 @@ public class AdaptivePurePursuitAction extends Action {
         }
 
         if (!hasStarted) {
-            path = new Path(pathPoints);
-            path = new Path(injectPoints(path));
+            path = smoother(new Path(injectPoints(new Path(pathPoints))), 0.25, 0.75, 0.025);
             hasStarted = true;
         }
 
@@ -132,7 +134,7 @@ public class AdaptivePurePursuitAction extends Action {
         driveTrain.setPower(0);
     }
 
-    public List<Position> injectPoints(Path path) {
+    private List<Position> injectPoints(Path path) {
         int spacingMM = 150;
         List<Position> injectedPathPoints = new ArrayList<Position>();
 
@@ -149,7 +151,7 @@ public class AdaptivePurePursuitAction extends Action {
         return injectedPathPoints;
     }
 
-    public Path smoother(Path path, double a, double b, double tolerance) {
+    private Path smoother(Path path, double a, double b, double tolerance) {
 
         Path newPath = path;
 
@@ -176,4 +178,58 @@ public class AdaptivePurePursuitAction extends Action {
 
     }
 
+    private void calculateDistanceCurvatureVelocity(Path path) {
+        for (int i=path.numPoints()-1; i>=0; i--) { //todo get rid of for loops
+
+            Vector vector = Vector.between(path.getPoint(i-1), path.getPoint(i));
+            path.getPoint(i).setDistanceAlongPath(path.getPoint(i-1).getDistanceAlongPath() + vector.getLength());
+
+            path.getPoint(i).setCurvature(curvature(path, i));
+
+            path.getPoint(i).setVelocity(getTargetVelocity(path, i));
+
+            if (i==0) {
+                path.getPoint(i).setDistanceAlongPath(0);
+
+                path.getPoint(i).setCurvature(0);
+
+                path.getPoint(i).setVelocity(0);
+            } else if (i == path.numPoints()-1) {
+                path.getPoint(i).setCurvature(0);
+            }
+
+        }
+    }
+
+    public static double curvature(Path path, int positionIndex) {
+        double x_1 = path.getPoint(positionIndex-1).getX();
+        double y_1 = path.getPoint(positionIndex-1).getY();
+        double x_2 = path.getPoint(positionIndex).getX();
+        double y_2 = path.getPoint(positionIndex).getY();
+        double x_3 = path.getPoint(positionIndex+1).getX();
+        double y_3 = path.getPoint(positionIndex+1).getY();
+
+
+        double k_1 = 0.5 * (MathFunctions.square(x_1) + MathFunctions.square(y_1) - MathFunctions.square(x_2) - MathFunctions.square(y_2)) / ((x_1 + 0.001) - x_2);
+        double k_2 = (y_1 - y_2) / (x_1 - x_2);
+        double b = 0.5 * (MathFunctions.square(x_2) - (2 * x_2 * k_1) + MathFunctions.square(y_2) - MathFunctions.square(x_3) + (2 * x_3 * k_1) - MathFunctions.square(y_3)) / ((x_3 * k_2) - y_3 + y_2 - (x_2 * k_2));
+        double a = k_1 - (k_2 * b);
+        double r = Math.sqrt(MathFunctions.square(x_1 - a) + MathFunctions.square(y_1 - b));
+
+        return 1/r;
+    }
+
+    private double calculateVelocity(Path path, int positionIndex) {
+        return Math.min(this.pathMaxVelocity, (this.K / curvature(path, positionIndex)));
+    }
+
+    private double getTargetVelocity(Path path, int positionIndex) {
+        double v_i = path.getPoint(positionIndex-1).getVelocity();
+        double a = 100; // todo max acceleration figure out
+        double d = path.getPoint(positionIndex).getDistanceAlongPath() - path.getPoint(positionIndex-1).getDistanceAlongPath();
+
+        double v_f = Math.sqrt(MathFunctions.square(v_i) + (2 * a * d));
+
+        return Math.min(v_f, calculateVelocity(path, positionIndex));
+    }
 }

@@ -8,6 +8,10 @@ public class Position {
     private double y;
     private double theta;
 
+    private double distanceAlongPath;
+    private double curvature;
+    private double velocity;
+
     private PidNav pidX = new PidNav(PurePursuitAction.P_XY, 0, 0);
     private PidNav pidY = new PidNav(PurePursuitAction.P_XY, 0, 0);
     private PidNav pidAngle = new PidNav(PurePursuitAction.P_ANGLE, 0, 0);
@@ -120,5 +124,29 @@ public class Position {
         this.pidX = position.pidX;
         this.pidY = position.pidY;
         this.pidAngle = position.pidAngle;
+    }
+
+    public double getDistanceAlongPath() {
+        return this.distanceAlongPath;
+    }
+
+    public void setDistanceAlongPath(double distanceAlongPath) {
+        this.distanceAlongPath = distanceAlongPath;
+    }
+
+    public double getCurvature() {
+        return this.curvature;
+    }
+
+    public void setCurvature(double curvature) {
+        this.curvature = curvature;
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(double velocity) {
+        this.velocity = velocity;
     }
 }
