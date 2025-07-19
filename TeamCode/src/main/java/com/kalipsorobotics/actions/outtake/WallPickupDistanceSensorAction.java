@@ -2,19 +2,15 @@ package com.kalipsorobotics.actions.outtake;
 
 import android.util.Log;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.kalipsorobotics.actions.MoveToDistanceThreshold;
 import com.kalipsorobotics.actions.WaitAction;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.actions.Action;
 import com.kalipsorobotics.actions.autoActions.KServoAutoAction;
 import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
 import com.kalipsorobotics.modules.Outtake;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class WallPickupDistanceSensorAction extends Action {

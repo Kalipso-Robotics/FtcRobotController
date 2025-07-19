@@ -1,6 +1,5 @@
 package com.kalipsorobotics.test.checkStuck;
 
-import android.os.SystemClock;
 import android.util.Log;
 
 import com.kalipsorobotics.actions.CheckStuckRobot;
@@ -8,12 +7,10 @@ import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.SparkfunOdometry;
 import com.kalipsorobotics.localization.WheelOdometry;
-import com.kalipsorobotics.math.Path;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 

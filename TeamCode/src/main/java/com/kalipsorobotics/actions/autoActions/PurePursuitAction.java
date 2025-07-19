@@ -1,7 +1,5 @@
 package com.kalipsorobotics.actions.autoActions;
 
-import android.util.Log;
-
 import com.kalipsorobotics.PID.PidNav;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.actions.Action;

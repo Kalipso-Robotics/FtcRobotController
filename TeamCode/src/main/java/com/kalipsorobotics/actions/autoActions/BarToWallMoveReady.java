@@ -4,8 +4,6 @@ import static com.kalipsorobotics.actions.autoActions.WallToBarHangRoundTrip.WAL
 import static com.kalipsorobotics.actions.autoActions.WallToBarHangRoundTrip.WALL_PICKUP_Y;
 
 import com.kalipsorobotics.actions.KActionSet;
-import com.kalipsorobotics.actions.MoveToDistanceThreshold;
-import com.kalipsorobotics.actions.outtake.DistanceDetectionAction;
 import com.kalipsorobotics.actions.outtake.SpecimenWallReady;
 import com.kalipsorobotics.actions.outtake.WallPickupDistanceSensorAction;
 import com.kalipsorobotics.localization.WheelOdometry;

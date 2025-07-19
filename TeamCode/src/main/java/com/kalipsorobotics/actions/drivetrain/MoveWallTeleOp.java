@@ -1,19 +1,13 @@
 package com.kalipsorobotics.actions.drivetrain;
 
-import static com.kalipsorobotics.actions.autoActions.FloorToBarHangRoundTrip.SPECIMEN_HANG_POS_X;
-import static com.kalipsorobotics.actions.autoActions.WallToBarHangRoundTrip.WALL_PICKUP_PID_VALUE;
 import static com.kalipsorobotics.actions.autoActions.WallToBarHangRoundTrip.WALL_PICKUP_X;
 import static com.kalipsorobotics.actions.autoActions.WallToBarHangRoundTrip.WALL_PICKUP_Y;
 
-import com.kalipsorobotics.WallToBarAction;
 import com.kalipsorobotics.actions.KActionSet;
 import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
-import com.kalipsorobotics.actions.autoActions.WallToBarHangRoundTrip;
-import com.kalipsorobotics.intoTheDeep.AutoSpecimen;
 import com.kalipsorobotics.localization.WheelOdometry;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.utilities.OpModeUtilities;
 
 public class MoveWallTeleOp extends KActionSet {
 

@@ -1,16 +1,13 @@
 package com.kalipsorobotics.intoTheDeep;
 
-import com.kalipsorobotics.actions.MoveToDistanceThreshold;
 import com.kalipsorobotics.actions.autoActions.FirstWallToBarRoundTrip;
 import com.kalipsorobotics.actions.autoActions.WallToBarMoveHang;
 import com.kalipsorobotics.actions.intake.IntakeCounterWeight;
 import com.kalipsorobotics.actions.intake.IntakeTransferReady;
-import com.kalipsorobotics.actions.outtake.DistanceDetectionAction;
 import com.kalipsorobotics.actions.outtake.WallPickupDistanceSensorAction;
 import com.kalipsorobotics.localization.OdometryFileWriter;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.actions.SetAutoDelayAction;
-import com.kalipsorobotics.actions.autoActions.FirstWallToBarHangAction;
 import com.kalipsorobotics.actions.autoActions.InitAuto;
 import com.kalipsorobotics.actions.KActionSet;
 import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
@@ -25,7 +22,6 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.IntakeClaw;
 import com.kalipsorobotics.modules.Outtake;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 

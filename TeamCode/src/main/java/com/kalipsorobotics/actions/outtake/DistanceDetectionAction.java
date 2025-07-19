@@ -1,8 +1,5 @@
 package com.kalipsorobotics.actions.outtake;
 
-import android.os.SystemClock;
-import android.util.Log;
-
 import com.kalipsorobotics.actions.KActionSet;
 import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
