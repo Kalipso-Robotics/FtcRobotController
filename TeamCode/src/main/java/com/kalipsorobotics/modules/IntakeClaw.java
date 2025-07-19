@@ -28,12 +28,12 @@ public class IntakeClaw {
 
     public static final double INTAKE_SMALL_PIVOT_INTAKE_READY_POS = 0.84; //0.882
 
-    public static final double INTAKE_SMALL_SWEEP_INTAKE_READY_POS = 0.46; //decrease to move more horizontal, increase to move more vertical
+    public static final double INTAKE_SMALL_SWEEP_INTAKE_READY_POS = 0.47; //decrease to move more horizontal, increase to move more vertical
 
     public static final double INTAKE_RATCHET_UNLOCK_POS = 0.135;
 
     //INTAKE ACTION
-    public  static final double INTAKE_SMALL_SWEEP_VERTICAL_POS = 0.77; //increase to move more horizontal, decrease to move more vertical
+    public  static final double INTAKE_SMALL_SWEEP_VERTICAL_POS = 0.99; //increase to move more horizontal, decrease to move more vertical
 
     public static final double INTAKE_BIG_PIVOT_GRAB_SAMPLE_POS = 0.7; //0.85    //increase to go down, decrease to
     // go up
@@ -64,9 +64,10 @@ public class IntakeClaw {
     public static final double INTAKE_SMALL_PIVOT_TRANSFER_READY_POS = 0.2; //0.25     //decrease to pivot down
     // increase to pivot to up
 
-    public static final double INTAKE_SMALL_SWEEP_TRANSFER_READY_POS = 0.46;
+    public static final double INTAKE_SMALL_SWEEP_TRANSFER_READY_POS = 0.47;
 
     public static final double INTAKE_RATCHET_LOCK_POS = 0.273;
+
 
     public static final double INTAKE_BIG_PIVOT_TRANSFER_UNDER_RUNG_MIDDLE_POS = 0.867;
 
@@ -78,7 +79,7 @@ public class IntakeClaw {
 
 
     //================INIT===================
-    public static final double INTAKE_SMALL_SWEEP_RETRACT_POS = 0.43; // Horizontal from Crossbar (parallel)
+    public static final double INTAKE_SMALL_SWEEP_RETRACT_POS = 0.47; // Horizontal from Crossbar (parallel)
     public static final double INTAKE_BIG_PIVOT_RETRACT_POS = 0.148;
     public static final double INTAKE_SMALL_PIVOT_RETRACT_POS = 0.874;
 

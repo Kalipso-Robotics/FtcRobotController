@@ -104,6 +104,7 @@ public class AdaptivePurePursuitAction extends Action {
 
         if (!hasStarted) {
             path = smoother(new Path(injectPoints(new Path(pathPoints))), 0.25, 0.75, 0.025);
+            calculateDistanceCurvatureVelocity(path);
             hasStarted = true;
         }
 
