@@ -47,4 +47,9 @@ public class MathFunctions {
     public static double square(double a) {
         return a*a;
     }
+
+    public static double interpolateAngle(double start, double end, double t) {
+        double delta = angleWrapRad(end - start);
+        return start + delta * t;
+    }
 }

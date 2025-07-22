@@ -149,4 +149,12 @@ public class Position {
     public void setVelocity(double velocity) {
         this.velocity = velocity;
     }
+
+    public void setX(double newX) {
+        this.x = newX;
+    }
+
+    public void setY(double newY) {
+        this.y = newY;
+    }
 }
