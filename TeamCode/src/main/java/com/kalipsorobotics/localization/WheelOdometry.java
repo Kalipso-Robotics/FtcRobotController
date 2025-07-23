@@ -442,7 +442,7 @@ public class WheelOdometry {
 
         prevImuHeading = currentImuHeading;
         prevSparkImuHeading = currentSparkImuHeading;
-        SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(Odometry.WHEEL_SPARK).getCurrentPosition());
+        SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(Odometry.WHEEL_IMU).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
         Log.d("updatepos", "updatepos done");
         return odometryPositionHistoryHashMap;
@@ -461,9 +461,9 @@ public class WheelOdometry {
     public Position updateDefaultPosition() {
         //SparkFun IMU
         HashMap<Odometry, PositionHistory> positionHistoryHashMap = updatePositionAll();
-        PositionHistory positionHistory = positionHistoryHashMap.get(Odometry.WHEEL_SPARK);
+        PositionHistory positionHistory = positionHistoryHashMap.get(Odometry.WHEEL_IMU);
         if (positionHistory == null) {
-            throw new RuntimeException("WHEEL_SPARK Position History Null");
+            throw new RuntimeException("WHEEL_IMU Position History Null");
         }
         return  positionHistory.getCurrentPosition();
     }

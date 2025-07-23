@@ -29,6 +29,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -288,7 +289,7 @@ public class AutoBasketFunnel extends LinearOpMode {
         pivotOuttakeToBar.setName("pivotOuttakeToBar");
         pivotOuttakeToBar.setDependentActions(lsTouchBar, pivotOuttakeHalfwayToBar, park);
         redAutoBasket.addAction(pivotOuttakeToBar);
-
+/*
 
         OuttakeTransferReady outtakeTransferReady = new OuttakeTransferReady(outtake);
         outtakeTransferReady.setName("outtakeTransferReady");
@@ -309,7 +310,7 @@ public class AutoBasketFunnel extends LinearOpMode {
         home2.setDependentActions(home);
         home2.addPoint(-4000, 2000, 180, PurePursuitAction.P_XY_SLOW, PurePursuitAction.P_ANGLE_SLOW);
         home2.setMaxTimeOutMS(4000);
-        redAutoBasket.addAction(home2);
+        redAutoBasket.addAction(home2);*/
 
         //bar to sample 1
 
@@ -337,14 +338,14 @@ public class AutoBasketFunnel extends LinearOpMode {
         telemetry.update();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasket", opModeUtilities);
+        //OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasketWithHome", opModeUtilities);
 
         waitForStart();
 
         OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
 
         while (opModeIsActive()) {
-            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
+            //odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
 
             //wheelOdometry.updatePosition();
 
@@ -357,7 +358,7 @@ public class AutoBasketFunnel extends LinearOpMode {
             Log.d("homePosMap", SharedData.getOdometryPositionMap().toString());
 
         }
-        odometryFileWriter.close();
+        //odometryFileWriter.close();
         //Log.d("executor service", "before shutdown" + SharedData.getOdometryPosition());
         OpModeUtilities.shutdownExecutorService(executorService);
         //Log.d("executor service",
