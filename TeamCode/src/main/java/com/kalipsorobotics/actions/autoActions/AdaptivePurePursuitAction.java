@@ -14,6 +14,8 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +48,6 @@ public class AdaptivePurePursuitAction extends Action {
     private static final double MAX_ACCELERATION = 800; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
     private final double angleKp = 1.0;
-
 
     private double startTimeMS = System.currentTimeMillis();
     private double maxTimeOutMS = 1000000000;
@@ -212,8 +213,8 @@ public class AdaptivePurePursuitAction extends Action {
 
         if (injectDone && smootherDone && calcDistanceCurvatureVelocityDone) {
             currentPosition = new Position(SharedData.getOdometryPosition());
-            double closestIdx = path.findIndex(lastPosition);
-            double lastIdx    = path.numPoints() - 1;
+            int lastIdx = path.numPoints() - 1;
+            int closestIdx = findClosestPointIndex(path, currentPosition);
 
             double elapsedTime = System.currentTimeMillis() - startTimeMS;
 
@@ -224,8 +225,6 @@ public class AdaptivePurePursuitAction extends Action {
             }
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
-
-            Position lastPoint = path.getLastPoint();
 
             if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
                 currentLookAheadRadius = lastSearchRadius;
@@ -243,16 +242,42 @@ public class AdaptivePurePursuitAction extends Action {
 //                }
 //            }
             } else if (closestIdx >= lastIdx) {
-                // we really are at the end of the path: switch to angle lock
-                double angleError = MathFunctions.angleWrapRad(
-                        path.getLastPoint().getTheta() - currentPosition.getTheta()
-                );
-                if (Math.abs(angleError) <= Math.toRadians(finalAngleLockingThreshholdDeg)) {
-                    finishedMoving();        // we’re within 1.5° of the final heading
-                } else {
-                    targetPosition(path.getLastPoint(), currentPosition);
+//                // we really are at the end of the path: switch to angle lock
+//                double angleError = MathFunctions.angleWrapRad(
+//                        path.getLastPoint().getTheta() - currentPosition.getTheta()
+//                );
+//                if (Math.abs(angleError) <= Math.toRadians(finalAngleLockingThreshholdDeg)) {
+//                    finishedMoving();        // we’re within 1.5° of the final heading
+//                } else {
+//                    targetPosition(path.getLastPoint(), currentPosition);
+//                }
+                // only _now_ do your final heading‑lock
+                double targetH = path.getLastPoint().getTheta();
+                double err     = MathFunctions.angleWrapRad(targetH - currentPosition.getTheta());
+
+                // special‑case EXACT ±π so sign doesn’t flip:
+                if (Math.abs(Math.abs(err) - Math.PI) < 1e-3) {
+                    err =  Math.PI;  // pick +π consistently
                 }
 
+                if (Math.abs(err) < Math.toRadians(finalAngleLockingThreshholdDeg)) {
+                    finishedMoving();
+                } else {
+                    // simple P‐turn: positive error → turn left, negative → turn right
+                    double kP = 0.8;  // you can tune this down to reduce oscillation
+                    double turn = kP * err;
+                    // clamp
+                    turn = Math.max(-1, Math.min(1, turn));
+
+                    // tank‐steer in place
+                    driveTrain.setPowerWithRangeClippingMinThreshold(
+                            +turn,  // frontLeft
+                            -turn,  // frontRight
+                            +turn,  // backLeft
+                            -turn,  // backRight
+                            0.0     // no dead‑zone
+                    );
+                }
             } else {
                 // lost lookahead mid‑path (e.g. big deviation) – keep chasing the last follow point
                 targetPosition(prevFollow.orElse(path.getLastPoint()), currentPosition);
@@ -565,5 +590,18 @@ public class AdaptivePurePursuitAction extends Action {
         double v_f = Math.sqrt(MathFunctions.square(v_i) + (2 * a * d));
 
         return Math.min(v_f, calculateVelocity(path, positionIndex));
+    }
+
+    private int findClosestPointIndex(Path path, Position current) {
+        List<Position> pts = path.getPath();
+        Position best = Collections.min(
+                pts,
+                Comparator.comparingDouble(p -> {
+                    double dx = current.getX() - p.getX();
+                    double dy = current.getY() - p.getY();
+                    return dx*dx + dy*dy;
+                })
+        );
+        return pts.indexOf(best);
     }
 }

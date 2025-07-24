@@ -95,4 +95,8 @@ public class Path {
         }
         return -1;
     }
+
+    public List<Position> getPath() {
+        return path;
+    }
 }
