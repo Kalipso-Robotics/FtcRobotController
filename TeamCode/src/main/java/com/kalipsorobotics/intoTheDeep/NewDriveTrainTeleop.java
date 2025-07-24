@@ -44,7 +44,7 @@ public class NewDriveTrainTeleop extends LinearOpMode {
             Log.d("odometry pos", wheelOdometry.updateDefaultPosition().toString());
             driveAction.move(gamepad1);
 
-            lsMotor1.setPower(-gamepad1.left_stick_y);
+            lsMotor1.setPower(-gamepad1.right_stick_y);
 
         }
         executorService.shutdown();

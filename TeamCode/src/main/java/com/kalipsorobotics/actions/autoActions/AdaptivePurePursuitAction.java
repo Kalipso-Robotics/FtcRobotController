@@ -212,6 +212,8 @@ public class AdaptivePurePursuitAction extends Action {
 
         if (injectDone && smootherDone && calcDistanceCurvatureVelocityDone) {
             currentPosition = new Position(SharedData.getOdometryPosition());
+            double closestIdx = path.findIndex(lastPosition);
+            double lastIdx    = path.numPoints() - 1;
 
             double elapsedTime = System.currentTimeMillis() - startTimeMS;
 
@@ -233,12 +235,27 @@ public class AdaptivePurePursuitAction extends Action {
 
             if (follow.isPresent()) {
                 targetPosition(follow.get(), currentPosition);
-            } else {
-                if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) <= Math.toRadians(finalAngleLockingThreshholdDeg) ) {
-                    finishedMoving();
+//            } else {
+//                if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) <= Math.toRadians(finalAngleLockingThreshholdDeg) ) {
+//                    finishedMoving();
+//                } else {
+//                    targetPosition(lastPoint, currentPosition);
+//                }
+//            }
+            } else if (closestIdx >= lastIdx) {
+                // we really are at the end of the path: switch to angle lock
+                double angleError = MathFunctions.angleWrapRad(
+                        path.getLastPoint().getTheta() - currentPosition.getTheta()
+                );
+                if (Math.abs(angleError) <= Math.toRadians(finalAngleLockingThreshholdDeg)) {
+                    finishedMoving();        // we’re within 1.5° of the final heading
                 } else {
-                    targetPosition(lastPoint, currentPosition);
+                    targetPosition(path.getLastPoint(), currentPosition);
                 }
+
+            } else {
+                // lost lookahead mid‑path (e.g. big deviation) – keep chasing the last follow point
+                targetPosition(prevFollow.orElse(path.getLastPoint()), currentPosition);
             }
 
             xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
