@@ -38,38 +38,25 @@ android {
 }
 
 repositories {
-    maven {
-        url = "https://maven.kuriosityrobotics.com/releases/"
-    }
+    // Temporarily disable broken repo
+    // maven { url = "https://maven.kuriosityrobotics.com/releases/" }
+
     maven { url = 'https://maven.brott.dev/' }
+    google()
+    mavenCentral()
 }
 
 dependencies {
-    // other stuff
     implementation project(':FtcRobotController')
+
     testImplementation 'junit:junit:4.12'
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
     implementation "com.kuriosityrobotics.shuttle:shuttle-core:1.0"
     implementation "com.kuriosityrobotics.shuttle:shuttle-hardware:1.0"
-}
 
-
-dependencies {
-    implementation 'org.openftc:easyopencv:1.5.0'
-    testImplementation 'junit:junit:4.12'
-    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
-
-    implementation "com.kuriosityrobotics.shuttle:shuttle-core:1.0"
-    implementation "com.kuriosityrobotics.shuttle:shuttle-hardware:1.0"
-}
-
-dependencies {
+    implementation 'org.openftc:easyopencv:1.5.2'
     implementation 'com.google.ai.edge.litert:litert-support-api:1.0.1'
     implementation 'com.google.ai.edge.litert:litert:1.0.1'
-    implementation 'org.openftc:easyopencv:1.5.2'
-//    implementation 'com.google.ai.edge.litert:litert:1.0.1'
-//    implementation 'com.google.ai.edge.litert:litert-support-api:1.0.1'
-//    implementation 'androidx.room:room-compiler:2.6.1'
     implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
 }
