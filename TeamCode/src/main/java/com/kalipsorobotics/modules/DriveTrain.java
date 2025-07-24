@@ -17,7 +17,6 @@ public class DriveTrain {
     private static DriveTrain single_instance = null;
 
     private final OpModeUtilities opModeUtilities;
-    //private final DcMotor testMotorDeleteLater;
     private DcMotor fLeft = null;
     private DcMotor fRight = null;
     private DcMotor bLeft = null;
