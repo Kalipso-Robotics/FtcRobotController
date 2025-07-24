@@ -1,0 +1,134 @@
+[
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/cube_mesh_vertex_shader.glsl",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-RobotCore-10.1.0-3:/raw/cube_mesh_vertex_shader.glsl"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/errormessage.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/errormessage.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/texture_vertex_shader.glsl",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-RobotCore-10.1.0-3:/raw/texture_vertex_shader.glsl"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_wookie.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_wookie.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_light_speed.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_light_speed.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_light_saber.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_light_saber.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_power_up.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_power_up.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_bb8_up.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_bb8_up.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/silver.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-main-17:/raw/silver.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/color_fragment_shader.glsl",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-RobotCore-10.1.0-3:/raw/color_fragment_shader.glsl"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_siren.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_siren.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_laser.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_laser.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/simple_vertex_shader.glsl",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-RobotCore-10.1.0-3:/raw/simple_vertex_shader.glsl"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/gold.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-main-17:/raw/gold.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_mine.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_mine.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_light_saber_short.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_light_saber_short.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/zxing_beep.ogg",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-zxing-android-embedded-4.3.0-11:/raw/zxing_beep.ogg"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/chimedisconnect.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/chimedisconnect.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/chimeconnect.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/chimeconnect.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_alarm.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_alarm.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/cube_mesh_fragment_shader.glsl",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-RobotCore-10.1.0-3:/raw/cube_mesh_fragment_shader.glsl"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/nxtstartupsound.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/nxtstartupsound.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/texture_fragment_shader.glsl",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-RobotCore-10.1.0-3:/raw/texture_fragment_shader.glsl"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_laser_burst.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_laser_burst.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_roger_roger.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_roger_roger.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/warningmessage.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/warningmessage.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_darth_vader.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_darth_vader.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_light_saber_long.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_light_saber_long.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_bb8_down.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_bb8_down.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_mf_fail.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_mf_fail.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/rev_bhi260_ap_fw_20",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-Hardware-10.1.0-1:/raw/rev_bhi260_ap_fw_20"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_r2d2_up.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_r2d2_up.wav"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/raw/ss_fly_by.wav",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-FtcCommon-10.1.0-12:/raw/ss_fly_by.wav"
+    }
+]

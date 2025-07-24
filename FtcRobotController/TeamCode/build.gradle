@@ -1,0 +1,75 @@
+//
+// build.gradle in TeamCode
+//
+// Most of the definitions for building your module reside in a common, shared
+// file 'build.common.gradle'. Being factored in this way makes it easier to
+// integrate updates to the FTC into your code. If you really need to customize
+// the build definitions, you can place those customizations in this file, but
+// please think carefully as to whether such customizations are really necessary
+// before doing so.
+
+
+// Custom definitions may go here
+
+// Include common definitions from above.
+apply from: '../build.common.gradle'
+apply from: '../build.dependencies.gradle'
+
+android {
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    namespace = 'org.firstinspires.ftc.teamcode'
+    androidResources {
+        noCompress 'tflite'
+    }
+
+    packagingOptions {
+        jniLibs {
+            pickFirsts += ['**/*.so']
+        }
+        jniLibs.useLegacyPackaging true
+    }
+}
+
+repositories {
+    maven {
+        url = "https://maven.kuriosityrobotics.com/releases/"
+    }
+    maven { url = 'https://maven.brott.dev/' }
+}
+
+dependencies {
+    // other stuff
+    implementation project(':FtcRobotController')
+    testImplementation 'junit:junit:4.12'
+    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
+
+    implementation "com.kuriosityrobotics.shuttle:shuttle-core:1.0"
+    implementation "com.kuriosityrobotics.shuttle:shuttle-hardware:1.0"
+}
+
+
+dependencies {
+    implementation 'org.openftc:easyopencv:1.5.0'
+    testImplementation 'junit:junit:4.12'
+    annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
+
+    implementation "com.kuriosityrobotics.shuttle:shuttle-core:1.0"
+    implementation "com.kuriosityrobotics.shuttle:shuttle-hardware:1.0"
+}
+
+dependencies {
+    implementation 'com.google.ai.edge.litert:litert-support-api:1.0.1'
+    implementation 'com.google.ai.edge.litert:litert:1.0.1'
+    implementation 'org.openftc:easyopencv:1.5.2'
+//    implementation 'com.google.ai.edge.litert:litert:1.0.1'
+//    implementation 'com.google.ai.edge.litert:litert-support-api:1.0.1'
+//    implementation 'androidx.room:room-compiler:2.6.1'
+    implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
+}

@@ -1,0 +1,18 @@
+<lint-module
+    format="1"
+    dir="C:\Users\ethan\Kalipso-Robotics\FtcRobotController\TeamCode"
+    name=":TeamCode"
+    type="APP"
+    maven="FtcRobotController:TeamCode:unspecified"
+    agpVersion="8.8.1"
+    buildFolder="build"
+    bootClassPath="C:\Users\ethan\AppData\Local\Android\Sdk\platforms\android-30\android.jar;C:\Users\ethan\AppData\Local\Android\Sdk\build-tools\35.0.0\core-lambda-stubs.jar"
+    javaSourceLevel="11"
+    compileTarget="android-30">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

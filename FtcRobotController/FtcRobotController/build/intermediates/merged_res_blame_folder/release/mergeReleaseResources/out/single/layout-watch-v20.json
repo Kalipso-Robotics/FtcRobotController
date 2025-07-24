@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/layout-watch-v20/abc_alert_dialog_title_material.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/layout-watch-v20/abc_alert_dialog_title_material.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml"
+    }
+]

@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/menu/menu_server.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-Blocks-10.1.0-9:/menu/menu_server.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/menu/inspection_menu_rc_remote.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-Inspection-10.1.0-8:/menu/inspection_menu_rc_remote.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/menu/ftc_robot_controller.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-main-17:/menu/ftc_robot_controller.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/menu/inspection_menu_rcds_local.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-Inspection-10.1.0-8:/menu/inspection_menu_rcds_local.xml"
+    }
+]

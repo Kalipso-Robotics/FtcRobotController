@@ -1,0 +1,140 @@
+-keep class androidx.core.app.CoreComponentFactory { <init>(); }
+-keep class androidx.core.content.FileProvider { <init>(); }
+-keep class com.journeyapps.barcodescanner.CaptureActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.AboutActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcAboutActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcAdvancedRCSettingsActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcLynxFirmwareUpdateActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcLynxModuleAddressUpdateActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcRobotControllerService { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcRobotControllerSettingsActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcWifiDirectChannelSelectorActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.FtcWifiDirectRememberedGroupsActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.StackTraceActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.ViewLogsActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.ConfigureFromTemplateActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditAnalogInputDevicesActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditDigitalDevicesActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditDigitalDevicesActivityLynx { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditEthernetOverUsbActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditI2cDevicesActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditI2cDevicesActivityLynx { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditLynxModuleActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditLynxUsbDeviceActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditMotorListActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditPWMDevicesActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditServoListActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditSwapUsbDevices { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.EditWebcamActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.FtcConfigurationActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.FtcLoadFileActivity { <init>(); }
+-keep class com.qualcomm.ftccommon.configuration.FtcNewFileActivity { <init>(); }
+-keep class org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService { <init>(); }
+-keep class org.firstinspires.ftc.ftccommon.internal.ProgramAndManageActivity { <init>(); }
+-keep class org.firstinspires.ftc.ftccommon.internal.RunOnBoot { <init>(); }
+-keep class org.firstinspires.ftc.onbotjava.OnBotJavaService { <init>(); }
+-keep class org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity { <init>(); }
+-keep class org.firstinspires.ftc.robotcontroller.internal.PermissionValidatorWrapper { <init>(); }
+-keep class org.firstinspires.ftc.robotcore.internal.files.MediaTransferProtocolMonitorService { <init>(); }
+-keep class org.firstinspires.ftc.robotcore.internal.system.RobotApplication { <init>(); }
+-keep class org.firstinspires.ftc.robotserver.internal.webserver.controlhubupdater.ChUpdaterCommManager$ChUpdaterBroadcastReceiver { <init>(); }
+-keep class org.firstinspires.inspection.DsInspectionActivity { <init>(); }
+-keep class org.firstinspires.inspection.RcInspectionActivity { <init>(); }
+-keep class android.widget.Space { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.app.AlertController$RecycleListView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.view.menu.ActionMenuItemView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.view.menu.ExpandedMenuView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.view.menu.ListMenuItemView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ActionBarContainer { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ActionBarContextView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ActionBarOverlayLayout { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ActionMenuView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ActivityChooserView$InnerLayout { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.AlertDialogLayout { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ButtonBarLayout { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ContentFrameLayout { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.DialogTitle { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.FitWindowsFrameLayout { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.FitWindowsLinearLayout { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.SearchView$SearchAutoComplete { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.Toolbar { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.appcompat.widget.ViewStubCompat { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class androidx.core.widget.NestedScrollView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class com.journeyapps.barcodescanner.BarcodeView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class com.journeyapps.barcodescanner.DecoratedBarcodeView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class com.journeyapps.barcodescanner.ViewfinderView { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class org.firstinspires.ftc.robotcore.internal.ui.ColorListPreference { <init>(...); }
+
+-keep class org.firstinspires.ftc.robotcore.internal.ui.ColorListPreferenceLineItem { <init>(android.content.Context, android.util.AttributeSet); }
+
+-keep class org.firstinspires.ftc.robotcore.internal.ui.LabelTextPreference { <init>(...); }
+
+-keepclassmembers class * { *** editController_portALL(android.view.View); }
+
+-keepclassmembers class * { *** onAccept(android.view.View); }
+
+-keepclassmembers class * { *** onAddButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onApplyButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onCancelButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onClearRememberedGroupsClicked(android.view.View); }
+
+-keepclassmembers class * { *** onConfigureButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onConfigureFromTemplatePressed(android.view.View); }
+
+-keepclassmembers class * { *** onDevicesInfoButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onDoneButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onDoneInfoButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onFileActivateButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onFileDeleteButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onFileEditButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onFixButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onInfoButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onNewButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onScanButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onSwapButtonPressed(android.view.View); }
+
+-keepclassmembers class * { *** onUpdateLynxFirmwareClicked(android.view.View); }
+
+-keepclassmembers class * { *** onWifiSettingsClicked(android.view.View); }
+
+-keepclassmembers class * { *** onZoomIn(android.view.View); }
+
+-keepclassmembers class * { *** onZoomOut(android.view.View); }
+

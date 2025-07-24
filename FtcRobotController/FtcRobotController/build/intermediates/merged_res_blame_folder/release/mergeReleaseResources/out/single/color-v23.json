@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_tint_edittext.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_tint_edittext.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_tint_default.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_tint_default.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_tint_spinner.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_tint_spinner.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_tint_switch_track.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_tint_switch_track.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_tint_btn_checkable.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_tint_btn_checkable.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_btn_colored_text_material.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_btn_colored_text_material.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_tint_seek_thumb.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_tint_seek_thumb.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_btn_colored_borderless_text_material.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_btn_colored_borderless_text_material.xml"
+    },
+    {
+        "merged": "com.qualcomm.ftcrobotcontroller.FtcRobotController-release-16:/color-v23/abc_color_highlight_material.xml",
+        "source": "com.qualcomm.ftcrobotcontroller.FtcRobotController-appcompat-1.2.0-2:/color-v23/abc_color_highlight_material.xml"
+    }
+]

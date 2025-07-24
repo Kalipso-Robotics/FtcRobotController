@@ -1,0 +1,1449 @@
+--------- beginning of main
+02-10 23:17:08.280  3038  3133 V Robocol : received command: CMD_SET_MATCH_NUMBER(16492) 0
+02-10 23:17:08.282  3038  3133 V Robocol : received command: CMD_INIT_OP_MODE(16493) RedTeleOp
+02-10 23:17:08.318  3038  3615 V RobotCore: thread: ...terminating 'OpModeThread'
+02-10 23:17:08.321  3038  3165 I RobotCore: Attempting to switch to OpMode RedTeleOp
+02-10 23:17:08.327  3038  3165 I RobotCore: ******************** START - OPMODE RedTeleOp ********************
+02-10 23:17:08.493  3038  3165 D HardwareMap: Clearing which device instances have been retrieved
+02-10 23:17:08.499  3038  3617 V RobotCore: thread: 'OpModeThread' starting...
+02-10 23:17:08.500  3038  3617 D AprilTagDetectorJNI: Creating 36h11 tag family
+02-10 23:17:08.500  3038  3617 D AprilTagDetectorJNI: Initializing april tag detector
+02-10 23:17:08.526  3038  3136 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(41588), attempt: 0
+02-10 23:17:08.680  3038  3617 I I2C     : Automatically initializing I2C device BHI260IMU (BHI260 IMU on USB (embedded); module 173; bus 0; addr7=0x28)
+02-10 23:17:08.682  3038  3617 V BHI260IMU: Suppressing I2C warnings while we check for a BHI260AP IMU
+02-10 23:17:08.684  3038  3617 V BHI260IMU: Found BHI260AP IMU
+02-10 23:17:08.698  3038  3617 D BHI260IMU: Firmware version: 20
+02-10 23:17:08.714  3038  3617 V BHI260IMU: Suppressing I2C warnings while we check for a BHI260AP IMU
+02-10 23:17:08.717  3038  3617 V BHI260IMU: Found BHI260AP IMU
+02-10 23:17:08.730  3038  3617 D BHI260IMU: Firmware version: 20
+02-10 23:17:08.760  3038  3133 V Robocol : received command: CMD_RUN_OP_MODE(16508) RedTeleOp
+02-10 23:17:08.806  3038  3136 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(41596), attempt: 0
+02-10 23:17:09.510  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.527  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray83.98060607910156heading
+02-10 23:17:09.543  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.558  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray87.43437957763672heading
+02-10 23:17:09.573  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.584  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray91.3322982788086heading
+02-10 23:17:09.592  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.604  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray94.17918395996094heading
+02-10 23:17:09.619  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.633  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray97.92655944824219heading
+02-10 23:17:09.644  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.656  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray99.90800476074219heading
+02-10 23:17:09.664  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.675  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray100.61300659179688heading
+02-10 23:17:09.684  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.696  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray100.82304382324219heading
+02-10 23:17:09.704  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.715  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray100.8031997680664heading
+02-10 23:17:09.724  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.736  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray100.69347381591797heading
+02-10 23:17:09.743  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.756  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray100.51797485351562heading
+02-10 23:17:09.770  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.783  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray100.35830688476562heading
+02-10 23:17:09.790  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.802  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray100.60799407958984heading
+02-10 23:17:09.813  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.825  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray101.80978393554688heading
+02-10 23:17:09.832  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.844  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray103.52078247070312heading
+02-10 23:17:09.851  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.863  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray105.69877624511719heading
+02-10 23:17:09.870  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.882  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray108.35240173339844heading
+02-10 23:17:09.889  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.900  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray111.35535430908203heading
+02-10 23:17:09.907  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.917  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray114.43531799316406heading
+02-10 23:17:09.929  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.940  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray118.64923095703125heading
+02-10 23:17:09.968  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:09.980  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray125.90031433105469heading
+02-10 23:17:10.024  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.037  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray134.3751983642578heading
+02-10 23:17:10.047  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.059  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.24075317382812heading
+02-10 23:17:10.067  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.077  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.86474609375heading
+02-10 23:17:10.085  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.101  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray137.0246124267578heading
+02-10 23:17:10.108  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.124  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.98077392578125heading
+02-10 23:17:10.131  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.146  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.79498291015625heading
+02-10 23:17:10.153  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.165  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.6270294189453heading
+02-10 23:17:10.177  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.191  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.49412536621094heading
+02-10 23:17:10.198  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.212  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.48252868652344heading
+02-10 23:17:10.225  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.238  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.46804809570312heading
+02-10 23:17:10.253  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.267  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.5670928955078heading
+02-10 23:17:10.279  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.295  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.70846557617188heading
+02-10 23:17:10.310  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.324  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray136.9194793701172heading
+02-10 23:17:10.334  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.348  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray137.217041015625heading
+02-10 23:17:10.355  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.369  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray137.80294799804688heading
+02-10 23:17:10.380  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.392  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray138.813720703125heading
+02-10 23:17:10.400  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.414  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray140.160888671875heading
+02-10 23:17:10.423  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.437  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray142.1597137451172heading
+02-10 23:17:10.450  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.464  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray145.17147827148438heading
+02-10 23:17:10.495  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.507  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray151.20233154296875heading
+02-10 23:17:10.559  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.571  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.78927612304688heading
+02-10 23:17:10.579  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.591  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.65008544921875heading
+02-10 23:17:10.599  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.612  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.27511596679688heading
+02-10 23:17:10.619  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.631  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.52059936523438heading
+02-10 23:17:10.637  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.649  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.61981201171875heading
+02-10 23:17:10.656  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.669  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.65843200683594heading
+02-10 23:17:10.675  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.687  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.6199493408203heading
+02-10 23:17:10.694  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.705  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.51138305664062heading
+02-10 23:17:10.713  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.727  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.4351043701172heading
+02-10 23:17:10.734  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.746  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.38975524902344heading
+02-10 23:17:10.754  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.766  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.354248046875heading
+02-10 23:17:10.783  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.797  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.36558532714844heading
+02-10 23:17:10.810  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.824  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.37254333496094heading
+02-10 23:17:10.835  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.852  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.33387756347656heading
+02-10 23:17:10.864  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.872  3038  3047 D AprilTagDetectorJNI: Freeing april tag JNI context object
+02-10 23:17:10.872  3038  3047 D AprilTagDetectorJNI: Freeing april tag detector
+02-10 23:17:10.872  3038  3047 D AprilTagDetectorJNI: Freeing tag family tag36h11
+02-10 23:17:10.873  3038  3047 D AprilTagDetectorJNI: Freed april tag JNI context object
+02-10 23:17:10.876  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.2127227783203heading
+02-10 23:17:10.888  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.899  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.13848876953125heading
+02-10 23:17:10.906  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.916  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.099609375heading
+02-10 23:17:10.923  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.946  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.07794189453125heading
+02-10 23:17:10.960  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:10.972  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.02066040039062heading
+02-10 23:17:10.999  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.011  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.9757080078125heading
+02-10 23:17:11.021  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.037  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.96160888671875heading
+02-10 23:17:11.051  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.063  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.9523468017578heading
+02-10 23:17:11.076  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.090  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.9521026611328heading
+02-10 23:17:11.097  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.109  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.94883728027344heading
+02-10 23:17:11.116  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.130  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.96348571777344heading
+02-10 23:17:11.154  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.171  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.98300170898438heading
+02-10 23:17:11.183  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.194  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.02296447753906heading
+02-10 23:17:11.202  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.212  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.0257568359375heading
+02-10 23:17:11.219  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.229  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.02593994140625heading
+02-10 23:17:11.236  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.247  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.0265350341797heading
+02-10 23:17:11.253  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.265  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.0290069580078heading
+02-10 23:17:11.272  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.284  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.03292846679688heading
+02-10 23:17:11.296  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.312  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.05384826660156heading
+02-10 23:17:11.321  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.333  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.08197021484375heading
+02-10 23:17:11.344  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.356  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.11422729492188heading
+02-10 23:17:11.363  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.374  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.12525939941406heading
+02-10 23:17:11.385  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.396  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.1646728515625heading
+02-10 23:17:11.404  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.415  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.2093963623047heading
+02-10 23:17:11.427  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.438  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.26409912109375heading
+02-10 23:17:11.450  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.463  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.3352508544922heading
+02-10 23:17:11.470  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.482  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.38388061523438heading
+02-10 23:17:11.510  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.524  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.50462341308594heading
+02-10 23:17:11.539  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.550  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.55567932128906heading
+02-10 23:17:11.565  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.576  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.6104736328125heading
+02-10 23:17:11.589  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.602  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.63526916503906heading
+02-10 23:17:11.613  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.626  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.6814727783203heading
+02-10 23:17:11.634  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.647  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.6778564453125heading
+02-10 23:17:11.669  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.683  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.7022705078125heading
+02-10 23:17:11.695  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.708  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.27090454101562heading
+02-10 23:17:11.715  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.727  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.56158447265625heading
+02-10 23:17:11.740  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.753  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.13455200195312heading
+02-10 23:17:11.761  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.774  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.7494354248047heading
+02-10 23:17:11.786  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.798  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.72244262695312heading
+02-10 23:17:11.808  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.821  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.24075317382812heading
+02-10 23:17:11.833  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.845  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray149.5612030029297heading
+02-10 23:17:11.856  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.868  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray146.63380432128906heading
+02-10 23:17:11.875  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.887  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray144.1808319091797heading
+02-10 23:17:11.894  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.907  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.44529724121094heading
+02-10 23:17:11.915  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.928  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray138.58685302734375heading
+02-10 23:17:11.935  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.948  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray135.6430206298828heading
+02-10 23:17:11.955  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.969  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray132.46665954589844heading
+02-10 23:17:11.976  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:11.990  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray129.20433044433594heading
+02-10 23:17:12.020  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.034  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray123.91431427001953heading
+02-10 23:17:12.049  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.060  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray120.45690155029297heading
+02-10 23:17:12.076  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.087  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray116.82868957519531heading
+02-10 23:17:12.101  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.114  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray113.25499725341797heading
+02-10 23:17:12.121  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.133  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray110.3873291015625heading
+02-10 23:17:12.145  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.156  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray107.12332916259766heading
+02-10 23:17:12.164  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.176  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray104.13021087646484heading
+02-10 23:17:12.196  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.208  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray99.14583587646484heading
+02-10 23:17:12.220  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.232  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray95.42568969726562heading
+02-10 23:17:12.239  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.251  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray92.21321105957031heading
+02-10 23:17:12.263  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.274  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray88.5323715209961heading
+02-10 23:17:12.281  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.293  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray85.40605926513672heading
+02-10 23:17:12.306  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.317  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray81.31122589111328heading
+02-10 23:17:12.329  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.342  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray76.85195922851562heading
+02-10 23:17:12.349  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.364  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray72.72994995117188heading
+02-10 23:17:12.376  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.385  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray68.54448699951172heading
+02-10 23:17:12.392  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.402  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray65.23009490966797heading
+02-10 23:17:12.408  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.418  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray62.137062072753906heading
+02-10 23:17:12.425  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.437  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray58.770652770996094heading
+02-10 23:17:12.444  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.455  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray55.14830017089844heading
+02-10 23:17:12.462  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.474  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray51.531951904296875heading
+02-10 23:17:12.482  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.493  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray47.91323471069336heading
+02-10 23:17:12.509  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.521  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray42.573509216308594heading
+02-10 23:17:12.540  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.553  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray36.200279235839844heading
+02-10 23:17:12.566  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.580  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray31.469154357910156heading
+02-10 23:17:12.594  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.610  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray26.105857849121094heading
+02-10 23:17:12.624  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.638  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray20.7635440826416heading
+02-10 23:17:12.651  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.666  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray15.310683250427246heading
+02-10 23:17:12.673  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.686  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray11.577375411987305heading
+02-10 23:17:12.709  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.722  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray4.937775611877441heading
+02-10 23:17:12.735  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.750  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray0.608756422996521heading
+02-10 23:17:12.757  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.772  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-2.7904531955718994heading
+02-10 23:17:12.786  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.800  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-6.545095443725586heading
+02-10 23:17:12.808  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.823  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-9.128582954406738heading
+02-10 23:17:12.832  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.847  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-10.276567459106445heading
+02-10 23:17:12.854  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.867  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-10.465046882629395heading
+02-10 23:17:12.875  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.888  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-10.486699104309082heading
+02-10 23:17:12.901  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.916  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-10.329134941101074heading
+02-10 23:17:12.929  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.943  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-10.543086051940918heading
+02-10 23:17:12.950  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.963  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-11.748424530029297heading
+02-10 23:17:12.974  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:12.988  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-14.248492240905762heading
+02-10 23:17:12.994  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.008  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-16.90699577331543heading
+02-10 23:17:13.023  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.036  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-21.42433738708496heading
+02-10 23:17:13.056  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.070  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.825035095214844heading
+02-10 23:17:13.086  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.098  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-33.27561950683594heading
+02-10 23:17:13.116  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.129  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-37.17472457885742heading
+02-10 23:17:13.147  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.160  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-40.45382308959961heading
+02-10 23:17:13.167  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.180  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.23301315307617heading
+02-10 23:17:13.188  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.201  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.934627532958984heading
+02-10 23:17:13.209  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.222  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-43.10203552246094heading
+02-10 23:17:13.229  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.243  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-43.10225296020508heading
+02-10 23:17:13.250  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.264  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-43.00823211669922heading
+02-10 23:17:13.271  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.284  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.903160095214844heading
+02-10 23:17:13.291  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.305  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.81120681762695heading
+02-10 23:17:13.312  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.324  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.721412658691406heading
+02-10 23:17:13.335  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.349  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.65449523925781heading
+02-10 23:17:13.357  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.369  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.61719512939453heading
+02-10 23:17:13.391  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.402  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.658607482910156heading
+02-10 23:17:13.413  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.425  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.6284065246582heading
+02-10 23:17:13.432  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.445  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-42.001731872558594heading
+02-10 23:17:13.457  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.469  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-40.18267059326172heading
+02-10 23:17:13.476  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.487  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-38.37039566040039heading
+02-10 23:17:13.499  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.510  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-35.28981018066406heading
+02-10 23:17:13.532  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.548  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-30.557241439819336heading
+02-10 23:17:13.569  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.586  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.063861846923828heading
+02-10 23:17:13.600  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.612  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.5154972076416heading
+02-10 23:17:13.626  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.637  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.521581649780273heading
+02-10 23:17:13.650  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.661  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.674657821655273heading
+02-10 23:17:13.668  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.680  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.841571807861328heading
+02-10 23:17:13.687  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.699  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.973661422729492heading
+02-10 23:17:13.706  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.720  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.05936050415039heading
+02-10 23:17:13.727  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.740  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.0849609375heading
+02-10 23:17:13.747  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.760  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.04432487487793heading
+02-10 23:17:13.767  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.780  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.009506225585938heading
+02-10 23:17:13.787  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.801  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.995838165283203heading
+02-10 23:17:13.808  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.821  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.00970458984375heading
+02-10 23:17:13.831  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.851  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.03034019470215heading
+02-10 23:17:13.861  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.872  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.0274715423584heading
+02-10 23:17:13.879  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.890  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.02326202392578heading
+02-10 23:17:13.897  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.908  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.009578704833984heading
+02-10 23:17:13.915  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.927  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.005279541015625heading
+02-10 23:17:13.947  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.958  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.998004913330078heading
+02-10 23:17:13.965  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:13.978  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.993310928344727heading
+02-10 23:17:13.989  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.002  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.076736450195312heading
+02-10 23:17:14.014  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.026  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.16518783569336heading
+02-10 23:17:14.042  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.055  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.328163146972656heading
+02-10 23:17:14.085  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.103  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.692096710205078heading
+02-10 23:17:14.127  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.142  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.942914962768555heading
+02-10 23:17:14.161  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.176  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.06182861328125heading
+02-10 23:17:14.184  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.198  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.068620681762695heading
+02-10 23:17:14.206  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.220  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.241844177246094heading
+02-10 23:17:14.227  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.242  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.43739128112793heading
+02-10 23:17:14.250  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.265  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.563209533691406heading
+02-10 23:17:14.272  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.287  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.61210823059082heading
+02-10 23:17:14.295  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.310  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.650211334228516heading
+02-10 23:17:14.317  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.329  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.665376663208008heading
+02-10 23:17:14.342  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.357  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.68325424194336heading
+02-10 23:17:14.372  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.387  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.68606948852539heading
+02-10 23:17:14.395  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.408  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.676454544067383heading
+02-10 23:17:14.415  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.427  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.6682071685791heading
+02-10 23:17:14.434  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.447  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.66117286682129heading
+02-10 23:17:14.455  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.466  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.66098403930664heading
+02-10 23:17:14.473  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.487  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.656904220581055heading
+02-10 23:17:14.494  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.505  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.661020278930664heading
+02-10 23:17:14.512  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.527  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.661090850830078heading
+02-10 23:17:14.534  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.545  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.656949996948242heading
+02-10 23:17:14.561  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.573  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.656814575195312heading
+02-10 23:17:14.593  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.609  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.66356086730957heading
+02-10 23:17:14.632  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.647  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.67848777770996heading
+02-10 23:17:14.655  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.670  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.71000862121582heading
+02-10 23:17:14.685  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:14.700  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.74989891052246heading
+02-10 23:17:14.812  3038  3617 D drone   : current velocity: 0.21target velocity: 1.372current power0.25
+02-10 23:17:14.921  3038  3617 D drone   : current velocity: 0.45target velocity: 1.372current power0.3
+02-10 23:17:15.029  3038  3617 D drone   : current velocity: 0.6target velocity: 1.372current power0.35
+02-10 23:17:15.137  3038  3617 D drone   : current velocity: 0.74target velocity: 1.372current power0.39999999999999997
+02-10 23:17:15.250  3038  3617 D drone   : current velocity: 0.89target velocity: 1.372current power0.44999999999999996
+02-10 23:17:15.360  3038  3617 D drone   : current velocity: 1.04target velocity: 1.372current power0.49999999999999994
+02-10 23:17:15.469  3038  3617 D drone   : current velocity: 1.15target velocity: 1.372current power0.5499999999999999
+02-10 23:17:15.577  3038  3617 D drone   : current velocity: 1.27target velocity: 1.372current power0.6
+02-10 23:17:15.688  3038  3617 D drone   : reach velocity: true
+02-10 23:17:16.726  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.742  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.656661987304688heading
+02-10 23:17:16.764  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.774  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.652587890625heading
+02-10 23:17:16.781  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.793  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.65264892578125heading
+02-10 23:17:16.801  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.812  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.65264892578125heading
+02-10 23:17:16.819  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.830  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.652587890625heading
+02-10 23:17:16.837  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.849  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.652557373046875heading
+02-10 23:17:16.855  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.870  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.652587890625heading
+02-10 23:17:16.877  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.890  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.649677276611328heading
+02-10 23:17:16.897  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.910  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.652454376220703heading
+02-10 23:17:16.917  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.929  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.649616241455078heading
+02-10 23:17:16.935  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.947  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.649585723876953heading
+02-10 23:17:16.954  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.967  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.627769470214844heading
+02-10 23:17:16.974  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:16.986  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.630529403686523heading
+02-10 23:17:16.993  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.005  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.64569664001465heading
+02-10 23:17:17.013  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.025  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.634700775146484heading
+02-10 23:17:17.032  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.045  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.63454246520996heading
+02-10 23:17:17.052  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.065  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.64567756652832heading
+02-10 23:17:17.072  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.088  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.627803802490234heading
+02-10 23:17:17.096  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.108  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.634700775146484heading
+02-10 23:17:17.114  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.126  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.638866424560547heading
+02-10 23:17:17.133  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.145  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.63876724243164heading
+02-10 23:17:17.152  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.162  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.634727478027344heading
+02-10 23:17:17.169  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.179  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.631942749023438heading
+02-10 23:17:17.186  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.196  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.627803802490234heading
+02-10 23:17:17.230  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.242  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.623624801635742heading
+02-10 23:17:17.263  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.275  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.613319396972656heading
+02-10 23:17:17.296  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.308  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.60714340209961heading
+02-10 23:17:17.315  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.327  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.63981819152832heading
+02-10 23:17:17.339  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.351  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.725366592407227heading
+02-10 23:17:17.358  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.369  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.76378059387207heading
+02-10 23:17:17.376  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.388  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.767976760864258heading
+02-10 23:17:17.395  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.408  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.781923294067383heading
+02-10 23:17:17.415  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.427  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.76152229309082heading
+02-10 23:17:17.434  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.448  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.736459732055664heading
+02-10 23:17:17.455  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.466  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.700780868530273heading
+02-10 23:17:17.473  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.485  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.651962280273438heading
+02-10 23:17:17.492  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.505  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.648086547851562heading
+02-10 23:17:17.515  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.527  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.622026443481445heading
+02-10 23:17:17.534  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.546  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.583110809326172heading
+02-10 23:17:17.553  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.569  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.514875411987305heading
+02-10 23:17:17.577  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.591  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.414392471313477heading
+02-10 23:17:17.599  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.615  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.350332260131836heading
+02-10 23:17:17.623  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.636  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.24234390258789heading
+02-10 23:17:17.645  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.659  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.161529541015625heading
+02-10 23:17:17.666  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.678  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.106403350830078heading
+02-10 23:17:17.686  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.701  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-28.04865837097168heading
+02-10 23:17:17.738  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.752  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.91368293762207heading
+02-10 23:17:17.760  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.773  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.880868911743164heading
+02-10 23:17:17.795  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.809  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.873079299926758heading
+02-10 23:17:17.816  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.830  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.876432418823242heading
+02-10 23:17:17.839  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.851  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.906965255737305heading
+02-10 23:17:17.859  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.870  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.90271759033203heading
+02-10 23:17:17.877  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.888  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.89535140991211heading
+02-10 23:17:17.895  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.907  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.900157928466797heading
+02-10 23:17:17.914  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.927  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.864002227783203heading
+02-10 23:17:17.934  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.945  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.832130432128906heading
+02-10 23:17:17.952  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.965  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.785573959350586heading
+02-10 23:17:17.971  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:17.984  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.738306045532227heading
+02-10 23:17:17.991  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.004  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.697416305541992heading
+02-10 23:17:18.011  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.023  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.65785789489746heading
+02-10 23:17:18.030  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.042  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.62248992919922heading
+02-10 23:17:18.050  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.065  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.580917358398438heading
+02-10 23:17:18.072  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.084  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.522884368896484heading
+02-10 23:17:18.091  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.104  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.4969425201416heading
+02-10 23:17:18.111  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.125  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.462678909301758heading
+02-10 23:17:18.147  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.162  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.410236358642578heading
+02-10 23:17:18.175  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.188  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.343427658081055heading
+02-10 23:17:18.195  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:18.207  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.26880645751953heading
+02-10 23:17:18.250  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1
+02-10 23:17:18.263  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-27.04241943359375heading
+02-10 23:17:18.277  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 42
+02-10 23:17:18.289  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.917619705200195heading
+02-10 23:17:18.307  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 105
+02-10 23:17:18.320  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.82733726501465heading
+02-10 23:17:18.336  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 166
+02-10 23:17:18.348  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.765331268310547heading
+02-10 23:17:18.355  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 189
+02-10 23:17:18.368  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.730606079101562heading
+02-10 23:17:18.380  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 196
+02-10 23:17:18.394  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.689998626708984heading
+02-10 23:17:18.403  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 197
+02-10 23:17:18.416  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.66539192199707heading
+02-10 23:17:18.427  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 197
+02-10 23:17:18.440  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.717113494873047heading
+02-10 23:17:18.452  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 193
+02-10 23:17:18.465  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-26.23577308654785heading
+02-10 23:17:18.472  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 191
+02-10 23:17:18.486  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-25.12073516845703heading
+02-10 23:17:18.498  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 190
+02-10 23:17:18.510  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-23.20960235595703heading
+02-10 23:17:18.518  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 189
+02-10 23:17:18.532  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-21.10862922668457heading
+02-10 23:17:18.545  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 189
+02-10 23:17:18.557  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-17.700206756591797heading
+02-10 23:17:18.568  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 212
+02-10 23:17:18.580  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-14.472383499145508heading
+02-10 23:17:18.591  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 246
+02-10 23:17:18.607  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-11.39478588104248heading
+02-10 23:17:18.616  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 294
+02-10 23:17:18.628  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-7.541386604309082heading
+02-10 23:17:18.637  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 336
+02-10 23:17:18.649  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-4.442564964294434heading
+02-10 23:17:18.657  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 380
+02-10 23:17:18.668  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-0.6143046617507935heading
+02-10 23:17:18.677  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 422
+02-10 23:17:18.688  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray3.1434645652770996heading
+02-10 23:17:18.697  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 464
+02-10 23:17:18.709  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray7.0784687995910645heading
+02-10 23:17:18.722  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 518
+02-10 23:17:18.734  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray12.144031524658203heading
+02-10 23:17:18.760  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 602
+02-10 23:17:18.774  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray20.599815368652344heading
+02-10 23:17:18.783  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 654
+02-10 23:17:18.796  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray25.494171142578125heading
+02-10 23:17:18.815  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 725
+02-10 23:17:18.828  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray32.64039993286133heading
+02-10 23:17:18.839  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 776
+02-10 23:17:18.852  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray37.896881103515625heading
+02-10 23:17:18.861  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 826
+02-10 23:17:18.874  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray42.62704086303711heading
+02-10 23:17:18.883  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 876
+02-10 23:17:18.896  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray47.66444778442383heading
+02-10 23:17:18.904  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 922
+02-10 23:17:18.915  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray52.131431579589844heading
+02-10 23:17:18.923  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 964
+02-10 23:17:18.934  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray56.329429626464844heading
+02-10 23:17:18.942  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1007
+02-10 23:17:18.953  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray60.81669616699219heading
+02-10 23:17:18.960  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1049
+02-10 23:17:18.972  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray65.04936218261719heading
+02-10 23:17:18.979  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1091
+02-10 23:17:18.991  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray69.2818374633789heading
+02-10 23:17:18.998  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1130
+02-10 23:17:19.008  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray73.48989868164062heading
+02-10 23:17:19.015  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1166
+02-10 23:17:19.027  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray77.41595458984375heading
+02-10 23:17:19.034  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1207
+02-10 23:17:19.046  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray81.60737609863281heading
+02-10 23:17:19.061  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1265
+02-10 23:17:19.072  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray87.47794342041016heading
+02-10 23:17:19.079  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1304
+02-10 23:17:19.090  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray91.65910339355469heading
+02-10 23:17:19.097  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1344
+02-10 23:17:19.108  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray95.53717041015625heading
+02-10 23:17:19.115  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1383
+02-10 23:17:19.127  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray99.95454406738281heading
+02-10 23:17:19.136  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1428
+02-10 23:17:19.149  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray104.66609191894531heading
+02-10 23:17:19.154  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1464
+02-10 23:17:19.163  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray108.28952026367188heading
+02-10 23:17:19.168  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1489
+02-10 23:17:19.180  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray111.63229370117188heading
+02-10 23:17:19.184  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1515
+02-10 23:17:19.196  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray115.2937240600586heading
+02-10 23:17:19.201  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1538
+02-10 23:17:19.213  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray119.268310546875heading
+02-10 23:17:19.233  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1572
+02-10 23:17:19.244  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray126.43647766113281heading
+02-10 23:17:19.270  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1594
+02-10 23:17:19.284  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray134.93850708007812heading
+02-10 23:17:19.289  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1600
+02-10 23:17:19.302  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray137.67518615722656heading
+02-10 23:17:19.315  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1602
+02-10 23:17:19.329  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray140.43267822265625heading
+02-10 23:17:19.341  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1602
+02-10 23:17:19.354  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.912841796875heading
+02-10 23:17:19.363  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1624
+02-10 23:17:19.376  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray142.31744384765625heading
+02-10 23:17:19.384  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1657
+02-10 23:17:19.397  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray142.32411193847656heading
+02-10 23:17:19.404  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1696
+02-10 23:17:19.416  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray142.16506958007812heading
+02-10 23:17:19.424  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1738
+02-10 23:17:19.436  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.96292114257812heading
+02-10 23:17:19.444  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1783
+02-10 23:17:19.456  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.83563232421875heading
+02-10 23:17:19.465  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1830
+02-10 23:17:19.477  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.73995971679688heading
+02-10 23:17:19.483  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1865
+02-10 23:17:19.495  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.72988891601562heading
+02-10 23:17:19.500  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1894
+02-10 23:17:19.511  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.7720184326172heading
+02-10 23:17:19.516  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1919
+02-10 23:17:19.527  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.79595947265625heading
+02-10 23:17:19.532  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1940
+02-10 23:17:19.544  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.79415893554688heading
+02-10 23:17:19.549  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1956
+02-10 23:17:19.565  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.79885864257812heading
+02-10 23:17:19.575  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1973
+02-10 23:17:19.588  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.78750610351562heading
+02-10 23:17:19.595  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1979
+02-10 23:17:19.609  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray141.87554931640625heading
+02-10 23:17:19.618  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1982
+02-10 23:17:19.629  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray142.07940673828125heading
+02-10 23:17:19.634  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1982
+02-10 23:17:19.645  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray142.7268829345703heading
+02-10 23:17:19.665  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1981
+02-10 23:17:19.677  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray145.0555877685547heading
+02-10 23:17:19.684  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1961
+02-10 23:17:19.694  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray146.77963256835938heading
+02-10 23:17:19.706  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1922
+02-10 23:17:19.717  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray149.4134063720703heading
+02-10 23:17:19.727  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1875
+02-10 23:17:19.737  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.0043182373047heading
+02-10 23:17:19.765  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1780
+02-10 23:17:19.780  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.63893127441406heading
+02-10 23:17:19.797  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1694
+02-10 23:17:19.812  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.81016540527344heading
+02-10 23:17:19.828  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1603
+02-10 23:17:19.844  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.49343872070312heading
+02-10 23:17:19.855  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1524
+02-10 23:17:19.868  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.53375244140625heading
+02-10 23:17:19.873  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1498
+02-10 23:17:19.887  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.34927368164062heading
+02-10 23:17:19.892  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1493
+02-10 23:17:19.905  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.11354064941406heading
+02-10 23:17:19.911  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1492
+02-10 23:17:19.929  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.05706787109375heading
+02-10 23:17:19.934  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1492
+02-10 23:17:19.949  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.02574157714844heading
+02-10 23:17:19.954  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1494
+02-10 23:17:19.970  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.92697143554688heading
+02-10 23:17:19.975  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1496
+02-10 23:17:19.990  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.83738708496094heading
+02-10 23:17:19.995  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1496
+02-10 23:17:20.012  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.85552978515625heading
+02-10 23:17:20.023  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1496
+02-10 23:17:20.044  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.03759765625heading
+02-10 23:17:20.055  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1497
+02-10 23:17:20.067  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.94337463378906heading
+02-10 23:17:20.072  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1497
+02-10 23:17:20.085  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.9046630859375heading
+02-10 23:17:20.101  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1497
+02-10 23:17:20.113  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.89962768554688heading
+02-10 23:17:20.121  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1475
+02-10 23:17:20.132  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.89932250976562heading
+02-10 23:17:20.145  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1426
+02-10 23:17:20.160  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.9033203125heading
+02-10 23:17:20.169  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1372
+02-10 23:17:20.184  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.8779754638672heading
+02-10 23:17:20.197  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1305
+02-10 23:17:20.209  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.8650665283203heading
+02-10 23:17:20.221  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1244
+02-10 23:17:20.234  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.8521270751953heading
+02-10 23:17:20.246  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1178
+02-10 23:17:20.259  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.86875915527344heading
+02-10 23:17:20.273  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1103
+02-10 23:17:20.288  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.89772033691406heading
+02-10 23:17:20.313  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1000
+02-10 23:17:20.329  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.90858459472656heading
+02-10 23:17:20.344  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 980
+02-10 23:17:20.359  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.9149627685547heading
+02-10 23:17:20.367  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 982
+02-10 23:17:20.380  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.92916870117188heading
+02-10 23:17:20.385  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 985
+02-10 23:17:20.405  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.91563415527344heading
+02-10 23:17:20.410  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 989
+02-10 23:17:20.424  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.92868041992188heading
+02-10 23:17:20.430  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 990
+02-10 23:17:20.445  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.955810546875heading
+02-10 23:17:20.450  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 991
+02-10 23:17:20.463  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.96771240234375heading
+02-10 23:17:20.469  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 991
+02-10 23:17:20.483  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.00164794921875heading
+02-10 23:17:20.488  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 992
+02-10 23:17:20.502  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.02853393554688heading
+02-10 23:17:20.507  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 992
+02-10 23:17:20.519  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.0638885498047heading
+02-10 23:17:20.525  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 992
+02-10 23:17:20.538  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.06788635253906heading
+02-10 23:17:20.543  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 993
+02-10 23:17:20.557  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.0771942138672heading
+02-10 23:17:20.564  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 994
+02-10 23:17:20.577  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.09779357910156heading
+02-10 23:17:20.582  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 994
+02-10 23:17:20.595  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.1291046142578heading
+02-10 23:17:20.600  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 995
+02-10 23:17:20.613  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.15533447265625heading
+02-10 23:17:20.620  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 995
+02-10 23:17:20.633  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.17442321777344heading
+02-10 23:17:20.638  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 996
+02-10 23:17:20.651  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.201171875heading
+02-10 23:17:20.673  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 997
+02-10 23:17:20.689  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.25027465820312heading
+02-10 23:17:20.699  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 998
+02-10 23:17:20.711  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.2703399658203heading
+02-10 23:17:20.716  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 998
+02-10 23:17:20.727  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.2911834716797heading
+02-10 23:17:20.737  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 999
+02-10 23:17:20.749  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.3055877685547heading
+02-10 23:17:20.756  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1000
+02-10 23:17:20.767  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.21897888183594heading
+02-10 23:17:20.785  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1002
+02-10 23:17:20.798  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.01649475097656heading
+02-10 23:17:20.815  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1042
+02-10 23:17:20.828  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.97337341308594heading
+02-10 23:17:20.835  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1079
+02-10 23:17:20.847  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.9683837890625heading
+02-10 23:17:20.862  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1137
+02-10 23:17:20.874  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.99549865722656heading
+02-10 23:17:20.886  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1193
+02-10 23:17:20.898  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.99874877929688heading
+02-10 23:17:20.905  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1238
+02-10 23:17:20.917  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.0089111328125heading
+02-10 23:17:20.926  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1283
+02-10 23:17:20.940  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.05279541015625heading
+02-10 23:17:20.947  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1322
+02-10 23:17:20.960  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.10943603515625heading
+02-10 23:17:20.967  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1361
+02-10 23:17:20.979  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.1291046142578heading
+02-10 23:17:20.986  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1399
+02-10 23:17:20.997  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.1575164794922heading
+02-10 23:17:21.004  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1436
+02-10 23:17:21.015  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.11248779296875heading
+02-10 23:17:21.022  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1474
+02-10 23:17:21.034  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.01113891601562heading
+02-10 23:17:21.043  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1522
+02-10 23:17:21.055  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.98526000976562heading
+02-10 23:17:21.069  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1583
+02-10 23:17:21.081  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.96307373046875heading
+02-10 23:17:21.086  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1616
+02-10 23:17:21.098  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.9853057861328heading
+02-10 23:17:21.104  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1647
+02-10 23:17:21.120  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.99314880371094heading
+02-10 23:17:21.125  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1677
+02-10 23:17:21.140  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.97860717773438heading
+02-10 23:17:21.146  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1698
+02-10 23:17:21.158  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.9967498779297heading
+02-10 23:17:21.164  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1708
+02-10 23:17:21.176  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.99020385742188heading
+02-10 23:17:21.181  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1712
+02-10 23:17:21.193  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.0102996826172heading
+02-10 23:17:21.200  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1715
+02-10 23:17:21.213  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.05519104003906heading
+02-10 23:17:21.219  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1717
+02-10 23:17:21.234  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.0557098388672heading
+02-10 23:17:21.240  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1717
+02-10 23:17:21.256  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.04946899414062heading
+02-10 23:17:21.295  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1718
+02-10 23:17:21.311  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.06065368652344heading
+02-10 23:17:21.339  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1772
+02-10 23:17:21.351  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.07188415527344heading
+02-10 23:17:21.374  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1807
+02-10 23:17:21.388  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.16676330566406heading
+02-10 23:17:21.394  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1825
+02-10 23:17:21.413  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.14183044433594heading
+02-10 23:17:21.427  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1850
+02-10 23:17:21.442  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.1804962158203heading
+02-10 23:17:21.455  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1858
+02-10 23:17:21.470  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.2553253173828heading
+02-10 23:17:21.475  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.486  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.35435485839844heading
+02-10 23:17:21.495  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.508  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.50146484375heading
+02-10 23:17:21.513  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.525  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.6426239013672heading
+02-10 23:17:21.531  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.544  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.7623291015625heading
+02-10 23:17:21.548  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.562  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.864013671875heading
+02-10 23:17:21.566  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.578  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.9452362060547heading
+02-10 23:17:21.582  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.594  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.0194854736328heading
+02-10 23:17:21.599  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.610  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.0654754638672heading
+02-10 23:17:21.615  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1859
+02-10 23:17:21.626  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.13247680664062heading
+02-10 23:17:21.631  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1860
+02-10 23:17:21.642  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray160.0309600830078heading
+02-10 23:17:21.646  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1861
+02-10 23:17:21.658  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.646484375heading
+02-10 23:17:21.663  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1863
+02-10 23:17:21.674  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray159.19252014160156heading
+02-10 23:17:21.680  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1866
+02-10 23:17:21.693  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.4778289794922heading
+02-10 23:17:21.698  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1869
+02-10 23:17:21.712  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.58349609375heading
+02-10 23:17:21.716  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1873
+02-10 23:17:21.730  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.76573181152344heading
+02-10 23:17:21.735  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1876
+02-10 23:17:21.747  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.98179626464844heading
+02-10 23:17:21.752  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1880
+02-10 23:17:21.765  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.26673889160156heading
+02-10 23:17:21.772  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1884
+02-10 23:17:21.785  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.5505828857422heading
+02-10 23:17:21.796  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1888
+02-10 23:17:21.809  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.85159301757812heading
+02-10 23:17:21.813  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1889
+02-10 23:17:21.826  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.4400634765625heading
+02-10 23:17:21.849  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1892
+02-10 23:17:21.862  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.734130859375heading
+02-10 23:17:21.875  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:21.889  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.29783630371094heading
+02-10 23:17:21.908  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:21.920  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.2143096923828heading
+02-10 23:17:21.931  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:21.945  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.39810180664062heading
+02-10 23:17:21.950  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:21.964  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5669708251953heading
+02-10 23:17:21.974  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:21.986  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.6705322265625heading
+02-10 23:17:21.991  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.004  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.66604614257812heading
+02-10 23:17:22.014  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.025  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.59873962402344heading
+02-10 23:17:22.030  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.042  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.54180908203125heading
+02-10 23:17:22.047  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.059  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5069580078125heading
+02-10 23:17:22.064  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.075  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5093536376953heading
+02-10 23:17:22.080  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.092  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.54185485839844heading
+02-10 23:17:22.097  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.110  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.57559204101562heading
+02-10 23:17:22.114  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.128  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5827178955078heading
+02-10 23:17:22.133  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.143  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.56781005859375heading
+02-10 23:17:22.148  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.160  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5561065673828heading
+02-10 23:17:22.165  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.178  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.53955078125heading
+02-10 23:17:22.183  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.194  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5491943359375heading
+02-10 23:17:22.200  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.213  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5613555908203heading
+02-10 23:17:22.218  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.230  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.56748962402344heading
+02-10 23:17:22.235  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.247  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5679473876953heading
+02-10 23:17:22.257  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.269  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5598907470703heading
+02-10 23:17:22.276  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.290  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.55935668945312heading
+02-10 23:17:22.313  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1893
+02-10 23:17:22.328  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.5589141845703heading
+02-10 23:17:22.350  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1932
+02-10 23:17:22.363  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.58290100097656heading
+02-10 23:17:22.370  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1953
+02-10 23:17:22.382  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.61392211914062heading
+02-10 23:17:22.398  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1993
+02-10 23:17:22.412  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.6830596923828heading
+02-10 23:17:22.434  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2058
+02-10 23:17:22.448  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray152.88156127929688heading
+02-10 23:17:22.469  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2127
+02-10 23:17:22.483  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.06105041503906heading
+02-10 23:17:22.493  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2162
+02-10 23:17:22.505  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.31202697753906heading
+02-10 23:17:22.510  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2183
+02-10 23:17:22.522  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.47254943847656heading
+02-10 23:17:22.527  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2199
+02-10 23:17:22.539  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.6343536376953heading
+02-10 23:17:22.543  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2210
+02-10 23:17:22.555  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.76759338378906heading
+02-10 23:17:22.560  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.573  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.84161376953125heading
+02-10 23:17:22.579  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.591  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.89859008789062heading
+02-10 23:17:22.595  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.610  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.98573303222656heading
+02-10 23:17:22.615  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.625  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.0494842529297heading
+02-10 23:17:22.630  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.643  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.0914306640625heading
+02-10 23:17:22.648  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.660  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.16531372070312heading
+02-10 23:17:22.665  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.676  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.19830322265625heading
+02-10 23:17:22.683  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.695  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.22630310058594heading
+02-10 23:17:22.701  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.719  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.27354431152344heading
+02-10 23:17:22.725  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.739  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.29588317871094heading
+02-10 23:17:22.743  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.755  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2711639404297heading
+02-10 23:17:22.760  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.772  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2710723876953heading
+02-10 23:17:22.779  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.791  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.26695251464844heading
+02-10 23:17:22.796  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.809  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.26010131835938heading
+02-10 23:17:22.820  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.833  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2847442626953heading
+02-10 23:17:22.837  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.853  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.3096466064453heading
+02-10 23:17:22.869  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.883  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.30950927734375heading
+02-10 23:17:22.888  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.901  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.30262756347656heading
+02-10 23:17:22.915  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.929  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2998504638672heading
+02-10 23:17:22.934  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.950  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.30274963378906heading
+02-10 23:17:22.955  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2213
+02-10 23:17:22.969  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.30270385742188heading
+02-10 23:17:22.984  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2212
+02-10 23:17:22.995  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.31358337402344heading
+02-10 23:17:23.002  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2191
+02-10 23:17:23.012  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.32736206054688heading
+02-10 23:17:23.019  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2155
+02-10 23:17:23.030  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.33428955078125heading
+02-10 23:17:23.036  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2113
+02-10 23:17:23.046  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.33148193359375heading
+02-10 23:17:23.053  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2071
+02-10 23:17:23.064  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.33157348632812heading
+02-10 23:17:23.071  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2027
+02-10 23:17:23.082  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2960968017578heading
+02-10 23:17:23.089  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1981
+02-10 23:17:23.101  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.26718139648438heading
+02-10 23:17:23.108  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1934
+02-10 23:17:23.120  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.24642944335938heading
+02-10 23:17:23.127  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1882
+02-10 23:17:23.140  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2355499267578heading
+02-10 23:17:23.147  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1836
+02-10 23:17:23.160  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.29591369628906heading
+02-10 23:17:23.167  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1799
+02-10 23:17:23.180  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.53317260742188heading
+02-10 23:17:23.187  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1772
+02-10 23:17:23.202  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.85552978515625heading
+02-10 23:17:23.210  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1744
+02-10 23:17:23.222  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.4048614501953heading
+02-10 23:17:23.230  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1720
+02-10 23:17:23.242  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.85520935058594heading
+02-10 23:17:23.248  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1699
+02-10 23:17:23.260  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.17088317871094heading
+02-10 23:17:23.267  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1677
+02-10 23:17:23.279  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.36016845703125heading
+02-10 23:17:23.303  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1637
+02-10 23:17:23.314  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.46444702148438heading
+02-10 23:17:23.329  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1608
+02-10 23:17:23.341  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.7595672607422heading
+02-10 23:17:23.348  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1585
+02-10 23:17:23.361  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.96792602539062heading
+02-10 23:17:23.384  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1535
+02-10 23:17:23.399  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.91311645507812heading
+02-10 23:17:23.407  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1500
+02-10 23:17:23.422  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.6444549560547heading
+02-10 23:17:23.439  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1449
+02-10 23:17:23.453  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.44961547851562heading
+02-10 23:17:23.462  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1417
+02-10 23:17:23.476  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.62496948242188heading
+02-10 23:17:23.495  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1373
+02-10 23:17:23.509  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.15220642089844heading
+02-10 23:17:23.519  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1345
+02-10 23:17:23.530  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.4788818359375heading
+02-10 23:17:23.538  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1321
+02-10 23:17:23.552  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.78399658203125heading
+02-10 23:17:23.560  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1296
+02-10 23:17:23.573  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.9684295654297heading
+02-10 23:17:23.581  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1273
+02-10 23:17:23.593  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray158.03919982910156heading
+02-10 23:17:23.601  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1251
+02-10 23:17:23.614  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.96922302246094heading
+02-10 23:17:23.622  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1228
+02-10 23:17:23.633  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.81190490722656heading
+02-10 23:17:23.640  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1207
+02-10 23:17:23.652  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.56893920898438heading
+02-10 23:17:23.659  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1186
+02-10 23:17:23.671  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.2996063232422heading
+02-10 23:17:23.677  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1166
+02-10 23:17:23.691  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.96266174316406heading
+02-10 23:17:23.702  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1140
+02-10 23:17:23.716  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.56207275390625heading
+02-10 23:17:23.724  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1115
+02-10 23:17:23.736  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.2537841796875heading
+02-10 23:17:23.744  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1094
+02-10 23:17:23.756  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.00003051757812heading
+02-10 23:17:23.763  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1075
+02-10 23:17:23.775  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.7647247314453heading
+02-10 23:17:23.783  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1056
+02-10 23:17:23.793  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.59523010253906heading
+02-10 23:17:23.804  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1036
+02-10 23:17:23.815  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.42018127441406heading
+02-10 23:17:23.830  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1013
+02-10 23:17:23.842  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.2306365966797heading
+02-10 23:17:23.849  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 996
+02-10 23:17:23.861  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.10906982421875heading
+02-10 23:17:23.868  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 982
+02-10 23:17:23.881  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.03465270996094heading
+02-10 23:17:23.899  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 958
+02-10 23:17:23.912  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.97439575195312heading
+02-10 23:17:23.918  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 943
+02-10 23:17:23.930  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.99685668945312heading
+02-10 23:17:23.945  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 924
+02-10 23:17:23.958  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.07986450195312heading
+02-10 23:17:23.967  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 909
+02-10 23:17:23.980  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.19200134277344heading
+02-10 23:17:24.000  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 886
+02-10 23:17:24.011  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.3936767578125heading
+02-10 23:17:24.018  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 874
+02-10 23:17:24.030  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.54127502441406heading
+02-10 23:17:24.037  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 862
+02-10 23:17:24.048  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.62518310546875heading
+02-10 23:17:24.057  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 848
+02-10 23:17:24.068  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.27833557128906heading
+02-10 23:17:24.079  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 837
+02-10 23:17:24.090  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.4740447998047heading
+02-10 23:17:24.099  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 829
+02-10 23:17:24.111  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.6097412109375heading
+02-10 23:17:24.121  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 822
+02-10 23:17:24.133  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.10870361328125heading
+02-10 23:17:24.142  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 813
+02-10 23:17:24.154  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.06768798828125heading
+02-10 23:17:24.164  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 803
+02-10 23:17:24.176  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.4755096435547heading
+02-10 23:17:24.185  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 793
+02-10 23:17:24.197  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.17071533203125heading
+02-10 23:17:24.206  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 783
+02-10 23:17:24.218  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.09490966796875heading
+02-10 23:17:24.229  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 771
+02-10 23:17:24.242  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.95526123046875heading
+02-10 23:17:24.251  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 756
+02-10 23:17:24.262  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.65847778320312heading
+02-10 23:17:24.271  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 743
+02-10 23:17:24.282  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.0377197265625heading
+02-10 23:17:24.290  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 730
+02-10 23:17:24.302  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray157.08657836914062heading
+02-10 23:17:24.313  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 716
+02-10 23:17:24.334  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.783447265625heading
+02-10 23:17:24.355  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 692
+02-10 23:17:24.368  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.61068725585938heading
+02-10 23:17:24.376  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 679
+02-10 23:17:24.387  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.15325927734375heading
+02-10 23:17:24.406  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 661
+02-10 23:17:24.417  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.7047576904297heading
+02-10 23:17:24.425  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 649
+02-10 23:17:24.438  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.65538024902344heading
+02-10 23:17:24.456  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 629
+02-10 23:17:24.470  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.98715209960938heading
+02-10 23:17:24.480  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 613
+02-10 23:17:24.492  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.3766326904297heading
+02-10 23:17:24.510  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 592
+02-10 23:17:24.523  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.8886260986328heading
+02-10 23:17:24.531  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 578
+02-10 23:17:24.543  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.11468505859375heading
+02-10 23:17:24.553  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 565
+02-10 23:17:24.565  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray156.13754272460938heading
+02-10 23:17:24.574  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 551
+02-10 23:17:24.586  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.95309448242188heading
+02-10 23:17:24.596  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 538
+02-10 23:17:24.609  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.60914611816406heading
+02-10 23:17:24.618  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 524
+02-10 23:17:24.630  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.25164794921875heading
+02-10 23:17:24.640  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 510
+02-10 23:17:24.652  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9535369873047heading
+02-10 23:17:24.661  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 497
+02-10 23:17:24.672  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.7764892578125heading
+02-10 23:17:24.681  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 485
+02-10 23:17:24.693  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.73936462402344heading
+02-10 23:17:24.702  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 473
+02-10 23:17:24.714  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.8511505126953heading
+02-10 23:17:24.725  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 459
+02-10 23:17:24.738  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.1026153564453heading
+02-10 23:17:24.749  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 446
+02-10 23:17:24.761  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.4142303466797heading
+02-10 23:17:24.771  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 434
+02-10 23:17:24.783  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.63084411621094heading
+02-10 23:17:24.792  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 423
+02-10 23:17:24.805  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.77455139160156heading
+02-10 23:17:24.816  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 411
+02-10 23:17:24.830  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.72679138183594heading
+02-10 23:17:24.840  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 399
+02-10 23:17:24.854  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.5521697998047heading
+02-10 23:17:24.871  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 383
+02-10 23:17:24.887  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.28094482421875heading
+02-10 23:17:24.897  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 370
+02-10 23:17:24.911  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.13706970214844heading
+02-10 23:17:24.931  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 352
+02-10 23:17:24.945  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.954833984375heading
+02-10 23:17:24.965  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 339
+02-10 23:17:24.980  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.8055419921875heading
+02-10 23:17:24.991  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 335
+02-10 23:17:25.003  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.0653076171875heading
+02-10 23:17:25.021  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 326
+02-10 23:17:25.034  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.26182556152344heading
+02-10 23:17:25.044  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 318
+02-10 23:17:25.058  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.01272583007812heading
+02-10 23:17:25.068  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 310
+02-10 23:17:25.083  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.7431182861328heading
+02-10 23:17:25.093  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 301
+02-10 23:17:25.107  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.21755981445312heading
+02-10 23:17:25.117  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 291
+02-10 23:17:25.130  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.46363830566406heading
+02-10 23:17:25.140  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 282
+02-10 23:17:25.154  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.4718780517578heading
+02-10 23:17:25.165  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 270
+02-10 23:17:25.180  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.32789611816406heading
+02-10 23:17:25.189  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 258
+02-10 23:17:25.203  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.11859130859375heading
+02-10 23:17:25.213  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 246
+02-10 23:17:25.228  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.972412109375heading
+02-10 23:17:25.239  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 232
+02-10 23:17:25.252  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.96844482421875heading
+02-10 23:17:25.262  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 218
+02-10 23:17:25.274  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.06715393066406heading
+02-10 23:17:25.286  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 203
+02-10 23:17:25.299  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.2247772216797heading
+02-10 23:17:25.308  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 189
+02-10 23:17:25.320  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.3033905029297heading
+02-10 23:17:25.332  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 175
+02-10 23:17:25.345  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.27101135253906heading
+02-10 23:17:25.354  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 162
+02-10 23:17:25.369  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.1197052001953heading
+02-10 23:17:25.386  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 142
+02-10 23:17:25.401  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.8951873779297heading
+02-10 23:17:25.411  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 126
+02-10 23:17:25.423  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.822998046875heading
+02-10 23:17:25.446  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 104
+02-10 23:17:25.458  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.90869140625heading
+02-10 23:17:25.488  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 77
+02-10 23:17:25.503  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.17776489257812heading
+02-10 23:17:25.523  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 55
+02-10 23:17:25.535  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.22035217285156heading
+02-10 23:17:25.545  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 43
+02-10 23:17:25.557  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.11976623535156heading
+02-10 23:17:25.566  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 32
+02-10 23:17:25.578  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.00254821777344heading
+02-10 23:17:25.589  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 21
+02-10 23:17:25.603  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.93284606933594heading
+02-10 23:17:25.612  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 14
+02-10 23:17:25.626  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.92869567871094heading
+02-10 23:17:25.636  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 9
+02-10 23:17:25.650  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.92933654785156heading
+02-10 23:17:25.659  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 6
+02-10 23:17:25.672  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.99923706054688heading
+02-10 23:17:25.682  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 2
+02-10 23:17:25.696  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.00717163085938heading
+02-10 23:17:25.705  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1
+02-10 23:17:25.719  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.00558471679688heading
+02-10 23:17:25.730  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.741  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.92823791503906heading
+02-10 23:17:25.751  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.762  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.84864807128906heading
+02-10 23:17:25.771  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.783  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.8308868408203heading
+02-10 23:17:25.792  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.805  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.8323211669922heading
+02-10 23:17:25.813  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.825  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.88743591308594heading
+02-10 23:17:25.836  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.848  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9137420654297heading
+02-10 23:17:25.856  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.868  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.94175720214844heading
+02-10 23:17:25.877  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.893  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9651641845703heading
+02-10 23:17:25.912  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.927  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.94078063964844heading
+02-10 23:17:25.943  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.954  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.94374084472656heading
+02-10 23:17:25.965  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:25.976  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9858856201172heading
+02-10 23:17:25.996  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.008  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.00344848632812heading
+02-10 23:17:26.017  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.028  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.97836303710938heading
+02-10 23:17:26.037  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.051  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.95516967773438heading
+02-10 23:17:26.062  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.076  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9334716796875heading
+02-10 23:17:26.086  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.100  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.93417358398438heading
+02-10 23:17:26.110  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.122  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.92979431152344heading
+02-10 23:17:26.132  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.146  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.93772888183594heading
+02-10 23:17:26.155  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.169  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.94252014160156heading
+02-10 23:17:26.180  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.191  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9512481689453heading
+02-10 23:17:26.202  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.214  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.94859313964844heading
+02-10 23:17:26.224  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.238  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9429473876953heading
+02-10 23:17:26.249  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.262  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.96612548828125heading
+02-10 23:17:26.272  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.286  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9939727783203heading
+02-10 23:17:26.296  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.310  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.00685119628906heading
+02-10 23:17:26.321  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.333  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.99813842773438heading
+02-10 23:17:26.345  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.359  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9894561767578heading
+02-10 23:17:26.369  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.382  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.98501586914062heading
+02-10 23:17:26.392  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:26.407  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.99212646484375heading
+02-10 23:17:26.430  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 1
+02-10 23:17:26.443  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.9901123046875heading
+02-10 23:17:26.456  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 14
+02-10 23:17:26.467  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.87100219726562heading
+02-10 23:17:26.474  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 23
+02-10 23:17:26.488  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.70196533203125heading
+02-10 23:17:26.507  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 40
+02-10 23:17:26.517  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.6143341064453heading
+02-10 23:17:26.524  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 49
+02-10 23:17:26.536  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.67709350585938heading
+02-10 23:17:26.543  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 58
+02-10 23:17:26.555  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.8204345703125heading
+02-10 23:17:26.563  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 69
+02-10 23:17:26.574  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.996337890625heading
+02-10 23:17:26.582  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 82
+02-10 23:17:26.594  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.15460205078125heading
+02-10 23:17:26.602  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 94
+02-10 23:17:26.613  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray155.15052795410156heading
+02-10 23:17:26.621  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 105
+02-10 23:17:26.634  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.97715759277344heading
+02-10 23:17:26.642  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 116
+02-10 23:17:26.654  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.7831573486328heading
+02-10 23:17:26.661  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 123
+02-10 23:17:26.673  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.54638671875heading
+02-10 23:17:26.681  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 130
+02-10 23:17:26.692  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.3524627685547heading
+02-10 23:17:26.700  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 136
+02-10 23:17:26.712  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.23251342773438heading
+02-10 23:17:26.719  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 142
+02-10 23:17:26.735  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.167724609375heading
+02-10 23:17:26.743  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 149
+02-10 23:17:26.757  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2335205078125heading
+02-10 23:17:26.764  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 154
+02-10 23:17:26.775  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.28558349609375heading
+02-10 23:17:26.782  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 157
+02-10 23:17:26.794  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.28341674804688heading
+02-10 23:17:26.802  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 161
+02-10 23:17:26.814  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.2477569580078heading
+02-10 23:17:26.821  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 165
+02-10 23:17:26.833  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray154.13697814941406heading
+02-10 23:17:26.845  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 168
+02-10 23:17:26.857  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.94683837890625heading
+02-10 23:17:26.864  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 171
+02-10 23:17:26.876  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.81527709960938heading
+02-10 23:17:26.883  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 174
+02-10 23:17:26.897  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.71231079101562heading
+02-10 23:17:26.905  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 176
+02-10 23:17:26.918  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.69847106933594heading
+02-10 23:17:26.944  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 180
+02-10 23:17:26.957  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.81442260742188heading
+02-10 23:17:26.971  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 183
+02-10 23:17:26.986  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.8563690185547heading
+02-10 23:17:26.993  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 184
+02-10 23:17:27.009  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.8173828125heading
+02-10 23:17:27.030  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 187
+02-10 23:17:27.043  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.69093322753906heading
+02-10 23:17:27.050  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 188
+02-10 23:17:27.063  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.64842224121094heading
+02-10 23:17:27.070  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 189
+02-10 23:17:27.081  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.63406372070312heading
+02-10 23:17:27.088  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 190
+02-10 23:17:27.104  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.65087890625heading
+02-10 23:17:27.111  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 190
+02-10 23:17:27.123  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.6620330810547heading
+02-10 23:17:27.130  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 191
+02-10 23:17:27.142  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.6620330810547heading
+02-10 23:17:27.149  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 191
+02-10 23:17:27.162  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.65086364746094heading
+02-10 23:17:27.169  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 192
+02-10 23:17:27.181  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.67813110351562heading
+02-10 23:17:27.188  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 194
+02-10 23:17:27.200  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.70059204101562heading
+02-10 23:17:27.207  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 196
+02-10 23:17:27.219  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.72479248046875heading
+02-10 23:17:27.226  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 197
+02-10 23:17:27.238  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.74107360839844heading
+02-10 23:17:27.248  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 198
+02-10 23:17:27.261  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.72007751464844heading
+02-10 23:17:27.268  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 200
+02-10 23:17:27.281  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.69088745117188heading
+02-10 23:17:27.287  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 202
+02-10 23:17:27.299  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.67431640625heading
+02-10 23:17:27.309  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 203
+02-10 23:17:27.323  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.65386962890625heading
+02-10 23:17:27.331  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 204
+02-10 23:17:27.343  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.66033935546875heading
+02-10 23:17:27.353  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 204
+02-10 23:17:27.365  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.67791748046875heading
+02-10 23:17:27.372  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.384  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.69789123535156heading
+02-10 23:17:27.391  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.405  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.71243286132812heading
+02-10 23:17:27.412  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.425  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.69601440429688heading
+02-10 23:17:27.449  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.461  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.6729278564453heading
+02-10 23:17:27.474  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.486  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.67584228515625heading
+02-10 23:17:27.494  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.504  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.68389892578125heading
+02-10 23:17:27.511  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.523  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.6938934326172heading
+02-10 23:17:27.541  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.551  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.706787109375heading
+02-10 23:17:27.558  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.569  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.70159912109375heading
+02-10 23:17:27.576  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.587  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.69627380371094heading
+02-10 23:17:27.594  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.606  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.69573974609375heading
+02-10 23:17:27.615  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.627  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.70420837402344heading
+02-10 23:17:27.633  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 205
+02-10 23:17:27.640  3038  3133 V Robocol : received command: CMD_INIT_OP_MODE(17348) $Stop$Robot$
+02-10 23:17:27.650  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray153.71847534179688heading
+02-10 23:17:27.664  3038  3617 D vision ls: teleOpWhileLoop: lsFront position 0
+02-10 23:17:27.666  3038  3617 E LynxI2cDeviceSynch: placeholder: readTimestamped
+02-10 23:17:27.667  3038  3617 W BHI260IMU: getRobotOrientationAsQuaternion(): Failed to retrieve valid quaternion from IMU. Returning the identity quaternion.
+02-10 23:17:27.669  3038  3617 W BHI260IMU: getRobotOrientationAsQuaternion(): Failed to retrieve valid quaternion from IMU. Returning the identity quaternion.
+02-10 23:17:27.669  3038  3617 D trayAngle: com.qualcomm.robotcore.hardware.ServoImplEx@5669835tray-0.0heading
+02-10 23:17:27.669  3038  3617 D RobotCore: User runOpModeMethod exited
+02-10 23:17:27.671  3038  3617 V RobotCore: thread: ...terminating 'OpModeThread'
+02-10 23:17:27.674  3038  3165 I RobotCore: Attempting to switch to OpMode $Stop$Robot$
+02-10 23:17:27.675  3038  3165 I RobotCore: ******************** STOP - OPMODE /storage/emulated/0/FIRST/matchlogs/Match-0-RedTeleOp.txt ********************
+02-10 23:17:27.681  3038  3165 D HardwareMap: Clearing which device instances have been retrieved
+02-10 23:17:27.681  3038  3619 I RobotCore: saving match logcat to /storage/emulated/0/FIRST/matchlogs/Match-0-RedTeleOp.txt
+02-10 23:17:27.681  3038  3619 I RobotCore: logging command line: exec logcat -d -T '2-10 23:17:8.000' -f '/storage/emulated/0/FIRST/matchlogs/Match-0-RedTeleOp.txt' -n4 -v threadtime UsbRequestJNI:S UsbRequest:S art:W ThreadPool:W System:W ExtendedExtractor:W OMXClient:W MediaPlayer:W dalvikvm:W  *:V
+02-10 23:17:27.684  3038  3621 V RobotCore: thread: 'OpModeThread' starting...
+02-10 23:17:27.686  3038  3136 V Robocol : sending CMD_NOTIFY_INIT_OP_MODE(42446), attempt: 0
+02-10 23:17:27.687  3038  3136 V Robocol : sending CMD_NOTIFY_RUN_OP_MODE(42447), attempt: 0
