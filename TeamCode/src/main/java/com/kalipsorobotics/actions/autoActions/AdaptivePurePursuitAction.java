@@ -47,7 +47,6 @@ public class AdaptivePurePursuitAction extends Action {
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
     private static final double MAX_ACCELERATION = 800; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
-    private final double angleKp = 1.0;
 
     private double startTimeMS = System.currentTimeMillis();
     private double maxTimeOutMS = 1000000000;
@@ -66,6 +65,10 @@ public class AdaptivePurePursuitAction extends Action {
     private boolean injectDone = false;
 
     Path newPath = null;
+    private double filteredVx = 0; // For smoothing vx
+    private final double ALPHA_VX = 0.1; // Tune this alpha for vx smoothing
+    private double filteredVy = 0;
+    private final double ALPHA_VY = 0.1;
     private boolean finishedCurrentLoop = false;
     private final double SMOOTHER_A = 0.25;
     private final double SMOOTHER_B = 1 - SMOOTHER_A;
@@ -77,12 +80,21 @@ public class AdaptivePurePursuitAction extends Action {
 
     private int calcPoint = -1;
     private boolean calcDistanceCurvatureVelocityDone = false;
+    private double lastUpdateTime;
+    private double lastHeadingError = 0;
+
+    // PID gains for strafing (Y-axis in robot frame)
+    private double strafeKp = 0.008; // START SMALL: tune this
+    private double strafeKd = 0.00065;  // START SMALL: tune this. Often needed for damping.
+    private double lastStrafeError = 0; // For strafe Kd term
+
 
     public AdaptivePurePursuitAction(DriveTrain driveTrain, WheelOdometry wheelOdometry) {
         this.driveTrain = driveTrain;
         this.wheelOdometry = wheelOdometry;
 
         this.timeoutTimer = new ElapsedTime();
+        lastUpdateTime = timeoutTimer.milliseconds();
 
         this.prevFollow = Optional.empty();
 
@@ -149,16 +161,38 @@ public class AdaptivePurePursuitAction extends Action {
         double curvature = target.getCurvature(); // from Pure Pursuit
         double robotAngle = currentPos.getTheta();
 
+        // Re-evaluate 'directionError' and 'angleError' carefully
+        // 'headingToTarget' is the angle from robot to look-ahead point
         double headingToTarget = toTarget.getHeadingDirection();
         double directionError = MathFunctions.angleWrapRad(headingToTarget - robotAngle);
 
-        double vx = velocity * Math.cos(directionError); // forward component
-        double vy = velocity * Math.sin(directionError); // strafe component
+        double vx = velocity * Math.cos(directionError) * 0.0; // forward component
+//        double vy = velocity * Math.sin(directionError); // strafe component
+//        double vy = target.getPidY().getPower(Math.sin(directionError) * toTarget.getLength());
+
+        double currentLoopTime = System.currentTimeMillis();
+        double dt = (currentLoopTime - lastUpdateTime) / 1000.0; // Convert to seconds
+        if (dt == 0) dt = 0.001; // Avoid division by zero
+        lastUpdateTime = currentLoopTime; // Update for the next iteration
+
+        // --- Strafe (Vy) Control ---
+        // The "error" for strafing is how far off the look-ahead point is perpendicular to robot's heading.
+        double strafeError = toTarget.getLength() * Math.sin(MathFunctions.angleWrapRad(toTarget.getHeadingDirection() - robotAngle));
+
+        double strafeDerivative = (strafeError - lastStrafeError) / dt;
+        double vy_command = (strafeKp * strafeError) + (strafeKd * strafeDerivative); // PID output for strafe
+        lastStrafeError = strafeError; // Update last error
+
+        filteredVy = ALPHA_VY * vy_command + (1 - ALPHA_VY) * filteredVy;
+        double vy = filteredVy; // This is your controlled strafe power
+
+        filteredVx = ALPHA_VX * vx + (1 - ALPHA_VX) * filteredVx;
+        vx = filteredVx;
 
         // Optional blend of curvature-based and PID-based orientation correction
         double angularVelocity = curvature * velocity; // rad/s
         double angleError = MathFunctions.angleWrapRad(target.getTheta() - robotAngle);
-        double rotationPower = angularVelocity + (angleKp * angleError); // e.g., angleKp = 1.0
+        double rotationPower = angularVelocity + (target.getPidAngle().getPower(angleError));
 
         double fLeftPower = vx + vy + rotationPower;
         double bLeftPower = vx - vy + rotationPower;
@@ -173,7 +207,15 @@ public class AdaptivePurePursuitAction extends Action {
         fRightPower /= max;
         bRightPower /= max;
 
-        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.4);
+        double basePowerMin = 0.4;
+        double distToGoal = Vector.between(currentPos, target).getLength();
+
+// taper the minimum from 40% (far away) down to 10% (once you’re <200 mm out)
+        double minPower = distToGoal > 200
+                ? basePowerMin
+                : 0.05 + 0.3 * (distToGoal / 200.0);
+
+        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, minPower);
 
         prevFollow = Optional.of(target);
     }
@@ -226,6 +268,21 @@ public class AdaptivePurePursuitAction extends Action {
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
+//            // inside update(), before lookAhead():
+//            Vector toLast   = Vector.between(currentPosition, path.getLastPoint());
+//            double segmentDir = toLast.getHeadingDirection();
+//            double heading    = currentPosition.getTheta();
+//
+//            // angle between "forward" and your path direction:
+//            double delta = Math.abs(MathFunctions.angleWrapRad(segmentDir - heading));
+
+            // if you’re more than ±60° off forward, you’re really strafing:
+//            if (Math.abs(Math.PI/2 - delta) < Math.toRadians(30)) {
+//                currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM * 0.3;  // shrink to 30%
+//            } else {
+//                currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
+//            }
+
             if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
                 currentLookAheadRadius = lastSearchRadius;
             }
@@ -251,6 +308,11 @@ public class AdaptivePurePursuitAction extends Action {
 //                } else {
 //                    targetPosition(path.getLastPoint(), currentPosition);
 //                }
+
+                double now = timeoutTimer.seconds();    // or System.currentTimeMillis()/1000.0
+                double dt  = now - lastUpdateTime;
+                lastUpdateTime = now;
+
                 // only _now_ do your final heading‑lock
                 double targetH = path.getLastPoint().getTheta();
                 double err     = MathFunctions.angleWrapRad(targetH - currentPosition.getTheta());
@@ -264,19 +326,15 @@ public class AdaptivePurePursuitAction extends Action {
                     finishedMoving();
                 } else {
                     // simple P‐turn: positive error → turn left, negative → turn right
-                    double kP = 0.8;  // you can tune this down to reduce oscillation
-                    double turn = kP * err;
-                    // clamp
-                    turn = Math.max(-1, Math.min(1, turn));
+                    double kP = 0.4, kD = 0.1;
+                    double derivative = (err - lastHeadingError) / dt;
+                    double turn = kP * err + kD * derivative;
 
-                    // tank‐steer in place
-                    driveTrain.setPowerWithRangeClippingMinThreshold(
-                            +turn,  // frontLeft
-                            -turn,  // frontRight
-                            +turn,  // backLeft
-                            -turn,  // backRight
-                            0.0     // no dead‑zone
-                    );
+// clamp and send
+                    turn = Math.max(-0.5, Math.min(0.5, turn));
+                    driveTrain.setPower(+turn, -turn, +turn, -turn);
+
+                    lastHeadingError = err;
                 }
             } else {
                 // lost lookahead mid‑path (e.g. big deviation) – keep chasing the last follow point
@@ -349,6 +407,7 @@ public class AdaptivePurePursuitAction extends Action {
         int spacingMM = 150;
 
         if (segInject == 0 && pointInject == 0 && injectedPathPoints.isEmpty()) {
+            injectedPathPoints.add(SharedData.getOdometryPosition());
             // Add the very first point from the original path only once
             injectedPathPoints.add(path.getPoint(0));
         }
@@ -477,6 +536,16 @@ public class AdaptivePurePursuitAction extends Action {
                 path.getPoint(calcPoint).setCurvature(curvature(path, calcPoint));
 
                 path.getPoint(calcPoint).setVelocity(getTargetVelocity(path, calcPoint));
+
+                if (calcPoint <= path.numPoints()-2) {
+                    double d = path.getPoint(calcPoint+1).getDistanceAlongPath()
+                            - path.getPoint(calcPoint).getDistanceAlongPath();
+                    double vNext = path.getPoint(calcPoint+1).getVelocity();
+                    // v² = vNext² + 2·a·d  →  v = sqrt(…)
+                    double vMaxDecel = Math.sqrt(vNext*vNext + 2*MAX_ACCELERATION*d);
+                    path.getPoint(calcPoint).setVelocity(Math.min(path.getPoint(calcPoint).getVelocity(), vMaxDecel));
+                }
+
             }
 
             Log.d("adaptive pure pursuit velocity", "calculated point: " + calcPoint);
@@ -573,8 +642,10 @@ public class AdaptivePurePursuitAction extends Action {
     }
 
     private double calculateVelocity(Path path, int positionIndex) {
-        if (positionIndex <= 0 || positionIndex >= path.numPoints() - 1) {
-            return 0;
+        if (positionIndex <= 0) {
+            return 0;                // don’t drive “backwards” into start
+        } else if (positionIndex == path.numPoints()-1) {
+            return pathMaxVelocity;  // *do* drive at full speed into your goal
         }
 
         double curvature = Math.abs(curvature(path, positionIndex));
