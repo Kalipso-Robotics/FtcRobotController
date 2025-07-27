@@ -11,6 +11,7 @@ public class Position {
     private double distanceAlongPath;
     private double curvature;
     private double velocity;
+    private double acceleration;
 
     private PidNav pidX = new PidNav(PurePursuitAction.P_XY, 0, 0);
     private PidNav pidY = new PidNav(PurePursuitAction.P_XY, 0, 0);
@@ -148,6 +149,14 @@ public class Position {
 
     public void setVelocity(double velocity) {
         this.velocity = velocity;
+    }
+
+    public double getAcceleration() {
+        return acceleration;
+    }
+
+    public void setAcceleration(double acceleration) {
+        this.acceleration = acceleration;
     }
 
     public void setX(double newX) {

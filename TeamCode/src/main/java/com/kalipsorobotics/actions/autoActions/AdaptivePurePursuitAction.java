@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.autoActions;
 
+import static androidx.core.math.MathUtils.clamp;
+
 import android.util.Log;
 
 import com.kalipsorobotics.actions.Action;
@@ -55,6 +57,7 @@ public class AdaptivePurePursuitAction extends Action {
     private double lastMilli = 0;
     ElapsedTime timeoutTimer;
 
+    private double currentVelocityMmPerS;
     private double xVelocity;
     private double yVelocity;
     private double thetaVelocity;
@@ -65,10 +68,6 @@ public class AdaptivePurePursuitAction extends Action {
     private boolean injectDone = false;
 
     Path newPath = null;
-    private double filteredVx = 0; // For smoothing vx
-    private final double ALPHA_VX = 0.1; // Tune this alpha for vx smoothing
-    private double filteredVy = 0;
-    private final double ALPHA_VY = 0.1;
     private boolean finishedCurrentLoop = false;
     private final double SMOOTHER_A = 0.25;
     private final double SMOOTHER_B = 1 - SMOOTHER_A;
@@ -83,11 +82,11 @@ public class AdaptivePurePursuitAction extends Action {
     private double lastUpdateTime;
     private double lastHeadingError = 0;
 
-    // PID gains for strafing (Y-axis in robot frame)
-    private double strafeKp = 0.008; // START SMALL: tune this
-    private double strafeKd = 0.00065;  // START SMALL: tune this. Often needed for damping.
-    private double lastStrafeError = 0; // For strafe Kd term
-
+    private double WHEELBASE_LENGTH = 300; //front wheel to back wheel
+    private double TRACK_WIDTH = 400; //side to side
+    private double K_p = 0; // 0.0005
+    private double K_a = 0.0001; // 0.0001
+    private double K_v = 0.000015;
 
     public AdaptivePurePursuitAction(DriveTrain driveTrain, WheelOdometry wheelOdometry) {
         this.driveTrain = driveTrain;
@@ -161,43 +160,32 @@ public class AdaptivePurePursuitAction extends Action {
         double curvature = target.getCurvature(); // from Pure Pursuit
         double robotAngle = currentPos.getTheta();
 
-        // Re-evaluate 'directionError' and 'angleError' carefully
-        // 'headingToTarget' is the angle from robot to look-ahead point
-        double headingToTarget = toTarget.getHeadingDirection();
-        double directionError = MathFunctions.angleWrapRad(headingToTarget - robotAngle);
+        // Robot‑relative vector to lookahead (in meters)
+        double dx = target.getX() - currentPos.getX();
+        double dy = target.getY() - currentPos.getY();
+        // Rotate into robot frame
+        double x_r =  Math.cos(robotAngle)*dx + Math.sin(robotAngle)*dy;
+        double y_r = -Math.sin(robotAngle)*dx + Math.cos(robotAngle)*dy;
+        // Direction and magnitude
+        double distance = Math.sqrt(x_r*x_r + y_r*y_r);
+        double headingError = Math.atan2(y_r, x_r);
+        // Choose speeds
+        double cosHE = Math.cos(headingError);
+        double vx = (Math.abs(cosHE) < 0.1)   // if bearing within ~±84°–96°, zero out forward
+                ? 0
+                : velocity * cosHE;
+        double vy = velocity * Math.sin(headingError);
+        double omega =  target.getPidAngle().getPower(MathFunctions.angleWrapRad(target.getTheta() - currentPos.getTheta()));
 
-        double vx = velocity * Math.cos(directionError) * 0.0; // forward component
-//        double vy = velocity * Math.sin(directionError); // strafe component
-//        double vy = target.getPidY().getPower(Math.sin(directionError) * toTarget.getLength());
+        double fLeftVelocity = vx + vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
+        double bLeftVelocity = vx - vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
+        double fRightVelocity = vx - vy - ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
+        double bRightVelocity = vx + vy - ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
 
-        double currentLoopTime = System.currentTimeMillis();
-        double dt = (currentLoopTime - lastUpdateTime) / 1000.0; // Convert to seconds
-        if (dt == 0) dt = 0.001; // Avoid division by zero
-        lastUpdateTime = currentLoopTime; // Update for the next iteration
-
-        // --- Strafe (Vy) Control ---
-        // The "error" for strafing is how far off the look-ahead point is perpendicular to robot's heading.
-        double strafeError = toTarget.getLength() * Math.sin(MathFunctions.angleWrapRad(toTarget.getHeadingDirection() - robotAngle));
-
-        double strafeDerivative = (strafeError - lastStrafeError) / dt;
-        double vy_command = (strafeKp * strafeError) + (strafeKd * strafeDerivative); // PID output for strafe
-        lastStrafeError = strafeError; // Update last error
-
-        filteredVy = ALPHA_VY * vy_command + (1 - ALPHA_VY) * filteredVy;
-        double vy = filteredVy; // This is your controlled strafe power
-
-        filteredVx = ALPHA_VX * vx + (1 - ALPHA_VX) * filteredVx;
-        vx = filteredVx;
-
-        // Optional blend of curvature-based and PID-based orientation correction
-        double angularVelocity = curvature * velocity; // rad/s
-        double angleError = MathFunctions.angleWrapRad(target.getTheta() - robotAngle);
-        double rotationPower = angularVelocity + (target.getPidAngle().getPower(angleError));
-
-        double fLeftPower = vx + vy + rotationPower;
-        double bLeftPower = vx - vy + rotationPower;
-        double fRightPower = vx - vy - rotationPower;
-        double bRightPower = vx + vy - rotationPower;
+        double fLeftPower = calculateMotorOutput(fLeftVelocity, target.getAcceleration());
+        double bLeftPower = calculateMotorOutput(bLeftVelocity, target.getAcceleration());
+        double fRightPower = calculateMotorOutput(fRightVelocity, target.getAcceleration());
+        double bRightPower = calculateMotorOutput(bRightVelocity, target.getAcceleration());
 
         double max = Math.max(1.0, Math.max(Math.abs(fLeftPower),
                 Math.max(Math.abs(bLeftPower), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)))));
@@ -207,15 +195,15 @@ public class AdaptivePurePursuitAction extends Action {
         fRightPower /= max;
         bRightPower /= max;
 
-        double basePowerMin = 0.4;
-        double distToGoal = Vector.between(currentPos, target).getLength();
+//        double basePowerMin = 0.4;
+//        double distToGoal = Vector.between(currentPos, target).getLength();
+//
+//// taper the minimum from 40% (far away) down to 10% (once you’re <200 mm out)
+//        double minPower = distToGoal > 200
+//                ? basePowerMin
+//                : 0.05 + 0.3 * (distToGoal / 200.0);
 
-// taper the minimum from 40% (far away) down to 10% (once you’re <200 mm out)
-        double minPower = distToGoal > 200
-                ? basePowerMin
-                : 0.05 + 0.3 * (distToGoal / 200.0);
-
-        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, minPower);
+        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.25);
 
         prevFollow = Optional.of(target);
     }
@@ -255,6 +243,8 @@ public class AdaptivePurePursuitAction extends Action {
 
         if (injectDone && smootherDone && calcDistanceCurvatureVelocityDone) {
             currentPosition = new Position(SharedData.getOdometryPosition());
+
+
             int lastIdx = path.numPoints() - 1;
             int closestIdx = findClosestPointIndex(path, currentPosition);
 
@@ -265,6 +255,19 @@ public class AdaptivePurePursuitAction extends Action {
                 //Log.d("purepursaction_debug_follow", "done timeout  " + getName());
                 return;
             }
+
+            double nowMs      = timeoutTimer.milliseconds();       // still in ms
+            double dtSeconds  = (nowMs - lastMilli) / 1000.0;     // convert ms → s
+
+            // guard against a zero‐division on the very first loop:
+            if (dtSeconds <= 0) dtSeconds = 1e-3;  // 1 ms
+
+            // compute distance travelled since last loop (in mm)
+            Vector lastToCurrent = Vector.between(lastPosition, currentPosition);
+            double distanceMm       = lastToCurrent.getLength();
+
+            // now velocity in mm/s
+            currentVelocityMmPerS = distanceMm / dtSeconds;
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
@@ -341,6 +344,7 @@ public class AdaptivePurePursuitAction extends Action {
                 targetPosition(prevFollow.orElse(path.getLastPoint()), currentPosition);
             }
 
+
             xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
             yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
             thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
@@ -354,7 +358,7 @@ public class AdaptivePurePursuitAction extends Action {
                 timeoutTimer.reset();
             }
 
-            lastMilli = timeoutTimer.milliseconds();
+            lastMilli = nowMs;
             lastPosition = currentPosition;
         }
 
@@ -536,6 +540,7 @@ public class AdaptivePurePursuitAction extends Action {
                 path.getPoint(calcPoint).setCurvature(curvature(path, calcPoint));
 
                 path.getPoint(calcPoint).setVelocity(getTargetVelocity(path, calcPoint));
+                path.getPoint(0).setAcceleration(0);
 
                 if (calcPoint <= path.numPoints()-2) {
                     double d = path.getPoint(calcPoint+1).getDistanceAlongPath()
@@ -546,6 +551,15 @@ public class AdaptivePurePursuitAction extends Action {
                     path.getPoint(calcPoint).setVelocity(Math.min(path.getPoint(calcPoint).getVelocity(), vMaxDecel));
                 }
 
+                    double vPrev = path.getPoint(calcPoint-1).getVelocity();        // mm/s
+                    double sPrev = path.getPoint(calcPoint-1).getDistanceAlongPath(); // mm
+                    double vCurr = path.getPoint(calcPoint).getVelocity();          // mm/s
+                    double sCurr = path.getPoint(calcPoint).getDistanceAlongPath(); // mm
+
+                    double deltaS = sCurr - sPrev;                          // mm
+                    // avoid divide‑by‑zero for back‑to‑back identical points
+                    double accelMmPerS2 = (vCurr*vCurr - vPrev*vPrev) / (2.0 * deltaS);
+                    path.getPoint(calcPoint).setAcceleration(accelMmPerS2);
             }
 
             Log.d("adaptive pure pursuit velocity", "calculated point: " + calcPoint);
@@ -674,5 +688,9 @@ public class AdaptivePurePursuitAction extends Action {
                 })
         );
         return pts.indexOf(best);
+    }
+
+    private double calculateMotorOutput(double wheelVelocity, double acceleration) {
+        return (K_p * (wheelVelocity - currentVelocityMmPerS) + K_v * wheelVelocity + K_a * acceleration);
     }
 }
