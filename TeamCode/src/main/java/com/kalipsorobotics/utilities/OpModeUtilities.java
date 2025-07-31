@@ -3,7 +3,7 @@ package com.kalipsorobotics.utilities;
 import android.os.Process;
 import android.util.Log;
 
-import com.kalipsorobotics.localization.WheelOdometry;
+import com.kalipsorobotics.localization.Odometry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -48,7 +48,7 @@ public class OpModeUtilities {
      * @param executorService
      * @param wheelOdometry
      */
-    public static void runOdometryExecutorService(ExecutorService executorService, WheelOdometry wheelOdometry) {
+    public static void runOdometryExecutorService(ExecutorService executorService, Odometry wheelOdometry) {
         try {
             executorService.submit(() -> {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);

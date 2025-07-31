@@ -1,7 +1,7 @@
 package com.kalipsorobotics.math;
 
 import com.kalipsorobotics.PID.PidNav;
-import com.kalipsorobotics.actions.autoActions.PurePursuitAction;
+import com.kalipsorobotics.navigation.PurePursuitAction;
 
 public class Position {
     private double x;

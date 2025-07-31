@@ -28,7 +28,7 @@ public class OdometryFileWriter extends KFileWriter {
 
         stringBuilder.append("Time");
         stringBuilder.append(",");
-        for (Odometry key : Odometry.values()) {
+        for (OdometrySensorCombinations key : OdometrySensorCombinations.values()) {
             stringBuilder.append(key.toString());
             stringBuilder.append(",");
             stringBuilder.append(key + "_X,");
@@ -40,13 +40,13 @@ public class OdometryFileWriter extends KFileWriter {
         super.writeLine(stringBuilder.toString());
     }
 
-    public void writeOdometryPositionHistory(HashMap<Odometry, PositionHistory> positionHistoryHashMap) {
+    public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap) {
         Log.d("odometryData", "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(System.currentTimeMillis());
         stringBuilder.append(",");
 
-        for (Odometry key : Odometry.values()) {
+        for (OdometrySensorCombinations key : OdometrySensorCombinations.values()) {
 
             stringBuilder.append(key.toString());
             stringBuilder.append(",");
