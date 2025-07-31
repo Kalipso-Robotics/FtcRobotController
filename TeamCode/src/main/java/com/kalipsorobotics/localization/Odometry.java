@@ -113,12 +113,12 @@ public class Odometry {
         return single_instance;
     }
 
-    private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, Odometry wheelOdometry) {
-        wheelOdometry.imuModule = imuModule;
-        wheelOdometry.sparkFunOTOS = driveTrain.getOtos();
-        wheelOdometry.rightEncoder = driveTrain.getRightEncoder();
-        wheelOdometry.leftEncoder = driveTrain.getLeftEncoder();
-        wheelOdometry.backEncoder = driveTrain.getBackEncoder();
+    private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
+        odometry.imuModule = imuModule;
+        odometry.sparkFunOTOS = driveTrain.getOtos();
+        odometry.rightEncoder = driveTrain.getRightEncoder();
+        odometry.leftEncoder = driveTrain.getLeftEncoder();
+        odometry.backEncoder = driveTrain.getBackEncoder();
     }
 
     public static void setInstanceNull() {
@@ -137,7 +137,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        return ticksToMM(rightEncoder.getCurrentPosition());
+        return ticksToMM(-rightEncoder.getCurrentPosition());
     }
     public double countLeft() {
         //corresponds to fLeft
@@ -148,7 +148,7 @@ public class Odometry {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        return ticksToMM(backEncoder.getCurrentPosition());
+        return ticksToMM(-backEncoder.getCurrentPosition());
     }
 
 
@@ -182,8 +182,6 @@ public class Odometry {
 
         return velocity;
     }
-
-
 
 
     private Velocity calculateRelativeDeltaWheelIMUFuse(double rightDistanceMM, double leftDistanceMM,
@@ -466,6 +464,10 @@ public class Odometry {
             throw new RuntimeException("WHEEL_IMU Position History Null");
         }
         return  positionHistory.getCurrentPosition();
+    }
+
+    public PositionHistory getCurrentPositionHistory() {
+        return wheelIMUPositionHistory;
     }
 
 //    public void run() throws InterruptedException{
