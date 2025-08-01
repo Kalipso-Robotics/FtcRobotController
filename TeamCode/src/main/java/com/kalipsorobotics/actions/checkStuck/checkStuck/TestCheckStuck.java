@@ -3,6 +3,8 @@ package com.kalipsorobotics.actions.checkStuck.checkStuck;
 import android.util.Log;
 
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
+import com.kalipsorobotics.modules.GoBildaOdoModule;
+import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.SparkfunOdometry;
@@ -20,8 +22,9 @@ public class TestCheckStuck extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+        GoBildaOdoModule goBildaOdoModule =  GoBildaOdoModule.getInstance(opModeUtilities);
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, new Position(0, 0, 0));
+        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry, 0, 0);
         DriveAction driveAction = new DriveAction(driveTrain);
         CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, purePursuitAction);

@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.math.MathFunctions;
+import com.kalipsorobotics.modules.GoBildaOdoModule;
+import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -33,6 +35,7 @@ public class Odometry {
     OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
     IMUModule imuModule;
+    GoBildaOdoModule goBildaOdoModule;
     SparkFunOTOS sparkFunOTOS;
     SensorFusion sensorFusion;
     private double wheelHeadingWeight = 0;
@@ -53,10 +56,10 @@ public class Odometry {
     private volatile double currentSparkImuHeading;
     private volatile double prevSparkImuHeading;
 
-    private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule,
+    private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule,
                      Position startPosMMRAD) {
         this.opModeUtilities = opModeUtilities;
-        resetHardware(opModeUtilities, driveTrain, imuModule, this);
+        resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, this);
 
         this.wheelPositionHistory.setCurrentPosition(startPosMMRAD);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
@@ -74,48 +77,48 @@ public class Odometry {
         prevLeftDistanceMM = countLeft();
         prevBackDistanceMM = countBack();
 
-
         sensorFusion = new SensorFusion();
     }
 
-    private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule,
+    private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule,
                      double startX, double startY, double startThetaDeg) {
-        this(opModeUtilities, driveTrain, imuModule, new Position(startX, startY, Math.toRadians(startThetaDeg)));
+        this(opModeUtilities, driveTrain, imuModule,  goBildaOdoModule, new Position(startX, startY, Math.toRadians(startThetaDeg)));
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
-                                                    IMUModule imuModule) {
+                                                    IMUModule imuModule, GoBildaOdoModule goBildaOdoModule) {
         if (single_instance == null) {
-            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
+            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, 0, 0, 0);
         } else {
-            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
+            resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, single_instance);
         }
         return single_instance;
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
-                                                    IMUModule imuModule, Position startPosMMRAD) {
+                                                    IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, Position startPosMMRAD) {
         if (single_instance == null) {
-            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startPosMMRAD);
+            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, startPosMMRAD);
         } else {
-            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
+            resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, single_instance);
         }
         return single_instance;
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
-                                                    IMUModule imuModule, double startX, double startY, double startThetaDeg) {
+                                                    IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, double startX, double startY, double startThetaDeg) {
         if (single_instance == null) {
-            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startX, startY, Math.toRadians(startThetaDeg));
+            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, startX, startY, Math.toRadians(startThetaDeg));
         } else {
-            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
+            resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, single_instance);
         }
         return single_instance;
     }
 
-    private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
+    private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, Odometry odometry) {
         odometry.imuModule = imuModule;
         odometry.sparkFunOTOS = driveTrain.getOtos();
+        odometry.goBildaOdoModule = goBildaOdoModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
@@ -137,7 +140,8 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        return ticksToMM(-rightEncoder.getCurrentPosition());
+        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
+        //return ticksToMM(-rightEncoder.getCurrentPosition());
     }
     public double countLeft() {
         //corresponds to fLeft
@@ -148,7 +152,8 @@ public class Odometry {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        return ticksToMM(-backEncoder.getCurrentPosition());
+        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
+        //return ticksToMM(-backEncoder.getCurrentPosition());
     }
 
 
@@ -483,6 +488,13 @@ public class Odometry {
         return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
     }
 
+    public Position getGoBildaPosition() {
+        Position position = Position.pose2DtoPosition(goBildaOdoModule.getGoBildaPinpointDriver().getPosition());
+        return position;
+    }
+
+
+
     public double getSparkIMUHeading() {
         return -sparkFunOTOS.getPosition().h;
     }
@@ -505,6 +517,10 @@ public class Odometry {
 
 
     public IMUModule getImuModule() {return imuModule;}
+
+    public GoBildaOdoModule getGoBildaOdoModule() {
+        return goBildaOdoModule;
+    }
 
     public double getCurrentImuHeading() {
         return this.currentImuHeading;

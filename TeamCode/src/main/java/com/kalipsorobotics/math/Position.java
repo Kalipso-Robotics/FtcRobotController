@@ -1,7 +1,23 @@
 package com.kalipsorobotics.math;
 
+import static org.checkerframework.checker.units.UnitsTools.mm;
+
 import com.kalipsorobotics.PID.PidNav;
+import com.kalipsorobotics.modules.GoBildaOdoModule;
+import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.navigation.PurePursuitAction;
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
+/**
+ *
+ * EVERYTHING HERE IS RADIANS
+ *
+ */
+
 
 public class Position {
     private double x;
@@ -80,6 +96,11 @@ public class Position {
     public String toString() {
         return  String.format("x=%.2f (%.2f in), y=%.2f (%.2f in), theta=%.4f (%.1f deg)", x, x/25.4, y, y/25.4,
                 theta, Math.toDegrees(theta));
+    }
+
+    public static Position pose2DtoPosition(Pose2D pose2D) {
+        Position position = new Position(pose2D.getX(DistanceUnit.MM), pose2D.getY(DistanceUnit.MM), pose2D.getHeading(AngleUnit.RADIANS));
+        return position;
     }
 
     public String getPoint() {
@@ -166,4 +187,5 @@ public class Position {
     public void setY(double newY) {
         this.y = newY;
     }
+
 }
