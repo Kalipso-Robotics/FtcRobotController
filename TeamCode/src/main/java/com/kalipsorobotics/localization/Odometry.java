@@ -355,7 +355,7 @@ public class Odometry {
         wheelIMURelDelta = linearToArcDelta(wheelIMURelDelta);
         Position globalPosition = calculateGlobal(wheelIMURelDelta, wheelIMUPositionHistory.getCurrentPosition());
         wheelIMUPositionHistory.setCurrentPosition(globalPosition);
-        wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds);
+        wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds * 1000); //mm/ms
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
 
     }

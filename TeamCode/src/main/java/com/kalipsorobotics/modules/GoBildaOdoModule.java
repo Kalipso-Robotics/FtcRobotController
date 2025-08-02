@@ -12,7 +12,7 @@ public class GoBildaOdoModule {
 
     public GoBildaOdoModule(OpModeUtilities opModeUtilities) {
 
-        goBildaPinpointDriver = opModeUtilities.getHardwareMap().get(GoBildaPinpointDriver.class, "goBildaOdo");
+        goBildaPinpointDriver = opModeUtilities.getHardwareMap().get(GoBildaPinpointDriver.class, "goBildaOdometry");
 
     }
 
@@ -30,7 +30,7 @@ public class GoBildaOdoModule {
     }
 
     private static void resetHardwareMap(HardwareMap hardwareMap, GoBildaOdoModule goBildaOdoModule) {
-        goBildaOdoModule.goBildaPinpointDriver = hardwareMap.get(GoBildaPinpointDriver.class, "goBildaOdo");
+        goBildaOdoModule.goBildaPinpointDriver = hardwareMap.get(GoBildaPinpointDriver.class, "goBildaOdometry");
     }
 
     public GoBildaPinpointDriver getGoBildaPinpointDriver() {

@@ -74,7 +74,7 @@ public class DriveTrain {
         driveTrain.bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
-        driveTrain.odo = hardwareMap.get(GoBildaPinpointDriver.class,"odo");
+        driveTrain.odo = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 
         driveTrain.rightEncoder = driveTrain.bRight;
         driveTrain.leftEncoder = driveTrain.bLeft;
