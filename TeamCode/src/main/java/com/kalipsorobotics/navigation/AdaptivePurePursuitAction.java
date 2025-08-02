@@ -43,11 +43,11 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double finalAngleLockingThreshholdDeg = 1.5;
 
-    private double pathMaxVelocity = 100;
+    private double pathMaxVelocity = 100; //100
     // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
     private final double K = 1000; //based on how slow you want the robot to go around turns
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private static final double MAX_ACCELERATION = 800; // mm/s^2
+    private static final double MAX_ACCELERATION = 4200; //800 // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
 
     private double startTimeMS = System.currentTimeMillis();
@@ -669,10 +669,9 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double getTargetVelocity(Path path, int positionIndex) {
         double v_i = path.getPoint(positionIndex-1).getVelocity();
-        double a = MAX_ACCELERATION;
         double d = path.getPoint(positionIndex).getDistanceAlongPath() - path.getPoint(positionIndex-1).getDistanceAlongPath();
 
-        double v_f = Math.sqrt(MathFunctions.square(v_i) + (2 * a * d));
+        double v_f = Math.sqrt(MathFunctions.square(v_i) + (2 * MAX_ACCELERATION * d));
 
         return Math.min(v_f, calculateVelocity(path, positionIndex));
     }
