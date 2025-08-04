@@ -43,11 +43,11 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double finalAngleLockingThreshholdDeg = 1.5;
 
-    private double pathMaxVelocity = 100; //100
+    private double pathMaxVelocity = 250;
     // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
-    private final double K = 1000; //based on how slow you want the robot to go around turns
+    private final double K = 900; //based on how slow you want the robot to go around turns
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private static final double MAX_ACCELERATION = 4200; //800 // mm/s^2
+    private static final double MAX_ACCELERATION = 10000; // 800 mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
 
     private double startTimeMS = System.currentTimeMillis();
@@ -84,9 +84,9 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double WHEELBASE_LENGTH = 300; //front wheel to back wheel
     private double TRACK_WIDTH = 400; //side to side
-    private double K_p = 0; // 0.0005
-    private double K_a = 0.0001; // 0.0001
-    private double K_v = 0.000015;
+    private double K_p = 0.00001; // 0.0000001
+    private double K_a = 0.001; // 0.001
+    private double K_v = 0.0004; // 0.0005
 
     public AdaptivePurePursuitAction(DriveTrain driveTrain, Odometry wheelOdometry) {
         this.driveTrain = driveTrain;
@@ -148,7 +148,7 @@ public class AdaptivePurePursuitAction extends Action {
 //        //bRightPower);
 //
 //        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.4);
-////        driveTrain.setPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
+    ////        driveTrain.setPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
 //        //Log.d("purepursactionlog", "target position " + target.getX() + " " + target.getY() + " " + targetAngle);
 //        prevFollow = Optional.of(target);
 //    }
@@ -159,41 +159,63 @@ public class AdaptivePurePursuitAction extends Action {
         double velocity = target.getVelocity(); // from Pure Pursuit
         double curvature = target.getCurvature(); // from Pure Pursuit
         double robotAngle = currentPos.getTheta();
+        Log.d("ppDebug", "robotAngle: " + robotAngle);
 
         // Robot‑relative vector to lookahead (in meters)
         double dx = target.getX() - currentPos.getX();
+
         double dy = target.getY() - currentPos.getY();
         // Rotate into robot frame
         double x_r =  Math.cos(robotAngle)*dx + Math.sin(robotAngle)*dy;
+        Log.d("ppDebug", "x_r: " + x_r);
+
         double y_r = -Math.sin(robotAngle)*dx + Math.cos(robotAngle)*dy;
         // Direction and magnitude
         double distance = Math.sqrt(x_r*x_r + y_r*y_r);
         double headingError = Math.atan2(y_r, x_r);
         // Choose speeds
         double cosHE = Math.cos(headingError);
-        double vx = (Math.abs(cosHE) < 0.1)   // if bearing within ~±84°–96°, zero out forward
-                ? 0
-                : velocity * cosHE;
+        Log.d("ppDebug", "cosHE: " + cosHE);
+
+        double vx = velocity * cosHE;
         double vy = velocity * Math.sin(headingError);
-        double omega =  target.getPidAngle().getPower(MathFunctions.angleWrapRad(target.getTheta() - currentPos.getTheta()));
+
+        double angleError = MathFunctions.angleWrapRad(
+                target.getTheta() - currentPos.getTheta()
+        );
+        double omega = 0;
+        if (Math.abs(angleError) > Math.toRadians(5)) {  // only correct if >5°
+            omega = target.getPidAngle().getPower(angleError);
+        }
+
+        Log.d("ppDebug", "vx: " + vx);
+        Log.d("ppDebug", "vy: " + vy);
+
 
         double fLeftVelocity = vx + vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
         double bLeftVelocity = vx - vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
         double fRightVelocity = vx - vy - ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
         double bRightVelocity = vx + vy - ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
 
+        Log.d("ppDebug", "fLeftVelocity: " + fLeftVelocity);
+
+        Log.d("ppDebug", "acceleration: " + target.getAcceleration());
+
+
         double fLeftPower = calculateMotorOutput(fLeftVelocity, target.getAcceleration());
         double bLeftPower = calculateMotorOutput(bLeftVelocity, target.getAcceleration());
         double fRightPower = calculateMotorOutput(fRightVelocity, target.getAcceleration());
         double bRightPower = calculateMotorOutput(bRightVelocity, target.getAcceleration());
 
-        double max = Math.max(1.0, Math.max(Math.abs(fLeftPower),
-                Math.max(Math.abs(bLeftPower), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)))));
+//        double max = Math.max(1.0, Math.max(Math.abs(fLeftPower),
+//                Math.max(Math.abs(bLeftPower), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)))));
+//
+//        fLeftPower /= max;
+//        bLeftPower /= max;
+//        fRightPower /= max;
+//        bRightPower /= max;
 
-        fLeftPower /= max;
-        bLeftPower /= max;
-        fRightPower /= max;
-        bRightPower /= max;
+        Log.d("ppDebug", "fLeftPower: " + fLeftPower);
 
 //        double basePowerMin = 0.4;
 //        double distToGoal = Vector.between(currentPos, target).getLength();
@@ -256,7 +278,7 @@ public class AdaptivePurePursuitAction extends Action {
                 return;
             }
 
-            double nowMs      = timeoutTimer.milliseconds();       // still in ms
+            double nowMs      = elapsedTime;       // still in ms
             double dtSeconds  = (nowMs - lastMilli) / 1000.0;     // convert ms → s
 
             // guard against a zero‐division on the very first loop:
@@ -312,7 +334,7 @@ public class AdaptivePurePursuitAction extends Action {
 //                    targetPosition(path.getLastPoint(), currentPosition);
 //                }
 
-                double now = timeoutTimer.seconds();    // or System.currentTimeMillis()/1000.0
+                double now = elapsedTime;    // or System.currentTimeMillis()/1000.0
                 double dt  = now - lastUpdateTime;
                 lastUpdateTime = now;
 
@@ -326,10 +348,11 @@ public class AdaptivePurePursuitAction extends Action {
                 }
 
                 if (Math.abs(err) < Math.toRadians(finalAngleLockingThreshholdDeg)) {
+                    Log.d("ppDebug", "finish by angle lock");
                     finishedMoving();
                 } else {
                     // simple P‐turn: positive error → turn left, negative → turn right
-                    double kP = 0.4, kD = 0.1;
+                    double kP = 0.3, kD = 0.1;
                     double derivative = (err - lastHeadingError) / dt;
                     double turn = kP * err + kD * derivative;
 
@@ -350,8 +373,9 @@ public class AdaptivePurePursuitAction extends Action {
             thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
 
 
-            if(xVelocity < 0.01 && yVelocity < 0.01 && thetaVelocity < 0.01) {
+            if(xVelocity < 0.001 && yVelocity < 0.001 && thetaVelocity < 0.001) {
                 if(timeoutTimer.milliseconds() > 1000) {
+                    Log.d("ppDebug", "finish by velocity");
                     finishedMoving();
                 }
             } else {
@@ -548,18 +572,25 @@ public class AdaptivePurePursuitAction extends Action {
                     double vNext = path.getPoint(calcPoint+1).getVelocity();
                     // v² = vNext² + 2·a·d  →  v = sqrt(…)
                     double vMaxDecel = Math.sqrt(vNext*vNext + 2*MAX_ACCELERATION*d);
-                    path.getPoint(calcPoint).setVelocity(Math.min(path.getPoint(calcPoint).getVelocity(), vMaxDecel));
+
+                    // after you compute vMaxDecel:
+                    double signedV    = path.getPoint(calcPoint).getVelocity();
+                    double sgn        = Math.signum(signedV);
+                    double mag        = Math.abs(signedV);
+                    double magLimited = Math.min(mag, vMaxDecel);
+
+                    path.getPoint(calcPoint).setVelocity(magLimited);
                 }
 
-                    double vPrev = path.getPoint(calcPoint-1).getVelocity();        // mm/s
-                    double sPrev = path.getPoint(calcPoint-1).getDistanceAlongPath(); // mm
-                    double vCurr = path.getPoint(calcPoint).getVelocity();          // mm/s
-                    double sCurr = path.getPoint(calcPoint).getDistanceAlongPath(); // mm
+                double vPrev = path.getPoint(calcPoint-1).getVelocity();        // mm/s
+                double sPrev = path.getPoint(calcPoint-1).getDistanceAlongPath(); // mm
+                double vCurr = path.getPoint(calcPoint).getVelocity();          // mm/s
+                double sCurr = path.getPoint(calcPoint).getDistanceAlongPath(); // mm
 
-                    double deltaS = sCurr - sPrev;                          // mm
-                    // avoid divide‑by‑zero for back‑to‑back identical points
-                    double accelMmPerS2 = (vCurr*vCurr - vPrev*vPrev) / (2.0 * deltaS);
-                    path.getPoint(calcPoint).setAcceleration(accelMmPerS2);
+                double deltaS = sCurr - sPrev;                          // mm
+                // avoid divide‑by‑zero for back‑to‑back identical points
+                double accelMmPerS2 = (vCurr*vCurr - vPrev*vPrev) / (2.0 * deltaS);
+                path.getPoint(calcPoint).setAcceleration(accelMmPerS2);
             }
 
             Log.d("adaptive pure pursuit velocity", "calculated point: " + calcPoint);
@@ -664,14 +695,28 @@ public class AdaptivePurePursuitAction extends Action {
 
         double curvature = Math.abs(curvature(path, positionIndex));
         if (curvature < 1e-6) return pathMaxVelocity; // straight line
-        return Math.min(pathMaxVelocity, K / curvature);
+
+        double mag = (positionIndex == path.numPoints()-1)
+                ? pathMaxVelocity
+                : Math.min(pathMaxVelocity, K / Math.abs(curvature(path, positionIndex)));
+
+        // 2) compute the direction of that segment in *field* coordinates
+        Position prev = path.getPoint(positionIndex-1);
+        Position curr = path.getPoint(positionIndex);
+        Vector seg    = Vector.between(prev, curr);
+
+        // 3) project that onto the field-X axis (1,0).  If it’s negative, we need to go backwards:
+        double sign = Math.signum(seg.getX());   // X‐axis dot seg == seg.getX()*1 + seg.getY()*0
+
+        return mag;
     }
 
     private double getTargetVelocity(Path path, int positionIndex) {
         double v_i = path.getPoint(positionIndex-1).getVelocity();
+        double a = MAX_ACCELERATION;
         double d = path.getPoint(positionIndex).getDistanceAlongPath() - path.getPoint(positionIndex-1).getDistanceAlongPath();
 
-        double v_f = Math.sqrt(MathFunctions.square(v_i) + (2 * MAX_ACCELERATION * d));
+        double v_f = Math.sqrt(MathFunctions.square(v_i) + (2 * a * d));
 
         return Math.min(v_f, calculateVelocity(path, positionIndex));
     }
@@ -690,6 +735,6 @@ public class AdaptivePurePursuitAction extends Action {
     }
 
     private double calculateMotorOutput(double wheelVelocity, double acceleration) {
-        return (K_p * (wheelVelocity - currentVelocityMmPerS) + K_v * wheelVelocity + K_a * acceleration);
+        return (K_p * (wheelVelocity - currentVelocityMmPerS) + K_v * wheelVelocity + K_a * Math.signum(wheelVelocity) * Math.abs(acceleration));
     }
 }
