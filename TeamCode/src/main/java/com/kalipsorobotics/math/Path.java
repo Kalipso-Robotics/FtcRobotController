@@ -103,4 +103,5 @@ public class Path {
     public List<Position> getPath() {
         return path;
     }
+
 }
