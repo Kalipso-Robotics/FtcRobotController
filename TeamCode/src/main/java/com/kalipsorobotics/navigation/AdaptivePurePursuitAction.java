@@ -167,41 +167,6 @@ public class AdaptivePurePursuitAction extends Action {
         }
     }
 
-//    private void targetPosition(Position target, Position currentPos) {
-//        //Position currentPos = wheelOdometry.getCurrentPosition();
-//        Vector currentToTarget = Vector.between(currentPos, target);
-//
-//        double distanceToTarget = currentToTarget.getLength();
-//        double targetDirection = currentToTarget.getHeadingDirection();
-//        double targetAngle = target.getTheta();
-//        double directionError = MathFunctions.angleWrapRad(targetDirection - currentPos.getTheta());
-//
-//        double angleError = MathFunctions.angleWrapRad(targetAngle - currentPos.getTheta());
-//        double xError = Math.cos(directionError) * distanceToTarget;
-//        double yError = Math.sin(directionError) * distanceToTarget;
-//
-//        double powerAngle = target.getPidAngle().getPower(angleError);
-//        double powerX = target.getPidX().getPower(xError);
-//        double powerY = target.getPidY().getPower(yError);
-//
-//        //Log.d("directionalpower", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
-//        //powerAngle));
-//
-//        double fLeftPower = powerX + powerY + powerAngle;
-//        double bLeftPower = powerX - powerY + powerAngle;
-//        double fRightPower = powerX - powerY - powerAngle;
-//        double bRightPower = powerX + powerY - powerAngle;
-//
-//        //Log.d("PurePursuit_Log",
-//        //"running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
-//        //bRightPower);
-//
-//        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.4);
-    ////        driveTrain.setPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
-//        //Log.d("purepursactionlog", "target position " + target.getX() + " " + target.getY() + " " + targetAngle);
-//        prevFollow = Optional.of(target);
-//    }
-
     private void targetPosition(Position target, Position currentPos) {
         Vector toTarget = Vector.between(currentPos, target);
 
@@ -236,16 +201,14 @@ public class AdaptivePurePursuitAction extends Action {
         Log.d("ppDebug", "angleError: " + angleError);
 
         double omega = 0;
-        if (Math.abs(angleError) > Math.toRadians(5)) {  // only correct if >5°
-            omega = target.getPidAngle().getPower(angleError);
+        if (Math.abs(angleError) > Math.toRadians(finalAngleLockingThreshholdDeg)) {  // only correct if >5°
+            omega = target.getPidAngleAdaptive().getPower(angleError);
             Log.d("ppDebug", "omega set due to angle error: " + omega);
         }
 
         Log.d("ppDebug", "vx: " + vx);
         Log.d("ppDebug", "vy: " + vy);
         Log.d("ppDebug", "omega: " + omega);
-
-
 
         double fLeftVelocity = vx + vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
         double bLeftVelocity = vx - vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
@@ -356,21 +319,6 @@ public class AdaptivePurePursuitAction extends Action {
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
-//            // inside update(), before lookAhead():
-//            Vector toLast   = Vector.between(currentPosition, path.getLastPoint());
-//            double segmentDir = toLast.getHeadingDirection();
-//            double heading    = currentPosition.getTheta();
-//
-//            // angle between "forward" and your path direction:
-//            double delta = Math.abs(MathFunctions.angleWrapRad(segmentDir - heading));
-
-            // if you’re more than ±60° off forward, you’re really strafing:
-//            if (Math.abs(Math.PI/2 - delta) < Math.toRadians(30)) {
-//                currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM * 0.3;  // shrink to 30%
-//            } else {
-//                currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
-//            }
-
             if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
                 currentLookAheadRadius = lastSearchRadius;
             }
@@ -386,12 +334,9 @@ public class AdaptivePurePursuitAction extends Action {
                     if (follow.get() == path.getLastPoint() && currentPosition.distanceTo(follow.get()) > LAST_RADIUS_MM) {
                         targetPosition(path.getPoint(path.findIndex(path.getLastPoint()) - 1), currentPosition);  // skip the zero-speed goal until you’re nearby
                         Log.d("ppDebug", "follow second last point");
-
                     } else {
-
                         targetPosition(follow.get(), currentPosition);
                         Log.d("ppDebug", "follow found point");
-
                     }
 
                 } else if (closestIdx >= lastIdx) {
@@ -429,6 +374,7 @@ public class AdaptivePurePursuitAction extends Action {
 
                 if (Math.abs(err) < Math.toRadians(finalAngleLockingThreshholdDeg)) {
                     Log.d("ppDebug", "finish by angle lock");
+                    Log.d("ppDebug", "finished position: " + currentPosition.toString());
                     finishedMoving();
                 } else {
 //                    // simple P‐turn: positive error → turn left, negative → turn right
@@ -474,39 +420,6 @@ public class AdaptivePurePursuitAction extends Action {
         isDone = true;
     }
 
-//    private List<Position> injectPoints(Path path) {
-//        int spacingMM = 150;
-//        List<Position> injectedPathPoints = new ArrayList<>();
-//
-//        for (int seg = 0; seg < path.numSegments(); seg++) {
-//            Vector vector = path.getSegment(seg).getVector();
-//            double segmentLength = vector.getLength();
-//            double numPointsFit = Math.ceil(segmentLength / spacingMM);
-//
-//            Vector norm = vector.normalize();
-//            Vector unitVector = new Vector(norm.getX() * spacingMM, norm.getY() * spacingMM);
-//
-//            Position start = path.getSegment(seg).getStart();
-//            Position end = path.getSegment(seg).getFinish();
-//
-//            double startTheta = start.getTheta();
-//            double endTheta = end.getTheta();
-//
-//            for (int i = 0; i < numPointsFit; i++) {
-//                double x = start.getX() + unitVector.getX() * i;
-//                double y = start.getY() + unitVector.getY() * i;
-//
-//                double t = i / numPointsFit;
-//                double theta = MathFunctions.interpolateAngle(startTheta, endTheta, t);
-//
-//                injectedPathPoints.add(new Position(x, y, theta));
-//            }
-//        }
-//
-//        injectedPathPoints.add(path.getLastPoint());
-//
-//        return injectedPathPoints;
-//    }
 
     private void injectPoints(Path path) {
         int spacingMM = 200;
@@ -553,32 +466,6 @@ public class AdaptivePurePursuitAction extends Action {
             injectedPathPoints.add(path.getLastPoint());
         }
     }
-
-//    private Path smoother(Path path, double a, double b, double tolerance) {
-//        Path newPath = path;
-//
-//        double change = tolerance;
-//
-//        while (change >= tolerance) {
-//            change  = 0.0;
-//            for (int i=0; i<=path.numPoints()-1; i++) {
-//                for (int j=0; j<=1; j++) {
-//                    if (j==0) {
-//                        double aux = newPath.getPoint(i).getX();
-//                        newPath.getPoint(i).addX(a * (path.getPoint(i).getX() - newPath.getPoint(i).getX()) + b * (newPath.getPoint(i-1).getX() + newPath.getPoint(i+1).getX() - (2.0 * newPath.getPoint(i).getX())));
-//                        change += Math.abs(aux - newPath.getPoint(i).getX());
-//                    } else {
-//                        double aux = newPath.getPoint(i).getY();
-//                        newPath.getPoint(i).addY(a * (path.getPoint(i).getY() - newPath.getPoint(i).getY()) + b * (newPath.getPoint(i-1).getY() + newPath.getPoint(i+1).getY() - (2.0 * newPath.getPoint(i).getY())));
-//                        change += Math.abs(aux - newPath.getPoint(i).getY());
-//                    }
-//                }
-//            }
-//        }
-//
-//        return newPath;
-//
-//    }
 
     private void smoother(Path path) {
 
