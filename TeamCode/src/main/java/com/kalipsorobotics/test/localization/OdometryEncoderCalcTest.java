@@ -12,7 +12,6 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,13 +50,13 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
             driveAction.move(gamepad1);
 
             Log.d("Position", odometry.updateDefaultPosition().toString());
-            Log.d("encoders", "count back: " + odometry.countBack() + "  count right: " + odometry.countRight() + "  count left: " + odometry.countLeft());
+            Log.d("encoders", "count back: " + odometry.countBack() +
+                    "  count right: " + odometry.countRight() +
+                    "  count left: " + odometry.countLeft());
             Log.d("Velocity", odometry.getCurrentPositionHistory().getCurrentVelocity().toString());
-
-
+            Log.d("PINPosition", goBildaOdoModule.getGoBildaPinpointDriver().getPosX() + ", " + goBildaOdoModule.getGoBildaPinpointDriver().getPosY());
         }
+
         OpModeUtilities.shutdownExecutorService(executorService);
-
     }
-
 }

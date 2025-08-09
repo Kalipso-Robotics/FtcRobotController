@@ -85,6 +85,10 @@ public class Path {
         return new Segment(getPoint(index), getPoint(index + 1));
     }
 
+    public Segment getSegmentIndex(Position position) {
+        return new Segment(getPoint(findIndex(position)), getPoint(findIndex(position) + 1));
+    }
+
     public int findIndex(Position position) {
         for (int i = 0; i < path.size(); i++) {
 
@@ -99,4 +103,5 @@ public class Path {
     public List<Position> getPath() {
         return path;
     }
+
 }

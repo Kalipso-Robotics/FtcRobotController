@@ -18,7 +18,10 @@ public class GoBildaOdoModule {
         goBildaPinpointDriver.recalibrateIMU();
         opModeUtilities.getOpMode().sleep(500);
         goBildaPinpointDriver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
-        goBildaPinpointDriver.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
+        goBildaPinpointDriver.setEncoderDirections(
+                GoBildaPinpointDriver.EncoderDirection.REVERSED,
+                GoBildaPinpointDriver.EncoderDirection.REVERSED
+        );
     }
 
     public static synchronized GoBildaOdoModule getInstance(OpModeUtilities opModeUtilities) {
