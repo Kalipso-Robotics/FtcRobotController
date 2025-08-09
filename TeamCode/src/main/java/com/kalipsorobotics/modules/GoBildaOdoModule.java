@@ -8,12 +8,17 @@ public class GoBildaOdoModule {
 
     private static GoBildaOdoModule single_instance = null;
 
-    public  GoBildaPinpointDriver goBildaPinpointDriver;
+    private GoBildaPinpointDriver goBildaPinpointDriver;
 
     public GoBildaOdoModule(OpModeUtilities opModeUtilities) {
 
         goBildaPinpointDriver = opModeUtilities.getHardwareMap().get(GoBildaPinpointDriver.class, "goBildaOdometry");
-
+        goBildaPinpointDriver.resetPosAndIMU();
+        opModeUtilities.getOpMode().sleep(500);
+        goBildaPinpointDriver.recalibrateIMU();
+        opModeUtilities.getOpMode().sleep(500);
+        goBildaPinpointDriver.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
+        goBildaPinpointDriver.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
     }
 
     public static synchronized GoBildaOdoModule getInstance(OpModeUtilities opModeUtilities) {

@@ -140,7 +140,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
+        return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
         //return ticksToMM(-rightEncoder.getCurrentPosition());
     }
     public double countLeft() {
@@ -152,7 +152,7 @@ public class Odometry {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
+        return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
         //return ticksToMM(-backEncoder.getCurrentPosition());
     }
 
