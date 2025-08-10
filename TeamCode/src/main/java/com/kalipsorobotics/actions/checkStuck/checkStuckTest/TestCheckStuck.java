@@ -1,10 +1,9 @@
-package com.kalipsorobotics.actions.checkStuck.checkStuck;
+package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
 import android.util.Log;
 
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
-import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.SparkfunOdometry;

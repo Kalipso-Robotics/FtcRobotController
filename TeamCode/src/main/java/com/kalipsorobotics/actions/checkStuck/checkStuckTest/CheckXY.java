@@ -1,4 +1,4 @@
-package com.kalipsorobotics.actions.checkStuck.checkStuck;
+package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
 import static java.lang.Math.abs;
 

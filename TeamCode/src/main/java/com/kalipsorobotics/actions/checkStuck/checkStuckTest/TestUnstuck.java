@@ -1,4 +1,4 @@
-package com.kalipsorobotics.actions.checkStuck.checkStuck;
+package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

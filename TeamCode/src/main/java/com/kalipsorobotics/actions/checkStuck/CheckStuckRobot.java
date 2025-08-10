@@ -8,7 +8,7 @@ import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.actions.checkStuck.checkStuck.CheckXY;
+import com.kalipsorobotics.actions.checkStuck.checkStuckTest.CheckXY;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 
 import java.util.ArrayList;

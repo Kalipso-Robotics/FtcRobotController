@@ -6,7 +6,6 @@ import android.util.Log;
 import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
-import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -46,6 +45,10 @@ public class Odometry {
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
     private DcMotor backEncoder;
+
+    private double rightOffset;
+    private double leftOffset;
+    private double backOffset;
     private volatile double prevRightDistanceMM;
     private volatile double prevLeftDistanceMM;
     volatile private double prevBackDistanceMM;
@@ -73,9 +76,9 @@ public class Odometry {
         currentImuHeading = prevImuHeading;
         prevSparkImuHeading = getSparkIMUHeading();
         currentSparkImuHeading = prevSparkImuHeading;
-        prevRightDistanceMM = countRight();
-        prevLeftDistanceMM = countLeft();
-        prevBackDistanceMM = countBack();
+        prevRightDistanceMM = getRightEncoderMM();
+        prevLeftDistanceMM = getLeftEncoderMM();
+        prevBackDistanceMM = getBackEncoderMM();
 
         sensorFusion = new SensorFusion();
     }
@@ -122,13 +125,16 @@ public class Odometry {
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
+        odometry.rightOffset = ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
+        odometry.leftOffset = odometry.getLeftEncoderMM();
+        odometry.backOffset = ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
     }
 
     public static void setInstanceNull() {
         single_instance = null;
     }
 
-    private double ticksToMM(double ticks) {
+    private static double ticksToMM(double ticks) {
         final double DEAD_WHEEL_RADIUS_MM = 24;
         final double TICKS_PER_REV = 2000;
         final double TICKS_TO_MM = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
@@ -136,24 +142,25 @@ public class Odometry {
         return ticks * TICKS_TO_MM;
     }
 
-    public double countRight() {
+    public double getRightEncoderMM() {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        //return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
-        return ticksToMM(rightEncoder.getCurrentPosition());
+        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset;
+        //return ticksToMM(rightEncoder.getCurrentPosition());
     }
-    public double countLeft() {
+    public double getLeftEncoderMM() {
         //corresponds to fLeft
         //direction FORWARD
         //positive because encoder directions
-        return ticksToMM(leftEncoder.getCurrentPosition());}
-    public double countBack() {
+        return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
+    }
+    public double getBackEncoderMM() {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        //return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
-        return ticksToMM(backEncoder.getCurrentPosition());
+        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY()) - backOffset;
+        //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
 
@@ -410,9 +417,9 @@ public class Odometry {
     }
     public HashMap<OdometrySensorCombinations, PositionHistory> updatePositionAll() {
         Log.d("updatepos", "updatepos");
-        double rightDistanceMM = countRight();
-        double leftDistanceMM = countLeft();
-        double backDistanceMM = countBack();
+        double rightDistanceMM = getRightEncoderMM();
+        double leftDistanceMM = getLeftEncoderMM();
+        double backDistanceMM = getBackEncoderMM();
         currentImuHeading = getIMUHeading();
         currentSparkImuHeading = getSparkIMUHeading();
 
@@ -527,6 +534,6 @@ public class Odometry {
     }
 
     public double countX() {
-        return (countLeft() + countRight()) / 2;
+        return (getLeftEncoderMM() + getRightEncoderMM()) / 2;
     }
 }
