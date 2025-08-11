@@ -49,12 +49,12 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
             driveAction.move(gamepad1);
 
-            Log.d("Position", odometry.updateDefaultPosition().toString());
+            Log.d("Odometry_Position", odometry.updateDefaultPosition().toString());
             Log.d("encoders", "count back: " + odometry.getBackEncoderMM() +
                     "  count right: " + odometry.getRightEncoderMM() +
                     "  count left: " + odometry.getLeftEncoderMM());
             Log.d("Velocity", odometry.getCurrentPositionHistory().getCurrentVelocity().toString());
-            Log.d("PINPosition", goBildaOdoModule.getGoBildaPinpointDriver().getPosX() + ", " + goBildaOdoModule.getGoBildaPinpointDriver().getPosY());
+            Log.d("PIN_Position", goBildaOdoModule.getGoBildaPinpointDriver().getPosX() + ", " + goBildaOdoModule.getGoBildaPinpointDriver().getPosY());
         }
 
         OpModeUtilities.shutdownExecutorService(executorService);

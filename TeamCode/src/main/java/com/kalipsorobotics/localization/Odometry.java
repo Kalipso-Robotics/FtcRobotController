@@ -63,6 +63,9 @@ public class Odometry {
                      Position startPosMMRAD) {
         this.opModeUtilities = opModeUtilities;
         resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, this);
+        this.rightOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
+        this.leftOffset = this.getLeftEncoderMM();
+        this.backOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
 
         this.wheelPositionHistory.setCurrentPosition(startPosMMRAD);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
@@ -125,9 +128,6 @@ public class Odometry {
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
-        odometry.rightOffset = ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
-        odometry.leftOffset = odometry.getLeftEncoderMM();
-        odometry.backOffset = ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
     }
 
     public static void setInstanceNull() {
@@ -146,7 +146,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset;
+        return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
     public double getLeftEncoderMM() {
@@ -159,7 +159,7 @@ public class Odometry {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        return ticksToMM(-goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY()) - backOffset;
+        return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY()) - backOffset;
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
