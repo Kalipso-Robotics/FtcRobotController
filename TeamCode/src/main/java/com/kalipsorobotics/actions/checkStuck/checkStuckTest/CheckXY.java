@@ -21,8 +21,8 @@ public class CheckXY {
         Position intendedPos = happyPath.getPoint((timeInMs-extra)/1000);
         Position currentPos = SharedData.getOdometryPosition();
         if (abs(intendedPos.getX() - currentPos.getX()) < MIN_POSITION_THRESHOLD && abs(intendedPos.getY() - currentPos.getY()) < MIN_POSITION_THRESHOLD) {
-            return false;
+            return true; // Robot IS on path
         }
-        return false;
+        return false; // Robot is NOT on path
     }
 }

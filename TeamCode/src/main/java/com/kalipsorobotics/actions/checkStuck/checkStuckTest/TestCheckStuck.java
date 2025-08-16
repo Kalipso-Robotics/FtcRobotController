@@ -33,18 +33,12 @@ public class TestCheckStuck extends LinearOpMode {
             sparkfunOdometry.updatePosition();
             Position currentPos = wheelOdometry.updateDefaultPosition();
 
-            // Compute deltas ONCE per loop
-            double xDelta = checkStuck.getXDelta(currentPos);
-            double yDelta = checkStuck.getYDelta(currentPos);
-            double thetaDelta = checkStuck.getThetaDelta(currentPos);
-
             if (checkStuck.isStuck(currentPos)) {
                 telemetry.addLine("robot is stuck");
             } else {
                 telemetry.addLine("robot is fine");
             }
 
-            Log.d("check stuks", "x delta: " + xDelta + " y delta: " + yDelta + " theta delta: " + thetaDelta);
             driveAction.move(gamepad1);
             telemetry.update();
         }
