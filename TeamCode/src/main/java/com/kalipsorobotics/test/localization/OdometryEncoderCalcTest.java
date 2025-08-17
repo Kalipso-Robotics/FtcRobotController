@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.localization.OdometryFileWriter;
+import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.GoBildaPinpointDriver;
@@ -33,10 +35,11 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
         GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
-        goBildaOdoModule.getGoBildaPinpointDriver().setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_SWINGARM_POD);
 
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+
+        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("OdometryTest", opModeUtilities);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
@@ -45,8 +48,8 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            goBildaOdoModule.getGoBildaPinpointDriver().update();
-
+            //goBildaOdoModule.getGoBildaPinpointDriver().update();
+            odometryFileWriter.writeOdometryPositionHistory(odometry.get());
             driveAction.move(gamepad1);
 
             Log.d("Odometry_Position", odometry.updateDefaultPosition().toString());

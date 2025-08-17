@@ -46,9 +46,9 @@ public class Odometry {
     private DcMotor leftEncoder;
     private DcMotor backEncoder;
 
-    private double rightOffset;
-    private double leftOffset;
-    private double backOffset;
+    private final double rightOffset;
+    private final double leftOffset;
+    private final double backOffset;
     private volatile double prevRightDistanceMM;
     private volatile double prevLeftDistanceMM;
     volatile private double prevBackDistanceMM;
@@ -146,8 +146,8 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset;
-        //return ticksToMM(rightEncoder.getCurrentPosition());
+        //return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset;
+        return -ticksToMM(rightEncoder.getCurrentPosition());
     }
     public double getLeftEncoderMM() {
         //corresponds to fLeft
@@ -159,8 +159,8 @@ public class Odometry {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY()) - backOffset;
-        //return ticksToMM(backEncoder.getCurrentPosition());
+        //return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY()) - backOffset;
+        return -ticksToMM(backEncoder.getCurrentPosition());
     }
 
 
