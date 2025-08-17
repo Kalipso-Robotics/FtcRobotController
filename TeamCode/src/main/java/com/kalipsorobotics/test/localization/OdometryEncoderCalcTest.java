@@ -11,6 +11,7 @@ import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -48,9 +49,11 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            //goBildaOdoModule.getGoBildaPinpointDriver().update();
-            odometryFileWriter.writeOdometryPositionHistory(odometry.get());
+            goBildaOdoModule.getGoBildaPinpointDriver().update();
+            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
             driveAction.move(gamepad1);
+
+
 
             Log.d("Odometry_Position", odometry.updateDefaultPosition().toString());
             Log.d("encoders", "count back: " + odometry.getBackEncoderMM() +
@@ -59,6 +62,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
             Log.d("Velocity", odometry.getCurrentPositionHistory().getCurrentVelocity().toString());
             Log.d("PIN_Position", goBildaOdoModule.getGoBildaPinpointDriver().getPosX() + ", " + goBildaOdoModule.getGoBildaPinpointDriver().getPosY());
         }
+        odometryFileWriter.close();
 
         OpModeUtilities.shutdownExecutorService(executorService);
     }

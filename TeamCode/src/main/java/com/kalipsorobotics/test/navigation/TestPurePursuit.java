@@ -1,4 +1,4 @@
-package com.kalipsorobotics.test.localization;
+package com.kalipsorobotics.test.navigation;
 
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;
@@ -9,7 +9,6 @@ import com.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.util.concurrent.ExecutorService;
