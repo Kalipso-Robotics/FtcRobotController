@@ -392,9 +392,7 @@ public class AdaptivePurePursuitAction extends Action {
 
             if (!enteredFinalAngleLock) {
 
-                if (closestIdx >= lastIdx) {
-                    enteredFinalAngleLock = true;
-                } else if (follow.isPresent()) {
+                if (follow.isPresent()) {
                     Log.d("ppDebug", "follow: " + path.findIndex(follow.get()) + ": " + follow.get().getPoint());
 
                     if (follow.get() == path.getLastPoint() && currentPosition.distanceTo(follow.get()) > LAST_RADIUS_MM) {
@@ -405,11 +403,14 @@ public class AdaptivePurePursuitAction extends Action {
                         Log.d("ppDebug", "follow found point");
                     }
 
+                } else if (closestIdx >= lastIdx) {
+                    enteredFinalAngleLock = true;
                 } else {
                     // lost lookahead mid‑path (e.g. big deviation) – keep chasing the last follow point
                     targetPosition(prevFollow.orElse(path.getLastPoint()), currentPosition);
                     Log.d("ppDebug", "follow not found -> prev point");
                 }
+
             } else {
                 ////                // we really are at the end of the path: switch to angle lock
                 double angleError = MathFunctions.angleWrapRad(
