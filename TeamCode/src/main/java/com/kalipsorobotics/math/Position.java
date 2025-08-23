@@ -32,7 +32,7 @@ public class Position {
     private PidNav pidX = new PidNav(PurePursuitAction.P_XY, 0, 0);
     private PidNav pidY = new PidNav(PurePursuitAction.P_XY, 0, 0);
     private PidNav pidAngle = new PidNav(PurePursuitAction.P_ANGLE, 0, 0);
-    private PidNav pidAngleAdaptive = new PidNav(6 / Math.toRadians(90), 0, 0);
+    private PidNav pidAngleAdaptive = new PidNav(1.3 / Math.toRadians(90), 0.001, 0);
 
     public Position (double x, double y, double theta) {
         this.x = x;
