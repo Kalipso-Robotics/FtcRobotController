@@ -15,6 +15,7 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,7 +45,6 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-        //goBildaOdoModule.getGoBildaPinpointDriver().update();
         waitForStart();
 
         while (opModeIsActive()) {
@@ -60,7 +60,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
                     "  count right: " + odometry.getRightEncoderMM() +
                     "  count left: " + odometry.getLeftEncoderMM());
             Log.d("Velocity", odometry.getCurrentPositionHistory().getCurrentVelocity().toString());
-            Log.d("PIN_Position", odometry.getGobildaPositionHistory().getCurrentPosition().toString());
+            Log.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
         }
         odometryFileWriter.close();
 

@@ -17,13 +17,9 @@ import com.kalipsorobotics.math.Velocity;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.modules.DriveTrain;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 import java.util.HashMap;
-
-import javax.crypto.spec.PSource;
 
 
 public class Odometry {
@@ -31,22 +27,12 @@ public class Odometry {
     //maybe double check BACK Distance
     static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
     private static Odometry single_instance = null;
-    final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
-    final private PositionHistory wheelIMUFusePositionHistory = new PositionHistory();
-    final private PositionHistory wheelSparkPositionHistory = new PositionHistory();
-    final private PositionHistory wheelSparkFusePositionHistory = new PositionHistory();
-    final private PositionHistory wheelIMUSparkFusePositionHistory = new PositionHistory();
-
     final private PositionHistory gobildaPositionHistory = new PositionHistory();
     OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
     IMUModule imuModule;
     GoBildaOdoModule goBildaOdoModule;
-    SparkFunOTOS sparkFunOTOS;
-    SensorFusion sensorFusion;
-    private double wheelHeadingWeight = 0;
-    private double imuHeadingWeight = 1;
     //200-182 offset compare to line between parallel odo pods
     //negative if robot center behind parallel wheels
     //final private static double ROBOT_CENTER_OFFSET_MM = -18;
@@ -64,8 +50,6 @@ public class Odometry {
     private volatile double currentImuHeading;
     private volatile double prevImuHeading;
 //    private final double MM_TO_INCH = 1/25.4;
-    private volatile double currentSparkImuHeading;
-    private volatile double prevSparkImuHeading;
 
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule,
                      Position startPosMMRAD) {
@@ -76,24 +60,15 @@ public class Odometry {
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
 
-        this.wheelPositionHistory.setCurrentPosition(startPosMMRAD);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
-        this.wheelIMUFusePositionHistory.setCurrentPosition(startPosMMRAD);
-        this.wheelSparkPositionHistory.setCurrentPosition(startPosMMRAD);
-        this.wheelSparkFusePositionHistory.setCurrentPosition(startPosMMRAD);
-        this.wheelIMUSparkFusePositionHistory.setCurrentPosition(startPosMMRAD);
         this.gobildaPositionHistory.setCurrentPosition(startPosMMRAD);
         ////Log.d("purepursaction_debug_odo_wheel", "init jimmeh" + currentPosition.toString());
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
         currentImuHeading = prevImuHeading;
-        prevSparkImuHeading = getSparkIMUHeading();
-        currentSparkImuHeading = prevSparkImuHeading;
         prevRightDistanceMM = getRightEncoderMM();
         prevLeftDistanceMM = getLeftEncoderMM();
         prevBackDistanceMM = getBackEncoderMM();
-
-        sensorFusion = new SensorFusion();
     }
 
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule,
@@ -133,7 +108,6 @@ public class Odometry {
 
     private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, Odometry odometry) {
         odometry.imuModule = imuModule;
-        odometry.sparkFunOTOS = driveTrain.getOtos();
         odometry.goBildaOdoModule = goBildaOdoModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
@@ -174,21 +148,6 @@ public class Odometry {
     }
 
 
-    private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
-        double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
-        double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
-        double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
-
-        double arcTanDeltaTheta = Math.atan2(deltaLeftDistance - deltaRightDistance, TRACK_WIDTH_MM);
-
-        double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
-        double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * arcTanDeltaTheta);
-
-        Velocity velocity = new Velocity(deltaX, deltaY, arcTanDeltaTheta);
-
-        return velocity;
-    }
-
 
     private Velocity calculateRelativeDeltaWheelIMU(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
@@ -204,94 +163,6 @@ public class Odometry {
 
         return velocity;
     }
-
-
-    private Velocity calculateRelativeDeltaWheelIMUFuse(double rightDistanceMM, double leftDistanceMM,
-                                                    double backDistanceMM, double deltaTimeMS) {
-        double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
-        double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
-        double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
-
-        double imuDeltaTheta = currentImuHeading - prevImuHeading;
-        double arcTanDeltaTheta = Math.atan2(deltaLeftDistance - deltaRightDistance, TRACK_WIDTH_MM);
-
-        double weightedAverageDeltaTheta = (0.5 * imuDeltaTheta) + (0.5 * arcTanDeltaTheta);
-
-        double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
-        double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * weightedAverageDeltaTheta);
-
-        Velocity velocity = new Velocity(deltaX, deltaY, weightedAverageDeltaTheta);
-
-        return velocity;
-    }
-
-
-    private Velocity calculateRelativeDeltaWheelSpark(double rightDistanceMM, double leftDistanceMM,
-                                                      double backDistanceMM, double deltaTimeMS) {
-        double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
-        double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
-        double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
-
-        double sparkFunDeltaTheta = currentSparkImuHeading - prevSparkImuHeading;
-
-        double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
-        double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * sparkFunDeltaTheta);
-
-        Velocity velocity = new Velocity(deltaX, deltaY, sparkFunDeltaTheta);
-
-        return velocity;
-    }
-
-
-    private Velocity calculateRelativeDeltaWheelSparkFuse(double rightDistanceMM, double leftDistanceMM,
-                                                    double backDistanceMM, double deltaTimeMS) {
-        double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
-        double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
-        double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
-
-        double sparkFunDeltaTheta = currentSparkImuHeading - prevSparkImuHeading;
-        double arcTanDeltaTheta = Math.atan2(deltaLeftDistance - deltaRightDistance, TRACK_WIDTH_MM);
-
-        double weightedAverageDeltaTheta = (0.5 * sparkFunDeltaTheta) + (0.5 * arcTanDeltaTheta);
-
-        double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
-        double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * weightedAverageDeltaTheta);
-
-        Velocity velocity = new Velocity(deltaX, deltaY, weightedAverageDeltaTheta);
-
-        return velocity;
-    }
-
-    private Velocity calculateRelativeDeltaWheelIMUSparkFuse(double rightDistanceMM, double leftDistanceMM,
-                                                          double backDistanceMM, double deltaTimeMS) {
-        double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
-        double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
-        double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
-
-        double imuDeltaTheta = currentImuHeading - prevImuHeading;
-        //wrapping to normalize theta -pi to pi
-        imuDeltaTheta = MathFunctions.angleWrapRad(imuDeltaTheta);
-        double arcTanDeltaTheta = Math.atan2(deltaLeftDistance - deltaRightDistance, TRACK_WIDTH_MM);
-        double sparkFunDeltaTheta = currentSparkImuHeading - prevSparkImuHeading;
-        sparkFunDeltaTheta = MathFunctions.angleWrapRad(sparkFunDeltaTheta);
-
-
-        double blendedDeltaTheta = sensorFusion.getFilteredAngleDelta(imuDeltaTheta, arcTanDeltaTheta, deltaTimeMS,
-                currentImuHeading, currentSparkImuHeading, sparkFunDeltaTheta);
-
-        double deltaTheta = blendedDeltaTheta; //blended compliment eachother — to reduce drift of imu in big movement and to detect small change
-
-        double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
-
-
-        double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * deltaTheta);
-
-
-        Velocity velocity = new Velocity(deltaX, deltaY, deltaTheta);
-
-        return velocity;
-    }
-
 
     private Velocity linearToArcDelta(Velocity relativeDelta) {
         if (Math.abs(relativeDelta.getTheta()) < 1e-4) {
@@ -341,16 +212,6 @@ public class Odometry {
         return position;
     }
 
-    private void updateWheelPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double timeElapsedSeconds) {
-        Velocity wheelRelDelta = calculateRelativeDeltaWheel(rightDistanceMM, leftDistanceMM,
-                backDistanceMM, timeElapsedSeconds * 1000);
-        wheelRelDelta = linearToArcDelta(wheelRelDelta);
-        Position globalPosition = calculateGlobal(wheelRelDelta, wheelPositionHistory.getCurrentPosition());
-        wheelPositionHistory.setCurrentPosition(globalPosition);
-        wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds);
-        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
-    }
-
     private void updateWheelIMUPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
                                    double timeElapsedSeconds) {
         Velocity wheelIMURelDelta = calculateRelativeDeltaWheelIMU(rightDistanceMM, leftDistanceMM, backDistanceMM,
@@ -362,57 +223,6 @@ public class Odometry {
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
 
     }
-
-    private void updateWheelIMUFusePos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
-                                       double timeElapsedSeconds) {
-        Velocity wheelIMUFuseRelDelta = calculateRelativeDeltaWheelIMUFuse(rightDistanceMM, leftDistanceMM,
-                backDistanceMM, timeElapsedSeconds * 1000);
-        wheelIMUFuseRelDelta = linearToArcDelta(wheelIMUFuseRelDelta);
-        Position globalPosition = calculateGlobal(wheelIMUFuseRelDelta, wheelIMUFusePositionHistory.getCurrentPosition());
-        wheelIMUFusePositionHistory.setCurrentPosition(globalPosition);
-        wheelIMUFusePositionHistory.setCurrentVelocity(wheelIMUFuseRelDelta, timeElapsedSeconds);
-        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU_FUSE, wheelIMUFusePositionHistory);
-
-    }
-
-    private void updateWheelSparkPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
-                                     double timeElapsedSeconds) {
-        Velocity wheelSparkRelDelta = calculateRelativeDeltaWheelSpark(rightDistanceMM, leftDistanceMM,
-                backDistanceMM, timeElapsedSeconds * 1000);
-        wheelSparkRelDelta = linearToArcDelta(wheelSparkRelDelta);
-        Position globalPosition = calculateGlobal(wheelSparkRelDelta, wheelSparkPositionHistory.getCurrentPosition());
-        wheelSparkPositionHistory.setCurrentPosition(globalPosition);
-        wheelSparkPositionHistory.setCurrentVelocity(wheelSparkRelDelta, timeElapsedSeconds);
-        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_SPARK, wheelSparkPositionHistory);
-
-    }
-
-    private void updateWheelSparkFusePos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
-                                         double timeElapsedSeconds) {
-        Velocity wheelSparkFuseRelDelta = calculateRelativeDeltaWheelSparkFuse(rightDistanceMM, leftDistanceMM,
-                backDistanceMM, timeElapsedSeconds * 1000);
-        wheelSparkFuseRelDelta = linearToArcDelta(wheelSparkFuseRelDelta);
-        Position globalPosition = calculateGlobal(wheelSparkFuseRelDelta, wheelSparkFusePositionHistory.getCurrentPosition());
-        wheelSparkFusePositionHistory.setCurrentPosition(globalPosition);
-        wheelSparkFusePositionHistory.setCurrentVelocity(wheelSparkFuseRelDelta, timeElapsedSeconds);
-        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEl_SPARK_FUSE, wheelSparkFusePositionHistory);
-
-    }
-
-    private void updateWheelIMUSparkFuse(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
-                                         double timeElapsedSeconds) {
-
-        Velocity wheelIMUSparkFuseRelDelta = calculateRelativeDeltaWheelIMUSparkFuse(rightDistanceMM, leftDistanceMM,
-                backDistanceMM, timeElapsedSeconds * 1000);
-        wheelIMUSparkFuseRelDelta = linearToArcDelta(wheelIMUSparkFuseRelDelta);
-        Position globalPosition = calculateGlobal(wheelIMUSparkFuseRelDelta, wheelIMUSparkFusePositionHistory.getCurrentPosition());
-        wheelIMUSparkFusePositionHistory.setCurrentPosition(globalPosition);
-        wheelIMUSparkFusePositionHistory.setCurrentVelocity(wheelIMUSparkFuseRelDelta, timeElapsedSeconds);
-        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU_SPARK_FUSE, wheelIMUSparkFusePositionHistory);
-
-    }
-
-
     private void updateGobilda(double timeElapsedSeconds) {
         goBildaOdoModule.getGoBildaPinpointDriver().update();
         Pose2D position = (goBildaOdoModule.getGoBildaPinpointDriver().getPosition());
@@ -427,7 +237,6 @@ public class Odometry {
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
         currentImuHeading = getIMUHeading();
-        currentSparkImuHeading = getSparkIMUHeading();
 
         Log.d("IMU_Heading", "Heading " + Math.toDegrees(currentImuHeading));
         Log.d("IMU_Prev_Heading", "PrevHeading" + Math.toDegrees(prevImuHeading));
@@ -437,21 +246,9 @@ public class Odometry {
         long currentTime = SystemClock.elapsedRealtime();
         double timeElapsedSeconds = (currentTime - prevTime) / 1000.0;
 
-        updateWheelPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
-        Log.d("updatepos", "updatepos after wheel");
+
         updateWheelIMUPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
-        Log.d("updatepos", "updatepos after wheelIMU");
-        updateWheelIMUFusePos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
-        Log.d("updatepos", "updatepos after wheelIMUFuse");
-        updateWheelSparkPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
-        Log.d("updatepos", "updatepos after wheelSpark");
-        updateWheelSparkFusePos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
-        Log.d("updatepos", "updatepos after wheelSparkFuse");
-        updateWheelIMUSparkFuse(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
-        Log.d("updatepos", "updatepos after wheelIMUSparkFuse");
         updateGobilda(timeElapsedSeconds);
-
-
 
         //Log.d("currentpos", "current pos " + currentPosition.toString());
         prevTime = currentTime;
@@ -461,14 +258,13 @@ public class Odometry {
         prevBackDistanceMM = backDistanceMM;
 
         prevImuHeading = currentImuHeading;
-        prevSparkImuHeading = currentSparkImuHeading;
         SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
         Log.d("updatepos", "updatepos done");
         return odometryPositionHistoryHashMap;
     }
 
-    public Position updateDefaultPosition() {
+    public Position update() {
         //IMU
         HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap = updatePositionAll();
         PositionHistory positionHistory = positionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU);
@@ -482,50 +278,8 @@ public class Odometry {
         return wheelIMUPositionHistory;
     }
 
-
     public double getIMUHeading() {
         return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
     }
 
-    public Position getGoBildaPosition() {
-        Position position = Position.pose2DtoPosition(goBildaOdoModule.getGoBildaPinpointDriver().getPosition());
-        return position;
-    }
-
-
-
-    public double getSparkIMUHeading() {
-        return -sparkFunOTOS.getPosition().h;
-    }
-
-    public double getImuHeadingWeight() {
-        return imuHeadingWeight;
-    }
-
-    public void setImuHeadingWeight(double imuHeadingWeight) {
-        this.imuHeadingWeight = imuHeadingWeight;
-    }
-
-    public double getWheelHeadingWeight() {
-        return wheelHeadingWeight;
-    }
-
-    public void setWheelHeadingWeight(double wheelHeadingWeight) {
-        this.wheelHeadingWeight = wheelHeadingWeight;
-    }
-
-
-    public IMUModule getImuModule() {return imuModule;}
-
-    public GoBildaOdoModule getGoBildaOdoModule() {
-        return goBildaOdoModule;
-    }
-
-    public double getCurrentImuHeading() {
-        return this.currentImuHeading;
-    }
-
-    public PositionHistory getGobildaPositionHistory() {
-        return gobildaPositionHistory;
-    }
 }
