@@ -1,7 +1,5 @@
 package com.kalipsorobotics.navigation;
 
-import static androidx.core.math.MathUtils.clamp;
-
 import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
@@ -60,9 +58,8 @@ public class AdaptivePurePursuitAction extends Action {
     ElapsedTime timeoutTimer;
 
     private double currentVelocityMmPerS;
-    private double xVelocity;
-    private double yVelocity;
-    private double thetaVelocity;
+    private double filteredVelocityMmPerS = 0;
+    private final double FILTER_SMOOTHING_FACTOR = 0.8; // A value between 0.0 and 1.0
 
     List<Position> injectedPathPoints = new ArrayList<>();
     private int pointInject = 0;
@@ -89,44 +86,35 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double WHEELBASE_LENGTH = 300; //front wheel to back wheel
     private double TRACK_WIDTH = 400; //side to side
-    private double K_p = 0.0; // 0.000015
+    private double K_p = 0; // 0.000015
     private double K_a = 0.0; // 0.001
     private double K_v = 0.0005; // 0.0004 0.00225
 
     /*
     * ↑ Raising K_p
-    * The controller reacts more aggressively to any mismatch between your commanded wheelVelocity and what you’re actually seeing.
     * Pros: tighter tracking, smaller steady‐state velocity error.
-    * Cons: if too high, you’ll get oscillations or a chattery response as you constantly “hunting” your target speed.
-
+    * Cons: if too high, oscillations or a chattery response as bot constantly “hunts” target speed.
     * ↓ Lowering K_p
-    * Makes that feedback loop more sluggish.
     * Pros: smoother, less jitter.
-    * Cons: larger lag and steady‐state error (you’ll always run a bit slower than commanded).
+    * Cons: larger lag and steady‐state error (always run a bit slower than commanded).
     */
 
     /*
     * ↑ Raising K_v
-    * Increases the baseline motor power you send for any given wheelVelocity.
-    * Pros: you’ll hit your commanded speed more easily, even on hills or friction.
-    * Cons: if too high, your outputs will clip at ±1.0 and corners of your profile will get “flattened” or you’ll overshoot.
-
+    * Pros: hit your commanded speed more easily, even on hills or friction.
+    * Cons: if too high, outputs will clip at ±1.0 and corners of profile will get “flattened” or overshoot.
     * ↓ Lowering K_v
-    * Hands more of the work over to the feedback term (K_p).
     * Pros: less risk of raw saturation, more graceful cornering of your velocity trapezoid.
-    * Cons: if too low, you’ll visibly struggle to reach or hold top speed, even when unloaded.
+    * Cons: if too low, visibly struggle to reach or hold top speed, even when unloaded.
     */
 
     /*
     * ↑ Raising K_a
-    * Kicks in extra power proportionally to how sharply you’re accelerating or braking along the path.
     * Pros: helps overcome inertia and get those velocity ramps on‐profile.
-    * Cons: if too high, you’ll see spikes in power whenever your path curvature or speed changes, which can feel jerky.
-
+    * Cons: if too high, spikes in power when path curvature or speed changes, which can feel jerky.
     * ↓ Lowering K_a
-    * Makes your accelerations more reliant on the feedback loop to “catch up.”
     * Pros: smoother, avoids power‐spikes.
-    * Cons: your robot may feel sluggish at the beginning of each motion segment or in tight decelerations.
+    * Cons: may feel sluggish at the beginning of each motion segment or in tight decelerations.
      */
 
     public AdaptivePurePursuitAction(DriveTrain driveTrain, Odometry wheelOdometry) {
@@ -195,8 +183,8 @@ public class AdaptivePurePursuitAction extends Action {
     private void targetPosition(Position target, Position currentPos) {
 
         double velocity;
-        // Check if the current target is the very last point
-        if (path.findIndex(target) == path.numPoints()-1) {
+
+        if (target == path.getLastPoint()) { //if the current target is the very last point
 
             // Final approach: Use a kinematic model for deceleration to a stop
             double distanceToEnd = Vector.between(currentPos, path.getLastPoint()).getLength();
@@ -205,7 +193,6 @@ public class AdaptivePurePursuitAction extends Action {
             velocity = Math.sqrt(2 * MAX_ACCELERATION * distanceToEnd);
 
         } else {
-            // Normal Pure Pursuit: use the pre-calculated path velocity
             velocity = target.getVelocity();
         }
 
@@ -214,17 +201,14 @@ public class AdaptivePurePursuitAction extends Action {
 
         // Robot‑relative vector to lookahead (in meters)
         double dx = target.getX() - currentPos.getX();
-
         double dy = target.getY() - currentPos.getY();
+
         // Rotate into robot frame
         double x_r =  Math.cos(robotAngle)*dx + Math.sin(robotAngle)*dy;
 //        Log.d("ppDebug", "x_r: " + x_r);
-
         double y_r = -Math.sin(robotAngle)*dx + Math.cos(robotAngle)*dy;
 //        Log.d("ppDebug", "y_r: " + y_r);
 
-        // Direction and magnitude
-        double distance = Math.sqrt(x_r*x_r + y_r*y_r);
         double headingError = Math.atan2(y_r, x_r);
         // Choose speeds
 //        double cosHE = Math.cos(headingError);
@@ -252,8 +236,6 @@ public class AdaptivePurePursuitAction extends Action {
 
 //        Log.d("ppDebug", "angleError: " + angleError);
 //        Log.d("ppDebug", "headingError: " + headingError);
-
-//        double omega = target.getPidAngleAdaptive().getPower(angleError);
 
         // Calculate the desired angular velocity based on the PID output
         double omegaAngularVelocity = target.getPidAngleAdaptive().getPower(angleError) * MAX_ANGULAR_VELOCITY; // This is in rad/s
@@ -304,7 +286,7 @@ public class AdaptivePurePursuitAction extends Action {
 
         driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.25);
 
-        Log.d("ppDebug", "velocity target: " + target.getVelocity());
+        Log.d("ppDebug", "velocity target: " + velocity);
         Log.d("ppDebug", "velocity current: " + currentVelocityMmPerS);
 
         prevFollow = Optional.of(target);
@@ -377,6 +359,9 @@ public class AdaptivePurePursuitAction extends Action {
             // now velocity in mm/s
             currentVelocityMmPerS = distanceMm / dtSeconds;
 
+            filteredVelocityMmPerS = (FILTER_SMOOTHING_FACTOR * filteredVelocityMmPerS) +
+                    ((1 - FILTER_SMOOTHING_FACTOR) * currentVelocityMmPerS);
+
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
             if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
@@ -447,46 +432,11 @@ public class AdaptivePurePursuitAction extends Action {
                 } else {
                     targetPosition(path.getLastPoint(), currentPosition);
                 }
-//
-//                // or System.currentTimeMillis()/1000.0
-//                double dt = elapsedTime - lastUpdateTime;
-//                lastUpdateTime = elapsedTime;
-
-//                // only _now_ do your final heading‑lock
-//                double targetH = path.getLastPoint().getTheta();
-//                double err = MathFunctions.angleWrapRad(targetH - currentPosition.getTheta());
-//                Log.d("ppDebug", "follow not found -> last point, angle error: " + err);
-//
-//                // special‑case EXACT ±π so sign doesn’t flip:
-//                if (Math.abs(Math.abs(err) - Math.PI) < 1e-3) {
-//                    err = Math.PI;  // pick +π consistently
-//                }
-//
-//                if (Math.abs(err) < Math.toRadians(finalAngleLockingThreshholdDeg)) {
-//                    Log.d("ppDebug", "finish by angle lock");
-//                    Log.d("ppDebug", "finished position: " + currentPosition.toString());
-//                    finishedMoving();
-//                } else {
-////                    // simple P‐turn: positive error → turn left, negative → turn right
-////                    double kP = 0.3, kD = 0.1;
-////                    double derivative = (err - lastHeadingError) / dt;
-////                    double turn = kP * err + kD * derivative;
-////
-////                    // clamp and send
-////                    turn = Range.clip(turn, -0.5, 0.5);
-//                    double turn = path.getLastPoint().getPidAngleAdaptive().getPower(err);
-////                    driveTrain.setPower(+turn, -turn, +turn, -turn);
-//                    driveTrain.setPowerWithRangeClippingMinThreshold(turn, -turn, turn, -turn, 0.15);
-//                    Log.d("ppDebug", "final angle locking power: " + turn);
-//
-//
-//                    //lastHeadingError = err;
-//                }
             }
 
-            xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-            yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-            thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+//            xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+//            yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+//            thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
 
 //            if(xVelocity < 0.001 && yVelocity < 0.001 && thetaVelocity < 0.001) {
 //                if(timeoutTimer.milliseconds() > 5000) {
@@ -500,10 +450,6 @@ public class AdaptivePurePursuitAction extends Action {
             lastMilli = elapsedTime;
             lastPosition = currentPosition;
         }
-
-        Log.d("adaptive pure pursuit", "inject done: " + injectDone);
-        Log.d("adaptive pure pursuit", "smoother done: " + smootherDone);
-        Log.d("adaptive pure pursuit", "velocity done: " + calcVelocityAccelDone);
 
     }
 
@@ -576,15 +522,14 @@ public class AdaptivePurePursuitAction extends Action {
         if (injectDone && (!finishedCurrentLoop || change >= SMOOTHER_TOLERANCE)) {
 
             if (finishedCurrentLoop && change >= SMOOTHER_TOLERANCE) {
-                smootherI = 1; //skip 0 we don't want to smooth first point
+                smootherI = 1; //skip 0 don't smooth first point
                 change = 0.0;
                 finishedCurrentLoop = false;
             }
 
             if (smootherI < path.numPoints()-1) { //skip last point
 
-                // Add a check to skip original waypoints
-                // We use a small tolerance for floating-point comparison
+                // Add a check to skip original waypoints, small tolerance for floating-point comparison
                 boolean isOriginal = false;
                 for (Position original : pathPoints) {
                     if (Math.abs(path.getPoint(smootherI).getX() - original.getX()) < 1e-6 &&
@@ -595,10 +540,10 @@ public class AdaptivePurePursuitAction extends Action {
                 }
 
                 if (isOriginal) {
-                    // Skip smoothing this point, move to the next one
+                    // Skip smoothing this point
                     smootherJ = 0;
                     smootherI++;
-                    return; // Go to the next iteration
+                    return;
                 }
 
                 if (smootherJ <= 1) {
@@ -666,19 +611,6 @@ public class AdaptivePurePursuitAction extends Action {
 
                 path.getPoint(calcVAIndex).setVelocity(getTargetVelocity(path, calcVAIndex));
                 path.getPoint(0).setAcceleration(0);
-
-                double d = path.getPoint(calcVAIndex +1).getDistanceAlongPath()
-                        - path.getPoint(calcVAIndex).getDistanceAlongPath();
-                double vNext = path.getPoint(calcVAIndex +1).getVelocity();
-                // v² = vNext² + 2·a·d  →  v = sqrt(…)
-                double vMaxDecel = Math.sqrt(vNext*vNext + 2*MAX_ACCELERATION*d);
-
-                // after you compute vMaxDecel:
-                double signedV    = path.getPoint(calcVAIndex).getVelocity();
-                double mag        = Math.abs(signedV);
-                double magLimited = Math.min(mag, vMaxDecel);
-
-                path.getPoint(calcVAIndex).setVelocity(magLimited);
 
                 double vPrev = path.getPoint(calcVAIndex -1).getVelocity();        // mm/s
                 double sPrev = path.getPoint(calcVAIndex -1).getDistanceAlongPath(); // mm
@@ -806,6 +738,6 @@ public class AdaptivePurePursuitAction extends Action {
     }
 
     private double calculateMotorOutput(double wheelVelocity, double acceleration) {
-        return (K_p * (wheelVelocity - currentVelocityMmPerS) + K_v * wheelVelocity + K_a * Math.signum(wheelVelocity) * Math.abs(acceleration));
+        return (K_p * (wheelVelocity - filteredVelocityMmPerS) + K_v * wheelVelocity + K_a * Math.signum(wheelVelocity) * Math.abs(acceleration));
     }
 }
