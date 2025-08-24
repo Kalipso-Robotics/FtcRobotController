@@ -17,7 +17,13 @@ import com.kalipsorobotics.math.Velocity;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.modules.DriveTrain;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
 import java.util.HashMap;
+
+import javax.crypto.spec.PSource;
 
 
 public class Odometry {
@@ -31,6 +37,8 @@ public class Odometry {
     final private PositionHistory wheelSparkPositionHistory = new PositionHistory();
     final private PositionHistory wheelSparkFusePositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUSparkFusePositionHistory = new PositionHistory();
+
+    final private PositionHistory gobildaPositionHistory = new PositionHistory();
     OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
     IMUModule imuModule;
@@ -63,6 +71,7 @@ public class Odometry {
                      Position startPosMMRAD) {
         this.opModeUtilities = opModeUtilities;
         resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, this);
+        goBildaOdoModule.getGoBildaPinpointDriver().update();
         this.rightOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
@@ -73,6 +82,7 @@ public class Odometry {
         this.wheelSparkPositionHistory.setCurrentPosition(startPosMMRAD);
         this.wheelSparkFusePositionHistory.setCurrentPosition(startPosMMRAD);
         this.wheelIMUSparkFusePositionHistory.setCurrentPosition(startPosMMRAD);
+        this.gobildaPositionHistory.setCurrentPosition(startPosMMRAD);
         ////Log.d("purepursaction_debug_odo_wheel", "init jimmeh" + currentPosition.toString());
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
@@ -415,6 +425,16 @@ public class Odometry {
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU_SPARK_FUSE, wheelIMUSparkFusePositionHistory);
 
     }
+
+
+    private void updateGobilda(double timeElapsedSeconds) {
+        goBildaOdoModule.getGoBildaPinpointDriver().update();
+        Pose2D position = (goBildaOdoModule.getGoBildaPinpointDriver().getPosition());
+        //Position newPosition = new Position(-position.getX(DistanceUnit.MM), position.getY(DistanceUnit.MM), position.getHeading(AngleUnit.RADIANS));
+        gobildaPositionHistory.setCurrentPosition(Position.pose2DtoPosition(position));
+        gobildaPositionHistory.setCurrentVelocity(Velocity.pose2DtoVelocity(goBildaOdoModule.getGoBildaPinpointDriver().getVelocity()), timeElapsedSeconds);
+        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.GOBILDA, gobildaPositionHistory);
+    }
     public HashMap<OdometrySensorCombinations, PositionHistory> updatePositionAll() {
         Log.d("updatepos", "updatepos");
         double rightDistanceMM = getRightEncoderMM();
@@ -422,6 +442,9 @@ public class Odometry {
         double backDistanceMM = getBackEncoderMM();
         currentImuHeading = getIMUHeading();
         currentSparkImuHeading = getSparkIMUHeading();
+
+        Log.d("IMU_Heading", "Heading " + Math.toDegrees(currentImuHeading));
+        Log.d("IMU_Prev_Heading", "PrevHeading" + Math.toDegrees(prevImuHeading));
 
         //Log.d("updatepos", rightDistanceMM + " " + leftDistanceMM + " " + backDistanceMM);
 
@@ -440,6 +463,7 @@ public class Odometry {
         Log.d("updatepos", "updatepos after wheelSparkFuse");
         updateWheelIMUSparkFuse(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
         Log.d("updatepos", "updatepos after wheelIMUSparkFuse");
+        updateGobilda(timeElapsedSeconds);
 
 
 
@@ -469,7 +493,7 @@ public class Odometry {
 
 
     public Position updateDefaultPosition() {
-        //SparkFun IMU
+        //IMU
         HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap = updatePositionAll();
         PositionHistory positionHistory = positionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU);
         if (positionHistory == null) {
@@ -533,7 +557,7 @@ public class Odometry {
         return this.currentImuHeading;
     }
 
-    public double countX() {
-        return (getLeftEncoderMM() + getRightEncoderMM()) / 2;
+    public PositionHistory getGobildaPositionHistory() {
+        return gobildaPositionHistory;
     }
 }

@@ -13,7 +13,7 @@ public class IMUModule {
 
     private final OpModeUtilities opModeUtilities;
     public IMU imu;
-
+    //Left, Forward
     private IMUModule(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
@@ -23,8 +23,8 @@ public class IMUModule {
             i++;
             boolean isImuIntitalized = imu.initialize(new IMU.Parameters(
                     new RevHubOrientationOnRobot(
-                            RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                            RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                            RevHubOrientationOnRobot.UsbFacingDirection.LEFT
                     )
             ));
             if (isImuIntitalized) {

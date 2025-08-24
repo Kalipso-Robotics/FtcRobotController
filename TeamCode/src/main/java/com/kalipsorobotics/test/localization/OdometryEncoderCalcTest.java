@@ -44,23 +44,23 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-        goBildaOdoModule.getGoBildaPinpointDriver().update();
+        //goBildaOdoModule.getGoBildaPinpointDriver().update();
         waitForStart();
 
         while (opModeIsActive()) {
 
-            goBildaOdoModule.getGoBildaPinpointDriver().update();
+            //goBildaOdoModule.getGoBildaPinpointDriver().update();
             odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
             driveAction.move(gamepad1);
 
 
 
-            Log.d("Odometry_Position", odometry.updateDefaultPosition().toString());
+            Log.d("Odometry_Position", SharedData.getOdometryPosition().toString());
             Log.d("encoders", "count back: " + odometry.getBackEncoderMM() +
                     "  count right: " + odometry.getRightEncoderMM() +
                     "  count left: " + odometry.getLeftEncoderMM());
             Log.d("Velocity", odometry.getCurrentPositionHistory().getCurrentVelocity().toString());
-            Log.d("PIN_Position", goBildaOdoModule.getGoBildaPinpointDriver().getPosX() + ", " + goBildaOdoModule.getGoBildaPinpointDriver().getPosY());
+            Log.d("PIN_Position", odometry.getGobildaPositionHistory().getCurrentPosition().toString());
         }
         odometryFileWriter.close();
 
