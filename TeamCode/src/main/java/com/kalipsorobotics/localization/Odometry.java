@@ -274,20 +274,6 @@ public class Odometry {
         double arcTanDeltaTheta = Math.atan2(deltaLeftDistance - deltaRightDistance, TRACK_WIDTH_MM);
         double sparkFunDeltaTheta = currentSparkImuHeading - prevSparkImuHeading;
         sparkFunDeltaTheta = MathFunctions.angleWrapRad(sparkFunDeltaTheta);
-//        Position newPosition = kalmanFilter.update(new Position(0, 0, arcTanDeltaTheta));
-//        newPosition = kalmanFilter.update(new Position(0, 0, imuDeltaTheta));
-//        newPosition = kalmanFilter.update(new Position(0, 0, encoderDeltaTheta));
-
-        ////Log.d("purepursaction_debug_odo_wheel_deltaTheta",
-        //        String.format("encoder = %.4f, imu = %.4f, arcTan = %.4f", encoderDeltaTheta, imuDeltaTheta,
-        //                arcTanDeltaTheta));
-        //double blendedDeltaTheta = (newPosition.getTheta());
-
-//        double blendedDeltaTheta =
-//                (wheelHeadingWeight * encoderDeltaTheta) + (imuHeadingWeight * imuDeltaTheta) + (wheelHeadingWeight * arcTanDeltaTheta);
-
-        //        currentImuHeading + ", " + imuDeltaTheta + ", " + arcTanDeltaTheta + ", " + encoderDeltaTheta +  ",
-        //        " + deltaTimeMS + ", " + (imuDeltaTheta / deltaTimeMS));
 
 
         double blendedDeltaTheta = sensorFusion.getFilteredAngleDelta(imuDeltaTheta, arcTanDeltaTheta, deltaTimeMS,
@@ -482,16 +468,6 @@ public class Odometry {
         return odometryPositionHistoryHashMap;
     }
 
-//    public Position updatePosition() {
-//        HashMap<Odometry, PositionHistory> positionHistoryHashMap = updatePositionAll();
-//        PositionHistory positionHistory = positionHistoryHashMap.get(Odometry.WHEEL_IMU_SPARK_FUSE);
-//        if (positionHistory == null) {
-//            throw new RuntimeException("WHEEL_IMU_SPARK_FUSE Position History Null");
-//        }
-//        return positionHistory.getCurrentPosition();
-//    }
-
-
     public Position updateDefaultPosition() {
         //IMU
         HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap = updatePositionAll();
@@ -506,14 +482,6 @@ public class Odometry {
         return wheelIMUPositionHistory;
     }
 
-//    public void run() throws InterruptedException{
-//        while (true) {
-//            updatePosition();
-//            if (Thread.interrupted()) {
-//                throw new InterruptedException();
-//            }
-//        }
-//    }
 
     public double getIMUHeading() {
         return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
