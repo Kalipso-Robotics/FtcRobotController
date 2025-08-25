@@ -41,14 +41,6 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double finalAngleLockingThreshholdDeg = 1.5;
 
-    private final double PATH_MAX_VELOCITY = 1500; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
-    private final double K = 1100; //based on how slow you want the robot to go around turns
-    // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private final double MAX_ACCELERATION = 6000; // mm/s^2
-    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
-    // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
-    private final double MAX_ANGULAR_VELOCITY = 5.5;
-
     private double startTimeMS = System.currentTimeMillis();
     private double maxTimeOutMS = 1000000000;
 
@@ -82,6 +74,16 @@ public class AdaptivePurePursuitAction extends Action {
     private boolean calcVelocityAccelDone = false;
     private double lastUpdateTime;
     private double lastHeadingError = 0;
+
+
+    //TUNING NUMBERS: USE DATA ABOUT ROBOT
+    private final double PATH_MAX_VELOCITY = 1500; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
+    private final double K = 1100; //based on how slow you want the robot to go around turns
+    // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
+    private final double MAX_ACCELERATION = 6000; // mm/s^2, maximum acceleration of the robot
+    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
+    // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
+    private final double MAX_ANGULAR_VELOCITY = 5.5; //rad/s, maximum turning velocity of the robot
 
     private double WHEELBASE_LENGTH = 300; //front wheel to back wheel
     private double TRACK_WIDTH = 400; //side to side
@@ -460,8 +462,15 @@ public class AdaptivePurePursuitAction extends Action {
                 double x = start.getX() + unitVector.getX() * pointInject;
                 double y = start.getY() + unitVector.getY() * pointInject;
 
-                double t = pointInject / numPointsFit;
-                double theta = MathFunctions.interpolateAngle(startTheta, endTheta, t);
+//                double t = pointInject / numPointsFit;
+//                double theta = MathFunctions.interpolateAngle(startTheta, endTheta, t);
+
+                double theta;
+                if (MAX_ANGULAR_VELOCITY * pointInject > endTheta) {
+                    theta = endTheta;
+                } else {
+                    theta = MAX_ANGULAR_VELOCITY * pointInject;
+                }
 
                 injectedPathPoints.add(new Position(x, y, theta));
                 Log.d("ppDebug", "injected point: " + x + ", " + y + ", " + theta);
@@ -475,15 +484,11 @@ public class AdaptivePurePursuitAction extends Action {
         } else {
             injectDone = true;
 
-            // Get the final point from the original path
             Position finalOriginalPoint = path.getLastPoint();
-
-            // Get the last point that was just injected
             Position lastInjectedPoint = injectedPathPoints.get(injectedPathPoints.size() - 1);
 
             // If the last injected point is NOT the same as the final original point,
             // then we need to add the final original point.
-            // Use a small tolerance for floating point comparison
             final double EPSILON = 1e-6;
             if (Math.abs(lastInjectedPoint.getX() - finalOriginalPoint.getX()) > EPSILON ||
                     Math.abs(lastInjectedPoint.getY() - finalOriginalPoint.getY()) > EPSILON) {
