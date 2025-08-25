@@ -41,12 +41,11 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double finalAngleLockingThreshholdDeg = 1.5;
 
-    private boolean enteredFinalAngleLock = false;
-
-    private final double PATH_MAX_VELOCITY = 2000; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
+    private final double PATH_MAX_VELOCITY = 1500; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
     private final double K = 1100; //based on how slow you want the robot to go around turns
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private final double MAX_ACCELERATION = 10000; // mm/s^2
+    private final double MAX_ACCELERATION = 6000; // mm/s^2
+    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
     private final double MAX_ANGULAR_VELOCITY = 5.5;
 
@@ -86,9 +85,9 @@ public class AdaptivePurePursuitAction extends Action {
 
     private double WHEELBASE_LENGTH = 300; //front wheel to back wheel
     private double TRACK_WIDTH = 400; //side to side
-    private double K_p = 0; // 0.000015
+    private double K_p = 0.00001; // 0.000015
     private double K_a = 0.0; // 0.001
-    private double K_v = 0.0005; // 0.0004 0.00225
+    private double K_v = 0.0004; // 0.0004 0.00225
 
     /*
     * ↑ Raising K_p
@@ -151,7 +150,6 @@ public class AdaptivePurePursuitAction extends Action {
         // Reset all boolean flags
         isDone = false;
         hasStarted = false;
-        enteredFinalAngleLock = false;
         injectDone = false;
         smootherDone = false;
         calcDistanceDone = false;
@@ -190,7 +188,7 @@ public class AdaptivePurePursuitAction extends Action {
             double distanceToEnd = Vector.between(currentPos, path.getLastPoint()).getLength();
 
             // Calculate the maximum velocity allowed to decelerate and stop at the target
-            velocity = Math.sqrt(2 * MAX_ACCELERATION * distanceToEnd);
+            velocity = Math.sqrt(2 * MAX_ACCELERATION_FINAL * distanceToEnd);
 
         } else {
             velocity = target.getVelocity();
@@ -364,60 +362,33 @@ public class AdaptivePurePursuitAction extends Action {
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
-            if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
-                currentLookAheadRadius = lastSearchRadius;
-                Log.d("ppDebug", "set search radius to last");
-            }
-
             follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
-            if (!enteredFinalAngleLock) {
+            // Check for the final point
+            // If lookAhead finds a point AND that point is the last point,
+            // it means we should shrink our search radius for the next iteration.
+            // This is a more robust way to handle the end of the path.
+            if (follow.isPresent() && follow.get() == path.getLastPoint()) {
+                currentLookAheadRadius = LAST_RADIUS_MM;
+                follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
+            }
 
-//                if (follow.isPresent()) {
-//                    Log.d("ppDebug", "follow: " + path.findIndex(follow.get()) + ": " + follow.get().getPoint());
-//
-//                    if (follow.get() == path.getLastPoint() && currentPosition.distanceTo(follow.get()) > LAST_RADIUS_MM) {
-//                        Log.d("ppDebug", "follow second last point");
-//                        targetPosition(path.getPoint(path.findIndex(path.getLastPoint()) - 1), currentPosition);  // skip the zero-speed goal until you’re nearby
-//                    } else {
-//                        Log.d("ppDebug", "follow found point");
-//                        targetPosition(follow.get(), currentPosition);
-//                    }
-//
-//                } else if (closestIdx >= lastIdx) {
-//                    enteredFinalAngleLock = true;
-//                } else {
-//                    // lost lookahead mid‑path (e.g. big deviation) – keep chasing the last follow point
-//                    targetPosition(prevFollow.orElse(path.getLastPoint()), currentPosition);
-//                    Log.d("ppDebug", "follow not found -> prev point");
-//                }
+            if (follow.isPresent()) {
+                Log.d("ppDebugFollow", "is follow.get() == path.getLastPoint()? " + (follow.get() == path.getLastPoint()));
 
-                if (follow.isPresent()) {
-                    Log.d("ppDebugFollow", "follow found point: " + path.findIndex(follow.get()) + ": " + follow.get().getPoint());
+                int followIndex = path.findIndex(follow.get());
+                int lastIndex = path.numPoints() - 1;
+                Log.d("ppDebugFollow", "follow index: " + followIndex + " | last index: " + lastIndex);
 
-                    // We've found a lookahead point to follow
-                    targetPosition(follow.get(), currentPosition);
-
-                    // If the lookahead point is the last point, enter the final approach mode
-                    if (follow.get() == path.getLastPoint()) {
-                        enteredFinalAngleLock = true;
-                    }
-
-                } else {
-                    // Lost lookahead mid-path. This is your fallback.
-                    targetPosition(prevFollow.orElse(path.getLastPoint()), currentPosition);
-                    Log.d("ppDebugFollow", "follow not found -> prev point");
-
-                    // If we are near the end and lost the lookahead, assume we are at the end
-                    if (closestIdx >= lastIdx) {
-                        enteredFinalAngleLock = true;
-                        Log.d("ppDebugFollow", "follow not found and near end -> entered final lock");
-
-                    }
-                }
+                // We have a point to follow
+                targetPosition(follow.get(), currentPosition);
+                Log.d("ppDebugFollow", "follow found point: " + path.findIndex(follow.get()) + ": " + follow.get().getPoint());
 
             } else {
-                // we really are at the end of the path: switch to angle lock
+                Log.d("ppDebugFollow", "No lookahead found, switching to final lock");
+
+                // If no lookahead point is found, we are at the end of the path.
+                // Command the robot to drive to the very last point.
                 double angleError = MathFunctions.angleWrapRad(
                         path.getLastPoint().getTheta() - currentPosition.getTheta()
                 );
@@ -425,14 +396,12 @@ public class AdaptivePurePursuitAction extends Action {
                 Vector between = Vector.between(currentPosition, path.getLastPoint());
 
                 if (Math.abs(angleError) <= Math.toRadians(finalAngleLockingThreshholdDeg) && between.getLength() < lastSearchRadius) {
-                    Log.d("ppDebug", "finish by angle lock");
-                    Log.d("ppDebug", "finished position: " + currentPosition.toString());
-
-                    finishedMoving();        // we’re within 1.5° of the final heading
+                    finishedMoving();
                 } else {
                     targetPosition(path.getLastPoint(), currentPosition);
                 }
             }
+
 
 //            xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
 //            yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
@@ -474,7 +443,7 @@ public class AdaptivePurePursuitAction extends Action {
             double segmentLength = vector.getLength();
             double eps = 1e-6;
             double numPointsFit = (int) Math.ceil((segmentLength - eps) / spacingMM);
-            Log.d("ppDebug", "num points fit: " + numPointsFit);
+            //Log.d("ppDebug", "num points fit: " + numPointsFit);
 
             Vector norm = vector.normalize();
             Vector unitVector = new Vector(norm.getX() * spacingMM, norm.getY() * spacingMM);
@@ -506,7 +475,23 @@ public class AdaptivePurePursuitAction extends Action {
         } else {
             injectDone = true;
 
-            injectedPathPoints.add(path.getLastPoint());
+            // Get the final point from the original path
+            Position finalOriginalPoint = path.getLastPoint();
+
+            // Get the last point that was just injected
+            Position lastInjectedPoint = injectedPathPoints.get(injectedPathPoints.size() - 1);
+
+            // If the last injected point is NOT the same as the final original point,
+            // then we need to add the final original point.
+            // Use a small tolerance for floating point comparison
+            final double EPSILON = 1e-6;
+            if (Math.abs(lastInjectedPoint.getX() - finalOriginalPoint.getX()) > EPSILON ||
+                    Math.abs(lastInjectedPoint.getY() - finalOriginalPoint.getY()) > EPSILON) {
+
+                injectedPathPoints.add(finalOriginalPoint);
+            }
+
+//            injectedPathPoints.add(path.getLastPoint());
 
             Log.d("ppDebug", "injected last point: " + path.getLastPoint().getX() + ", " + path.getLastPoint().getY() + ", " + path.getLastPoint().getTheta());
 
