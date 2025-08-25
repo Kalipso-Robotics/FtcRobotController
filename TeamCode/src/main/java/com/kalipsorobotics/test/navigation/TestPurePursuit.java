@@ -1,36 +1,32 @@
+<<<<<<<< HEAD:TeamCode/src/main/java/com/kalipsorobotics/test/test/TestPurePursuit.java
 package com.kalipsorobotics.test.test;
+========
+package com.kalipsorobotics.test.navigation;
+>>>>>>>> ef9b84022529e5f9df1de3f675a70bf50a4cc998:TeamCode/src/main/java/com/kalipsorobotics/test/navigation/TestPurePursuit.java
 
-import android.util.Log;
-
-import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;
-import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
-import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@TeleOp
-public class OdometryEncoderCalcTest extends LinearOpMode {
+@Autonomous(name="pptest")
+public class TestPurePursuit extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
 
         DriveTrain.setInstanceNull();
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-
-        DriveAction driveAction = new DriveAction(driveTrain);
 
         IMUModule.setInstanceNull();
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
@@ -41,29 +37,36 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
 
-        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("OdometryTest", opModeUtilities);
-
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasket", opModeUtilities);
+
+        AdaptivePurePursuitAction test = new AdaptivePurePursuitAction(driveTrain, odometry);
+        test.addPoint(0, 0, 0);
+        //test.addPoint(50, 0, 0);
+        test.addPoint(610, 0, 0);
+        test.addPoint(610, -610, 0);
+        //test.addPoint(200, 200, 0);
+//        test.addPoint(500, 300, 90);
+//        test.addPoint(200, 300, 0);
+//        test.addPoint(0, 0, 0);
+
         waitForStart();
+
+        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         while (opModeIsActive()) {
 
-            //goBildaOdoModule.getGoBildaPinpointDriver().update();
             odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
-            driveAction.move(gamepad1);
 
+            test.updateCheckDone();
 
-
-            Log.d("Odometry_Position", SharedData.getOdometryPosition().toString());
-            Log.d("encoders", "count back: " + odometry.getBackEncoderMM() +
-                    "  count right: " + odometry.getRightEncoderMM() +
-                    "  count left: " + odometry.getLeftEncoderMM());
-            Log.d("Velocity", odometry.getCurrentPositionHistory().getCurrentVelocity().toString());
-            Log.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
+            if (test.getIsDone()) {
+                break;
+            }
         }
-        odometryFileWriter.close();
 
+        odometryFileWriter.close();
         OpModeUtilities.shutdownExecutorService(executorService);
+
     }
 }

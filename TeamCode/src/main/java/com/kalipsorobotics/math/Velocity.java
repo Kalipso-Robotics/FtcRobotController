@@ -1,5 +1,9 @@
 package com.kalipsorobotics.math;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
 public class Velocity {
     final private double x;
     final private double y;
@@ -19,6 +23,11 @@ public class Velocity {
 //          this.theta + velocity.y
 //        );
 //    }
+
+    public static Velocity pose2DtoVelocity(Pose2D pose2D) {
+        Velocity velocity = new Velocity(pose2D.getX(DistanceUnit.MM), pose2D.getY(DistanceUnit.MM), pose2D.getHeading(AngleUnit.RADIANS));
+        return velocity;
+    }
 
     public Velocity divide(double denominator) {
         return new Velocity(this.x / denominator, this.y / denominator, this.theta / denominator);

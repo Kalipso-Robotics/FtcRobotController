@@ -73,6 +73,16 @@ public class DriveTrain {
         driveTrain.fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         driveTrain.bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        driveTrain.bLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveTrain.bLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        driveTrain.fRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveTrain.fRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        driveTrain.bRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        driveTrain.bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
         driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
         driveTrain.odo = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 

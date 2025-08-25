@@ -7,5 +7,6 @@ public enum OdometrySensorCombinations {
     WHEEL_SPARK,
     WHEEl_SPARK_FUSE,
     WHEEL_IMU_SPARK_FUSE,
-    SPARK
+    SPARK,
+    GOBILDA
 }

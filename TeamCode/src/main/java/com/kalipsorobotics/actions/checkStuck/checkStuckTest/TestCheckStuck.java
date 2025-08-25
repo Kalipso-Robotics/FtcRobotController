@@ -1,10 +1,9 @@
-package com.kalipsorobotics.actions.checkStuck.checkStuck;
+package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
 import android.util.Log;
 
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
-import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.SparkfunOdometry;
@@ -32,12 +31,7 @@ public class TestCheckStuck extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             sparkfunOdometry.updatePosition();
-            Position currentPos = wheelOdometry.updateDefaultPosition();
-
-            // Compute deltas ONCE per loop
-            double xDelta = checkStuck.getXDelta(currentPos);
-            double yDelta = checkStuck.getYDelta(currentPos);
-            double thetaDelta = checkStuck.getThetaDelta(currentPos);
+            Position currentPos = wheelOdometry.update();
 
             if (checkStuck.isStuck(currentPos)) {
                 telemetry.addLine("robot is stuck");
@@ -45,7 +39,6 @@ public class TestCheckStuck extends LinearOpMode {
                 telemetry.addLine("robot is fine");
             }
 
-            Log.d("check stuks", "x delta: " + xDelta + " y delta: " + yDelta + " theta delta: " + thetaDelta);
             driveAction.move(gamepad1);
             telemetry.update();
         }
