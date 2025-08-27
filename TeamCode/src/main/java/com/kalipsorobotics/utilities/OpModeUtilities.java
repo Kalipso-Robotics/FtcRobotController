@@ -54,7 +54,7 @@ public class OpModeUtilities {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
                 while (!Thread.currentThread().isInterrupted()) {
                     Log.d("ExcecutorService", "running");
-                    wheelOdometry.updateDefaultPosition();
+                    wheelOdometry.update();
                     Log.d("ExcecutorService", "running after update");
 
                 }

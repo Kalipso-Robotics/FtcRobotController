@@ -1,4 +1,4 @@
-package com.kalipsorobotics.test.localization;
+package com.kalipsorobotics.test.test;
 
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;
@@ -9,7 +9,6 @@ import com.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.util.concurrent.ExecutorService;
@@ -28,6 +27,7 @@ public class TestPurePursuit extends LinearOpMode {
         IMUModule.setInstanceNull();
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
+        GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
         Odometry.setInstanceNull();
@@ -39,7 +39,8 @@ public class TestPurePursuit extends LinearOpMode {
         AdaptivePurePursuitAction test = new AdaptivePurePursuitAction(driveTrain, odometry);
         test.addPoint(0, 0, 0);
         //test.addPoint(50, 0, 0);
-        test.addPoint(-300, 300, 90);
+        test.addPoint(610, 0, 0);
+        test.addPoint(610, -610, 0);
         //test.addPoint(200, 200, 0);
 //        test.addPoint(500, 300, 90);
 //        test.addPoint(200, 300, 0);

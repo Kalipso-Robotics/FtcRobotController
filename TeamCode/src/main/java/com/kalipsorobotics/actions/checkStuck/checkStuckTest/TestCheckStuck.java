@@ -31,7 +31,7 @@ public class TestCheckStuck extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             sparkfunOdometry.updatePosition();
-            Position currentPos = wheelOdometry.updateDefaultPosition();
+            Position currentPos = wheelOdometry.update();
 
             if (checkStuck.isStuck(currentPos)) {
                 telemetry.addLine("robot is stuck");

@@ -14,7 +14,8 @@ public class OdometryFileWriter extends KFileWriter {
      * Creates a new OdometryFileWriter <p>
      * name is at beginning of file <p>
      * .csv is always appended to name <p>
-     * Write using writeOdometryPositionHistory() <p></p>
+     * Write using writeOdometryPositionHistory() <p>
+     * get OdometryPositionMap from SharedData <p>
      * Close using close() <p>
      */
     public OdometryFileWriter(String name, OpModeUtilities opModeUtilities) {
