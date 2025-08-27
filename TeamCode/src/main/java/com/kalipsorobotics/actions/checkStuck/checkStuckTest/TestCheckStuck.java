@@ -6,7 +6,6 @@ import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
-import com.kalipsorobotics.localization.SparkfunOdometry;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -27,10 +26,10 @@ public class TestCheckStuck extends LinearOpMode {
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry, 0, 0);
         DriveAction driveAction = new DriveAction(driveTrain);
         CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, purePursuitAction);
-        SparkfunOdometry sparkfunOdometry = new SparkfunOdometry(driveTrain, opModeUtilities, 0, 0, 0);
+        //SparkfunOdometry sparkfunOdometry = new SparkfunOdometry(driveTrain, opModeUtilities, 0, 0, 0);
         waitForStart();
         while (opModeIsActive()) {
-            sparkfunOdometry.updatePosition();
+            //sparkfunOdometry.updatePosition();
             Position currentPos = wheelOdometry.update();
 
             if (checkStuck.isStuck(currentPos)) {
