@@ -1,4 +1,4 @@
-package com.kalipsorobotics.test.localization;
+package com.kalipsorobotics.test.test;
 
 import android.util.Log;
 
