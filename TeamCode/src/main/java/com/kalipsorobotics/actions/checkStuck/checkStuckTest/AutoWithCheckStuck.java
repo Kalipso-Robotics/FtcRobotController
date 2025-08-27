@@ -22,8 +22,8 @@ import java.util.concurrent.Executors;
  * Simple autonomous using action-based structure like AutoBasketFunnelWithCheckStuck
  * Instead of KActionSet, uses individual PurePursuitAction instances with stuck detection
  */
-@Autonomous(name = "Simple Action-Based Auto with Check Stuck")
-public class SimpleActionBasedAutoWithCheckStuck extends LinearOpMode {
+@Autonomous(name = "Auto with Check Stuck")
+public class AutoWithCheckStuck extends LinearOpMode {
 
     private CheckStuckRobot checkStuckRobot;
     private boolean isCurrentlyStuck = false;
