@@ -68,7 +68,9 @@ public class PurePursuitFileWriter extends KFileWriter {
 
         super.writeLine(stringBuilder.toString());
     }
+
     public void close() {
         super.close();
     }
+
 }

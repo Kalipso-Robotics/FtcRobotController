@@ -1,4 +1,4 @@
-package com.kalipsorobotics.test.test;
+package com.kalipsorobotics.test.localization;
 
 import android.util.Log;
 
@@ -8,7 +8,6 @@ import com.kalipsorobotics.localization.OdometryFileWriter;
 import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
-import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -59,7 +58,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
             Log.d("encoders", "count back: " + odometry.getBackEncoderMM() +
                     "  count right: " + odometry.getRightEncoderMM() +
                     "  count left: " + odometry.getLeftEncoderMM());
-            Log.d("Velocity", odometry.getCurrentPositionHistory().getCurrentVelocity().toString());
+            Log.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
             Log.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
         }
         odometryFileWriter.close();

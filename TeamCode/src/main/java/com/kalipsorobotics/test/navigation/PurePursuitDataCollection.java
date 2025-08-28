@@ -2,15 +2,18 @@ package com.kalipsorobotics.test.navigation;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.navigation.PurePursuitFileWriter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -49,7 +52,7 @@ public class PurePursuitDataCollection extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             //purePursuitAction.updateCheckDone();
-            purePursuitFileWriter.writeOdometryPositionHistory(odometry.getCurrentPositionHistory(), driveTrain);
+            purePursuitFileWriter.writeOdometryPositionHistory(Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)), driveTrain);
             driveAction.move(gamepad1);
         }
         purePursuitFileWriter.close();

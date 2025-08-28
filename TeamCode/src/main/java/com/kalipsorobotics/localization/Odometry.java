@@ -274,7 +274,7 @@ public class Odometry {
         return  positionHistory.getCurrentPosition();
     }
 
-    public PositionHistory getCurrentPositionHistory() {
+    private PositionHistory getCurrentPositionHistory() {
         return wheelIMUPositionHistory;
     }
 
