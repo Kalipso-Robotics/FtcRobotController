@@ -48,24 +48,24 @@ public class PurePursuitFileWriter extends KFileWriter {
         super.writeLine(stringBuilder.toString());
     }
 
-    public void writeOdometryPositionHistory(PositionHistory positionHistory, DriveTrain driveTrain) {
+    public void writePurePursuitData(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryMap, DriveTrain driveTrain) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(System.currentTimeMillis());
         stringBuilder.append(",");
 
         stringBuilder.append(OdometrySensorCombinations.WHEEL_IMU);
         stringBuilder.append(",");
-        stringBuilder.append(positionHistory.toStringCSV());
+        stringBuilder.append(positionHistoryMap.get(OdometrySensorCombinations.WHEEL_IMU).toStringCSV());
         stringBuilder.append(",");
 
-        stringBuilder.append(driveTrain.getfLeft().getPower());
+        stringBuilder.append(driveTrain.getfLeftPower());
         stringBuilder.append(",");
-        stringBuilder.append(driveTrain.getfRight().getPower());
+        stringBuilder.append(driveTrain.getfRightPower());
         stringBuilder.append(",");
-        stringBuilder.append(driveTrain.getbLeft().getPower());
+        stringBuilder.append(driveTrain.getbLeftPower());
         stringBuilder.append(",");
-        stringBuilder.append(driveTrain.getbRight().getPower());
-
+        stringBuilder.append(driveTrain.getbRightPower());
+        Log.d("purepursaction_power", "power " + driveTrain.getfLeftPower() + " " + driveTrain.getfRightPower() + " " + driveTrain.getbLeftPower() + " " + driveTrain.getbRightPower());
         super.writeLine(stringBuilder.toString());
     }
 

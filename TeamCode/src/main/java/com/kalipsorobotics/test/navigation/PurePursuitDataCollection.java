@@ -52,7 +52,7 @@ public class PurePursuitDataCollection extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             //purePursuitAction.updateCheckDone();
-            purePursuitFileWriter.writeOdometryPositionHistory(Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)), driveTrain);
+            purePursuitFileWriter.writePurePursuitData(SharedData.getOdometryPositionMap(), driveTrain);
             driveAction.move(gamepad1);
         }
         purePursuitFileWriter.close();

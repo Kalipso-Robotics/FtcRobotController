@@ -27,6 +27,12 @@ public class DriveTrain {
     private DcMotor leftEncoder;
     private GoBildaPinpointDriver odo;
 
+
+    private double fLeftPower;
+    private double fRightPower;
+    private double bLeftPower;
+    private double bRightPower;
+
     private DriveTrain(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
@@ -91,13 +97,25 @@ public class DriveTrain {
         driveTrain.backEncoder = driveTrain.fRight;
     }
 
-    public void setFLeftPower(double power) { fLeft.setPower(power); }
+    public void setFLeftPower(double power) {
+        fLeft.setPower(power);
+        fLeftPower = power;
+    }
 
-    public void setFRightPower(double power) { fRight.setPower(power); }
+    public void setFRightPower(double power) {
+        fRight.setPower(power);
+        fRightPower = power;
+    }
 
-    public void setBLeftPower(double power) { bLeft.setPower(power); }
+    public void setBLeftPower(double power) {
+        bLeft.setPower(power);
+        bLeftPower = power;
+    }
 
-    public void setBRightPower(double power) { bRight.setPower(power); }
+    public void setBRightPower(double power) {
+        bRight.setPower(power);
+        bRightPower = power;
+    }
 
     public void setPower (double fLeftPower, double fRightPower, double bLeftPower, double bRightPower){
         setFLeftPower(fLeftPower);
@@ -239,11 +257,20 @@ public class DriveTrain {
         bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    public double getfLeftPower() {
+        return fLeft.getPower();
+    }
 
+    public double getfRightPower() {
+        return fRight.getPower();
+    }
 
-    /*public void setTestPower(double power) throws InterruptedException {
-        getTestMotorDeleteLater().setPower(power);
-        Thread.sleep(3000);
-        getTestMotorDeleteLater().setPower(0);
-    }*/
+    public double getbLeftPower() {
+        return bLeft.getPower();
+    }
+
+    public double getbRightPower() {
+        return bRight.getPower();
+    }
+
 }
