@@ -28,6 +28,13 @@ android {
     androidResources {
         noCompress 'tflite'
     }
+    sourceSets {
+        main {
+            assets {
+                srcDirs 'src/main/assets'
+            }
+        }
+    }
 
     packagingOptions {
         jniLibs {

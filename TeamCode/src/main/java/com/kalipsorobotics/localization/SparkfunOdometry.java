@@ -1,3 +1,4 @@
+/*
 package com.kalipsorobotics.localization;
 
 import android.os.SystemClock;
@@ -194,3 +195,4 @@ public class SparkfunOdometry {
         return SystemClock.elapsedRealtime() - prevTime;
     }
 }
+*/

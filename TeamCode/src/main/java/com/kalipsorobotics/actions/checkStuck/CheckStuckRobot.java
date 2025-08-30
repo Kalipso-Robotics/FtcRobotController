@@ -198,7 +198,6 @@ public class CheckStuckRobot {
             if (notMoving || spinning) {
                 isCurrentlyStuck = true;
                 Log.d("check stuck", "---ROBOT IS STUCK---");
-                unstuckRobot(driveTrain, currentPos);
                 return true;
             } else {
                 isCurrentlyStuck = false;
