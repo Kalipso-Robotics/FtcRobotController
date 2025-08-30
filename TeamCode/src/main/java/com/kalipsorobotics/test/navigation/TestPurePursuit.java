@@ -1,8 +1,5 @@
-<<<<<<<< HEAD:TeamCode/src/main/java/com/kalipsorobotics/test/test/TestPurePursuit.java
-package com.kalipsorobotics.test.test;
-========
 package com.kalipsorobotics.test.navigation;
->>>>>>>> ef9b84022529e5f9df1de3f675a70bf50a4cc998:TeamCode/src/main/java/com/kalipsorobotics/test/navigation/TestPurePursuit.java
+
 
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;
