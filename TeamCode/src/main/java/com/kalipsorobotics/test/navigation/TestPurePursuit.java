@@ -39,8 +39,8 @@ public class TestPurePursuit extends LinearOpMode {
         AdaptivePurePursuitAction test = new AdaptivePurePursuitAction(driveTrain, odometry);
         test.addPoint(0, 0, 0);
         //test.addPoint(50, 0, 0);
-        test.addPoint(610, 0, 0);
-        test.addPoint(610, -610, 0);
+        test.addPoint(-610, 0, 0);
+        test.addPoint(-610, -610, 90);
         //test.addPoint(200, 200, 0);
 //        test.addPoint(500, 300, 90);
 //        test.addPoint(200, 300, 0);

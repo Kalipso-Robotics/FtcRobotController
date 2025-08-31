@@ -51,6 +51,7 @@ public class AdaptivePurePursuitAction extends Action {
     private double currentVelocityMmPerS;
     private double filteredVelocityMmPerS = 0;
     private final double FILTER_SMOOTHING_FACTOR = 0.8; // A value between 0.0 and 1.0
+    private static final double VELOCITY_DEADBAND = 5.0;
 
     List<Position> injectedPathPoints = new ArrayList<>();
     private int pointInject = 0;
@@ -77,19 +78,19 @@ public class AdaptivePurePursuitAction extends Action {
 
 
     //TUNING NUMBERS: USE DATA ABOUT ROBOT
-    private final double PATH_MAX_VELOCITY = 1500; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
-    private final double K = 1100; //based on how slow you want the robot to go around turns
+    private final double PATH_MAX_VELOCITY = 2000; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private final double MAX_ACCELERATION = 6000; // mm/s^2, maximum acceleration of the robot
+    private final double MAX_ACCELERATION = 7500; // mm/s^2, maximum acceleration of the robot
     private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
     private final double MAX_ANGULAR_VELOCITY = 5.5; //rad/s, maximum turning velocity of the robot
 
     private double WHEELBASE_LENGTH = 300; //front wheel to back wheel
     private double TRACK_WIDTH = 400; //side to side
-    private double K_p = 0.00001; // 0.000015
+    private double K_p = 0.00002; // 0.000015
     private double K_a = 0.0; // 0.001
     private double K_v = 0.0004; // 0.0004 0.00225
+    private final double K = 1100; //based on how slow you want the robot to go around turns
 
     /*
     * ↑ Raising K_p
@@ -287,7 +288,7 @@ public class AdaptivePurePursuitAction extends Action {
         driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.25);
 
         Log.d("ppDebug", "velocity target: " + velocity);
-        Log.d("ppDebug", "velocity current: " + currentVelocityMmPerS);
+        Log.d("ppDebug", "velocity current: " + filteredVelocityMmPerS);
 
         prevFollow = Optional.of(target);
     }
@@ -359,8 +360,10 @@ public class AdaptivePurePursuitAction extends Action {
             // now velocity in mm/s
             currentVelocityMmPerS = distanceMm / dtSeconds;
 
-            filteredVelocityMmPerS = (FILTER_SMOOTHING_FACTOR * filteredVelocityMmPerS) +
-                    ((1 - FILTER_SMOOTHING_FACTOR) * currentVelocityMmPerS);
+            if (Math.abs(currentVelocityMmPerS) > VELOCITY_DEADBAND) {
+                filteredVelocityMmPerS = (FILTER_SMOOTHING_FACTOR * filteredVelocityMmPerS) +
+                        ((1 - FILTER_SMOOTHING_FACTOR) * currentVelocityMmPerS);
+            }
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
@@ -703,6 +706,7 @@ public class AdaptivePurePursuitAction extends Action {
         // calculate max velocity (v_f) at the current point to be able to decelerate to v_next over the distance d
         double v_f = Math.sqrt(MathFunctions.square(v_next) + (2 * MAX_ACCELERATION * d));
 
+        Log.d("ppDebug", "velocity of " + positionIndex + " set to " + (Math.min(v_f, calculateVelocity(path, positionIndex)) == v_f ? "v_f" : "calculated vel"));
         //robot velocity at the current point is the minimum of max velocity allowed by the path's curvature, and max velocity allowed by deceleration to the next point.
         return Math.min(v_f, calculateVelocity(path, positionIndex));
     }
