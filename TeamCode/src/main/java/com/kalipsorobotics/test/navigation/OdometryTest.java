@@ -12,13 +12,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Odometry Test For New Robot")
 public class OdometryTest extends LinearOpMode {
-    OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
-    DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-    IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
-    GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
-    Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
     @Override
     public void runOpMode() throws InterruptedException {
+        OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
+        DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
+        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+        GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        
         waitForStart();
         while(opModeIsActive()) {
             Log.d("OdometryTest","x: " + odometry.update().getX() + "y: " + odometry.update().getY() + "theta: " + odometry.getIMUHeading());

@@ -21,7 +21,7 @@ public class DriveTrain {
     private DcMotor fRight = null;
     private DcMotor bLeft = null;
     private DcMotor bRight = null;
-    private SparkFunOTOS otos;
+    //private SparkFunOTOS otos;
     private DcMotor backEncoder;
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
@@ -32,7 +32,7 @@ public class DriveTrain {
 
         resetHardwareMap(opModeUtilities.getHardwareMap(), this);
 
-        sparkResetData(true, Math.toRadians(180));
+        //sparkResetData(true, Math.toRadians(180));
 
         resetWheelOdom();
 
@@ -83,7 +83,7 @@ public class DriveTrain {
         driveTrain.bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-        driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
+        //driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
         driveTrain.odo = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 
         driveTrain.rightEncoder = driveTrain.bRight;
@@ -145,10 +145,10 @@ public class DriveTrain {
         return bRight;
     }
 
-    public SparkFunOTOS getOtos() {
-        return otos;
-    }
-
+    //public SparkFunOTOS getOtos() {
+    //    return;
+   // }
+/*
     private void sparkResetData(Boolean reCalibrate, double heading) {
         otos.resetTracking();
         if (reCalibrate) { otos.calibrateImu(); }
@@ -198,6 +198,8 @@ public class DriveTrain {
         //22.1072219488189  21.374319482037404 0.0022
         //24 24
     }
+    */
+ /*
 
     /*public DcMotor getTestMotorDeleteLater() {
         return testMotorDeleteLater;
