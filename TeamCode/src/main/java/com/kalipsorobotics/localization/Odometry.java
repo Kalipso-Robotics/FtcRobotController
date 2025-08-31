@@ -130,7 +130,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        return ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset;
+        return (ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset);
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
     public double getLeftEncoderMM() {
