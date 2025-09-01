@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
+import android.util.Log;
+
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;
@@ -20,15 +22,22 @@ public class TestCheckStuck extends LinearOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule goBildaOdoModule =  GoBildaOdoModule.getInstance(opModeUtilities);
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
-        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, 0, 0);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
+        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, odometry, 0, 0);
         DriveAction driveAction = new DriveAction(driveTrain);
+<<<<<<< HEAD
+        CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, odometry, opModeUtilities, purePursuitAction);
+        waitForStart();
+        while (opModeIsActive()) {
+            Position currentPos = odometry.update();
+=======
         CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, purePursuitAction);
         //SparkfunOdometry sparkfunOdometry = new SparkfunOdometry(driveTrain, opModeUtilities, 0, 0, 0);
         waitForStart();
         while (opModeIsActive()) {
             //sparkfunOdometry.updatePosition();
             Position currentPos = wheelOdometry.update();
+>>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
 
             if (checkStuck.isStuck(currentPos)) {
                 telemetry.addLine("robot is stuck");

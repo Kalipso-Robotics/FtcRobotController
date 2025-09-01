@@ -1,4 +1,8 @@
 package com.kalipsorobotics.test.navigation;
+<<<<<<< HEAD
+
+=======
+>>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
 
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;

@@ -10,6 +10,7 @@ import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -48,16 +49,16 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         Position pos1 = SharedData.getOdometryPosition();
         Position pos2 = SharedData.getOdometryPosition();
         double power = 0;
-        boolean calibrationComplete = true;
+        boolean calibrationComplete = false;
         waitForStart();
         while (opModeIsActive()) {
 
-            /*while (SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU).getCurrentVelocity().getX() <  (50.0/1000.0) && !calibrationComplete) {
+            while (SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU).getCurrentVelocity().getX() <  (50.0/1000.0) && !calibrationComplete) {
                 driveTrain.setPower(power);
                 power += 0.001;
-            }*/
+            }
             calibrationComplete = true;
-            Log.d("minimumPower", "minimum power " + power);
+            KLog.d("minimumPower", "minimum power " + power);
             driveTrain.setPower(power);
 
 
@@ -66,22 +67,21 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
             driveAction.move(gamepad1);
 
 
-            Log.d("Left_Encoder", "left_encoder " + driveTrain.getLeftEncoder().getCurrentPosition());
-            if (driveTrain.getfLeftPower() == 0 || true) {
-                Log.d("Odometry_Position_While_Stopped", SharedData.getOdometryPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
+            KLog.d("Left_Encoder", "left_encoder " + driveTrain.getLeftEncoder().getCurrentPosition());
+            if (driveTrain.getfLeftPower() == 0) {
+                KLog.d("Odometry_Position_While_Stopped", SharedData.getOdometryPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
                 pos1 = SharedData.getOdometryPosition();
             } else {
-                Log.d("Odometry_Position_While_Moving", SharedData.getOdometryPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
+                KLog.d("Odometry_Position_While_Moving", SharedData.getOdometryPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
                 pos2 = SharedData.getOdometryPosition();
             }
-            Log.d("Calibration_Data", "nurture distance " + pos1.distanceTo(pos2) + " nurture angle " + Math.abs(pos1.getTheta() - pos2.getTheta()));
-            Log.d("encoders", "count back: " + odometry.getBackEncoderMM() +
+            KLog.d("Calibration_Data", "nurture distance " + pos1.distanceTo(pos2) + " nurture angle " + Math.abs(pos1.getTheta() - pos2.getTheta()));
+            KLog.d("encoders", "count back: " + odometry.getBackEncoderMM() +
                     "  count right: " + odometry.getRightEncoderMM() +
                     "  count left: " + odometry.getLeftEncoderMM());
-            Log.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
-            Log.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
+            KLog.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
+            KLog.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
         }
-        OpModeUtilities.shutdownExecutorService(executorService);
         odometryFileWriter.close();
 
     }
