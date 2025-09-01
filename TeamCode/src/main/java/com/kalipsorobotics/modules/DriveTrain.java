@@ -27,6 +27,12 @@ public class DriveTrain {
     private DcMotor leftEncoder;
     private GoBildaPinpointDriver odo;
 
+
+    private double fLeftPower;
+    private double fRightPower;
+    private double bLeftPower;
+    private double bRightPower;
+
     private DriveTrain(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
@@ -83,7 +89,11 @@ public class DriveTrain {
         driveTrain.bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
+<<<<<<< HEAD
         //driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
+=======
+//        driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
+>>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
         driveTrain.odo = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 
         driveTrain.rightEncoder = driveTrain.bRight;
@@ -91,13 +101,25 @@ public class DriveTrain {
         driveTrain.backEncoder = driveTrain.fRight;
     }
 
-    public void setFLeftPower(double power) { fLeft.setPower(power); }
+    public void setFLeftPower(double power) {
+        fLeft.setPower(power);
+        fLeftPower = power;
+    }
 
-    public void setFRightPower(double power) { fRight.setPower(power); }
+    public void setFRightPower(double power) {
+        fRight.setPower(power);
+        fRightPower = power;
+    }
 
-    public void setBLeftPower(double power) { bLeft.setPower(power); }
+    public void setBLeftPower(double power) {
+        bLeft.setPower(power);
+        bLeftPower = power;
+    }
 
-    public void setBRightPower(double power) { bRight.setPower(power); }
+    public void setBRightPower(double power) {
+        bRight.setPower(power);
+        bRightPower = power;
+    }
 
     public void setPower (double fLeftPower, double fRightPower, double bLeftPower, double bRightPower){
         setFLeftPower(fLeftPower);
@@ -145,9 +167,18 @@ public class DriveTrain {
         return bRight;
     }
 
+<<<<<<< HEAD
     //public SparkFunOTOS getOtos() {
     //    return;
    // }
+=======
+/*
+    public SparkFunOTOS getOtos() {
+        return otos;
+    }
+*/
+
+>>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
 /*
     private void sparkResetData(Boolean reCalibrate, double heading) {
         otos.resetTracking();
@@ -198,12 +229,13 @@ public class DriveTrain {
         //22.1072219488189  21.374319482037404 0.0022
         //24 24
     }
+<<<<<<< HEAD
     */
  /*
+=======
+*/
+>>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
 
-    /*public DcMotor getTestMotorDeleteLater() {
-        return testMotorDeleteLater;
-    }*/
 
     public OpModeUtilities getOpModeUtilities() {
         return opModeUtilities;
@@ -240,11 +272,20 @@ public class DriveTrain {
         bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    public double getfLeftPower() {
+        return fLeft.getPower();
+    }
 
+    public double getfRightPower() {
+        return fRight.getPower();
+    }
 
-    /*public void setTestPower(double power) throws InterruptedException {
-        getTestMotorDeleteLater().setPower(power);
-        Thread.sleep(3000);
-        getTestMotorDeleteLater().setPower(0);
-    }*/
+    public double getbLeftPower() {
+        return bLeft.getPower();
+    }
+
+    public double getbRightPower() {
+        return bRight.getPower();
+    }
+
 }

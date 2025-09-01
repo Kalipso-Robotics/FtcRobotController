@@ -1,71 +1,62 @@
 package com.kalipsorobotics.test.navigation;
-<<<<<<< HEAD
 
-=======
->>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
-
+import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.localization.OdometryFileWriter;
+import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
-import com.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import com.kalipsorobotics.navigation.PurePursuitAction;
+import com.kalipsorobotics.navigation.PurePursuitFileWriter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Autonomous(name="pptest")
-public class TestPurePursuit extends LinearOpMode {
+@TeleOp
+public class PurePursuitDataCollection extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
 
         DriveTrain.setInstanceNull();
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-
+        DriveAction driveAction = new DriveAction(driveTrain);
         IMUModule.setInstanceNull();
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
-
         GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
-
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, odometry);
+        purePursuitAction.addPoint(0, 0, 0);
+        purePursuitAction.addPoint(600, 600, 0);
+        purePursuitAction.addPoint(1200, -600, 90);
+        purePursuitAction.addPoint(1800, -1200, 180);
+        purePursuitAction.addPoint(1200, 1200, 0);
+        purePursuitAction.addPoint(-600, 0, 90);
+        purePursuitAction.addPoint(1800, -600, 180);
+        purePursuitAction.addPoint(0, 0, 0);
+
+        PurePursuitFileWriter purePursuitFileWriter = new PurePursuitFileWriter("datafordabigduong", opModeUtilities);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasket", opModeUtilities);
-
-        AdaptivePurePursuitAction test = new AdaptivePurePursuitAction(driveTrain, odometry);
-        test.addPoint(0, 0, 0);
-        //test.addPoint(50, 0, 0);
-        test.addPoint(610, 0, 0);
-        test.addPoint(610, -610, 0);
-        //test.addPoint(200, 200, 0);
-//        test.addPoint(500, 300, 90);
-//        test.addPoint(200, 300, 0);
-//        test.addPoint(0, 0, 0);
-
-        waitForStart();
-
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
+        waitForStart();
         while (opModeIsActive()) {
-
-            odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
-
-            test.updateCheckDone();
-
-            if (test.getIsDone()) {
-                break;
-            }
+            //purePursuitAction.updateCheckDone();
+            purePursuitFileWriter.writePurePursuitData(SharedData.getOdometryPositionMap(), driveTrain);
+            driveAction.move(gamepad1);
         }
+        purePursuitFileWriter.close();
 
-        odometryFileWriter.close();
         OpModeUtilities.shutdownExecutorService(executorService);
 
     }
