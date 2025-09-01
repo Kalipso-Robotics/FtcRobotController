@@ -18,10 +18,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Simple autonomous using action-based structure like AutoBasketFunnelWithCheckStuck
- * Instead of KActionSet, uses individual PurePursuitAction instances with stuck detection
- */
 @Autonomous(name = "Check Stuck Auto")
 public class AutoWithCheckStuck extends LinearOpMode {
 
@@ -48,20 +44,18 @@ public class AutoWithCheckStuck extends LinearOpMode {
         Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
         SharedData.resetOdometryPosition();
 
-        // Initialize CheckStuckRobot
         checkStuckRobot = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, null);
 
-        // Create movement actions - similar to AutoBasketFunnel structure
         PurePursuitAction moveForward1 = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveForward1.addPoint(0, 500, 0); // Move forward 500mm
+        moveForward1.addPoint(0, 500, 0); //forward
         moveForward1.setMaxTimeOutMS(8000);
 
         PurePursuitAction moveForward2 = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveForward2.addPoint(0, 1000, 0); // Move forward to 1000mm total
+        moveForward2.addPoint(0, 1000, 0); //forward
         moveForward2.setMaxTimeOutMS(8000);
 
         PurePursuitAction moveBack = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveBack.addPoint(0, 0, 0); // Move back to start
+        moveBack.addPoint(0, 0, 0); //back
         moveBack.setMaxTimeOutMS(8000);
 
         telemetry.addLine("init finished");
@@ -74,15 +68,13 @@ public class AutoWithCheckStuck extends LinearOpMode {
 
         OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
 
-        // Action execution state tracking
+        //action state tracking
         boolean action1Done = false;
         boolean action2Done = false;
         boolean action3Done = false;
 
         while (opModeIsActive()) {
             odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
-
-            // Execute actions in sequence - similar to KActionSet behavior
             if (!isCurrentlyStuck && !isExecutingUnstuckAction) {
                 if (!action1Done) {
                     moveForward1.updateCheckDone();
@@ -107,12 +99,12 @@ public class AutoWithCheckStuck extends LinearOpMode {
                         Log.d("SimpleActionAuto", "Action 3 completed - returned to start");
                         telemetry.addLine("✅ All movements completed!");
                         telemetry.update();
-                        break; // All actions complete
+                        break; //actions complete
                     }
                 }
             }
 
-            // Check for stuck condition - identical to original structure
+            // Checking for stuck
             Position currentPosition = SharedData.getOdometryPosition();
             if (currentPosition != null) {
                 boolean isStuck = checkStuckRobot.isStuck(currentPosition);
@@ -123,7 +115,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                     telemetry.addLine("⚠️ ROBOT STUCK - Recovery in progress...");
                     telemetry.update();
                     
-                    // Create unstuck action if not already created
+                    // Create unstuck action if not existing
                     if (unstuckAction == null) {
                         unstuckAction = new PurePursuitAction(driveTrain, wheelOdometry);
                         Position safePosition = checkStuckRobot.findBestSafePosition(currentPosition);
@@ -132,7 +124,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                             Log.d("unstuck", "Moving to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
                             unstuckAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
                         } else {
-                            // Fallback: move backward 100mm
+                            // recovery, move backward 100mm
                             double backupX = currentPosition.getX() - 100 * Math.cos(currentPosition.getTheta());
                             double backupY = currentPosition.getY() - 100 * Math.sin(currentPosition.getTheta());
                             unstuckAction.addPoint(backupX, backupY, currentPosition.getTheta());
