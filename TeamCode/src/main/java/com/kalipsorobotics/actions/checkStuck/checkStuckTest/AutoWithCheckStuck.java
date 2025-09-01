@@ -47,15 +47,15 @@ public class AutoWithCheckStuck extends LinearOpMode {
         checkStuckRobot = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, null);
 
         PurePursuitAction moveForward1 = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveForward1.addPoint(0, 500, 0); //forward
+        moveForward1.addPoint(-1000, 0, 0); //right
         moveForward1.setMaxTimeOutMS(8000);
 
         PurePursuitAction moveForward2 = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveForward2.addPoint(0, 1000, 0); //forward
+        moveForward2.addPoint(-9000, 0, 0); //forward
         moveForward2.setMaxTimeOutMS(8000);
 
         PurePursuitAction moveBack = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveBack.addPoint(0, 0, 0); //back
+        moveBack.addPoint(13000, 0, 0); //back
         moveBack.setMaxTimeOutMS(8000);
 
         telemetry.addLine("init finished");
