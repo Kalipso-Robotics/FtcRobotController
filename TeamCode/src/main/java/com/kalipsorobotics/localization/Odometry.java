@@ -4,11 +4,9 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.kalipsorobotics.math.PositionHistory;
-import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import com.kalipsorobotics.math.Position;
@@ -54,7 +52,7 @@ public class Odometry {
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule,
                      Position startPosMMRAD) {
         this.opModeUtilities = opModeUtilities;
-        resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, this);
+        resetHardware(driveTrain, imuModule, goBildaOdoModule, this);
         goBildaOdoModule.getGoBildaPinpointDriver().update();
         this.rightOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
         this.leftOffset = this.getLeftEncoderMM();
@@ -81,7 +79,7 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, 0, 0, 0);
         } else {
-            resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, single_instance);
+            resetHardware(driveTrain, imuModule, goBildaOdoModule, single_instance);
         }
         return single_instance;
     }
@@ -91,7 +89,7 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, startPosMMRAD);
         } else {
-            resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, single_instance);
+            resetHardware(driveTrain, imuModule, goBildaOdoModule, single_instance);
         }
         return single_instance;
     }
@@ -101,12 +99,13 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, startX, startY, Math.toRadians(startThetaDeg));
         } else {
-            resetHardware(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, single_instance);
+            resetHardware(driveTrain, imuModule, goBildaOdoModule, single_instance);
         }
         return single_instance;
     }
 
-    private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, Odometry odometry) {
+    private static void resetHardware(DriveTrain driveTrain, IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, Odometry odometry) {
+        SharedData.resetOdometryPosition();
         odometry.imuModule = imuModule;
         odometry.goBildaOdoModule = goBildaOdoModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();

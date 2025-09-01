@@ -46,15 +46,15 @@ public class OpModeUtilities {
      * Executor Service Parameter -> ExecutorService executorService = Executors.newSingleThreadExecutor(); <p>
      * Run shutdown after opMode ends
      * @param executorService
-     * @param wheelOdometry
+     * @param odometry
      */
-    public static void runOdometryExecutorService(ExecutorService executorService, Odometry wheelOdometry) {
+    public static void runOdometryExecutorService(ExecutorService executorService, Odometry odometry) {
         try {
             executorService.submit(() -> {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
                 while (!Thread.currentThread().isInterrupted()) {
                     Log.d("ExcecutorService", "running");
-                    wheelOdometry.update();
+                    odometry.update();
                     Log.d("ExcecutorService", "running after update");
 
                 }

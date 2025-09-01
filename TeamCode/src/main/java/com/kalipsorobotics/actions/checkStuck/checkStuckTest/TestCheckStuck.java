@@ -1,7 +1,5 @@
 package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
-import android.util.Log;
-
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;
@@ -23,7 +21,7 @@ public class TestCheckStuck extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule =  GoBildaOdoModule.getInstance(opModeUtilities);
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
         Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
-        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry, 0, 0);
+        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, 0, 0);
         DriveAction driveAction = new DriveAction(driveTrain);
         CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, purePursuitAction);
         //SparkfunOdometry sparkfunOdometry = new SparkfunOdometry(driveTrain, opModeUtilities, 0, 0, 0);
