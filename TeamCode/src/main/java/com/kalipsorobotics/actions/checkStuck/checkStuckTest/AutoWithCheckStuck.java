@@ -18,7 +18,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Autonomous(name = "Check Stuck Auto")
+/**
+ * Simple autonomous using action-based structure like AutoBasketFunnelWithCheckStuck
+ * Instead of KActionSet, uses individual PurePursuitAction instances with stuck detection
+ */
+@Autonomous(name = "Auto with Check Stuck")
 public class AutoWithCheckStuck extends LinearOpMode {
 
     private CheckStuckRobot checkStuckRobot;
@@ -44,18 +48,20 @@ public class AutoWithCheckStuck extends LinearOpMode {
         Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
         SharedData.resetOdometryPosition();
 
+        // Initialize CheckStuckRobot
         checkStuckRobot = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, null);
 
-        PurePursuitAction moveForward1 = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveForward1.addPoint(-1000, 0, 0); //right
+        // Create movement actions - similar to AutoBasketFunnel structure
+        PurePursuitAction moveForward1 = new PurePursuitAction(driveTrain);
+        moveForward1.addPoint(0, 500, 0); // Move forward 500mm
         moveForward1.setMaxTimeOutMS(8000);
 
-        PurePursuitAction moveForward2 = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveForward2.addPoint(-9000, 0, 0); //forward
+        PurePursuitAction moveForward2 = new PurePursuitAction(driveTrain);
+        moveForward2.addPoint(0, 1000, 0); // Move forward to 1000mm total
         moveForward2.setMaxTimeOutMS(8000);
 
-        PurePursuitAction moveBack = new PurePursuitAction(driveTrain, wheelOdometry);
-        moveBack.addPoint(13000, 0, 0); //back
+        PurePursuitAction moveBack = new PurePursuitAction(driveTrain);
+        moveBack.addPoint(0, 0, 0); // Move back to start
         moveBack.setMaxTimeOutMS(8000);
 
         telemetry.addLine("init finished");
@@ -68,13 +74,15 @@ public class AutoWithCheckStuck extends LinearOpMode {
 
         OpModeUtilities.runOdometryExecutorService(executorService, wheelOdometry);
 
-        //action state tracking
+        // Action execution state tracking
         boolean action1Done = false;
         boolean action2Done = false;
         boolean action3Done = false;
 
         while (opModeIsActive()) {
             odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap());
+
+            // Execute actions in sequence - similar to KActionSet behavior
             if (!isCurrentlyStuck && !isExecutingUnstuckAction) {
                 if (!action1Done) {
                     moveForward1.updateCheckDone();
@@ -99,32 +107,32 @@ public class AutoWithCheckStuck extends LinearOpMode {
                         Log.d("SimpleActionAuto", "Action 3 completed - returned to start");
                         telemetry.addLine("✅ All movements completed!");
                         telemetry.update();
-                        break; //actions complete
+                        break; // All actions complete
                     }
                 }
             }
 
-            // Checking for stuck
+            // Check for stuck condition - identical to original structure
             Position currentPosition = SharedData.getOdometryPosition();
             if (currentPosition != null) {
                 boolean isStuck = checkStuckRobot.isStuck(currentPosition);
 
                 if (isStuck && !isCurrentlyStuck) {
                     isCurrentlyStuck = true;
-                    Log.d("SimpleActionBasedAutoWithCheckStuck", "⚠⚠Robot stuck detected - executing recovery");
+                    Log.d("SimpleActionBasedAutoWithCheckStuck", "Robot stuck detected - executing recovery");
                     telemetry.addLine("⚠️ ROBOT STUCK - Recovery in progress...");
                     telemetry.update();
                     
-                    // Create unstuck action if not existing
+                    // Create unstuck action if not already created
                     if (unstuckAction == null) {
-                        unstuckAction = new PurePursuitAction(driveTrain, wheelOdometry);
+                        unstuckAction = new PurePursuitAction(driveTrain);
                         Position safePosition = checkStuckRobot.findBestSafePosition(currentPosition);
                         
                         if (safePosition != null) {
                             Log.d("unstuck", "Moving to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
                             unstuckAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
                         } else {
-                            // recovery, move backward 100mm
+                            // Fallback: move backward 100mm
                             double backupX = currentPosition.getX() - 100 * Math.cos(currentPosition.getTheta());
                             double backupY = currentPosition.getY() - 100 * Math.sin(currentPosition.getTheta());
                             unstuckAction.addPoint(backupX, backupY, currentPosition.getTheta());

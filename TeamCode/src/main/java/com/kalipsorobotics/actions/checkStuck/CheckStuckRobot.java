@@ -223,7 +223,7 @@ public class CheckStuckRobot {
             return;
         }
 
-        purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry);
+        purePursuitAction = new PurePursuitAction(driveTrain);
         purePursuitAction.setMaxTimeOutMS(2000); // Give more time for reverse navigation
 
         Position safePosition = findBestSafePosition(currentPos);

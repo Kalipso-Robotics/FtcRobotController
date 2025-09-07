@@ -35,8 +35,6 @@ public class PurePursuitAction extends Action {
 
 
     DriveTrain driveTrain;
-    Odometry odometry;
-    //SparkfunOdometry sparkfunOdometry;
 
     private final PidNav pidX;
     private final PidNav pidY;
@@ -80,11 +78,8 @@ public class PurePursuitAction extends Action {
      * If move more than normal range --> add more waypoints
      */
 
-    public PurePursuitAction(DriveTrain driveTrain/*, SparkfunOdometry sparkfunOdometry*/,
-                             Odometry wheelOdometry) {
+    public PurePursuitAction(DriveTrain driveTrain) {
         this.driveTrain = driveTrain;
-        //this.sparkfunOdometry = sparkfunOdometry;
-        this.odometry = wheelOdometry;
         this.pidX = new PidNav(P_XY, 0, 0);
         this.pidY = new PidNav(P_XY, 0, 0);
         this.pidAngle = new PidNav(P_ANGLE, 0, 0);
@@ -100,10 +95,8 @@ public class PurePursuitAction extends Action {
         this.dependentActions.add(new DoneStateAction());
     }
 
-    public PurePursuitAction(DriveTrain driveTrain/*, SparkfunOdometry sparkfunOdometry*/, Odometry wheelOdometry, double pidXY, double pidAngle) {
+    public PurePursuitAction(DriveTrain driveTrain, double pidXY, double pidAngle) {
         this.driveTrain = driveTrain;
-        //this.sparkfunOdometry = sparkfunOdometry;
-        this.odometry = wheelOdometry;
         this.pidX = new PidNav(pidXY, 0, 0);
         this.pidY = new PidNav(pidXY, 0, 0);
         this.pidAngle = new PidNav(pidAngle, 0, 0);
@@ -120,8 +113,9 @@ public class PurePursuitAction extends Action {
     public void addPoint(double x, double y, double headingDeg) {
         double headingRad = Math.toRadians(headingDeg);
         //double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
+        double adaptivePAngel = calcAdaptivePAngle(headingRad);
         double[] adaptiveP = {P_XY, P_ANGLE};
-        pathPoints.add(new Position(x, y, headingRad, adaptiveP[0], adaptiveP[1]));
+        pathPoints.add(new Position(x, y, headingRad, adaptiveP[0], adaptivePAngel));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
 
@@ -129,8 +123,14 @@ public class PurePursuitAction extends Action {
         pathPoints.add(new Position(x, y, Math.toRadians(headingDeg), pXY, pAngle));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
-
-/*
+    private double calcAdaptivePAngle(double theta) {
+        Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
+        double headingDelta = Math.abs(pos.getTheta() - theta);
+        if (headingDelta == 0) {
+            return 0;
+        }
+        return 1.0 / headingDelta;
+    }
     public double[] calcAdaptiveP(double x, double y, double theta) {
         final double SLOW = 1.0/600;
         final double FAST = 1.0/120;
@@ -162,7 +162,6 @@ public class PurePursuitAction extends Action {
         //Log.d("purepursaction_adaptiveP", String.format("heading delta %f, P increased from %f to %f", headingDelta, P_ANGLE, adaptiveTheta));
         return new double[]{adaptiveXY, adaptiveTheta};
     }
-*/
 
     public void setFinalSearchRadius(double searchRadiusMM){
         this.lastSearchRadius = searchRadiusMM;
@@ -328,9 +327,5 @@ public class PurePursuitAction extends Action {
 
     public void setMaxTimeOutMS(double maxTimeOutMS) {
         this.maxTimeOutMS = maxTimeOutMS;
-    }
-
-    public Odometry getOdometry() {
-        return odometry;
     }
 }
