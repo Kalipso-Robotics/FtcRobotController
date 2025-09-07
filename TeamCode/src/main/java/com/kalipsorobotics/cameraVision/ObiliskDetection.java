@@ -50,17 +50,15 @@ public class ObiliskDetection {
     
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
-    private String webcamName;
     
-    public ObiliskDetection(String webcamName) {
-        this.webcamName = webcamName;
+    public ObiliskDetection() {
     }
     
     public void init(HardwareMap hardwareMap) {
         aprilTagProcessor = AprilTagProcessor.easyCreateWithDefaults();
         
         visionPortal = VisionPortal.easyCreateWithDefaults(
-            hardwareMap.get(WebcamName.class, webcamName), 
+            hardwareMap.get(WebcamName.class, "camera1"), 
             aprilTagProcessor
         );
     }
