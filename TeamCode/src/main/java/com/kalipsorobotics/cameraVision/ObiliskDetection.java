@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class ObiliskDetection {
     
-    private static final int[] OBELISK_APRILTAG_IDS = {11, 12, 13, 14, 15, 16};
+    private static final int[] OBELISK_APRILTAG_IDS = {21, 22, 23};
     
     public enum MotifColor {
         PURPLE, GREEN, UNKNOWN
@@ -119,6 +119,25 @@ public class ObiliskDetection {
         return analyzeMotifPattern(obeliskDetection);
     }
     
+    public MotifPattern getExpectedMotifPattern(int aprilTagId) {
+        switch (aprilTagId) {
+            case 21: return new MotifPattern(MotifColor.GREEN, MotifColor.PURPLE, MotifColor.PURPLE);
+            case 22: return new MotifPattern(MotifColor.PURPLE, MotifColor.GREEN, MotifColor.PURPLE);
+            case 23: return new MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
+            default: return new MotifPattern(MotifColor.UNKNOWN, MotifColor.UNKNOWN, MotifColor.UNKNOWN);
+        }
+    }
+    
+    public int getObeliskId() {
+        AprilTagDetection closest = getClosestObeliskDetection();
+        return closest != null ? closest.id : -1;
+    }
+    
+    public MotifPattern getExpectedMotifPattern() {
+        int id = getObeliskId();
+        return getExpectedMotifPattern(id);
+    }
+    
     private MotifPattern analyzeMotifPattern(AprilTagDetection detection) {
         Mat frame = visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING ? 
             null : getCurrentFrame();
@@ -200,8 +219,21 @@ public class ObiliskDetection {
         List<AprilTagDetection> obeliskDetections = getObeliskDetections();
         telemetry.addData("Obelisk Tags Detected", obeliskDetections.size());
         
-        MotifPattern motifPattern = getObeliskMotifPattern();
-        telemetry.addData("Motif Pattern", motifPattern.toString());
+        if (!obeliskDetections.isEmpty()) {
+            int obeliskId = getObeliskId();
+            telemetry.addData("Obelisk ID", obeliskId);
+            
+            MotifPattern detectedPattern = getObeliskMotifPattern();
+            MotifPattern expectedPattern = getExpectedMotifPattern(obeliskId);
+            
+            telemetry.addData("Detected Pattern", detectedPattern.toString());
+            telemetry.addData("Expected Pattern", expectedPattern.toString());
+            
+            String patternName = getPatternName(obeliskId);
+            if (!patternName.isEmpty()) {
+                telemetry.addData("Pattern Name", patternName);
+            }
+        }
         
         for (AprilTagDetection detection : obeliskDetections) {
             if (detection.metadata != null) {
@@ -216,6 +248,15 @@ public class ObiliskDetection {
                 telemetry.addLine(String.format("\n==== Unknown Obelisk Tag (ID %d)", detection.id));
                 telemetry.addLine(String.format("Distance: %.1f inches", detection.ftcPose.range));
             }
+        }
+    }
+    
+    private String getPatternName(int aprilTagId) {
+        switch (aprilTagId) {
+            case 21: return "Green-Purple-Purple 🟩🟪🟪";
+            case 22: return "Purple-Green-Purple 🟪🟩🟪";
+            case 23: return "Purple-Purple-Green 🟪🟪🟩";
+            default: return "";
         }
     }
     
