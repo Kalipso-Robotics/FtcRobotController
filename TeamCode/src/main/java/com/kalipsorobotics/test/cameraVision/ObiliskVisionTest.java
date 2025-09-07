@@ -37,11 +37,11 @@ public class ObiliskVisionTest extends LinearOpMode {
                     telemetry.addData("Pattern", pattern);
                     
                     if (obeliskDetection.isMotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN)) {
-                        Log.d("obeliskDetection", "Purple-Purple-Green");
+                        Log.d("obeliskDetection", "Purple-Purple-Green🟪🟪🟩");
                     } else if (obeliskDetection.isMotifPattern(MotifColor.PURPLE, MotifColor.GREEN, MotifColor.PURPLE)) {
-                        Log.d("obeliskDetection", "Purple-Green-Purple");
+                        Log.d("obeliskDetection", "Purple-Green-Purple🟪🟩🟪");
                     } else if (obeliskDetection.isMotifPattern(MotifColor.GREEN, MotifColor.PURPLE, MotifColor.PURPLE)) {
-                        Log.d("obeliskDetection", "Green-Purple-Purple");
+                        Log.d("obeliskDetection", "Green-Purple-Purple🟩🟪🟪");
                     } else {
                         Log.d("obeliskDetection", "Unknown or partial pattern");
                     }
