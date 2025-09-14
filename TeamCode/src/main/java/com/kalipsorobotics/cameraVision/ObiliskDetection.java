@@ -23,10 +23,6 @@ public class ObiliskDetection {
     
     private static final int[] OBELISK_APRILTAG_IDS = {21, 22, 23};
     
-    public enum MotifColor {
-        PURPLE, GREEN, UNKNOWN
-    }
-    
     public static class MotifPattern {
         public final MotifColor top;
         public final MotifColor middle; 
@@ -58,7 +54,7 @@ public class ObiliskDetection {
         aprilTagProcessor = AprilTagProcessor.easyCreateWithDefaults();
         
         visionPortal = VisionPortal.easyCreateWithDefaults(
-            hardwareMap.get(WebcamName.class, "camera1"), 
+            hardwareMap.get(WebcamName.class, "Webcam 1"),
             aprilTagProcessor
         );
     }
@@ -78,23 +74,24 @@ public class ObiliskDetection {
         }
         
         return obeliskDetections.stream()
+            .filter(d -> d.ftcPose != null)
             .min((d1, d2) -> Double.compare(d1.ftcPose.range, d2.ftcPose.range))
             .orElse(null);
     }
     
     public double getDistanceToObelisk() {
         AprilTagDetection closest = getClosestObeliskDetection();
-        return closest != null ? closest.ftcPose.range : -1;
+        return closest != null && closest.ftcPose != null ? closest.ftcPose.range : -1;
     }
     
     public double getBearingToObelisk() {
         AprilTagDetection closest = getClosestObeliskDetection();
-        return closest != null ? closest.ftcPose.bearing : 0;
+        return closest != null && closest.ftcPose != null ? closest.ftcPose.bearing : 0;
     }
     
     public double getElevationToObelisk() {
         AprilTagDetection closest = getClosestObeliskDetection();
-        return closest != null ? closest.ftcPose.elevation : 0;
+        return closest != null && closest.ftcPose != null ? closest.ftcPose.elevation : 0;
     }
     
     public boolean isObeliskVisible() {
@@ -116,7 +113,8 @@ public class ObiliskDetection {
             return new MotifPattern(MotifColor.UNKNOWN, MotifColor.UNKNOWN, MotifColor.UNKNOWN);
         }
         
-        return analyzeMotifPattern(obeliskDetection);
+        // Return expected pattern based on AprilTag ID since image analysis isn't working
+        return getExpectedMotifPattern(obeliskDetection.id);
     }
     
     public MotifPattern getExpectedMotifPattern(int aprilTagId) {
@@ -129,8 +127,13 @@ public class ObiliskDetection {
     }
     
     public int getObeliskId() {
-        AprilTagDetection closest = getClosestObeliskDetection();
-        return closest != null ? closest.id : -1;
+        List<AprilTagDetection> obeliskDetections = getObeliskDetections();
+        if (obeliskDetections.isEmpty()) {
+            return -1;
+        }
+        
+        // Return the first obelisk detection's ID, regardless of pose data
+        return obeliskDetections.get(0).id;
     }
     
     public MotifPattern getExpectedMotifPattern() {
@@ -239,14 +242,22 @@ public class ObiliskDetection {
             if (detection.metadata != null) {
                 telemetry.addLine(String.format("\n==== Obelisk (ID %d) %s", 
                     detection.id, detection.metadata.name));
-                telemetry.addLine(String.format("Distance: %.1f inches", detection.ftcPose.range));
-                telemetry.addLine(String.format("Bearing: %.1f degrees", detection.ftcPose.bearing));
-                telemetry.addLine(String.format("Elevation: %.1f degrees", detection.ftcPose.elevation));
-                telemetry.addLine(String.format("Position XYZ: %.1f %.1f %.1f", 
-                    detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                if (detection.ftcPose != null) {
+                    telemetry.addLine(String.format("Distance: %.1f inches", detection.ftcPose.range));
+                    telemetry.addLine(String.format("Bearing: %.1f degrees", detection.ftcPose.bearing));
+                    telemetry.addLine(String.format("Elevation: %.1f degrees", detection.ftcPose.elevation));
+                    telemetry.addLine(String.format("Position XYZ: %.1f %.1f %.1f", 
+                        detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                } else {
+                    telemetry.addLine("Pose data unavailable");
+                }
             } else {
                 telemetry.addLine(String.format("\n==== Unknown Obelisk Tag (ID %d)", detection.id));
-                telemetry.addLine(String.format("Distance: %.1f inches", detection.ftcPose.range));
+                if (detection.ftcPose != null) {
+                    telemetry.addLine(String.format("Distance: %.1f inches", detection.ftcPose.range));
+                } else {
+                    telemetry.addLine("Pose data unavailable");
+                }
             }
         }
     }

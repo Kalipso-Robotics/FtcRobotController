@@ -89,11 +89,7 @@ public class DriveTrain {
         driveTrain.bRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-<<<<<<< HEAD
         //driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
-=======
-//        driveTrain.otos = hardwareMap.get(SparkFunOTOS.class, "sprk sensor OTOS");
->>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
         driveTrain.odo = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 
         driveTrain.rightEncoder = driveTrain.bRight;
@@ -167,18 +163,9 @@ public class DriveTrain {
         return bRight;
     }
 
-<<<<<<< HEAD
     //public SparkFunOTOS getOtos() {
-    //    return;
-   // }
-=======
-/*
-    public SparkFunOTOS getOtos() {
-        return otos;
-    }
-*/
-
->>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
+    //    return otos;
+    //}
 /*
     private void sparkResetData(Boolean reCalibrate, double heading) {
         otos.resetTracking();
@@ -229,12 +216,7 @@ public class DriveTrain {
         //22.1072219488189  21.374319482037404 0.0022
         //24 24
     }
-<<<<<<< HEAD
     */
- /*
-=======
-*/
->>>>>>> eea0ba7fe75cefa00a6f193b683f571f9e2c21ed
 
 
     public OpModeUtilities getOpModeUtilities() {
