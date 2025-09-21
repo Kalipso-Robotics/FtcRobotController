@@ -25,13 +25,15 @@ public class KMotifDetection {
         return obiliskDetection.getObeliskMotifPattern();
     }
     public MotifColor getFirstMotifColor() {
-        return getMotifPattern().top;
+        return obiliskDetection.getExpectedMotifPattern().top;
     }
     public MotifColor getSecondMotifColor() {
-        return getMotifPattern().middle;
+        return obiliskDetection.getExpectedMotifPattern().middle;
     }
     public MotifColor getThirdMotifColor() {
-        return getMotifPattern().bottom;
+        return obiliskDetection.getExpectedMotifPattern().bottom;
     }
-
+    public boolean obiliskVisible() {
+        return obiliskDetection.isObeliskVisible();
+    }
 }
