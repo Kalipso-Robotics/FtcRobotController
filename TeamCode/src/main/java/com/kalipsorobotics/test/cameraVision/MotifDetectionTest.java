@@ -5,13 +5,13 @@ import android.util.Log;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.utilities.KMotifDetection;
+import com.kalipsorobotics.utilities.KMotifDetectionAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 public class MotifDetectionTest extends LinearOpMode {
     OpModeUtilities opModeUtilities;
-    KMotifDetection kMotifDetection;
+    KMotifDetectionAction kMotifDetection;
     ObiliskDetection obiliskDetection;
     DriveTrain driveTrain;
     DriveAction driveAction;
@@ -19,12 +19,13 @@ public class MotifDetectionTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         obiliskDetection = new ObiliskDetection();
-        kMotifDetection = new KMotifDetection(obiliskDetection);
+        kMotifDetection = new KMotifDetectionAction(obiliskDetection);
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         driveAction = new DriveAction(driveTrain);
         waitForStart();
         while (opModeIsActive()) {
             driveAction.move(gamepad1);
+            kMotifDetection.updateCheckDone();
             Log.d("Motif Detection", "Motif Pattern: " + kMotifDetection.getMotifPattern());
         }
     }
