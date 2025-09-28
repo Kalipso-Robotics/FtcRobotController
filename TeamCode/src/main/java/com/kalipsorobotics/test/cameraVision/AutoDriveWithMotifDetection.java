@@ -31,9 +31,9 @@ public class AutoDriveWithMotifDetection extends LinearOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
-        PurePursuitAction moveForward = new PurePursuitAction(driveTrain);
-        moveForward.addPoint(-500, 0, 0);
-        moveForward.setMaxTimeOutMS(8000);
+        //PurePursuitAction moveForward = new PurePursuitAction(driveTrain);
+        //moveForward.addPoint(-500, 0, 0);
+        //moveForward.setMaxTimeOutMS(8000);
 
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -41,7 +41,8 @@ public class AutoDriveWithMotifDetection extends LinearOpMode {
 
         waitForStart();
         while(opModeIsActive()) {
-            moveForward.updateCheckDone();
+            //moveForward.updateCheckDone();
+            driveTrain.setPower(-0.3);
             motifDetection.updateCheckDone();
             Log.d("Motif Detection Auto", "Motif Pattern: " + motifDetection.getMotifPattern());
             telemetry.addLine("" + motifDetection.getMotifPattern());
