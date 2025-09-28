@@ -8,7 +8,9 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.utilities.KMotifDetectionAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+@TeleOp
 public class MotifDetectionTest extends LinearOpMode {
     OpModeUtilities opModeUtilities;
     KMotifDetectionAction kMotifDetection;
@@ -19,6 +21,7 @@ public class MotifDetectionTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         obiliskDetection = new ObiliskDetection();
+        obiliskDetection.init(hardwareMap);
         kMotifDetection = new KMotifDetectionAction(obiliskDetection);
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         driveAction = new DriveAction(driveTrain);
@@ -26,7 +29,13 @@ public class MotifDetectionTest extends LinearOpMode {
         while (opModeIsActive()) {
             driveAction.move(gamepad1);
             kMotifDetection.updateCheckDone();
+            //Detectable from across field
             Log.d("Motif Detection", "Motif Pattern: " + kMotifDetection.getMotifPattern());
+            if (kMotifDetection.getIsDone()) {
+                break;
+            }
         }
+        
+        obiliskDetection.close();
     }
 }

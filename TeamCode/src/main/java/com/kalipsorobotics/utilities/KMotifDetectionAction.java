@@ -23,14 +23,14 @@ public class KMotifDetectionAction extends Action {
          */
     }
     public ObiliskDetection.MotifPattern getMotifPattern() {
-        return obiliskDetection.getObeliskMotifPattern();
+        return obiliskDetection.getExpectedMotifPattern(getObiliskID());
     }
-    //TODO
     @Override
     protected boolean checkDoneCondition() {
-        return false;
+        return obiliskDetection.isObeliskVisible();
     }
-
+    //TODO think about auto implementation + what to do if no pattern detected
+    //TODO timeout if nothing detected
     @Override
     protected void update() {
         obiliskDetection.refreshMotifPattern();
