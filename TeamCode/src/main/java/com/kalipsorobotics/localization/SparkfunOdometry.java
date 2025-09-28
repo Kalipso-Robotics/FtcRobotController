@@ -196,5 +196,4 @@ public class SparkfunOdometry {
         return SystemClock.elapsedRealtime() - prevTime;
     }
 }
-<<<<<<< HEAD
 */

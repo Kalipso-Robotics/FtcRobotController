@@ -23,8 +23,8 @@ public class IMUModule {
             i++;
             boolean isImuIntitalized = imu.initialize(new IMU.Parameters(
                     new RevHubOrientationOnRobot(
-                            RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                            RevHubOrientationOnRobot.UsbFacingDirection.LEFT
+                            RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
                     )
             ));
             if (isImuIntitalized) {
