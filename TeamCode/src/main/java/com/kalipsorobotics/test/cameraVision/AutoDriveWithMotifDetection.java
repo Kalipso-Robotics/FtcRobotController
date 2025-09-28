@@ -47,7 +47,7 @@ public class AutoDriveWithMotifDetection extends LinearOpMode {
             Log.d("Motif Detection Auto", "Motif Pattern: " + motifDetection.getMotifPattern());
             telemetry.addLine("" + motifDetection.getMotifPattern());
             if (motifDetection.getIsDone()) {
-                break;
+                driveTrain.setPower(-0.3, 0.3, 0.3, -0.3);
             }
         }
         OpModeUtilities.shutdownExecutorService(executorService);
