@@ -52,15 +52,15 @@ public class AutoWithCheckStuck extends LinearOpMode {
         checkStuckRobot = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, null);
 
         // Create movement actions - similar to AutoBasketFunnel structure
-        PurePursuitAction moveForward1 = new PurePursuitAction(driveTrain, wheelOdometry);
+        PurePursuitAction moveForward1 = new PurePursuitAction(driveTrain);
         moveForward1.addPoint(0, 500, 0); // Move forward 500mm
         moveForward1.setMaxTimeOutMS(8000);
 
-        PurePursuitAction moveForward2 = new PurePursuitAction(driveTrain, wheelOdometry);
+        PurePursuitAction moveForward2 = new PurePursuitAction(driveTrain);
         moveForward2.addPoint(0, 1000, 0); // Move forward to 1000mm total
         moveForward2.setMaxTimeOutMS(8000);
 
-        PurePursuitAction moveBack = new PurePursuitAction(driveTrain, wheelOdometry);
+        PurePursuitAction moveBack = new PurePursuitAction(driveTrain);
         moveBack.addPoint(0, 0, 0); // Move back to start
         moveBack.setMaxTimeOutMS(8000);
 
@@ -125,7 +125,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                     
                     // Create unstuck action if not already created
                     if (unstuckAction == null) {
-                        unstuckAction = new PurePursuitAction(driveTrain, wheelOdometry);
+                        unstuckAction = new PurePursuitAction(driveTrain);
                         Position safePosition = checkStuckRobot.findBestSafePosition(currentPosition);
                         
                         if (safePosition != null) {

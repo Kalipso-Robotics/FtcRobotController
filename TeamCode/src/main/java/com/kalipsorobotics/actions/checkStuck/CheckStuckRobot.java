@@ -88,20 +88,22 @@ public class CheckStuckRobot {
 
     private double prevHeading = 0;
 
-    private boolean checkRobotSpinning(double xDelta, double yDelta, double thetaDelta, Position currentPos, long currentTimeMs) {
+    private boolean checkRobotSpinning(double xDelta, double yDelta, double thetaDelta, Position currentPos, long currentTimeMs, double expectedHeading) {
         if (currentPos == null) {
             return false;
         }
 
         double currentHeading = currentPos.getTheta();
         double headingDelta = Math.abs(currentHeading - prevHeading);
+        double headingError = Math.abs(currentHeading - expectedHeading);
 
         // Robot is spinning if it's not moving in X/Y but has significant heading change
+        // OR if the current heading is much different from the expected heading
         boolean isCurrentlySpinning =
                 Math.abs(xDelta) < X_DELTA_MIN_THRESHOLD &&
                         Math.abs(yDelta) < Y_DELTA_MIN_THRESHOLD &&
-                        Math.abs(thetaDelta) > THETA_DELTA_MIN_THRESHOLD &&
-                        headingDelta > HEADING_DELTA_THRESHOLD; // degrees - should be GREATER than threshold
+                        (Math.abs(thetaDelta) > THETA_DELTA_MIN_THRESHOLD ||
+                         headingError > Math.toRadians(20)); // 20 degrees threshold
 
         if (isCurrentlySpinning) {
             if (!wasSpinning) {
@@ -177,6 +179,10 @@ public class CheckStuckRobot {
     // change from out of void when method finished
     // if delta x, y, and theta are too low ( make threshold large ) then check the path and current pos
     public boolean isStuck(Position currentPos) {
+        return isStuck(currentPos, currentPos != null ? currentPos.getTheta() : 0);
+    }
+
+    public boolean isStuck(Position currentPos, double expectedHeading) {
         if (currentPos == null) {
             return false;
         }
@@ -189,7 +195,7 @@ public class CheckStuckRobot {
         double yDelta = getYDelta(currentPos);
         double thetaDelta = getThetaDelta(currentPos);
 
-        boolean spinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPos, currentTime);
+        boolean spinning = checkRobotSpinning(xDelta, yDelta, thetaDelta, currentPos, currentTime, expectedHeading);
         boolean notMoving = checkRobotNotMoving(xDelta, yDelta);
 
         if (currentTime - lastStuckCheckTime >= 1000) {
@@ -217,7 +223,7 @@ public class CheckStuckRobot {
             return;
         }
 
-        purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry);
+        purePursuitAction = new PurePursuitAction(driveTrain);
         purePursuitAction.setMaxTimeOutMS(2000); // Give more time for reverse navigation
 
         Position safePosition = findBestSafePosition(currentPos);

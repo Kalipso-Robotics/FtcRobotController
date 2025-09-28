@@ -1,5 +1,7 @@
 package com.kalipsorobotics.navigation;
 
+import android.util.Log;
+
 import com.kalipsorobotics.PID.PidNav;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.actions.actionUtilities.Action;
@@ -19,22 +21,20 @@ import java.util.List;
 import java.util.Optional;
 
 public class PurePursuitAction extends Action {
-
-    public static final double P_XY = 1.0/600.0;
-    public static final double P_ANGLE = 0.7 / Math.toRadians(90);
-    public static final double P_XY_FAST = 1.0/100.0;
-    public static final double P_ANGLE_FAST = 1.0/ Math.toRadians(30);
-    public static final double P_XY_SLOW = 1.0/800.0;
-    public static final double P_ANGLE_SLOW = 1.0/ Math.toRadians(130);
-    public static final double P_ANGLE_SLOW_FOREAL_BASKET_THIRD_SAMPLE_AUTO = 1.0 / Math.toRadians(180);
-    public static final double STUCK_THRESHOLD = 1;
+    public static final double P_XY = 1.0/350.0;
+    public static final double P_ANGLE = (1.0 / Math.toRadians(90));
+    public static final double P_XY_FAST = P_XY * 2;
+    public static final double P_ANGLE_FAST = P_ANGLE * 2;
+    public static final double P_XY_SLOW = P_XY / 2;
+    public static final double P_ANGLE_SLOW = P_ANGLE / 2;
+    private static final double MINIMUM_POWER = 0.12;
 
     private double lastSearchRadius = LAST_RADIUS_MM;
 
-    List<Position> pathPoints = new ArrayList<Position>();
+    List<Position> pathPoints = new ArrayList<>();
+
+
     DriveTrain driveTrain;
-    Odometry wheelOdometry;
-    //SparkfunOdometry sparkfunOdometry;
 
     private final PidNav pidX;
     private final PidNav pidY;
@@ -56,7 +56,7 @@ public class PurePursuitAction extends Action {
 
     private double maxTimeOutMS = 1000000000;
 
-    private double finalAngleLockingThreshholdDeg = 1.5;
+    private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 1;
 
     private double startTimeMS = System.currentTimeMillis();
 
@@ -78,11 +78,8 @@ public class PurePursuitAction extends Action {
      * If move more than normal range --> add more waypoints
      */
 
-    public PurePursuitAction(DriveTrain driveTrain/*, SparkfunOdometry sparkfunOdometry*/,
-                             Odometry wheelOdometry) {
+    public PurePursuitAction(DriveTrain driveTrain) {
         this.driveTrain = driveTrain;
-        //this.sparkfunOdometry = sparkfunOdometry;
-        this.wheelOdometry = wheelOdometry;
         this.pidX = new PidNav(P_XY, 0, 0);
         this.pidY = new PidNav(P_XY, 0, 0);
         this.pidAngle = new PidNav(P_ANGLE, 0, 0);
@@ -98,10 +95,8 @@ public class PurePursuitAction extends Action {
         this.dependentActions.add(new DoneStateAction());
     }
 
-    public PurePursuitAction(DriveTrain driveTrain/*, SparkfunOdometry sparkfunOdometry*/, Odometry wheelOdometry, double pidXY, double pidAngle) {
+    public PurePursuitAction(DriveTrain driveTrain, double pidXY, double pidAngle) {
         this.driveTrain = driveTrain;
-        //this.sparkfunOdometry = sparkfunOdometry;
-        this.wheelOdometry = wheelOdometry;
         this.pidX = new PidNav(pidXY, 0, 0);
         this.pidY = new PidNav(pidXY, 0, 0);
         this.pidAngle = new PidNav(pidAngle, 0, 0);
@@ -117,8 +112,10 @@ public class PurePursuitAction extends Action {
 
     public void addPoint(double x, double y, double headingDeg) {
         double headingRad = Math.toRadians(headingDeg);
-        double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
-        pathPoints.add(new Position(x, y, headingRad, adaptiveP[0], adaptiveP[1]));
+        //double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
+        double adaptivePAngel = calcAdaptivePAngle(headingRad);
+        double[] adaptiveP = {P_XY, P_ANGLE};
+        pathPoints.add(new Position(x, y, headingRad, adaptiveP[0], adaptivePAngel));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
 
@@ -126,7 +123,14 @@ public class PurePursuitAction extends Action {
         pathPoints.add(new Position(x, y, Math.toRadians(headingDeg), pXY, pAngle));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
-
+    private double calcAdaptivePAngle(double theta) {
+        Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
+        double headingDelta = Math.abs(pos.getTheta() - theta);
+        if (headingDelta == 0) {
+            return 0;
+        }
+        return 1.0 / headingDelta;
+    }
     public double[] calcAdaptiveP(double x, double y, double theta) {
         final double SLOW = 1.0/600;
         final double FAST = 1.0/120;
@@ -183,19 +187,19 @@ public class PurePursuitAction extends Action {
         double powerX = target.getPidX().getPower(xError);
         double powerY = target.getPidY().getPower(yError);
 
-        //Log.d("directionalpower", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
-                //powerAngle));
+        Log.d("directionalpower", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
+                powerAngle));
 
         double fLeftPower = powerX + powerY + powerAngle;
         double bLeftPower = powerX - powerY + powerAngle;
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
 
-        //Log.d("PurePursuit_Log",
-                //"running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
-                //bRightPower);
+        Log.d("PurePursuit_Log",
+                "running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
+                bRightPower);
 
-        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.4);
+        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, MINIMUM_POWER);
 //        driveTrain.setPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
         //Log.d("purepursactionlog", "target position " + target.getX() + " " + target.getY() + " " + targetAngle);
         prevFollow = Optional.of(target);
@@ -251,18 +255,18 @@ public class PurePursuitAction extends Action {
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
         if (follow.isPresent()) {
-            //Log.d("purepursaction_debug_follow",
-                    //"follow point:  " + follow.get());
-            //Log.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+            Log.d("purepursaction_debug_follow",
+                    "follow point:  " + follow.get());
+            Log.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
             targetPosition(follow.get(), currentPosition);
 
         } else {
-            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) <= Math.toRadians(finalAngleLockingThreshholdDeg) ) {
+            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) <= Math.toRadians(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) ) {
                 finishedMoving();
             } else {
-                //Log.d("purepursaction_debug_follow",
-                        //"locking final angle:  " + lastPoint);
-                //Log.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+                Log.d("purepursaction_debug_follow",
+                        "locking final angle:  " + lastPoint);
+                Log.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
                 targetPosition(lastPoint, currentPosition);
             }
         }
@@ -323,13 +327,5 @@ public class PurePursuitAction extends Action {
 
     public void setMaxTimeOutMS(double maxTimeOutMS) {
         this.maxTimeOutMS = maxTimeOutMS;
-    }
-
-    public void setFinalAngleLockingThreshholdDeg(double threshholdDeg) {
-        finalAngleLockingThreshholdDeg = threshholdDeg;
-    }
-
-    public Odometry getOdometry() {
-        return wheelOdometry;
     }
 }

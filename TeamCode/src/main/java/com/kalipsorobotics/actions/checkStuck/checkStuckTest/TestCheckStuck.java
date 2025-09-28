@@ -22,15 +22,13 @@ public class TestCheckStuck extends LinearOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule goBildaOdoModule =  GoBildaOdoModule.getInstance(opModeUtilities);
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
-        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, wheelOdometry, 0, 0);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
+        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, 0.0, 0.0);
         DriveAction driveAction = new DriveAction(driveTrain);
-        CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, wheelOdometry, opModeUtilities, purePursuitAction);
-        //SparkfunOdometry sparkfunOdometry = new SparkfunOdometry(driveTrain, opModeUtilities, 0, 0, 0);
+        CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, odometry, opModeUtilities, purePursuitAction);
         waitForStart();
         while (opModeIsActive()) {
-            //sparkfunOdometry.updatePosition();
-            Position currentPos = wheelOdometry.update();
+            Position currentPos = odometry.update();
 
             if (checkStuck.isStuck(currentPos)) {
                 telemetry.addLine("robot is stuck");
