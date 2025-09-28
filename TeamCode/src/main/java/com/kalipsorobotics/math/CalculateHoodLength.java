@@ -8,8 +8,10 @@ public class CalculateHoodLength {
     double launchAngle;
     double gravity = 9.80665;
     double ballExitSpeed; //TODO measure    (meters per second), apply speed from angle formula?
-    double heightDifference; //TODO measure     (goal height - ball release height)
-    double radius; //TODO measure
+    double goalHeight = 1;
+    double releaseHeight = 0.46;//TODO tune later, not exact
+    double heightDifference = goalHeight - releaseHeight;
+    double radius = 0.1778;
     public double calculateHoodLengthHighArc(Position robotPosition) {
         launchAngle = Math.atan(Math.pow(ballExitSpeed, 2) +
                 Math.sqrt(Math.pow(ballExitSpeed, 4) - gravity*((gravity*Math.pow(calculateHorizontalDistance(robotPosition), 2)) +
@@ -25,7 +27,7 @@ public class CalculateHoodLength {
     private double calculateHorizontalDistance(Position robotPosition) {
         return Math.sqrt(Math.pow(robotPosition.getX() - goalPosition.getX(), 2) + Math.pow(robotPosition.getY() - goalPosition.getY(), 2));
     }
-    private double calulateSpeedFromAngle(double radiansPerSecond) {//speed is radians per second, to be calculated
+    private double calulateSpeedFromAngle(double radiansPerSecond) {//to be calculated
         return radius*radiansPerSecond;
     }
 }
