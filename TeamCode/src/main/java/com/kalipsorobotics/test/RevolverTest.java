@@ -13,7 +13,7 @@ public class RevolverTest extends LinearOpMode {
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         Servo servo = opModeUtilities.getHardwareMap().servo.get("revolver");
 
-        double servoPosition = 1.0/3;
+        double servoPosition = 0.0;
 
         boolean aWasPressed = false;
         boolean bWasPressed = false;
@@ -30,10 +30,10 @@ public class RevolverTest extends LinearOpMode {
             }
 
             if (!gamepad1.a && aWasPressed) {
-                servoPosition += 0.33;
+                servoPosition += 0.5;
                 aWasPressed = false;
             } else if (gamepad1.b) {
-                servoPosition -= 0.33;
+                servoPosition -= 0.5;
                 bWasPressed = false;
             }
 
