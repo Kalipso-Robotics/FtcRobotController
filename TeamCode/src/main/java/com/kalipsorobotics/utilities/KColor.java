@@ -42,15 +42,35 @@ public class KColor {
         float saturation = hsv[1]; // 0–1
         float value = hsv[2];      // 0–1
 
-        if (hue > 250 && hue < 300 && saturation > 0.5 && value > 0.2) {
+        if (hue > 200 && hue < 240 && saturation > 0.47 && value > 0.2) {
             return KColor.Color.PURPLE;
         }
-        else if (hue > 80 && hue < 160 && saturation > 0.5 && value > 0.2) {
+        else if (hue > 130 && hue < 180 && saturation > 0.6 && value > 0.5) {
             return KColor.Color.GREEN;
         }
         else {
             return KColor.Color.NONE;
         }
+    }
+
+
+    public static String getColor(RevColorSensorV3 revColor) {
+        return "Red: " + revColor.red() + " Green: " + revColor.green() + " Blue: " + revColor.blue();
+    }
+
+    public static String getHSV(RevColorSensorV3 revColor) {
+        int red = revColor.red();
+        int green = revColor.green();
+        int blue = revColor.blue();
+
+        float[] hsv = new float[3];
+        android.graphics.Color.RGBToHSV(red, green, blue, hsv);
+
+        float hue = hsv[0];        // 0–360 degrees
+        float saturation = hsv[1]; // 0–1
+        float value = hsv[2];      // 0–1
+
+        return "Hue: " + hue + " Saturation: " +saturation + " Value: " + value;
     }
     public KColor(int red, int green, int blue) {
         this.red = red;
