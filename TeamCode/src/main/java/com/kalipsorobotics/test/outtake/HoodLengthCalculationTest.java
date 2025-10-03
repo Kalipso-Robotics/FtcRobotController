@@ -30,7 +30,8 @@ public class HoodLengthCalculationTest extends LinearOpMode {
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         waitForStart();
         while(opModeIsActive()) {
-            Log.d("Hood Length Calculation", "hood length: " + calculateHoodLength.calculateHoodLengthHighArc(SharedData.getOdometryPosition()));
+            Log.d("Hood Length Calculation", "hood length: " + calculateHoodLength.calculateHoodLengthFlatArc(SharedData.getOdometryPosition()));
+
         }
     }
 }
