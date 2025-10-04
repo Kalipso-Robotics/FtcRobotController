@@ -2,6 +2,7 @@ package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.modules.DriveTrain;
+import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -33,7 +34,9 @@ public class ShooterTest extends LinearOpMode {
 //        kickerRight.setPosition(0.5);
 //        kickerLeft.setPosition(0.5);
 
-
+        int revolverCount = 0;
+        boolean joyWasPos = false;
+        boolean joyWasNeg = false;
 
 
         Servo pusher = hardwareMap.servo.get("pusher");
@@ -102,12 +105,30 @@ public class ShooterTest extends LinearOpMode {
             }
 
 
+            if (revolverCount == 0) {
+                revolver.setPosition(Revolver.REVOLVER_INDEX_0);
+            } else if (revolverCount == 1) {
+                revolver.setPosition(Revolver.REVOLVER_INDEX_1);
+            } else if (revolverCount == 2) {
+                revolver.setPosition(Revolver.REVOLVER_INDEX_2);
+            }
+
             if (gamepad1.left_stick_x > 0) {
-                revolver.setPosition(revolverPosition);
-                revolverPosition += 0.01;
+                joyWasPos = true;
             } else if (gamepad1.left_stick_x < 0) {
-                revolver.setPosition(revolverPosition);
-                revolverPosition -= 0.01;
+                joyWasNeg = true;
+            }
+
+            if (gamepad1.left_stick_x == 0 && joyWasPos) {
+                if (revolverCount > 0) {
+                    revolverCount--;
+                }
+                joyWasPos = false;
+            } else if (gamepad1.left_stick_x == 0 && joyWasNeg) {
+                if (revolverCount < 2) {
+                    revolverCount++;
+                }
+                joyWasNeg = false;
             }
 
             //0.9219

@@ -16,9 +16,9 @@ public class Revolver {
     public RevColorSensorV3 sen2;
     public RevColorSensorV3 sen3;
 
-    public static final double REVOLVER_INDEX_0 = 0.0; //todo set
-    public static final double REVOLVER_INDEX_1 = 0.0; //todo set
-    public static final double REVOLVER_INDEX_2 = 0.0; //todo set
+    public static final double REVOLVER_INDEX_0 = 0.195;
+    public static final double REVOLVER_INDEX_1 = 0.58;
+    public static final double REVOLVER_INDEX_2 = 0.965;
 
     private Revolver(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
