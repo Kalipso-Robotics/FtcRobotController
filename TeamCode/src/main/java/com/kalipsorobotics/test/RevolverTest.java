@@ -13,7 +13,7 @@ public class RevolverTest extends LinearOpMode {
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         Servo servo = opModeUtilities.getHardwareMap().servo.get("revolver");
 
-        double servoPosition = 0.0;
+        double servoPosition = 0;
 
         boolean aWasPressed = false;
         boolean bWasPressed = false;

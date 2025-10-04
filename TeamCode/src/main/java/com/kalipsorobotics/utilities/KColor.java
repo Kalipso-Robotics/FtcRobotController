@@ -1,34 +1,13 @@
 package com.kalipsorobotics.utilities;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 public class KColor {
     public enum Color {
-        RED, YELLOW, GREEN, BLUE, PURPLE, NONE
+        PURPLE, GREEN, NONE
     }
+
     int red, green, blue;
-    public int getGreen() {
-        return green;
-    }
-    public void setGreen(int green) {
-        this.green = green;
-    }
-
-    public int getRed() {
-        return red;
-    }
-
-    public void setRed(int red) {
-        this.red = red;
-    }
-    public int getBlue() {
-        return blue;
-    }
-    public void setBlue(int blue) {
-        this.blue = blue;
-    }
 
     public static Color classify(RevColorSensorV3 revColor) {
         int red = revColor.red();
@@ -54,11 +33,11 @@ public class KColor {
     }
 
 
-    public static String getColor(RevColorSensorV3 revColor) {
+    public static String printColor(RevColorSensorV3 revColor) {
         return "Red: " + revColor.red() + " Green: " + revColor.green() + " Blue: " + revColor.blue();
     }
 
-    public static String getHSV(RevColorSensorV3 revColor) {
+    public static String printHSV(RevColorSensorV3 revColor) {
         int red = revColor.red();
         int green = revColor.green();
         int blue = revColor.blue();

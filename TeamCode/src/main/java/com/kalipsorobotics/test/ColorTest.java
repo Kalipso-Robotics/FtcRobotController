@@ -5,8 +5,6 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 @TeleOp
 public class ColorTest extends LinearOpMode {
 
@@ -20,14 +18,14 @@ public class ColorTest extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()) {
             telemetry.addLine("revColor1: " + KColor.classify(revColor));
-            telemetry.addLine(KColor.getColor(revColor));
-            telemetry.addLine(KColor.getHSV(revColor));
+            telemetry.addLine(KColor.printColor(revColor));
+            telemetry.addLine(KColor.printHSV(revColor));
             telemetry.addLine("revColor2: " + KColor.classify(revColor2));
-            telemetry.addLine(KColor.getColor(revColor2));
-            telemetry.addLine(KColor.getHSV(revColor2));
+            telemetry.addLine(KColor.printColor(revColor2));
+            telemetry.addLine(KColor.printHSV(revColor2));
             telemetry.addLine("revColor3: " + KColor.classify(revColor3));
-            telemetry.addLine(KColor.getColor(revColor3));
-            telemetry.addLine(KColor.getHSV(revColor3));
+            telemetry.addLine(KColor.printColor(revColor3));
+            telemetry.addLine(KColor.printHSV(revColor3));
             telemetry.update();
         }
     }

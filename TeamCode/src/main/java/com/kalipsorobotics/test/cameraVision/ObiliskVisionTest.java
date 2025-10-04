@@ -3,7 +3,6 @@ package com.kalipsorobotics.test.cameraVision;
 import android.util.Log;
 
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
-import com.kalipsorobotics.cameraVision.MotifColor;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
