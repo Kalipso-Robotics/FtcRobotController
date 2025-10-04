@@ -58,5 +58,7 @@ public class Revolver {
         } else if (revolverServo.getPosition() == REVOLVER_INDEX_2) {
             return 2;
         }
+
+        return -1;
     }
 }
