@@ -2,6 +2,8 @@ package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.modules.DriveTrain;
+import com.kalipsorobotics.modules.Shooter;
+import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -15,9 +17,7 @@ public class ShooterTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        DcMotor shooter1 = hardwareMap.dcMotor.get("shooter1");
-        DcMotor shooter2 = hardwareMap.dcMotor.get("shooter2");
-        shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         DcMotor turret = hardwareMap.dcMotor.get("turret");
 
@@ -36,28 +36,32 @@ public class ShooterTest extends LinearOpMode {
 
 
 
-        Servo pusher = hardwareMap.servo.get("pusher");
+        //Servo pusher = hardwareMap.servo.get("hood");
         double pusherPosition = 0.9;
-        pusher.setPosition(pusherPosition);
+        //pusher.setPosition(pusherPosition);
 
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
         DriveAction driveAction = new DriveAction(driveTrain);
 
+        KFileWriter shooterDataWriter = new KFileWriter("shooterData", opModeUtilities);
+
+        Shooter shooter = new Shooter(opModeUtilities);
 
         waitForStart();
 
         while (opModeIsActive()) {
+            shooterDataWriter.writeLine("Shooter RPS: " + shooter.getRPS() + " HoodPos: " + shooter.getHoodPosition());
 
             driveAction.move(gamepad2);
 
 
             if (gamepad1.left_trigger > 0.1) {
-                pusher.setPosition(pusherPosition);
                 pusherPosition += 0.001;
+                shooter.getHood().setPosition(pusherPosition);
             } else if (gamepad1.right_trigger > 0.1) {
-                pusher.setPosition(pusherPosition);
                 pusherPosition -= 0.001;
+                shooter.getHood().setPosition(pusherPosition);
             }
 
 
@@ -68,11 +72,11 @@ public class ShooterTest extends LinearOpMode {
             }
 
             if (gamepad1.dpad_left) {
-                shooter1.setPower(power);
-                shooter2.setPower(power);
+                shooter.getShooter1().setPower(power);
+                shooter.getShooter2().setPower(power);
             } else {
-                shooter1.setPower(0);
-                shooter2.setPower(0);
+                shooter.getShooter1().setPower(0);
+                shooter.getShooter2().setPower(0);
             }
 
             if (gamepad1.left_bumper) {
@@ -110,8 +114,10 @@ public class ShooterTest extends LinearOpMode {
                 revolverPosition -= 0.01;
             }
 
+
             //0.9219
             //0.64
+            telemetry.addLine("Shooter RPS: " + shooter.getRPS() + "\nHoodPos: " + shooter.getHoodPosition());
             telemetry.addData("revolver position", revolverPosition);
 //            telemetry.addData("kickerRight position", kickerPosition1);
 //            telemetry.addData("kickerLeft position", kickerPosition2);
@@ -120,6 +126,8 @@ public class ShooterTest extends LinearOpMode {
             telemetry.update();
 
         }
+
+        shooterDataWriter.close();
 
     }
 
