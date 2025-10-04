@@ -82,6 +82,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
             KLog.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
             KLog.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
         }
+        OpModeUtilities.shutdownExecutorService(executorService);
         odometryFileWriter.close();
 
     }

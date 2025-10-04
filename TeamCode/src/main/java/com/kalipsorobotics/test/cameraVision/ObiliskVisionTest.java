@@ -4,10 +4,12 @@ import android.util.Log;
 
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.cameraVision.MotifColor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Obelisk Vision Test")
+@Disabled
 public class ObiliskVisionTest extends LinearOpMode {
     
     private ObiliskDetection obeliskDetection;

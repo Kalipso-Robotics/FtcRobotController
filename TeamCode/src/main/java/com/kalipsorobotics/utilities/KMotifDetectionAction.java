@@ -1,11 +1,12 @@
 package com.kalipsorobotics.utilities;
 
+import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.cameraVision.MotifColor;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 
-public class KMotifDetection {
+public class KMotifDetectionAction extends Action {
     private final ObiliskDetection obiliskDetection;
-    public KMotifDetection(ObiliskDetection obiliskDetection) {
+    public KMotifDetectionAction(ObiliskDetection obiliskDetection) {
         this.obiliskDetection = obiliskDetection;
     }
 
@@ -13,7 +14,7 @@ public class KMotifDetection {
     public ObiliskDetection getObiliskDetection() {
         return obiliskDetection;
     }
-    public int getObiliskID() {
+    private int getObiliskID() {
         return obiliskDetection.getObeliskId();
         /*
         21 = GPP
@@ -22,18 +23,17 @@ public class KMotifDetection {
          */
     }
     public ObiliskDetection.MotifPattern getMotifPattern() {
-        return obiliskDetection.getObeliskMotifPattern();
+        return obiliskDetection.getExpectedMotifPattern(getObiliskID());
     }
-    public MotifColor getFirstMotifColor() {
-        return obiliskDetection.getExpectedMotifPattern().top;
-    }
-    public MotifColor getSecondMotifColor() {
-        return obiliskDetection.getExpectedMotifPattern().middle;
-    }
-    public MotifColor getThirdMotifColor() {
-        return obiliskDetection.getExpectedMotifPattern().bottom;
-    }
-    public boolean obiliskVisible() {
+    @Override
+    protected boolean checkDoneCondition() {
         return obiliskDetection.isObeliskVisible();
+    }
+    //TODO think about auto implementation + what to do if no pattern detected
+    //TODO timeout if nothing detected
+    @Override
+    protected void update() {
+        obiliskDetection.refreshMotifPattern();
+        isDone = true;
     }
 }

@@ -46,6 +46,8 @@ public class ObiliskDetection {
     
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
+    private MotifPattern cachedMotifPattern;
+    private boolean motifPatternCached = false;
     
     public ObiliskDetection() {
     }
@@ -108,13 +110,26 @@ public class ObiliskDetection {
     }
     
     public MotifPattern getObeliskMotifPattern() {
+        if (!motifPatternCached) {
+            updateMotifPattern();
+        }
+        return cachedMotifPattern;
+    }
+    
+    public void updateMotifPattern() {
         AprilTagDetection obeliskDetection = getClosestObeliskDetection();
         if (obeliskDetection == null) {
-            return new MotifPattern(MotifColor.UNKNOWN, MotifColor.UNKNOWN, MotifColor.UNKNOWN);
+            cachedMotifPattern = new MotifPattern(MotifColor.UNKNOWN, MotifColor.UNKNOWN, MotifColor.UNKNOWN);
+        } else {
+            // Return expected pattern based on AprilTag ID since image analysis isn't working
+            cachedMotifPattern = getExpectedMotifPattern(obeliskDetection.id);
         }
-        
-        // Return expected pattern based on AprilTag ID since image analysis isn't working
-        return getExpectedMotifPattern(obeliskDetection.id);
+        motifPatternCached = true;
+    }
+    
+    public void refreshMotifPattern() {
+        motifPatternCached = false;
+        updateMotifPattern();
     }
     
     public MotifPattern getExpectedMotifPattern(int aprilTagId) {

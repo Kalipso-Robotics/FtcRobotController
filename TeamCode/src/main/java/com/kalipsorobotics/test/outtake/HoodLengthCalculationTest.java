@@ -1,0 +1,36 @@
+package com.kalipsorobotics.test.outtake;
+
+import android.util.Log;
+
+import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.math.CalculateHoodLength;
+import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.modules.DriveTrain;
+import com.kalipsorobotics.modules.GoBildaOdoModule;
+import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class HoodLengthCalculationTest extends LinearOpMode {
+    CalculateHoodLength calculateHoodLength;
+    @Override
+    public void runOpMode() throws InterruptedException {
+        OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
+        DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
+        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+        GoBildaOdoModule goBildaOdoModule = new GoBildaOdoModule(opModeUtilities);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        calculateHoodLength = new CalculateHoodLength(new Position(0, 0, 0)); //TODO find actual goal position
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        waitForStart();
+        while(opModeIsActive()) {
+            Log.d("Hood Length Calculation", "hood length: " + calculateHoodLength.calculateHoodLengthHighArc(SharedData.getOdometryPosition()));
+        }
+    }
+}
