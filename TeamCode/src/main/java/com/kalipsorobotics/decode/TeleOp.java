@@ -2,6 +2,7 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeFullAction;
 import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeReverse;
 import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeRun;
 import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeStop;
@@ -12,6 +13,7 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
+import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -24,10 +26,12 @@ public class TeleOp extends KTeleOp {
 
     Shooter shooter = null;
     Intake intake = null;
+    Revolver revolver = null;
     ShooterReady shooterReady = null;
     KickBall kickBall = null;
 
     IntakeRun intakeRun = null;
+    IntakeFullAction intakeFullAction = null;
     IntakeStop intakeStop = null;
 
     IntakeReverse intakeReverse = null;
@@ -58,8 +62,10 @@ public class TeleOp extends KTeleOp {
         driveAction = new DriveAction(driveTrain);
 
         intake = new Intake(opModeUtilities);
+        revolver = Revolver.getInstance(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
 
+        intakeFullAction = new IntakeFullAction(intake, revolver);
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
@@ -106,8 +112,8 @@ public class TeleOp extends KTeleOp {
             }
 
             if (intakePressed) {
-                if (intakeRun != null || intakeRun.getIsDone()) {
-                    intakeRun = new IntakeRun(intake);
+                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
+                    intakeFullAction = new IntakeFullAction(intake, revolver);
                     setLastIntakeAction(intakeRun);
                 }
             } else if (intakeReversePressed) {
@@ -116,6 +122,9 @@ public class TeleOp extends KTeleOp {
                     setLastIntakeAction(intakeReverse);
                 }
             } else {
+                if (intakeFullAction != null) {
+                    intakeFullAction.setIsDone(true);
+                }
                 if (intakeStop != null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
