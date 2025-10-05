@@ -31,8 +31,6 @@ public class HoodLengthCalculationTest extends LinearOpMode {
         double xIn = 1000*(SharedData.getOdometryPosition().getX()); //converts to meters
         double yIn = 1000*(SharedData.getOdometryPosition().getY());
 
-        //hood.setAngleDegrees(sp.thetaDeg);
-        //flywheel.setTargetRPM(sp.rpm);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
@@ -42,6 +40,9 @@ public class HoodLengthCalculationTest extends LinearOpMode {
             ShooterLUTCornerGrid.ShotParams sp = lut.queryInches(xIn, yIn);
             Log.d("Hood Length Calculation", "hood length: " + sp.thetaDeg + "Motor rpm: " + sp.rpm);
 
+            //replce with  real hood and flywheel motor
+            //hood.setAngleDegrees(sp.thetaDeg);
+            //flywheel.setTargetRPM(sp.rpm);
         }
     }
 }

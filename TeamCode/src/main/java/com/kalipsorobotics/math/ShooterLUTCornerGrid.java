@@ -42,7 +42,6 @@ public class ShooterLUTCornerGrid {
             {Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN},
     };
 
-    // =====================================================================
 
     public static class ShotParams {
         public final double thetaDeg;
@@ -50,7 +49,7 @@ public class ShooterLUTCornerGrid {
         public ShotParams(double thetaDeg, double rpm){ this.thetaDeg = thetaDeg; this.rpm = rpm; }
     }
 
-    //query odo data
+    //query odo data to b able to use tile unit
     public ShotParams queryInches(double xIn, double yIn){
         double u = xIn / TILE_IN;   // 0..6
         double v = yIn / TILE_IN;   // 0..6
@@ -82,7 +81,7 @@ public class ShooterLUTCornerGrid {
 
         return clamp(th, rp);
     }
-
+    //for odo values that use meters/cm/mm
     public ShotParams queryMeters(double xM, double yM){
         double xIn = xM * 39.37007874;
         double yIn = yM * 39.37007874;
