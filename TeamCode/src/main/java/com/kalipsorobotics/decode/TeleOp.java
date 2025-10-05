@@ -76,6 +76,14 @@ public class TeleOp extends KTeleOp {
         waitForStart();
         while (opModeIsActive()) {
 
+            if(kGamePad1.getLeftStickY() != 0 || kGamePad1.getRightStickX() != 0 || kGamePad1.getLeftStickX() != 0) {
+                setLastMoveAction(null);
+                driveAction.move(gamepad1);
+            } else {
+                if (lastMoveAction == null || lastMoveAction.getIsDone()) {
+                    driveTrain.setPower(0);
+                }
+            }
 
             shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
             kickPressed = kGamePad2.isButtonYFirstPressed();

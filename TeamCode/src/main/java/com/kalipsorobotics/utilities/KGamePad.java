@@ -235,6 +235,22 @@ public class KGamePad {
         return toggle;
     }
 
+    public double getLeftStickX(){
+        return gamepad.left_stick_x;
+    }
+
+    public double getLeftStickY(){
+        return gamepad.left_stick_y;
+    }
+
+    public double getRightStickX(){
+        return gamepad.right_stick_x;
+    }
+
+    public double getRightStickY(){
+        return gamepad.right_stick_y;
+    }
+
 
 
 }
