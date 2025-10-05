@@ -2,27 +2,19 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
-import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeRun;
 import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeStop;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
-import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.utilities.KGamePad;
-import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends KTeleOp {
     private DriveTrain driveTrain;
@@ -72,7 +64,7 @@ public class TeleOp extends KTeleOp {
         waitForStart();
         while (opModeIsActive()) {
             shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
-            kickPressed = kGamePad2.isToggleButtonY();
+            kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
 
             if (shooterReadyPressed) {

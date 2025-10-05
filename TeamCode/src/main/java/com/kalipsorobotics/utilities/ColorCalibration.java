@@ -7,8 +7,6 @@ import static com.kalipsorobotics.utilities.KColor.Color.NONE;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.HashMap;
 
@@ -55,7 +53,7 @@ public class ColorCalibration extends LinearOpMode {
                 telemetry.addLine("Color Set to PURPLE");
 
             }
-            if (kPad.isToggleButtonY()) {
+            if (kPad.isButtonYFirstPressed()) {
                 calibrate(front, currentColor, rev1);
                 calibrate(bLeft, currentColor, rev2);
                 calibrate(bRight, currentColor, rev3);
@@ -73,7 +71,7 @@ public class ColorCalibration extends LinearOpMode {
                 telemetry.addLine("Calibration Stopped.");
             }
 
-            if (kPad.isToggleRightBumper()) {
+            if (kPad.isRightBumperFirstPressed()) {
                 telemetry.clear();
                 telemetry.addLine("Rev 1 Values, PURPLE: " + rev1.get(PURPLE) + " GREEN: " + rev1.get(GREEN) + " NONE: " + rev1.get(NONE) + "\n");
                 telemetry.addLine("Rev 2 Values, PURPLE: " + rev2.get(PURPLE) + " GREEN: " + rev2.get(GREEN) + " NONE: " + rev2.get(NONE)  + "\n");

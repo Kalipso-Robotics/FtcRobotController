@@ -25,7 +25,7 @@ public class SetAutoDelayAction extends Action {
             return true;
         }
 
-        if (kGamePad1.isToggleLeftBumper() && kGamePad1.isToggleRightBumper()){
+        if (kGamePad1.isLeftBumperFirstPressed() && kGamePad1.isRightBumperFirstPressed()){
             opModeUtilities.getTelemetry().addLine("CONFIRMED DELAY");
             opModeUtilities.getTelemetry().addData("DELAY TIME IN MS ", getTimeMs());
             opModeUtilities.getTelemetry().update();
@@ -37,9 +37,9 @@ public class SetAutoDelayAction extends Action {
 
     @Override
     protected void update() {
-        if (kGamePad1.isToggleDpadLeft()) {
+        if (kGamePad1.isDpadLeftFirstPressed()) {
             time -= 1;
-        } else if (kGamePad1.isToggleDpadRight()) {
+        } else if (kGamePad1.isDpadRightFirstPressed()) {
             time += 1;
         }
 
