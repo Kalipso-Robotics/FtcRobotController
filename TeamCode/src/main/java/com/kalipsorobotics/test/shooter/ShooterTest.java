@@ -1,5 +1,6 @@
 package com.kalipsorobotics.test.shooter;
 
+import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.localization.Odometry;
@@ -8,6 +9,7 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
+import com.kalipsorobotics.utilities.KGamePad;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -33,7 +35,7 @@ public class ShooterTest extends LinearOpMode {
 
         KFileWriter shooterDataWriter = new KFileWriter("shooterData", opModeUtilities);
 
-
+        KGamePad gamePad1 = new KGamePad(gamepad1);
 
         DcMotor turret = hardwareMap.dcMotor.get("turret");
 
@@ -60,6 +62,7 @@ public class ShooterTest extends LinearOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        KActionSet teleOp = new KActionSet();
         waitForStart();
         while (opModeIsActive()) {
             shooterDataWriter.writeLine("Shooter RPS: " + shooter.getRPS() + " HoodPos: " + shooter.getHoodPosition());
@@ -77,18 +80,19 @@ public class ShooterTest extends LinearOpMode {
 
 
             if (gamepad1.dpad_up) {
-                power += 0.0001;
+                power += 0.01;
             } else if (gamepad1.dpad_down) {
-                power -= 0.0001;
+                power -= 0.01;
             }
 
             if (gamepad1.dpad_left) {
 //                shooter.getShooter1().setPower(power);
 //                shooter.getShooter2().setPower(power);
                 shooterReady = new ShooterReady(shooter, new Point(3600, 1200));
+                teleOp.addAction(shooterReady);
             } else {
-                shooter.getShooter1().setPower(0);
-                shooter.getShooter2().setPower(0);
+                shooterReady = null;
+                teleOp.addAction(shooterReady);
             }
 
             if (gamepad1.left_bumper) {
@@ -136,8 +140,7 @@ public class ShooterTest extends LinearOpMode {
             telemetry.addData("power", power);
             telemetry.addData("pusher position", pusherPosition);
             telemetry.update();
-            shooterReady.update();
-
+            teleOp.update();
         }
         OpModeUtilities.shutdownExecutorService(executorService);
         shooterDataWriter.close();

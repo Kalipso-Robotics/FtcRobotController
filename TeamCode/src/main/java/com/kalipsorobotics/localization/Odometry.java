@@ -26,11 +26,9 @@ public class Odometry {
     static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
     private static Odometry single_instance = null;
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
-    //final private PositionHistory gobildaPositionHistory = new PositionHistory();
     OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
     IMUModule imuModule;
-    //GoBildaOdoModule goBildaOdoModule;
     //200-182 offset compare to line between parallel odo pods
     //negative if robot center behind parallel wheels
     //final private static double ROBOT_CENTER_OFFSET_MM = -18;
@@ -53,12 +51,11 @@ public class Odometry {
                      Position startPosMMRAD) {
         this.opModeUtilities = opModeUtilities;
         resetHardware(driveTrain, imuModule, this);
-        this.rightOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX());
+        this.rightOffset = this.getRightEncoderMM();
         this.leftOffset = this.getLeftEncoderMM();
-        this.backOffset = ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY());
+        this.backOffset = this.getBackEncoderMM();
 
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
-        this.gobildaPositionHistory.setCurrentPosition(startPosMMRAD);
         ////Log.d("purepursaction_debug_odo_wheel", "init jimmeh" + currentPosition.toString());
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
@@ -128,7 +125,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        return (ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderX()) - rightOffset);
+        return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
     public double getLeftEncoderMM() {
@@ -141,7 +138,7 @@ public class Odometry {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        return -(ticksToMM(goBildaOdoModule.getGoBildaPinpointDriver().getEncoderY()) - backOffset);
+        return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
@@ -221,14 +218,7 @@ public class Odometry {
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
 
     }
-    private void updateGobilda(double timeElapsedSeconds) {
-        goBildaOdoModule.getGoBildaPinpointDriver().update();
-        Pose2D position = (goBildaOdoModule.getGoBildaPinpointDriver().getPosition());
-        //Position newPosition = new Position(-position.getX(DistanceUnit.MM), position.getY(DistanceUnit.MM), position.getHeading(AngleUnit.RADIANS));
-        gobildaPositionHistory.setCurrentPosition(Position.pose2DtoPosition(position));
-        gobildaPositionHistory.setCurrentVelocity(Velocity.pose2DtoVelocity(goBildaOdoModule.getGoBildaPinpointDriver().getVelocity()), timeElapsedSeconds);
-        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.GOBILDA, gobildaPositionHistory);
-    }
+
     public HashMap<OdometrySensorCombinations, PositionHistory> updatePositionAll() {
         Log.d("updatepos", "updatepos");
         double rightDistanceMM = getRightEncoderMM();
@@ -246,7 +236,6 @@ public class Odometry {
 
 
         updateWheelIMUPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
-        updateGobilda(timeElapsedSeconds);
 
         //Log.d("currentpos", "current pos " + currentPosition.toString());
         prevTime = currentTime;

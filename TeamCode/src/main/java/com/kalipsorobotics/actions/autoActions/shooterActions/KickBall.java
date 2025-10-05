@@ -1,0 +1,34 @@
+package com.kalipsorobotics.actions.autoActions.shooterActions;
+
+import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.actions.actionUtilities.WaitAction;
+import com.kalipsorobotics.actions.shooter.ShooterStop;
+import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.utilities.OpModeUtilities;
+
+public class KickBall extends KActionSet {
+
+    public KickBall(Shooter shooter) {
+
+        KServoAutoAction kickRight = new KServoAutoAction(shooter.getKickerRight(), 0.5);
+        kickRight.setName("kickRight");
+        this.addAction(kickRight);
+        KServoAutoAction kickLeft = new KServoAutoAction(shooter.getKickerLeft(), 0.75);
+        kickLeft.setName("kickLeft");
+        this.addAction(kickLeft);
+        KServoAutoAction staticRight = new KServoAutoAction(shooter.getKickerRight(), 0.8);
+        staticRight.setName("staticRight");
+        this.addAction(staticRight);
+        staticRight.setDependentActions(kickRight);
+        KServoAutoAction staticLeft = new KServoAutoAction(shooter.getKickerLeft(), 0.45);
+        staticLeft.setName("staticLeft");
+        this.addAction(staticLeft);
+        staticLeft.setDependentActions(kickLeft);
+        ShooterStop shooterStop = new ShooterStop(shooter);
+        shooterStop.setName("shooterStop");
+        this.addAction(shooterStop);
+        shooterStop.setDependentActions(staticRight, staticLeft);
+    }
+
+}

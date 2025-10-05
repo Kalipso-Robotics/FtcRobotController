@@ -27,15 +27,44 @@ public class Shooter {
 
     private final KServo hood;
 
+    private final KServo kickerRight;
+    private final KServo kickerLeft;
+
+
     private final ShooterLutPredictor predictor;
+
+    public KServo getKickerRight() {
+        return kickerRight;
+    }
+
+    public KServo getKickerLeft() {
+        return kickerLeft;
+    }
 
     public Shooter(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
         shooter1 = opModeUtilities.getHardwareMap().dcMotor.get("shooter1");
         shooter2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
         shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
-        Servo hoodServo = opModeUtilities.getHardwareMap().servo.get("hood");
-        hood = new KServo(hoodServo, KServo.AXON_MAX_SPEED, 255, 0, false);
+        Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
+        if (hood == null) {
+            opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
+        }
+        this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
+
+        Servo kickerRight = opModeUtilities.getHardwareMap().servo.get("kicker1");
+        if (kickerRight == null) {
+            opModeUtilities.getTelemetry().addData("Error", "Kicker1 servo not found in hardware map");
+        }
+        this.kickerRight = new KServo(kickerRight, KServo.AXON_MAX_SPEED, 255, 0, false);
+
+        Servo kickerLeft = opModeUtilities.getHardwareMap().servo.get("kicker2");
+        if (kickerLeft == null) {
+            opModeUtilities.getTelemetry().addData("Error", "Kicker2 servo not found in hardware map");
+        }
+        this.kickerLeft = new KServo(kickerLeft, KServo.AXON_MAX_SPEED, 255, 0, false);
+
+
 
         ShooterLutPredictor temp = null;
         try {
