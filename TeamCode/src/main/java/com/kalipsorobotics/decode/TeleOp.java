@@ -2,9 +2,11 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeReverse;
 import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeRun;
 import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeStop;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
+import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -28,11 +30,16 @@ public class TeleOp extends KTeleOp {
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
 
+    IntakeReverse intakeReverse = null;
+
+    DriveAction driveAction = null;
+
 
 
     boolean shooterReadyPressed = false;
     boolean kickPressed = false;
     boolean intakePressed = false;
+    boolean intakeReversePressed = false;
 
     @Override
     protected void initializeRobot() {
@@ -48,13 +55,18 @@ public class TeleOp extends KTeleOp {
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        driveAction = new DriveAction(driveTrain);
+
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
 
-        kickBall = new KickBall(shooter);
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
+        intakeReverse = new IntakeReverse(intake);
+
         shooterReady = new ShooterReady(shooter, ShooterReady.FAR_LAUNCH_POINT);
+        kickBall = new KickBall(shooter);
+
 
     }
 
@@ -63,9 +75,13 @@ public class TeleOp extends KTeleOp {
         initializeRobot();
         waitForStart();
         while (opModeIsActive()) {
+
+
             shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
             kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
+            intakeReversePressed = kGamePad2.isRightBumperPressed();
+
 
             if (shooterReadyPressed) {
                 if (shooterReady != null || shooterReady.getIsDone()) {
@@ -86,12 +102,19 @@ public class TeleOp extends KTeleOp {
                     intakeRun = new IntakeRun(intake);
                     setLastIntakeAction(intakeRun);
                 }
+            } else if (intakeReversePressed) {
+                if (intakeReverse != null || intakeReverse.getIsDone()) {
+                    intakeReverse = new IntakeReverse(intake);
+                    setLastIntakeAction(intakeReverse);
+                }
             } else {
                 if (intakeStop != null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
                 }
             }
+
+
 
 
 
