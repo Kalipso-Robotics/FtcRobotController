@@ -8,21 +8,17 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 public class DetectColorsAction extends Action {
 
+    private Revolver revolver;
     private RevColorSensorV3 sen1;
     private RevColorSensorV3 sen2;
     private RevColorSensorV3 sen3;
 
-    private KColor.Color[] colors = new KColor.Color[3];
-
     public DetectColorsAction(Revolver revolver) {
+        this.revolver = revolver;
         this.sen1 = revolver.sen1;
         this.sen2 = revolver.sen2;
         this.sen3 = revolver.sen3;
         this.dependentActions.add(new DoneStateAction());
-    }
-
-    public KColor.Color[] getColors() {
-        return colors;
     }
 
     @Override
@@ -36,9 +32,9 @@ public class DetectColorsAction extends Action {
     @Override
     protected void update() {
         if(!hasStarted) {
-            colors[0] = KColor.classify(sen1);
-            colors[1] = KColor.classify(sen2);
-            colors[2] = KColor.classify(sen3);
+            revolver.setColorSet(0, KColor.classify(sen1));
+            revolver.setColorSet(1, KColor.classify(sen2));
+            revolver.setColorSet(2, KColor.classify(sen3));
             hasStarted = true;
         }
     }
