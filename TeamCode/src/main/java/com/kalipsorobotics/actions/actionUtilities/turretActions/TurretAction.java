@@ -1,0 +1,73 @@
+package com.kalipsorobotics.actions.actionUtilities.turretActions;
+
+import android.util.Log;
+
+import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+
+public class TurretAction extends Action {
+    Odometry odometry;
+
+
+
+    public TurretAction (Odometry odometry){
+        this.odometry = odometry;
+
+
+    }
+
+    @Override
+    protected boolean checkDoneCondition() {
+        return false;
+        //check to see if turret is aligned with the goal
+
+    }
+
+    @Override
+    protected void update() {
+        // input: what i know
+        //   x_innit_setup
+        //   y_init-setup
+        //   x_odo
+        //   y_ooo
+
+        //cal
+        //  x_goal
+        // y_goal
+
+        //output
+        //  angle_target = arctan (x_goal/y_goal)
+
+        double x_init_setup = 3657.6;
+        double y_init_setup = 3251.2;
+
+        Position currentPosition = SharedData.getOdometryPosition();
+        double currentX = currentPosition.getX();
+        double currentY = currentPosition.getY();
+
+
+        double yTargetGoal = y_init_setup + currentY;
+        double xTargetGoal = x_init_setup - currentX;
+
+        double angle_target = Math.atan(yTargetGoal/xTargetGoal);
+        KLog.d("turret angle", angle_target + " ");
+
+
+
+//read position of robot in the field
+//calculate distance from the goal
+//read angle of robot
+//read turret position
+//calculate target angle of turret to goal
+//calculate how much the turret has to turn
+//move turret to target number of ticks
+//
+
+//need odometry
+    }
+}
