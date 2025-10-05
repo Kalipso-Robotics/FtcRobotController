@@ -8,7 +8,6 @@ public class KColor {
     }
 
     int red, green, blue;
-
     public static Color classify(RevColorSensorV3 revColor) {
         int red = revColor.red();
         int green = revColor.green();
@@ -21,17 +20,21 @@ public class KColor {
         float saturation = hsv[1]; // 0–1
         float value = hsv[2];      // 0–1
 
-        if (hue > 200 && hue < 240 && saturation > 0.47 && value > 0.2) {
+
+        // NONE
+        if (saturation < 0.35 || value < 0.20 || value > 5.5) return KColor.Color.NONE;
+
+        // PURPLE
+        if (hue >= 200 && hue <= 240 && saturation >= 0.55 && value >= 0.20 && value <= 5.5) {
             return KColor.Color.PURPLE;
         }
-        else if (hue > 130 && hue < 180 && saturation > 0.6 && value > 0.5) {
+        // GREEN
+        if (hue >= 60 && hue <= 150 && saturation >= 0.38 && value >= 0.20 && value <= 5.5) {
             return KColor.Color.GREEN;
         }
-        else {
-            return KColor.Color.NONE;
-        }
-    }
 
+        return KColor.Color.NONE;
+    }
 
     public static String printColor(RevColorSensorV3 revColor) {
         return "Red: " + revColor.red() + " Green: " + revColor.green() + " Blue: " + revColor.blue();
