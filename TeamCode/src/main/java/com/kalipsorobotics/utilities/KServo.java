@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class KServo {
-
-    private final double servoSpeed; // degrees per sec
+    public final static double AXON_MAX_SPEED = 428.57;
+    private final double servoSpeed; // degrees per sec Axon Max 4.8V: 428.57 deg/sec
     private final Servo servo;
     private final double rangeDegrees;
     private final double zeroPosition;

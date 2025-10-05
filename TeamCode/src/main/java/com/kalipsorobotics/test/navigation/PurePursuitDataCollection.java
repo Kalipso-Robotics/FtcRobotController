@@ -31,7 +31,7 @@ public class PurePursuitDataCollection extends LinearOpMode {
         GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain);
         purePursuitAction.addPoint(0, 0, 0);
         purePursuitAction.addPoint(600, 600, 0);

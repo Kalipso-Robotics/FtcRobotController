@@ -7,7 +7,6 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
-import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KMotifDetectionAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -30,7 +29,7 @@ public class AutoDriveWithMotifDetection extends LinearOpMode {
         motifDetection = new KMotifDetectionAction(obiliskDetection);
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         //PurePursuitAction moveForward = new PurePursuitAction(driveTrain);
         //moveForward.addPoint(-500, 0, 0);
         //moveForward.setMaxTimeOutMS(8000);

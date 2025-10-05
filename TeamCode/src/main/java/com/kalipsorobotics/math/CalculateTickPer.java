@@ -15,6 +15,9 @@ public class CalculateTickPer {
 
     static final public double TICK_PER_DEGREE = 2786.2 / 360;
 
+    public static double ticksToRotation6000RPM(double ticks) {
+        return ticks/28;
+    }
 
     static double mmPerInch = 25.4;
 
@@ -51,6 +54,8 @@ public class CalculateTickPer {
     public static double ticksToMmLS(double ticks) {
         return 0.5 * (ticks / getTicksPerMm(ticksPerRevolutionLS, lsCircumfMm));
     }
+
+
 
     public static double inchToTicksLS(double inches) {
         return (mmToTicksLS(inches * mmPerInch));

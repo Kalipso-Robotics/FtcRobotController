@@ -157,7 +157,7 @@ public class TestNavigation extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         // Start odometry executor service
         executorService = Executors.newSingleThreadExecutor();

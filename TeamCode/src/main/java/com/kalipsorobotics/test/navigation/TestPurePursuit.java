@@ -31,7 +31,7 @@ public class TestPurePursuit extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OdometryFileWriter odometryFileWriter = new OdometryFileWriter("AutoBasket", opModeUtilities);

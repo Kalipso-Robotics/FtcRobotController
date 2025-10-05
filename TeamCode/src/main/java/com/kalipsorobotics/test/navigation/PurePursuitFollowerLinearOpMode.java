@@ -14,12 +14,8 @@ package com.kalipsorobotics.test.navigation;
 
 import android.util.Log;
 
-import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.localization.OdometryFileWriter;
-import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.Position;
-import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
@@ -29,9 +25,6 @@ import com.kalipsorobotics.utilities.SharedData;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 
 import org.json.JSONException;
@@ -41,7 +34,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -67,7 +59,7 @@ public class PurePursuitFollowerLinearOpMode extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         //OdometryFileWriter odometryFileWriter = new OdometryFileWriter("PurePursuitRun", opModeUtilities);
 

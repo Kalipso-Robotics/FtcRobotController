@@ -1,9 +1,7 @@
 package com.kalipsorobotics.test.navigation;
 
-import android.os.SystemClock;
 import android.util.Log;
 
-import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.math.Vector;
@@ -30,7 +28,7 @@ public class AdaptivePurePursuitRobotData extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         Position prevPosition = new Position(0,0,0);
         double prevTime = 0;

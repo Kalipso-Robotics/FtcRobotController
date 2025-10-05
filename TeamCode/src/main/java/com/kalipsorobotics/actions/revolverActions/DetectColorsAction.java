@@ -1,0 +1,45 @@
+package com.kalipsorobotics.actions.revolverActions;
+
+import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
+import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.utilities.KColor;
+import com.qualcomm.hardware.rev.RevColorSensorV3;
+
+public class DetectColorsAction extends Action {
+
+    private RevColorSensorV3 sen1;
+    private RevColorSensorV3 sen2;
+    private RevColorSensorV3 sen3;
+
+    private KColor.Color[] colors = new KColor.Color[3];
+
+    public DetectColorsAction(Revolver revolver) {
+        this.sen1 = revolver.sen1;
+        this.sen2 = revolver.sen2;
+        this.sen3 = revolver.sen3;
+        this.dependentActions.add(new DoneStateAction());
+    }
+
+    public KColor.Color[] getColors() {
+        return colors;
+    }
+
+    @Override
+    protected boolean checkDoneCondition() {
+        if (hasStarted) {
+            isDone = true;
+        }
+        return isDone;
+    }
+
+    @Override
+    protected void update() {
+        if(!hasStarted) {
+            colors[0] = KColor.classify(sen1);
+            colors[1] = KColor.classify(sen2);
+            colors[2] = KColor.classify(sen3);
+            hasStarted = true;
+        }
+    }
+}

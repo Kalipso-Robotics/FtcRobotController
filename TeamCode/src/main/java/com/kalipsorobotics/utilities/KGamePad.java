@@ -19,6 +19,10 @@ public class KGamePad {
     private boolean previousLeftBumper = false;
     private boolean previousBackButton = false;
     private boolean previousStartButton = false;
+    private boolean previousLeftTrigger = false;
+    private boolean previousRightTrigger = false;
+    private boolean previousLeftStickButton = false;
+    private boolean previousRightStickButton = false;
 
 
     public KGamePad(Gamepad gamepad){
@@ -33,7 +37,7 @@ public class KGamePad {
         return gamepad.left_bumper;
     }
 
-    public boolean isToggleDpadLeft (){
+    public boolean isDpadLeftFirstPressed(){
         boolean current = gamepad.dpad_left;
         boolean toggle = false;
         if (!this.previousDpadLeft && current){
@@ -45,7 +49,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleDpadRight(){
+    public boolean isDpadRightFirstPressed(){
         boolean current = gamepad.dpad_right;
         boolean toggle = false;
         if (!this.previousDpadRight && current){
@@ -56,7 +60,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleDpadUp(){
+    public boolean isDpadUpFirstPressed(){
         boolean current = gamepad.dpad_up;
         boolean toggle = false;
         if (!this.previousDpadUp && current){
@@ -67,7 +71,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleDpadDown(){
+    public boolean isDpadDownFirstPressed(){
         boolean current = gamepad.dpad_down;
         boolean toggle = false;
         if (!this.previousDpadDown && current){
@@ -78,7 +82,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleButtonB(){
+    public boolean isButtonBFirstPressed(){
         boolean current = gamepad.b;
         boolean toggle = false;
         if(!this.previousButtonB && current){
@@ -89,7 +93,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleButtonX(){
+    public boolean isButtonXFirstPressed(){
         boolean current = gamepad.x;
         boolean toggle = false;
         if(!this.previousButtonX && current){
@@ -100,7 +104,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleButtonA(){
+    public boolean isButtonAFirstPressed(){
         boolean current = gamepad.a;
         boolean toggle = false;
         if(!this.previousButtonA && current){
@@ -111,7 +115,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleButtonY(){
+    public boolean isButtonYFirstPressed(){
         boolean current = gamepad.y;
         boolean toggle = false;
         if(!this.previousButtonY && current){
@@ -122,7 +126,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleRightBumper(){
+    public boolean isRightBumperFirstPressed(){
         boolean current = gamepad.right_bumper;
         boolean toggle = false;
         if(!this.previousRightBumper && current){
@@ -133,7 +137,7 @@ public class KGamePad {
         return toggle;
     }
 
-    public boolean isToggleLeftBumper(){
+    public boolean isLeftBumperFirstPressed(){
         boolean current = gamepad.left_bumper;
         boolean toggle = false;
         if(!this.previousLeftBumper && current){
@@ -145,12 +149,55 @@ public class KGamePad {
     }
 
     public boolean isRightTriggerPressed(){
-
         return gamepad.right_trigger > 0.9;
     }
 
     public boolean isLeftTriggerPressed(){
-        return gamepad.left_trigger > 0.9;
+        return gamepad.left_trigger > 0.5;
+    }
+
+    public boolean isLeftTriggerFirstPressed(){
+        boolean current = gamepad.left_trigger > 0.5;
+        boolean toggle = false;
+        if(!this.previousLeftTrigger && current){
+            toggle = true;
+            Log.d("KGamePad", "This left trigger toggle");
+        }
+        this.previousLeftTrigger = current;
+        return toggle;
+    }
+
+    public boolean isRightTriggerFirstPressed(){
+        boolean current = gamepad.right_trigger > 0.9;
+        boolean toggle = false;
+        if(!this.previousRightTrigger && current){
+            toggle = true;
+            Log.d("KGamePad", "This right trigger toggle");
+        }
+        this.previousRightTrigger = current;
+        return toggle;
+    }
+
+    public boolean isLeftStickButtonFirstPressed(){
+        boolean current = gamepad.left_stick_button;
+        boolean toggle = false;
+        if(!this.previousLeftStickButton && current){
+            toggle = true;
+            Log.d("KGamePad", "This left stick button toggle");
+        }
+        this.previousLeftStickButton = current;
+        return toggle;
+    }
+
+    public boolean isRightStickButtonFirstPressed(){
+        boolean current = gamepad.right_stick_button;
+        boolean toggle = false;
+        if(!this.previousRightStickButton && current){
+            toggle = true;
+            Log.d("KGamePad", "This right stick button toggle");
+        }
+        this.previousRightStickButton = current;
+        return toggle;
     }
 
     public boolean isBackButtonPressed(){
