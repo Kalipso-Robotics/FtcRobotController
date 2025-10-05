@@ -24,6 +24,8 @@ public class KGamePad {
     private boolean previousLeftStickButton = false;
     private boolean previousRightStickButton = false;
 
+    private boolean toggleY = false;
+
 
     public KGamePad(Gamepad gamepad){
         this.gamepad = gamepad;
@@ -124,6 +126,13 @@ public class KGamePad {
         }
         this.previousButtonY = current;
         return toggle;
+    }
+
+    public boolean isToggleY() {
+        if (isButtonYFirstPressed()) {
+            toggleY = !toggleY;
+        }
+        return toggleY;
     }
 
     public boolean isRightBumperFirstPressed(){

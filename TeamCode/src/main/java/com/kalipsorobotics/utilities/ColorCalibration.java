@@ -1,5 +1,6 @@
 package com.kalipsorobotics.utilities;
 
+import static com.kalipsorobotics.utilities.ColorCalibrationDetection.detectColor;
 import static com.kalipsorobotics.utilities.KColor.Color.PURPLE;
 import static com.kalipsorobotics.utilities.KColor.Color.GREEN;
 import static com.kalipsorobotics.utilities.KColor.Color.NONE;
@@ -20,9 +21,9 @@ public class ColorCalibration extends LinearOpMode {
     RevColorSensorV3 bRight;
     OpModeUtilities opModeUtilities;
     LinearOpMode linearOpMode;
-    HashMap<KColor.Color, HSV> rev1 = new HashMap<>();
-    HashMap<KColor.Color, HSV> rev2 = new HashMap<>();
-    HashMap<KColor.Color, HSV> rev3 = new HashMap<>();
+    HashMap<KColor.Color, HSV> revFront = new HashMap<>();
+    HashMap<KColor.Color, HSV> revBLeft = new HashMap<>();
+    HashMap<KColor.Color, HSV> revBRight = new HashMap<>();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -39,29 +40,30 @@ public class ColorCalibration extends LinearOpMode {
 
         waitForStart();
         while(opModeIsActive()) {
-            if (gamepad1.a) {
+            if (kPad.isButtonAFirstPressed()) {
                 currentColor = KColor.Color.NONE;
-                telemetry.addLine("Color Set to NONE");
+                KLog.d("kPad", "Color Set to NONE");
             }
-            if (gamepad1.b) {
+            if (kPad.isButtonBFirstPressed()) {
                 currentColor = KColor.Color.GREEN;
-                telemetry.addLine("Color Set to GREEN");
-
+                KLog.d("kPad", "Color Set to GREEN");
             }
-            if (gamepad1.x) {
-                currentColor = PURPLE;
-                telemetry.addLine("Color Set to PURPLE");
-
+            if (kPad.isButtonXFirstPressed()) {
+                currentColor = KColor.Color.PURPLE;
+                KLog.d("kPad", "Color Set to PURPLE");
             }
-            if (kPad.isButtonYFirstPressed()) {
-                calibrate(front, currentColor, rev1);
-                calibrate(bLeft, currentColor, rev2);
-                calibrate(bRight, currentColor, rev3);
-                telemetry.addLine("Calibrating.");
-//                telemetry.clear();
-//                telemetry.addLine("Calibrating..");
-//                telemetry.clear();
-//                telemetry.addLine("Calibrating...");
+
+            // Display current color selection
+            if (currentColor != null) {
+                telemetry.addLine("Color Set to " + currentColor);
+            }
+
+            if (kPad.isToggleY()) {
+                calibrate(front, currentColor, revFront);
+                calibrate(bLeft, currentColor, revBLeft);
+                calibrate(bRight, currentColor, revBRight);
+                telemetry.addLine("Calibrating...");
+
 //                kFile.writeLine(
 //                        rev1.get(PURPLE) + "," + rev1.get(GREEN) + "," + rev1.get(NONE) + "," +
 //                                rev2.get(PURPLE) + "," + rev2.get(GREEN) + "," + rev2.get(NONE) + "," +
@@ -72,16 +74,25 @@ public class ColorCalibration extends LinearOpMode {
             }
 
             if (kPad.isRightBumperFirstPressed()) {
-                telemetry.clear();
-                telemetry.addLine("Rev 1 Values, PURPLE: " + rev1.get(PURPLE) + " GREEN: " + rev1.get(GREEN) + " NONE: " + rev1.get(NONE) + "\n");
-                telemetry.addLine("Rev 2 Values, PURPLE: " + rev2.get(PURPLE) + " GREEN: " + rev2.get(GREEN) + " NONE: " + rev2.get(NONE)  + "\n");
-                telemetry.addLine("Rev 3 Values, PURPLE: " + rev3.get(PURPLE) + " GREEN: " + rev3.get(GREEN) + " NONE: " + rev3.get(NONE)  + "\n");
+                KLog.d("CalibratedRevColor", "Front, PURPLE: " + revFront.get(PURPLE) + " GREEN: " + revFront.get(GREEN) + " NONE: " + revFront.get(NONE) + "\n");
+                KLog.d("CalibratedRevColor","BLeft, PURPLE: " + revBLeft.get(PURPLE) + " GREEN: " + revBLeft.get(GREEN) + " NONE: " + revBLeft.get(NONE)  + "\n");
+                KLog.d("CalibratedRevColor","Bright, PURPLE: " + revBRight.get(PURPLE) + " GREEN: " + revBRight.get(GREEN) + " NONE: " + revBRight.get(NONE)  + "\n");
+//                telemetry.addLine("Rev 1 Values, PURPLE: " + rev1.get(PURPLE) + " GREEN: " + rev1.get(GREEN) + " NONE: " + rev1.get(NONE) + "\n");
+//                telemetry.addLine("Rev 2 Values, PURPLE: " + rev2.get(PURPLE) + " GREEN: " + rev2.get(GREEN) + " NONE: " + rev2.get(NONE)  + "\n");
+//                telemetry.addLine("Rev 3 Values, PURPLE: " + rev3.get(PURPLE) + " GREEN: " + rev3.get(GREEN) + " NONE: " + rev3.get(NONE)  + "\n");
+            }
+
+            if (kPad.isLeftBumperFirstPressed()) {
+                KLog.d("RevColorTest", "Front Color: " + detectColor(revFront, front));
+                KLog.d("RevColorTest", "BLeft Color: " +  detectColor(revBLeft, bLeft));
+                KLog.d("RevColorTest", "BRight Color: " + detectColor(revBRight, bRight));
             }
 
             telemetry.update();
         }
 //        kFile.close();
     }
+
     public static void calibrate(RevColorSensorV3 revColor,
                                  KColor.Color currentColor,
                                  HashMap<KColor.Color, HSV> calibrationMap) {
@@ -100,8 +111,6 @@ public class ColorCalibration extends LinearOpMode {
             entry.avgHSV(curHSV[0], curHSV[1], curHSV[2]);
         }
     }
-
-
 
 
 }
