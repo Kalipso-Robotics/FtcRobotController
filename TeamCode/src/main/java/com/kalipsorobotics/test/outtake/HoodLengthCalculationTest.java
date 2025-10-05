@@ -23,7 +23,7 @@ public class HoodLengthCalculationTest extends LinearOpMode {
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule goBildaOdoModule = new GoBildaOdoModule(opModeUtilities);
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         calculateHoodLength = new CalculateHoodLength(new Position(0, 0, 0)); //TODO find actual goal position
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();

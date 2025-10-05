@@ -1,7 +1,5 @@
 package com.kalipsorobotics.test.localization;
 
-import android.util.Log;
-
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;
@@ -40,7 +38,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         OdometryFileWriter odometryFileWriter = new OdometryFileWriter("OdometryTest", opModeUtilities);
 

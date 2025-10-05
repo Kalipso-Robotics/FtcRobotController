@@ -1,21 +1,37 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.modules.Shooter;
+import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @TeleOp(name = "Shooter", group = "Linear OpMode")
 public class ShooterTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
+        DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
+        DriveAction driveAction = new DriveAction(driveTrain);
+        IMUModule.setInstanceNull();
+        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+        Odometry.setInstanceNull();
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+
+        KFileWriter shooterDataWriter = new KFileWriter("shooterData", opModeUtilities);
 
 
 
@@ -32,24 +48,19 @@ public class ShooterTest extends LinearOpMode {
         Servo kickerLeft = hardwareMap.servo.get("kicker2");
 //        kickerRight.setPosition(0.5);
 //        kickerLeft.setPosition(0.5);
-
-
+        Shooter shooter = new Shooter(opModeUtilities);
+        ShooterReady shooterReady = new ShooterReady(shooter, new Point(3600, 1200));
 
 
         //Servo pusher = hardwareMap.servo.get("hood");
         double pusherPosition = 0.9;
         //pusher.setPosition(pusherPosition);
 
-        OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
-        DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-        DriveAction driveAction = new DriveAction(driveTrain);
 
-        KFileWriter shooterDataWriter = new KFileWriter("shooterData", opModeUtilities);
 
-        Shooter shooter = new Shooter(opModeUtilities);
-
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         waitForStart();
-
         while (opModeIsActive()) {
             shooterDataWriter.writeLine("Shooter RPS: " + shooter.getRPS() + " HoodPos: " + shooter.getHoodPosition());
 
@@ -72,8 +83,9 @@ public class ShooterTest extends LinearOpMode {
             }
 
             if (gamepad1.dpad_left) {
-                shooter.getShooter1().setPower(power);
-                shooter.getShooter2().setPower(power);
+//                shooter.getShooter1().setPower(power);
+//                shooter.getShooter2().setPower(power);
+                shooterReady = new ShooterReady(shooter, new Point(3600, 1200));
             } else {
                 shooter.getShooter1().setPower(0);
                 shooter.getShooter2().setPower(0);
@@ -124,9 +136,10 @@ public class ShooterTest extends LinearOpMode {
             telemetry.addData("power", power);
             telemetry.addData("pusher position", pusherPosition);
             telemetry.update();
+            shooterReady.update();
 
         }
-
+        OpModeUtilities.shutdownExecutorService(executorService);
         shooterDataWriter.close();
 
     }

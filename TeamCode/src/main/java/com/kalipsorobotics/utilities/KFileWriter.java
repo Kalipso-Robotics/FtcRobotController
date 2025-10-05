@@ -13,6 +13,14 @@ import java.util.Date;
 import java.util.Locale;
 
 public class KFileWriter {
+    /**
+     * Deleting and Pulling Logs
+     * <p>
+     * alias deleteLog=adb shell "rm -r /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/*"
+     * <p>
+     * alias pullLog='adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog ~/Downloads'
+     *
+     */
 
     OpModeUtilities opModeUtilities;
     // Get the current date and time
