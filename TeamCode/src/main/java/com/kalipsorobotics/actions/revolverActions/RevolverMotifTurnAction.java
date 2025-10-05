@@ -26,7 +26,7 @@ public class RevolverMotifTurnAction extends Action {
         this.revolver = revolver;
         this.revolverServo = revolver.revolverServo;
         this.motifPattern = obiliskDetection.getObeliskMotifPattern();
-        this.colorSet = detectColorsAction.getColors();
+        this.colorSet = revolver.getColorSet();
         this.dependentActions.add(new DoneStateAction());
     }
 
