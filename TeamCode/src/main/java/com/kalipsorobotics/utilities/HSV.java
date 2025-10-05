@@ -6,10 +6,13 @@ public class HSV {
     private float saturation;
     private float value;
 
+    private int counter;
+
     public HSV(float hue, float saturation, float value) {
         this.hue = hue;
         this.saturation = saturation;
         this.value = value;
+        counter = 0;
     }
 
     public HSV(int red, int green, int blue) {
@@ -32,10 +35,14 @@ public class HSV {
         return value;
     }
 
+    public void resetCounter(){
+        counter = 0;
+    }
     public void avgHSV(float newHue, float newSaturation, float newValue) {
-        hue = (hue+newHue)/2;
-        saturation = (saturation + newSaturation)/2;
-        value = (value + newValue)/2;
+        hue = ((hue * counter) + newHue) / (counter + 1);
+        saturation = ((saturation * counter) + newSaturation) / (counter + 1);
+        value = ((value * counter) + newValue) / (counter + 1);
+        counter++;
     }
 
     @Override
