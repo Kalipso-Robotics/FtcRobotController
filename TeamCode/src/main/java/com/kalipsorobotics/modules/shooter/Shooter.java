@@ -14,6 +14,7 @@ import org.json.JSONException;
 import java.io.IOException;
 
 public class Shooter {
+    private static final double GOAL_HEIGHT = 838.0;
     private final OpModeUtilities opModeUtilities;
     private double rpm;
     double prevTicks = 0;
@@ -120,7 +121,7 @@ public class Shooter {
 
         // Convert millimeters to pixels (0.2608 pixels/mm)
         double xPixels = xMM * 0.2608;
-        double yPixels = 1000 * 0.2608;
+        double yPixels = GOAL_HEIGHT * 0.2608;
 
         ShooterLutPredictor.Prediction prediction = predictor.predict(xPixels, yPixels);
 
@@ -165,7 +166,7 @@ public class Shooter {
 
         // Convert millimeters to pixels (0.2608 pixels/mm)
         double xPixels = distance * 0.2608;
-        double yPixels = 1000 * 0.2608;
+        double yPixels = GOAL_HEIGHT * 0.2608;
 
         ShooterLutPredictor.Prediction prediction = predictor.predict(xPixels, yPixels);
         return prediction.rps;

@@ -39,6 +39,10 @@ public class KGamePad {
         return gamepad.left_bumper;
     }
 
+    public boolean isRightBumperPressed(){
+        return gamepad.right_bumper;
+    }
+
     public boolean isDpadLeftFirstPressed(){
         boolean current = gamepad.dpad_left;
         boolean toggle = false;
@@ -158,7 +162,7 @@ public class KGamePad {
     }
 
     public boolean isRightTriggerPressed(){
-        return gamepad.right_trigger > 0.9;
+        return gamepad.right_trigger > 0.5;
     }
 
     public boolean isLeftTriggerPressed(){
@@ -177,7 +181,7 @@ public class KGamePad {
     }
 
     public boolean isRightTriggerFirstPressed(){
-        boolean current = gamepad.right_trigger > 0.9;
+        boolean current = gamepad.right_trigger > 0.5;
         boolean toggle = false;
         if(!this.previousRightTrigger && current){
             toggle = true;
@@ -229,6 +233,22 @@ public class KGamePad {
         }
         this.previousStartButton = current;
         return toggle;
+    }
+
+    public double getLeftStickX(){
+        return gamepad.left_stick_x;
+    }
+
+    public double getLeftStickY(){
+        return gamepad.left_stick_y;
+    }
+
+    public double getRightStickX(){
+        return gamepad.right_stick_x;
+    }
+
+    public double getRightStickY(){
+        return gamepad.right_stick_y;
     }
 
 

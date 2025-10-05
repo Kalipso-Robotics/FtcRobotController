@@ -10,31 +10,39 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterReady extends Action {
 
-    public static final Point FAR_LAUNCH_POINT = new Point(3600, 1200);
+    public static final Point FAR_LAUNCH_POINT = new Point(3725, 1325);
 
     private final Shooter shooter;
     private final Point target;
 
     // PID constants - tune these values
-    private static final double KP = 0.001;  // Proportional gain
+    private static final double KP = 0.0007;  // Proportional gain
     private static final double KI = 0.0001;  // Integral gain
     private static final double KD = 0.0005;  // Derivative gain
 
-    private static final double TARGET_RPS_TOLERANCE = 3.0;
-    private static final double STABLE_TIME_MS = 200; // Time RPS must be stable
-    private static final double UPDATE_INTERVAL_MS = 500; // Update interval for RPS reading and power adjustment
+    private static final double TARGET_RPS_TOLERANCE = 1.0;
+    private static final double RPS_READ_DURATION_MS = 100; // Duration to read RPS
+    private static final double MOTOR_ACCELERATION_WAIT_MS = 150; // Wait for motor to accelerate
     private static final double MAX_POWER = 1.0;
     private static final double MIN_POWER = 0.0;
+
+    // State tracking
+    private enum State {
+        READING_RPS,
+        WAITING_FOR_ACCELERATION
+    }
+
+    private State currentState = State.READING_RPS;
+    private ElapsedTime stateTimer = null;
 
     // PID state
     private double previousError = 0;
     private double integral = 0;
     private double currentPower = MIN_POWER;
 
-    // Stabilization tracking
-    private ElapsedTime stableTimer = null;
-    private ElapsedTime updateTimer = null;
-    private boolean isStable = false;
+    // RPS accumulation
+    private double rpsSum = 0;
+    private int rpsReadCount = 0;
 
     public ShooterReady(Shooter shooter, Point target) {
         this.shooter = shooter;
@@ -54,72 +62,128 @@ public class ShooterReady extends Action {
             previousError = 0;
             integral = 0;
             currentPower = MIN_POWER;
-            stableTimer = null;
-            updateTimer = new ElapsedTime();
-            isStable = false;
+            currentState = State.READING_RPS;
+            stateTimer = new ElapsedTime();
+            rpsSum = 0;
+            rpsReadCount = 0;
         }
 
         // Always update hood position based on current position
         shooter.updateHoodFromPosition(SharedData.getOdometryPosition(), target);
 
-        // Only update RPS and power every UPDATE_INTERVAL_MS
-        if (updateTimer.milliseconds() < UPDATE_INTERVAL_MS) {
+        switch (currentState) {
+            case READING_RPS:
+                handleReadingRPS();
+                break;
+
+            case WAITING_FOR_ACCELERATION:
+                handleWaitingForAcceleration();
+                break;
+        }
+    }
+
+    private void handleReadingRPS() {
+        // Read Current RPS for duration 100ms
+        accumulateRPSReading();
+
+        // Check if we've read for the full duration
+        if (stateTimer.milliseconds() >= RPS_READ_DURATION_MS) {
+            processRPSReadings();
+        }
+    }
+
+    private void accumulateRPSReading() {
+        double currentRPS = shooter.getRPS();
+        rpsSum += currentRPS;
+        rpsReadCount++;
+    }
+
+    private void processRPSReadings() {
+        double averageRPS = calculateAverageRPS();
+        double targetRPS = getTargetRPS();
+        double error = targetRPS - averageRPS;
+
+        logRPSReadings(averageRPS, targetRPS, error);
+
+        // Check if RPS is within range
+        if (isRPSWithinTolerance(error)) {
+            markAsDone();
             return;
         }
 
-        // Reset update timer for next interval
-        updateTimer.reset();
+        // Calculate and set motor power
+        double newPower = calculateNewPower(error);
+        shooter.setPower(newPower);
 
-        double targetRPS = shooter.getTargetRPS(SharedData.getOdometryPosition(), target);
-        double currentRPS = shooter.getRPS();
+        // Update state and transition
+        updatePIDState(newPower, error);
+        transitionToAccelerationState();
+    }
 
-        // Calculate error
-        double error = targetRPS - currentRPS;
+    private double calculateAverageRPS() {
+        return rpsSum / rpsReadCount;
+    }
 
-        // PID calculations
+    private double getTargetRPS() {
+        return shooter.getTargetRPS(SharedData.getOdometryPosition(), target);
+    }
+
+    private void logRPSReadings(double averageRPS, double targetRPS, double error) {
+        Log.d("ShooterReady", "Average RPS: " + averageRPS + " (from " + rpsReadCount +
+              " readings), Target: " + targetRPS + ", Error: " + error);
+    }
+
+    private boolean isRPSWithinTolerance(double error) {
+        return Math.abs(error) <= TARGET_RPS_TOLERANCE;
+    }
+
+    private void markAsDone() {
+        isDone = true;
+        Log.d("ShooterReady", "RPS within tolerance - Ready!");
+    }
+
+    private double calculateNewPower(double error) {
+        // Update integral with anti-windup
         integral += error;
-
-        // Anti-windup: clamp integral to prevent excessive buildup
         double maxIntegral = 100.0;
         if (integral > maxIntegral) integral = maxIntegral;
         if (integral < -maxIntegral) integral = -maxIntegral;
 
+        // Calculate derivative
         double derivative = error - previousError;
 
         // Calculate PID output
         double pidOutput = (KP * error) + (KI * integral) + (KD * derivative);
 
-        // Update power based on PID output
-        currentPower += pidOutput;
+        // Calculate new power
+        double newPower = currentPower + pidOutput;
 
         // Clamp power to valid range
-        if (currentPower > MAX_POWER) currentPower = MAX_POWER;
-        if (currentPower < MIN_POWER) currentPower = MIN_POWER;
+        if (newPower > MAX_POWER) newPower = MAX_POWER;
+        if (newPower < MIN_POWER) newPower = MIN_POWER;
 
-        // Set motor power
-        shooter.setPower(currentPower);
+        return newPower;
+    }
 
-        // Store error for next iteration
+    private void updatePIDState(double newPower, double error) {
+        currentPower = newPower;
         previousError = error;
+    }
 
-        Log.d("ShooterReady", "Target RPS: " + targetRPS + ", Current RPS: " + currentRPS +
-              ", Error: " + error + ", Power: " + currentPower + ", PID: " + pidOutput);
+    private void transitionToAccelerationState() {
+        currentState = State.WAITING_FOR_ACCELERATION;
+        stateTimer.reset();
+    }
 
-        // Check if RPS is within tolerance
-        if (Math.abs(error) <= TARGET_RPS_TOLERANCE) {
-            // Start or continue stability timer
-            if (stableTimer == null) {
-                stableTimer = new ElapsedTime();
-                Log.d("ShooterReady", "Started stability timer");
-            } else if (stableTimer.milliseconds() >= STABLE_TIME_MS) {
-                // RPS has been stable for required time
-                isDone = true;
-                Log.d("ShooterReady", "RPS stable and ready!");
-                return;
-            }
-        } else {
-            // RPS moved out of tolerance, reset stability timer
-            stableTimer = null;
+    private void handleWaitingForAcceleration() {
+        // Wait for motor to accelerate (150ms)
+        if (stateTimer.milliseconds() >= MOTOR_ACCELERATION_WAIT_MS) {
+            // Return to reading RPS
+            currentState = State.READING_RPS;
+            stateTimer.reset();
+            rpsSum = 0;
+            rpsReadCount = 0;
+            Log.d("ShooterReady", "Motor acceleration complete, reading RPS again");
         }
     }
 }
