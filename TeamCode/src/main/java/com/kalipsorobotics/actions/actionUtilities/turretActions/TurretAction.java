@@ -3,8 +3,10 @@ package com.kalipsorobotics.actions.actionUtilities.turretActions;
 import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,13 +14,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class TurretAction extends Action {
     Odometry odometry;
+    Turret turret;
+    DcMotor motor;
+
+    private final double ticksPerRotation = 384.5;
+    private final double gearRatio = 2.69;
+    private final double degreesPerRotation = 360.0;
+
+    private final double ticksPerDegree = (ticksPerRotation * gearRatio) / degreesPerRotation;
 
 
 
-    public TurretAction (Odometry odometry){
+
+    public TurretAction (Odometry odometry, Turret turret){
         this.odometry = odometry;
-
-
+        this.turret = turret;
+        this.motor = turret.turretMotor;
+        this.dependentActions.add(new DoneStateAction());
     }
 
     @Override
@@ -56,6 +68,19 @@ public class TurretAction extends Action {
 
         double angle_target = Math.atan(yTargetGoal/xTargetGoal);
         KLog.d("turret angle", angle_target + " ");
+
+        double turretRotation = angle_target / 360;
+        double motorRotation = turretRotation * gearRatio;
+        double numberOfTicks = ticksPerRotation * motorRotation;
+
+        motor.setTargetPosition((int) numberOfTicks);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(0.5);
+
+
+
+
+
 
 
 

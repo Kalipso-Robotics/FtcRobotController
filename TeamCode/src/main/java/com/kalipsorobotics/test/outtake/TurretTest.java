@@ -7,6 +7,7 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -16,11 +17,15 @@ public class TurretTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
+        DriveTrain.setInstanceNull();
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
+        IMUModule.setInstanceNull();
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
-        GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule);
-        TurretAction turretAction = new TurretAction(odometry);
+        Odometry.setInstanceNull();
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        Turret.setInstanceNull();
+        Turret turret = Turret.getInstance(opModeUtilities);
+        TurretAction turretAction = new TurretAction(odometry, turret);
 
         waitForStart();
         while(opModeIsActive()) {
