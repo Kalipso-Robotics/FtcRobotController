@@ -51,7 +51,7 @@ public class ColorCalibration extends LinearOpMode {
 
         // Uncomment to collect raw data points for analysis
         rawDataFile = new KFileWriter("ColorRawData", opModeUtilities);
-        rawDataFile.writeLine("Timestamp,Sensor,Color,Hue,Saturation,Value,Red,Green,Blue");
+        rawDataFile.writeLine("Timestamp,Sensor,Color,Hue,Saturation,Value,Distance,Red,Green,Blue");
 
         waitForStart();
         while(opModeIsActive()) {
@@ -230,7 +230,7 @@ public class ColorCalibration extends LinearOpMode {
         String colorName = (currentColor != null) ? currentColor.toString() : "UNKNOWN";
 
         rawDataFile.writeLine(timestamp + "," + sensorName + "," + colorName + "," +
-                hsv[0] + "," + hsv[1] + "," + hsv[2] + "," + revColor.getDistance(DistanceUnit.MM) + "," + revColor.getRawLightDetected() + "," + revColor.getNormalizedColors() + revColor.getRawLightDetectedMax() + "," + ","  + red + "," + green + "," + blue);
+                hsv[0] + "," + hsv[1] + "," + hsv[2] + "," + revColor.getDistance(DistanceUnit.MM) + ","  + red + "," + green + "," + blue);
     }
 
 }
