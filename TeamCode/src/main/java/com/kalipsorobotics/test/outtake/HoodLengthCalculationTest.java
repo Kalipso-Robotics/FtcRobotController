@@ -5,6 +5,7 @@ import android.util.Log;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.CalculateHoodLength;
 import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.math.ShooterLUTCornerGrid;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
@@ -25,13 +26,23 @@ public class HoodLengthCalculationTest extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = new GoBildaOdoModule(opModeUtilities);
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         calculateHoodLength = new CalculateHoodLength(new Position(0, 0, 0)); //TODO find actual goal position
+        ShooterLUTCornerGrid lut = new ShooterLUTCornerGrid();
+
+        double xIn = 1000*(SharedData.getOdometryPosition().getX()); //converts to meters
+        double yIn = 1000*(SharedData.getOdometryPosition().getY());
+
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         waitForStart();
         while(opModeIsActive()) {
-            Log.d("Hood Length Calculation", "hood length: " + calculateHoodLength.calculateHoodLengthFlatArc(SharedData.getOdometryPosition()));
+            //TODO make into action so it dosnt pause other things
+            ShooterLUTCornerGrid.ShotParams sp = lut.queryInches(xIn, yIn);
+            Log.d("Hood Length Calculation", "hood length: " + sp.thetaDeg + "Motor rpm: " + sp.rpm);
 
+            //replce with  real hood and flywheel motor
+            //hood.setAngleDegrees(sp.thetaDeg);
+            //flywheel.setTargetRPM(sp.rpm);
         }
     }
 }

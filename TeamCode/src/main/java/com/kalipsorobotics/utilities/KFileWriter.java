@@ -18,7 +18,8 @@ public class KFileWriter {
      * <p>
      * alias deleteLog=adb shell "rm -r /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/*"
      * <p>
-     * alias pullLog='adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog ~/Downloads'
+     * alias pullLog='adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog ~/
+     * '
      *
      */
 
