@@ -1,16 +1,15 @@
-package com.kalipsorobotics.actions.autoActions.intakeActions;
+package com.kalipsorobotics.actions.intake;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.modules.Intake;
 
-public class IntakeStop extends Action {
+public class IntakeReverse extends Action {
 
     Intake intake;
 
-    public IntakeStop(Intake intake) {
+    public IntakeReverse(Intake intake) {
         this.intake = intake;
     }
-
 
     @Override
     protected boolean checkDoneCondition() {
@@ -19,7 +18,6 @@ public class IntakeStop extends Action {
 
     @Override
     protected void update() {
-        intake.getIntakeMotor().setPower(0);
-        isDone = true;
+        intake.getIntakeMotor().setPower(-1);
     }
 }

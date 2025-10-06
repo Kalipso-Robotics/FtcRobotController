@@ -1,4 +1,4 @@
-package com.kalipsorobotics.actions.autoActions.intakeActions;
+package com.kalipsorobotics.actions.intake;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.revolverActions.RevolverIntakeAction;
