@@ -15,9 +15,11 @@ import java.io.IOException;
 
 public class Shooter {
     private static final double GOAL_HEIGHT = 838.0;
+    public static final Point FAR_LAUNCH_POINT = new Point(3352.8+150, 1524+150);
     private final OpModeUtilities opModeUtilities;
     private double rpm;
     double prevTicks = 0;
+    //darren cant digest cheese
     double prevTimeMS = System.currentTimeMillis();
 
     private final DcMotor shooter1;
@@ -113,7 +115,7 @@ public class Shooter {
      * Calculate and set motor powers and hood position based on millimeter coordinates
      * @param xMM horizontal position in millimeters
      */
-    private void setCalculatedPowerAndHood(double xMM) {
+    private void setCalculatedHood(double xMM) {
         if (predictor == null) {
             opModeUtilities.getTelemetry().addData("Warning", "Predictor not initialized");
             return;
@@ -130,6 +132,7 @@ public class Shooter {
 
         // Note: This does NOT set motor power - use ShooterReady action for power ramping
         // This only sets the hood position
+        Log.d("Hood", "Hood Pos: " + prediction.hood);
         hood.setPosition(prediction.hood);
     }
 
@@ -168,7 +171,14 @@ public class Shooter {
         double xPixels = distance * 0.2608;
         double yPixels = GOAL_HEIGHT * 0.2608;
 
+        Log.d("TargetRPS", "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
+              "), Target: (" + target.getX() + ", " + target.getY() +
+              "), Distance: " + distance + "mm, xPixels: " + xPixels);
+
         ShooterLutPredictor.Prediction prediction = predictor.predict(xPixels, yPixels);
+
+        Log.d("TargetRPS", "Predicted RPS: " + prediction.rps + ", Hood: " + prediction.hood);
+
         return prediction.rps;
     }
 
@@ -183,8 +193,9 @@ public class Shooter {
         double dy = target.getY() - currentPosition.getY();
         double distance = Math.sqrt((dx * dx) + (dy * dy));
 
+        Log.d("Distance", "distance: " + distance);
         // Use distance as xMM to set hood position
-        setCalculatedPowerAndHood(distance);
+        setCalculatedHood(distance);
     }
 
 

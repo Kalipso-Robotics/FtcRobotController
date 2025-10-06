@@ -2,9 +2,9 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
-import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeReverse;
-import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeRun;
-import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeStop;
+import com.kalipsorobotics.actions.intake.IntakeReverse;
+import com.kalipsorobotics.actions.intake.IntakeRun;
+import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
@@ -35,11 +35,12 @@ public class TeleOp extends KTeleOp {
     DriveAction driveAction = null;
 
 
-
+    double turretStickValue;
     boolean shooterReadyPressed = false;
     boolean kickPressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
+
 
     @Override
     protected void initializeRobot() {
@@ -64,7 +65,7 @@ public class TeleOp extends KTeleOp {
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
 
-        shooterReady = new ShooterReady(shooter, ShooterReady.FAR_LAUNCH_POINT);
+        shooterReady = new ShooterReady(shooter, Shooter.FAR_LAUNCH_POINT);
         kickBall = new KickBall(shooter);
 
 
@@ -73,6 +74,7 @@ public class TeleOp extends KTeleOp {
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
+        //darren cant digest cheese
         waitForStart();
         while (opModeIsActive()) {
 
@@ -85,6 +87,7 @@ public class TeleOp extends KTeleOp {
                 }
             }
 
+            turretStickValue = kGamePad2.getRightStickX();
             shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
             kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
@@ -93,7 +96,7 @@ public class TeleOp extends KTeleOp {
 
             if (shooterReadyPressed) {
                 if (shooterReady != null || shooterReady.getIsDone()) {
-                    shooterReady = new ShooterReady(shooter, ShooterReady.FAR_LAUNCH_POINT);
+                    shooterReady = new ShooterReady(shooter, Shooter.FAR_LAUNCH_POINT);
                     setLastShooterAction(shooterReady);
                 }
             }
@@ -120,6 +123,10 @@ public class TeleOp extends KTeleOp {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
                 }
+            }
+
+            if (turretStickValue != 0) {
+
             }
 
 

@@ -44,6 +44,7 @@ public abstract class KTeleOp extends LinearOpMode {
     protected void cleanupRobot() {
         try {
             OpModeUtilities.shutdownExecutorService(executorService);
+            //darren cant digest cheese
         } catch (InterruptedException e) {
             Log.e("KTeleOp", "Error shutting down executor service", e);
         }
