@@ -65,7 +65,7 @@ public class TeleOp extends KTeleOp {
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
 
-        shooterReady = new ShooterReady(shooter, Shooter.FAR_LAUNCH_POINT);
+        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
         kickBall = new KickBall(shooter);
 
 
@@ -95,8 +95,10 @@ public class TeleOp extends KTeleOp {
 
 
             if (shooterReadyPressed) {
+                Log.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
-                    shooterReady = new ShooterReady(shooter, Shooter.FAR_LAUNCH_POINT);
+                    Log.d("ShooterReadyPressed", "Shooter Ready set");
+                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
                     setLastShooterAction(shooterReady);
                 }
             }

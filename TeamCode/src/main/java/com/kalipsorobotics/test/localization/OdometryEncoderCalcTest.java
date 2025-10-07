@@ -51,11 +51,11 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
-            while (SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU).getCurrentVelocity().getX() <  (50.0/1000.0) && !calibrationComplete) {
-                driveTrain.setPower(power);
-                power += 0.001;
-            }
-            calibrationComplete = true;
+//            while (SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU).getCurrentVelocity().getX() <  (50.0/1000.0) && !calibrationComplete) {
+//                driveTrain.setPower(power);
+//                power += 0.001;
+//            }
+//            calibrationComplete = true;
             KLog.d("minimumPower", "minimum power " + power);
             driveTrain.setPower(power);
 
@@ -78,7 +78,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
                     "  count right: " + odometry.getRightEncoderMM() +
                     "  count left: " + odometry.getLeftEncoderMM());
             KLog.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
-            KLog.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
+            //KLog.d("PIN_Position", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.GOBILDA)).getCurrentPosition().toString());
         }
         OpModeUtilities.shutdownExecutorService(executorService);
         odometryFileWriter.close();

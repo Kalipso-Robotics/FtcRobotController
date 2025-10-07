@@ -52,4 +52,8 @@ public class MathFunctions {
         double delta = angleWrapRad(end - start);
         return start + delta * t;
     }
+
+    public static double distance(Point p1, Point p2) {
+        return Math.hypot(p2.getX() - p1.getX(), p2.getY() - p1.getY());
+    }
 }

@@ -68,6 +68,7 @@ public class ShooterReady extends Action {
             rpsSum = 0;
             rpsReadCount = 0;
         }
+        Log.d("ShooterReadyPressed", "Shooter Ready Update");
 
         // Always update hood position based on current position
         shooter.updateHoodFromPosition(SharedData.getOdometryPosition(), target);
