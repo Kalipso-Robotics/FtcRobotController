@@ -12,7 +12,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "Odometry Test For New Robot")
+@TeleOp(name = "TurretTest", group = "Linear OpMode")
 public class TurretTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

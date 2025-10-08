@@ -56,7 +56,7 @@ public class TurretAction extends Action {
         //  angle_target = arctan (x_goal/y_goal)
 
         double x_init_setup = 3657.6;
-        double y_init_setup = 3251.2;
+        double y_init_setup = -3251.2;
 
         Position currentPosition = SharedData.getOdometryPosition();
         double currentX = currentPosition.getX();
@@ -66,16 +66,19 @@ public class TurretAction extends Action {
         double yTargetGoal = y_init_setup + currentY;
         double xTargetGoal = x_init_setup - currentX;
 
-        double angle_target = Math.atan(yTargetGoal/xTargetGoal);
-        KLog.d("turret angle", angle_target + " ");
+        double angle_target = Math.atan(yTargetGoal/xTargetGoal) * 180/Math.PI;//180 deg = 3.14 radians
+        KLog.d("turret angle", "deg " + angle_target);
 
         double turretRotation = angle_target / 360;
         double motorRotation = turretRotation * gearRatio;
-        double numberOfTicks = ticksPerRotation * motorRotation;
+        double targetTicks = ticksPerRotation * motorRotation;
+        KLog.d("turret angle", "ticks " + targetTicks );
+        KLog.d("turret angle", "motor position "+ motor.getCurrentPosition());
 
 
-
-        KLog.d("turret angle", numberOfTicks + " ");
+        motor.setTargetPosition((int) targetTicks);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(0.5);
 
 
 
