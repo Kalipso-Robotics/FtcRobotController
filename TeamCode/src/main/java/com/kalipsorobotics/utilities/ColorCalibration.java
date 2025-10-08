@@ -9,6 +9,11 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 
 @TeleOp
@@ -25,18 +30,28 @@ public class ColorCalibration extends LinearOpMode {
     HashMap<KColor.Color, HSV> revBLeft = new HashMap<>();
     HashMap<KColor.Color, HSV> revBRight = new HashMap<>();
 
+    private static final String CALIBRATION_FILENAME = "color_calibration.csv";
+
+    // Uncomment to collect raw data points for analysis
+    private KFileWriter rawDataFile;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
-        front = hardwareMap.get(RevColorSensorV3.class, "revColor1");
-        bLeft = hardwareMap.get(RevColorSensorV3.class, "revColor2");
-        bRight = hardwareMap.get(RevColorSensorV3.class, "revColor3");
+        bLeft = hardwareMap.get(RevColorSensorV3.class, "revColor1");
+        bRight = hardwareMap.get(RevColorSensorV3.class, "revColor2");
+        front = hardwareMap.get(RevColorSensorV3.class, "revColor3");
 
         opModeUtilities = new OpModeUtilities(hardwareMap, linearOpMode, telemetry);
 
         kPad = new KGamePad(gamepad1);
-//        kFile = new KFileWriter("color", opModeUtilities);
-//        kFile.writeLine("Rev1_PURPLE,Rev1_GREEN,Rev1_NONE,Rev2_PURPLE,Rev2_GREEN,Rev2_NONE,Rev3_PURPLE,Rev3_GREEN,Rev3_NONE");
+
+        // Try to load saved calibration data
+        loadCalibrationData();
+
+        // Uncomment to collect raw data points for analysis
+        rawDataFile = new KFileWriter("ColorRawData", opModeUtilities);
+        rawDataFile.writeLine("Timestamp,Sensor,Color,Hue,Saturation,Value,Distance,Red,Green,Blue");
 
         waitForStart();
         while(opModeIsActive()) {
@@ -64,11 +79,11 @@ public class ColorCalibration extends LinearOpMode {
                 calibrate(bRight, currentColor, revBRight);
                 telemetry.addLine("Calibrating...");
 
-//                kFile.writeLine(
-//                        rev1.get(PURPLE) + "," + rev1.get(GREEN) + "," + rev1.get(NONE) + "," +
-//                                rev2.get(PURPLE) + "," + rev2.get(GREEN) + "," + rev2.get(NONE) + "," +
-//                                rev3.get(PURPLE) + "," + rev3.get(GREEN) + "," + rev3.get(NONE)
-//                );
+                // Uncomment to collect raw data points for analysis
+                collectRawDataPoint(front, "Front", currentColor);
+                collectRawDataPoint(bLeft, "BLeft", currentColor);
+                collectRawDataPoint(bRight, "BRight", currentColor);
+
             } else {
                 telemetry.addLine("Calibration Stopped.");
             }
@@ -88,9 +103,17 @@ public class ColorCalibration extends LinearOpMode {
                 KLog.d("RevColorTest", "BRight Color: " + detectColor(revBRight, bRight));
             }
 
+            // Save calibration when Start button is pressed
+            if (kPad.isStartButtonPressed()) {
+                saveCalibrationData();
+                telemetry.addLine("Calibration Saved!");
+            }
+
             telemetry.update();
         }
-//        kFile.close();
+
+        // Uncomment to close raw data file
+        rawDataFile.close();
     }
 
     public static void calibrate(RevColorSensorV3 revColor,
@@ -112,5 +135,102 @@ public class ColorCalibration extends LinearOpMode {
         }
     }
 
+    private void saveCalibrationData() {
+        File path = new File(opModeUtilities.getHardwareMap().appContext.getExternalFilesDir(null), "OdometryLog");
+        if (!path.exists()) {
+            path.mkdirs();
+        }
+
+        File file = new File(path, CALIBRATION_FILENAME);
+
+        try {
+            FileWriter writer = new FileWriter(file, false);
+            writer.write("Sensor,Color,Hue,Saturation,Value\n");
+
+            // Write Front sensor data
+            writeCalibrationEntry(writer, "Front", PURPLE, revFront.get(PURPLE));
+            writeCalibrationEntry(writer, "Front", GREEN, revFront.get(GREEN));
+            writeCalibrationEntry(writer, "Front", NONE, revFront.get(NONE));
+
+            // Write BLeft sensor data
+            writeCalibrationEntry(writer, "BLeft", PURPLE, revBLeft.get(PURPLE));
+            writeCalibrationEntry(writer, "BLeft", GREEN, revBLeft.get(GREEN));
+            writeCalibrationEntry(writer, "BLeft", NONE, revBLeft.get(NONE));
+
+            // Write BRight sensor data
+            writeCalibrationEntry(writer, "BRight", PURPLE, revBRight.get(PURPLE));
+            writeCalibrationEntry(writer, "BRight", GREEN, revBRight.get(GREEN));
+            writeCalibrationEntry(writer, "BRight", NONE, revBRight.get(NONE));
+
+            writer.close();
+            KLog.d("ColorCalibration", "Calibration data saved successfully");
+        } catch (IOException e) {
+            KLog.d("ColorCalibration", "Failed to save calibration data: " + e.getMessage());
+        }
+    }
+
+    private void writeCalibrationEntry(FileWriter writer, String sensor, KColor.Color color, HSV hsv) throws IOException {
+        if (hsv != null) {
+            writer.write(sensor + "," + color + "," + hsv.getHue() + "," + hsv.getSaturation() + "," + hsv.getValue() + "\n");
+        }
+    }
+
+    private void loadCalibrationData() {
+        try {
+            KFileReader reader = new KFileReader(CALIBRATION_FILENAME, opModeUtilities);
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("Sensor")) {
+                    continue;
+                }
+
+                String[] values = line.split(",");
+                if (values.length < 5) continue;
+
+                String sensor = values[0];
+                KColor.Color color = KColor.Color.valueOf(values[1]);
+                float hue = Float.parseFloat(values[2]);
+                float sat = Float.parseFloat(values[3]);
+                float val = Float.parseFloat(values[4]);
+
+                HSV hsv = new HSV(hue, sat, val);
+
+                if (sensor.equals("Front")) {
+                    revFront.put(color, hsv);
+                } else if (sensor.equals("BLeft")) {
+                    revBLeft.put(color, hsv);
+                } else if (sensor.equals("BRight")) {
+                    revBRight.put(color, hsv);
+                }
+            }
+
+            reader.close();
+            KLog.d("ColorCalibration", "Calibration data loaded successfully");
+        } catch (Exception e) {
+            KLog.d("ColorCalibration", "No existing calibration data found or failed to load: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Collects raw HSV data points for cluster analysis
+     * Uncomment the method calls to enable data collection
+     * Creates a timestamped CSV file with all individual readings
+     * Recommended: Hold each color for 10-15 seconds (~500-750 data points per sensor per color)
+     */
+    private void collectRawDataPoint(RevColorSensorV3 revColor, String sensorName, KColor.Color currentColor) {
+        int red = revColor.red();
+        int green = revColor.green();
+        int blue = revColor.blue();
+
+        float[] hsv = new float[3];
+        android.graphics.Color.RGBToHSV(red, green, blue, hsv);
+
+        long timestamp = System.currentTimeMillis();
+        String colorName = (currentColor != null) ? currentColor.toString() : "UNKNOWN";
+
+        rawDataFile.writeLine(timestamp + "," + sensorName + "," + colorName + "," +
+                hsv[0] + "," + hsv[1] + "," + hsv[2] + "," + revColor.getDistance(DistanceUnit.MM) + ","  + red + "," + green + "," + blue);
+    }
 
 }

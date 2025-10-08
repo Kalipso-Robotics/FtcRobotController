@@ -2,10 +2,9 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
-import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeFullAction;
-import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeReverse;
-import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeRun;
-import com.kalipsorobotics.actions.autoActions.intakeActions.IntakeStop;
+import com.kalipsorobotics.actions.intake.IntakeReverse;
+import com.kalipsorobotics.actions.intake.IntakeRun;
+import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
@@ -13,7 +12,6 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -26,12 +24,10 @@ public class TeleOp extends KTeleOp {
 
     Shooter shooter = null;
     Intake intake = null;
-    Revolver revolver = null;
     ShooterReady shooterReady = null;
     KickBall kickBall = null;
 
     IntakeRun intakeRun = null;
-    IntakeFullAction intakeFullAction = null;
     IntakeStop intakeStop = null;
 
     IntakeReverse intakeReverse = null;
@@ -39,11 +35,12 @@ public class TeleOp extends KTeleOp {
     DriveAction driveAction = null;
 
 
-
+    double turretStickValue;
     boolean shooterReadyPressed = false;
     boolean kickPressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
+
 
     @Override
     protected void initializeRobot() {
@@ -62,15 +59,13 @@ public class TeleOp extends KTeleOp {
         driveAction = new DriveAction(driveTrain);
 
         intake = new Intake(opModeUtilities);
-        revolver = Revolver.getInstance(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
 
-        intakeFullAction = new IntakeFullAction(intake, revolver);
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
 
-        shooterReady = new ShooterReady(shooter, ShooterReady.FAR_LAUNCH_POINT);
+        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
         kickBall = new KickBall(shooter);
 
 
@@ -79,6 +74,7 @@ public class TeleOp extends KTeleOp {
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
+        //darren cant digest cheese
         waitForStart();
         while (opModeIsActive()) {
 
@@ -91,6 +87,7 @@ public class TeleOp extends KTeleOp {
                 }
             }
 
+            turretStickValue = kGamePad2.getRightStickX();
             shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
             kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
@@ -98,8 +95,10 @@ public class TeleOp extends KTeleOp {
 
 
             if (shooterReadyPressed) {
+                Log.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
-                    shooterReady = new ShooterReady(shooter, ShooterReady.FAR_LAUNCH_POINT);
+                    Log.d("ShooterReadyPressed", "Shooter Ready set");
+                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
                     setLastShooterAction(shooterReady);
                 }
             }
@@ -112,8 +111,8 @@ public class TeleOp extends KTeleOp {
             }
 
             if (intakePressed) {
-                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
-                    intakeFullAction = new IntakeFullAction(intake, revolver);
+                if (intakeRun != null || intakeRun.getIsDone()) {
+                    intakeRun = new IntakeRun(intake);
                     setLastIntakeAction(intakeRun);
                 }
             } else if (intakeReversePressed) {
@@ -122,13 +121,14 @@ public class TeleOp extends KTeleOp {
                     setLastIntakeAction(intakeReverse);
                 }
             } else {
-                if (intakeFullAction != null) {
-                    intakeFullAction.setIsDone(true);
-                }
                 if (intakeStop != null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
                 }
+            }
+
+            if (turretStickValue != 0) {
+
             }
 
 

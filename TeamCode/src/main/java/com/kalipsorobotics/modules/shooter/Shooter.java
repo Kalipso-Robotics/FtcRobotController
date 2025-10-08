@@ -14,10 +14,15 @@ import org.json.JSONException;
 import java.io.IOException;
 
 public class Shooter {
-    private static final double GOAL_HEIGHT = 838.0;
+    public static final double MM_TO_PIXEL_RATIO = 0.2608;
+
+    public static final double GOAL_HEIGHT_MM = 750.0;//838
+    public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
+    public static final Point FAR_STARTING_POS_MM = new Point(3352.8+300, 1524+300);
     private final OpModeUtilities opModeUtilities;
     private double rpm;
     double prevTicks = 0;
+    //darren cant digest cheese
     double prevTimeMS = System.currentTimeMillis();
 
     private final DcMotor shooter1;
@@ -69,7 +74,7 @@ public class Shooter {
 
         ShooterLutPredictor temp = null;
         try {
-            temp = new ShooterLutPredictor(opModeUtilities.getHardwareMap().appContext, "Shooter LUT.json");
+            temp = new ShooterLutPredictor(opModeUtilities.getHardwareMap().appContext, "ShooterLUT.json");
         } catch (IOException | JSONException e) {
             opModeUtilities.getTelemetry().addData("Error", "Failed to load Shooter LUT: " + e.getMessage());
         }
@@ -110,26 +115,39 @@ public class Shooter {
     }
 
     /**
-     * Calculate and set motor powers and hood position based on millimeter coordinates
+     * Calculate prediction based on millimeter coordinates
      * @param xMM horizontal position in millimeters
+     * @return prediction containing RPS and hood position, or null if predictor not initialized
      */
-    private void setCalculatedPowerAndHood(double xMM) {
+    private ShooterLutPredictor.Prediction getPrediction(double xMM) {
         if (predictor == null) {
             opModeUtilities.getTelemetry().addData("Warning", "Predictor not initialized");
-            return;
+            return null;
         }
 
-        // Convert millimeters to pixels (0.2608 pixels/mm)
-        double xPixels = xMM * 0.2608;
-        double yPixels = GOAL_HEIGHT * 0.2608;
+        // Convert millimeters to pixels
+        double xPixels = mmToPixel(xMM);
+        double yPixels = mmToPixel(GOAL_HEIGHT_MM);
 
-        ShooterLutPredictor.Prediction prediction = predictor.predict(xPixels, yPixels);
+        return predictor.predict(xPixels, yPixels);
+    }
+
+    /**
+     * Set hood position based on millimeter coordinates
+     * @param xMM horizontal position in millimeters
+     */
+    private void setCalculatedHood(double xMM) {
+        ShooterLutPredictor.Prediction prediction = getPrediction(xMM);
+        if (prediction == null) {
+            return;
+        }
 
         Log.d("Hood", "Hood Pos: " + hood.getPosition());
         Log.d("Wheel", "Target RPS: " + prediction.rps + ", Current RPS: " + getRPS());
 
         // Note: This does NOT set motor power - use ShooterReady action for power ramping
         // This only sets the hood position
+        Log.d("Hood", "Hood Pos: " + prediction.hood);
         hood.setPosition(prediction.hood);
     }
 
@@ -154,21 +172,21 @@ public class Shooter {
      * @return target RPS for the shooter
      */
     public double getTargetRPS(Position currentPosition, Point target) {
-        if (predictor == null) {
-            opModeUtilities.getTelemetry().addData("Warning", "Predictor not initialized");
-            return 0;
-        }
-
         // Calculate distance between current position and target (ignoring theta)
         double dx = target.getX() - currentPosition.getX();
         double dy = target.getY() - currentPosition.getY();
         double distance = Math.sqrt((dx * dx) + (dy * dy));
 
-        // Convert millimeters to pixels (0.2608 pixels/mm)
-        double xPixels = distance * 0.2608;
-        double yPixels = GOAL_HEIGHT * 0.2608;
+        ShooterLutPredictor.Prediction prediction = getPrediction(distance);
 
-        ShooterLutPredictor.Prediction prediction = predictor.predict(xPixels, yPixels);
+        if (prediction == null) {
+            return 0;
+        }
+
+        Log.d("TargetRPS", "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
+              "), Target: (" + target.getX() + ", " + target.getY() +
+              "), Distance: " + distance + "mm, Predicted RPS: " + prediction.rps + ", Hood: " + prediction.hood);
+
         return prediction.rps;
     }
 
@@ -183,10 +201,18 @@ public class Shooter {
         double dy = target.getY() - currentPosition.getY();
         double distance = Math.sqrt((dx * dx) + (dy * dy));
 
+        Log.d("Distance", "distance: " + distance);
         // Use distance as xMM to set hood position
-        setCalculatedPowerAndHood(distance);
+        setCalculatedHood(distance);
     }
 
+    public static double mmToPixel(double mm) {
+        return mm * MM_TO_PIXEL_RATIO;
+    }
+
+    public static double pixelToMM(double pixel) {
+        return pixel / MM_TO_PIXEL_RATIO;
+    }
 
 
 }

@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterReady extends Action {
 
-    public static final Point FAR_LAUNCH_POINT = new Point(3725, 1325);
 
     private final Shooter shooter;
     private final Point target;
@@ -39,6 +38,7 @@ public class ShooterReady extends Action {
     private double previousError = 0;
     private double integral = 0;
     private double currentPower = MIN_POWER;
+    private double previousTargetRPS = 0;
 
     // RPS accumulation
     private double rpsSum = 0;
@@ -62,11 +62,13 @@ public class ShooterReady extends Action {
             previousError = 0;
             integral = 0;
             currentPower = MIN_POWER;
+            previousTargetRPS = 0;
             currentState = State.READING_RPS;
             stateTimer = new ElapsedTime();
             rpsSum = 0;
             rpsReadCount = 0;
         }
+        Log.d("ShooterReadyPressed", "Shooter Ready Update");
 
         // Always update hood position based on current position
         shooter.updateHoodFromPosition(SharedData.getOdometryPosition(), target);
@@ -103,6 +105,14 @@ public class ShooterReady extends Action {
         double targetRPS = getTargetRPS();
         double error = targetRPS - averageRPS;
 
+        // Reset PID if target changed significantly (>5 RPS)
+        if (Math.abs(targetRPS - previousTargetRPS) > 5.0) {
+            integral = 0;
+            previousError = 0;
+            Log.w("ShooterReady_PID", "Target changed from " + previousTargetRPS + " to " + targetRPS + " - Resetting PID");
+        }
+        previousTargetRPS = targetRPS;
+
         logRPSReadings(averageRPS, targetRPS, error);
 
         // Check if RPS is within range
@@ -112,8 +122,14 @@ public class ShooterReady extends Action {
         }
 
         // Calculate and set motor power
+        double oldPower = currentPower;
         double newPower = calculateNewPower(error);
         shooter.setPower(newPower);
+
+        Log.i("ShooterReady_PID", String.format(
+            "PID Update: Error=%.2f, Integral=%.2f, Derivative=%.2f, Power: %.3f -> %.3f (Δ=%.3f)",
+            error, integral, (error - previousError), oldPower, newPower, (newPower - oldPower)
+        ));
 
         // Update state and transition
         updatePIDState(newPower, error);
@@ -129,8 +145,10 @@ public class ShooterReady extends Action {
     }
 
     private void logRPSReadings(double averageRPS, double targetRPS, double error) {
-        Log.d("ShooterReady", "Average RPS: " + averageRPS + " (from " + rpsReadCount +
-              " readings), Target: " + targetRPS + ", Error: " + error);
+        Log.d("ShooterReady_RPS", String.format(
+            "Current: %.2f RPS (avg of %d readings) | Target: %.2f RPS | Error: %.2f RPS",
+            averageRPS, rpsReadCount, targetRPS, error
+        ));
     }
 
     private boolean isRPSWithinTolerance(double error) {

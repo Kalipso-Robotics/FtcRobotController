@@ -31,6 +31,13 @@ public class Point {
         return new Point(this.getX() - other.getX(), this.getY() - other.getY());
     }
 
+    public static double distance(Point p1, Point p2) {
+        return Math.hypot(p2.getX() - p1.getX(), p2.getY() - p1.getY());
+    }
+
+    public static double distance(double x1, double y1, double x2, double y2) {
+        return Math.hypot(x2 - x1, y2 - y1);
+    }
 
     public Point add(Vector vector) {
         return new Point(this.getX() + vector.getX(), this.getY() + vector.getY());
