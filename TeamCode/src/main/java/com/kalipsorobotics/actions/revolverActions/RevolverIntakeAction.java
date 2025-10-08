@@ -4,6 +4,7 @@ import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.utilities.KColor;
+import com.kalipsorobotics.utilities.KServo;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -13,7 +14,7 @@ public class RevolverIntakeAction extends Action {
     private RevColorSensorV3 sen1;
     private RevColorSensorV3 sen2;
     private RevColorSensorV3 sen3;
-    private Servo revolverServo;
+    private KServo revolverServo;
 
     private int count;
 

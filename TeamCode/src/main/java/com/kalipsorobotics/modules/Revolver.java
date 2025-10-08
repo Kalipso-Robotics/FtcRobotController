@@ -1,6 +1,7 @@
 package com.kalipsorobotics.modules;
 
 import com.kalipsorobotics.utilities.KColor;
+import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,7 +14,7 @@ public class Revolver {
 
     private final OpModeUtilities opModeUtilities;
 
-    public Servo revolverServo;
+    public KServo revolverServo;
 
     public RevColorSensorV3 sen1;
     public RevColorSensorV3 sen2;
@@ -45,7 +46,8 @@ public class Revolver {
     }
 
     private static void resetHardwareMap(HardwareMap hardwareMap, Revolver revolver) {
-        revolver.revolverServo = hardwareMap.servo.get("revolver");
+        Servo servo = hardwareMap.servo.get("revolver");
+        revolver.revolverServo = new KServo(servo, KServo.AXON_MAX_SPEED,242, 0, false);
         revolver.sen1 = hardwareMap.get(RevColorSensorV3.class, "revColor1");
         revolver.sen2 = hardwareMap.get(RevColorSensorV3.class, "revColor2");
         revolver.sen3 = hardwareMap.get(RevColorSensorV3.class, "revColor3");
@@ -68,10 +70,37 @@ public class Revolver {
     }
 
     public void setColorSet(int index, KColor.Color color) {
+        this.colorSet[index] = color;
+    }
+
+    public void setColorSet(KColor.Color[] color) {
         this.colorSet = colorSet;
     }
 
     public KColor.Color[] getColorSet() {
+        setColorSet(0, KColor.classify(sen1));
+        setColorSet(1, KColor.classify(sen2));
+        setColorSet(2, KColor.classify(sen3));
         return colorSet;
+    }
+
+    public static KColor.Color[] transformColorSetToTray(KColor.Color[] colorSet, int currentRevolverIndex) {
+        KColor.Color[] transformedColorSet = new KColor.Color[3];
+
+        //transformed color set holds color of ball in each revolver tray index,
+        //rather than color above each color sensor index.
+        if (currentRevolverIndex == 0) {
+            transformedColorSet = colorSet;
+        } else if (currentRevolverIndex == 1) {
+            transformedColorSet[0] = colorSet[2];
+            transformedColorSet[1] =  colorSet[0];
+            transformedColorSet[2] = colorSet[1];
+        } else if (currentRevolverIndex == 2) {
+            transformedColorSet[0] = colorSet[1];
+            transformedColorSet[1] =  colorSet[2];
+            transformedColorSet[2] = colorSet[0];
+        }
+
+        return transformedColorSet;
     }
 }
