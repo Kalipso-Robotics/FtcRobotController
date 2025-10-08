@@ -73,11 +73,9 @@ public class TurretAction extends Action {
         double motorRotation = turretRotation * gearRatio;
         double numberOfTicks = ticksPerRotation * motorRotation;
 
-        motor.setTargetPosition((int) numberOfTicks);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(0.5);
 
 
+        KLog.d("turret angle", numberOfTicks + " ");
 
 
 
