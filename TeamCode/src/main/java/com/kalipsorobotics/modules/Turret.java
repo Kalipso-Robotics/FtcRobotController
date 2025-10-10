@@ -38,6 +38,10 @@ public class Turret {
         turret.turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
+    public DcMotor getTurretMotor(){
+        return turretMotor;
+    }
+
     public OpModeUtilities getOpModeUtilities() {
         return opModeUtilities;
     }
