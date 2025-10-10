@@ -1,9 +1,11 @@
 package com.kalipsorobotics.utilities;
 
 import static com.kalipsorobotics.utilities.KColorDetection.detectColor;
-import static com.kalipsorobotics.utilities.KColor.Color.PURPLE;
-import static com.kalipsorobotics.utilities.KColor.Color.GREEN;
-import static com.kalipsorobotics.utilities.KColor.Color.NONE;
+import static com.kalipsorobotics.modules.MotifColors.PURPLE;
+import static com.kalipsorobotics.modules.MotifColors.GREEN;
+import static com.kalipsorobotics.modules.MotifColors.NONE;
+
+import com.kalipsorobotics.modules.MotifColors;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,7 +20,7 @@ import java.util.HashMap;
 
 @TeleOp
 public class ColorCalibration extends LinearOpMode {
-    KColor.Color currentColor;
+    MotifColors currentColor;
     KGamePad kPad;
     KFileWriter kFile;
     RevColorSensorV3 front;
@@ -26,9 +28,9 @@ public class ColorCalibration extends LinearOpMode {
     RevColorSensorV3 bRight;
     OpModeUtilities opModeUtilities;
     LinearOpMode linearOpMode;
-    HashMap<KColor.Color, HSV> revFront = new HashMap<>();
-    HashMap<KColor.Color, HSV> revBLeft = new HashMap<>();
-    HashMap<KColor.Color, HSV> revBRight = new HashMap<>();
+    HashMap<MotifColors, HSV> revFront = new HashMap<>();
+    HashMap<MotifColors, HSV> revBLeft = new HashMap<>();
+    HashMap<MotifColors, HSV> revBRight = new HashMap<>();
 
     private static final String CALIBRATION_FILENAME = "color_calibration.csv";
 
@@ -56,15 +58,15 @@ public class ColorCalibration extends LinearOpMode {
         waitForStart();
         while(opModeIsActive()) {
             if (kPad.isButtonAFirstPressed()) {
-                currentColor = KColor.Color.NONE;
+                currentColor = MotifColors.NONE;
                 KLog.d("kPad", "Color Set to NONE");
             }
             if (kPad.isButtonBFirstPressed()) {
-                currentColor = KColor.Color.GREEN;
+                currentColor = MotifColors.GREEN;
                 KLog.d("kPad", "Color Set to GREEN");
             }
             if (kPad.isButtonXFirstPressed()) {
-                currentColor = KColor.Color.PURPLE;
+                currentColor = MotifColors.PURPLE;
                 KLog.d("kPad", "Color Set to PURPLE");
             }
 
@@ -120,8 +122,8 @@ public class ColorCalibration extends LinearOpMode {
     }
 
     public static void calibrate(RevColorSensorV3 revColor,
-                                 KColor.Color currentColor,
-                                 HashMap<KColor.Color, HSV> calibrationMap) {
+                                 MotifColors currentColor,
+                                 HashMap<MotifColors, HSV> calibrationMap) {
         int red   = revColor.red();
         int green = revColor.green();
         int blue  = revColor.blue();
@@ -172,7 +174,7 @@ public class ColorCalibration extends LinearOpMode {
         }
     }
 
-    private void writeCalibrationEntry(FileWriter writer, String sensor, KColor.Color color, HSV hsv) throws IOException {
+    private void writeCalibrationEntry(FileWriter writer, String sensor, MotifColors color, HSV hsv) throws IOException {
         if (hsv != null) {
             writer.write(sensor + "," + color + "," + hsv.getHue() + "," + hsv.getSaturation() + "," + hsv.getValue() + "\n");
         }
@@ -192,7 +194,7 @@ public class ColorCalibration extends LinearOpMode {
                 if (values.length < 5) continue;
 
                 String sensor = values[0];
-                KColor.Color color = KColor.Color.valueOf(values[1]);
+                MotifColors color = MotifColors.valueOf(values[1]);
                 float hue = Float.parseFloat(values[2]);
                 float sat = Float.parseFloat(values[3]);
                 float val = Float.parseFloat(values[4]);
@@ -215,7 +217,7 @@ public class ColorCalibration extends LinearOpMode {
         }
     }
 
-    private void collectRawDataPoint(RevColorSensorV3 revColor, String sensorName, KColor.Color currentColor) {
+    private void collectRawDataPoint(RevColorSensorV3 revColor, String sensorName, MotifColors currentColor) {
         int red = revColor.red();
         int green = revColor.green();
         int blue = revColor.blue();

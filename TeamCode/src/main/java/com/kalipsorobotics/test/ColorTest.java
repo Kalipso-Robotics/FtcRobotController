@@ -1,5 +1,6 @@
 package com.kalipsorobotics.test;
 
+import com.kalipsorobotics.modules.MotifColors;
 import com.kalipsorobotics.utilities.KColorDetection;
 import com.kalipsorobotics.utilities.KColor;
 import com.kalipsorobotics.utilities.KLog;
@@ -12,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class ColorTest extends LinearOpMode {
 
 
-    KColor.Color currentColor;
+    MotifColors currentColor;
 
     @Override
     public void runOpMode() throws InterruptedException {

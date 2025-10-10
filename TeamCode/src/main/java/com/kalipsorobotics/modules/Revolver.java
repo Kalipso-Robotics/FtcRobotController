@@ -1,7 +1,6 @@
 package com.kalipsorobotics.modules;
 
 import com.kalipsorobotics.utilities.KColorDetection;
-import com.kalipsorobotics.utilities.KColor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
@@ -21,7 +20,7 @@ public class Revolver {
     public static final double REVOLVER_INDEX_1 = 0.58;
     public static final double REVOLVER_INDEX_2 = 0.965;
 
-    private KColor.Color[] colorSet = new KColor.Color[3];
+    private MotifColors[] colorSet = new MotifColors[3];
 
     public Revolver(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
@@ -65,23 +64,23 @@ public class Revolver {
         return -1;
     }
 
-    public void setColorSet(int index, KColor.Color color) {
+    public void setColorSet(int index, MotifColors color) {
         this.colorSet[index] = color;
     }
 
-    public void setColorSet(KColor.Color[] color) {
+    public void setColorSet(MotifColors[] color) {
         this.colorSet = colorSet;
     }
 
-    public KColor.Color[] getColorSet() {
+    public MotifColors[] getColorSet() {
         setColorSet(0, KColorDetection.detectColor("revColor1", sen1, opModeUtilities));
         setColorSet(1, KColorDetection.detectColor("revColor2", sen2, opModeUtilities));
         setColorSet(2, KColorDetection.detectColor("revColor3", sen3, opModeUtilities));
         return colorSet;
     }
 
-    public static KColor.Color[] transformColorSetToTray(KColor.Color[] colorSet, int currentRevolverIndex) {
-        KColor.Color[] transformedColorSet = new KColor.Color[3];
+    public static MotifColors[] transformColorSetToTray(MotifColors[] colorSet, int currentRevolverIndex) {
+        MotifColors[] transformedColorSet = new MotifColors[3];
 
         //transformed color set holds color of ball in each revolver tray index,
         //rather than color above each color sensor index.

@@ -3,10 +3,6 @@ package com.kalipsorobotics.utilities;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 public class KColor {
-    public enum Color {
-        PURPLE, GREEN, NONE
-    }
-
     int red, green, blue;
 
     public static String printColor(RevColorSensorV3 revColor) {

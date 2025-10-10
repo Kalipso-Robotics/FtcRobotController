@@ -1,6 +1,6 @@
 package com.kalipsorobotics.cameraVision;
 
-import com.kalipsorobotics.utilities.KColor;
+import com.kalipsorobotics.modules.MotifColors;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -25,11 +25,11 @@ public class ObiliskDetection {
     private static final int[] OBELISK_APRILTAG_IDS = {21, 22, 23};
     
     public static class MotifPattern {
-        public final KColor.Color top;
-        public final KColor.Color middle;
-        public final KColor.Color bottom;
-        
-        public MotifPattern(KColor.Color top, KColor.Color middle, KColor.Color bottom) {
+        public final MotifColors top;
+        public final MotifColors middle;
+        public final MotifColors bottom;
+
+        public MotifPattern(MotifColors top, MotifColors middle, MotifColors bottom) {
             this.top = top;
             this.middle = middle;
             this.bottom = bottom;
@@ -40,7 +40,7 @@ public class ObiliskDetection {
             return String.format("%s-%s-%s", top, middle, bottom);
         }
         
-        public boolean equals(KColor.Color expectedTop, KColor.Color expectedMiddle, KColor.Color expectedBottom) {
+        public boolean equals(MotifColors expectedTop, MotifColors expectedMiddle, MotifColors expectedBottom) {
             return top == expectedTop && middle == expectedMiddle && bottom == expectedBottom;
         }
     }
@@ -120,7 +120,7 @@ public class ObiliskDetection {
     public void updateMotifPattern() {
         AprilTagDetection obeliskDetection = getClosestObeliskDetection();
         if (obeliskDetection == null) {
-            cachedMotifPattern = new MotifPattern(KColor.Color.NONE, KColor.Color.NONE, KColor.Color.NONE);
+            cachedMotifPattern = new MotifPattern(MotifColors.NONE, MotifColors.NONE, MotifColors.NONE);
         } else {
             // Return expected pattern based on AprilTag ID since image analysis isn't working
             cachedMotifPattern = getExpectedMotifPattern(obeliskDetection.id);
@@ -135,10 +135,10 @@ public class ObiliskDetection {
     
     public MotifPattern getExpectedMotifPattern(int aprilTagId) {
         switch (aprilTagId) {
-            case 21: return new MotifPattern(KColor.Color.GREEN, KColor.Color.PURPLE, KColor.Color.PURPLE);
-            case 22: return new MotifPattern(KColor.Color.PURPLE, KColor.Color.GREEN, KColor.Color.PURPLE);
-            case 23: return new MotifPattern(KColor.Color.PURPLE, KColor.Color.PURPLE, KColor.Color.GREEN);
-            default: return new MotifPattern(KColor.Color.NONE, KColor.Color.NONE, KColor.Color.NONE);
+            case 21: return new MotifPattern(MotifColors.GREEN, MotifColors.PURPLE, MotifColors.PURPLE);
+            case 22: return new MotifPattern(MotifColors.PURPLE, MotifColors.GREEN, MotifColors.PURPLE);
+            case 23: return new MotifPattern(MotifColors.PURPLE, MotifColors.PURPLE, MotifColors.GREEN);
+            default: return new MotifPattern(MotifColors.NONE, MotifColors.NONE, MotifColors.NONE);
         }
     }
     
@@ -158,11 +158,11 @@ public class ObiliskDetection {
     }
     
     private MotifPattern analyzeMotifPattern(AprilTagDetection detection) {
-        Mat frame = visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING ? 
+        Mat frame = visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING ?
             null : getCurrentFrame();
-            
+
         if (frame == null) {
-            return new MotifPattern(KColor.Color.NONE, KColor.Color.NONE, KColor.Color.NONE);
+            return new MotifPattern(MotifColors.NONE, MotifColors.NONE, MotifColors.NONE);
         }
         
         int centerX = (int) detection.center.x;
@@ -175,16 +175,16 @@ public class ObiliskDetection {
         int leftX = Math.max(0, centerX - regionSize/2);
         int rightX = Math.min(frame.cols(), centerX + regionSize/2);
 
-        KColor.Color topColor = detectColorInRegion(frame, leftX, topY, rightX - leftX, regionSize);
-        KColor.Color middleColor = detectColorInRegion(frame, leftX, middleY, rightX - leftX, regionSize);
-        KColor.Color bottomColor = detectColorInRegion(frame, leftX, bottomY, rightX - leftX, regionSize);
+        MotifColors topColor = detectColorInRegion(frame, leftX, topY, rightX - leftX, regionSize);
+        MotifColors middleColor = detectColorInRegion(frame, leftX, middleY, rightX - leftX, regionSize);
+        MotifColors bottomColor = detectColorInRegion(frame, leftX, bottomY, rightX - leftX, regionSize);
         
         return new MotifPattern(topColor, middleColor, bottomColor);
     }
     
-    private KColor.Color detectColorInRegion(Mat frame, int x, int y, int width, int height) {
+    private MotifColors detectColorInRegion(Mat frame, int x, int y, int width, int height) {
         if (x < 0 || y < 0 || x + width > frame.cols() || y + height > frame.rows()) {
-            return KColor.Color.NONE;
+            return MotifColors.NONE;
         }
         
         Rect region = new Rect(x, y, width, height);
@@ -212,11 +212,11 @@ public class ObiliskDetection {
         greenMask.release();
         
         if (purplePixels > greenPixels && purplePixels > 100) {
-            return KColor.Color.PURPLE;
+            return MotifColors.PURPLE;
         } else if (greenPixels > 100) {
-            return KColor.Color.GREEN;
+            return MotifColors.GREEN;
         } else {
-            return KColor.Color.NONE;
+            return MotifColors.NONE;
         }
     }
     
@@ -224,7 +224,7 @@ public class ObiliskDetection {
         return null;
     }
     
-    public boolean isMotifPattern(KColor.Color expectedTop, KColor.Color expectedMiddle, KColor.Color expectedBottom) {
+    public boolean isMotifPattern(MotifColors expectedTop, MotifColors expectedMiddle, MotifColors expectedBottom) {
         MotifPattern pattern = getObeliskMotifPattern();
         return pattern.equals(expectedTop, expectedMiddle, expectedBottom);
     }
