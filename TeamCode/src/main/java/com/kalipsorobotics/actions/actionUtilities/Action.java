@@ -86,7 +86,9 @@ public abstract class Action {
         return isDone;
     }
 
-    protected abstract boolean checkDoneCondition();
+    protected boolean checkDoneCondition() {
+        return isDone;
+    }
 
     //motor power, etc
     protected abstract void update();

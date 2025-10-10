@@ -78,7 +78,7 @@ public class TeleOp extends KTeleOp {
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(intake, revolver);
 
-        //todo just fed in testing motif pattern change later
+        //TODO just fed in testing motif pattern change later
         testingMotif = new ObiliskDetection.MotifPattern(KColor.Color.PURPLE, KColor.Color.PURPLE, KColor.Color.GREEN);
         fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
 
@@ -104,10 +104,10 @@ public class TeleOp extends KTeleOp {
 
             turretStickValue = kGamePad2.getRightStickX();
             shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
-            kickPressed = kGamePad2.isButtonYFirstPressed();
+            //kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed();
-            fullShootPressed = kGamePad2.isButtonAFirstPressed();
+            fullShootPressed = kGamePad2.isButtonYFirstPressed();
 
 
             if (shooterReadyPressed) {
@@ -122,6 +122,9 @@ public class TeleOp extends KTeleOp {
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
                     fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
+                    setLastKickerAction(fullShootMotifAction);
+                    setLastShooterAction(fullShootMotifAction);
+                    //idempotent
                 }
             }
 

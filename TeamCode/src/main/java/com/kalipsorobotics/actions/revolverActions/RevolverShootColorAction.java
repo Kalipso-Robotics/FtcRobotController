@@ -10,7 +10,7 @@ import com.kalipsorobotics.utilities.KColor;
 
 public class RevolverShootColorAction extends KActionSet {
     public RevolverShootColorAction(Revolver revolver, Shooter shooter, KColor.Color shootColor) {
-        ShooterReady shooterReady = new ShooterReady(shooter, new Point(0,0)); //todo set point
+        ShooterReady shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM); //todo set point
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 

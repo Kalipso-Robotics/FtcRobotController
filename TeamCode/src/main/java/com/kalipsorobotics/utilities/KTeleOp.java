@@ -86,21 +86,22 @@ public abstract class KTeleOp extends LinearOpMode {
     /**
      * Update all active actions
      * Call this at the end of your loop() method
+     * Automatically prevents duplicate updates if the same action is referenced in multiple slots
      */
     protected void updateActions() {
         if (lastIntakeAction != null) {
             lastIntakeAction.updateCheckDone();
         }
 
-        if (lastMoveAction != null) {
+        if (lastMoveAction != null && lastMoveAction != lastIntakeAction) {
             lastMoveAction.updateCheckDone();
         }
 
-        if (lastShooterAction != null) {
+        if (lastShooterAction != null && lastShooterAction != lastIntakeAction && lastShooterAction != lastMoveAction) {
             lastShooterAction.updateCheckDone();
         }
 
-        if (lastKickerAction != null) {
+        if (lastKickerAction != null && lastKickerAction != lastIntakeAction && lastKickerAction != lastMoveAction && lastKickerAction != lastShooterAction) {
             lastKickerAction.updateCheckDone();
         }
     }
