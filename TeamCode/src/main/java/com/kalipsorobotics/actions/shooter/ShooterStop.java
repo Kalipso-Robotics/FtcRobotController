@@ -12,11 +12,6 @@ public class ShooterStop extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
-        return isDone;
-    }
-
-    @Override
     protected void update() {
         shooter.stop();
         isDone = true;

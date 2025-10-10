@@ -23,15 +23,6 @@ public class KActionSet extends Action {
         }
     }
 
-    @Override
-    public boolean checkDoneCondition() {
-        for (Action a : actions) {
-            if (a != null && !a.getIsDone()) {
-                return false;
-            }
-        }
-        return true;
-    }
 
     @Override
     public boolean updateCheckDone(){
@@ -49,7 +40,13 @@ public class KActionSet extends Action {
         if(isDone) {
             return isDone;
         }
-        isDone = checkDoneCondition();
+        for (Action a : actions) {
+            if (a != null && !a.getIsDone()) {
+                isDone = false;
+                return isDone;
+            }
+        }
+        isDone = true;
         return isDone;
     }
 

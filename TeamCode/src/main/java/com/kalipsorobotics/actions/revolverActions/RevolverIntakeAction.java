@@ -30,7 +30,7 @@ public class RevolverIntakeAction extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
+    protected boolean updateIsDone() {
         if (KColor.classify(sen1) != KColor.Color.NONE && KColor.classify(sen2) != KColor.Color.NONE && KColor.classify(sen3) != KColor.Color.NONE) {
             revolver.setColorSet(0, KColor.classify(sen1));
             revolver.setColorSet(1, KColor.classify(sen2));

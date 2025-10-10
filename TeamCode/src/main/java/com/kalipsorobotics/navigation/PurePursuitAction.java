@@ -206,11 +206,6 @@ public class PurePursuitAction extends Action {
     }
 
     @Override
-    public boolean checkDoneCondition() {
-        return isDone;
-    }
-
-    @Override
     public void setIsDone(boolean isDone) {
         this.isDone = isDone;
         if (isDone) {

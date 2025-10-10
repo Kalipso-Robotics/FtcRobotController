@@ -7,11 +7,6 @@ public class DoneStateAction extends Action {
     }
 
     @Override
-    public boolean checkDoneCondition() {
-        return true;
-    }
-
-    @Override
     public void update() {
     }
 }

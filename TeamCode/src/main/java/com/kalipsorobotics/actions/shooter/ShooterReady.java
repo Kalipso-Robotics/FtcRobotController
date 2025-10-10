@@ -51,11 +51,6 @@ public class ShooterReady extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
-        return isDone;
-    }
-
-    @Override
     public void update() {
         if (!hasStarted) {
             hasStarted = true;

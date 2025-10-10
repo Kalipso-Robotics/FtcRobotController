@@ -20,7 +20,7 @@ public class SetAutoDelayAction extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
+    protected boolean updateIsDone() {
         if(isDone) {
             return true;
         }
@@ -29,6 +29,7 @@ public class SetAutoDelayAction extends Action {
             opModeUtilities.getTelemetry().addLine("CONFIRMED DELAY");
             opModeUtilities.getTelemetry().addData("DELAY TIME IN MS ", getTimeMs());
             opModeUtilities.getTelemetry().update();
+            isDone = true;
             return true;
         } else {
             return false;

@@ -44,11 +44,4 @@ public class KServoAutoAction extends Action {
 
     }
 
-    @Override
-    public boolean checkDoneCondition() {
-        return isDone;
-    }
-
-
-
 }

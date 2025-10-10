@@ -22,7 +22,7 @@ public class DetectColorsAction extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
+    protected boolean updateIsDone() {
         if (hasStarted) {
             isDone = true;
         }

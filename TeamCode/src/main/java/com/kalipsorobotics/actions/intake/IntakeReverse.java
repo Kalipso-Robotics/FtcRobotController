@@ -12,11 +12,6 @@ public class IntakeReverse extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
-        return isDone;
-    }
-
-    @Override
     protected void update() {
         intake.getIntakeMotor().setPower(-1);
     }

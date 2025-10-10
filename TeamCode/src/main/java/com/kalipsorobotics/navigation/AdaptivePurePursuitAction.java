@@ -137,11 +137,6 @@ public class AdaptivePurePursuitAction extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
-        return isDone;
-    }
-
-    @Override
     public void setIsDone(boolean isDone) {
         this.isDone = isDone;
         if (isDone) {

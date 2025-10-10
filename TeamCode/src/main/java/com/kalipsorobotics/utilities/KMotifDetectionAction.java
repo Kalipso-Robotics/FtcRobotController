@@ -27,8 +27,9 @@ public class KMotifDetectionAction extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
-        return obiliskDetection.isObeliskVisible();
+    protected boolean updateIsDone() {
+        isDone = obiliskDetection.isObeliskVisible();
+        return isDone;
     }
     //TODO think about auto implementation + what to do if no pattern detected
     //TODO timeout if nothing detected

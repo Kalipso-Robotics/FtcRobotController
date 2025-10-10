@@ -22,11 +22,6 @@ public class RevolverMoveToColorAction extends Action {
     }
 
     @Override
-    protected boolean checkDoneCondition() {
-        return isDone;
-    }
-
-    @Override
     protected void update() {
         KColor.Color[] colorSet = revolver.getColorSet();
 

@@ -153,6 +153,12 @@ public class TeleOp extends KTeleOp {
                 }
             }
 
+            if (turretStickValue != 0) {
+
+            } else {
+
+            }
+
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }

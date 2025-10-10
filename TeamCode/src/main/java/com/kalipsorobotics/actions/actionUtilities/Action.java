@@ -16,6 +16,7 @@ public abstract class Action {
     protected String name;
 
     protected Telemetry telemetry;
+
     public boolean getIsDone() {
         return isDone;
     }
@@ -82,11 +83,6 @@ public abstract class Action {
     }
 
     protected boolean updateIsDone() {
-        isDone = checkDoneCondition();
-        return isDone;
-    }
-
-    protected boolean checkDoneCondition() {
         return isDone;
     }
 

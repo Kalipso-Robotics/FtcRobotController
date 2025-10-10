@@ -15,11 +15,12 @@ public class WaitAction extends Action {
     }
 
     @Override
-    public boolean checkDoneCondition() {
+    protected boolean updateIsDone() {
         if (hasStarted) {
 //            boolean done = elapsedTime.seconds() >= waitTimeSeconds;
             Log.d("waitaction", "elapsed time " + elapsedTime.seconds());
-            return elapsedTime.milliseconds() >= waitTimeMS;
+            isDone = elapsedTime.milliseconds() >= waitTimeMS;
+            return isDone;
         }
 
         return false;
