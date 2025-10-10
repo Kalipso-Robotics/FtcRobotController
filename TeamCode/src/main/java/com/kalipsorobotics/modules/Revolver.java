@@ -1,13 +1,12 @@
 package com.kalipsorobotics.modules;
 
+import com.kalipsorobotics.utilities.KColorDetection;
 import com.kalipsorobotics.utilities.KColor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.checkerframework.checker.units.qual.K;
 
 public class Revolver {
     private static Revolver single_instance = null;
@@ -78,9 +77,9 @@ public class Revolver {
     }
 
     public KColor.Color[] getColorSet() {
-        setColorSet(0, KColor.classify(sen1));
-        setColorSet(1, KColor.classify(sen2));
-        setColorSet(2, KColor.classify(sen3));
+        setColorSet(0, KColorDetection.detectColor("revColor1", sen1, opModeUtilities));
+        setColorSet(1, KColorDetection.detectColor("revColor2", sen2, opModeUtilities));
+        setColorSet(2, KColorDetection.detectColor("revColor3", sen3, opModeUtilities));
         return colorSet;
     }
 

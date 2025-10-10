@@ -3,7 +3,7 @@ package com.kalipsorobotics.actions.revolverActions;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.modules.Revolver;
-import com.kalipsorobotics.utilities.KColor;
+import com.kalipsorobotics.utilities.KColorDetection;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 public class DetectColorsAction extends Action {
@@ -32,9 +32,9 @@ public class DetectColorsAction extends Action {
     @Override
     protected void update() {
         if(!hasStarted) {
-            revolver.setColorSet(0, KColor.classify(sen1));
-            revolver.setColorSet(1, KColor.classify(sen2));
-            revolver.setColorSet(2, KColor.classify(sen3));
+            revolver.setColorSet(0, KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()));
+            revolver.setColorSet(1, KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()));
+            revolver.setColorSet(2, KColorDetection.detectColor("revColor3", sen3, revolver.getOpModeUtilities()));
             hasStarted = true;
         }
     }

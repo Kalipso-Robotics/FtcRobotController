@@ -6,27 +6,11 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 
 import java.util.HashMap;
 
-public class ColorCalibrationDetection {
+public class KColorDetection {
 
     private static final String CALIBRATION_FILENAME = "color_calibration.csv";
 
-    /**
-     * Detect color using auto-loaded calibration data
-     * <p>
-     * Auto-loads calibration from file and detects color. Calibration must be saved first using ColorCalibration OpMode.
-     * <p>
-     * Example usage:
-     * <pre>
-     * RevColorSensorV3 frontSensor = hardwareMap.get(RevColorSensorV3.class, "revColor1");
-     * KColor.Color detected = ColorCalibrationDetection.detectColor("Front", frontSensor, opModeUtilities);
-     * </pre>
-     *
-     * @param sensorName Sensor identifier - MUST match exactly: "Front", "BLeft", or "BRight" (case-sensitive)
-     *                   These correspond to revColor1, revColor2, revColor3 respectively
-     * @param revColor The RevColorSensorV3 sensor instance to read from
-     * @param opModeUtilities OpModeUtilities instance for file access
-     * @return Detected color (PURPLE, GREEN, or NONE)
-     */
+
     public static KColor.Color detectColor(String sensorName, RevColorSensorV3 revColor, OpModeUtilities opModeUtilities) {
         HashMap<KColor.Color, HSV> calibration = loadCalibration(sensorName, opModeUtilities);
         return detectColor(calibration, revColor);
@@ -83,34 +67,11 @@ public class ColorCalibrationDetection {
 
         double s = test.getSaturation() - ref.getSaturation();
 
-//        // Value can be >1 because inputs to RGBToHSV weren't 0..255.
-//        // Normalize by a soft scale so it can't swamp the metric.
-//        double valueScale = 2.0; // TUNE: 1.0–4.0; start at 2
-//        double v = (test.getValue() - ref.getValue()) / valueScale;
-
-        // weights: emphasize hue to split green vs purple cleanly
-//        double wH = 4.0, wS = 1.0, wV = 0.25;
+        // final calculation (can be tuned) currently uses simple distance formula and equal weight between h and s
         return Math.sqrt(h*h + s*s);
     }
 
-    /**
-     * Load calibration data for a specific sensor from saved file
-     * <p>
-     * Loads previously saved calibration from color_calibration.csv in OdometryLog directory.
-     * Use this if you want to cache calibration data instead of loading it every detection call.
-     * <p>
-     * Example usage:
-     * <pre>
-     * // Load once during init
-     * HashMap&lt;KColor.Color, HSV&gt; frontCal = ColorCalibrationDetection.loadCalibration("Front", opModeUtilities);
-     * // Use multiple times in loop
-     * KColor.Color detected = ColorCalibrationDetection.detectColor(frontCal, frontSensor);
-     * </pre>
-     *
-     * @param sensorName Sensor identifier - MUST be exactly: "Front", "BLeft", or "BRight" (case-sensitive)
-     * @param opModeUtilities OpModeUtilities instance for file access
-     * @return HashMap with calibrated HSV values for PURPLE, GREEN, and NONE
-     */
+
     public static HashMap<KColor.Color, HSV> loadCalibration(String sensorName, OpModeUtilities opModeUtilities) {
         HashMap<KColor.Color, HSV> calibrationMap = new HashMap<>();
 
@@ -124,10 +85,14 @@ public class ColorCalibrationDetection {
                 }
 
                 String[] values = line.split(",");
-                if (values.length < 5) continue;
+                if (values.length < 5) {
+                    continue;
+                }
 
                 String sensor = values[0];
-                if (!sensor.equals(sensorName)) continue;
+                if (!sensor.equals(sensorName)) {
+                    continue;
+                }
 
                 KColor.Color color = KColor.Color.valueOf(values[1]);
                 float hue = Float.parseFloat(values[2]);
