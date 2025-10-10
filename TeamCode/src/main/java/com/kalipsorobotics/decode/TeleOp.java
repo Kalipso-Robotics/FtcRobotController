@@ -1,8 +1,6 @@
 package com.kalipsorobotics.decode;
 
-import com.kalipsorobotics.actions.turret.TurretMove;
-import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.utilities.KLog;
+import android.util.Log;
 
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
@@ -17,9 +15,9 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
+import com.kalipsorobotics.modules.MotifColors;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.utilities.KColor;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -31,8 +29,6 @@ public class TeleOp extends KTeleOp {
 
     Shooter shooter = null;
     Intake intake = null;
-    Turret turret = null;
-
     ShooterReady shooterReady = null;
     KickBall kickBall = null;
     Revolver revolver = null;
@@ -46,9 +42,6 @@ public class TeleOp extends KTeleOp {
     IntakeReverse intakeReverse = null;
 
     DriveAction driveAction = null;
-
-    TurretMove turretMove = null;
-
 
 
     double turretStickValue;
@@ -78,23 +71,19 @@ public class TeleOp extends KTeleOp {
 
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
-        revolver = new Revolver(opModeUtilities);
-        turret = Turret.getInstance(opModeUtilities);
-
+        revolver = Revolver.getInstance(opModeUtilities);
 
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(intake, revolver);
 
-        //TODO just fed in testing motif pattern change later
-        testingMotif = new ObiliskDetection.MotifPattern(KColor.Color.PURPLE, KColor.Color.PURPLE, KColor.Color.GREEN);
+        //todo just fed in testing motif pattern change later
+        testingMotif = new ObiliskDetection.MotifPattern(MotifColors.PURPLE, MotifColors.PURPLE, MotifColors.GREEN);
         fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
 
         shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
         kickBall = new KickBall(shooter);
-
-        turretMove = new TurretMove(turret, 0);
     }
 
     @Override
@@ -115,16 +104,16 @@ public class TeleOp extends KTeleOp {
 
             turretStickValue = kGamePad2.getRightStickX();
             shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
-            //kickPressed = kGamePad2.isButtonYFirstPressed();
+            kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed();
-            fullShootPressed = kGamePad2.isButtonYFirstPressed();
+            fullShootPressed = kGamePad2.isButtonAFirstPressed();
 
 
             if (shooterReadyPressed) {
-                KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
+                Log.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
-                    KLog.d("ShooterReadyPressed", "Shooter Ready set");
+                    Log.d("ShooterReadyPressed", "Shooter Ready set");
                     shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
                     setLastShooterAction(shooterReady);
                 }
@@ -133,9 +122,6 @@ public class TeleOp extends KTeleOp {
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
                     fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
-                    setLastKickerAction(fullShootMotifAction);
-                    setLastShooterAction(fullShootMotifAction);
-                    //idempotent
                 }
             }
 
@@ -164,14 +150,7 @@ public class TeleOp extends KTeleOp {
                 }
             }
 
-            if (turretStickValue != 0) {
-                turretMove = new TurretMove(turret, turretStickValue);
-                //TODO set a lastAction for later
-            } else {
-                turretMove = new TurretMove(turret, 0);
-            }
-
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryPosition());
+            Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
 

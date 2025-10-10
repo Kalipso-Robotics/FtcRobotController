@@ -4,13 +4,13 @@ import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.MotifColors;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.utilities.KColor;
 
 public class RevolverShootColorAction extends KActionSet {
-    public RevolverShootColorAction(Revolver revolver, Shooter shooter, KColor.Color shootColor) {
-        ShooterReady shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
+    public RevolverShootColorAction(Revolver revolver, Shooter shooter, MotifColors shootColor) {
+        ShooterReady shooterReady = new ShooterReady(shooter, new Point(0,0)); //todo set point
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 
