@@ -71,7 +71,7 @@ public class TeleOp extends KTeleOp {
 
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
-        revolver = Revolver.getInstance(opModeUtilities);
+        revolver = new Revolver(opModeUtilities);
 
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
