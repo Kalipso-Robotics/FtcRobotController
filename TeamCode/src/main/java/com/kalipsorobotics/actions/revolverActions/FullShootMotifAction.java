@@ -7,8 +7,7 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KColor;
 
 public class FullShootMotifAction extends KActionSet {
-    public FullShootMotifAction(Revolver revolver, Shooter shooter, ObiliskDetection obiliskDetection) {
-        ObiliskDetection.MotifPattern motifPattern = obiliskDetection.getObeliskMotifPattern();
+    public FullShootMotifAction(Revolver revolver, Shooter shooter, ObiliskDetection.MotifPattern motifPattern) {
 
         RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(revolver, shooter, motifPattern.top);
         revolverShootColorAction1.setName("revolverShootColorAction1");

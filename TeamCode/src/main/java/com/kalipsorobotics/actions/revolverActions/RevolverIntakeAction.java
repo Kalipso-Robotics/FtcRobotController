@@ -43,7 +43,13 @@ public class RevolverIntakeAction extends Action {
     @Override
     protected void update() {
         if (!hasStarted) {
-            revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
+            if (KColor.classify(sen1) != KColor.Color.NONE && KColor.classify(sen2) != KColor.Color.NONE) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
+            } else if (KColor.classify(sen1) != KColor.Color.NONE) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
+            } else {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
+            }
         }
 
         if (KColor.classify(sen1) != KColor.Color.NONE) {

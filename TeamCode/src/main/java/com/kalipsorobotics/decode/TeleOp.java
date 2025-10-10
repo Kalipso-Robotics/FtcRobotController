@@ -2,17 +2,22 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
+import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.utilities.KColor;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -26,9 +31,13 @@ public class TeleOp extends KTeleOp {
     Intake intake = null;
     ShooterReady shooterReady = null;
     KickBall kickBall = null;
+    Revolver revolver = null;
 
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
+    IntakeFullAction intakeFullAction = null;
+
+    FullShootMotifAction fullShootMotifAction = null;
 
     IntakeReverse intakeReverse = null;
 
@@ -40,7 +49,9 @@ public class TeleOp extends KTeleOp {
     boolean kickPressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
+    boolean fullShootPressed = false;
 
+    ObiliskDetection.MotifPattern testingMotif;
 
     @Override
     protected void initializeRobot() {
@@ -60,15 +71,19 @@ public class TeleOp extends KTeleOp {
 
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
+        revolver = Revolver.getInstance(opModeUtilities);
 
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
+        intakeFullAction = new IntakeFullAction(intake, revolver);
+
+        //todo just fed in testing motif pattern change later
+        testingMotif = new ObiliskDetection.MotifPattern(KColor.Color.PURPLE, KColor.Color.PURPLE, KColor.Color.GREEN);
+        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
 
         shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
         kickBall = new KickBall(shooter);
-
-
     }
 
     @Override
@@ -92,6 +107,7 @@ public class TeleOp extends KTeleOp {
             kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed();
+            fullShootPressed = kGamePad2.isButtonAFirstPressed();
 
 
             if (shooterReadyPressed) {
@@ -103,6 +119,12 @@ public class TeleOp extends KTeleOp {
                 }
             }
 
+            if (fullShootPressed) {
+                if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
+                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
+                }
+            }
+
             if (kickPressed) {
                 if (kickBall != null || kickBall.getIsDone()) {
                     kickBall = new KickBall(shooter);
@@ -111,9 +133,9 @@ public class TeleOp extends KTeleOp {
             }
 
             if (intakePressed) {
-                if (intakeRun != null || intakeRun.getIsDone()) {
-                    intakeRun = new IntakeRun(intake);
-                    setLastIntakeAction(intakeRun);
+                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
+                    intakeFullAction = new IntakeFullAction(intake, revolver);
+                    setLastIntakeAction(intakeFullAction);
                 }
             } else if (intakeReversePressed) {
                 if (intakeReverse != null || intakeReverse.getIsDone()) {
@@ -121,19 +143,12 @@ public class TeleOp extends KTeleOp {
                     setLastIntakeAction(intakeReverse);
                 }
             } else {
+                intakeFullAction.setIsDone(true);
                 if (intakeStop != null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
                 }
             }
-
-            if (turretStickValue != 0) {
-
-            }
-
-
-
-
 
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
