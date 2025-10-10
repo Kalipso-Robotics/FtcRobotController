@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.actionUtilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -18,7 +18,7 @@ public class WaitAction extends Action {
     protected boolean updateIsDone() {
         if (hasStarted) {
 //            boolean done = elapsedTime.seconds() >= waitTimeSeconds;
-            Log.d("waitaction", "elapsed time " + elapsedTime.seconds());
+            KLog.d("waitaction", "elapsed time " + elapsedTime.seconds());
             isDone = elapsedTime.milliseconds() >= waitTimeMS;
             return isDone;
         }

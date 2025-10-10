@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,21 +26,21 @@ public class KFileReader {
 
         File path = new File(opModeUtilities.getHardwareMap().appContext.getExternalFilesDir(null), "OdometryLog");
         if(!path.exists()) {
-            Log.d("KFileReader", "Directory does not exist: " + path.getAbsolutePath());
+            KLog.d("KFileReader", "Directory does not exist: " + path.getAbsolutePath());
             throw new RuntimeException("Directory does not exist: " + path.getAbsolutePath());
         }
 
         File file = new File(path, fileName);
 
         if (!file.exists()) {
-            Log.d("KFileReader", "File does not exist: " + file.getAbsolutePath());
+            KLog.d("KFileReader", "File does not exist: " + file.getAbsolutePath());
             throw new RuntimeException("File does not exist: " + file.getAbsolutePath());
         }
 
         try {
             reader = new BufferedReader(new FileReader(file));
         } catch (IOException ioException) {
-            Log.e("IOException", "Failed Initializing File Reader For " + fileName,
+            KLog.e("IOException", "Failed Initializing File Reader For " + fileName,
                     ioException);
             throw new RuntimeException("Failed to initialize KFileReader for " + fileName, ioException);
         }
@@ -50,7 +50,7 @@ public class KFileReader {
         try {
             return reader.readLine();
         } catch (IOException ioException) {
-            Log.d("IOException", "Caught IOException While Reading");
+            KLog.d("IOException", "Caught IOException While Reading");
             return null;
         }
     }
@@ -59,7 +59,7 @@ public class KFileReader {
         try {
             reader.close();
         } catch (IOException e) {
-            Log.d("IOException", "Caught IOException While Closing");
+            KLog.d("IOException", "Caught IOException While Closing");
         }
     }
 

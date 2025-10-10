@@ -1,6 +1,7 @@
 package com.kalipsorobotics.actions.shooter;
 
 import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.math.Point;
@@ -63,7 +64,7 @@ public class ShooterReady extends Action {
             rpsSum = 0;
             rpsReadCount = 0;
         }
-        Log.d("ShooterReadyPressed", "Shooter Ready Update");
+        KLog.d("ShooterReadyPressed", "Shooter Ready Update");
 
         // Always update hood position based on current position
         shooter.updateHoodFromPosition(SharedData.getOdometryPosition(), target);
@@ -140,7 +141,7 @@ public class ShooterReady extends Action {
     }
 
     private void logRPSReadings(double averageRPS, double targetRPS, double error) {
-        Log.d("ShooterReady_RPS", String.format(
+        KLog.d("ShooterReady_RPS", String.format(
             "Current: %.2f RPS (avg of %d readings) | Target: %.2f RPS | Error: %.2f RPS",
             averageRPS, rpsReadCount, targetRPS, error
         ));
@@ -152,7 +153,7 @@ public class ShooterReady extends Action {
 
     private void markAsDone() {
         isDone = true;
-        Log.d("ShooterReady", "RPS within tolerance - Ready!");
+        KLog.d("ShooterReady", "RPS within tolerance - Ready!");
     }
 
     private double calculateNewPower(double error) {
@@ -196,7 +197,7 @@ public class ShooterReady extends Action {
             stateTimer.reset();
             rpsSum = 0;
             rpsReadCount = 0;
-            Log.d("ShooterReady", "Motor acceleration complete, reading RPS again");
+            KLog.d("ShooterReady", "Motor acceleration complete, reading RPS again");
         }
     }
 }

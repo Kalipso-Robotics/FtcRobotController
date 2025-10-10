@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.navigation;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -22,7 +22,7 @@ public class OdometryTest extends LinearOpMode {
         
         waitForStart();
         while(opModeIsActive()) {
-            Log.d("OdometryTest","x: " + odometry.update().getX() + "y: " + odometry.update().getY() + "theta: " + odometry.getIMUHeading());
+            KLog.d("OdometryTest","x: " + odometry.update().getX() + "y: " + odometry.update().getY() + "theta: " + odometry.getIMUHeading());
         }
     }
 }

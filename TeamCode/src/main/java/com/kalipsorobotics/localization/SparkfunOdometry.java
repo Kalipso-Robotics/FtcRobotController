@@ -3,7 +3,7 @@ package com.kalipsorobotics.localization;
 
 
 import android.os.SystemClock;
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
@@ -78,7 +78,7 @@ public class SparkfunOdometry {
 //        double theta = Math.toRadians(-otos.getPosition().h);
 //        theta = Math.round(theta * 100.0) / 100.0;
 
-        Log.d("sparkfun", otos.getPosition().y + " " + " " + otos.getPosition().x + " " + String.format("%.4f", -otos.getPosition().h));
+        KLog.d("sparkfun", otos.getPosition().y + " " + " " + otos.getPosition().x + " " + String.format("%.4f", -otos.getPosition().h));
 
         return -otos.getPosition().h;
         //clockwise -> positive theta
@@ -107,7 +107,7 @@ public class SparkfunOdometry {
             return relativeDelta;
         }
 
-        Log.d("odometry", "linearDelta " + relativeDelta);
+        KLog.d("odometry", "linearDelta " + relativeDelta);
         double forwardRadius = relativeDelta.getX() / relativeDelta.getTheta();
         double strafeRadius = relativeDelta.getY() / relativeDelta.getTheta();
 
@@ -121,7 +121,7 @@ public class SparkfunOdometry {
                 MathFunctions.angleWrapRad(relativeDelta.getTheta());
 
         Velocity arcDelta = new Velocity(relDeltaX, relDeltaY, relDeltaTheta);
-        Log.d("odometry", "arcDelta " + arcDelta);
+        KLog.d("odometry", "arcDelta " + arcDelta);
         return arcDelta;
     }
 
@@ -140,7 +140,7 @@ public class SparkfunOdometry {
         Velocity globalDelta = rotate(relativeDelta, previousGlobalPosition);
 
         Position position = previousGlobalPosition.add(globalDelta);
-        Log.d("thetavalue", "theta " + position.getTheta());
+        KLog.d("thetavalue", "theta " + position.getTheta());
         return position;
     }
 
@@ -162,7 +162,7 @@ public class SparkfunOdometry {
         double y = countY();
         double theta = countTheta();
 
-        //Log.d("updatepos", rightTicks + " " + leftTicks + " " + backTicks);
+        //KLog.d("updatepos", rightTicks + " " + leftTicks + " " + backTicks);
 
         long currentTime = SystemClock.elapsedRealtime();
         double timeElapsed = (currentTime - prevTime) / 1000.;
@@ -174,7 +174,7 @@ public class SparkfunOdometry {
         prevTime = currentTime;
 
         currentPosition = updateGlobal(relativeDelta, currentPosition);
-        Log.d("currentpos", "current pos " + currentPosition.getTheta());
+        KLog.d("currentpos", "current pos " + currentPosition.getTheta());
 
         prevX = x;
         prevY = y;

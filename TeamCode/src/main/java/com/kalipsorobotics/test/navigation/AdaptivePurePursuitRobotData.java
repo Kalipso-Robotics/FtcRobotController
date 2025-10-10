@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.navigation;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Position;
@@ -69,9 +69,9 @@ public class AdaptivePurePursuitRobotData extends LinearOpMode {
             }
         }
 
-        Log.d("AdaptivePurePursuitRobotData", "maxLinearAcceleration: " + maxLinearAcceleration);
-        Log.d("AdaptivePurePursuitRobotData", "maxLinearVelocity: " + maxLinearVelocity);
-        Log.d("AdaptivePurePursuitRobotData", "maxAngularVelocity: " + maxAngularVelocity);
+        KLog.d("AdaptivePurePursuitRobotData", "maxLinearAcceleration: " + maxLinearAcceleration);
+        KLog.d("AdaptivePurePursuitRobotData", "maxLinearVelocity: " + maxLinearVelocity);
+        KLog.d("AdaptivePurePursuitRobotData", "maxAngularVelocity: " + maxAngularVelocity);
 
     }
 }

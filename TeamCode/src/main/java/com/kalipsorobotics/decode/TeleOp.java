@@ -1,6 +1,8 @@
 package com.kalipsorobotics.decode;
 
-import android.util.Log;
+import com.kalipsorobotics.actions.turret.TurretMove;
+import com.kalipsorobotics.modules.Turret;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
@@ -29,6 +31,8 @@ public class TeleOp extends KTeleOp {
 
     Shooter shooter = null;
     Intake intake = null;
+    Turret turret = null;
+
     ShooterReady shooterReady = null;
     KickBall kickBall = null;
     Revolver revolver = null;
@@ -42,6 +46,9 @@ public class TeleOp extends KTeleOp {
     IntakeReverse intakeReverse = null;
 
     DriveAction driveAction = null;
+
+    TurretMove turretMove = null;
+
 
 
     double turretStickValue;
@@ -71,7 +78,9 @@ public class TeleOp extends KTeleOp {
 
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
-        revolver = Revolver.getInstance(opModeUtilities);
+        revolver = new Revolver(opModeUtilities);
+        turret = Turret.getInstance(opModeUtilities);
+
 
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
@@ -84,6 +93,8 @@ public class TeleOp extends KTeleOp {
 
         shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
         kickBall = new KickBall(shooter);
+
+        turretMove = new TurretMove(turret, 0);
     }
 
     @Override
@@ -111,9 +122,9 @@ public class TeleOp extends KTeleOp {
 
 
             if (shooterReadyPressed) {
-                Log.d("ShooterReadyPressed", "Shooter Ready Pressed");
+                KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
-                    Log.d("ShooterReadyPressed", "Shooter Ready set");
+                    KLog.d("ShooterReadyPressed", "Shooter Ready set");
                     shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
                     setLastShooterAction(shooterReady);
                 }
@@ -154,12 +165,13 @@ public class TeleOp extends KTeleOp {
             }
 
             if (turretStickValue != 0) {
-
+                turretMove = new TurretMove(turret, turretStickValue);
+                //TODO set a lastAction for later
             } else {
-
+                turretMove = new TurretMove(turret, 0);
             }
 
-            Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
+            KLog.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
 

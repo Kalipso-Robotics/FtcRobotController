@@ -16,7 +16,7 @@ public class RevolverMoveToColorAction extends Action {
 
     public RevolverMoveToColorAction(Revolver revolver, KColor.Color shootColor) {
         this.revolver = revolver;
-        this.revolverServo = revolver.revolverServo;
+        this.revolverServo = revolver.getRevolverServo();
         this.shootColor = shootColor;
         this.dependentActions.add(new DoneStateAction());
     }
@@ -29,7 +29,7 @@ public class RevolverMoveToColorAction extends Action {
             int currentRevolverIndex = revolver.getCurrentRevolverServoIndex();
             KColor.Color[] transformedColorSet = Revolver.transformColorSetToTray(colorSet, currentRevolverIndex);
 
-            int turnToIndex = Arrays.asList(transformedColorSet).indexOf(shootColor); //todo make it find the closest one
+            int turnToIndex = Arrays.asList(transformedColorSet).indexOf(shootColor); //todo make it find the closest one | wait laing wouldnt all the positions always be one turn away
             revolverServo.setPosition(turnToIndex);
 
             int indDiff = revolver.getCurrentRevolverServoIndex() - currentRevolverIndex;

@@ -1,6 +1,6 @@
 package com.kalipsorobotics.navigation;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.PID.PidNav;
 import com.kalipsorobotics.utilities.SharedData;
@@ -187,7 +187,7 @@ public class PurePursuitAction extends Action {
         double powerX = target.getPidX().getPower(xError);
         double powerY = target.getPidY().getPower(yError);
 
-        Log.d("directionalpower", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
+        KLog.d("directionalpower", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
                 powerAngle));
 
         double fLeftPower = powerX + powerY + powerAngle;
@@ -195,7 +195,7 @@ public class PurePursuitAction extends Action {
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
 
-        Log.d("PurePursuit_Log",
+        KLog.d("PurePursuit_Log",
                 "running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
                 bRightPower);
 
@@ -250,18 +250,18 @@ public class PurePursuitAction extends Action {
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
         if (follow.isPresent()) {
-            Log.d("purepursaction_debug_follow",
+            KLog.d("purepursaction_debug_follow",
                     "follow point:  " + follow.get());
-            Log.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+            KLog.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
             targetPosition(follow.get(), currentPosition);
 
         } else {
             if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) <= Math.toRadians(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) ) {
                 finishedMoving();
             } else {
-                Log.d("purepursaction_debug_follow",
+                KLog.d("purepursaction_debug_follow",
                         "locking final angle:  " + lastPoint);
-                Log.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+                KLog.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
                 targetPosition(lastPoint, currentPosition);
             }
         }

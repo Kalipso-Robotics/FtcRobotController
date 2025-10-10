@@ -1,6 +1,4 @@
-package com.kalipsorobotics.actions.actionUtilities.turretActions;
-
-import android.util.Log;
+package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
@@ -12,10 +10,11 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
-public class TurretAction extends Action {
-    Odometry odometry;
+public class TurretAutoAlign extends Action {
+
+    // you dont get odometry pos from here mini dugong :)
     Turret turret;
-    DcMotor motor;
+    DcMotor turretMotor;
 
     private final double ticksPerRotation = 384.5;
     private final double gearRatio = 2.69;
@@ -26,18 +25,10 @@ public class TurretAction extends Action {
 
 
 
-    public TurretAction (Odometry odometry, Turret turret){
-        this.odometry = odometry;
+    public TurretAutoAlign(Turret turret) {
         this.turret = turret;
-        this.motor = turret.turretMotor;
+        this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
-    }
-
-    @Override
-    protected boolean checkDoneCondition() {
-        return false;
-        //check to see if turret is aligned with the goal
-
     }
 
     @Override
@@ -73,12 +64,12 @@ public class TurretAction extends Action {
         double motorRotation = turretRotation * gearRatio;
         double targetTicks = ticksPerRotation * motorRotation;
         KLog.d("turret angle", "ticks " + targetTicks );
-        KLog.d("turret angle", "motor position "+ motor.getCurrentPosition());
+        KLog.d("turret angle", "motor position "+ turretMotor.getCurrentPosition());
 
 
-        motor.setTargetPosition((int) targetTicks);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(0.5);
+        turretMotor.setTargetPosition((int) targetTicks);
+        //turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);  Idk if you want this setting we have never used it unless big banana wants it :) but if you were to use it set it inside of modules.Turret
+        turretMotor.setPower(0.5);
 
 
 
@@ -95,5 +86,12 @@ public class TurretAction extends Action {
 //
 
 //need odometry
+
+
+
+
+
+        //check to see if turret is aligned with the goal
+
     }
 }

@@ -1,6 +1,6 @@
 package com.kalipsorobotics.modules;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.MathFunctions;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -64,10 +64,10 @@ public class DriveTrain {
         driveTrain.bLeft = hardwareMap.dcMotor.get("bLeft");
         driveTrain.bRight = hardwareMap.dcMotor.get("bRight");
 
-        Log.d("drive", "fleft port #:" + driveTrain.fLeft.getPortNumber());
-        Log.d("drive", "fRight port #:" + driveTrain.fRight.getPortNumber());
-        Log.d("drive", "bLeft port #:" + driveTrain.bLeft.getPortNumber());
-        Log.d("drive", "bRight port #:" + driveTrain.bRight.getPortNumber());
+        KLog.d("drive", "fleft port #:" + driveTrain.fLeft.getPortNumber());
+        KLog.d("drive", "fRight port #:" + driveTrain.fRight.getPortNumber());
+        KLog.d("drive", "bLeft port #:" + driveTrain.bLeft.getPortNumber());
+        KLog.d("drive", "bRight port #:" + driveTrain.bRight.getPortNumber());
 
         driveTrain.fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         driveTrain.fRight.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -120,7 +120,7 @@ public class DriveTrain {
         setFRightPower(fRightPower);
         setBLeftPower(bLeftPower);
         setBRightPower(bRightPower);
-        Log.d("purepursaction_power", "power " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
+        KLog.d("purepursaction_power", "power " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
     }
 
     public void setPower(double power) {

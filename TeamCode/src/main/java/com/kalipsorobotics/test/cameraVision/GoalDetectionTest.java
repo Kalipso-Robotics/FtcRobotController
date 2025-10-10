@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.cameraVision.GoalDetection;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
@@ -16,7 +16,7 @@ public class GoalDetectionTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         goalDetection = new GoalDetection();
         while (opModeIsActive()) {
-            Log.d("Goal detection",
+            KLog.d("Goal detection",
                     "Alliance Color: " + goalDetection.getGoalColor(goalDetection.getGoalId()) +
                     " distance: " + goalDetection.getDistanceToGoal() +
                     " heading error: " + goalDetection.getHeadingError(SharedData.getOdometryPosition().getTheta()));

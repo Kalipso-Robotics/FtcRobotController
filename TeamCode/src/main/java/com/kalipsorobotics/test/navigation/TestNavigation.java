@@ -1,6 +1,7 @@
 package com.kalipsorobotics.test.navigation;
 
 import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Position;
@@ -124,7 +125,7 @@ public class TestNavigation extends LinearOpMode {
             telemetry.addLine("❌ INITIALIZATION FAILED");
             telemetry.addData("Error", e.getMessage());
             telemetry.update();
-            Log.e(TAG, "Initialization failed", e);
+            KLog.e(TAG, "Initialization failed", e);
             return;
         }
 
@@ -163,7 +164,7 @@ public class TestNavigation extends LinearOpMode {
         executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         
-        Log.d(TAG, "Hardware initialized successfully");
+        KLog.d(TAG, "Hardware initialized successfully");
     }
     
     private void initializeNavigation() throws IOException, JSONException {
@@ -188,7 +189,7 @@ public class TestNavigation extends LinearOpMode {
             navigationSystem.startDataCollection("Auto_" + System.currentTimeMillis());
         }
         
-        Log.d(TAG, "Navigation system initialized");
+        KLog.d(TAG, "Navigation system initialized");
     }
     
     private void configureForPrecision() {
@@ -196,7 +197,7 @@ public class TestNavigation extends LinearOpMode {
         navigationSystem.setMaxCruiseSpeed(0.8);
         navigationSystem.setTerminalRadius(0.25);
         navigationSystem.setMaxPathTime(30.0);
-        Log.d(TAG, "Configured for high precision mode");
+        KLog.d(TAG, "Configured for high precision mode");
     }
     
     private void configureForGeneral() {
@@ -204,7 +205,7 @@ public class TestNavigation extends LinearOpMode {
         navigationSystem.setMaxCruiseSpeed(1.0);
         navigationSystem.setTerminalRadius(0.35);
         navigationSystem.setMaxPathTime(25.0);
-        Log.d(TAG, "Configured for general testing mode");
+        KLog.d(TAG, "Configured for general testing mode");
     }
     
     private void displayInitializationInfo() {
@@ -278,7 +279,7 @@ public class TestNavigation extends LinearOpMode {
             
             if (!pathActive) {
                 pathExecutionComplete = true;
-                Log.d(TAG, "Path execution completed");
+                KLog.d(TAG, "Path execution completed");
             }
             
             // Display real-time telemetry
@@ -306,7 +307,7 @@ public class TestNavigation extends LinearOpMode {
         
         // Log final performance stats
         double avgLoopTime = loopCount > 0 ? totalLoopTime / loopCount : 0;
-        Log.d(TAG, String.format("Execution completed - %d loops, avg: %.1fms, max: %.1fms", 
+        KLog.d(TAG, String.format("Execution completed - %d loops, avg: %.1fms, max: %.1fms", 
                 loopCount, avgLoopTime, maxLoopTime));
     }
     
@@ -373,12 +374,12 @@ public class TestNavigation extends LinearOpMode {
                 String filename = "/sdcard/FIRST/navigation_data.csv";
                 boolean exported = navigationSystem.exportData(filename);
                 if (exported) {
-                    Log.d(TAG, "Navigation data exported to " + filename);
+                    KLog.d(TAG, "Navigation data exported to " + filename);
                 } else {
                     Log.w(TAG, "Failed to export navigation data");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Data export error", e);
+                KLog.e(TAG, "Data export error", e);
             }
         }
         
@@ -437,7 +438,7 @@ public class TestNavigation extends LinearOpMode {
             executorService.shutdown();
         }
         
-        Log.d(TAG, "Autonomous navigation test completed successfully");
+        KLog.d(TAG, "Autonomous navigation test completed successfully");
         
         // Keep telemetry visible for review
         while (opModeIsActive()) {
@@ -457,25 +458,25 @@ public class TestNavigation extends LinearOpMode {
             case "precision":
                 enableHighPrecisionMode = true;
                 enableDataCollection = true;
-                Log.d(TAG, "Configured for precision testing");
+                KLog.d(TAG, "Configured for precision testing");
                 break;
                 
             case "speed":
                 navigationSystem.setMaxCruiseSpeed(1.5);
                 navigationSystem.setTerminalRadius(0.5);
                 enableDataCollection = true;
-                Log.d(TAG, "Configured for speed testing");
+                KLog.d(TAG, "Configured for speed testing");
                 break;
                 
             case "reliability":
                 navigationSystem.setMaxCruiseSpeed(0.6);
                 navigationSystem.setMaxPathTime(45.0);
                 enableDataCollection = true;
-                Log.d(TAG, "Configured for reliability testing");
+                KLog.d(TAG, "Configured for reliability testing");
                 break;
                 
             default:
-                Log.d(TAG, "Using default configuration");
+                KLog.d(TAG, "Using default configuration");
                 break;
         }
     }

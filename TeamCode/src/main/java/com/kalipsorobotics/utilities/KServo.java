@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -72,9 +72,9 @@ public class KServo {
 
     public boolean isDone() {
         double deltaTime = (getTime() - startTime);
-        Log.d("isDone", "time" + deltaTime);
+        KLog.d("isDone", "time" + deltaTime);
         if (deltaTime > estimatedFinishTime) {
-            Log.d("isDone", "done time " + deltaTime + ", port# " + getPortNumber());
+            KLog.d("isDone", "done time " + deltaTime + ", port# " + getPortNumber());
             lastPosition = servo.getPosition();
             return true;
         }

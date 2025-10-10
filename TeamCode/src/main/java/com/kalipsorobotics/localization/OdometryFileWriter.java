@@ -1,6 +1,6 @@
 package com.kalipsorobotics.localization;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.utilities.KFileWriter;
@@ -42,7 +42,7 @@ public class OdometryFileWriter extends KFileWriter {
     }
 
     public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap) {
-        Log.d("odometryData", "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
+        KLog.d("odometryData", "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(System.currentTimeMillis());
         stringBuilder.append(",");

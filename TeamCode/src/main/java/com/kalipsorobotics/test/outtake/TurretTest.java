@@ -1,11 +1,10 @@
 package com.kalipsorobotics.test.outtake;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
-import com.kalipsorobotics.actions.actionUtilities.turretActions.TurretAction;
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -25,12 +24,12 @@ public class TurretTest extends LinearOpMode {
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         Turret.setInstanceNull();
         Turret turret = Turret.getInstance(opModeUtilities);
-        TurretAction turretAction = new TurretAction(odometry, turret);
+        TurretAutoAlign turretAutoAlign = new TurretAutoAlign(turret);
 
         waitForStart();
         while(opModeIsActive()) {
-            Log.d("OdometryTest","x: " + odometry.update().getX() + "y: " + odometry.update().getY() + "theta: " + odometry.getIMUHeading());
-            turretAction.updateCheckDone();
+            KLog.d("OdometryTest","x: " + odometry.update().getX() + "y: " + odometry.update().getY() + "theta: " + odometry.getIMUHeading());
+            turretAutoAlign.updateCheckDone();
         }
     }
 }

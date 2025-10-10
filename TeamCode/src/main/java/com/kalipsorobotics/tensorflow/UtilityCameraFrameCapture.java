@@ -1,7 +1,7 @@
 package com.kalipsorobotics.tensorflow;
 
 import android.os.SystemClock;
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 import android.util.Size;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -64,7 +64,7 @@ public class UtilityCameraFrameCapture extends LinearOpMode {
         while (opModeIsActive())
         {
             portal.saveNextFrameRaw(String.format(Locale.US, "CameraFrameCapture-%06d", frameCount++));
-            Log.d("Camera", "writing to CameraFrameCapture. frame count: " + frameCount);
+            KLog.d("Camera", "writing to CameraFrameCapture. frame count: " + frameCount);
             capReqTime = System.currentTimeMillis();
 
 

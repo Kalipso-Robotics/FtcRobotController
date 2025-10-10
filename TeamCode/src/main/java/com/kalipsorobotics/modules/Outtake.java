@@ -1,6 +1,6 @@
 package com.kalipsorobotics.modules;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.CalculateTickPer;
 import com.kalipsorobotics.utilities.KServo;
@@ -21,7 +21,7 @@ public class Outtake {
 
     private Outtake(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
-        Log.d("Outtake_LS", "init Outtake");
+        KLog.d("Outtake_LS", "init Outtake");
 
         resetHardwareMap(opModeUtilities.getHardwareMap(), this);
 

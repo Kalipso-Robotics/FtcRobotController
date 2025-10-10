@@ -13,7 +13,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import android.graphics.Bitmap;
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.tensorflow.lite.Interpreter;
@@ -59,9 +59,9 @@ public class MainActivity extends LinearOpMode {
 
                 // Display results on telemetry
                 if (output[0][0] > 0.5) {
-                    Log.d("Detection", "Robot Detected!");
+                    KLog.d("Detection", "Robot Detected!");
                 } else {
-                    Log.d("Detection", "No Robot Detected");
+                    KLog.d("Detection", "No Robot Detected");
                 }
                 telemetry.update();
 

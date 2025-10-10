@@ -1,6 +1,6 @@
 package com.kalipsorobotics.modules.shooter;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.CalculateTickPer;
 import com.kalipsorobotics.math.Point;
@@ -142,12 +142,12 @@ public class Shooter {
             return;
         }
 
-        Log.d("Hood", "Hood Pos: " + hood.getPosition());
-        Log.d("Wheel", "Target RPS: " + prediction.rps + ", Current RPS: " + getRPS());
+        KLog.d("Hood", "Hood Pos: " + hood.getPosition());
+        KLog.d("Wheel", "Target RPS: " + prediction.rps + ", Current RPS: " + getRPS());
 
         // Note: This does NOT set motor power - use ShooterReady action for power ramping
         // This only sets the hood position
-        Log.d("Hood", "Hood Pos: " + prediction.hood);
+        KLog.d("Hood", "Hood Pos: " + prediction.hood);
         hood.setPosition(prediction.hood);
     }
 
@@ -183,7 +183,7 @@ public class Shooter {
             return 0;
         }
 
-        Log.d("TargetRPS", "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
+        KLog.d("TargetRPS", "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
               "), Target: (" + target.getX() + ", " + target.getY() +
               "), Distance: " + distance + "mm, Predicted RPS: " + prediction.rps + ", Hood: " + prediction.hood);
 
@@ -201,7 +201,7 @@ public class Shooter {
         double dy = target.getY() - currentPosition.getY();
         double distance = Math.sqrt((dx * dx) + (dy * dy));
 
-        Log.d("Distance", "distance: " + distance);
+        KLog.d("Distance", "distance: " + distance);
         // Use distance as xMM to set hood position
         setCalculatedHood(distance);
     }

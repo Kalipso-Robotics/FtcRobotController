@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -43,7 +43,7 @@ public class KFileWriter {
         File path = new File(opModeUtilities.getHardwareMap().appContext.getExternalFilesDir(null), "OdometryLog");
         if(!path.exists()) {
             if (!path.mkdirs()) {
-                Log.d("KFileWriter", "Failed To Make Directory");
+                KLog.d("KFileWriter", "Failed To Make Directory");
                 throw new RuntimeException("Failed To Make Directory");
             }
         }
@@ -53,7 +53,7 @@ public class KFileWriter {
         try {
             writer = new BufferedWriter(new FileWriter(file));
         } catch (IOException ioException) {
-            Log.e("IOException", "Failed Initializing File Writer For " + name + "—" + formattedDateTime + ".csv",
+            KLog.e("IOException", "Failed Initializing File Writer For " + name + "—" + formattedDateTime + ".csv",
                     ioException);
             throw new RuntimeException("Failed to initialize KFileWriter for " + name + "—" + formattedDateTime + ".csv", ioException);
         }
@@ -66,7 +66,7 @@ public class KFileWriter {
             writer.write(string);
             writer.newLine();
         } catch (IOException ioException) {
-            Log.d("IOException", "Caught IOException While Writing");
+            KLog.d("IOException", "Caught IOException While Writing");
         }
     }
 
@@ -74,7 +74,7 @@ public class KFileWriter {
         try {
             writer.close();
         } catch (IOException e) {
-            Log.d("IOException", "Caught IOException While Closing");
+            KLog.d("IOException", "Caught IOException While Closing");
         }
     }
 

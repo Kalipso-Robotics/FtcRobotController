@@ -2,6 +2,7 @@ package com.kalipsorobotics.navigation;
 
 import android.content.Context;
 import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -127,7 +128,7 @@ public class NavigationSystem {
         speedCaps.setCurvatureGain(0.8);
         
         isInitialized = true;
-        Log.d(TAG, "NavigationSystem initialized successfully");
+        KLog.d(TAG, "NavigationSystem initialized successfully");
     }
     
     /**
@@ -135,7 +136,7 @@ public class NavigationSystem {
      */
     public void setPath(List<Position> waypoints) {
         if (!isInitialized || waypoints == null || waypoints.isEmpty()) {
-            Log.e(TAG, "Cannot set path - not initialized or invalid waypoints");
+            KLog.e(TAG, "Cannot set path - not initialized or invalid waypoints");
             return;
         }
         
@@ -154,10 +155,10 @@ public class NavigationSystem {
             biasAdaptor.reset();
             terminalController.reset();
             
-            Log.d(TAG, String.format("Path set with %d waypoints", waypoints.size()));
+            KLog.d(TAG, String.format("Path set with %d waypoints", waypoints.size()));
             
         } catch (Exception e) {
-            Log.e(TAG, "Failed to set path", e);
+            KLog.e(TAG, "Failed to set path", e);
             currentMode = ControlMode.FINISHED;
         }
     }
@@ -237,13 +238,13 @@ public class NavigationSystem {
         
         if (currentMode == ControlMode.PURSUIT && distanceToGoal <= terminalRadius) {
             currentMode = ControlMode.TERMINAL;
-            Log.d(TAG, "Switching to terminal control mode");
+            KLog.d(TAG, "Switching to terminal control mode");
         }
         
         if (currentMode == ControlMode.TERMINAL && 
             terminalController.isFinished(goalPose, currentPose)) {
             currentMode = ControlMode.FINISHED;
-            Log.d(TAG, "Path following completed!");
+            KLog.d(TAG, "Path following completed!");
         }
     }
     
@@ -312,7 +313,7 @@ public class NavigationSystem {
             float[] motorPowers = inverseModel.getMotorPowers(velocity[0], velocity[1], velocity[2]);
             driveTrainIntegration.setMotorPowers(motorPowers);
         } catch (Exception e) {
-            Log.e(TAG, "Failed to send motor commands", e);
+            KLog.e(TAG, "Failed to send motor commands", e);
             stopRobot();
         }
     }
@@ -385,7 +386,7 @@ public class NavigationSystem {
     public void cleanup() {
         if (inverseModel != null) inverseModel.close();
         if (driveTrainIntegration != null) driveTrainIntegration.emergencyStop();
-        Log.d(TAG, "NavigationSystem cleaned up");
+        KLog.d(TAG, "NavigationSystem cleaned up");
     }
     
     // =============================================================================
@@ -424,7 +425,7 @@ public class NavigationSystem {
                 inputStds[i] = (float) stds.getDouble(i);
             }
             
-            Log.d(TAG, "Loaded normalization parameters");
+            KLog.d(TAG, "Loaded normalization parameters");
         }
         
         private void loadModel(Context context, String modelPath) throws IOException {
@@ -437,7 +438,7 @@ public class NavigationSystem {
             modelBuffer.put(buffer);
             
             interpreter = new Interpreter(modelBuffer);
-            Log.d(TAG, "Loaded TFLite model");
+            KLog.d(TAG, "Loaded TFLite model");
         }
         
         public float[] getMotorPowers(double vx, double vy, double omega) {
@@ -461,7 +462,7 @@ public class NavigationSystem {
                 return outputs;
                 
             } catch (Exception e) {
-                Log.e(TAG, "TFLite failed, using fallback", e);
+                KLog.e(TAG, "TFLite failed, using fallback", e);
                 return simpleMecanumKinematics(vx, vy, omega);
             }
         }
@@ -1199,15 +1200,15 @@ public class NavigationSystem {
             
             if (driveTrain != null) {
                 isConnected = true;
-                Log.d(TAG, "DriveTrain integration initialized successfully");
+                KLog.d(TAG, "DriveTrain integration initialized successfully");
             } else {
-                Log.e(TAG, "DriveTrain is null - integration failed");
+                KLog.e(TAG, "DriveTrain is null - integration failed");
             }
         }
         
         public void setMotorPowers(float[] powers) {
             if (!isConnected || powers.length != 4) {
-                Log.e(TAG, "Cannot set motor powers - not connected or invalid array length");
+                KLog.e(TAG, "Cannot set motor powers - not connected or invalid array length");
                 return;
             }
             
@@ -1227,7 +1228,7 @@ public class NavigationSystem {
                 lastMotorPowers = safePowers.clone();
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to set motor powers", e);
+                KLog.e(TAG, "Failed to set motor powers", e);
                 emergencyStop();
             }
         }
@@ -1239,7 +1240,7 @@ public class NavigationSystem {
 
             driveTrain.setPower(powers[0], powers[1], powers[2], powers[3]);
 
-            Log.d(TAG, String.format("Motor Powers: FL=%.3f FR=%.3f BL=%.3f BR=%.3f",
+            KLog.d(TAG, String.format("Motor Powers: FL=%.3f FR=%.3f BL=%.3f BR=%.3f",
                     powers[0], powers[1], powers[2], powers[3]));
                     
             // TODO: Implement actual motor control based on your DriveTrain interface
@@ -1288,7 +1289,7 @@ public class NavigationSystem {
                 lastMotorPowers = zeroPowers.clone();
                 Log.w(TAG, "Emergency stop executed");
             } catch (Exception e) {
-                Log.e(TAG, "Failed to execute emergency stop", e);
+                KLog.e(TAG, "Failed to execute emergency stop", e);
             }
         }
         
@@ -1334,12 +1335,12 @@ public class NavigationSystem {
             this.startTime = System.currentTimeMillis();
             this.isCollecting = true;
             
-            Log.d(TAG, "Started data collection: " + this.sessionName);
+            KLog.d(TAG, "Started data collection: " + this.sessionName);
         }
         
         public void stopCollection() {
             this.isCollecting = false;
-            Log.d(TAG, String.format("Stopped data collection: %s (%d points)", sessionName, dataPoints.size()));
+            KLog.d(TAG, String.format("Stopped data collection: %s (%d points)", sessionName, dataPoints.size()));
         }
         
         public boolean exportToCSV(String filename) {
@@ -1381,11 +1382,11 @@ public class NavigationSystem {
                 writer.flush();
                 writer.close();
                 
-                Log.d(TAG, String.format("Exported %d data points to %s", dataPoints.size(), filename));
+                KLog.d(TAG, String.format("Exported %d data points to %s", dataPoints.size(), filename));
                 return true;
                 
             } catch (IOException e) {
-                Log.e(TAG, "Failed to export data", e);
+                KLog.e(TAG, "Failed to export data", e);
                 return false;
             }
         }

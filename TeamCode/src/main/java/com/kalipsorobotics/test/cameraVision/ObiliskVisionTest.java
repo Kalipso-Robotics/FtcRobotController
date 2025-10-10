@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -41,28 +41,28 @@ public class ObiliskVisionTest extends LinearOpMode {
                     int obeliskId = obeliskDetection.getObeliskId();
                     
                     if (obeliskId == 21) {
-                        Log.d("obeliskDetection", "Green-Purple-Purple🟩🟪🟪");
+                        KLog.d("obeliskDetection", "Green-Purple-Purple🟩🟪🟪");
                         telemetry.addData("PATTERN MATCH", "Green-Purple-Purple 🟩🟪🟪");
                     } else if (obeliskId == 22) {
-                        Log.d("obeliskDetection", "Purple-Green-Purple🟪🟩🟪");
+                        KLog.d("obeliskDetection", "Purple-Green-Purple🟪🟩🟪");
                         telemetry.addData("PATTERN MATCH", "Purple-Green-Purple 🟪🟩🟪");
                     } else if (obeliskId == 23) {
-                        Log.d("obeliskDetection", "Purple-Purple-Green🟪🟪🟩");
+                        KLog.d("obeliskDetection", "Purple-Purple-Green🟪🟪🟩");
                         telemetry.addData("PATTERN MATCH", "Purple-Purple-Green 🟪🟪🟩");
                     } else {
-                        Log.d("obeliskDetection", "Unknown AprilTag ID: " + obeliskId);
+                        KLog.d("obeliskDetection", "Unknown AprilTag ID: " + obeliskId);
                         telemetry.addData("RESULT", "Unknown AprilTag ID: " + obeliskId);
                     }
                 } else {
-                    Log.d("obeliskDetection", "No Obelisk detected");
+                    KLog.d("obeliskDetection", "No Obelisk detected");
                 }
                 
                 if (gamepad1.dpad_down) {
                     obeliskDetection.stopStreaming();
-                    Log.d("obeliskDetection", "Streaming STOPPED");
+                    KLog.d("obeliskDetection", "Streaming STOPPED");
                 } else if (gamepad1.dpad_up) {
                     obeliskDetection.resumeStreaming();
-                    Log.d("obeliskDetection", "Streaming RESUMED");
+                    KLog.d("obeliskDetection", "Streaming RESUMED");
                 }
                 
                 telemetry.update();

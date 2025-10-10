@@ -1,8 +1,6 @@
 package com.kalipsorobotics.math;
 
 
-import android.util.Log;
-
 public class MathFunctions {
     public static double angleWrapRad(double angle) {
         angle = angle % (2 * Math.PI);

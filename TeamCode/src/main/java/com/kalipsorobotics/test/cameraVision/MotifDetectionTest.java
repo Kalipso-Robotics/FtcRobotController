@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
@@ -30,7 +30,7 @@ public class MotifDetectionTest extends LinearOpMode {
             driveAction.move(gamepad1);
             kMotifDetection.updateCheckDone();
             //Detectable from across field
-            Log.d("Motif Detection", "Motif Pattern: " + kMotifDetection.getMotifPattern());
+            KLog.d("Motif Detection", "Motif Pattern: " + kMotifDetection.getMotifPattern());
             if (kMotifDetection.getIsDone()) {
                 break;
             }

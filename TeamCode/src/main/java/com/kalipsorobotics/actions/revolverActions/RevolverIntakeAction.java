@@ -20,10 +20,10 @@ public class RevolverIntakeAction extends Action {
 
     public RevolverIntakeAction(Revolver revolver) {
         this.revolver = revolver;
-        this.sen1 = revolver.sen1;
-        this.sen2 = revolver.sen2;
-        this.sen3 = revolver.sen3;
-        this.revolverServo = revolver.revolverServo;
+        this.sen1 = revolver.getSen1();
+        this.sen2 = revolver.getSen2();
+        this.sen3 = revolver.getSen3();
+        this.revolverServo = revolver.getRevolverServo();
         this.dependentActions.add(new DoneStateAction());
 
         count = 0;

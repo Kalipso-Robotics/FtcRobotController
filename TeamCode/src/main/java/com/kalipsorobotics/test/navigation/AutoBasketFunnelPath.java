@@ -1,7 +1,7 @@
 package com.kalipsorobotics.test.navigation;
 
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.localization.Odometry;
@@ -173,13 +173,13 @@ public class AutoBasketFunnelPath extends LinearOpMode {
         while (opModeIsActive()) {
 
             redAutoBasket.updateCheckDone();
-            Log.d("homePos", SharedData.getOdometryPosition().toString());
-            Log.d("homePosMap", SharedData.getOdometryPositionMap().toString());
+            KLog.d("homePos", SharedData.getOdometryPosition().toString());
+            KLog.d("homePosMap", SharedData.getOdometryPositionMap().toString());
 
         }
 
         OpModeUtilities.shutdownExecutorService(executorService);
-        //Log.d("executor service",
+        //KLog.d("executor service",
         //        "after shutdown" + SharedData.getOdometryPosition() + "is shutdown " + executorService.isShutdown()
         //        + "is terminated " + executorService.isTerminated());
 

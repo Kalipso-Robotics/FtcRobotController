@@ -1,6 +1,6 @@
 package com.kalipsorobotics.navigation;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.PositionHistory;
@@ -65,7 +65,7 @@ public class PurePursuitFileWriter extends KFileWriter {
         stringBuilder.append(driveTrain.getbLeftPower());
         stringBuilder.append(",");
         stringBuilder.append(driveTrain.getbRightPower());
-        Log.d("purepursaction_power", "power " + driveTrain.getfLeftPower() + " " + driveTrain.getfRightPower() + " " + driveTrain.getbLeftPower() + " " + driveTrain.getbRightPower());
+        KLog.d("purepursaction_power", "power " + driveTrain.getfLeftPower() + " " + driveTrain.getfRightPower() + " " + driveTrain.getbLeftPower() + " " + driveTrain.getbRightPower());
         super.writeLine(stringBuilder.toString());
     }
 

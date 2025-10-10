@@ -10,15 +10,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.checkerframework.checker.units.qual.K;
 
 public class Revolver {
-    private static Revolver single_instance = null;
-
     private final OpModeUtilities opModeUtilities;
 
-    public KServo revolverServo;
+    private final KServo revolverServo;
 
-    public RevColorSensorV3 sen1;
-    public RevColorSensorV3 sen2;
-    public RevColorSensorV3 sen3;
+    private final RevColorSensorV3 sen1; // made private for encapsulation little k :)
+    private final RevColorSensorV3 sen2;
+    private final RevColorSensorV3 sen3;
 
     public static final double REVOLVER_INDEX_0 = 0.195;
     public static final double REVOLVER_INDEX_1 = 0.58;
@@ -26,35 +24,34 @@ public class Revolver {
 
     private KColor.Color[] colorSet = new KColor.Color[3];
 
-    private Revolver(OpModeUtilities opModeUtilities) {
+    public Revolver(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
-        resetHardwareMap(opModeUtilities.getHardwareMap(), this);
-    }
-
-    public static synchronized Revolver getInstance(OpModeUtilities opModeUtilities) {
-        if (single_instance == null) {
-            single_instance = new Revolver(opModeUtilities);
-        } else {
-            resetHardwareMap(opModeUtilities.getHardwareMap(), single_instance);
-        }
-        return single_instance;
-    }
-
-    public static void setInstanceNull() {
-        single_instance = null;
-    }
-
-    private static void resetHardwareMap(HardwareMap hardwareMap, Revolver revolver) {
-        Servo servo = hardwareMap.servo.get("revolver");
-        revolver.revolverServo = new KServo(servo, KServo.AXON_MAX_SPEED,242, 0, false);
-        revolver.sen1 = hardwareMap.get(RevColorSensorV3.class, "revColor1");
-        revolver.sen2 = hardwareMap.get(RevColorSensorV3.class, "revColor2");
-        revolver.sen3 = hardwareMap.get(RevColorSensorV3.class, "revColor3");
+        Servo servo = opModeUtilities.getHardwareMap().servo.get("revolver");
+        this.revolverServo = new KServo(servo, KServo.AXON_MAX_SPEED, 242, 0, false);
+        this.sen1 = opModeUtilities.getHardwareMap().get(RevColorSensorV3.class, "revColor1");
+        this.sen2 = opModeUtilities.getHardwareMap().get(RevColorSensorV3.class, "revColor2");
+        this.sen3 = opModeUtilities.getHardwareMap().get(RevColorSensorV3.class, "revColor3");
     }
 
     public OpModeUtilities getOpModeUtilities() {
         return opModeUtilities;
+    }
+
+    public KServo getRevolverServo() {
+        return revolverServo;
+    }
+
+    public RevColorSensorV3 getSen1() {
+        return sen1;
+    }
+
+    public RevColorSensorV3 getSen2() {
+        return sen2;
+    }
+
+    public RevColorSensorV3 getSen3() {
+        return sen3;
     }
 
     public int getCurrentRevolverServoIndex() {

@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -48,7 +48,7 @@ public class KGamePad {
         boolean toggle = false;
         if (!this.previousDpadLeft && current){
             toggle = true;
-            Log.d("KGamePad", "This Dpad left toggle");
+            KLog.d("KGamePad", "This Dpad left toggle");
         }
 
         this.previousDpadLeft = current;
@@ -60,7 +60,7 @@ public class KGamePad {
         boolean toggle = false;
         if (!this.previousDpadRight && current){
             toggle = true;
-            Log.d("KGamePad", "This Dpad right toggle");
+            KLog.d("KGamePad", "This Dpad right toggle");
         }
         this.previousDpadRight = current;
         return toggle;
@@ -71,7 +71,7 @@ public class KGamePad {
         boolean toggle = false;
         if (!this.previousDpadUp && current){
             toggle = true;
-            Log.d("KGamePad", "This Dpad up toggle");
+            KLog.d("KGamePad", "This Dpad up toggle");
         }
         this.previousDpadUp = current;
         return toggle;
@@ -82,7 +82,7 @@ public class KGamePad {
         boolean toggle = false;
         if (!this.previousDpadDown && current){
             toggle = true;
-            Log.d("KGamePad", "This Dpad down toggle");
+            KLog.d("KGamePad", "This Dpad down toggle");
         }
         this.previousDpadDown = current;
         return toggle;
@@ -93,7 +93,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousButtonB && current){
             toggle = true;
-            Log.d("KGamePad", "This button B toggle");
+            KLog.d("KGamePad", "This button B toggle");
         }
         this.previousButtonB = current;
         return toggle;
@@ -104,7 +104,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousButtonX && current){
             toggle = true;
-            Log.d("KGamePad", "This button X toggle");
+            KLog.d("KGamePad", "This button X toggle");
         }
         this.previousButtonX = current;
         return toggle;
@@ -115,7 +115,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousButtonA && current){
             toggle = true;
-            Log.d("KGamePad", "This button A toggle");
+            KLog.d("KGamePad", "This button A toggle");
         }
         this.previousButtonA = current;
         return toggle;
@@ -126,7 +126,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousButtonY && current){
             toggle = true;
-            Log.d("KGamePad", "This button Y toggle");
+            KLog.d("KGamePad", "This button Y toggle");
         }
         this.previousButtonY = current;
         return toggle;
@@ -144,7 +144,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousRightBumper && current){
             toggle = true;
-            Log.d("KGamePad", "This right bumper toggle");
+            KLog.d("KGamePad", "This right bumper toggle");
         }
         this.previousRightBumper = current;
         return toggle;
@@ -155,7 +155,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousLeftBumper && current){
             toggle = true;
-            Log.d("KGamePad", "This left bumper toggle");
+            KLog.d("KGamePad", "This left bumper toggle");
         }
         this.previousLeftBumper = current;
         return toggle;
@@ -174,7 +174,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousLeftTrigger && current){
             toggle = true;
-            Log.d("KGamePad", "This left trigger toggle");
+            KLog.d("KGamePad", "This left trigger toggle");
         }
         this.previousLeftTrigger = current;
         return toggle;
@@ -185,7 +185,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousRightTrigger && current){
             toggle = true;
-            Log.d("KGamePad", "This right trigger toggle");
+            KLog.d("KGamePad", "This right trigger toggle");
         }
         this.previousRightTrigger = current;
         return toggle;
@@ -196,7 +196,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousLeftStickButton && current){
             toggle = true;
-            Log.d("KGamePad", "This left stick button toggle");
+            KLog.d("KGamePad", "This left stick button toggle");
         }
         this.previousLeftStickButton = current;
         return toggle;
@@ -207,7 +207,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousRightStickButton && current){
             toggle = true;
-            Log.d("KGamePad", "This right stick button toggle");
+            KLog.d("KGamePad", "This right stick button toggle");
         }
         this.previousRightStickButton = current;
         return toggle;
@@ -218,7 +218,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousBackButton && current){
             toggle = true;
-            Log.d("KGamePad", "This back button toggle");
+            KLog.d("KGamePad", "This back button toggle");
         }
         this.previousBackButton = current;
         return toggle;
@@ -229,7 +229,7 @@ public class KGamePad {
         boolean toggle = false;
         if(!this.previousStartButton && current){
             toggle = true;
-            Log.d("KGamePad", "This start button toggle");
+            KLog.d("KGamePad", "This start button toggle");
         }
         this.previousStartButton = current;
         return toggle;

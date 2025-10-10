@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.drivetrain;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -36,9 +36,9 @@ public class DriveAction {
         double turn = gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x;
         double strafe = gamepadx * gamepadx * gamepadx;
 
-        Log.d("drive", "forward " + forward);
-        Log.d("drive", "turn " + turn);
-        Log.d("drive", "strafe " + strafe);
+        KLog.d("drive", "forward " + forward);
+        KLog.d("drive", "turn " + turn);
+        KLog.d("drive", "strafe " + strafe);
 
         double fLeftPower = (forward + strafe + turn);
         double fRightPower = (forward - strafe - turn);
@@ -67,9 +67,9 @@ public class DriveAction {
         double turn = 1 * gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x;
         double strafe = 1 * gamepad.left_stick_x * gamepad.left_stick_x * gamepad.left_stick_x;
 
-        Log.d("drive", "forward " + forward);
-        Log.d("drive", "turn " + turn);
-        Log.d("drive", "strafe " + strafe);
+        KLog.d("drive", "forward " + forward);
+        KLog.d("drive", "turn " + turn);
+        KLog.d("drive", "strafe " + strafe);
 
         double fLeftPower = (forward + strafe + turn);
         double fRightPower = (forward - strafe - turn);
@@ -102,10 +102,10 @@ public class DriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        Log.d("drive", "fLeft power " + driveTrainPower[0]);
-        Log.d("drive", "fRight power " + driveTrainPower[1]);
-        Log.d("drive", "bLeft power " + driveTrainPower[2]);
-        Log.d("drive", "bRight power " + driveTrainPower[3]);
+        KLog.d("drive", "fLeft power " + driveTrainPower[0]);
+        KLog.d("drive", "fRight power " + driveTrainPower[1]);
+        KLog.d("drive", "bLeft power " + driveTrainPower[2]);
+        KLog.d("drive", "bRight power " + driveTrainPower[3]);
 
     }
     public void moveWithXYValues(double x, double y, Gamepad gamepad) {
@@ -116,10 +116,10 @@ public class DriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        Log.d("drive", "fLeft power " + driveTrainPower[0]);
-        Log.d("drive", "fRight power " + driveTrainPower[1]);
-        Log.d("drive", "bLeft power " + driveTrainPower[2]);
-        Log.d("drive", "bRight power " + driveTrainPower[3]);
+        KLog.d("drive", "fLeft power " + driveTrainPower[0]);
+        KLog.d("drive", "fRight power " + driveTrainPower[1]);
+        KLog.d("drive", "bLeft power " + driveTrainPower[2]);
+        KLog.d("drive", "bRight power " + driveTrainPower[3]);
     }
 
     public OpModeUtilities getOpModeUtilities() {

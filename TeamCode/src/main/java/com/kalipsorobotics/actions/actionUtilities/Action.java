@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.actionUtilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -121,6 +121,6 @@ public abstract class Action {
                 stringBuilder.append(a);
             }
         }
-        Log.d("action dependencies",  stringBuilder.toString());
+        KLog.d("action dependencies",  stringBuilder.toString());
     }
 }

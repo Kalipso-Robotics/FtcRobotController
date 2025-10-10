@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.localization.Odometry;
@@ -43,7 +43,7 @@ public class AutoDriveWithMotifDetection extends LinearOpMode {
             //moveForward.updateCheckDone();
             driveTrain.setPower(-0.3);
             motifDetection.updateCheckDone();
-            Log.d("Motif Detection Auto", "Motif Pattern: " + motifDetection.getMotifPattern());
+            KLog.d("Motif Detection Auto", "Motif Pattern: " + motifDetection.getMotifPattern());
             telemetry.addLine("" + motifDetection.getMotifPattern());
             if (motifDetection.getIsDone()) {
                 driveTrain.setPower(-0.3, 0.3, 0.3, -0.3);

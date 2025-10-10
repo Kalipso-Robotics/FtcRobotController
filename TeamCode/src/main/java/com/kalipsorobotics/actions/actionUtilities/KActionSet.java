@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.actionUtilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +17,7 @@ public class KActionSet extends Action {
     public void update() {
         for (Action a : actions) {
             if (a != null && a.dependentActionsDone()) {
-                Log.d("action set log", "executing " + a);
+                KLog.d("action set log", "executing " + a);
                 a.updateCheckDone();
             }
         }
@@ -27,7 +27,7 @@ public class KActionSet extends Action {
     @Override
     public boolean updateCheckDone(){
         if (isDone) {
-            Log.d("action set log", "done for " + name);
+            KLog.d("action set log", "done for " + name);
             return true;
         }
 
@@ -51,7 +51,7 @@ public class KActionSet extends Action {
     }
 
     public void printWithDependentActions() {
-        Log.d("action dependencies", "Start Action Set");
+        KLog.d("action dependencies", "Start Action Set");
         super.printWithDependentActions();
 
         for (Action a : actions) {
@@ -59,7 +59,7 @@ public class KActionSet extends Action {
                 a.printWithDependentActions();
             }
         }
-        Log.d("action dependencies", "End Action Set");
+        KLog.d("action dependencies", "End Action Set");
 
     }
 

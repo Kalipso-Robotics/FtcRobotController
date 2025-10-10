@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.localization.OdometryFileWriter;
@@ -88,7 +88,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                     moveForward1.updateCheckDone();
                     if (moveForward1.getIsDone()) {
                         action1Done = true;
-                        Log.d("SimpleActionAuto", "Action 1 completed - moved to 500mm");
+                        KLog.d("SimpleActionAuto", "Action 1 completed - moved to 500mm");
                         telemetry.addLine("✅ First movement completed");
                         telemetry.update();
                     }
@@ -96,7 +96,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                     moveForward2.updateCheckDone();
                     if (moveForward2.getIsDone()) {
                         action2Done = true;
-                        Log.d("SimpleActionAuto", "Action 2 completed - moved to 1000mm");
+                        KLog.d("SimpleActionAuto", "Action 2 completed - moved to 1000mm");
                         telemetry.addLine("✅ Second movement completed");
                         telemetry.update();
                     }
@@ -104,7 +104,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                     moveBack.updateCheckDone();
                     if (moveBack.getIsDone()) {
                         action3Done = true;
-                        Log.d("SimpleActionAuto", "Action 3 completed - returned to start");
+                        KLog.d("SimpleActionAuto", "Action 3 completed - returned to start");
                         telemetry.addLine("✅ All movements completed!");
                         telemetry.update();
                         break; // All actions complete
@@ -119,7 +119,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
 
                 if (isStuck && !isCurrentlyStuck) {
                     isCurrentlyStuck = true;
-                    Log.d("SimpleActionBasedAutoWithCheckStuck", "Robot stuck detected - executing recovery");
+                    KLog.d("SimpleActionBasedAutoWithCheckStuck", "Robot stuck detected - executing recovery");
                     telemetry.addLine("⚠️ ROBOT STUCK - Recovery in progress...");
                     telemetry.update();
                     
@@ -129,7 +129,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                         Position safePosition = checkStuckRobot.findBestSafePosition(currentPosition);
                         
                         if (safePosition != null) {
-                            Log.d("unstuck", "Moving to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
+                            KLog.d("unstuck", "Moving to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
                             unstuckAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
                         } else {
                             // Fallback: move backward 100mm
@@ -147,7 +147,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                     unstuckAction.updateCheckDone();
                     
                     if (unstuckAction.getIsDone()) {
-                        Log.d("SimpleActionBasedAutoWithCheckStuck", "Unstuck action completed");
+                        KLog.d("SimpleActionBasedAutoWithCheckStuck", "Unstuck action completed");
                         isExecutingUnstuckAction = false;
                         unstuckAction = null;
                         isCurrentlyStuck = false;
@@ -169,8 +169,8 @@ public class AutoWithCheckStuck extends LinearOpMode {
                 telemetry.update();
             }
 
-            Log.d("homePos", SharedData.getOdometryPosition().toString());
-            Log.d("homePosMap", SharedData.getOdometryPositionMap().toString());
+            KLog.d("homePos", SharedData.getOdometryPosition().toString());
+            KLog.d("homePosMap", SharedData.getOdometryPositionMap().toString());
         }
         
         odometryFileWriter.close();

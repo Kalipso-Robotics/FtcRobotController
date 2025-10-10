@@ -1,7 +1,7 @@
 package com.kalipsorobotics.localization;
 
 import android.os.SystemClock;
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
@@ -56,7 +56,7 @@ public class Odometry {
         this.backOffset = this.getBackEncoderMM();
 
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
-        ////Log.d("purepursaction_debug_odo_wheel", "init jimmeh" + currentPosition.toString());
+        ////KLog.d("purepursaction_debug_odo_wheel", "init jimmeh" + currentPosition.toString());
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
         currentImuHeading = prevImuHeading;
@@ -164,7 +164,7 @@ public class Odometry {
             return relativeDelta;
         }
 
-        //Log.d("odometry", "linearDelta " + relativeDelta);
+        //KLog.d("odometry", "linearDelta " + relativeDelta);
         double forwardRadius = relativeDelta.getX() / relativeDelta.getTheta();
         double strafeRadius = relativeDelta.getY() / relativeDelta.getTheta();
 
@@ -179,7 +179,7 @@ public class Odometry {
 
         Velocity arcDelta = new Velocity(relDeltaX, relDeltaY, relDeltaTheta);
         if (Math.abs(arcDelta.getTheta()) > 0.01) {
-            //Log.d("odometry new arc delta", "arcDelta4" + arcDelta);
+            //KLog.d("odometry new arc delta", "arcDelta4" + arcDelta);
         }
         return arcDelta;
     }
@@ -202,7 +202,7 @@ public class Odometry {
 
     private Position calculateGlobal(Velocity relativeDelta, Position previousGlobalPosition) {
         Velocity globalDelta = rotate(relativeDelta, previousGlobalPosition);
-        //Log.d("global delta", globalDelta.toString());
+        //KLog.d("global delta", globalDelta.toString());
         Position position = previousGlobalPosition.add(globalDelta);
         return position;
     }
@@ -220,16 +220,16 @@ public class Odometry {
     }
 
     public HashMap<OdometrySensorCombinations, PositionHistory> updatePositionAll() {
-        Log.d("updatepos", "updatepos");
+        KLog.d("updatepos", "updatepos");
         double rightDistanceMM = getRightEncoderMM();
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
         currentImuHeading = getIMUHeading();
 
-        Log.d("IMU_Heading", "Heading " + Math.toDegrees(currentImuHeading));
-        Log.d("IMU_Prev_Heading", "PrevHeading" + Math.toDegrees(prevImuHeading));
+        KLog.d("IMU_Heading", "Heading " + Math.toDegrees(currentImuHeading));
+        KLog.d("IMU_Prev_Heading", "PrevHeading" + Math.toDegrees(prevImuHeading));
 
-        //Log.d("updatepos", rightDistanceMM + " " + leftDistanceMM + " " + backDistanceMM);
+        //KLog.d("updatepos", rightDistanceMM + " " + leftDistanceMM + " " + backDistanceMM);
 
         long currentTime = SystemClock.elapsedRealtime();
         double timeElapsedSeconds = (currentTime - prevTime) / 1000.0;
@@ -237,7 +237,7 @@ public class Odometry {
 
         updateWheelIMUPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
 
-        //Log.d("currentpos", "current pos " + currentPosition.toString());
+        //KLog.d("currentpos", "current pos " + currentPosition.toString());
         prevTime = currentTime;
 
         prevRightDistanceMM = rightDistanceMM;
@@ -247,7 +247,7 @@ public class Odometry {
         prevImuHeading = currentImuHeading;
         SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
-        Log.d("updatepos", "updatepos done");
+        KLog.d("updatepos", "updatepos done");
         return odometryPositionHistoryHashMap;
     }
 

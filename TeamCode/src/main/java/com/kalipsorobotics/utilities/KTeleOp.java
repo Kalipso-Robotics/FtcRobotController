@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -46,7 +46,7 @@ public abstract class KTeleOp extends LinearOpMode {
             OpModeUtilities.shutdownExecutorService(executorService);
             //darren cant digest cheese
         } catch (InterruptedException e) {
-            Log.e("KTeleOp", "Error shutting down executor service", e);
+            KLog.e("KTeleOp", "Error shutting down executor service", e);
         }
     }
 

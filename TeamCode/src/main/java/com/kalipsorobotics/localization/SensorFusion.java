@@ -1,6 +1,6 @@
 package com.kalipsorobotics.localization;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import java.util.LinkedList;
 
@@ -58,7 +58,7 @@ public class SensorFusion {
 
 
         if ((isImuAndEncoderAngleCrazyWildlyDifferentFromEachother || isSpike)) {
-            Log.d("Sensor_Fusion",
+            KLog.d("Sensor_Fusion",
                     "not valid detected.   " + imuAngleDelta + "   encoder : " + encoderAngleDelta + "   is spike  " +
                             isSpike + "  is wildly carzy different cheese " + isImuAndEncoderAngleCrazyWildlyDifferentFromEachother + "   imu angle  " + imuAngle);
         }
@@ -104,10 +104,10 @@ public class SensorFusion {
             }
             imuHistory.add(imuRateChange);
         } else {
-            Log.d("Sensor_Fusion",
+            KLog.d("Sensor_Fusion",
                     "spike detected imu angle delta :" + imuDeltaAngle + "  rateChange  " + imuRateChange +
                             "  deltaTime: " + deltaTimeMS);
-            Log.d("Sensor_Fusion",
+            KLog.d("Sensor_Fusion",
                     "  spike cause change rate too big :" + (Math.abs(imuRateChange) > MAX_CHANGE_THRESHOLD)
                     // + "spike cause2 :" + (Math.abs(imuRateChange - mean) > 2 * stdDev)
             );

@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.checkStuck;
 import android.os.SystemClock;
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.localization.Odometry;
@@ -203,11 +203,11 @@ public class CheckStuckRobot {
 
             if (notMoving || spinning) {
                 isCurrentlyStuck = true;
-                Log.d("check stuck", "---ROBOT IS STUCK---");
+                KLog.d("check stuck", "---ROBOT IS STUCK---");
                 return true;
             } else {
                 isCurrentlyStuck = false;
-                Log.d("check stuck", "---robot is not stuck---");
+                KLog.d("check stuck", "---robot is not stuck---");
             }
         }
 
@@ -230,7 +230,7 @@ public class CheckStuckRobot {
 
         if (safePosition != null) {
             // Use pure pursuit to reverse to the safe position
-            Log.d("unstuck", "Reversing to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
+            KLog.d("unstuck", "Reversing to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
             purePursuitAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
 
             // Add a few intermediate points for smoother navigation
@@ -246,7 +246,7 @@ public class CheckStuckRobot {
             }
         } else {
             // Fallback to original escape strategy if no safe position found
-            Log.d("unstuck", "No safe position found, using escape strategy");
+            KLog.d("unstuck", "No safe position found, using escape strategy");
             double offset = 100; // distance in mm to try moving
 
             Position[] escapePositions = new Position[] {
@@ -262,6 +262,6 @@ public class CheckStuckRobot {
             }
         }
 
-        Log.d("unstuck", "Trying to reverse to safe position or escape.");
+        KLog.d("unstuck", "Trying to reverse to safe position or escape.");
     }
 }

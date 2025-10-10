@@ -15,9 +15,9 @@ public class DetectColorsAction extends Action {
 
     public DetectColorsAction(Revolver revolver) {
         this.revolver = revolver;
-        this.sen1 = revolver.sen1;
-        this.sen2 = revolver.sen2;
-        this.sen3 = revolver.sen3;
+        this.sen1 = revolver.getSen1();
+        this.sen2 = revolver.getSen2();
+        this.sen3 = revolver.getSen3();
         this.dependentActions.add(new DoneStateAction());
     }
 

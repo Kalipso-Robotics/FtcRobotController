@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
-import android.util.Log;
+import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
