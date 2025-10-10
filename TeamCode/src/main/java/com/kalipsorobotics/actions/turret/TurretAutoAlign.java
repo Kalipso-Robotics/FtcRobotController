@@ -44,7 +44,7 @@ public class TurretAutoAlign extends Action {
         // y_goal
 
         //output
-        //  angle_target = arctan (x_goal/y_goal)
+        //  angleTargetRadian = arctan (x_goal/y_goal)
 
         double x_init_setup = 3657.6;
         double y_init_setup = -3251.2;
@@ -57,10 +57,13 @@ public class TurretAutoAlign extends Action {
         double yTargetGoal = y_init_setup + currentY;
         double xTargetGoal = x_init_setup - currentX;
 
-        double angle_target = Math.atan(yTargetGoal/xTargetGoal) * 180/Math.PI;//180 deg = 3.14 radians
-        KLog.d("turret angle", "deg " + angle_target);
+        double angleTargetRadian = Math.atan(yTargetGoal/xTargetGoal);//180 deg = 3.14 radians
+        KLog.d("turret angle", "radian " + angleTargetRadian);
 
-        double turretRotation = angle_target / 360;
+        double currentRobotAngleRadian = currentPosition.getTheta();
+        double reverseTurretAngleRadian = -currentRobotAngleRadian;
+
+        double turretRotation = (angleTargetRadian + reverseTurretAngleRadian) / ( 2 * Math.PI);
         double motorRotation = turretRotation * gearRatio;
         double targetTicks = ticksPerRotation * motorRotation;
         KLog.d("turret angle", "ticks " + targetTicks );
@@ -70,7 +73,6 @@ public class TurretAutoAlign extends Action {
         turretMotor.setTargetPosition((int) targetTicks);
         //turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);  Idk if you want this setting we have never used it unless big banana wants it :) but if you were to use it set it inside of modules.Turret
         turretMotor.setPower(0.5);
-
 
 
 
