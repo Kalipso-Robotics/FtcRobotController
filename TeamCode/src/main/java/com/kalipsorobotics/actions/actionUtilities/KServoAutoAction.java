@@ -14,7 +14,6 @@ public class KServoAutoAction extends Action {
         this.targetPos = targetPos;
     }
 
-
     @Override
     public void update() {
         KLog.d("servo_action", "running update  " + targetPos + "currentTime  " + kServo.getTime() +

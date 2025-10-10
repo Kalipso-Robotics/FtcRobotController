@@ -49,8 +49,6 @@ public class TeleOp extends KTeleOp {
 
     TurretMove turretMove = null;
 
-
-
     double turretStickValue;
     boolean shooterReadyPressed = false;
     boolean kickPressed = false;
@@ -80,7 +78,6 @@ public class TeleOp extends KTeleOp {
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
         turret = Turret.getInstance(opModeUtilities);
-
 
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);

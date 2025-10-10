@@ -50,7 +50,6 @@ public class RevolverIntakeAction extends Action {
             }
         }
 
-
         if (KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()) != KColor.Color.NONE && KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()) != KColor.Color.NONE && KColorDetection.detectColor("revColor3", sen3, revolver.getOpModeUtilities()) != KColor.Color.NONE) {
             revolver.setColorSet(0, KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()));
             revolver.setColorSet(1, KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()));
