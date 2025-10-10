@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import static com.kalipsorobotics.utilities.ColorCalibrationDetection.detectColor;
+import static com.kalipsorobotics.utilities.KColorDetection.detectColor;
 import static com.kalipsorobotics.utilities.KColor.Color.PURPLE;
 import static com.kalipsorobotics.utilities.KColor.Color.GREEN;
 import static com.kalipsorobotics.utilities.KColor.Color.NONE;
@@ -49,7 +49,7 @@ public class ColorCalibration extends LinearOpMode {
         // Try to load saved calibration data
         loadCalibrationData();
 
-        // Uncomment to collect raw data points for analysis
+        // RAW DATA COLLECTION HEADER
         rawDataFile = new KFileWriter("ColorRawData", opModeUtilities);
         rawDataFile.writeLine("Timestamp,Sensor,Color,Hue,Saturation,Value,Distance,Red,Green,Blue");
 
@@ -74,12 +74,13 @@ public class ColorCalibration extends LinearOpMode {
             }
 
             if (kPad.isToggleY()) {
+                // getting calibrated values
                 calibrate(front, currentColor, revFront);
                 calibrate(bLeft, currentColor, revBLeft);
                 calibrate(bRight, currentColor, revBRight);
                 telemetry.addLine("Calibrating...");
 
-                // Uncomment to collect raw data points for analysis
+                // RAW DATA COLLECTION MAIN
                 collectRawDataPoint(front, "Front", currentColor);
                 collectRawDataPoint(bLeft, "BLeft", currentColor);
                 collectRawDataPoint(bRight, "BRight", currentColor);
@@ -89,6 +90,7 @@ public class ColorCalibration extends LinearOpMode {
             }
 
             if (kPad.isRightBumperFirstPressed()) {
+                // SET OF CALLIBRATED COLOR HSV VALUES
                 KLog.d("CalibratedRevColor", "Front, PURPLE: " + revFront.get(PURPLE) + " GREEN: " + revFront.get(GREEN) + " NONE: " + revFront.get(NONE) + "\n");
                 KLog.d("CalibratedRevColor","BLeft, PURPLE: " + revBLeft.get(PURPLE) + " GREEN: " + revBLeft.get(GREEN) + " NONE: " + revBLeft.get(NONE)  + "\n");
                 KLog.d("CalibratedRevColor","Bright, PURPLE: " + revBRight.get(PURPLE) + " GREEN: " + revBRight.get(GREEN) + " NONE: " + revBRight.get(NONE)  + "\n");
@@ -98,6 +100,7 @@ public class ColorCalibration extends LinearOpMode {
             }
 
             if (kPad.isLeftBumperFirstPressed()) {
+                // DETECTING COLORS TEST
                 KLog.d("RevColorTest", "Front Color: " + detectColor(revFront, front));
                 KLog.d("RevColorTest", "BLeft Color: " +  detectColor(revBLeft, bLeft));
                 KLog.d("RevColorTest", "BRight Color: " + detectColor(revBRight, bRight));
@@ -212,12 +215,6 @@ public class ColorCalibration extends LinearOpMode {
         }
     }
 
-    /**
-     * Collects raw HSV data points for cluster analysis
-     * Uncomment the method calls to enable data collection
-     * Creates a timestamped CSV file with all individual readings
-     * Recommended: Hold each color for 10-15 seconds (~500-750 data points per sensor per color)
-     */
     private void collectRawDataPoint(RevColorSensorV3 revColor, String sensorName, KColor.Color currentColor) {
         int red = revColor.red();
         int green = revColor.green();
@@ -229,6 +226,7 @@ public class ColorCalibration extends LinearOpMode {
         long timestamp = System.currentTimeMillis();
         String colorName = (currentColor != null) ? currentColor.toString() : "UNKNOWN";
 
+        // values collected for rawData, remember to change header if any values here change
         rawDataFile.writeLine(timestamp + "," + sensorName + "," + colorName + "," +
                 hsv[0] + "," + hsv[1] + "," + hsv[2] + "," + revColor.getDistance(DistanceUnit.MM) + ","  + red + "," + green + "," + blue);
     }

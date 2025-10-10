@@ -3,10 +3,10 @@ package com.kalipsorobotics.actions.revolverActions;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.utilities.KColorDetection;
 import com.kalipsorobotics.utilities.KColor;
 import com.kalipsorobotics.utilities.KServo;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.hardware.Servo;
 
 public class RevolverIntakeAction extends Action {
 
@@ -30,29 +30,18 @@ public class RevolverIntakeAction extends Action {
     }
 
     @Override
-    protected boolean updateIsDone() {
-        if (KColor.classify(sen1) != KColor.Color.NONE && KColor.classify(sen2) != KColor.Color.NONE && KColor.classify(sen3) != KColor.Color.NONE) {
-            revolver.setColorSet(0, KColor.classify(sen1));
-            revolver.setColorSet(1, KColor.classify(sen2));
-            revolver.setColorSet(2, KColor.classify(sen3));
-            isDone = true;
-        }
-        return isDone;
-    }
-
-    @Override
     protected void update() {
         if (!hasStarted) {
-            if (KColor.classify(sen1) != KColor.Color.NONE && KColor.classify(sen2) != KColor.Color.NONE) {
+            if (KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()) != KColor.Color.NONE && KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()) != KColor.Color.NONE) {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
-            } else if (KColor.classify(sen1) != KColor.Color.NONE) {
+            } else if (KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()) != KColor.Color.NONE) {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
             } else {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
             }
         }
 
-        if (KColor.classify(sen1) != KColor.Color.NONE) {
+        if (KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()) != KColor.Color.NONE) {
             count++;
             if (count == 1) {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
@@ -60,5 +49,14 @@ public class RevolverIntakeAction extends Action {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
             }
         }
+
+
+        if (KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()) != KColor.Color.NONE && KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()) != KColor.Color.NONE && KColorDetection.detectColor("revColor3", sen3, revolver.getOpModeUtilities()) != KColor.Color.NONE) {
+            revolver.setColorSet(0, KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()));
+            revolver.setColorSet(1, KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()));
+            revolver.setColorSet(2, KColorDetection.detectColor("revColor3", sen3, revolver.getOpModeUtilities()));
+            isDone = true;
+        }
+
     }
 }
