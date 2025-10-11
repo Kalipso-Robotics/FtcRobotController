@@ -18,9 +18,8 @@ public class Shooter {
 
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
-    public static final Point FAR_STARTING_POS_MM = new Point(3352.8+300, 1524+300);
+    public static final Point FAR_STARTING_POS_MM_RED = new Point(3352.8+300, 1135.3+300);
     private final OpModeUtilities opModeUtilities;
-    private double rpm;
     double prevTicks = 0;
     //darren cant digest cheese
     double prevTimeMS = System.currentTimeMillis();

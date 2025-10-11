@@ -12,7 +12,6 @@ import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretMove;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -22,7 +21,6 @@ import com.kalipsorobotics.modules.MotifColors;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.utilities.ColorCalibration;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -99,7 +97,7 @@ public class TeleOp extends KTeleOp {
         testingMotif = new ObiliskDetection.MotifPattern(MotifColors.PURPLE, MotifColors.PURPLE, MotifColors.GREEN);
         fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
 
-        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
+        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED);
         kickBall = new KickBall(shooter);
     }
 
@@ -132,7 +130,7 @@ public class TeleOp extends KTeleOp {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
+                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED);
                     setLastShooterAction(shooterReady);
                 }
             }
