@@ -1,24 +1,30 @@
 package com.kalipsorobotics.actions.revolverActions;
 
+import android.graphics.Region;
+
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KColor;
+import com.kalipsorobotics.utilities.OpModeUtilities;
 
 public class FullShootMotifAction extends KActionSet {
-    public FullShootMotifAction(Revolver revolver, Shooter shooter, ObiliskDetection.MotifPattern motifPattern) {
+    public FullShootMotifAction(Revolver revolver, Shooter shooter, ObiliskDetection.MotifPattern motifPattern, TripleColorSensor colorSensors, OpModeUtilities opModeUtilities) {
 
-        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(revolver, shooter, motifPattern.top);
+        DetectColorsAction detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
+
+        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(revolver, shooter, motifPattern.top, detectColorsAction);
         revolverShootColorAction1.setName("revolverShootColorAction1");
         this.addAction(revolverShootColorAction1);
 
-        RevolverShootColorAction revolverShootColorAction2 = new RevolverShootColorAction(revolver, shooter, motifPattern.middle);
+        RevolverShootColorAction revolverShootColorAction2 = new RevolverShootColorAction(revolver, shooter, motifPattern.middle, detectColorsAction);
         revolverShootColorAction2.setName("revolverShootColorAction2");
         revolverShootColorAction2.setDependentActions(revolverShootColorAction1);
         this.addAction(revolverShootColorAction2);
 
-        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(revolver, shooter, motifPattern.bottom);
+        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(revolver, shooter, motifPattern.bottom, detectColorsAction);
         revolverShootColorAction3.setName("revolverShootColorAction3");
         revolverShootColorAction3.setDependentActions(revolverShootColorAction2);
         this.addAction(revolverShootColorAction3);

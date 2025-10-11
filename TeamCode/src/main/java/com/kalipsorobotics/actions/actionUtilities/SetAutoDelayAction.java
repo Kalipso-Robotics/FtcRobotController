@@ -20,7 +20,7 @@ public class SetAutoDelayAction extends Action {
     }
 
     @Override
-    protected boolean updateIsDone() {
+    protected boolean isUpdateDone() {
         if(isDone) {
             return true;
         }

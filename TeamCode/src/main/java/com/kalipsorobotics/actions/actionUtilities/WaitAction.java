@@ -15,7 +15,7 @@ public class WaitAction extends Action {
     }
 
     @Override
-    protected boolean updateIsDone() {
+    protected boolean isUpdateDone() {
         if (hasStarted) {
 //            boolean done = elapsedTime.seconds() >= waitTimeSeconds;
             KLog.d("waitaction", "elapsed time " + elapsedTime.seconds());

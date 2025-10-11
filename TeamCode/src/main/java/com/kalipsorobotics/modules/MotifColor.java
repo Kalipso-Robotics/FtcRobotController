@@ -1,5 +1,5 @@
 package com.kalipsorobotics.modules;
 
-public enum MotifColors {
+public enum MotifColor {
     PURPLE, GREEN, NONE
 }

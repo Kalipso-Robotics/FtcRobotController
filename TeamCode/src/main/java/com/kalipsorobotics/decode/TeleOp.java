@@ -8,18 +8,19 @@ import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretMove;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.MotifColors;
+import com.kalipsorobotics.modules.MotifColor;
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KLog;
@@ -32,12 +33,14 @@ public class TeleOp extends KTeleOp {
     private DriveTrain driveTrain;
     private  Odometry odometry;
 
+    TripleColorSensor colorSensors = null;
     Shooter shooter = null;
     Intake intake = null;
     ShooterReady shooterReady = null;
     KickBall kickBall = null;
     Revolver revolver = null;
     Turret turret = null;
+
 
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
@@ -52,6 +55,8 @@ public class TeleOp extends KTeleOp {
     DriveAction driveAction = null;
 
     TurretAutoAlign turretAutoAlign = null;
+
+    DetectColorsAction detectColorsAction = null;
 
     double turretStickValue;
     boolean shooterReadyPressed = false;
@@ -80,6 +85,8 @@ public class TeleOp extends KTeleOp {
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
 
+        colorSensors = new TripleColorSensor(opModeUtilities);
+
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
@@ -88,15 +95,17 @@ public class TeleOp extends KTeleOp {
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake, revolver);
+        intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
         turretAutoAlign = new TurretAutoAlign(turret);
 
+        detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
+
         //todo just fed in testing motif pattern change later
-        testingMotif = new ObiliskDetection.MotifPattern(MotifColors.PURPLE, MotifColors.PURPLE, MotifColors.GREEN);
-        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
+        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
+        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
         kickBall = new KickBall(shooter);
@@ -138,7 +147,7 @@ public class TeleOp extends KTeleOp {
 
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
-                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif);
+                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
                 }
             }
 
@@ -151,7 +160,7 @@ public class TeleOp extends KTeleOp {
 
             if (intakePressed) {
                 if (intakeFullAction != null || intakeFullAction.getIsDone()) {
-                    intakeFullAction = new IntakeFullAction(intake, revolver);
+                    intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
                     setLastIntakeAction(intakeFullAction);
                 }
             } else if (intakeReversePressed) {
