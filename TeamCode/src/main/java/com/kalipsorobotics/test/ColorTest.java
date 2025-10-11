@@ -17,7 +17,7 @@ public class ColorTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, telemetry, gamepad1, gamepad2);
+        OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, this.telemetry);
 
         RevColorSensorV3 revColor = hardwareMap.get(RevColorSensorV3.class, "revColor1");
         RevColorSensorV3 revColor2 = hardwareMap.get(RevColorSensorV3.class, "revColor2");

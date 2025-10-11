@@ -24,6 +24,7 @@ public abstract class KTeleOp extends LinearOpMode {
     protected Action lastShooterAction = null;
 
     protected Action lastKickerAction = null;
+    protected Action lastRevolverAction = null;
 
     /**
      * Initialize hardware and utilities before waitForStart()
@@ -83,6 +84,8 @@ public abstract class KTeleOp extends LinearOpMode {
         lastKickerAction = action;
     }
 
+    protected void setLastRevolverAction(Action action) {lastRevolverAction = action;}
+
     /**
      * Update all active actions
      * Call this at the end of your loop() method
@@ -103,6 +106,10 @@ public abstract class KTeleOp extends LinearOpMode {
 
         if (lastKickerAction != null && lastKickerAction != lastIntakeAction && lastKickerAction != lastMoveAction && lastKickerAction != lastShooterAction) {
             lastKickerAction.updateCheckDone();
+        }
+
+        if (lastRevolverAction != null && lastRevolverAction != lastIntakeAction && lastRevolverAction != lastMoveAction && lastRevolverAction != lastShooterAction && lastRevolverAction != lastKickerAction) {
+            lastRevolverAction.updateCheckDone();
         }
     }
 

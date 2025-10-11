@@ -33,7 +33,7 @@ public class Turret {
     }
 
     private static void resetHardwareMap(HardwareMap hardwareMap, Turret turret) {
-        turret.turretMotor = hardwareMap.dcMotor.get("turretMotor");
+        turret.turretMotor = hardwareMap.dcMotor.get("turret");
         turret.turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
     }

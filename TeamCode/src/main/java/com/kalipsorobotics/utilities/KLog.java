@@ -12,6 +12,12 @@ public class KLog {
         }
     }
 
+    public static void e(String tag, String message, Exception e) {
+        if (DEBUG) {
+            Log.e(tag, message, e);
+        }
+    }
+
     public static void e(String tag, String message) {
         if (DEBUG) {
             Log.e(tag, message);

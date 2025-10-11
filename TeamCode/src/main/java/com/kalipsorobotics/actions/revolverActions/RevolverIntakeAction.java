@@ -50,6 +50,7 @@ public class RevolverIntakeAction extends Action {
             } else {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
             }
+            hasStarted = true;
         }
 
         if (KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()) != MotifColors.NONE) {
@@ -60,10 +61,10 @@ public class RevolverIntakeAction extends Action {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
             }
         }
-        if (KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()) != MotifColors.NONE && KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()) != MotifColors.NONE && KColorDetection.detectColor("revColor3", sen3, revolver.getOpModeUtilities()) != MotifColors.NONE) {
-            revolver.setColorSet(0, KColorDetection.detectColor("revColor1", sen1, revolver.getOpModeUtilities()));
-            revolver.setColorSet(1, KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()));
-            revolver.setColorSet(2, KColorDetection.detectColor("revColor3", sen3, revolver.getOpModeUtilities()));
+        if (KColorDetection.detectColor("Front", sen1, revolver.getOpModeUtilities()) != MotifColors.NONE && KColorDetection.detectColor("revColor2", sen2, revolver.getOpModeUtilities()) != MotifColors.NONE && KColorDetection.detectColor("revColor3", sen3, revolver.getOpModeUtilities()) != MotifColors.NONE) {
+            revolver.setColorSet(0, KColorDetection.detectColor("Front", sen1, revolver.getOpModeUtilities()));
+            revolver.setColorSet(1, KColorDetection.detectColor("BLeft", sen2, revolver.getOpModeUtilities()));
+            revolver.setColorSet(2, KColorDetection.detectColor("BRight", sen3, revolver.getOpModeUtilities()));
             isDone = true;
         }
     }

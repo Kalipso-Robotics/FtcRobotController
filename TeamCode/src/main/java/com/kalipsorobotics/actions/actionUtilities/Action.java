@@ -68,7 +68,6 @@ public abstract class Action {
 
         update();
 
-
         return updateIsDone();
 
     }
