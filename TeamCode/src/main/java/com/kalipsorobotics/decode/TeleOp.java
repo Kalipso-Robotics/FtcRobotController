@@ -2,7 +2,6 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
-import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
@@ -10,7 +9,10 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
+import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretMove;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -18,12 +20,12 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.MotifColors;
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-
-import org.opencv.core.Mat;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends KTeleOp {
@@ -35,26 +37,30 @@ public class TeleOp extends KTeleOp {
     ShooterReady shooterReady = null;
     KickBall kickBall = null;
     Revolver revolver = null;
+    Turret turret = null;
 
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
-    IntakeReverse intakeReverse = null;
     IntakeFullAction intakeFullAction = null;
-    KServoAutoAction manualRevolverAction = null;
-    double revolverPosition = 0;
+
+    RevolverTeleOp revolverTeleOp = null;
+
     FullShootMotifAction fullShootMotifAction = null;
+
+    IntakeReverse intakeReverse = null;
 
     DriveAction driveAction = null;
 
+    TurretAutoAlign turretAutoAlign = null;
 
     double turretStickValue;
     boolean shooterReadyPressed = false;
     boolean kickPressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
-    boolean manualRevolverPressedRight = false;
-    boolean manualRevolverPressedLeft = false;
     boolean fullShootPressed = false;
+    boolean revolverLeftPressed = false;
+    boolean revolverRightPressed = false;
 
     ObiliskDetection.MotifPattern testingMotif;
 
@@ -77,13 +83,16 @@ public class TeleOp extends KTeleOp {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
+        turret = Turret.getInstance(opModeUtilities);
 
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(intake, revolver);
 
-        manualRevolverAction = new KServoAutoAction(revolver.getRevolverServo(), revolverPosition);
+        revolverTeleOp = new RevolverTeleOp(revolver, false);
+
+        turretAutoAlign = new TurretAutoAlign(turret);
 
         //todo just fed in testing motif pattern change later
         testingMotif = new ObiliskDetection.MotifPattern(MotifColors.PURPLE, MotifColors.PURPLE, MotifColors.GREEN);
@@ -114,10 +123,9 @@ public class TeleOp extends KTeleOp {
             kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed();
-            manualRevolverPressedRight = kGamePad2.isButtonBFirstPressed();
-            manualRevolverPressedLeft = kGamePad2.isButtonXFirstPressed();
             fullShootPressed = kGamePad2.isButtonAFirstPressed();
-
+            revolverLeftPressed = kGamePad2.isButtonXFirstPressed();
+            revolverRightPressed = kGamePad2.isButtonBFirstPressed();
 
             if (shooterReadyPressed) {
                 Log.d("ShooterReadyPressed", "Shooter Ready Pressed");
@@ -159,20 +167,25 @@ public class TeleOp extends KTeleOp {
                 }
             }
 
-            if (manualRevolverPressedRight) {
-                if (manualRevolverAction != null || manualRevolverAction.getIsDone()) {
-                    revolverPosition += 0.333;
-                    revolverPosition = Math.min(revolverPosition, 1);
-                    manualRevolverAction = new KServoAutoAction(revolver.getRevolverServo(), revolverPosition);
+            if (revolverLeftPressed) {
+                KLog.d("teleop", "revolver pressed");
+                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
+                    KLog.d("teleop", "revolverteleop reset");
+                    revolverTeleOp = new RevolverTeleOp(revolver, true);
                 }
-            } else if (manualRevolverPressedLeft) {
-                if (manualRevolverAction != null || manualRevolverAction.getIsDone()) {
-                    revolverPosition -= 0.333;
-                    revolverPosition = Math.max(revolverPosition, 0);
-                    manualRevolverAction = new KServoAutoAction(revolver.getRevolverServo(), revolverPosition);
+                setLastRevolverAction(revolverTeleOp);
+            } else if (revolverRightPressed) {
+                KLog.d("teleop", "revolver pressed");
+                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
+                    KLog.d("teleop", "revolverteleop reset");
+                    revolverTeleOp = new RevolverTeleOp(revolver, false);
                 }
+                setLastRevolverAction(revolverTeleOp);
             }
 
+
+
+            turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }

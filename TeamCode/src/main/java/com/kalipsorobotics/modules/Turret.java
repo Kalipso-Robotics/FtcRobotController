@@ -12,7 +12,7 @@ public class Turret {
 
     private final OpModeUtilities opModeUtilities;
 
-    private DcMotor turretMotor; //made private for encapsulation little d :)
+    public DcMotor turretMotor;
     private Turret(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
@@ -33,17 +33,17 @@ public class Turret {
     }
 
     private static void resetHardwareMap(HardwareMap hardwareMap, Turret turret) {
-        turret.turretMotor = hardwareMap.dcMotor.get("turretMotor");
+        turret.turretMotor = hardwareMap.dcMotor.get("turret");
         turret.turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turret.turretMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);// you forgor this line mini duong :)
-        turret.turretMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        turret.turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+    }
+
+    public DcMotor getTurretMotor(){
+        return turretMotor;
     }
 
     public OpModeUtilities getOpModeUtilities() {
         return opModeUtilities;
     }
 
-    public DcMotor getTurretMotor() {
-        return turretMotor;
-    }
 }
