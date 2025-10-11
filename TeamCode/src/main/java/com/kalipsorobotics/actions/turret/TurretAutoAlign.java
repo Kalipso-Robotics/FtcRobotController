@@ -17,12 +17,14 @@ public class TurretAutoAlign extends Action {
     DcMotor turretMotor;
 
     private final double ticksPerRotation = 384.5;
-    private final double gearRatio = 2.69;
+    private final double gearRatio = 299.0/111.0;
     private final double degreesPerRotation = 360.0;
+    private final double radiansPerRotation = 2 * Math.PI;
 
-    private final double TOLERANCE = 40;
+    private final double TICKS_PER_RADIAN = (ticksPerRotation * gearRatio) / radiansPerRotation;
+    private final double TICKS_PER_DEGREE = (ticksPerRotation * gearRatio) / degreesPerRotation;
 
-    private final double ticksPerDegree = (ticksPerRotation * gearRatio) / degreesPerRotation;
+    private final double TOLERANCE_TICKS = (TICKS_PER_DEGREE);
 
 
 
@@ -48,7 +50,7 @@ public class TurretAutoAlign extends Action {
         //output
         //  angleTargetRadian = arctan (x_goal/y_goal)
 
-        double x_init_setup = 3445.14;
+        double x_init_setup = 3445.14; //make static field
         double y_init_setup = -2028.8;
 
         Position currentPosition = SharedData.getOdometryPosition();
@@ -66,6 +68,7 @@ public class TurretAutoAlign extends Action {
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
 
         double turretRotation = (angleTargetRadian + reverseTurretAngleRadian) / ( 2 * Math.PI);
+        //double targetTicks = (angleTargetRadian + reverseTurretAngleRadian) * ticksPerRadian);
         double motorRotation = turretRotation * gearRatio;
         double targetTicks = ticksPerRotation * motorRotation;
         KLog.d("turret angle", "ticks " + targetTicks + "  motor position "+ turretMotor.getCurrentPosition() + "target ticks " + targetTicks);
@@ -73,9 +76,9 @@ public class TurretAutoAlign extends Action {
 
         turretMotor.setTargetPosition((int) targetTicks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);  //Idk if you want this setting we have never used it unless big banana wants it :) but if you were to use it set it inside of modules.Turret
-        turretMotor.setPower(0.7);
+        turretMotor.setPower(1);
 
-        if (turretMotor.getCurrentPosition() >= targetTicks - TOLERANCE && turretMotor.getCurrentPosition() <= targetTicks + TOLERANCE) {
+        if (turretMotor.getCurrentPosition() >= targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() <= targetTicks + TOLERANCE_TICKS) {
             isDone = false;
         }
 

@@ -11,6 +11,7 @@ public class IntakeStop extends Action {
         this.intake = intake;
     }
 
+
     @Override
     protected void update() {
         intake.getIntakeMotor().setPower(0);
