@@ -12,7 +12,7 @@ public class Revolver {
 
     private final KServo revolverServo;
 
-    private final RevColorSensorV3 sen1; // made private for encapsulation little k :)
+    private final RevColorSensorV3 sen1;
     private final RevColorSensorV3 sen2;
     private final RevColorSensorV3 sen3;
 

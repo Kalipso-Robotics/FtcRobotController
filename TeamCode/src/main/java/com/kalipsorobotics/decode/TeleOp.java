@@ -22,6 +22,7 @@ import com.kalipsorobotics.modules.MotifColors;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.utilities.ColorCalibration;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -30,7 +31,6 @@ import com.kalipsorobotics.utilities.SharedData;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends KTeleOp {
     private DriveTrain driveTrain;
-    private  Odometry odometry;
 
     Shooter shooter = null;
     Intake intake = null;
@@ -75,7 +75,7 @@ public class TeleOp extends KTeleOp {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
-        odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
@@ -83,6 +83,7 @@ public class TeleOp extends KTeleOp {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
+        Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
         intakeRun = new IntakeRun(intake);
@@ -128,9 +129,9 @@ public class TeleOp extends KTeleOp {
             revolverRightPressed = kGamePad2.isButtonBFirstPressed();
 
             if (shooterReadyPressed) {
-                Log.d("ShooterReadyPressed", "Shooter Ready Pressed");
+                KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
-                    Log.d("ShooterReadyPressed", "Shooter Ready set");
+                    KLog.d("ShooterReadyPressed", "Shooter Ready set");
                     shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
                     setLastShooterAction(shooterReady);
                 }
