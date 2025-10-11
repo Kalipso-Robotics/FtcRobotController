@@ -41,7 +41,6 @@ public class TeleOp extends KTeleOp {
     Revolver revolver = null;
     Turret turret = null;
 
-
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
     IntakeFullAction intakeFullAction = null;
@@ -90,6 +89,8 @@ public class TeleOp extends KTeleOp {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
+        revolver.getRevolverServo().setPosition(Revolver.REVOLVER_INDEX_0);
+
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
