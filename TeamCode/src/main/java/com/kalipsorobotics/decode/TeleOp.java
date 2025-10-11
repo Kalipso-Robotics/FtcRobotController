@@ -2,6 +2,7 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
@@ -22,6 +23,8 @@ import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 
+import org.opencv.core.Mat;
+
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends KTeleOp {
     private DriveTrain driveTrain;
@@ -35,11 +38,11 @@ public class TeleOp extends KTeleOp {
 
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
-    IntakeFullAction intakeFullAction = null;
-
-    FullShootMotifAction fullShootMotifAction = null;
-
     IntakeReverse intakeReverse = null;
+    IntakeFullAction intakeFullAction = null;
+    KServoAutoAction manualRevolverAction = null;
+    double revolverPosition = 0;
+    FullShootMotifAction fullShootMotifAction = null;
 
     DriveAction driveAction = null;
 
@@ -49,6 +52,8 @@ public class TeleOp extends KTeleOp {
     boolean kickPressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
+    boolean manualRevolverPressedRight = false;
+    boolean manualRevolverPressedLeft = false;
     boolean fullShootPressed = false;
 
     ObiliskDetection.MotifPattern testingMotif;
@@ -77,6 +82,8 @@ public class TeleOp extends KTeleOp {
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(intake, revolver);
+
+        manualRevolverAction = new KServoAutoAction(revolver.getRevolverServo(), revolverPosition);
 
         //todo just fed in testing motif pattern change later
         testingMotif = new ObiliskDetection.MotifPattern(MotifColors.PURPLE, MotifColors.PURPLE, MotifColors.GREEN);
@@ -107,6 +114,8 @@ public class TeleOp extends KTeleOp {
             kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed();
+            manualRevolverPressedRight = kGamePad2.isButtonBFirstPressed();
+            manualRevolverPressedLeft = kGamePad2.isButtonXFirstPressed();
             fullShootPressed = kGamePad2.isButtonAFirstPressed();
 
 
@@ -147,6 +156,20 @@ public class TeleOp extends KTeleOp {
                 if (intakeStop != null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
+                }
+            }
+
+            if (manualRevolverPressedRight) {
+                if (manualRevolverAction != null || manualRevolverAction.getIsDone()) {
+                    revolverPosition += 0.333;
+                    revolverPosition = Math.min(revolverPosition, 1);
+                    manualRevolverAction = new KServoAutoAction(revolver.getRevolverServo(), revolverPosition);
+                }
+            } else if (manualRevolverPressedLeft) {
+                if (manualRevolverAction != null || manualRevolverAction.getIsDone()) {
+                    revolverPosition -= 0.333;
+                    revolverPosition = Math.max(revolverPosition, 0);
+                    manualRevolverAction = new KServoAutoAction(revolver.getRevolverServo(), revolverPosition);
                 }
             }
 
