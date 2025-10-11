@@ -27,7 +27,7 @@ public class TurretAutoAlign extends Action {
 
     public TurretAutoAlign(Turret turret) {
         this.turret = turret;
-        this.turretMotor = turret.getTurretMotor();
+        this.turretMotor = turret.turretMotor();
         this.dependentActions.add(new DoneStateAction());
     }
 
