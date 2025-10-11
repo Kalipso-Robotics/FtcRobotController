@@ -1,16 +1,12 @@
 package com.kalipsorobotics.cameraVision;
 
-import com.kalipsorobotics.modules.MotifColors;
+import com.kalipsorobotics.modules.MotifColor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvPipeline;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
@@ -18,18 +14,17 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
-import java.util.ArrayList;
 
 public class ObiliskDetection {
     
     private static final int[] OBELISK_APRILTAG_IDS = {21, 22, 23};
     
     public static class MotifPattern {
-        public final MotifColors top;
-        public final MotifColors middle;
-        public final MotifColors bottom;
+        public final MotifColor top;
+        public final MotifColor middle;
+        public final MotifColor bottom;
 
-        public MotifPattern(MotifColors top, MotifColors middle, MotifColors bottom) {
+        public MotifPattern(MotifColor top, MotifColor middle, MotifColor bottom) {
             this.top = top;
             this.middle = middle;
             this.bottom = bottom;
@@ -40,7 +35,7 @@ public class ObiliskDetection {
             return String.format("%s-%s-%s", top, middle, bottom);
         }
         
-        public boolean equals(MotifColors expectedTop, MotifColors expectedMiddle, MotifColors expectedBottom) {
+        public boolean equals(MotifColor expectedTop, MotifColor expectedMiddle, MotifColor expectedBottom) {
             return top == expectedTop && middle == expectedMiddle && bottom == expectedBottom;
         }
     }
@@ -120,7 +115,7 @@ public class ObiliskDetection {
     public void updateMotifPattern() {
         AprilTagDetection obeliskDetection = getClosestObeliskDetection();
         if (obeliskDetection == null) {
-            cachedMotifPattern = new MotifPattern(MotifColors.NONE, MotifColors.NONE, MotifColors.NONE);
+            cachedMotifPattern = new MotifPattern(MotifColor.NONE, MotifColor.NONE, MotifColor.NONE);
         } else {
             // Return expected pattern based on AprilTag ID since image analysis isn't working
             cachedMotifPattern = getExpectedMotifPattern(obeliskDetection.id);
@@ -135,10 +130,10 @@ public class ObiliskDetection {
     
     public MotifPattern getExpectedMotifPattern(int aprilTagId) {
         switch (aprilTagId) {
-            case 21: return new MotifPattern(MotifColors.GREEN, MotifColors.PURPLE, MotifColors.PURPLE);
-            case 22: return new MotifPattern(MotifColors.PURPLE, MotifColors.GREEN, MotifColors.PURPLE);
-            case 23: return new MotifPattern(MotifColors.PURPLE, MotifColors.PURPLE, MotifColors.GREEN);
-            default: return new MotifPattern(MotifColors.NONE, MotifColors.NONE, MotifColors.NONE);
+            case 21: return new MotifPattern(MotifColor.GREEN, MotifColor.PURPLE, MotifColor.PURPLE);
+            case 22: return new MotifPattern(MotifColor.PURPLE, MotifColor.GREEN, MotifColor.PURPLE);
+            case 23: return new MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
+            default: return new MotifPattern(MotifColor.NONE, MotifColor.NONE, MotifColor.NONE);
         }
     }
     
@@ -162,7 +157,7 @@ public class ObiliskDetection {
             null : getCurrentFrame();
 
         if (frame == null) {
-            return new MotifPattern(MotifColors.NONE, MotifColors.NONE, MotifColors.NONE);
+            return new MotifPattern(MotifColor.NONE, MotifColor.NONE, MotifColor.NONE);
         }
         
         int centerX = (int) detection.center.x;
@@ -175,16 +170,16 @@ public class ObiliskDetection {
         int leftX = Math.max(0, centerX - regionSize/2);
         int rightX = Math.min(frame.cols(), centerX + regionSize/2);
 
-        MotifColors topColor = detectColorInRegion(frame, leftX, topY, rightX - leftX, regionSize);
-        MotifColors middleColor = detectColorInRegion(frame, leftX, middleY, rightX - leftX, regionSize);
-        MotifColors bottomColor = detectColorInRegion(frame, leftX, bottomY, rightX - leftX, regionSize);
+        MotifColor topColor = detectColorInRegion(frame, leftX, topY, rightX - leftX, regionSize);
+        MotifColor middleColor = detectColorInRegion(frame, leftX, middleY, rightX - leftX, regionSize);
+        MotifColor bottomColor = detectColorInRegion(frame, leftX, bottomY, rightX - leftX, regionSize);
         
         return new MotifPattern(topColor, middleColor, bottomColor);
     }
     
-    private MotifColors detectColorInRegion(Mat frame, int x, int y, int width, int height) {
+    private MotifColor detectColorInRegion(Mat frame, int x, int y, int width, int height) {
         if (x < 0 || y < 0 || x + width > frame.cols() || y + height > frame.rows()) {
-            return MotifColors.NONE;
+            return MotifColor.NONE;
         }
         
         Rect region = new Rect(x, y, width, height);
@@ -212,11 +207,11 @@ public class ObiliskDetection {
         greenMask.release();
         
         if (purplePixels > greenPixels && purplePixels > 100) {
-            return MotifColors.PURPLE;
+            return MotifColor.PURPLE;
         } else if (greenPixels > 100) {
-            return MotifColors.GREEN;
+            return MotifColor.GREEN;
         } else {
-            return MotifColors.NONE;
+            return MotifColor.NONE;
         }
     }
     
@@ -224,7 +219,7 @@ public class ObiliskDetection {
         return null;
     }
     
-    public boolean isMotifPattern(MotifColors expectedTop, MotifColors expectedMiddle, MotifColors expectedBottom) {
+    public boolean isMotifPattern(MotifColor expectedTop, MotifColor expectedMiddle, MotifColor expectedBottom) {
         MotifPattern pattern = getObeliskMotifPattern();
         return pattern.equals(expectedTop, expectedMiddle, expectedBottom);
     }

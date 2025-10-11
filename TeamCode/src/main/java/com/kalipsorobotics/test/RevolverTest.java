@@ -1,6 +1,7 @@
 package com.kalipsorobotics.test;
 
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -13,6 +14,7 @@ public class RevolverTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
+        TripleColorSensor colorSensors = new TripleColorSensor(opModeUtilities);
         Revolver revolver = new Revolver(opModeUtilities);
         Shooter shooter = new Shooter(opModeUtilities);
 

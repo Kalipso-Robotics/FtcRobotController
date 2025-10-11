@@ -32,11 +32,11 @@ public class KActionSet extends Action {
         }
 
         update();
-        return updateIsDone();
+        return isUpdateDone();
     }
 
     @Override
-    protected boolean updateIsDone() {
+    protected boolean isUpdateDone() {
         if(isDone) {
             return isDone;
         }

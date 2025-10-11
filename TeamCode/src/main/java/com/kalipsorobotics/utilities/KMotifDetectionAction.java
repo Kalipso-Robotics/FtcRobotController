@@ -27,7 +27,7 @@ public class KMotifDetectionAction extends Action {
     }
 
     @Override
-    protected boolean updateIsDone() {
+    protected boolean isUpdateDone() {
         isDone = obiliskDetection.isObeliskVisible();
         return isDone;
     }

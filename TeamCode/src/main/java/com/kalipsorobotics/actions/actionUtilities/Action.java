@@ -68,7 +68,7 @@ public abstract class Action {
 
         update();
 
-        return updateIsDone();
+        return isUpdateDone();
 
     }
 
@@ -81,7 +81,7 @@ public abstract class Action {
         return true;
     }
 
-    protected boolean updateIsDone() {
+    protected boolean isUpdateDone() {
         return isDone;
     }
 
