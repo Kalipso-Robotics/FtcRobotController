@@ -2,9 +2,9 @@ package com.kalipsorobotics.modules.shooter;
 
 import com.kalipsorobotics.utilities.KLog;
 
-import com.kalipsorobotics.math.CalculateTickPer;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,14 +20,9 @@ public class Shooter {
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
     public static final Point FAR_STARTING_POS_MM_RED = new Point(3352.8+300, 1135.3+300);
     private final OpModeUtilities opModeUtilities;
-    double prevTicks = 0;
-    //darren cant digest cheese
-    double prevTimeMS = System.currentTimeMillis();
 
-    private final DcMotor shooter1;
-
-
-    private final DcMotor shooter2;
+    private final KMotor shooter1;
+    private final KMotor shooter2;
 
 
     private final KServo hood;
@@ -48,9 +43,12 @@ public class Shooter {
 
     public Shooter(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
-        shooter1 = opModeUtilities.getHardwareMap().dcMotor.get("shooter1");
-        shooter2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
-        shooter2.setDirection(DcMotorSimple.Direction.REVERSE);
+        DcMotor motor1 = opModeUtilities.getHardwareMap().dcMotor.get("shooter1");
+        DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
+        motor2.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        shooter1 = new KMotor(motor1, 1.0/10.0, 0, 0);
+        shooter2 = new KMotor(motor2, 1.0/10.0, 0, 0);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
         if (hood == null) {
             opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
@@ -85,15 +83,7 @@ public class Shooter {
     }
 
     public double getRPS() {
-        double currentTicks = shooter1.getCurrentPosition();
-        double currentTimeMS = System.currentTimeMillis();
-        double deltaTicks = Math.abs(currentTicks - prevTicks);
-        double deltaRotation = CalculateTickPer.ticksToRotation6000RPM(deltaTicks);
-        double deltaTimeMS = currentTimeMS - prevTimeMS;
-        double rps = (deltaRotation) / (deltaTimeMS / 1000);
-        prevTicks = currentTicks;
-        prevTimeMS = currentTimeMS;
-        return (rps);
+        return shooter1.getRPS();
     }
 
 
@@ -104,12 +94,12 @@ public class Shooter {
     }
 
 
-    public DcMotor getShooter1() {
+    public KMotor getShooter1() {
         return shooter1;
     }
 
 
-    public DcMotor getShooter2() {
+    public KMotor getShooter2() {
         return shooter2;
     }
 
@@ -118,7 +108,7 @@ public class Shooter {
      * @param xMM horizontal position in millimeters
      * @return prediction containing RPS and hood position, or null if predictor not initialized
      */
-    private ShooterLutPredictor.Prediction getPrediction(double xMM) {
+    public ShooterLutPredictor.Prediction getPrediction(double xMM) {
         if (predictor == null) {
             opModeUtilities.getTelemetry().addData("Warning", "Predictor not initialized");
             return null;
@@ -151,8 +141,8 @@ public class Shooter {
     }
 
     public void stop() {
-        shooter1.setPower(0);
-        shooter2.setPower(0);
+        shooter1.stop();
+        shooter2.stop();
     }
 
     /**
@@ -162,6 +152,15 @@ public class Shooter {
     public void setPower(double power) {
         shooter1.setPower(power);
         shooter2.setPower(power);
+    }
+
+    /**
+     * Set target RPS for both motors using PID control
+     * @param targetRPS desired rotations per second
+     */
+    public void goToRPS(double targetRPS) {
+        shooter1.goToRPS(targetRPS);
+        shooter2.goToRPS(targetRPS);
     }
 
     /**

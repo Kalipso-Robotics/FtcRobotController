@@ -22,6 +22,7 @@ import com.kalipsorobotics.modules.MotifColor;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.Turret;
+import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
@@ -107,7 +108,7 @@ public class TeleOp extends KTeleOp {
         testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
         fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
-        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED);
+        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED, LaunchPosition.AUTO);
         kickBall = new KickBall(shooter);
     }
 
@@ -140,7 +141,7 @@ public class TeleOp extends KTeleOp {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED);
+                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED, LaunchPosition.AUTO);
                     setLastShooterAction(shooterReady);
                 }
             }
