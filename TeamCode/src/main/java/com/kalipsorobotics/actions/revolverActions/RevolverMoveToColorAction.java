@@ -34,7 +34,6 @@ public class RevolverMoveToColorAction extends Action {
             revolverServo.setPosition(turnToIndex);
 
             int indDiff = revolver.getCurrentRevolverServoIndex() - currentRevolverIndex;
-
             revolver.setColorSet(detectColorsAction.transformColorSetToTray(colorSet, indDiff));
         }
         isDone = true;

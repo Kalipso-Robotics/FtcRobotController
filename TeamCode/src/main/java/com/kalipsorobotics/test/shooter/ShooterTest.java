@@ -7,6 +7,7 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KGamePad;
@@ -51,7 +52,7 @@ public class ShooterTest extends LinearOpMode {
 //        kickerRight.setPosition(0.5);
 //        kickerLeft.setPosition(0.5);
         Shooter shooter = new Shooter(opModeUtilities);
-        ShooterReady shooterReady = new ShooterReady(shooter, new Point(3600, 1200));
+        ShooterReady shooterReady = new ShooterReady(shooter, new Point(3600, 1200), LaunchPosition.AUTO);
 
 
         //Servo pusher = hardwareMap.servo.get("hood");
@@ -88,7 +89,7 @@ public class ShooterTest extends LinearOpMode {
             if (gamepad1.dpad_left) {
 //                shooter.getShooter1().setPower(power);
 //                shooter.getShooter2().setPower(power);
-                shooterReady = new ShooterReady(shooter, new Point(3600, 1200));
+                shooterReady = new ShooterReady(shooter, new Point(3600, 1200), LaunchPosition.AUTO);
                 teleOp.addAction(shooterReady);
             } else {
                 shooterReady = null;

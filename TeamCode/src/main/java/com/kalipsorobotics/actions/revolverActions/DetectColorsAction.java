@@ -165,6 +165,7 @@ public class DetectColorsAction extends Action {
     public HashMap<ColorSensorPosition, HSV> getRawValues() {
         return rawValues;
     }
+
     public MotifColor[] getColorSet(){
         MotifColor[] colorSet = new MotifColor[3];
         colorSet[0] = getFrontColor();
@@ -172,6 +173,7 @@ public class DetectColorsAction extends Action {
         colorSet[2] = getBLeftColor();
         return colorSet;
     }
+
     public static void clearCalibratedMap() {
         calibratedFront = null;
         calibratedBLeft = null;

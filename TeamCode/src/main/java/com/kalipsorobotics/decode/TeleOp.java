@@ -22,8 +22,8 @@ import com.kalipsorobotics.modules.MotifColor;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.Turret;
+import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.utilities.ColorCalibration;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -40,7 +40,6 @@ public class TeleOp extends KTeleOp {
     KickBall kickBall = null;
     Revolver revolver = null;
     Turret turret = null;
-
 
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
@@ -90,6 +89,8 @@ public class TeleOp extends KTeleOp {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
+        revolver.getRevolverServo().setPosition(Revolver.REVOLVER_INDEX_0);
+
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
@@ -108,7 +109,7 @@ public class TeleOp extends KTeleOp {
         testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
         fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
-        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
+        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED, LaunchPosition.AUTO);
         kickBall = new KickBall(shooter);
     }
 
@@ -141,7 +142,7 @@ public class TeleOp extends KTeleOp {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shooterReady != null || shooterReady.getIsDone()) {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM);
+                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED, LaunchPosition.AUTO);
                     setLastShooterAction(shooterReady);
                 }
             }

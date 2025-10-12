@@ -50,8 +50,12 @@ public class TurretAutoAlign extends Action {
         //output
         //  angleTargetRadian = arctan (x_goal/y_goal)
 
+//        double x_init_setup = 3445.14; //make static field
+//        double y_init_setup = -2028.8;
+
         double x_init_setup = 3445.14; //make static field
-        double y_init_setup = -2028.8;
+        double y_init_setup = 2028.8;
+
 
         Position currentPosition = SharedData.getOdometryPosition();
         double currentX = currentPosition.getX();
