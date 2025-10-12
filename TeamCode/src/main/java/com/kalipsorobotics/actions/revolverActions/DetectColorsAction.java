@@ -42,6 +42,9 @@ public class DetectColorsAction extends Action {
         if (!hasStarted) {
             hasStarted = true;
         }
+        if (calibratedFront == null || calibratedBLeft == null || calibratedBRight == null) {
+            loadCalibrationData();
+        }
         for (ColorSensorPosition position : colorSensors.getSensors().keySet()) {
             RevColorSensorV3 sensor = colorSensors.getSensors().get(position);
 
