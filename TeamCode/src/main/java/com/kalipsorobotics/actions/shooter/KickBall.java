@@ -1,9 +1,8 @@
-package com.kalipsorobotics.actions.autoActions.shooterActions;
+package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
-import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class KickBall extends KActionSet {

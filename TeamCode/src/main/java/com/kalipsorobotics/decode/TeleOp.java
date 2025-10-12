@@ -6,15 +6,17 @@ import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
-import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
+import com.kalipsorobotics.actions.shooter.KickBall;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
+import com.kalipsorobotics.actions.shooter.ShootAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
@@ -31,12 +33,17 @@ import com.kalipsorobotics.utilities.SharedData;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends KTeleOp {
+
+    protected final Point ROBOT_START_POINT = Shooter.RED_TARGET_FROM_NEAR;
     private DriveTrain driveTrain;
 
     TripleColorSensor colorSensors = null;
     Shooter shooter = null;
     Intake intake = null;
     ShooterReady shooterReady = null;
+    ShootAction shootAction = null;
+
+    LaunchPosition launchPosition = LaunchPosition.AUTO;
     KickBall kickBall = null;
     Revolver revolver = null;
     Turret turret = null;
@@ -58,13 +65,20 @@ public class TeleOp extends KTeleOp {
     DetectColorsAction detectColorsAction = null;
 
     double turretStickValue;
-    boolean shooterReadyPressed = false;
+    boolean shootActionPressed = false;
     boolean kickPressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
     boolean fullShootPressed = false;
     boolean revolverLeftPressed = false;
     boolean revolverRightPressed = false;
+    boolean shooterReadyNearPressed = false;
+    boolean shooterReadyMiddlePressed = false;
+    boolean shooterReadyWallPressed = false;
+    boolean shooterReadyBluePressed = false;
+    boolean shooterReadyRedPressed = false;
+    boolean shooterReadyRedMiddlePressed = false;
+    boolean shooterReadyBlueMiddlePressed = false;
 
     ObiliskDetection.MotifPattern testingMotif;
 
@@ -109,7 +123,8 @@ public class TeleOp extends KTeleOp {
         testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
         fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
-        shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED, LaunchPosition.AUTO);
+        shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+        shootAction = new ShootAction(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kickBall = new KickBall(shooter);
     }
 
@@ -130,7 +145,7 @@ public class TeleOp extends KTeleOp {
             }
 
             turretStickValue = kGamePad2.getRightStickX();
-            shooterReadyPressed = kGamePad2.isLeftTriggerPressed();
+            shootActionPressed = kGamePad2.isLeftTriggerPressed();
             kickPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed();
@@ -138,14 +153,52 @@ public class TeleOp extends KTeleOp {
             revolverLeftPressed = kGamePad2.isButtonXFirstPressed();
             revolverRightPressed = kGamePad2.isButtonBFirstPressed();
 
-            if (shooterReadyPressed) {
-                KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
+            shooterReadyNearPressed = kGamePad2.isDpadUpFirstPressed();
+            shooterReadyMiddlePressed = kGamePad2.isDpadDownFirstPressed();
+            shooterReadyWallPressed = kGamePad2.isDpadUpFirstPressed() && kGamePad2.isLeftBumperPressed();
+            shooterReadyRedPressed = kGamePad2.isDpadRightFirstPressed();
+            shooterReadyBluePressed = kGamePad2.isDpadLeftFirstPressed();
+            shooterReadyRedMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadRightFirstPressed();
+            shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
+            boolean isWarmup = true;
+            if (shooterReadyNearPressed) {
+                launchPosition = LaunchPosition.NEAR;
+            } else if (shooterReadyMiddlePressed) {
+                launchPosition = LaunchPosition.MIDDLE;
+            } else if (shooterReadyWallPressed) {
+                launchPosition = LaunchPosition.WALL;
+            } else if (shooterReadyRedPressed) {
+                launchPosition = LaunchPosition.RED;
+            } else if (shooterReadyBluePressed) {
+                launchPosition = LaunchPosition.BLUE;
+            } else if (shooterReadyRedMiddlePressed) {
+                launchPosition = LaunchPosition.MIDDLE_RED;
+            } else if (shooterReadyBlueMiddlePressed) {
+                launchPosition = LaunchPosition.MIDDLE_BLUE;
+            } else {
+                isWarmup = false;
+                launchPosition = LaunchPosition.AUTO;
+            }
+
+            if (isWarmup) {
                 if (shooterReady != null || shooterReady.getIsDone()) {
-                    KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shooterReady = new ShooterReady(shooter, Shooter.FAR_STARTING_POS_MM_RED, LaunchPosition.AUTO);
+                    shooterReady = new ShooterReady(shooter, ROBOT_START_POINT, launchPosition);
+                    KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up For Position: " + launchPosition);
                     setLastShooterAction(shooterReady);
                 }
             }
+
+
+            if (shootActionPressed) {
+                KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
+                if (shootAction != null || shootAction.getIsDone()) {
+                    KLog.d("ShooterReadyPressed", "Shooter Ready set");
+                    shootAction = new ShootAction(shooter, ROBOT_START_POINT, launchPosition);
+                    setLastShooterAction(shooterReady);
+                }
+            }
+
+
 
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
@@ -193,6 +246,8 @@ public class TeleOp extends KTeleOp {
                 }
                 setLastRevolverAction(revolverTeleOp);
             }
+
+
 
 
 

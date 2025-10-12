@@ -18,7 +18,7 @@ public class Shooter {
 
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
-    public static final Point FAR_STARTING_POS_MM_RED = new Point(3352.8+300, 1135.3+300);
+    public static final Point RED_TARGET_FROM_NEAR = new Point(3352.8+300, 1135.3+300);
     private final OpModeUtilities opModeUtilities;
 
     private final KMotor shooter1;
@@ -47,8 +47,8 @@ public class Shooter {
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        shooter1 = new KMotor(motor1, 1.0/10.0, 0, 0);
-        shooter2 = new KMotor(motor2, 1.0/10.0, 0, 0);
+        shooter1 = new KMotor(motor1, 1.0/100.0, 0, 0);
+        shooter2 = new KMotor(motor2, 1.0/100.0, 0, 0);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
         if (hood == null) {
             opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
@@ -160,7 +160,7 @@ public class Shooter {
      */
     public void goToRPS(double targetRPS) {
         shooter1.goToRPS(targetRPS);
-        shooter2.goToRPS(targetRPS);
+        shooter2.setPower(shooter1.getPower());
     }
 
     /**
