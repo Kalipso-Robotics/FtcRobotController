@@ -45,14 +45,14 @@ public class ShooterReady extends Action {
         shooter.goToRPS(prediction.rps);
 
         // Get current RPS for logging and checking
-        double currentRPS = shooter.getRPS();
-        double error = prediction.rps - currentRPS;
-
-        // Log status
-        KLog.d("ShooterReady", String.format(
-            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f RPS, Hood: %.3f",
-            prediction.rps, currentRPS, error, prediction.hood
-        ));
+//        double currentRPS = shooter.getRPS();
+//        double error = prediction.rps - currentRPS;
+//
+//        // Log status
+//        KLog.d("ShooterReady", String.format(
+//            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f RPS, Hood: %.3f",
+//            prediction.rps, currentRPS, error, prediction.hood
+//        ));
 
         // Check if we've reached target RPS
         if (shooter.getShooter1().isAtTargetRPS(TARGET_RPS_TOLERANCE)) {

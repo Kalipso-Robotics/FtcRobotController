@@ -37,6 +37,7 @@ public class KMotor {
 
     public KMotor(DcMotor motor, double kp, double ki, double kd) {
         this.motor = motor;
+        this.prevTicks = motor.getCurrentPosition();
         this.prevTimeMS = System.currentTimeMillis();
         this.elapsedTime = new ElapsedTime();
         this.pidController = new PIDController(kp, ki, kd, "KMotor_" + motor.getDeviceName());
@@ -52,6 +53,15 @@ public class KMotor {
         double deltaTicks = Math.abs(currentTicks - prevTicks);
         double deltaRotation = CalculateTickPer.ticksToRotation6000RPM(deltaTicks);
         double deltaTimeMS = currentTimeMS - prevTimeMS;
+
+        // If too much time has passed (>500ms), reset tracking and return 0
+        // This prevents inaccurate readings when getRPS() hasn't been called for a while
+        if (deltaTimeMS > 500) {
+            prevTicks = currentTicks;
+            prevTimeMS = currentTimeMS;
+            KLog.d("KMotor", "getRPS: Time delta too large (" + deltaTimeMS + "ms), resetting tracking");
+            return 0;
+        }
 
         // Avoid division by zero
         if (deltaTimeMS == 0) {
@@ -109,7 +119,12 @@ public class KMotor {
      */
     public boolean isAtTargetRPS(double tolerance) {
         double currentRPS = getRPS();
-        return Math.abs(currentRPS - targetRPS) <= tolerance;
+        KLog.d("ShooterReady", "Current RPS: " + currentRPS + " Target RPS: " + targetRPS);
+        boolean isAtTarget = (Math.abs(currentRPS - targetRPS) <= tolerance);
+        if (isAtTarget) {
+            KLog.d("ShooterReady", "RPS within tolerance - Ready!");
+        }
+        return isAtTarget;
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.kalipsorobotics.actions.revolverActions;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
-import com.kalipsorobotics.actions.autoActions.shooterActions.KickBall;
+import com.kalipsorobotics.actions.shooter.KickBall;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.MotifColor;
