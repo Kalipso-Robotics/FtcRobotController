@@ -105,7 +105,6 @@ public class ColorCalibration extends LinearOpMode {
 
             if (kPad.isLeftBumperFirstPressed()) {
                 // DETECTING COLORS TEST
-                DetectColorsAction.clearCalibratedMap();
                 detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
                 HashMap<ColorSensorPosition, MotifColor> colors = detectColorsAction.getCalculatedColorValue();
                 KLog.d("RevColorTest", "Front Color: " + colors.get(ColorSensorPosition.FRONT));
@@ -159,6 +158,7 @@ public class ColorCalibration extends LinearOpMode {
 
             writer.close();
             KLog.d("ColorCalibration", "Calibration data saved successfully");
+            detectColorsAction.clearCalibratedMap();
         } catch (IOException e) {
             KLog.d("ColorCalibration", "Failed to save calibration data: " + e.getMessage());
         }

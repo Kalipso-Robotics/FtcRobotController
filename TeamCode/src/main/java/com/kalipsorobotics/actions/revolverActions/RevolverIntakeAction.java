@@ -48,6 +48,7 @@ public class RevolverIntakeAction extends Action {
 
     @Override
     protected void update() {
+        detectColorsAction.update();
         if (!hasStarted) {
             if (detectColorsAction.getFrontColor() != MotifColor.NONE && detectColorsAction.getBLeftColor() != MotifColor.NONE) {
                 revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
