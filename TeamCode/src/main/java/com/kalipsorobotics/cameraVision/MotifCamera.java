@@ -21,23 +21,23 @@ public class MotifCamera {
     private static final int[] OBELISK_APRILTAG_IDS = {21, 22, 23};
 
     public static class MotifPattern {
-        public final MotifColor top;
+        public final MotifColor first;
         public final MotifColor middle;
-        public final MotifColor bottom;
+        public final MotifColor last;
 
-        public MotifPattern(MotifColor top, MotifColor middle, MotifColor bottom) {
-            this.top = top;
+        public MotifPattern(MotifColor first, MotifColor middle, MotifColor last) {
+            this.first = first;
             this.middle = middle;
-            this.bottom = bottom;
+            this.last = last;
         }
 
         @Override
         public String toString() {
-            return String.format("%s-%s-%s", top, middle, bottom);
+            return String.format("%s-%s-%s", first, middle, last);
         }
 
-        public boolean equals(MotifColor expectedTop, MotifColor expectedMiddle, MotifColor expectedBottom) {
-            return top == expectedTop && middle == expectedMiddle && bottom == expectedBottom;
+        public boolean equals(MotifColor expectedFirst, MotifColor expectedMiddle, MotifColor expectedLast) {
+            return first == expectedFirst && middle == expectedMiddle && last == expectedLast;
         }
     }
 
