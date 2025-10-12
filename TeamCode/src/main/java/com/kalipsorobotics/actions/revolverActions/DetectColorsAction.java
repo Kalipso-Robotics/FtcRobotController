@@ -65,6 +65,10 @@ public class DetectColorsAction extends Action {
 
     private void loadCalibrationData() {
         try {
+            calibratedFront = new HashMap<>();
+            calibratedBLeft = new HashMap<>();
+            calibratedBRight = new HashMap<>();
+
             KFileReader reader = new KFileReader(CALIBRATION_FILENAME, opModeUtilities);
             String line;
 
@@ -106,19 +110,17 @@ public class DetectColorsAction extends Action {
 //    }
 
     private MotifColor calculateColor(HashMap<MotifColor, HSV> calibrationMap, HSV testValue) {
-//        int red   = sensor.red();
-//        int green = sensor.green();
-//        int blue  = sensor.blue();
-//
-//        float[] testHSV = new float[3];
-//        Color.RGBToHSV(red, green, blue, testHSV);
-//        HSV testValue = new HSV(testHSV[0], testHSV[1], testHSV[2]);
+        if (calibrationMap == null || calibrationMap.isEmpty() || testValue == null) {
+            return NONE;
+        }
 
         double minDistance = Double.MAX_VALUE;
         MotifColor closestColor = NONE;
 
         for (MotifColor color : calibrationMap.keySet()) {
             HSV calibratedValue = calibrationMap.get(color);
+
+            if (calibratedValue == null) continue;
 
             double distance = calculateHSVDistance(testValue, calibratedValue);
             if (distance < minDistance) {

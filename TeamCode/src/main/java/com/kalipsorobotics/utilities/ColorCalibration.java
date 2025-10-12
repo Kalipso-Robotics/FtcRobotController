@@ -48,6 +48,8 @@ public class ColorCalibration extends LinearOpMode {
         calibratedBRight = new HashMap<>();
         calibratedBLeft= new HashMap<>();
 
+        detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
+
         // RAW DATA COLLECTION HEADER
         rawDataFile = new KFileWriter("ColorRawData", opModeUtilities);
         rawDataFile.writeLine("Timestamp,Sensor,Color,Hue,Saturation,Value");
@@ -91,8 +93,8 @@ public class ColorCalibration extends LinearOpMode {
 
                 // RAW DATA COLLECTION MAIN
                 writeRawDataPoint(detectColorsAction.getRawValues().get(ColorSensorPosition.FRONT), ColorSensorPosition.FRONT, currentColor);
-                writeRawDataPoint(detectColorsAction.getRawValues().get(ColorSensorPosition.BLEFT),  ColorSensorPosition.FRONT, currentColor);
-                writeRawDataPoint(detectColorsAction.getRawValues().get(ColorSensorPosition.BRIGHT),  ColorSensorPosition.FRONT, currentColor);
+                writeRawDataPoint(detectColorsAction.getRawValues().get(ColorSensorPosition.BLEFT), ColorSensorPosition.BLEFT, currentColor);
+                writeRawDataPoint(detectColorsAction.getRawValues().get(ColorSensorPosition.BRIGHT), ColorSensorPosition.BRIGHT, currentColor);
 
             } else {
                 telemetry.addLine("Calibration Stopped.");
@@ -105,8 +107,6 @@ public class ColorCalibration extends LinearOpMode {
 
             if (kPad.isLeftBumperFirstPressed()) {
                 // DETECTING COLORS TEST
-                DetectColorsAction.clearCalibratedMap();
-                detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
                 HashMap<ColorSensorPosition, MotifColor> colors = detectColorsAction.getCalculatedColorValue();
                 KLog.d("RevColorTest", "Front Color: " + colors.get(ColorSensorPosition.FRONT));
                 KLog.d("RevColorTest", "BLeft Color: " +  colors.get(ColorSensorPosition.BLEFT));
@@ -159,6 +159,7 @@ public class ColorCalibration extends LinearOpMode {
 
             writer.close();
             KLog.d("ColorCalibration", "Calibration data saved successfully");
+            detectColorsAction.clearCalibratedMap();
         } catch (IOException e) {
             KLog.d("ColorCalibration", "Failed to save calibration data: " + e.getMessage());
         }
