@@ -71,12 +71,20 @@ public class TurretAutoAlign extends Action {
         double currentRobotAngleRadian = currentPosition.getTheta();
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
 
-        double turretRotation = (angleTargetRadian + reverseTurretAngleRadian) / ( 2 * Math.PI);
-        //double targetTicks = (angleTargetRadian + reverseTurretAngleRadian) * ticksPerRadian);
-        double motorRotation = turretRotation * gearRatio;
-        double targetTicks = ticksPerRotation * motorRotation;
-        KLog.d("turret angle", "ticks " + targetTicks + "  motor position "+ turretMotor.getCurrentPosition() + "target ticks " + targetTicks);
 
+
+        double targetTicks;
+        if (turretMotor.getCurrentPosition() >= -Math.PI){
+            targetTicks = 0;
+        } else {
+            //double targetTicks = (angleTargetRadian + reverseTurretAngleRadian) * ticksPerRadian);
+            double turretRotation = (angleTargetRadian + reverseTurretAngleRadian) / ( 2 * Math.PI);
+            double motorRotation = turretRotation * gearRatio;
+            targetTicks = ticksPerRotation * motorRotation;
+        }
+
+
+        KLog.d("turret angle", "ticks " + targetTicks + "  motor position "+ turretMotor.getCurrentPosition() + "target ticks " + targetTicks);
 
         turretMotor.setTargetPosition((int) targetTicks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);  //Idk if you want this setting we have never used it unless big banana wants it :) but if you were to use it set it inside of modules.Turret
