@@ -51,10 +51,13 @@ public class RevolverIntakeAction extends Action {
 
     @Override
     protected void update() {
-        detectColorsAction.setIsDone(false);
-        detectColorsAction.updateCheckDone();
 
-        MotifColor[] motifColors = {detectColorsAction.getFrontColor(), detectColorsAction.getBLeftColor(), detectColorsAction.getBrightColor()};
+        if (revolverServo.isDone()) {
+            detectColorsAction.setIsDone(false);
+            detectColorsAction.updateCheckDone();
+        }
+
+        MotifColor[] motifColors = {detectColorsAction.getFrontColor(), detectColorsAction.getBrightColor(), detectColorsAction.getBLeftColor()};
 
         if (!hasStarted) {
 //            if (detectColorsAction.getFrontColor() != MotifColor.NONE && detectColorsAction.getBLeftColor() != MotifColor.NONE) {
@@ -88,16 +91,17 @@ public class RevolverIntakeAction extends Action {
 //            revolver.setColorSet(1, detectColorsAction.getBLeftColor());
 //            revolver.setColorSet(2, detectColorsAction.getBrightColor());
             isDone = true;
+        } else if (detectColorsAction.getFrontColor() == MotifColor.NONE){
+            return;
         } else {
             int emptySlotSensorIndex = Arrays.asList(motifColors).indexOf(MotifColor.NONE); //todo make it find the closest one
             int currentTrayIndex = revolver.getCurrentRevolverServoIndex();
 //            int indDiff = currentTrayIndex - emptySlotSensorIndex;
 
             int[] indexes = {0,1,2};
-            int moveTo = indexes[(currentTrayIndex - emptySlotSensorIndex) % 3];
+            int moveTo = indexes[(currentTrayIndex + emptySlotSensorIndex) % 3];
 
             revolver.moveToIndex(moveTo);
-
         }
 
     }
