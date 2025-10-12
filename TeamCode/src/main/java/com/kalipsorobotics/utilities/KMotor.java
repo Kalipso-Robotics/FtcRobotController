@@ -16,6 +16,8 @@ public class KMotor {
     private double prevTicks = 0;
     private double prevTimeMS;
 
+    private double prevRPS = 0;
+
     // PID controller for RPS control
     private final PIDController pidController;
     private double targetRPS = 0;
@@ -53,24 +55,30 @@ public class KMotor {
         double deltaTicks = Math.abs(currentTicks - prevTicks);
         double deltaRotation = CalculateTickPer.ticksToRotation6000RPM(deltaTicks);
         double deltaTimeMS = currentTimeMS - prevTimeMS;
+        // Avoid division by zero
+        if (deltaTimeMS < 50) {
+            KLog.d("KMotor", "getRPS: Time delta too small (" + deltaTimeMS + "ms), returning previous RPS");
+            return prevRPS;
+        }
+
+        KLog.d("KMotor", "getRPS: deltaTicks: " + deltaTicks + ", deltaRotation: " + deltaRotation + ", deltaTimeMS: " + deltaTimeMS);
+
 
         // If too much time has passed (>500ms), reset tracking and return 0
         // This prevents inaccurate readings when getRPS() hasn't been called for a while
-        if (deltaTimeMS > 500) {
+        if (deltaTimeMS > 1000) {
             prevTicks = currentTicks;
             prevTimeMS = currentTimeMS;
             KLog.d("KMotor", "getRPS: Time delta too large (" + deltaTimeMS + "ms), resetting tracking");
             return 0;
         }
 
-        // Avoid division by zero
-        if (deltaTimeMS == 0) {
-            return 0;
-        }
+
 
         double rps = (deltaRotation) / (deltaTimeMS / 1000.0);
         prevTicks = currentTicks;
         prevTimeMS = currentTimeMS;
+        prevRPS = rps;
         return rps;
     }
 
@@ -107,8 +115,8 @@ public class KMotor {
 
         // Log for debugging
         KLog.d("KMotor", String.format(
-            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f -> %.3f",
-            targetRPS, currentRPS, (targetRPS - currentRPS), currentPower, newPower
+            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDOutPut: %.2f, Power: %.3f -> %.3f",
+            targetRPS, currentRPS, (targetRPS - currentRPS), pidOutput, currentPower, newPower
         ));
     }
 

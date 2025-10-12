@@ -183,6 +183,7 @@ public class TeleOp extends KTeleOp {
             if (isWarmup) {
                 if (shooterReady != null || shooterReady.getIsDone()) {
                     shooterReady = new ShooterReady(shooter, ROBOT_START_POINT, launchPosition);
+                    KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up For Position: " + launchPosition);
                     setLastShooterAction(shooterReady);
                 }
             }

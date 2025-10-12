@@ -47,8 +47,8 @@ public class Shooter {
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
         motor2.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        shooter1 = new KMotor(motor1, 1.0/10.0, 0, 0);
-        shooter2 = new KMotor(motor2, 1.0/10.0, 0, 0);
+        shooter1 = new KMotor(motor1, 1.0/100.0, 0, 0);
+        shooter2 = new KMotor(motor2, 1.0/100.0, 0, 0);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
         if (hood == null) {
             opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
@@ -160,7 +160,7 @@ public class Shooter {
      */
     public void goToRPS(double targetRPS) {
         shooter1.goToRPS(targetRPS);
-        shooter2.goToRPS(targetRPS);
+        shooter2.setPower(shooter1.getPower());
     }
 
     /**
