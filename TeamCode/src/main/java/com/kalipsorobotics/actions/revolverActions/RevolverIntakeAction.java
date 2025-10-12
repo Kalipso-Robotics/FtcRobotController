@@ -9,6 +9,8 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KServo;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 
+import java.util.Arrays;
+
 public class RevolverIntakeAction extends Action {
 
     private final Revolver revolver;
@@ -49,41 +51,54 @@ public class RevolverIntakeAction extends Action {
 
     @Override
     protected void update() {
+        detectColorsAction.setIsDone(false);
         detectColorsAction.updateCheckDone();
 
+        MotifColor[] motifColors = {detectColorsAction.getFrontColor(), detectColorsAction.getBLeftColor(), detectColorsAction.getBrightColor()};
+
         if (!hasStarted) {
-            if (detectColorsAction.getFrontColor() != MotifColor.NONE && detectColorsAction.getBLeftColor() != MotifColor.NONE) {
-                KLog.d("teleoprevolver", "begin revolver intake, move tray index to 2");
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
-            } else if (detectColorsAction.getFrontColor() != MotifColor.NONE) {
-                KLog.d("teleoprevolver", "begin revolver intake, move tray index to 1");
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
-            } else {
-                KLog.d("teleoprevolver", "begin revolver intake, move tray index to 0");
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
-            }
+//            if (detectColorsAction.getFrontColor() != MotifColor.NONE && detectColorsAction.getBLeftColor() != MotifColor.NONE) {
+//                KLog.d("teleoprevolver", "begin revolver intake, move tray index to 2");
+//                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
+//            } else if (detectColorsAction.getFrontColor() != MotifColor.NONE) {
+//                KLog.d("teleoprevolver", "begin revolver intake, move tray index to 1");
+//                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
+//            } else {
+//                KLog.d("teleoprevolver", "begin revolver intake, move tray index to 0");
+//                revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
+//            }
             hasStarted = true;
         }
 
-        if (detectColorsAction.getFrontColor() != MotifColor.NONE) {
-            KLog.d("teleoprevolver", "front has ball");
-            count++;
-            if (count == 1) {
-                KLog.d("teleoprevolver", "move tray index to 1");
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
-            } else if (count == 2) {
-                KLog.d("teleoprevolver", "move tray index to 2");
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
-            }
-        }
+//        if (detectColorsAction.getFrontColor() != MotifColor.NONE) {
+//            KLog.d("teleoprevolver", "front has ball");
+//            count++;
+//            if (count == 1) {
+//                KLog.d("teleoprevolver", "move tray index to 1");
+//                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
+//            } else if (count == 2) {
+//                KLog.d("teleoprevolver", "move tray index to 2");
+//                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
+//            }
+//        }
 
-        if (detectColorsAction.getFrontColor() != MotifColor.NONE &&detectColorsAction.getBLeftColor() != MotifColor.NONE && detectColorsAction.getBrightColor() != MotifColor.NONE) {
+        if (detectColorsAction.getFrontColor() != MotifColor.NONE && detectColorsAction.getBLeftColor() != MotifColor.NONE && detectColorsAction.getBrightColor() != MotifColor.NONE) {
             KLog.d("teleoprevolver", "done revolver intake");
 //            revolver.setColorSet(0, detectColorsAction.getBLeftColor());
 //            revolver.setColorSet(1, detectColorsAction.getBLeftColor());
 //            revolver.setColorSet(2, detectColorsAction.getBrightColor());
             isDone = true;
+        } else {
+            int turnToIndex = Arrays.asList(motifColors).indexOf(MotifColor.NONE); //todo make it find the closest one
+            if (turnToIndex == 0) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
+            } else if (turnToIndex == 1) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
+            } else if (turnToIndex == 2) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
+            }
         }
+
     }
 
 }

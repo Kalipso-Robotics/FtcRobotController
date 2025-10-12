@@ -31,7 +31,13 @@ public class RevolverMoveToColorAction extends Action {
             MotifColor[] transformedColorSet = detectColorsAction.transformColorSetToTray(colorSet, currentRevolverIndex);
 
             int turnToIndex = Arrays.asList(transformedColorSet).indexOf(shootColor); //todo make it find the closest one | wait laing wouldnt all the positions always be one turn away
-            revolverServo.setPosition(turnToIndex);
+            if (turnToIndex == 0) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
+            } else if (turnToIndex == 1) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
+            } else if (turnToIndex == 2) {
+                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
+            }
 
             int indDiff = revolver.getCurrentRevolverServoIndex() - currentRevolverIndex;
             revolver.setColorSet(detectColorsAction.transformColorSetToTray(colorSet, indDiff));
