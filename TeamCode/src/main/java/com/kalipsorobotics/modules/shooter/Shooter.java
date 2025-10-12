@@ -18,7 +18,7 @@ public class Shooter {
 
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
-    public static final Point RED_TARGET_FROM_NEAR = new Point(3352.8+300, 1135.3+300);
+    public static final Point RED_TARGET_FROM_NEAR = new Point(3352.8+300, 747.95+300);
     private final OpModeUtilities opModeUtilities;
 
     private final KMotor shooter1;
