@@ -89,14 +89,15 @@ public class RevolverIntakeAction extends Action {
 //            revolver.setColorSet(2, detectColorsAction.getBrightColor());
             isDone = true;
         } else {
-            int turnToIndex = Arrays.asList(motifColors).indexOf(MotifColor.NONE); //todo make it find the closest one
-            if (turnToIndex == 0) {
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_0);
-            } else if (turnToIndex == 1) {
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_1);
-            } else if (turnToIndex == 2) {
-                revolverServo.setPosition(Revolver.REVOLVER_INDEX_2);
-            }
+            int emptySlotSensorIndex = Arrays.asList(motifColors).indexOf(MotifColor.NONE); //todo make it find the closest one
+            int currentTrayIndex = revolver.getCurrentRevolverServoIndex();
+//            int indDiff = currentTrayIndex - emptySlotSensorIndex;
+
+            int[] indexes = {0,1,2};
+            int moveTo = indexes[(currentTrayIndex - emptySlotSensorIndex) % 3];
+
+            revolver.moveToIndex(moveTo);
+
         }
 
     }

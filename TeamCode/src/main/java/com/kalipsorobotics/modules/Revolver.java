@@ -56,4 +56,14 @@ public class Revolver {
         this.colorSet = colorSet;
     }
 
+    public void moveToIndex(int i) {
+        if (i == 0) {
+            revolverServo.setPosition(REVOLVER_INDEX_0);
+        } else if (i == 1) {
+            revolverServo.setPosition(REVOLVER_INDEX_1);
+        } else if (i == 2) {
+            revolverServo.setPosition(REVOLVER_INDEX_2);
+        }
+    }
+
 }
