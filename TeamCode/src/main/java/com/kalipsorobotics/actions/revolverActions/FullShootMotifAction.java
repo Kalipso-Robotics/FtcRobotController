@@ -1,17 +1,14 @@
 package com.kalipsorobotics.actions.revolverActions;
 
-import android.graphics.Region;
-
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
-import com.kalipsorobotics.cameraVision.ObiliskDetection;
+import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.utilities.KColor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 
 public class FullShootMotifAction extends KActionSet {
-    public FullShootMotifAction(Revolver revolver, Shooter shooter, ObiliskDetection.MotifPattern motifPattern, TripleColorSensor colorSensors, OpModeUtilities opModeUtilities) {
+    public FullShootMotifAction(Revolver revolver, Shooter shooter, MotifCamera.MotifPattern motifPattern, TripleColorSensor colorSensors, OpModeUtilities opModeUtilities) {
 
         DetectColorsAction detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 

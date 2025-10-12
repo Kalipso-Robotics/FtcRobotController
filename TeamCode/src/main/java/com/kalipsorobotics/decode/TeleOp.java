@@ -15,7 +15,7 @@ import com.kalipsorobotics.actions.shooter.ShootAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.cameraVision.ObiliskDetection;
+import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -84,7 +84,7 @@ public class TeleOp extends KTeleOp {
     private boolean shooterStopPressed = false;
 
 
-    ObiliskDetection.MotifPattern testingMotif;
+    MotifCamera.MotifPattern testingMotif;
 
     @Override
     protected void initializeRobot() {
@@ -124,7 +124,7 @@ public class TeleOp extends KTeleOp {
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
         //todo just fed in testing motif pattern change later
-        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
+        testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
         fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
