@@ -10,11 +10,13 @@ import java.util.List;
 
 public class MotifDetectionAction extends Action {
     private final MotifCamera motifCamera;
-
+    private long startTime;
     public MotifDetectionAction(MotifCamera motifCamera) {
         this.motifCamera = motifCamera;
     }
-
+    public void startSearching() {
+        this.startTime = System.currentTimeMillis();
+    }
     public MotifCamera getMotifCamera() {
         return motifCamera;
     }
@@ -23,7 +25,12 @@ public class MotifDetectionAction extends Action {
 
         return detections.get(0).id;
     }
+    public boolean hasTimedOut() {
+        long currentTime = System.currentTimeMillis();
+        long elapsedTime = currentTime - startTime;
 
+        return elapsedTime >= 5000 && !MotifVisible();
+    }
     public MotifCamera.MotifPattern getMotifPattern() {
         if (getObiliskID() == 21) {
             return new MotifCamera.MotifPattern(MotifColor.GREEN, MotifColor.PURPLE, MotifColor.PURPLE);
