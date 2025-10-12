@@ -5,7 +5,7 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.utilities.MotifDetectionAction;
+import com.kalipsorobotics.actions.cameraVision.MotifDetectionAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

@@ -1,13 +1,10 @@
-package com.kalipsorobotics.utilities;
+package com.kalipsorobotics.actions.cameraVision;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.modules.MotifColor;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
