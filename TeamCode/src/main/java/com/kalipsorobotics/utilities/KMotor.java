@@ -3,6 +3,7 @@ package com.kalipsorobotics.utilities;
 import com.kalipsorobotics.PID.PIDController;
 import com.kalipsorobotics.math.CalculateTickPer;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -10,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Provides smart power ramping to achieve target RPS quickly
  */
 public class KMotor {
-    private final DcMotor motor;
+    private final DcMotorEx motor;
 
     // RPS tracking
     private double prevTicks = 0;
@@ -38,7 +39,7 @@ public class KMotor {
     }
 
     public KMotor(DcMotor motor, double kp, double ki, double kd) {
-        this.motor = motor;
+        this.motor = (DcMotorEx) motor;
         this.prevTicks = motor.getCurrentPosition();
         this.prevTimeMS = System.currentTimeMillis();
         this.elapsedTime = new ElapsedTime();
@@ -49,14 +50,14 @@ public class KMotor {
      * Calculate current RPS of the motor
      * @return current rotations per second
      */
-    public double getRPS() {
+    public double getRPS() {/*
         double currentTicks = motor.getCurrentPosition();
         double currentTimeMS = System.currentTimeMillis();
         double deltaTicks = Math.abs(currentTicks - prevTicks);
         double deltaRotation = CalculateTickPer.ticksToRotation6000RPM(deltaTicks);
         double deltaTimeMS = currentTimeMS - prevTimeMS;
         // Avoid division by zero
-        if (deltaTimeMS < 50) {
+        if (deltaTimeMS < 10) {
             KLog.d("KMotor", "getRPS: Time delta too small (" + deltaTimeMS + "ms), returning previous RPS");
             return prevRPS;
         }
@@ -70,7 +71,7 @@ public class KMotor {
             prevTicks = currentTicks;
             prevTimeMS = currentTimeMS;
             KLog.d("KMotor", "getRPS: Time delta too large (" + deltaTimeMS + "ms), resetting tracking");
-            return 0;
+            return CalculateTickPer.ticksToRotation6000RPM(motor.getVelocity());
         }
 
 
@@ -79,6 +80,9 @@ public class KMotor {
         prevTicks = currentTicks;
         prevTimeMS = currentTimeMS;
         prevRPS = rps;
+        return rps;*/
+        double rps = CalculateTickPer.ticksToRotation6000RPM(motor.getVelocity());
+        KLog.d("KMotor", "getRPS: " + rps);
         return rps;
     }
 
@@ -90,7 +94,7 @@ public class KMotor {
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
-        // Update target if changed significantly (>0.005 RPS)
+       /* // Update target if changed significantly (>0.005 RPS)
         if (Math.abs(targetRPS - this.targetRPS) > 0.005) {
             this.targetRPS = targetRPS;
             // Reset PID on target change to prevent overshoot
@@ -117,7 +121,11 @@ public class KMotor {
         KLog.d("KMotor", String.format(
             "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDOutPut: %.2f, Power: %.3f -> %.3f",
             targetRPS, currentRPS, (targetRPS - currentRPS), pidOutput, currentPower, newPower
-        ));
+        ));*/
+        double targetTPS = CalculateTickPer.rotationToTicks6000RPM(targetRPS);
+        this.targetRPS = targetRPS;
+        KLog.d("KMotor", "goToRPS: " + targetRPS);
+        motor.setVelocity(targetTPS);
     }
 
     /**
@@ -127,7 +135,7 @@ public class KMotor {
      */
     public boolean isAtTargetRPS(double tolerance) {
         double currentRPS = getRPS();
-        KLog.d("ShooterReady", "Current RPS: " + currentRPS + " Target RPS: " + targetRPS);
+        KLog.d("KMotor", "Current RPS: " + currentRPS + " Target RPS: " + targetRPS);
         boolean isAtTarget = (Math.abs(currentRPS - targetRPS) <= tolerance);
         if (isAtTarget) {
             KLog.d("ShooterReady", "RPS within tolerance - Ready!");

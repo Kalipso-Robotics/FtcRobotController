@@ -45,7 +45,8 @@ public class Shooter {
         this.opModeUtilities = opModeUtilities;
         DcMotor motor1 = opModeUtilities.getHardwareMap().dcMotor.get("shooter1");
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
-        motor2.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
+        motor2.setDirection(DcMotorSimple.Direction.FORWARD);
 
         shooter1 = new KMotor(motor1, 1.0/100.0, 0, 0);
         shooter2 = new KMotor(motor2, 1.0/100.0, 0, 0);

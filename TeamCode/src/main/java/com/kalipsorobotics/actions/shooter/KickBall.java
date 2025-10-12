@@ -26,10 +26,6 @@ public class KickBall extends KActionSet {
         staticLeft.setName("staticLeft");
         this.addAction(staticLeft);
         staticLeft.setDependentActions(kickLeft, waitAction);
-        ShooterStop shooterStop = new ShooterStop(shooter);
-        shooterStop.setName("shooterStop");
-        this.addAction(shooterStop);
-        shooterStop.setDependentActions(staticRight, staticLeft);
     }
 
 }

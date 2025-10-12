@@ -19,6 +19,10 @@ public class CalculateTickPer {
         return ticks/28;
     }
 
+    public static double rotationToTicks6000RPM(double rotations) {
+        return rotations*28;
+    }
+
     static double mmPerInch = 25.4;
 
     public static double getTicksPerMm(double ticksPerRevolution, double circumf) {
