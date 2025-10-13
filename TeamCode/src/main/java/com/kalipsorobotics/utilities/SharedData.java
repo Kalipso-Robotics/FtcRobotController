@@ -1,5 +1,6 @@
 package com.kalipsorobotics.utilities;
 
+import com.kalipsorobotics.cameraVision.AllianceSetup;
 import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.math.PositionHistory;
@@ -31,4 +32,13 @@ public class SharedData {
         SharedData.odometryPositionMap.putAll(odometryPositionMap);
     }
 
+    private static AllianceSetup allianceSetup = AllianceSetup.RED;
+
+    public static AllianceSetup getAllianceColor() {
+        return allianceSetup;
+    }
+
+    public static void setAllianceColor(AllianceSetup allianceSetup) {
+        SharedData.allianceSetup = allianceSetup;
+    }
 }

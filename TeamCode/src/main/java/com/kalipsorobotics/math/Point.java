@@ -50,4 +50,7 @@ public class Point {
         return y;
     }
 
+    public Point multiplyY(int polarity) {
+        return new Point(x, y * polarity);
+    }
 }

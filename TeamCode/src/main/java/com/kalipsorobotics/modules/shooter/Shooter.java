@@ -18,7 +18,9 @@ public class Shooter {
 
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
-    public static final Point RED_TARGET_FROM_NEAR = new Point(3352.8+300, 1524+300);
+    public static final Point RED_TARGET_FROM_NEAR = new Point(3352.8+300, 1524+300);//red
+    public static final Point RED_TARGET_FROM_FAR = new Point(0, 0);//TODO
+
     private final OpModeUtilities opModeUtilities;
 
     private final KMotor shooter1;
@@ -42,6 +44,7 @@ public class Shooter {
     }
 
     public Shooter(OpModeUtilities opModeUtilities) {
+
         this.opModeUtilities = opModeUtilities;
         DcMotor motor1 = opModeUtilities.getHardwareMap().dcMotor.get("shooter1");
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
@@ -212,6 +215,7 @@ public class Shooter {
     public static double pixelToMM(double pixel) {
         return pixel / MM_TO_PIXEL_RATIO;
     }
+
 
 
 }
