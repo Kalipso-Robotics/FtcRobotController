@@ -12,7 +12,7 @@ public class FullShootMotifAction extends KActionSet {
 
         DetectColorsAction detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
-        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(revolver, shooter, motifPattern.top, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(revolver, shooter, motifPattern.first, detectColorsAction);
         revolverShootColorAction1.setName("revolverShootColorAction1");
         this.addAction(revolverShootColorAction1);
 
@@ -21,7 +21,7 @@ public class FullShootMotifAction extends KActionSet {
         revolverShootColorAction2.setDependentActions(revolverShootColorAction1);
         this.addAction(revolverShootColorAction2);
 
-        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(revolver, shooter, motifPattern.bottom, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(revolver, shooter, motifPattern.last, detectColorsAction);
         revolverShootColorAction3.setName("revolverShootColorAction3");
         revolverShootColorAction3.setDependentActions(revolverShootColorAction2);
         this.addAction(revolverShootColorAction3);
