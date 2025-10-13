@@ -26,6 +26,8 @@ public class TurretAutoAlign extends Action {
 
     private final double TOLERANCE_TICKS = (TICKS_PER_DEGREE);
 
+    private boolean isUnwind = false;
+
 
 
 
@@ -66,31 +68,45 @@ public class TurretAutoAlign extends Action {
         double xTargetGoal = x_init_setup - currentX;
 
         double angleTargetRadian = Math.atan(yTargetGoal/xTargetGoal);//180 deg = 3.14 radians
-        KLog.d("turret angle", "radian " + angleTargetRadian);
+        KLog.d("turret angle", "target radian " + angleTargetRadian);
 
         double currentRobotAngleRadian = currentPosition.getTheta();
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
-
+        double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
 
 
         double targetTicks;
-        if (turretMotor.getCurrentPosition() >= -Math.PI){
+
+        //max cable limit reached
+        if (Math.abs(totalTurretAngle) >= Math.PI){
+            isUnwind = true; //turn on unwind mode
             targetTicks = 0;
+
         } else {
             //double targetTicks = (angleTargetRadian + reverseTurretAngleRadian) * ticksPerRadian);
-            double turretRotation = (angleTargetRadian + reverseTurretAngleRadian) / ( 2 * Math.PI);
+            double turretRotation = (totalTurretAngle) / (2 * Math.PI);
             double motorRotation = turretRotation * gearRatio;
             targetTicks = ticksPerRotation * motorRotation;
         }
+         if (isUnwind == true){
+             //finished unwind
+             if (turretMotor.getCurrentPosition() > 0 - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < 0 + TOLERANCE_TICKS){
+                 isUnwind = false;
+             } else {
+                 //still unwinding (wait)
+                 KLog.d("turret angle", "is unwind " + isUnwind + ". not done yet. current motor position " + turretMotor.getCurrentPosition());
+                 targetTicks = 0;
+             }
 
+         }
 
-        KLog.d("turret angle", "ticks " + targetTicks + "  motor position "+ turretMotor.getCurrentPosition() + "target ticks " + targetTicks);
+        KLog.d("turret angle", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
         turretMotor.setTargetPosition((int) targetTicks);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);  //Idk if you want this setting we have never used it unless big banana wants it :) but if you were to use it set it inside of modules.Turret
-        turretMotor.setPower(1);
+        turretMotor.setPower(0.7);
 
-        if (turretMotor.getCurrentPosition() >= targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() <= targetTicks + TOLERANCE_TICKS) {
+        if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
             isDone = false;
         }
 
