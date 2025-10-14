@@ -68,12 +68,15 @@ public class TurretAutoAlign extends Action {
         double yTargetGoal = y_init_setup + currentY;
         double xTargetGoal = x_init_setup - currentX;
 
-        double angleTargetRadian = Math.atan(yTargetGoal/xTargetGoal);//180 deg = 3.14 radians
+        // Use atan2 for proper angle calculation in all quadrants
+        double angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
         KLog.d("turret angle", "target radian " + angleTargetRadian);
 
         double currentRobotAngleRadian = currentPosition.getTheta();
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
-        double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
+
+        // Use angleWrapRad to normalize the turret angle to [-π, π]
+        double totalTurretAngle = MathFunctions.angleWrapRad(angleTargetRadian + reverseTurretAngleRadian);
 
 
         double targetTicks;
