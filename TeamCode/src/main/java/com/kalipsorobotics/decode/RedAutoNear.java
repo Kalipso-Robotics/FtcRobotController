@@ -122,7 +122,7 @@ public class RedAutoNear extends KTeleOp {
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
-        turretAutoAlign = new TurretAutoAlign(turret);
+        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
