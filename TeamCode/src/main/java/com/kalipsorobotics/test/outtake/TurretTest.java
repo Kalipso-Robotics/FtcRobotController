@@ -24,7 +24,7 @@ public class TurretTest extends LinearOpMode {
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         Turret.setInstanceNull();
         Turret turret = Turret.getInstance(opModeUtilities);
-        TurretAutoAlign turretAutoAlign = new TurretAutoAlign(turret);
+        TurretAutoAlign turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
 
         waitForStart();
         while(opModeIsActive()) {
