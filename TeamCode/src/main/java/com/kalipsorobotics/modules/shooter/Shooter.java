@@ -10,7 +10,6 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import org.json.JSONException;
 import java.io.IOException;
 
 public class Shooter {
@@ -75,8 +74,8 @@ public class Shooter {
 
         ShooterLutPredictor temp = null;
         try {
-            temp = new ShooterLutPredictor(opModeUtilities.getHardwareMap().appContext, "ShooterLUT.json");
-        } catch (IOException | JSONException e) {
+            temp = new ShooterLutPredictor(opModeUtilities.getHardwareMap().appContext, "ShooterLUT.bin");
+        } catch (IOException e) {
             opModeUtilities.getTelemetry().addData("Error", "Failed to load Shooter LUT: " + e.getMessage());
         }
         predictor = temp;

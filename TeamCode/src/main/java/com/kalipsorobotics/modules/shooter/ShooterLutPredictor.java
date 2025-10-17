@@ -2,9 +2,9 @@ package com.kalipsorobotics.modules.shooter;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import org.json.*;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.*;
 
 public class ShooterLutPredictor {
@@ -22,23 +22,60 @@ public class ShooterLutPredictor {
     }
     private final List<Row> rows = new ArrayList<>();
 
-    public ShooterLutPredictor(Context ctx, String assetName) throws IOException, JSONException {
+    public ShooterLutPredictor(Context ctx, String assetName) throws IOException {
+        // Load binary LUT data (much faster than JSON parsing)
         AssetManager am = ctx.getAssets();
         try (InputStream is = am.open(assetName)) {
-            StringBuilder sb = new StringBuilder();
-            byte[] buffer = new byte[1024];
+            // Read entire file into byte array
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = is.read(buffer)) != -1) {
-                sb.append(new String(buffer, 0, bytesRead, StandardCharsets.UTF_8));
+                baos.write(buffer, 0, bytesRead);
             }
-            String json = sb.toString();
-            JSONObject root = new JSONObject(json);
-            JSONArray data = root.getJSONArray("data");
-            for (int i=0; i<data.length(); i++) {
-                JSONObject o = data.getJSONObject(i);
-                rows.add(new Row(o.getDouble("x_pixel"), o.getDouble("y_pixel"),
-                        o.getDouble("rps"), o.getDouble("hood")));
+
+            // Parse binary format
+            ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+
+            // Read number of entries
+            int numEntries = bb.getInt();
+
+            // Read entries (each entry is 4 doubles = 32 bytes)
+            for (int i = 0; i < numEntries; i++) {
+                double x = bb.getDouble();
+                double y = bb.getDouble();
+                double rps = bb.getDouble();
+                double hood = bb.getDouble();
+                rows.add(new Row(x, y, rps, hood));
             }
+        }
+    }
+
+    // Constructor for unit tests that read from file system
+    public ShooterLutPredictor(InputStream is) throws IOException {
+        // Read entire file into byte array
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer)) != -1) {
+            baos.write(buffer, 0, bytesRead);
+        }
+
+        // Parse binary format
+        ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+
+        // Read number of entries
+        int numEntries = bb.getInt();
+
+        // Read entries (each entry is 4 doubles = 32 bytes)
+        for (int i = 0; i < numEntries; i++) {
+            double x = bb.getDouble();
+            double y = bb.getDouble();
+            double rps = bb.getDouble();
+            double hood = bb.getDouble();
+            rows.add(new Row(x, y, rps, hood));
         }
     }
 

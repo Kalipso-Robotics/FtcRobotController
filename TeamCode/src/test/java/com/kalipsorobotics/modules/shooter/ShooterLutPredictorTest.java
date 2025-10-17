@@ -3,15 +3,6 @@ package com.kalipsorobotics.modules.shooter;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static org.junit.Assert.*;
 
 import com.kalipsorobotics.math.Point;
@@ -19,122 +10,22 @@ import com.kalipsorobotics.math.Point;
 /**
  * Unit test for ShooterLutPredictor
  * This test runs locally without requiring an Android device or FTC controller.
+ * Now uses the pre-generated ShooterLutData instead of parsing JSON.
  */
 public class ShooterLutPredictorTest {
 
-    private TestShooterLutPredictor predictor;
-
-    /**
-     * Test implementation of ShooterLutPredictor that reads from file system
-     * instead of Android assets
-     */
-    private static class TestShooterLutPredictor {
-        private static final double MIN_HOOD_POS = 0.23;
-        private static final double MAX_HOOD_POS = 0.8;
-
-        private static class Row {
-            final double x, y, rps, hood;
-            Row(double x, double y, double rps, double hood) {
-                this.x = x;
-                this.y = y;
-                this.rps = rps;
-                this.hood = hood;
-            }
-        }
-
-        private final List<Row> rows = new ArrayList<>();
-
-        public TestShooterLutPredictor(String jsonFilePath) throws IOException {
-            // Simple JSON parsing without org.json dependency (which isn't available in unit tests)
-            StringBuilder sb = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new java.io.FileReader(jsonFilePath))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            }
-
-            String json = sb.toString();
-
-            // Extract data array using regex
-            Pattern dataPattern = Pattern.compile("\"data\"\\s*:\\s*\\[(.*?)\\](?=\\s*})");
-            Matcher dataMatcher = dataPattern.matcher(json);
-
-            if (dataMatcher.find()) {
-                String dataArray = dataMatcher.group(1);
-
-                // Extract individual objects
-                Pattern objPattern = Pattern.compile("\\{([^}]+)\\}");
-                Matcher objMatcher = objPattern.matcher(dataArray);
-
-                while (objMatcher.find()) {
-                    String obj = objMatcher.group(1);
-
-                    double x = extractDouble(obj, "x_pixel");
-                    double y = extractDouble(obj, "y_pixel");
-                    double rps = extractDouble(obj, "rps");
-                    double hood = extractDouble(obj, "hood");
-
-                    rows.add(new Row(x, y, rps, hood));
-                }
-            }
-        }
-
-        private static double extractDouble(String json, String key) {
-            Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*([0-9.\\-]+)");
-            Matcher matcher = pattern.matcher(json);
-            if (matcher.find()) {
-                return Double.parseDouble(matcher.group(1));
-            }
-            throw new RuntimeException("Key not found: " + key);
-        }
-
-        public ShooterLutPredictor.Prediction predict(double xPixel, double yPixel) {
-            // KNN (K=8), inverse-distance weighting (Shepard). If exact hit, return it.
-            final int K = 8;
-            PriorityQueue<double[]> pq = new PriorityQueue<>(Comparator.comparingDouble(a -> -a[0])); // max-heap by dist
-
-            for (Row r : rows) {
-                double dx = r.x - xPixel, dy = r.y - yPixel;
-                double d = Math.hypot(dx, dy);
-
-                if (d == 0.0) {
-                    double clampedHood = Math.max(MIN_HOOD_POS, Math.min(MAX_HOOD_POS, r.hood));
-                    return new ShooterLutPredictor.Prediction(r.rps, clampedHood);
-                }
-
-                if (pq.size() < K) {
-                    pq.offer(new double[]{d, r.rps, r.hood});
-                } else if (d < pq.peek()[0]) {
-                    pq.poll();
-                    pq.offer(new double[]{d, r.rps, r.hood});
-                }
-            }
-
-            double wsum = 0, rpsSum = 0, hoodSum = 0;
-            while (!pq.isEmpty()) {
-                double[] e = pq.poll();
-                double w = 1.0 / (e[0] + 1e-6);
-                wsum += w;
-                rpsSum += w * e[1];
-                hoodSum += w * e[2];
-            }
-
-            double predictedRps = rpsSum / wsum;
-            double predictedHood = hoodSum / wsum;
-
-            // Clamp hood position to valid bounds
-            double clampedHood = Math.max(MIN_HOOD_POS, Math.min(MAX_HOOD_POS, predictedHood));
-
-            return new ShooterLutPredictor.Prediction(predictedRps, clampedHood);
-        }
-    }
+    private ShooterLutPredictor predictor;
 
     @Before
-    public void setUp() throws IOException {
-        // Use direct path to assets folder
-        String resourcePath = "src/main/assets/ShooterLUT.json";
-        predictor = new TestShooterLutPredictor(resourcePath);
+    public void setUp() throws Exception {
+        // Use real ShooterLutPredictor with binary data file
+        String resourcePath = "ShooterLUT.bin";
+        java.io.InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
+        if (is == null) {
+            throw new RuntimeException("Could not find resource: " + resourcePath);
+        }
+        predictor = new ShooterLutPredictor(is);
+        is.close();
     }
 
 //    @Test
