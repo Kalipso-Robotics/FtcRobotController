@@ -2,7 +2,6 @@ package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
@@ -22,20 +21,33 @@ public class TurretAutoAlign extends Action {
     private final double degreesPerRotation = 360.0;
     private final double radiansPerRotation = 2 * Math.PI;
 
+    private double xInitSetup;// = 3445.14;
+    private double yInitSetup;// = 2028.8;
+
+    public static double RED_X_INIT_SETUP = 3445.14;
+
+    public static double RED_Y_INIT_SETUP = 2028.8;
+
     private final double TICKS_PER_RADIAN = (ticksPerRotation * gearRatio) / radiansPerRotation;
     private final double TICKS_PER_DEGREE = (ticksPerRotation * gearRatio) / degreesPerRotation;
 
     private final double TOLERANCE_TICKS = (TICKS_PER_DEGREE);
 
-    private boolean isUnwind = false;
+    private boolean isWithinRange = false;
 
 
 
 
-    public TurretAutoAlign(Turret turret) {
+    public TurretAutoAlign(Turret turret, double xInitSetup, double yInitSetup) {
         this.turret = turret;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
+        this.xInitSetup = xInitSetup;
+        this.yInitSetup = yInitSetup;
+    }
+
+    public boolean isWithinRange() {
+        return isWithinRange;
     }
 
     @Override
@@ -55,9 +67,11 @@ public class TurretAutoAlign extends Action {
 
 //        double x_init_setup = 3445.14; //make static field
 //        double y_init_setup = -2028.8;
+       /* if(turretMotor.isBusy()){   //turn off if we need turret to be more responsive
+            return;
+        }*/
 
-        double x_init_setup = 3445.14; //make static field
-        double y_init_setup = 2028.8;
+
 
 
         Position currentPosition = SharedData.getOdometryPosition();
@@ -65,27 +79,38 @@ public class TurretAutoAlign extends Action {
         double currentY = currentPosition.getY();
 
 
-        double yTargetGoal = y_init_setup + currentY;
-        double xTargetGoal = x_init_setup - currentX;
+        double yTargetGoal = yInitSetup + currentY;
+        double xTargetGoal = xInitSetup - currentX;
 
-        double angleTargetRadian = Math.atan(yTargetGoal/xTargetGoal);//180 deg = 3.14 radians
+        // Use atan2 for proper angle calculation in all quadrants
+        double angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
         KLog.d("turret angle", "target radian " + angleTargetRadian);
 
         double currentRobotAngleRadian = currentPosition.getTheta();
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
+
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
+        // Use angleWrapRad to normalize the turret angle to [-π, π]
+        double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
+
 
 
         double targetTicks;
+        double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
+        double motorRotation = turretRotation * gearRatio;
+        targetTicks = ticksPerRotation * motorRotation;
+        KLog.d("turret angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
 
+
+        /*
         //max cable limit reached
-        if (Math.abs(totalTurretAngle) >= Math.PI){
+        if (Math.abs(totalTurretAngleWrap) >= Math.PI){
             isUnwind = true; //turn on unwind mode
             targetTicks = 0;
 
         } else {
             //double targetTicks = (angleTargetRadian + reverseTurretAngleRadian) * ticksPerRadian);
-            double turretRotation = (totalTurretAngle) / (2 * Math.PI);
+            double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
             double motorRotation = turretRotation * gearRatio;
             targetTicks = ticksPerRotation * motorRotation;
         }
@@ -95,11 +120,11 @@ public class TurretAutoAlign extends Action {
                  isUnwind = false;
              } else {
                  //still unwinding (wait)
-                 KLog.d("turret angle", "is unwind " + isUnwind + ". not done yet. current motor position " + turretMotor.getCurrentPosition());
+                 KLog.d("turret angle unwind", "is unwind " + isUnwind + ". not done yet. current motor position " + turretMotor.getCurrentPosition());
                  targetTicks = 0;
              }
 
-         }
+         }*/
 
         KLog.d("turret angle", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
@@ -108,8 +133,13 @@ public class TurretAutoAlign extends Action {
         turretMotor.setPower(0.7);
 
         if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
-            isDone = false;
+            isWithinRange = true;
+            SharedData.setIsTurretWithinRange(isWithinRange);
+        } else {
+            isWithinRange = false;
+            SharedData.setIsTurretWithinRange(isWithinRange);
         }
+        KLog.d("turret angle", "is the turret in range " + isWithinRange);
 
 
 

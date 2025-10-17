@@ -10,6 +10,16 @@ import java.util.HashMap;
 public class SharedData {
 
     private static final Position odometryPosition = new Position(0, 0, 0);
+
+    public static boolean isIsTurretWithinRange() {
+        return isTurretWithinRange;
+    }
+
+    public static void setIsTurretWithinRange(boolean isTurretWithinRange) {
+        SharedData.isTurretWithinRange = isTurretWithinRange;
+    }
+
+    private static boolean isTurretWithinRange = false;
     private static final HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionMap = new HashMap<>();
 
     public static Position getOdometryPosition() {
