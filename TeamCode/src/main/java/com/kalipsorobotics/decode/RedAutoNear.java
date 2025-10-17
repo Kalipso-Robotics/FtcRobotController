@@ -16,7 +16,6 @@ import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.cameraVision.AllianceSetup;
-import com.kalipsorobotics.cameraVision.ObiliskDetection;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -86,7 +85,6 @@ public class RedAutoNear extends KTeleOp {
     private boolean shooterStopPressed = false;
 
 
-    ObiliskDetection.MotifPattern testingMotif;
 
     @Override
     protected void initializeRobot() {
