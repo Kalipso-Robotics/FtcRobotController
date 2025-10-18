@@ -9,9 +9,9 @@ public class Revolver {
 
     private final KServo revolverServo;
 
-    public static final double REVOLVER_INDEX_0 = 0.160; //+ for counterclockwise
-    public static final double REVOLVER_INDEX_1 = 0.53;
-    public static final double REVOLVER_INDEX_2 = 0.930;
+    public static final double REVOLVER_INDEX_0 = 0.11; //+ for counterclockwise
+    public static final double  REVOLVER_INDEX_1 = 0.51;
+    public static final double REVOLVER_INDEX_2 = 0.91;
 
     private MotifColor[] colorSet = new MotifColor[3];
 

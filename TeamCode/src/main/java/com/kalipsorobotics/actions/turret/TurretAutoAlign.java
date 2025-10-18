@@ -26,7 +26,7 @@ public class TurretAutoAlign extends Action {
 
     public static double RED_X_INIT_SETUP = 3445.14;
 
-    public static double RED_Y_INIT_SETUP = 2028.8;
+    public static double RED_Y_INIT_SETUP = 1800 - 193.68; //2028.8;
 
     private final double TICKS_PER_RADIAN = (ticksPerRotation * gearRatio) / radiansPerRotation;
     private final double TICKS_PER_DEGREE = (ticksPerRotation * gearRatio) / degreesPerRotation;
@@ -129,7 +129,7 @@ public class TurretAutoAlign extends Action {
         KLog.d("turret angle", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
         turretMotor.setTargetPosition((int) targetTicks);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);  //Idk if you want this setting we have never used it unless big banana wants it :) but if you were to use it set it inside of modules.Turret
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setPower(0.7);
 
         if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {

@@ -15,6 +15,11 @@ public class ShooterLutPredictor {
         public final double rps;
         public final double hood;
         public Prediction(double rps, double hood) { this.rps = rps; this.hood = hood; }
+
+        @Override
+        public String toString() {
+            return "Prediction(rps=" + rps + ", hood=" + hood + ")";
+        }
     }
     private static class Row {
         final double x, y, rps, hood;

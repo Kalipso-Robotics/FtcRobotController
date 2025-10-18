@@ -76,7 +76,23 @@ public class ShooterLutPredictorTest {
             {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_NEAR.getX(), Shooter.RED_TARGET_FROM_NEAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_NEAR.getX()/2, Shooter.RED_TARGET_FROM_NEAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(300), Shooter.GOAL_HEIGHT_PIXELS},
-            {Shooter.mmToPixel(150), Shooter.GOAL_HEIGHT_PIXELS}
+            {Shooter.mmToPixel(150), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(600), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(620), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(640), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(660), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(665), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(670), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(675), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(680), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(700), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(710), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(720), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(730), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(740), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(745), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(750), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(752), Shooter.GOAL_HEIGHT_PIXELS},
         };
 
         System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════════════╗");
