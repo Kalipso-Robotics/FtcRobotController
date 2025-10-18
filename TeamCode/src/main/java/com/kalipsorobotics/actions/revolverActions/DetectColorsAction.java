@@ -21,7 +21,7 @@ public class DetectColorsAction extends Action {
 
     public static final String CALIBRATION_FILENAME = "color_calibration.csv";
 
-    private OpModeUtilities opModeUtilities;
+    private final OpModeUtilities opModeUtilities;
     TripleColorSensor colorSensors;
     static HashMap<MotifColor, HSV> calibratedFront = null;
     static HashMap<MotifColor, HSV> calibratedBLeft = null;
@@ -197,4 +197,12 @@ public class DetectColorsAction extends Action {
 
         return Math.sqrt(wH * h * h + wS * s * s);
     }
+
+    public boolean isFull() {
+        return getFrontColor().isPurpleOrGreen() &&
+                getBLeftColor().isPurpleOrGreen() &&
+                getBrightColor().isPurpleOrGreen();
+    }
+
+
 }

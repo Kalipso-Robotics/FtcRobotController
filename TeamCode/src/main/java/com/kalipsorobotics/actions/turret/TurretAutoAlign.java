@@ -26,7 +26,7 @@ public class TurretAutoAlign extends Action {
 
     public static double RED_X_INIT_SETUP = 3445.14;
 
-    public static double RED_Y_INIT_SETUP = 1800 - 193.68; //2028.8;
+    public static double RED_Y_INIT_SETUP = 1800 - 193.68 - (196.85); //2028.8;
 
     private final double TICKS_PER_RADIAN = (ticksPerRotation * gearRatio) / radiansPerRotation;
     private final double TICKS_PER_DEGREE = (ticksPerRotation * gearRatio) / degreesPerRotation;

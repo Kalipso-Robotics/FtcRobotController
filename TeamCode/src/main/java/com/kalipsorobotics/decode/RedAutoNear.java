@@ -4,14 +4,12 @@ import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
-import com.kalipsorobotics.actions.intake.IntakeCycle;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
-import com.kalipsorobotics.actions.revolverActions.RevolverShootColorAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.KickBall;
 import com.kalipsorobotics.actions.shooter.ShootAction;
@@ -38,10 +36,11 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.checkerframework.dataflow.qual.Pure;
 
 @Autonomous(name="Red Auto Near")
 public class RedAutoNear extends KTeleOp {
+    KActionSet redAutoNear;
+
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
@@ -56,7 +55,6 @@ public class RedAutoNear extends KTeleOp {
     final double THIRD_BALL_X = 304.8 + DISTANCE_BETWEEN_BALLS*2;
     final double THIRD_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN;
     private DriveTrain driveTrain;
-    KActionSet redAutoNear;
     TripleColorSensor colorSensors = null;
     Shooter shooter = null;
     Intake intake = null;
@@ -148,22 +146,22 @@ public class RedAutoNear extends KTeleOp {
         PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
         moveToDepotBalls.setName("moveToDepotBalls");
 //        moveToDepotBalls.setDependentActions(firstShoot);
-        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 90*allianceSetup.getPolarity());
-        moveToDepotBalls.addPoint(DEPOT_X+350, DEPOT_Y+350, 90*allianceSetup.getPolarity(), PurePursuitAction.P_XY_SLOW/2, PurePursuitAction.P_ANGLE_SLOW);
-
+        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        moveToDepotBalls.addPoint(DEPOT_X + 200, (DEPOT_Y + 600) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         redAutoNear.addAction(moveToDepotBalls);
 
 
-        IntakeCycle first3Intake = new IntakeCycle(driveTrain, intake, revolver, colorSensors, IntakeCycle.RED_MOVE_INCREMENT*allianceSetup.getPolarity(),SharedData.getOdometryPosition().getX(), SharedData.getOdometryPosition().getY(), SharedData.getOdometryPosition().getTheta());
+        IntakeFullAction first3Intake = new IntakeFullAction(intake, revolver, colorSensors);
         first3Intake.setName("first3Intake");
-//        first3Intake.setDependentActions(moveToDepotBalls);
+        //first3Intake.setDependentActions(firstShoot);
         redAutoNear.addAction(first3Intake);
+//
 
-//        PurePursuitAction moveToNearShoot = new PurePursuitAction(driveTrain);
-//        moveToNearShoot.setName("moveToNearShoot");
-//        moveToNearShoot.setDependentActions(first3Intake);
-//        moveToNearShoot.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
-//        redAutoNear.addAction(moveToNearShoot);
+        PurePursuitAction moveToNearShoot = new PurePursuitAction(driveTrain);
+        moveToNearShoot.setName("moveToNearShoot");
+        moveToNearShoot.setDependentActions(moveToDepotBalls, first3Intake);
+        moveToNearShoot.addPoint(0,0,0); // turret should align to goal not sure, also pos can be not 0,0 for faster
+        redAutoNear.addAction(moveToNearShoot);
 //
 //        FullShootMotifAction secondShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 //        secondShoot.setName("secondShoot");
@@ -225,8 +223,7 @@ public class RedAutoNear extends KTeleOp {
         while (opModeIsActive()) {
             redAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
-            updateActions();
+            KLog.d("Odometry", "Position: " + SharedData.getOdometryPosition());
         }
         cleanupRobot();
     }
