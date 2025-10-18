@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.shooter;
 
+import android.annotation.SuppressLint;
+
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -25,6 +27,7 @@ public class ShooterReady extends Action {
         this.name = "ShooterReady";
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void update() {
         if (!hasStarted) {
@@ -34,7 +37,7 @@ public class ShooterReady extends Action {
         // Get prediction for target RPS and hood position
         ShooterLutPredictor.Prediction prediction = getPrediction();
         if (prediction == null) {
-            KLog.e("ShooterReady", "Failed to get prediction");
+            KLog.e("shooter_ready", "Failed to get prediction");
             return;
         }
 
@@ -49,15 +52,15 @@ public class ShooterReady extends Action {
 //        double error = prediction.rps - currentRPS;
 //
 //        // Log status
-//        KLog.d("ShooterReady", String.format(
-//            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f RPS, Hood: %.3f",
-//            prediction.rps, currentRPS, error, prediction.hood
-//        ));
+        KLog.d("shooter_ready", String.format(
+            "Target: %.2f RPS, Hood: %.3f",
+            prediction.rps, prediction.hood
+        ));
 
         // Check if we've reached target RPS
         if (shooter.getShooter1().isAtTargetRPS(TARGET_RPS_TOLERANCE)) {
             isDone = true;
-            KLog.d("ShooterReady", "RPS within tolerance - Ready!");
+            KLog.d("shooter_ready", "RPS within tolerance - Ready!");
         }
     }
 
@@ -65,16 +68,19 @@ public class ShooterReady extends Action {
         double distanceMM;
 
         if (launchPosition == LaunchPosition.AUTO) {
+            KLog.d("shooter_ready", "Using target position: " + target);
             // Calculate distance from odometry position to target
             Position currentPosition = SharedData.getOdometryPosition();
             double dx = target.getX() - currentPosition.getX();
             double dy = target.getY() - currentPosition.getY();
             distanceMM = Math.sqrt((dx * dx) + (dy * dy));
         } else {
+            KLog.d("shooter_ready", "Using launch position: " + launchPosition);
             // Use the distance from the launch position enum
             distanceMM = launchPosition.getDistanceToTargetMM();
         }
-
+        ShooterLutPredictor.Prediction prediction = shooter.getPrediction(distanceMM);
+        KLog.d("shooter_ready", "Distance: " + distanceMM + " prediction: " + prediction);
         // Get prediction from shooter using the distance
         return shooter.getPrediction(distanceMM);
     }

@@ -125,8 +125,8 @@ public class RedAutoNear extends KTeleOp {
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
         //todo just fed in testing motif pattern change later
-        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
-        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+        //testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
+        //fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shootAction = new ShootAction(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
@@ -217,11 +217,11 @@ public class RedAutoNear extends KTeleOp {
 
 
 
-            if (fullShootPressed) {
-                if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
-                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
-                }
-            }
+//            if (fullShootPressed) {
+//                if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
+//                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+//                }
+//            }
 
             if (kickPressed) {
                 if (kickBall != null || kickBall.getIsDone()) {
