@@ -1,6 +1,7 @@
 package com.kalipsorobotics.actions.revolverActions;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
@@ -25,5 +26,11 @@ public class FullShootMotifAction extends KActionSet {
         revolverShootColorAction3.setName("revolverShootColorAction3");
         revolverShootColorAction3.setDependentActions(revolverShootColorAction2);
         this.addAction(revolverShootColorAction3);
+
+        ShooterStop stop = new ShooterStop(shooter);
+        stop.setName("stop");
+        stop.setDependentActions(revolverShootColorAction3);
+        this.addAction(stop);
+
     }
 }

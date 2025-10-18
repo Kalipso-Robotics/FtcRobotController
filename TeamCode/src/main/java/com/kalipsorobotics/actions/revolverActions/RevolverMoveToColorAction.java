@@ -25,17 +25,21 @@ public class RevolverMoveToColorAction extends Action {
     @Override
     protected void update() {
         MotifColor[] colorSet = detectColorsAction.getColorSet();
+        if (revolverServo.isDone()) {
+            detectColorsAction.setIsDone(false);
+            detectColorsAction.updateCheckDone();
 
-        if(shootColor != colorSet[0]) {
-            int currentRevolverIndex = revolver.getCurrentRevolverServoIndex();
-            MotifColor[] transformedColorSet = detectColorsAction.transformColorSetToTray(colorSet, currentRevolverIndex);
+            if(shootColor != colorSet[0]) {
+                int currentRevolverIndex = revolver.getCurrentRevolverServoIndex();
+                MotifColor[] transformedColorSet = detectColorsAction.transformColorSetToTray(colorSet, currentRevolverIndex);
 
-            int turnToIndex = Arrays.asList(transformedColorSet).indexOf(shootColor); //todo make it find the closest one | wait laing wouldnt all the positions always be one turn away
-            revolver.moveToIndex(turnToIndex);
+                int turnToIndex = Arrays.asList(transformedColorSet).indexOf(shootColor); //todo make it find the closest one | wait laing wouldnt all the positions always be one turn away
+                revolver.moveToIndex(turnToIndex);
 //
 //            int indDiff = revolver.getCurrentRevolverServoIndex() - currentRevolverIndex;
 //            revolver.setColorSet(detectColorsAction.transformColorSetToTray(colorSet, indDiff));
+            }
+            isDone = true;
         }
-        isDone = true;
     }
 }

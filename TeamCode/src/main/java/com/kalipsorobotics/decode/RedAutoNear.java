@@ -2,13 +2,16 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.actions.intake.IntakeCycle;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
+import com.kalipsorobotics.actions.revolverActions.RevolverShootColorAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.KickBall;
 import com.kalipsorobotics.actions.shooter.ShootAction;
@@ -28,19 +31,32 @@ import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
+import org.checkerframework.dataflow.qual.Pure;
+
+@Autonomous(name="Red Auto Near")
 public class RedAutoNear extends KTeleOp {
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
+    final double DISTANCE_BETWEEN_BALLS = 609.6;
+    final double DISTANCE_TO_BALL_FROM_ORIGIN = 1066.8;
+    final double DEPOT_X = 10;
+    final double DEPOT_Y = 600;
+    final double FIRST_BALL_X = 304.8;
+    final double FIRST_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN;
+    final double SECOND_BALL_X = 304.8 + DISTANCE_BETWEEN_BALLS ;
+    final double SECOND_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN;
+    final double THIRD_BALL_X = 304.8 + DISTANCE_BETWEEN_BALLS*2;
+    final double THIRD_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN;
     private DriveTrain driveTrain;
-
+    KActionSet redAutoNear;
     TripleColorSensor colorSensors = null;
     Shooter shooter = null;
     Intake intake = null;
@@ -69,23 +85,6 @@ public class RedAutoNear extends KTeleOp {
 
     DetectColorsAction detectColorsAction = null;
 
-    double turretStickValue;
-    boolean shootActionPressed = false;
-    boolean kickPressed = false;
-    boolean intakePressed = false;
-    boolean intakeReversePressed = false;
-    boolean fullShootPressed = false;
-    boolean revolverLeftPressed = false;
-    boolean revolverRightPressed = false;
-    boolean shooterReadyNearPressed = false;
-    boolean shooterReadyMiddlePressed = false;
-    boolean shooterReadyWallPressed = false;
-    boolean shooterReadyBluePressed = false;
-    boolean shooterReadyRedPressed = false;
-    boolean shooterReadyRedMiddlePressed = false;
-    boolean shooterReadyBlueMiddlePressed = false;
-    private boolean shooterStopPressed = false;
-
     MotifCamera.MotifPattern testingMotif;
 
     @Override
@@ -103,10 +102,10 @@ public class RedAutoNear extends KTeleOp {
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-        driveAction = new DriveAction(driveTrain);
 
         colorSensors = new TripleColorSensor(opModeUtilities);
 
+        redAutoNear = new KActionSet();
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
@@ -140,142 +139,95 @@ public class RedAutoNear extends KTeleOp {
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
-        //darren cant digest cheese
+
+        // auto code here
+//        FullShootMotifAction firstShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+//        firstShoot.setName("firstShoot");
+//        redAutoNear.addAction(firstShoot);
+//
+        PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
+        moveToDepotBalls.setName("moveToDepotBalls");
+//        moveToDepotBalls.setDependentActions(firstShoot);
+        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 90*allianceSetup.getPolarity());
+        moveToDepotBalls.addPoint(DEPOT_X+350, DEPOT_Y+350, 90*allianceSetup.getPolarity(), PurePursuitAction.P_XY_SLOW/2, PurePursuitAction.P_ANGLE_SLOW);
+
+        redAutoNear.addAction(moveToDepotBalls);
+
+
+        IntakeCycle first3Intake = new IntakeCycle(driveTrain, intake, revolver, colorSensors, IntakeCycle.RED_MOVE_INCREMENT*allianceSetup.getPolarity(),SharedData.getOdometryPosition().getX(), SharedData.getOdometryPosition().getY(), SharedData.getOdometryPosition().getTheta());
+        first3Intake.setName("first3Intake");
+//        first3Intake.setDependentActions(moveToDepotBalls);
+        redAutoNear.addAction(first3Intake);
+
+//        PurePursuitAction moveToNearShoot = new PurePursuitAction(driveTrain);
+//        moveToNearShoot.setName("moveToNearShoot");
+//        moveToNearShoot.setDependentActions(first3Intake);
+//        moveToNearShoot.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
+//        redAutoNear.addAction(moveToNearShoot);
+//
+//        FullShootMotifAction secondShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+//        secondShoot.setName("secondShoot");
+//        secondShoot.setDependentActions(moveToNearShoot);
+//        redAutoNear.addAction(secondShoot);
+//
+//        PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
+//        moveToFirstBalls.setName("moveToFirstBalls");
+//        moveToFirstBalls.setDependentActions(secondShoot);
+//        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90);
+//        redAutoNear.addAction(moveToFirstBalls);
+//
+//        IntakeCycle next6Intake = new IntakeCycle(driveTrain, intake, revolver, colorSensors, DEPOT_X, DEPOT_Y, 90);
+//        next6Intake.setName("next6Intake");
+//        next6Intake.setDependentActions(moveToFirstBalls);
+//        redAutoNear.addAction(next6Intake);
+//
+//        PurePursuitAction moveToNearShoot2 = new PurePursuitAction(driveTrain);
+//        moveToNearShoot2.setName("moveToNearShoot2");
+//        moveToNearShoot2.setDependentActions(next6Intake);
+//        moveToNearShoot2.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
+//        redAutoNear.addAction(moveToNearShoot2);
+//
+//        FullShootMotifAction thirdShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+//        thirdShoot.setName("thirdShoot");
+//        thirdShoot.setDependentActions(moveToNearShoot2);
+//        redAutoNear.addAction(thirdShoot);
+//
+//        PurePursuitAction moveToSecondBalls = new PurePursuitAction(driveTrain);
+//        moveToSecondBalls.setName("moveToSecondBalls");
+//        moveToSecondBalls.setDependentActions(thirdShoot);
+//        moveToSecondBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90);
+//        redAutoNear.addAction(moveToSecondBalls);
+//
+//        IntakeCycle final12Intake = new IntakeCycle(driveTrain, intake, revolver, colorSensors, FIRST_BALL_X, FIRST_BALL_Y, 90);
+//        final12Intake.setName("final9Intake");
+//        final12Intake.setDependentActions(moveToSecondBalls);
+//        redAutoNear.addAction(final12Intake);
+//
+//        PurePursuitAction moveToNearShoot3 = new PurePursuitAction(driveTrain);
+//        moveToNearShoot3.setName("moveToNearShoot3");
+//        moveToNearShoot3.setDependentActions(final12Intake);
+//        moveToNearShoot3.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
+//        redAutoNear.addAction(moveToNearShoot3);
+//
+//        FullShootMotifAction fourthShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+//        fourthShoot.setName("fourthShoot");
+//        fourthShoot.setDependentActions(moveToNearShoot3);
+//        redAutoNear.addAction(fourthShoot);
+//
+//        PurePursuitAction park = new PurePursuitAction(driveTrain);
+//        park.setName("park");
+//        park.setDependentActions(fourthShoot);
+//        park.addPoint(400, 400, 90);
+//        park.setMaxCheckDoneCounter(20);
+//        redAutoNear.addAction(park);
+
         waitForStart();
         while (opModeIsActive()) {
-
-            if(kGamePad1.getLeftStickY() != 0 || kGamePad1.getRightStickX() != 0 || kGamePad1.getLeftStickX() != 0) {
-                setLastMoveAction(null);
-                driveAction.move(gamepad1);
-            } else {
-                if (lastMoveAction == null || lastMoveAction.getIsDone()) {
-                    driveTrain.setPower(0);
-                }
-            }
-
-            turretStickValue = kGamePad2.getRightStickX();
-            shootActionPressed = kGamePad2.isLeftTriggerPressed();
-            kickPressed = kGamePad2.isButtonYFirstPressed();
-            intakePressed = kGamePad2.isRightTriggerPressed();
-            intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
-            fullShootPressed = kGamePad2.isButtonAFirstPressed();
-            revolverLeftPressed = kGamePad2.isButtonXFirstPressed();
-            revolverRightPressed = kGamePad2.isButtonBFirstPressed();
-
-            shooterReadyNearPressed = kGamePad2.isDpadUpFirstPressed();
-            shooterReadyMiddlePressed = kGamePad2.isDpadDownFirstPressed();
-            shooterReadyWallPressed = kGamePad2.isDpadUpFirstPressed() && kGamePad2.isLeftBumperPressed();
-            shooterReadyRedPressed = kGamePad2.isDpadRightFirstPressed();
-            shooterReadyBluePressed = kGamePad2.isDpadLeftFirstPressed();
-            shooterReadyRedMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadRightFirstPressed();
-            shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
-            shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
-
-            boolean isWarmup = true;
-
-
-            if (shooterStopPressed) {
-                if (shooterStop != null || shooterStop.getIsDone()) {
-                    shooterStop = new ShooterStop(shooter);
-                    setLastShooterAction(shooterStop);
-                }
-            }
-
-            if (shooterReadyNearPressed) {
-                launchPosition = LaunchPosition.NEAR;
-            } else if (shooterReadyMiddlePressed) {
-                launchPosition = LaunchPosition.MIDDLE;
-            } else if (shooterReadyWallPressed) {
-                launchPosition = LaunchPosition.WALL;
-            } else if (shooterReadyRedPressed) {
-                launchPosition = LaunchPosition.RED;
-            } else if (shooterReadyBluePressed) {
-                launchPosition = LaunchPosition.BLUE;
-            } else if (shooterReadyRedMiddlePressed) {
-                launchPosition = LaunchPosition.MIDDLE_RED;
-            } else if (shooterReadyBlueMiddlePressed) {
-                launchPosition = LaunchPosition.MIDDLE_BLUE;
-            } else {
-                isWarmup = false;
-                launchPosition = LaunchPosition.AUTO;
-            }
-
-            if (isWarmup) {
-                if (shooterReady != null || shooterReady.getIsDone()) {
-                    shooterReady = new ShooterReady(shooter, ROBOT_START_POINT_RED.multiplyY(allianceSetup.getPolarity()), launchPosition);
-                    KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up For Position: " + launchPosition);
-                    setLastShooterAction(shooterReady);
-                }
-            }
-
-
-            if (shootActionPressed) {
-                KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
-                if (shootAction != null || shootAction.getIsDone()) {
-                    KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shootAction = new ShootAction(shooter, ROBOT_START_POINT_RED, launchPosition);
-                    setLastShooterAction(shootAction);
-                }
-            }
-
-
-
-            if (fullShootPressed) {
-                if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
-                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
-                }
-            }
-
-            if (kickPressed) {
-                if (kickBall != null || kickBall.getIsDone()) {
-                    kickBall = new KickBall(shooter);
-                    setLastKickerAction(kickBall);
-                }
-            }
-
-            if (intakePressed) {
-                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
-                    intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
-                    setLastIntakeAction(intakeFullAction);
-                }
-            } else if (intakeReversePressed) {
-                if (intakeReverse != null || intakeReverse.getIsDone()) {
-                    intakeReverse = new IntakeReverse(intake);
-                    setLastIntakeAction(intakeReverse);
-                }
-            } else {
-                intakeFullAction.setIsDone(true);
-                if (intakeStop != null || intakeStop.getIsDone()) {
-                    intakeStop = new IntakeStop(intake);
-                    setLastIntakeAction(intakeStop);
-                }
-            }
-
-            if (revolverLeftPressed) {
-                KLog.d("teleop", "revolver pressed");
-                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
-                    KLog.d("teleop", "revolverteleop reset");
-                    revolverTeleOp = new RevolverTeleOp(revolver, true);
-                }
-                setLastRevolverAction(revolverTeleOp);
-            } else if (revolverRightPressed) {
-                KLog.d("teleop", "revolver pressed");
-                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
-                    KLog.d("teleop", "revolverteleop reset");
-                    revolverTeleOp = new RevolverTeleOp(revolver, false);
-                }
-                setLastRevolverAction(revolverTeleOp);
-            }
-
-
-
-
-
+            redAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
-
         cleanupRobot();
     }
 }
