@@ -12,12 +12,13 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class RevolverShootColorAction extends KActionSet {
     public RevolverShootColorAction(Revolver revolver, Shooter shooter, MotifColor shootColor, DetectColorsAction detectColorsAction) {
+
         RevolverMoveToColorAction revolverMoveToColorAction = new RevolverMoveToColorAction(revolver, shootColor, detectColorsAction);
         revolverMoveToColorAction.setName("revolverMoveToColorAction");
         this.addAction(revolverMoveToColorAction);
 
-        WaitAction waitAction1 = new WaitAction(300);
-        waitAction1.setName("waitAction");
+        WaitAction waitAction1 = new WaitAction(200);
+        waitAction1.setName("waitAction1");
         this.addAction(waitAction1);
         waitAction1.setDependentActions(revolverMoveToColorAction);
 
@@ -25,5 +26,10 @@ public class RevolverShootColorAction extends KActionSet {
         kickBall.setName("kickBall");
         kickBall.setDependentActions(revolverMoveToColorAction, waitAction1);
         this.addAction(kickBall);
+
+        WaitAction waitAction2 = new WaitAction(1);
+        waitAction2.setName("waitAction2");
+        this.addAction(waitAction2);
+        waitAction2.setDependentActions(kickBall);
     }
 }
