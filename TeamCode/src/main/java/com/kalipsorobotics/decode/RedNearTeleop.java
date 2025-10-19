@@ -91,7 +91,6 @@ public class RedNearTeleop extends KTeleOp {
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
-        allianceSetup = AllianceSetup.RED;
 
         // Create your modules
         driveTrain = DriveTrain.getInstance(opModeUtilities);
