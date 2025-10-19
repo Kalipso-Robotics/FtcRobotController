@@ -10,6 +10,7 @@ import com.kalipsorobotics.utilities.KGamePad;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 
 import java.security.PrivateKey;
 import java.util.PriorityQueue;
@@ -22,8 +23,6 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     private double rps = 0;
     private double hoodPosition = 0;
     private double distance = 0;
-    private boolean prevA = false;
-    private boolean prevB = false;
     private boolean isIncrementRps = true;
     @Override
     public void initialize() {
@@ -54,6 +53,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
              */
             shooter.getHood().setPosition(hoodPosition);
             shooter.goToRPS(rps);
+            distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
             }
