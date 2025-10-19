@@ -128,7 +128,7 @@ public class RedNearTeleop extends KTeleOp {
         //todo just fed in testing motif pattern change later
         testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
-//        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shootAction = new ShootAction(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
@@ -222,6 +222,9 @@ public class RedNearTeleop extends KTeleOp {
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
                     fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+                    setLastShooterAction(fullShootMotifAction);
+                    setLastRevolverAction(fullShootMotifAction);
+                    setLastKickerAction(fullShootMotifAction);
                 }
             }
 
@@ -236,6 +239,7 @@ public class RedNearTeleop extends KTeleOp {
                 if (intakeFullAction != null || intakeFullAction.getIsDone()) {
                     intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
                     setLastIntakeAction(intakeFullAction);
+                    setLastRevolverAction(intakeFullAction);
                 }
             } else if (intakeReversePressed) {
                 if (intakeReverse != null || intakeReverse.getIsDone()) {

@@ -1,6 +1,7 @@
 package com.kalipsorobotics.actions.revolverActions;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.shooter.KickBall;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.math.Point;
@@ -15,9 +16,14 @@ public class RevolverShootColorAction extends KActionSet {
         revolverMoveToColorAction.setName("revolverMoveToColorAction");
         this.addAction(revolverMoveToColorAction);
 
+        WaitAction waitAction1 = new WaitAction(300);
+        waitAction1.setName("waitAction");
+        this.addAction(waitAction1);
+        waitAction1.setDependentActions(revolverMoveToColorAction);
+
         KickBall kickBall = new KickBall(shooter);
         kickBall.setName("kickBall");
-        kickBall.setDependentActions(revolverMoveToColorAction);
+        kickBall.setDependentActions(revolverMoveToColorAction, waitAction1);
         this.addAction(kickBall);
     }
 }

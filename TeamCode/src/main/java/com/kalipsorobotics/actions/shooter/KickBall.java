@@ -20,7 +20,7 @@ public class KickBall extends KActionSet {
         KServoAutoAction kickLeft = new KServoAutoAction(shooter.getKickerLeft(), KICK_LEFT_POS);
         kickLeft.setName("kickLeft");
         this.addAction(kickLeft);
-        WaitAction waitAction = new WaitAction(500);
+        WaitAction waitAction = new WaitAction(100);
         waitAction.setName("waitAction");
         this.addAction(waitAction);
         KServoAutoAction staticRight = new KServoAutoAction(shooter.getKickerRight(), STATIC_RIGHT_POS);

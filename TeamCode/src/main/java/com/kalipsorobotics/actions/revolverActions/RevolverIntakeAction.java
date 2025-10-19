@@ -30,27 +30,31 @@ public class RevolverIntakeAction extends Action {
     @Override
     protected void update() {
 
-        if (revolverServo.isDone()) {
+        if (revolverServo.isDone() & hasStarted) {
             detectColorsAction.setIsDone(false);
             detectColorsAction.updateCheckDone();
         }
 
-        MotifColor[] motifColors = {detectColorsAction.getFrontColor(), detectColorsAction.getBrightColor(), detectColorsAction.getBLeftColor()};
-
         if (!hasStarted) {
             hasStarted = true;
+            detectColorsAction.setIsDone(false);
+            detectColorsAction.updateCheckDone();
         }
 
         if (detectColorsAction.isFull()) {
             KLog.d("teleoprevolver", "done revolver intake");
             isDone = true;
-        } else if (!(detectColorsAction.getFrontColor() == MotifColor.NONE)){
+        } else if (revolverServo.isDone() && !(detectColorsAction.getFrontColor() == MotifColor.NONE)){
+            MotifColor[] motifColors = {detectColorsAction.getFrontColor(), detectColorsAction.getBrightColor(), detectColorsAction.getBLeftColor()};
             int emptySlotSensorIndex = Arrays.asList(motifColors).indexOf(MotifColor.NONE); //todo make it find the closest one
+            KLog.d("teleoprevolver", "sensor list " + Arrays.asList(motifColors));
             int currentTrayIndex = revolver.getCurrentRevolverServoIndex();
-            KLog.d("teleoprevolver", "done revolver intake");
+            KLog.d("teleoprevolver", "empty sensor index " + emptySlotSensorIndex);
+            KLog.d("teleoprevolver", "current tray index " + currentTrayIndex);
 //            int indDiff = currentTrayIndex - emptySlotSensorIndex;
 
             int moveTo = (currentTrayIndex + emptySlotSensorIndex) % 3;
+            KLog.d("teleoprevolver", "move to " + moveTo);
 
             revolver.moveToIndex(moveTo);
         }

@@ -202,9 +202,19 @@ public class DetectColorsAction extends Action {
         if (getFrontColor()  == null || getBLeftColor() == null || getBrightColor() == null) {
             return false;
         }
-        return getFrontColor().isPurpleOrGreen() &&
+
+        KLog.d("teleoprevolver", "front color " + getFrontColor());
+        KLog.d("teleoprevolver", "bleft color " + getBLeftColor());
+        KLog.d("teleoprevolver", "bright color " + getBrightColor());
+
+        boolean isFull = getFrontColor().isPurpleOrGreen() &&
                 getBLeftColor().isPurpleOrGreen() &&
                 getBrightColor().isPurpleOrGreen();
+
+        KLog.d("teleoprevolver", "is full " + isFull);
+
+
+        return isFull;
     }
 
 
