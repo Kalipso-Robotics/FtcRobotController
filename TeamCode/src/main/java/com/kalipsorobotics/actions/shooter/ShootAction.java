@@ -17,6 +17,7 @@ public class ShootAction extends KActionSet {
         this.addAction(kickBall);
         kickBall.setDependentActions(shooterReady);
 
+
         KickBall kickBall2 = new KickBall(shooter);
         kickBall2.setName("kickBall2");
         this.addAction(kickBall2);

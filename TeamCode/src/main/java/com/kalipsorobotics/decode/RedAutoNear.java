@@ -142,7 +142,7 @@ public class RedAutoNear extends KTeleOp {
 //        FullShootMotifAction firstShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 //        firstShoot.setName("firstShoot");
 //        redAutoNear.addAction(firstShoot);
-//
+
         PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
         moveToDepotBalls.setName("moveToDepotBalls");
 //        moveToDepotBalls.setDependentActions(firstShoot);
@@ -162,62 +162,62 @@ public class RedAutoNear extends KTeleOp {
         moveToNearShoot.setDependentActions(moveToDepotBalls, first3Intake);
         moveToNearShoot.addPoint(0,0,0); // turret should align to goal not sure, also pos can be not 0,0 for faster
         redAutoNear.addAction(moveToNearShoot);
-//
-//        FullShootMotifAction secondShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
-//        secondShoot.setName("secondShoot");
-//        secondShoot.setDependentActions(moveToNearShoot);
-//        redAutoNear.addAction(secondShoot);
-//
-//        PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
-//        moveToFirstBalls.setName("moveToFirstBalls");
-//        moveToFirstBalls.setDependentActions(secondShoot);
-//        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90);
-//        redAutoNear.addAction(moveToFirstBalls);
-//
-//        IntakeCycle next6Intake = new IntakeCycle(driveTrain, intake, revolver, colorSensors, DEPOT_X, DEPOT_Y, 90);
-//        next6Intake.setName("next6Intake");
-//        next6Intake.setDependentActions(moveToFirstBalls);
-//        redAutoNear.addAction(next6Intake);
-//
-//        PurePursuitAction moveToNearShoot2 = new PurePursuitAction(driveTrain);
-//        moveToNearShoot2.setName("moveToNearShoot2");
-//        moveToNearShoot2.setDependentActions(next6Intake);
-//        moveToNearShoot2.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
-//        redAutoNear.addAction(moveToNearShoot2);
-//
-//        FullShootMotifAction thirdShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
-//        thirdShoot.setName("thirdShoot");
-//        thirdShoot.setDependentActions(moveToNearShoot2);
-//        redAutoNear.addAction(thirdShoot);
-//
-//        PurePursuitAction moveToSecondBalls = new PurePursuitAction(driveTrain);
-//        moveToSecondBalls.setName("moveToSecondBalls");
-//        moveToSecondBalls.setDependentActions(thirdShoot);
-//        moveToSecondBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90);
-//        redAutoNear.addAction(moveToSecondBalls);
-//
-//        IntakeCycle final12Intake = new IntakeCycle(driveTrain, intake, revolver, colorSensors, FIRST_BALL_X, FIRST_BALL_Y, 90);
-//        final12Intake.setName("final9Intake");
-//        final12Intake.setDependentActions(moveToSecondBalls);
-//        redAutoNear.addAction(final12Intake);
-//
-//        PurePursuitAction moveToNearShoot3 = new PurePursuitAction(driveTrain);
-//        moveToNearShoot3.setName("moveToNearShoot3");
-//        moveToNearShoot3.setDependentActions(final12Intake);
-//        moveToNearShoot3.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
-//        redAutoNear.addAction(moveToNearShoot3);
-//
-//        FullShootMotifAction fourthShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
-//        fourthShoot.setName("fourthShoot");
-//        fourthShoot.setDependentActions(moveToNearShoot3);
-//        redAutoNear.addAction(fourthShoot);
-//
-//        PurePursuitAction park = new PurePursuitAction(driveTrain);
-//        park.setName("park");
-//        park.setDependentActions(fourthShoot);
-//        park.addPoint(400, 400, 90);
-//        park.setMaxCheckDoneCounter(20);
-//        redAutoNear.addAction(park);
+
+        FullShootMotifAction secondShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+        secondShoot.setName("secondShoot");
+        secondShoot.setDependentActions(moveToNearShoot);
+        redAutoNear.addAction(secondShoot);
+
+        PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
+        moveToFirstBalls.setName("moveToFirstBalls");
+        moveToFirstBalls.setDependentActions(secondShoot);
+        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90);
+        redAutoNear.addAction(moveToFirstBalls);
+
+        IntakeFullAction next6Intake = new IntakeFullAction(intake, revolver, colorSensors);
+        next6Intake.setName("next6Intake");
+        //next6Intake.setDependentActions(secondShoot);
+        redAutoNear.addAction(next6Intake);
+
+        PurePursuitAction moveToNearShoot2 = new PurePursuitAction(driveTrain);
+        moveToNearShoot2.setName("moveToNearShoot2");
+        moveToNearShoot2.setDependentActions(next6Intake);
+        moveToNearShoot2.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
+        redAutoNear.addAction(moveToNearShoot2);
+
+        FullShootMotifAction thirdShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+        thirdShoot.setName("thirdShoot");
+        thirdShoot.setDependentActions(moveToNearShoot2);
+        redAutoNear.addAction(thirdShoot);
+
+        PurePursuitAction moveToSecondBalls = new PurePursuitAction(driveTrain);
+        moveToSecondBalls.setName("moveToSecondBalls");
+        moveToSecondBalls.setDependentActions(thirdShoot);
+        moveToSecondBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90);
+        redAutoNear.addAction(moveToSecondBalls);
+
+        IntakeFullAction final9Intake = new IntakeFullAction(intake, revolver, colorSensors);
+        final9Intake.setName("final9Intake");
+        //final9Intake.setDependentActions(thirdShoot);
+        redAutoNear.addAction(final9Intake);
+
+        PurePursuitAction moveToNearShoot3 = new PurePursuitAction(driveTrain);
+        moveToNearShoot3.setName("moveToNearShoot3");
+        moveToNearShoot3.setDependentActions(final9Intake);
+        moveToNearShoot3.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
+        redAutoNear.addAction(moveToNearShoot3);
+
+        FullShootMotifAction fourthShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+        fourthShoot.setName("fourthShoot");
+        fourthShoot.setDependentActions(moveToNearShoot3);
+        redAutoNear.addAction(fourthShoot);
+
+        PurePursuitAction park = new PurePursuitAction(driveTrain);
+        park.setName("park");
+        park.setDependentActions(fourthShoot);
+        park.addPoint(400, 400, 90);
+        park.setMaxCheckDoneCounter(20);
+        redAutoNear.addAction(park);
 
         waitForStart();
         while (opModeIsActive()) {
