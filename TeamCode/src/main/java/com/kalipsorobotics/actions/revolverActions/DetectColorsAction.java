@@ -199,10 +199,14 @@ public class DetectColorsAction extends Action {
     }
 
     public boolean isFull() {
+        if (getFrontColor()  == null || getBLeftColor() == null || getBrightColor() == null) {
+            return false;
+        }
         return getFrontColor().isPurpleOrGreen() &&
                 getBLeftColor().isPurpleOrGreen() &&
                 getBrightColor().isPurpleOrGreen();
     }
+
 
 
 }
