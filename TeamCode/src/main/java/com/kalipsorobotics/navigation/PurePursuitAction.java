@@ -33,7 +33,6 @@ public class PurePursuitAction extends Action {
 
     List<Position> pathPoints = new ArrayList<>();
 
-
     DriveTrain driveTrain;
 
     private final PidNav pidX;

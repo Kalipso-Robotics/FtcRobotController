@@ -24,9 +24,9 @@ public class TurretAutoAlign extends Action {
     private double xInitSetup;// = 3445.14;
     private double yInitSetup;// = 2028.8;
 
-    public static double RED_X_INIT_SETUP = 3445.14;
+    public static double RED_X_INIT_SETUP = 121 *25.4; //121 inches
 
-    public static double RED_Y_INIT_SETUP = 1800 - 193.68; //2028.8;
+    public static double RED_Y_INIT_SETUP = 46 * 25.4; //46inches
 
     private final double TICKS_PER_RADIAN = (ticksPerRotation * gearRatio) / radiansPerRotation;
     private final double TICKS_PER_DEGREE = (ticksPerRotation * gearRatio) / degreesPerRotation;
@@ -79,12 +79,13 @@ public class TurretAutoAlign extends Action {
         double currentY = currentPosition.getY();
 
 
-        double yTargetGoal = yInitSetup + currentY;
+        double yTargetGoal = yInitSetup - currentY;
         double xTargetGoal = xInitSetup - currentX;
+        KLog.d("turret_angle", "y init setup" + yInitSetup + "current y" + currentY);
 
         // Use atan2 for proper angle calculation in all quadrants
         double angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
-        KLog.d("turret angle", "target radian " + angleTargetRadian);
+        KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
 
         double currentRobotAngleRadian = currentPosition.getTheta();
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
@@ -99,7 +100,7 @@ public class TurretAutoAlign extends Action {
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
         double motorRotation = turretRotation * gearRatio;
         targetTicks = ticksPerRotation * motorRotation;
-        KLog.d("turret angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
+        KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
 
 
         /*
@@ -126,20 +127,22 @@ public class TurretAutoAlign extends Action {
 
          }*/
 
-        KLog.d("turret angle", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+        KLog.d("turret_position", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
-        turretMotor.setTargetPosition((int) targetTicks);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.7);
+
 
         if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
             isWithinRange = true;
             SharedData.setIsTurretWithinRange(isWithinRange);
+            turretMotor.setPower(0);
         } else {
             isWithinRange = false;
             SharedData.setIsTurretWithinRange(isWithinRange);
+            turretMotor.setTargetPosition((int) targetTicks);
+            turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            turretMotor.setPower(0.7);
         }
-        KLog.d("turret angle", "is the turret in range " + isWithinRange);
+        KLog.d("turret_in_range", "is the turret in range " + isWithinRange);
 
 
 

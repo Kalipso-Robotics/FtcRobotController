@@ -21,7 +21,7 @@ public class DetectColorsAction extends Action {
 
     public static final String CALIBRATION_FILENAME = "color_calibration.csv";
 
-    private OpModeUtilities opModeUtilities;
+    private final OpModeUtilities opModeUtilities;
     TripleColorSensor colorSensors;
     static HashMap<MotifColor, HSV> calibratedFront = null;
     static HashMap<MotifColor, HSV> calibratedBLeft = null;
@@ -197,4 +197,26 @@ public class DetectColorsAction extends Action {
 
         return Math.sqrt(wH * h * h + wS * s * s);
     }
+
+    public boolean isFull() {
+        if (getFrontColor()  == null || getBLeftColor() == null || getBrightColor() == null) {
+            return false;
+        }
+
+        KLog.d("teleoprevolver", "front color " + getFrontColor());
+        KLog.d("teleoprevolver", "bleft color " + getBLeftColor());
+        KLog.d("teleoprevolver", "bright color " + getBrightColor());
+
+        boolean isFull = getFrontColor().isPurpleOrGreen() &&
+                getBLeftColor().isPurpleOrGreen() &&
+                getBrightColor().isPurpleOrGreen();
+
+        KLog.d("teleoprevolver", "is full " + isFull);
+
+
+        return isFull;
+    }
+
+
+
 }

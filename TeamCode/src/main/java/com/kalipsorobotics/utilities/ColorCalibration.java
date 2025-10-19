@@ -108,6 +108,9 @@ public class ColorCalibration extends LinearOpMode {
             if (kPad.isLeftBumperFirstPressed()) {
                 // DETECTING COLORS TEST
                 HashMap<ColorSensorPosition, MotifColor> colors = detectColorsAction.getCalculatedColorValue();
+                telemetry.addData("RevColorTest", "Front Color: " + colors.get(ColorSensorPosition.FRONT));
+                telemetry.addData("RevColorTest", "BLeft Color: " +  colors.get(ColorSensorPosition.BLEFT));
+                telemetry.addData("RevColorTest", "BRight Color: " + colors.get(ColorSensorPosition.BRIGHT));
                 KLog.d("RevColorTest", "Front Color: " + colors.get(ColorSensorPosition.FRONT));
                 KLog.d("RevColorTest", "BLeft Color: " +  colors.get(ColorSensorPosition.BLEFT));
                 KLog.d("RevColorTest", "BRight Color: " + colors.get(ColorSensorPosition.BRIGHT));

@@ -36,6 +36,7 @@ public class Turret {
         turret.turretMotor = hardwareMap.dcMotor.get("turret");
         turret.turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        turret.turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public DcMotor getTurretMotor(){
