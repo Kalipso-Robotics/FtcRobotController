@@ -173,11 +173,15 @@ public class Shooter {
      * @param target target point to shoot at
      * @return target RPS for the shooter
      */
-    public double getTargetRPS(Position currentPosition, Point target) {
-        // Calculate distance between current position and target (ignoring theta)
+    public double getDistance(Position currentPosition, Point target) {
         double dx = target.getX() - currentPosition.getX();
         double dy = target.getY() - currentPosition.getY();
         double distance = Math.sqrt((dx * dx) + (dy * dy));
+        return distance;
+    }
+    public double getTargetRPS(Position currentPosition, Point target) {
+        // Calculate distance between current position and target (ignoring theta)
+        double distance = getDistance(currentPosition, target);
 
         ShooterLutPredictor.Prediction prediction = getPrediction(distance);
 
