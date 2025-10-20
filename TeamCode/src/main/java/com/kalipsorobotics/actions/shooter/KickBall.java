@@ -10,7 +10,7 @@ public class KickBall extends KActionSet {
     public static double KICK_RIGHT_POS = 0.53; //up to go down
     public static double KICK_LEFT_POS = 0.74; //down to go down
     public static double STATIC_RIGHT_POS = 0.86;
-    public static double STATIC_LEFT_POS = 0.4;
+    public static double STATIC_LEFT_POS = 0.41;
 
     public KickBall(Shooter shooter) {
 

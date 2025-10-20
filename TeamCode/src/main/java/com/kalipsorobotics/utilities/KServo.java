@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class KServo {
-    public final static double AXON_MAX_SPEED = 60/0.25;
+    public final static double AXON_MAX_SPEED = 60/0.3;
     private final double servoSpeed; // degrees per sec Axon Max 4.8V: 428.57 deg/sec
     private final Servo servo;
     private final double rangeDegrees;
@@ -72,7 +72,7 @@ public class KServo {
 
     public boolean isDone() {
         double deltaTime = (getTime() - startTime);
-        KLog.d("isDone", "time" + deltaTime);
+        KLog.d("isDone", "time " + deltaTime + " estimated " + estimatedFinishTime);
         if (deltaTime > estimatedFinishTime) {
             KLog.d("isDone", "done time " + deltaTime + ", port# " + getPortNumber());
             lastPosition = servo.getPosition();
