@@ -59,5 +59,16 @@ public class RevolverIntakeAction extends Action {
             revolver.moveToIndex(moveTo);
         }
 
+        /* todo test:
+            nothing in tray
+            1 in tray in 3
+            1 in tray in 2
+            1 in tray in 1
+            2 in tray in 3,2
+            2 in tray in 2,1
+            2 in tray in 3,1
+            3 in tray
+        */
+
     }
 }

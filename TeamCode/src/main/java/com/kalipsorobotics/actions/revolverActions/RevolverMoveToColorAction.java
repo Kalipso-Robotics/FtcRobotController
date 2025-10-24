@@ -36,6 +36,20 @@ public class RevolverMoveToColorAction extends Action {
 
                 int turnToIndex = Arrays.asList(transformedColorSet).indexOf(shootColor); //todo make it find the closest one | wait laing wouldnt all the positions always be one turn away
 
+                /* todo test:
+                    nothing in tray
+                    ppg
+                    gpp
+                    pgp
+                    ppp
+                    ggg
+                    pp
+                    gg
+                    pg
+                    p
+                    g
+                */
+
                 if (turnToIndex == -1) {
                     if (shootColor == MotifColor.PURPLE) {
                         turnToIndex = Arrays.asList(transformedColorSet).indexOf(MotifColor.GREEN);
