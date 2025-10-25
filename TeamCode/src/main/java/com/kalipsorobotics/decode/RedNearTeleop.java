@@ -85,6 +85,7 @@ public class RedNearTeleop extends KTeleOp {
     boolean shooterReadyRedMiddlePressed = false;
     boolean shooterReadyBlueMiddlePressed = false;
     private boolean shooterStopPressed = false;
+    boolean quickShootPressed = false;
 
     MotifCamera.MotifPattern testingMotif;
 
