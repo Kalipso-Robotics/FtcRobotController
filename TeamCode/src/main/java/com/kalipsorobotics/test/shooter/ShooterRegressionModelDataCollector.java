@@ -25,7 +25,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     private double distance = 0;
     private boolean isIncrementRps = true;
     @Override
-    public void initialize() {
+    public void initializeRobot() {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         kFileWriter = new KFileWriter("shooter_data", opModeUtilities);
         shooter = new Shooter(opModeUtilities);
@@ -35,8 +35,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
-        initialize();
+        initializeRobot();
         waitForStart();
         while (opModeIsActive()) {
             /*

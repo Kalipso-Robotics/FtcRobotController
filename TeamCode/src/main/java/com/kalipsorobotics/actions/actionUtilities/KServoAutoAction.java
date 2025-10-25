@@ -21,7 +21,6 @@ public class KServoAutoAction extends Action {
         if (isDone) {
             KLog.d("servo_action", "done for  " + targetPos + "currentTime  " + kServo.getTime() +
                     "port number  " + kServo.getPortNumber());
-
             return;
         }
 
