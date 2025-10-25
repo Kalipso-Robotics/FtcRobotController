@@ -129,5 +129,4 @@ public abstract class KTeleOp extends LinearOpMode {
         return !isGamePadDriveJoystickZero();
     }
 
-    public abstract void initialize();
 }

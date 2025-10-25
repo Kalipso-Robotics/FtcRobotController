@@ -18,7 +18,7 @@ public class Revolver {
     public Revolver(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
         Servo servo = opModeUtilities.getHardwareMap().servo.get("revolver");
-        this.revolverServo = new KServo(servo, KServo.AXON_MAX_SPEED, 242, 0, false);
+        this.revolverServo = new KServo(servo, 60.0/0.35, 242, 0, false);
     }
 
     public OpModeUtilities getOpModeUtilities() {

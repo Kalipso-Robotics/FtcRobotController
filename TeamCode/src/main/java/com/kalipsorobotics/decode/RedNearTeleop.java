@@ -136,6 +136,7 @@ public class RedNearTeleop extends KTeleOp {
         kickBall = new KickBall(shooter);
     }
 
+
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
