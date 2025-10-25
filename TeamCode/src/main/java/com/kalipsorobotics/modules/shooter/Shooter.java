@@ -19,7 +19,7 @@ public class Shooter {
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
     public static final Point RED_TARGET_FROM_NEAR = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
     public static final Point RED_TARGET_FROM_FAR = new Point(0, 0);//TODO
-    private static final double HOOD_ZERO_POS = 0.25;
+    public static final double HOOD_OFFSET = 0.25;
 
     private final OpModeUtilities opModeUtilities;
 
@@ -75,7 +75,7 @@ public class Shooter {
 
         ShooterLutPredictor temp = null;
         try {
-            temp = new ShooterLutPredictor(opModeUtilities.getHardwareMap().appContext, "ShooterLUT.bin");
+            temp = new ShooterLutPredictor(opModeUtilities.getHardwareMap().appContext, "CappedShooterLUT.bin");
         } catch (IOException e) {
             opModeUtilities.getTelemetry().addData("Error", "Failed to load Shooter LUT: " + e.getMessage());
         }
@@ -141,7 +141,7 @@ public class Shooter {
         // Note: This does NOT set motor power - use ShooterReady action for power ramping
         // This only sets the hood position
         KLog.d("Hood", "Hood Pos: " + prediction.hood);
-        hood.setPosition(HOOD_ZERO_POS + prediction.hood);
+        hood.setPosition(HOOD_OFFSET + prediction.hood);
     }
 
     public void stop() {

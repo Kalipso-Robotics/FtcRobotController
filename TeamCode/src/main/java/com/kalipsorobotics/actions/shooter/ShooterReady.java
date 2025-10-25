@@ -42,7 +42,7 @@ public class ShooterReady extends Action {
         }
 
         // Update hood position
-        shooter.getHood().setPosition(prediction.hood);
+        shooter.getHood().setPosition(prediction.hood + Shooter.HOOD_OFFSET);
 
         // Use KMotor's goToRPS for automatic PID control
         shooter.goToRPS(prediction.rps);

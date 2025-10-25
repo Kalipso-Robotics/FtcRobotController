@@ -14,18 +14,30 @@ import com.kalipsorobotics.math.Point;
  */
 public class ShooterLutPredictorTest {
 
-    private ShooterLutPredictor predictor;
+    private ShooterLutPredictor predictorCapped;
+    private ShooterLutPredictor predictorLUT2;
 
     @Before
     public void setUp() throws Exception {
-        // Use real ShooterLutPredictor with binary data file
-        String resourcePath = "ShooterLUT.bin";
-        java.io.InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath);
-        if (is == null) {
-            throw new RuntimeException("Could not find resource: " + resourcePath);
+        // Load CappedShooterLUT.bin
+        String assetsPath1 = "src/main/assets/CappedShooterLUT.bin";
+        java.io.File file1 = new java.io.File(assetsPath1);
+        if (!file1.exists()) {
+            throw new RuntimeException("Could not find asset file: " + file1.getAbsolutePath());
         }
-        predictor = new ShooterLutPredictor(is);
-        is.close();
+        java.io.InputStream is1 = new java.io.FileInputStream(file1);
+        predictorCapped = new ShooterLutPredictor(is1);
+        is1.close();
+
+        // Load ShooterLUT2.bin
+        String assetsPath2 = "src/main/assets/ShooterLUT2.bin";
+        java.io.File file2 = new java.io.File(assetsPath2);
+        if (!file2.exists()) {
+            throw new RuntimeException("Could not find asset file: " + file2.getAbsolutePath());
+        }
+        java.io.InputStream is2 = new java.io.FileInputStream(file2);
+        predictorLUT2 = new ShooterLutPredictor(is2);
+        is2.close();
     }
 
 //    @Test
@@ -75,6 +87,9 @@ public class ShooterLutPredictorTest {
         double[][] testPoints = {
             {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_NEAR.getX(), Shooter.RED_TARGET_FROM_NEAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_NEAR.getX()/2, Shooter.RED_TARGET_FROM_NEAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(2500), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(2800), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(3000), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(300), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(150), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(600), Shooter.GOAL_HEIGHT_PIXELS},
@@ -95,14 +110,15 @@ public class ShooterLutPredictorTest {
             {Shooter.mmToPixel(752), Shooter.GOAL_HEIGHT_PIXELS},
         };
 
+        // Table 1: CappedShooterLUT.bin Results
         System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                           ShooterLutPredictor Test Results                             ║");
+        System.out.println("║                    CappedShooterLUT.bin - Test Results                                 ║");
         System.out.println("╠════════════╦════════════╦═════════════╦═════════════╦═══════════════╦══════════════════╣");
         System.out.println("║  X Pixel   ║  Y Pixel   ║   X (mm)    ║   Y (mm)    ║      RPS      ║   Hood Position  ║");
         System.out.println("╠════════════╬════════════╬═════════════╬═════════════╬═══════════════╬══════════════════╣");
 
         for (double[] point : testPoints) {
-            ShooterLutPredictor.Prediction prediction = predictor.predict(point[0], point[1]);
+            ShooterLutPredictor.Prediction prediction = predictorCapped.predict(point[0], point[1]);
 
             System.out.printf("║ %10.1f ║ %10.1f ║ %11.1f ║ %11.1f ║ %13.2f ║ %16.4f ║%n",
                             point[0], point[1],
@@ -114,6 +130,52 @@ public class ShooterLutPredictorTest {
                        prediction.rps > 0);
             assertTrue("Hood should be within bounds for point (" + point[0] + ", " + point[1] + ")",
                        prediction.hood >= 0.23 && prediction.hood <= 0.8);
+        }
+
+        System.out.println("╚════════════╩════════════╩═════════════╩═════════════╩═══════════════╩══════════════════╝\n");
+
+        // Table 2: ShooterLUT2.bin Results
+        System.out.println("╔════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                      ShooterLUT2.bin - Test Results                                    ║");
+        System.out.println("╠════════════╦════════════╦═════════════╦═════════════╦═══════════════╦══════════════════╣");
+        System.out.println("║  X Pixel   ║  Y Pixel   ║   X (mm)    ║   Y (mm)    ║      RPS      ║   Hood Position  ║");
+        System.out.println("╠════════════╬════════════╬═════════════╬═════════════╬═══════════════╬══════════════════╣");
+
+        for (double[] point : testPoints) {
+            ShooterLutPredictor.Prediction prediction = predictorLUT2.predict(point[0], point[1]);
+
+            System.out.printf("║ %10.1f ║ %10.1f ║ %11.1f ║ %11.1f ║ %13.2f ║ %16.4f ║%n",
+                            point[0], point[1],
+                            Shooter.pixelToMM(point[0]), Shooter.pixelToMM(point[1]),
+                            prediction.rps, prediction.hood);
+
+            assertNotNull("Prediction should not be null", prediction);
+            assertTrue("RPS should be positive for point (" + point[0] + ", " + point[1] + ")",
+                       prediction.rps > 0);
+            assertTrue("Hood should be within bounds for point (" + point[0] + ", " + point[1] + ")",
+                       prediction.hood >= 0.23 && prediction.hood <= 0.8);
+        }
+
+        System.out.println("╚════════════╩════════════╩═════════════╩═════════════╩═══════════════╩══════════════════╝\n");
+
+        // Table 3: Difference Between LUTs
+        System.out.println("╔════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                         Difference (LUT2 - Capped)                                     ║");
+        System.out.println("╠════════════╦════════════╦═════════════╦═════════════╦═══════════════╦══════════════════╣");
+        System.out.println("║  X Pixel   ║  Y Pixel   ║   X (mm)    ║   Y (mm)    ║   Δ RPS       ║   Δ Hood         ║");
+        System.out.println("╠════════════╬════════════╬═════════════╬═════════════╬═══════════════╬══════════════════╣");
+
+        for (double[] point : testPoints) {
+            ShooterLutPredictor.Prediction predictionCapped = predictorCapped.predict(point[0], point[1]);
+            ShooterLutPredictor.Prediction predictionLUT2 = predictorLUT2.predict(point[0], point[1]);
+
+            double deltaRPS = predictionLUT2.rps - predictionCapped.rps;
+            double deltaHood = predictionLUT2.hood - predictionCapped.hood;
+
+            System.out.printf("║ %10.1f ║ %10.1f ║ %11.1f ║ %11.1f ║ %+13.2f ║ %+16.4f ║%n",
+                            point[0], point[1],
+                            Shooter.pixelToMM(point[0]), Shooter.pixelToMM(point[1]),
+                            deltaRPS, deltaHood);
         }
 
         System.out.println("╚════════════╩════════════╩═════════════╩═════════════╩═══════════════╩══════════════════╝\n");
