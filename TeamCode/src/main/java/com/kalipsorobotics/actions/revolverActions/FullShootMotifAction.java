@@ -25,34 +25,21 @@ public class FullShootMotifAction extends KActionSet {
         this.addAction(revolverShootColorAction1);
         revolverShootColorAction1.setDependentActions(shooterReady);
 
-        WaitAction waitAction1 = new WaitAction(300);
-        waitAction1.setName("waitAction");
-        this.addAction(waitAction1);
-        waitAction1.setDependentActions(revolverShootColorAction1);
 
         RevolverShootColorAction revolverShootColorAction2 = new RevolverShootColorAction(revolver, shooter, motifPattern.middle, detectColorsAction);
         revolverShootColorAction2.setName("revolverShootColorAction2");
-        revolverShootColorAction2.setDependentActions(revolverShootColorAction1, waitAction1);
+        revolverShootColorAction2.setDependentActions(revolverShootColorAction1);
         this.addAction(revolverShootColorAction2);
-
-        WaitAction waitAction2 = new WaitAction(300);
-        waitAction2.setName("waitAction");
-        this.addAction(waitAction2);
-        waitAction2.setDependentActions(revolverShootColorAction2);
 
         RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(revolver, shooter, motifPattern.last, detectColorsAction);
         revolverShootColorAction3.setName("revolverShootColorAction3");
-        revolverShootColorAction3.setDependentActions(revolverShootColorAction2, waitAction2);
+        revolverShootColorAction3.setDependentActions(revolverShootColorAction2);
         this.addAction(revolverShootColorAction3);
 
-        WaitAction waitAction3 = new WaitAction(300);
-        waitAction3.setName("waitAction");
-        this.addAction(waitAction3);
-        waitAction3.setDependentActions(revolverShootColorAction3);
 
         ShooterStop stop = new ShooterStop(shooter);
         stop.setName("stop");
-        stop.setDependentActions(revolverShootColorAction3, waitAction3);
+        stop.setDependentActions(revolverShootColorAction3);
         this.addAction(stop);
 
     }

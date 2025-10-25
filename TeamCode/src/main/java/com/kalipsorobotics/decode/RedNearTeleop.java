@@ -214,6 +214,7 @@ public class RedNearTeleop extends KTeleOp {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
                     shootAction = new ShootAction(shooter, ROBOT_START_POINT_RED, launchPosition);
                     setLastShooterAction(shootAction);
+                    setLastKickerAction(shootAction);
                 }
             }
 
