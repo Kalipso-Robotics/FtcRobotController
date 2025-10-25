@@ -18,12 +18,13 @@ public class QuickShootAction extends KActionSet {
 
         KServoAutoAction revolverTurn1 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_0);
         revolverTurn1.setName("revolverTurn1");
+        revolverTurn1.setDependentActions(shooterReady);
         this.addAction(revolverTurn1);
 
-        WaitAction waitAction1 = new WaitAction(200);
+        WaitAction waitAction1 = new WaitAction(50);
         waitAction1.setName("waitAction1");
-        this.addAction(waitAction1);
         waitAction1.setDependentActions(revolverTurn1);
+        this.addAction(waitAction1);
 
         KickBall kickBall = new KickBall(shooter);
         kickBall.setName("kickBall");
@@ -32,17 +33,18 @@ public class QuickShootAction extends KActionSet {
 
         WaitAction waitAction2 = new WaitAction(1);
         waitAction2.setName("waitAction2");
-        this.addAction(waitAction2);
         waitAction2.setDependentActions(kickBall);
+        this.addAction(waitAction2);
 
-        KServoAutoAction revolverTurn2 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_0);
+        KServoAutoAction revolverTurn2 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_1);
         revolverTurn2.setName("revolverTurn2");
+        revolverTurn2.setDependentActions(waitAction2);
         this.addAction(revolverTurn2);
 
-        WaitAction waitAction3 = new WaitAction(200);
+        WaitAction waitAction3 = new WaitAction(50);
         waitAction3.setName("waitAction3");
-        this.addAction(waitAction3);
         waitAction3.setDependentActions(revolverTurn2);
+        this.addAction(waitAction3);
 
         KickBall kickBall2 = new KickBall(shooter);
         kickBall2.setName("kickBall2");
@@ -54,11 +56,12 @@ public class QuickShootAction extends KActionSet {
         this.addAction(waitAction4);
         waitAction4.setDependentActions(kickBall2);
 
-        KServoAutoAction revolverTurn3 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_0);
+        KServoAutoAction revolverTurn3 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_2);
         revolverTurn3.setName("revolverTurn3");
         this.addAction(revolverTurn3);
+        revolverTurn3.setDependentActions(waitAction4);
 
-        WaitAction waitAction5 = new WaitAction(200);
+        WaitAction waitAction5 = new WaitAction(50);
         waitAction5.setName("waitAction5");
         this.addAction(waitAction5);
         waitAction5.setDependentActions(revolverTurn3);

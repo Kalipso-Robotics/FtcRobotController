@@ -9,6 +9,7 @@ import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
+import com.kalipsorobotics.actions.revolverActions.QuickShootAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.KickBall;
 import com.kalipsorobotics.actions.shooter.ShootAction;
@@ -68,6 +69,8 @@ public class RedNearTeleop extends KTeleOp {
     TurretAutoAlign turretAutoAlign = null;
 
     DetectColorsAction detectColorsAction = null;
+
+    QuickShootAction quickShootAction = null;
 
     double turretStickValue;
     boolean shootActionPressed = false;
@@ -135,6 +138,7 @@ public class RedNearTeleop extends KTeleOp {
         shootAction = new ShootAction(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
         kickBall = new KickBall(shooter);
+        quickShootAction = new QuickShootAction(revolver, shooter);
     }
 
 
@@ -171,6 +175,7 @@ public class RedNearTeleop extends KTeleOp {
             shooterReadyRedMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadRightFirstPressed();
             shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
             shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
+            quickShootPressed = kGamePad2.isStartButtonPressed();
 
             boolean isWarmup = true;
 
@@ -231,6 +236,15 @@ public class RedNearTeleop extends KTeleOp {
                 }
             }
 
+            if (quickShootPressed) {
+                if (quickShootAction != null || quickShootAction.getIsDone()) {
+                    quickShootAction = new QuickShootAction(revolver, shooter);
+                    setLastShooterAction(quickShootAction);
+                    setLastRevolverAction(quickShootAction);
+                    setLastKickerAction(quickShootAction);
+                }
+            }
+
             if (kickPressed) {
                 if (kickBall != null || kickBall.getIsDone()) {
                     kickBall = new KickBall(shooter);
@@ -272,10 +286,6 @@ public class RedNearTeleop extends KTeleOp {
                 }
                 setLastRevolverAction(revolverTeleOp);
             }
-
-
-
-
 
             turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
