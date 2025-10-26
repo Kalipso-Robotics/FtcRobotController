@@ -58,9 +58,10 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             }
             if (kGamePad1.isButtonBFirstPressed()) { //shoot
                 if (shootAction != null || shootAction.getIsDone()) {
-                    KLog.d("ShooterReadyPressed", "Shooter Ready set");
+                    KLog.d("Regression Module Data Collector", "Shooter Ready set");
                     shootAction = new ShootAction(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
                     setLastShooterAction(shootAction);
+                    KLog.d("Regression Module Data Collector", "ball shot");
                 }
             }
 
@@ -108,6 +109,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             }
             telemetry.addData("RPS: ", rps);
             telemetry.addData("Hood Position", hoodPosition);
+            telemetry.update();
         }
     }
 }
