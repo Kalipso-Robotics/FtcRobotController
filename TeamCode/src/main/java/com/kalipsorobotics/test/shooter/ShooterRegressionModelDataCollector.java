@@ -27,7 +27,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     @Override
     public void initializeRobot() {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
-        kFileWriter = new KFileWriter("shooter_data", opModeUtilities);
+        kFileWriter = new KFileWriter("shooter_data", opModeUtilities); //log destination
         shooter = new Shooter(opModeUtilities);
 
         kFileWriter.writeLine("distance, rps, hood position");
@@ -55,6 +55,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
+                KLog.d("Regression Module Data Collector", "data logged into file");
             }
             if (kGamePad1.isButtonBFirstPressed()) { //shoot
                 if (shootAction != null || shootAction.getIsDone()) {
