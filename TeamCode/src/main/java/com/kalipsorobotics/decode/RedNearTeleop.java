@@ -103,6 +103,7 @@ public class RedNearTeleop extends KTeleOp {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
+        Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
