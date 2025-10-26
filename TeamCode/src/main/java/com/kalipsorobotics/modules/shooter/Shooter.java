@@ -10,7 +10,6 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import java.io.IOException;
 
 public class Shooter {
     public static final double MM_TO_PIXEL_RATIO = 0.2608;
@@ -33,7 +32,7 @@ public class Shooter {
     private final KServo kickerLeft;
 
 
-    private final ShooterLutPredictor predictor;
+    private final IShooterPredictor predictor;
 
     public KServo getKickerRight() {
         return kickerRight;
@@ -73,13 +72,10 @@ public class Shooter {
 
 
 
-        ShooterLutPredictor temp = null;
-        try {
-            temp = new ShooterLutPredictor(opModeUtilities.getHardwareMap().appContext, "CappedShooterLUT.bin");
-        } catch (IOException e) {
-            opModeUtilities.getTelemetry().addData("Error", "Failed to load Shooter LUT: " + e.getMessage());
-        }
-        predictor = temp;
+        // Use manual tuned data lookup (no file loading needed)
+        // To swap implementations, change this line:
+        predictor = new ShooterInterpolationDataLookup();
+        // Alternative: predictor = new ShooterLutPredictorAdapter(opModeUtilities.getHardwareMap().appContext, "CappedShooterLUT.bin");
     }
 
     public double getHoodPosition() {
@@ -108,40 +104,29 @@ public class Shooter {
     }
 
     /**
-     * Calculate prediction based on millimeter coordinates
-     * @param xMM horizontal position in millimeters
-     * @return prediction containing RPS and hood position, or null if predictor not initialized
+     * Calculate shooter parameters based on distance to target
+     * @param distanceMM distance to target in millimeters
+     * @return shooter parameters containing RPS and hood position
      */
-    public ShooterLutPredictor.Prediction getPrediction(double xMM) {
-        if (predictor == null) {
-            opModeUtilities.getTelemetry().addData("Warning", "Predictor not initialized");
-            return null;
-        }
-
-        // Convert millimeters to pixels
-        double xPixels = mmToPixel(xMM);
-        double yPixels = mmToPixel(GOAL_HEIGHT_MM);
-
-        return predictor.predict(xPixels, yPixels);
+    public IShooterPredictor.ShooterParams getPrediction(double distanceMM) {
+        return predictor.predict(distanceMM);
     }
 
     /**
-     * Set hood position based on millimeter coordinates
-     * @param xMM horizontal position in millimeters
+     * Set hood position based on distance to target
+     * @param distanceMM distance to target in millimeters
      */
-    private void setCalculatedHood(double xMM) {
-        ShooterLutPredictor.Prediction prediction = getPrediction(xMM);
-        if (prediction == null) {
-            return;
-        }
+    private void setCalculatedHood(double distanceMM) {
+        IShooterPredictor.ShooterParams params = getPrediction(distanceMM);
 
         KLog.d("Hood", "Hood Pos: " + hood.getPosition());
-        KLog.d("Wheel", "Target RPS: " + prediction.rps + ", Current RPS: " + getRPS());
+        KLog.d("Wheel", "Target RPS: " + params.rps + ", Current RPS: " + getRPS());
 
         // Note: This does NOT set motor power - use ShooterReady action for power ramping
         // This only sets the hood position
-        KLog.d("Hood", "Hood Pos: " + prediction.hood);
-        hood.setPosition(HOOD_OFFSET + prediction.hood);
+        // Hood offset is already included in predictor implementations
+        KLog.d("Hood", "Hood Pos: " + params.hoodPosition);
+        hood.setPosition(params.hoodPosition);
     }
 
     public void stop() {
@@ -183,17 +168,13 @@ public class Shooter {
         // Calculate distance between current position and target (ignoring theta)
         double distance = getDistance(currentPosition, target);
 
-        ShooterLutPredictor.Prediction prediction = getPrediction(distance);
-
-        if (prediction == null) {
-            return 0;
-        }
+        IShooterPredictor.ShooterParams params = getPrediction(distance);
 
         KLog.d("TargetRPS", "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
               "), Target: (" + target.getX() + ", " + target.getY() +
-              "), Distance: " + distance + "mm, Predicted RPS: " + prediction.rps + ", Hood: " + prediction.hood);
+              "), Distance: " + distance + "mm, Predicted RPS: " + params.rps + ", Hood: " + params.hoodPosition);
 
-        return prediction.rps;
+        return params.rps;
     }
 
     /**

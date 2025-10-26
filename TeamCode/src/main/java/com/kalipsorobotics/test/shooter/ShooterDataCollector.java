@@ -2,16 +2,28 @@ package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.KickBall;
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.modules.DriveTrain;
+import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KTeleOp;
+import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "ShooterDataCollector", group = "Test")
 public class ShooterDataCollector extends KTeleOp {
 
+    DriveTrain driveTrain;
+
     private Shooter shooter;
     private Revolver revolver;
+    Turret turret = null;
+    TurretAutoAlign turretAutoAlign = null;
+
     private KickBall kickBall;
     private RevolverTeleOp revolverTeleOp;
 
@@ -22,8 +34,23 @@ public class ShooterDataCollector extends KTeleOp {
     protected void initializeRobot() {
         super.initializeRobot();
 
+        driveTrain = DriveTrain.getInstance(opModeUtilities);
+        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+
+        sleep(1000); // Optional: let hardware initialize
+
+        // Create odometry
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+
+        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+
         // Initialize shooter module
         shooter = new Shooter(opModeUtilities);
+
+        Turret.setInstanceNull();
+        turret = Turret.getInstance(opModeUtilities);
+        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
+
 
         // Initialize revolver module
         revolver = new Revolver(opModeUtilities);
@@ -128,6 +155,8 @@ public class ShooterDataCollector extends KTeleOp {
             telemetry.addData("Hood Position", String.format("%.3f", hoodPosition));
             telemetry.addData("Actual Hood Pos", String.format("%.3f", shooter.getHoodPosition()));
             telemetry.addLine();
+            telemetry.addLine("Distance: " + shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR));
+            telemetry.addLine();
             telemetry.addLine("Controls:");
             telemetry.addLine("GP1 DPad Up/Down: Adjust RPS");
             telemetry.addLine("GP1 DPad Left/Right: Revolver");
@@ -137,6 +166,7 @@ public class ShooterDataCollector extends KTeleOp {
             telemetry.update();
 
             // Update all actions
+            turretAutoAlign.updateCheckDone();
             updateActions();
         }
 

@@ -7,9 +7,9 @@ import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.shooter.IShooterPredictor;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.modules.shooter.ShooterLutPredictor;
 import com.kalipsorobotics.utilities.SharedData;
 
 public class ShooterReady extends Action {
@@ -34,27 +34,23 @@ public class ShooterReady extends Action {
             hasStarted = true;
         }
 
-        // Get prediction for target RPS and hood position
-        ShooterLutPredictor.Prediction prediction = getPrediction();
-        if (prediction == null) {
-            KLog.e("shooter_ready", "Failed to get prediction");
-            return;
-        }
+        // Get shooter parameters for target RPS and hood position
+        IShooterPredictor.ShooterParams params = getPrediction();
 
-        // Update hood position
-        shooter.getHood().setPosition(prediction.hood + Shooter.HOOD_OFFSET);
+        // Update hood position (offset already included in predictor)
+        shooter.getHood().setPosition(params.hoodPosition);
 
         // Use KMotor's goToRPS for automatic PID control
-        shooter.goToRPS(prediction.rps);
+        shooter.goToRPS(params.rps);
 
         // Get current RPS for logging and checking
 //        double currentRPS = shooter.getRPS();
-//        double error = prediction.rps - currentRPS;
+//        double error = params.rps - currentRPS;
 //
 //        // Log status
         KLog.d("shooter_ready", String.format(
             "Target: %.2f RPS, Hood: %.3f",
-            prediction.rps, prediction.hood
+            params.rps, params.hoodPosition
         ));
 
         // Check if we've reached target RPS
@@ -64,7 +60,7 @@ public class ShooterReady extends Action {
         }
     }
 
-    private ShooterLutPredictor.Prediction getPrediction() {
+    private IShooterPredictor.ShooterParams getPrediction() {
         double distanceMM;
 
         if (launchPosition == LaunchPosition.AUTO) {
@@ -79,9 +75,9 @@ public class ShooterReady extends Action {
             // Use the distance from the launch position enum
             distanceMM = launchPosition.getDistanceToTargetMM();
         }
-        ShooterLutPredictor.Prediction prediction = shooter.getPrediction(distanceMM);
-        KLog.d("shooter_ready", "Distance: " + distanceMM + " prediction: " + prediction);
-        // Get prediction from shooter using the distance
+        IShooterPredictor.ShooterParams params = shooter.getPrediction(distanceMM);
+        KLog.d("shooter_ready", "Distance: " + distanceMM + " params: " + params);
+        // Get shooter parameters from predictor using the distance
         return shooter.getPrediction(distanceMM);
     }
 }

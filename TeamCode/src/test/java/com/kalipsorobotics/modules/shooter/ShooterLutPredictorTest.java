@@ -14,8 +14,8 @@ import com.kalipsorobotics.math.Point;
  */
 public class ShooterLutPredictorTest {
 
-    private ShooterLutPredictor predictorCapped;
-    private ShooterLutPredictor predictorLUT2;
+    private ShooterLutPredictorInternal predictorCapped;
+    private ShooterLutPredictorInternal predictorLUT2;
 
     @Before
     public void setUp() throws Exception {
@@ -26,7 +26,7 @@ public class ShooterLutPredictorTest {
             throw new RuntimeException("Could not find asset file: " + file1.getAbsolutePath());
         }
         java.io.InputStream is1 = new java.io.FileInputStream(file1);
-        predictorCapped = new ShooterLutPredictor(is1);
+        predictorCapped = new ShooterLutPredictorInternal(is1);
         is1.close();
 
         // Load ShooterLUT2.bin
@@ -36,7 +36,7 @@ public class ShooterLutPredictorTest {
             throw new RuntimeException("Could not find asset file: " + file2.getAbsolutePath());
         }
         java.io.InputStream is2 = new java.io.FileInputStream(file2);
-        predictorLUT2 = new ShooterLutPredictor(is2);
+        predictorLUT2 = new ShooterLutPredictorInternal(is2);
         is2.close();
     }
 
@@ -118,7 +118,7 @@ public class ShooterLutPredictorTest {
         System.out.println("╠════════════╬════════════╬═════════════╬═════════════╬═══════════════╬══════════════════╣");
 
         for (double[] point : testPoints) {
-            ShooterLutPredictor.Prediction prediction = predictorCapped.predict(point[0], point[1]);
+            ShooterLutPredictorInternal.Prediction prediction = predictorCapped.predict(point[0], point[1]);
 
             System.out.printf("║ %10.1f ║ %10.1f ║ %11.1f ║ %11.1f ║ %13.2f ║ %16.4f ║%n",
                             point[0], point[1],
@@ -142,7 +142,7 @@ public class ShooterLutPredictorTest {
         System.out.println("╠════════════╬════════════╬═════════════╬═════════════╬═══════════════╬══════════════════╣");
 
         for (double[] point : testPoints) {
-            ShooterLutPredictor.Prediction prediction = predictorLUT2.predict(point[0], point[1]);
+            ShooterLutPredictorInternal.Prediction prediction = predictorLUT2.predict(point[0], point[1]);
 
             System.out.printf("║ %10.1f ║ %10.1f ║ %11.1f ║ %11.1f ║ %13.2f ║ %16.4f ║%n",
                             point[0], point[1],
@@ -166,8 +166,8 @@ public class ShooterLutPredictorTest {
         System.out.println("╠════════════╬════════════╬═════════════╬═════════════╬═══════════════╬══════════════════╣");
 
         for (double[] point : testPoints) {
-            ShooterLutPredictor.Prediction predictionCapped = predictorCapped.predict(point[0], point[1]);
-            ShooterLutPredictor.Prediction predictionLUT2 = predictorLUT2.predict(point[0], point[1]);
+            ShooterLutPredictorInternal.Prediction predictionCapped = predictorCapped.predict(point[0], point[1]);
+            ShooterLutPredictorInternal.Prediction predictionLUT2 = predictorLUT2.predict(point[0], point[1]);
 
             double deltaRPS = predictionLUT2.rps - predictionCapped.rps;
             double deltaHood = predictionLUT2.hood - predictionCapped.hood;
