@@ -25,7 +25,7 @@
 //        waitForStart();
 //        while(opModeIsActive()) {
 ////            KLog.d("revColor", "rev1" + ColorCalibrationDetection.detectColor("revColor1", revColor, opModeUtilities) + " " + KColor.printHSV(revColor) + " rev2 " + ColorCalibrationDetection.detectColor("revColor2", revColor2, opModeUtilities) + " " + KColor.printHSV(revColor2) + " rev3 " + ColorCalibrationDetection.detectColor("revColor3", revColor3, opModeUtilities) + " " +  KColor.printHSV(revColor3));
-//            KLog.d("revColor", "rev1" + " " + KColor.printHSV(revColor) + " rev2 " +  " " + KColor.printHSV(revColor2) + " rev3 " + " " +  KColor.printHSV(revColor3)); //blahblahblah blah2
+//            KLog.d("revColor", "rev1" + " " + KColor.printHSV(revColor) + " rev2 " +  " " + KColor.printHSV(revColor2) + " rev3 " + " " +  KColor.printHSV(revColor3)); //blahblahblah blah2 blah 3
 //            telemetry.addLine("revColor1: " + KColorDetection.detectColor("revColor1", revColor, opModeUtilities));
 ////            telemetry.addLine(KColor.printColor(revColor));
 //            telemetry.addLine(KColor.printHSV(revColor));
