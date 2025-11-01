@@ -1,5 +1,6 @@
 package com.kalipsorobotics.modules.shooter;
 
+import com.kalipsorobotics.utilities.KCRServo;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.Point;
@@ -7,6 +8,7 @@ import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -28,19 +30,19 @@ public class Shooter {
 
     private final KServo hood;
 
-    private final KServo kickerRight;
-    private final KServo kickerLeft;
-
+//    private final KCRServo pusherRight;
+//    private final KCRServo pusherLeft;
+//
 
     private final IShooterPredictor predictor;
 
-    public KServo getKickerRight() {
-        return kickerRight;
-    }
-
-    public KServo getKickerLeft() {
-        return kickerLeft;
-    }
+//    public KCRServo getPusherRight() {
+//        return pusherRight;
+//    }
+//
+//    public KCRServo getPusherLeft() {
+//        return pusherLeft;
+//    }
 
     public Shooter(OpModeUtilities opModeUtilities) {
 
@@ -58,17 +60,17 @@ public class Shooter {
         }
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
 
-        Servo kickerRight = opModeUtilities.getHardwareMap().servo.get("kicker1");
-        if (kickerRight == null) {
-            opModeUtilities.getTelemetry().addData("Error", "Kicker1 servo not found in hardware map");
-        }
-        this.kickerRight = new KServo(kickerRight, KServo.AXON_MAX_SPEED, 255, 0, false);
-
-        Servo kickerLeft = opModeUtilities.getHardwareMap().servo.get("kicker2");
-        if (kickerLeft == null) {
-            opModeUtilities.getTelemetry().addData("Error", "Kicker2 servo not found in hardware map");
-        }
-        this.kickerLeft = new KServo(kickerLeft, KServo.AXON_MAX_SPEED, 255, 0, false);
+//        CRServo kickerRight = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
+//        if (kickerRight == null) {
+//            opModeUtilities.getTelemetry().addData("Error", "Kicker1 servo not found in hardware map");
+//        }
+//        this.pusherRight = new KCRServo(kickerRight, false);
+//
+//        CRServo kickerLeft = opModeUtilities.getHardwareMap().crservo.get("pusherLeft");
+//        if (kickerLeft == null) {
+//            opModeUtilities.getTelemetry().addData("Error", "Kicker2 servo not found in hardware map");
+//        }
+//        this.pusherLeft = new KCRServo(kickerLeft, true);
 
 
 

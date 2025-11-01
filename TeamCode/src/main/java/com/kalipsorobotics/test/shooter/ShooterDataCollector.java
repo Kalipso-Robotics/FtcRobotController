@@ -1,11 +1,12 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
-import com.kalipsorobotics.actions.shooter.KickBall;
+import com.kalipsorobotics.actions.shooter.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.modules.Pusher;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
@@ -21,10 +22,11 @@ public class ShooterDataCollector extends KTeleOp {
 
     private Shooter shooter;
     private Revolver revolver;
+    private Pusher pusher;
     Turret turret = null;
     TurretAutoAlign turretAutoAlign = null;
 
-    private KickBall kickBall;
+    private PushBall pushBall;
     private RevolverTeleOp revolverTeleOp;
 
     private double targetRPS = 0.0;
@@ -46,7 +48,7 @@ public class ShooterDataCollector extends KTeleOp {
 
         // Initialize shooter module
         shooter = new Shooter(opModeUtilities);
-
+        pusher = new Pusher(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
@@ -138,9 +140,9 @@ public class ShooterDataCollector extends KTeleOp {
             // ========== Kick Ball with Gamepad1 Y ==========
             if (gamepad1.y) {
                 // Create a new KickBall action if one doesn't exist or has completed
-                if (kickBall == null || kickBall.getIsDone()) {
-                    kickBall = new KickBall(shooter);
-                    setLastKickerAction(kickBall);
+                if (pushBall == null || pushBall.getIsDone()) {
+                    pushBall = new PushBall(pusher);
+                    setLastKickerAction(pushBall);
                 }
             }
 

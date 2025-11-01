@@ -47,8 +47,8 @@ public class ShooterTest extends LinearOpMode {
 
         double power = 0;
 
-        Servo kickerRight = hardwareMap.servo.get("kicker1");
-        Servo kickerLeft = hardwareMap.servo.get("kicker2");
+        Servo kickerRight = hardwareMap.servo.get("pusherRight");
+        Servo kickerLeft = hardwareMap.servo.get("pusherLeft");
 //        kickerRight.setPosition(0.5);
 //        kickerLeft.setPosition(0.5);
         Shooter shooter = new Shooter(opModeUtilities);
