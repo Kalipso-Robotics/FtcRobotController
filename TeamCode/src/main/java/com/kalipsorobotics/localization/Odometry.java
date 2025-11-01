@@ -1,6 +1,9 @@
 package com.kalipsorobotics.localization;
 
 import android.os.SystemClock;
+
+import androidx.annotation.Nullable;
+
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.PositionHistory;
@@ -25,6 +28,7 @@ public class Odometry {
     //maybe double check BACK Distance
     static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
     private static Odometry single_instance = null;
+    final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
     OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
@@ -55,8 +59,9 @@ public class Odometry {
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = this.getBackEncoderMM();
 
+        this.wheelPositionHistory.setCurrentPosition(startPosMMRAD);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
-        ////KLog.d("purepursaction_debug_odo_wheel", "init jimmeh" + currentPosition.toString());
+
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
         currentImuHeading = prevImuHeading;
@@ -142,7 +147,20 @@ public class Odometry {
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
+    private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
+        double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
+        double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
+        double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
 
+        double arcTanDeltaTheta = Math.atan2(deltaLeftDistance - deltaRightDistance, TRACK_WIDTH_MM);
+
+        double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
+        double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * arcTanDeltaTheta);
+
+        Velocity velocity = new Velocity(deltaX, deltaY, arcTanDeltaTheta);
+
+        return velocity;
+    }
 
     private Velocity calculateRelativeDeltaWheelIMU(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
@@ -207,6 +225,16 @@ public class Odometry {
         return position;
     }
 
+    private void updateWheelPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double timeElapsedSeconds) {
+        Velocity wheelRelDelta = calculateRelativeDeltaWheel(rightDistanceMM, leftDistanceMM,
+                backDistanceMM, timeElapsedSeconds * 1000);
+        wheelRelDelta = linearToArcDelta(wheelRelDelta);
+        Position globalPosition = calculateGlobal(wheelRelDelta, wheelPositionHistory.getCurrentPosition());
+        wheelPositionHistory.setCurrentPosition(globalPosition);
+        wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds);
+        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
+    }
+
     private void updateWheelIMUPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
                                    double timeElapsedSeconds) {
         Velocity wheelIMURelDelta = calculateRelativeDeltaWheelIMU(rightDistanceMM, leftDistanceMM, backDistanceMM,
@@ -268,5 +296,4 @@ public class Odometry {
     public double getIMUHeading() {
         return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
     }
-
 }
