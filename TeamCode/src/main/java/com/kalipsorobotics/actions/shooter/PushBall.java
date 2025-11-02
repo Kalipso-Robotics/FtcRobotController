@@ -26,18 +26,18 @@ public class PushBall extends KActionSet {
         this.addAction(untilShootingDone);
 
         KLog.d("teleop", "shooting done.(based off intake)");
-        WaitAction wait = new WaitAction(500);
+        WaitAction wait = new WaitAction(1000);
         wait.setDependentActions(untilShootingDone);
         this.addAction(wait);
 
         KCRServoAutoAction stopPushRight = new KCRServoAutoAction(pusher.getKickerRight(), 0);
         stopPushRight.setName("stopPushRight");
-        stopPushRight.setDependentActions(wait);
+        stopPushRight.setDependentActions(wait, untilShootingDone);
         this.addAction(stopPushRight);
 
         KCRServoAutoAction stopPushLeft = new KCRServoAutoAction(pusher.getKickerLeft(), 0);
         stopPushLeft.setName("stopPushLeft");
-        stopPushLeft.setDependentActions(wait);
+        stopPushLeft.setDependentActions(wait, untilShootingDone);
         this.addAction(stopPushLeft);
 
         KLog.d("teleop", "pusher Stopped(based off intake)");
