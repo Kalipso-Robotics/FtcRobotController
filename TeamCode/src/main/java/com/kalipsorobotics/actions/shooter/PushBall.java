@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KCRServoAutoAction;
+import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Pusher;
@@ -25,15 +26,18 @@ public class PushBall extends KActionSet {
         this.addAction(untilShootingDone);
 
         KLog.d("teleop", "shooting done.(based off intake)");
+        WaitAction wait = new WaitAction(500);
+        wait.setDependentActions(untilShootingDone);
+        this.addAction(wait);
 
         KCRServoAutoAction stopPushRight = new KCRServoAutoAction(pusher.getKickerRight(), 0);
         stopPushRight.setName("stopPushRight");
-        stopPushRight.setDependentActions(untilShootingDone);
+        stopPushRight.setDependentActions(wait);
         this.addAction(stopPushRight);
 
         KCRServoAutoAction stopPushLeft = new KCRServoAutoAction(pusher.getKickerLeft(), 0);
         stopPushLeft.setName("stopPushLeft");
-        stopPushLeft.setDependentActions(untilShootingDone);
+        stopPushLeft.setDependentActions(wait);
         this.addAction(stopPushLeft);
 
         KLog.d("teleop", "pusher Stopped(based off intake)");
