@@ -3,6 +3,7 @@ package com.kalipsorobotics.test.shooter;
 import com.kalipsorobotics.actions.shooter.ShootAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.cameraVision.MotifCamera;
+import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Pusher;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
@@ -19,6 +20,7 @@ import java.util.PriorityQueue;
 public class ShooterRegressionModelDataCollector extends KTeleOp {
     KFileWriter kFileWriter = null;
     Shooter shooter = null;
+    Intake intake = null;
     Pusher pusher = null;
     ShootAction shootAction = null;
     OpModeUtilities opModeUtilities = null;
@@ -32,7 +34,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
         kFileWriter = new KFileWriter("shooter_data", opModeUtilities); //log destination
         shooter = new Shooter(opModeUtilities);
         pusher = new Pusher(opModeUtilities);
-
+        intake = new Intake(opModeUtilities);
         kFileWriter.writeLine("distance, rps, hood position");
     }
 
@@ -63,7 +65,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             if (kGamePad1.isButtonBFirstPressed()) { //shoot
                 if (shootAction != null || shootAction.getIsDone()) {
                     KLog.d("Regression Module Data Collector", "Shooter Ready set");
-                    shootAction = new ShootAction(pusher, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+                    shootAction = new ShootAction(pusher, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
                     setLastShooterAction(shootAction);
                     KLog.d("Regression Module Data Collector", "ball shot");
                 }

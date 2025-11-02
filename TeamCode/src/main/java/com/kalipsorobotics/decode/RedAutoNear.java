@@ -130,9 +130,9 @@ public class RedAutoNear extends KTeleOp {
 //        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
-        shootAction = new ShootAction(pusher, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+        shootAction = new ShootAction(pusher, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
-        pushBall = new PushBall(pusher);
+        pushBall = new PushBall(pusher, intake);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class RedAutoNear extends KTeleOp {
         moveToNearShoot.addPoint(0,0,0); // turret should align to goal not sure, also pos can be not 0,0 for faster
         redAutoNear.addAction(moveToNearShoot);
 
-        FullShootMotifAction secondShoot = new FullShootMotifAction(revolver, shooter, pusher, testingMotif, colorSensors, opModeUtilities);
+        FullShootMotifAction secondShoot = new FullShootMotifAction(revolver, shooter, pusher, intake, testingMotif, colorSensors, opModeUtilities);
         secondShoot.setName("secondShoot");
         secondShoot.setDependentActions(moveToNearShoot);
         redAutoNear.addAction(secondShoot);
@@ -186,7 +186,7 @@ public class RedAutoNear extends KTeleOp {
         moveToNearShoot2.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
         redAutoNear.addAction(moveToNearShoot2);
 
-        FullShootMotifAction thirdShoot = new FullShootMotifAction(revolver, shooter, pusher, testingMotif, colorSensors, opModeUtilities);
+        FullShootMotifAction thirdShoot = new FullShootMotifAction(revolver, shooter, pusher, intake, testingMotif, colorSensors, opModeUtilities);
         thirdShoot.setName("thirdShoot");
         thirdShoot.setDependentActions(moveToNearShoot2);
         redAutoNear.addAction(thirdShoot);
@@ -208,7 +208,7 @@ public class RedAutoNear extends KTeleOp {
         moveToNearShoot3.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
         redAutoNear.addAction(moveToNearShoot3);
 
-        FullShootMotifAction fourthShoot = new FullShootMotifAction(revolver, shooter, pusher, testingMotif, colorSensors, opModeUtilities);
+        FullShootMotifAction fourthShoot = new FullShootMotifAction(revolver, shooter, pusher, intake, testingMotif, colorSensors, opModeUtilities);
         fourthShoot.setName("fourthShoot");
         fourthShoot.setDependentActions(moveToNearShoot3);
         redAutoNear.addAction(fourthShoot);
