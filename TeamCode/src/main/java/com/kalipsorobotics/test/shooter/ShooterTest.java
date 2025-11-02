@@ -13,15 +13,15 @@ import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KGamePad;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@TeleOp(name = "Shooter", group = "Linear OpMode")
+@Disabled
 public class ShooterTest extends LinearOpMode {
 
     @Override

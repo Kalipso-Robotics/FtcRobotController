@@ -1,7 +1,6 @@
 package com.kalipsorobotics.utilities;
 
 import android.os.Process;
-import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.localization.Odometry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -54,7 +53,7 @@ public class OpModeUtilities {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
                 while (!Thread.currentThread().isInterrupted()) {
                     KLog.d("ExcecutorService", "running");
-                    odometry.update();
+                    odometry.updateAll();
                     KLog.d("ExcecutorService", "running after update");
 
                 }

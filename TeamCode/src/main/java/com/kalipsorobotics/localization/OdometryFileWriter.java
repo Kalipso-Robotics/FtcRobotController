@@ -62,6 +62,7 @@ public class OdometryFileWriter extends KFileWriter {
 
         }
         stringBuilder.append(action);
+        KLog.d("odometry_file_writer_line", stringBuilder.toString());
         super.writeLine(stringBuilder.toString());
     }
     public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap) {

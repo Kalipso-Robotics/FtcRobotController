@@ -8,13 +8,13 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Autonomous(name="pptest")
+@Disabled
 public class TestPurePursuit extends LinearOpMode {
 
     @Override

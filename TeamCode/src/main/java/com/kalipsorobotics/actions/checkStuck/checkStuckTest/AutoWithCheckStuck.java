@@ -12,7 +12,7 @@ import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.util.concurrent.ExecutorService;
@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
  * Simple autonomous using action-based structure like AutoBasketFunnelWithCheckStuck
  * Instead of KActionSet, uses individual PurePursuitAction instances with stuck detection
  */
-@Autonomous(name = "Auto with Check Stuck")
+@Disabled
 public class AutoWithCheckStuck extends LinearOpMode {
 
     private CheckStuckRobot checkStuckRobot;

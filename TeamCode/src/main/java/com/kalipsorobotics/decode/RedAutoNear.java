@@ -34,10 +34,10 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 
-@Autonomous(name="Red Auto Near")
+@Disabled
 public class RedAutoNear extends KTeleOp {
     KActionSet redAutoNear;
 

@@ -12,9 +12,9 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@TeleOp(name = "ShooterDataCollector", group = "Test")
+@Disabled
 public class ShooterDataCollector extends KTeleOp {
 
     DriveTrain driveTrain;

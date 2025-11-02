@@ -10,15 +10,15 @@ import com.kalipsorobotics.modules.ColorSensorPosition;
 import com.kalipsorobotics.modules.MotifColor;
 
 import com.kalipsorobotics.modules.TripleColorSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
-@TeleOp
+@Disabled
 public class ColorCalibration extends LinearOpMode {
     MotifColor currentColor;
     KGamePad kPad;

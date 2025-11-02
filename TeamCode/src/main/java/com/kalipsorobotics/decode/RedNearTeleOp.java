@@ -36,7 +36,7 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class RedNearTeleop extends KTeleOp {
+public class RedNearTeleOp extends KTeleOp {
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;

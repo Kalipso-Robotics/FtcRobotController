@@ -39,7 +39,6 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
         OdometryFileWriter odometryFileWriter = new OdometryFileWriter("OdometryTest", opModeUtilities);
 
-        KGamePad kGamePad = new KGamePad(gamepad1);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
@@ -47,7 +46,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         Position pos2 = SharedData.getOdometryPosition();
         double power = 0;
         boolean calibrationComplete = false;
-        String action = "";
+        String action;
         waitForStart();
         while (opModeIsActive()) {
 
@@ -56,14 +55,13 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 //                power += 0.001;
 //            }
 //            calibrationComplete = true;
-            KLog.d("minimumPower", "minimum power " + power);
-            driveTrain.setPower(power);
+//            KLog.d("minimumPower", "minimum power " + power);
+//            driveTrain.setPower(power);
 
-            if (kGamePad.isButtonAFirstPressed()) {
+            if (gamepad1.a) {
                 action = "Slamming";
-            }
-            if (kGamePad.isButtonAFirstPressed() && action.equals("Slamming")) {
-                action = "";
+            } else {
+                action = "normal";
             }
 
             odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap(), action);

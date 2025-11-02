@@ -8,9 +8,9 @@ import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@TeleOp
+@Disabled
 public class RevolverCalibration extends KTeleOp {
 
     private static final double POSITION_INCREMENT = 0.01;
