@@ -2,20 +2,24 @@ package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.Intake;
+import com.kalipsorobotics.modules.Pusher;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class ShootAction extends KActionSet {
 
-    public ShootAction(Shooter shooter, Point target, LaunchPosition launchPosition) {
+    public ShootAction(Pusher pusher, Intake intake, Shooter shooter, Point target, LaunchPosition launchPosition) {
         ShooterReady shooterReady = new ShooterReady(shooter, target, launchPosition);
         shooterReady.setName("ShooterReady");
         this.addAction(shooterReady);
 
-        KickBall kickBall1 = new KickBall(shooter);
-        kickBall1.setName("kickBall1");
-        this.addAction(kickBall1);
-        kickBall1.setDependentActions(shooterReady);
+        PushBall pushBall1 = new PushBall(pusher, intake);
+        pushBall1.setName("kickBall1");
+        this.addAction(pushBall1);
+        pushBall1.setDependentActions(shooterReady);
+
+
 //
 //
 //        KickBall kickBall2 = new KickBall(shooter);
@@ -31,7 +35,7 @@ public class ShootAction extends KActionSet {
         ShooterStop shooterStop = new ShooterStop(shooter);
         shooterStop.setName("shooterStop");
         this.addAction(shooterStop);
-        shooterStop.setDependentActions(kickBall1);
+        shooterStop.setDependentActions(pushBall1);
     }
 
 }
