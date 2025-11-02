@@ -74,7 +74,6 @@ public class RedNearTeleop extends KTeleOp {
 
     QuickShootAction quickShootAction = null;
 
-    IntakeRun runIntake = null;
 
     double turretStickValue;
     boolean shootActionPressed = false;
@@ -124,7 +123,6 @@ public class RedNearTeleop extends KTeleOp {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
-        intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
@@ -134,7 +132,6 @@ public class RedNearTeleop extends KTeleOp {
         turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
-        runIntake = new IntakeRun(intake);
         //todo just fed in testing motif pattern change later
         testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
@@ -258,32 +255,33 @@ public class RedNearTeleop extends KTeleOp {
                 }
             }
 
-//            if (intakePressed) {
-//                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
-//                    intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
-//                    KLog.d("teleop", "intakePower" + intake.getIntakeMotor().getPower());
-//                    setLastIntakeAction(intakeFullAction);
-//                    setLastRevolverAction(intakeFullAction);
-//                }
-//            } else if (intakeReversePressed) {
-//                if (intakeReverse != null || intakeReverse.getIsDone()) {
-//                    intakeReverse = new IntakeReverse(intake);
-//                    setLastIntakeAction(intakeReverse);
-//                }
-//            } else {
-//                intakeFullAction.setIsDone(true);
-//                if (intakeStop != null || intakeStop.getIsDone()) {
-//                    intakeStop = new IntakeStop(intake);
-//                    setLastIntakeAction(intakeStop);
-//                }
-//            }
-
             if (intakePressed) {
                 if (intakeFullAction != null || intakeFullAction.getIsDone()) {
-                    runIntake = new IntakeRun(intake);
-                    setLastIntakeAction(runIntake);
+                    intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
+                    KLog.d("teleop", "intakePower" + intake.getIntakeMotor().getPower());
+                    setLastIntakeAction(intakeFullAction);
+                    setLastRevolverAction(intakeFullAction);
+                }
+            } else if (intakeReversePressed) {
+                if (intakeReverse != null || intakeReverse.getIsDone()) {
+                    intakeReverse = new IntakeReverse(intake);
+                    setLastIntakeAction(intakeReverse);
+                }
+            } else {
+                intakeFullAction.setIsDone(true);
+                if (intakeStop != null || intakeStop.getIsDone()) {
+                    intakeStop = new IntakeStop(intake);
+                    setLastIntakeAction(intakeStop);
                 }
             }
+
+//            Intake Auto Behavior
+//            if (intakePressed) {
+//                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
+//                    runIntake = new IntakeRun(intake);
+//                    setLastIntakeAction(runIntake);
+//                }
+//            }
 
             if (revolverLeftPressed) {
                 KLog.d("teleop", "revolver pressed");
