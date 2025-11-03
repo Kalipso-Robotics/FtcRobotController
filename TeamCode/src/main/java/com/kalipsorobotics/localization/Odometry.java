@@ -105,7 +105,6 @@ public class Odometry {
     private static void resetHardware(DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
         SharedData.resetOdometryPosition();
         odometry.imuModule = imuModule;
-        //odometry.goBildaOdoModule = goBildaOdoModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
@@ -148,7 +147,8 @@ public class Odometry {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
-        double deltaTheta = MathFunctions.angleWrapDeg((deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM);
+        double deltaTheta = MathFunctions.angleWrapRad((deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM);
+
 
 
         double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
@@ -165,6 +165,22 @@ public class Odometry {
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
 
         double imuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
+
+//
+//        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
+//        double wheelDeltaTheta  = (deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM;
+//
+//        // ChatGPT recommendation: this limit should match your loop time; 20°/cycle is safe for FTC.
+//        double maxTurnPerStep = Math.toRadians(5);
+//
+//        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
+//            // ChatGPT recommendation: this is likely an IMU shock / 180° wrap → fall back to wheel
+//            imuDeltaTheta = wheelDeltaTheta;
+//        } else {
+//            // ChatGPT recommendation: IMU is usually better for heading, but we still keep 30% wheel
+//            // to improve continuity with the dead-wheel translation.
+//            imuDeltaTheta = rawImuDeltaTheta;
+//        }
 
         double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
         double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * imuDeltaTheta);
@@ -228,7 +244,7 @@ public class Odometry {
         wheelRelDelta = linearToArcDelta(wheelRelDelta);
         Position globalPosition = calculateGlobal(wheelRelDelta, wheelPositionHistory.getCurrentPosition());
         wheelPositionHistory.setCurrentPosition(globalPosition);
-        wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds);
+        wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds * 1000);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
     }
 

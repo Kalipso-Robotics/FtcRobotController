@@ -2,7 +2,7 @@ package com.kalipsorobotics.actions.revolverActions;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
-import com.kalipsorobotics.actions.shooter.PushBall;
+import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Pusher;
 import com.kalipsorobotics.modules.MotifColor;

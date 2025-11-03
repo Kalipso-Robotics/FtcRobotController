@@ -1,7 +1,7 @@
 //package com.kalipsorobotics.decode.calibrations;
 //
-//import static com.kalipsorobotics.actions.shooter.PushBall.STATIC_LEFT_POS;
-//import static com.kalipsorobotics.actions.shooter.PushBall.STATIC_RIGHT_POS;
+//import static com.kalipsorobotics.actions.shooter.pusher.PushBall.STATIC_LEFT_POS;
+//import static com.kalipsorobotics.actions.shooter.pusher.PushBall.STATIC_RIGHT_POS;
 //import static com.kalipsorobotics.modules.Revolver.REVOLVER_INDEX_0;
 //
 //import com.kalipsorobotics.modules.Revolver;
