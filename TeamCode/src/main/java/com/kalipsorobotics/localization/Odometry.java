@@ -170,14 +170,14 @@ public class Odometry {
 //        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
 //        double wheelDeltaTheta  = (deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM;
 //
-//        // ChatGPT recommendation: this limit should match your loop time; 20°/cycle is safe for FTC.
-//        double maxTurnPerStep = Math.toRadians(5);
+//        //this limit should match your loop time; 20°/cycle is safe for FTC.
+//        double maxTurnPerStep = Math.toRadians(10);
 //
 //        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
-//            // ChatGPT recommendation: this is likely an IMU shock / 180° wrap → fall back to wheel
+//            //this is likely an IMU shock / 180° wrap → fall back to wheel
 //            imuDeltaTheta = wheelDeltaTheta;
 //        } else {
-//            // ChatGPT recommendation: IMU is usually better for heading, but we still keep 30% wheel
+//            //IMU is usually better for heading, but we still keep 30% wheel
 //            // to improve continuity with the dead-wheel translation.
 //            imuDeltaTheta = rawImuDeltaTheta;
 //        }
@@ -288,7 +288,7 @@ public class Odometry {
         prevImuHeading = currentImuHeading;
         SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
-        KLog.d("updatepos", "updatepos done");
+        KLog.d("updatepos", "odometry pos " + SharedData.getOdometryPosition());
         return odometryPositionHistoryHashMap;
     }
 
