@@ -2,6 +2,7 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
@@ -75,6 +76,8 @@ public class RedFarTeleOp extends KTeleOp {
 
     QuickShootAction quickShootAction = null;
 
+    RunUntilStallAction runUntilStallAction = null;
+
 
     double turretStickValue;
     boolean shootActionPressed = false;
@@ -93,6 +96,7 @@ public class RedFarTeleOp extends KTeleOp {
     boolean shooterReadyBlueMiddlePressed = false;
     private boolean shooterStopPressed = false;
     boolean quickShootPressed = false;
+    boolean runUntilStalledPressed = false;
 
     MotifCamera.MotifPattern testingMotif;
 
@@ -143,6 +147,7 @@ public class RedFarTeleOp extends KTeleOp {
         shooterStop = new ShooterStop(shooter);
         pushBall = new PushBall(stopper, intake);
         quickShootAction = new QuickShootAction(revolver, shooter, stopper, intake);
+        runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3);
     }
 
 
@@ -168,7 +173,7 @@ public class RedFarTeleOp extends KTeleOp {
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
             fullShootPressed = kGamePad2.isButtonAFirstPressed();
-            revolverLeftPressed = kGamePad2.isButtonXFirstPressed();
+//            revolverLeftPressed = kGamePad2.isButtonXFirstPressed();
             revolverRightPressed = kGamePad2.isButtonBFirstPressed();
 
             shooterReadyNearPressed = kGamePad2.isDpadUpFirstPressed();
@@ -180,6 +185,7 @@ public class RedFarTeleOp extends KTeleOp {
             shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
             shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
             quickShootPressed = kGamePad2.isStartButtonPressed();
+            runUntilStalledPressed = kGamePad2.isButtonXFirstPressed();
 
             boolean isWarmup = true;
 
@@ -287,13 +293,18 @@ public class RedFarTeleOp extends KTeleOp {
 //                }
 //            }
 
-            if (revolverLeftPressed) {
+            if (runUntilStalledPressed) {
                 KLog.d("teleop", "revolver pressed");
-                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
-                    KLog.d("teleop", "revolverteleop reset");
-                    revolverTeleOp = new RevolverTeleOp(revolver, true);
+//                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
+//                    KLog.d("teleop", "revolverteleop reset");
+//                    revolverTeleOp = new RevolverTeleOp(revolver, true);
+//                }
+//
+                if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
+                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
                 }
-                setLastRevolverAction(revolverTeleOp);
+
+                setLastIntakeAction(runUntilStallAction);
             } else if (revolverRightPressed) {
                 KLog.d("teleop", "revolver pressed");
                 if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {

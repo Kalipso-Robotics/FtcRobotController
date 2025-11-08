@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.Intake;
@@ -20,6 +21,9 @@ public class ShootAllAction extends KActionSet {
         shooterReady.setName("ShooterReady");
         this.addAction(shooterReady);
 
+        WaitAction waitDuringWarmup = new WaitAction(1000);
+        this.addAction(waitDuringWarmup);
+
         KServoAutoAction stopperOpen = new KServoAutoAction(stopper.getStopper(), STOPPER_SERVO_OPEN_POS);
         stopperOpen.setName("stopperOpen");
         stopperOpen.setDependentActions(shooterReady);
@@ -27,7 +31,7 @@ public class ShootAllAction extends KActionSet {
 
         PushBall pushAllBalls = new PushBall(stopper, intake);
         pushAllBalls.setName("pushAllBalls");
-        pushAllBalls.setDependentActions(shooterReady, stopperOpen);
+        pushAllBalls.setDependentActions(waitDuringWarmup);
         this.addAction(pushAllBalls);
 
         ShooterStop shooterStop = new ShooterStop(shooter);
