@@ -1,10 +1,10 @@
 package com.kalipsorobotics.decode;
 
 import com.kalipsorobotics.cameraVision.AllianceSetup;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@TeleOp
-public class BlueTeleOpTemp extends RedNearTeleop {
+@Disabled
+public class BlueTeleOpTemp extends RedFarTeleOp {
 
     public BlueTeleOpTemp() {
         allianceSetup = AllianceSetup.BLUE;

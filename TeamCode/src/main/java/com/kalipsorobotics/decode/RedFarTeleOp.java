@@ -12,8 +12,8 @@ import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
 import com.kalipsorobotics.actions.revolverActions.QuickShootAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
-import com.kalipsorobotics.actions.shooter.KickBall;
-import com.kalipsorobotics.actions.shooter.ShootAction;
+import com.kalipsorobotics.actions.shooter.pusher.PushBall;
+import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -24,6 +24,7 @@ import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.MotifColor;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
@@ -36,8 +37,9 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
-public class RedNearTeleop extends KTeleOp {
+
+@TeleOp(name = "RedFarTeleop")
+public class RedFarTeleOp extends KTeleOp {
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
@@ -48,12 +50,13 @@ public class RedNearTeleop extends KTeleOp {
     Intake intake = null;
     ShooterReady shooterReady = null;
     ShooterStop shooterStop = null;
-    ShootAction shootAction = null;
+    ShootAllAction shootAction = null;
 
     LaunchPosition launchPosition = LaunchPosition.AUTO;
-    KickBall kickBall = null;
+    PushBall pushBall = null;
     Revolver revolver = null;
     Turret turret = null;
+    Stopper stopper = null;
 
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
@@ -71,13 +74,14 @@ public class RedNearTeleop extends KTeleOp {
 
     DetectColorsAction detectColorsAction = null;
 
-//    QuickShootAction quickShootAction = null;
+    QuickShootAction quickShootAction = null;
 
     GoalDetectionAction goalDetectionAction = null;
 
+
     double turretStickValue;
     boolean shootActionPressed = false;
-    boolean kickPressed = false;
+    boolean pushPressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
     boolean fullShootPressed = false;
@@ -91,7 +95,7 @@ public class RedNearTeleop extends KTeleOp {
     boolean shooterReadyRedMiddlePressed = false;
     boolean shooterReadyBlueMiddlePressed = false;
     private boolean shooterStopPressed = false;
-//    boolean quickShootPressed = false;
+    boolean quickShootPressed = false;
     boolean useAprilTagPressed = false;
     boolean useAprilTag = false;
     boolean useWebcamPressed = false;
@@ -110,6 +114,7 @@ public class RedNearTeleop extends KTeleOp {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
+        Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
@@ -120,15 +125,15 @@ public class RedNearTeleop extends KTeleOp {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
+        stopper = new Stopper(opModeUtilities);
         revolver.getRevolverServo().setPosition(Revolver.REVOLVER_INDEX_0);
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
-        intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
+        intakeFullAction = new IntakeFullAction(intake);
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
@@ -137,17 +142,16 @@ public class RedNearTeleop extends KTeleOp {
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
         goalDetectionAction = new GoalDetectionAction(opModeUtilities);
-
         //todo just fed in testing motif pattern change later
         testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
-        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, stopper, intake, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
-        shootAction = new ShootAction(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
-        kickBall = new KickBall(shooter);
-//        quickShootAction = new QuickShootAction(revolver, shooter);
+        pushBall = new PushBall(stopper, intake);
+        quickShootAction = new QuickShootAction(revolver, shooter, stopper, intake);
     }
 
 
@@ -169,7 +173,7 @@ public class RedNearTeleop extends KTeleOp {
 
             turretStickValue = kGamePad2.getRightStickX();
             shootActionPressed = kGamePad2.isLeftTriggerPressed();
-            kickPressed = kGamePad2.isButtonYFirstPressed();
+            pushPressed = kGamePad2.isButtonYFirstPressed();
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
             fullShootPressed = kGamePad2.isButtonAFirstPressed();
@@ -184,7 +188,7 @@ public class RedNearTeleop extends KTeleOp {
             shooterReadyRedMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadRightFirstPressed();
             shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
             shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
-//            quickShootPressed = kGamePad2.isStartButtonPressed();
+            quickShootPressed = kGamePad2.isStartButtonPressed();
             useAprilTagPressed = kGamePad2.isBackButtonPressed();
             useWebcamPressed = kGamePad2.isStartButtonPressed();
 
@@ -231,7 +235,7 @@ public class RedNearTeleop extends KTeleOp {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shootAction != null || shootAction.getIsDone()) {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shootAction = new ShootAction(shooter, ROBOT_START_POINT_RED, launchPosition);
+                    shootAction = new ShootAllAction(stopper, intake, shooter, ROBOT_START_POINT_RED, launchPosition);
                     setLastShooterAction(shootAction);
                     setLastKickerAction(shootAction);
                 }
@@ -240,34 +244,38 @@ public class RedNearTeleop extends KTeleOp {
 
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
-                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
+                    fullShootMotifAction = new FullShootMotifAction(revolver, shooter, stopper, intake, testingMotif, colorSensors, opModeUtilities);
                     setLastShooterAction(fullShootMotifAction);
                     setLastRevolverAction(fullShootMotifAction);
                     setLastKickerAction(fullShootMotifAction);
                 }
             }
 
-//            if (quickShootPressed) {
-//                if (quickShootAction != null || quickShootAction.getIsDone()) {
-//                    quickShootAction = new QuickShootAction(revolver, shooter);
-//                    setLastShooterAction(quickShootAction);
-//                    setLastRevolverAction(quickShootAction);
-//                    setLastKickerAction(quickShootAction);
-//                }
-//            }
+            if (quickShootPressed) {
+                if (quickShootAction != null || quickShootAction.getIsDone()) {
+                    quickShootAction = new QuickShootAction(revolver, shooter, stopper, intake);
+                    setLastShooterAction(quickShootAction);
+                    setLastRevolverAction(quickShootAction);
+                    setLastKickerAction(quickShootAction);
+                }
+            }
 
-            if (kickPressed) {
-                if (kickBall != null || kickBall.getIsDone()) {
-                    kickBall = new KickBall(shooter);
-                    setLastKickerAction(kickBall);
+            if (pushPressed) {
+                if (pushBall != null || pushBall.getIsDone()) {
+                    pushBall = new PushBall(stopper, intake);
+                    setLastKickerAction(pushBall);
                 }
             }
 
             if (intakePressed) {
                 if (intakeFullAction != null || intakeFullAction.getIsDone()) {
-                    intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
-                    setLastIntakeAction(intakeFullAction);
-                    setLastRevolverAction(intakeFullAction);
+//                    intakeFullAction = new IntakeFullAction(intake);
+//                    KLog.d("teleop", "intakePower" + intake.getIntakeMotor().getPower());
+//                    setLastIntakeAction(intakeFullAction);
+//                    setLastRevolverAction(intakeFullAction);
+                    intakeRun = new IntakeRun(intake);
+                    setLastIntakeAction(intakeRun);
+
                 }
             } else if (intakeReversePressed) {
                 if (intakeReverse != null || intakeReverse.getIsDone()) {
@@ -281,6 +289,14 @@ public class RedNearTeleop extends KTeleOp {
                     setLastIntakeAction(intakeStop);
                 }
             }
+
+//            Intake Auto Behavior
+//            if (intakePressed) {
+//                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
+//                    runIntake = new IntakeRun(intake);
+//                    setLastIntakeAction(runIntake);
+//                }
+//            }
 
             if (revolverLeftPressed) {
                 KLog.d("teleop", "revolver pressed");

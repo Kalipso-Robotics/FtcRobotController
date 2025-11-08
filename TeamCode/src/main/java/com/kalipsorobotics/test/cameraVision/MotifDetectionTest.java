@@ -7,10 +7,10 @@ import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.actions.cameraVision.MotifDetectionAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
+@Disabled
 public class MotifDetectionTest extends LinearOpMode {
     OpModeUtilities opModeUtilities;
     MotifDetectionAction kMotifDetection;

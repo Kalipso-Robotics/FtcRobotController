@@ -1,30 +1,33 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
-import com.kalipsorobotics.actions.shooter.KickBall;
+import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.modules.Intake;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@TeleOp(name = "ShooterDataCollector", group = "Test")
+@Disabled
 public class ShooterDataCollector extends KTeleOp {
 
     DriveTrain driveTrain;
 
     private Shooter shooter;
     private Revolver revolver;
+    private Stopper stopper;
     Turret turret = null;
     TurretAutoAlign turretAutoAlign = null;
-
-    private KickBall kickBall;
+    private Intake intake = null;
+    private PushBall pushBall;
     private RevolverTeleOp revolverTeleOp;
 
     private double targetRPS = 0.0;
@@ -46,7 +49,8 @@ public class ShooterDataCollector extends KTeleOp {
 
         // Initialize shooter module
         shooter = new Shooter(opModeUtilities);
-
+        stopper = new Stopper(opModeUtilities);
+        intake = new Intake(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
@@ -138,9 +142,9 @@ public class ShooterDataCollector extends KTeleOp {
             // ========== Kick Ball with Gamepad1 Y ==========
             if (gamepad1.y) {
                 // Create a new KickBall action if one doesn't exist or has completed
-                if (kickBall == null || kickBall.getIsDone()) {
-                    kickBall = new KickBall(shooter);
-                    setLastKickerAction(kickBall);
+                if (pushBall == null || pushBall.getIsDone()) {
+                    pushBall = new PushBall(stopper, intake);
+                    setLastKickerAction(pushBall);
                 }
             }
 

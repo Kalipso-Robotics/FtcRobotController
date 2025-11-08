@@ -3,10 +3,10 @@ package com.kalipsorobotics.test;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "KServo Timing Test", group = "Test")
+@Disabled
 public class KServoTimingTest extends LinearOpMode {
 
     private enum TestState {

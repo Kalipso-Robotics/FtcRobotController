@@ -1,5 +1,6 @@
 package com.kalipsorobotics.actions.intake;
 
+import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.revolverActions.RevolverIntakeAction;
 import com.kalipsorobotics.modules.Intake;
@@ -7,20 +8,20 @@ import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
 
 public class IntakeFullAction extends KActionSet {
-    public IntakeFullAction(Intake intake, Revolver revolver, TripleColorSensor colorSensors){
+    public IntakeFullAction(Intake intake){
 
         IntakeRun intakeRun = new IntakeRun(intake);
         intakeRun.setName("intakeRun");
         this.addAction(intakeRun);
 
-        RevolverIntakeAction revolverIntakeAction = new RevolverIntakeAction(revolver, colorSensors);
-        revolverIntakeAction.setName("revolverIntakeAction");
-        revolverIntakeAction.setDependentActions(intakeRun);
-        this.addAction(revolverIntakeAction);
+        RunUntilStallAction intakeAll = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
+        intakeAll.setName("intakeAll");
+        intakeAll.setDependentActions(intakeRun);
+        this.addAction(intakeAll);
 
         IntakeStop intakeStop = new IntakeStop(intake);
         intakeStop.setName("intakeStop");
-        intakeStop.setDependentActions(revolverIntakeAction);
+        intakeStop.setDependentActions(intakeAll);
         this.addAction(intakeStop);
 
     }

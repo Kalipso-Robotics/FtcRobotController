@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 /**
  * Utility class for DC motors with RPS control
  * Provides smart power ramping to achieve target RPS quickly
@@ -31,6 +33,8 @@ public class KMotor {
     private static final double DEFAULT_KP = 0.0007;
     private static final double DEFAULT_KI = 0.0001;
     private static final double DEFAULT_KD = 0.0005;
+
+
 
     private final ElapsedTime elapsedTime;
 

@@ -17,7 +17,7 @@ public class TurretAutoAlign extends Action {
     DcMotor turretMotor;
 
     private final double ticksPerRotation = 384.5;
-    private final double gearRatio = 299.0/111.0;
+    private final double gearRatio = 125.0/32.0;
     private final double degreesPerRotation = 360.0;
     private final double radiansPerRotation = 2 * Math.PI;
 
