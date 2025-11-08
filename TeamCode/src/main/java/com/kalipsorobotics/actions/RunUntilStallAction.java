@@ -49,7 +49,6 @@ public class RunUntilStallAction extends Action {
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0);
             isDone = true;
-            return;
         }
 
         double curVelocity = Math.abs(motor.getVelocity());
