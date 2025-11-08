@@ -35,7 +35,7 @@ public class PushBall extends KActionSet {
         wait.setDependentActions(untilShootingDone);
         this.addAction(wait);
 
-        KServoAutoAction block = new KServoAutoAction(pusher.getStopper(), 0.6);
+        KServoAutoAction block = new KServoAutoAction(pusher.getStopper(), 0.4);
         block.setName("block");
         this.addAction(block);
         block.setDependentActions(wait, untilShootingDone);
