@@ -2,6 +2,7 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
 import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
@@ -76,8 +77,9 @@ public class RedFarTeleOp extends KTeleOp {
 
     QuickShootAction quickShootAction = null;
 
-    RunUntilStallAction runUntilStallAction = null;
+    GoalDetectionAction goalDetectionAction = null;
 
+    RunUntilStallAction runUntilStallAction = null;
 
     double turretStickValue;
     boolean shootActionPressed = false;
@@ -96,6 +98,10 @@ public class RedFarTeleOp extends KTeleOp {
     boolean shooterReadyBlueMiddlePressed = false;
     private boolean shooterStopPressed = false;
     boolean quickShootPressed = false;
+    boolean useAprilTagPressed = false;
+    boolean useAprilTag = false;
+    boolean useWebcamPressed = false;
+    boolean useWebcam = false;
     boolean runUntilStalledPressed = false;
 
     MotifCamera.MotifPattern testingMotif;
@@ -130,13 +136,15 @@ public class RedFarTeleOp extends KTeleOp {
 
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake, 8);
+        intakeFullAction = new IntakeFullAction(intake);
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
         turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
+
+        goalDetectionAction = new GoalDetectionAction(opModeUtilities);
         //todo just fed in testing motif pattern change later
         testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
@@ -185,6 +193,9 @@ public class RedFarTeleOp extends KTeleOp {
             shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
             shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
             quickShootPressed = kGamePad2.isStartButtonPressed();
+            useAprilTagPressed = kGamePad2.isBackButtonPressed();
+            useWebcamPressed = kGamePad2.isStartButtonPressed();
+
             runUntilStalledPressed = kGamePad2.isButtonXFirstPressed();
 
             boolean isWarmup = true;
@@ -236,7 +247,6 @@ public class RedFarTeleOp extends KTeleOp {
             }
 
 
-
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
                     fullShootMotifAction = new FullShootMotifAction(revolver, shooter, stopper, intake, testingMotif, colorSensors, opModeUtilities);
@@ -263,39 +273,27 @@ public class RedFarTeleOp extends KTeleOp {
             }
 
             if (intakePressed) {
-//                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
-////                    intakeFullAction = new IntakeFullAction(intake);
-////                    KLog.d("teleop", "intakePower" + intake.getIntakeMotor().getPower());
-////                    setLastIntakeAction(intakeFullAction);
-////                    setLastRevolverAction(intakeFullAction);
-//                    intakeRun = new IntakeRun(intake);
-//                    setLastIntakeAction(intakeRun);
+                if (intakeFullAction != null || intakeFullAction.getIsDone()) {
+//                    intakeFullAction = new IntakeFullAction(intake);
+//                    KLog.d("teleop", "intakePower" + intake.getIntakeMotor().getPower());
+//                    setLastIntakeAction(intakeFullAction);
+//                    setLastRevolverAction(intakeFullAction);
+                    intakeRun = new IntakeRun(intake);
+                    setLastIntakeAction(intakeRun);
 
-//            }
-                if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
-                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
                 }
-                setLastIntakeAction(runUntilStallAction);
-
+            } else if (intakeReversePressed) {
+                if (intakeReverse != null || intakeReverse.getIsDone()) {
+                    intakeReverse = new IntakeReverse(intake);
+                    setLastIntakeAction(intakeReverse);
+                }
+            } else {
+                intakeFullAction.setIsDone(true);
+                if (intakeStop != null || intakeStop.getIsDone()) {
+                    intakeStop = new IntakeStop(intake);
+                    setLastIntakeAction(intakeStop);
+                }
             }
-//            } else if (intakeReversePressed) {
-//                if (intakeReverse != null || intakeReverse.getIsDone()) {
-//                    intakeReverse = new IntakeReverse(intake);
-//                    setLastIntakeAction(intakeReverse);
-//                }
-//            } else if (runUntilStalledPressed) {
-//                if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
-//                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
-//                }
-//
-//                setLastIntakeAction(runUntilStallAction);
-//            } else {
-//                intakeFullAction.setIsDone(true);
-//                if (intakeStop != null || intakeStop.getIsDone()) {
-//                    intakeStop = new IntakeStop(intake);
-//                    setLastIntakeAction(intakeStop);
-//                }
-//            }
 
 //            Intake Auto Behavior
 //            if (intakePressed) {
@@ -305,25 +303,47 @@ public class RedFarTeleOp extends KTeleOp {
 //                }
 //            }
 
-//            if (runUntilStalledPressed) {
-//                KLog.d("teleop", "revolver pressed");
-////                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
-////                    KLog.d("teleop", "revolverteleop reset");
-////                    revolverTeleOp = new RevolverTeleOp(revolver, true);
-////                }
-////
-//                if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
-//                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
+            if (runUntilStalledPressed) {
+                KLog.d("teleop", "revolver pressed");
+//                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
+//                    KLog.d("teleop", "revolverteleop reset");
+//                    revolverTeleOp = new RevolverTeleOp(revolver, true);
 //                }
 //
-//                setLastIntakeAction(runUntilStallAction);
-//            }
-//
+                if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
+                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
+                }
+
+                setLastIntakeAction(runUntilStallAction);
+            } else if (revolverRightPressed) {
+                KLog.d("teleop", "revolver pressed");
+                if (revolverTeleOp != null || revolverTeleOp.getIsDone()) {
+                    KLog.d("teleop", "revolverteleop reset");
+                    revolverTeleOp = new RevolverTeleOp(revolver, false);
+                }
+                setLastRevolverAction(revolverTeleOp);
+            }
+
+            if (useAprilTagPressed) {
+                useAprilTag = !useAprilTag;
+            }
+
+            turretAutoAlign.setUseAprilTag(useAprilTag);
+            shooterReady.setUseAprilTag(useAprilTag);
+
+            if (useWebcamPressed) {
+                useWebcam = !useWebcam;
+            }
+
+            goalDetectionAction.setUseWebcam(useWebcam);
+
+            goalDetectionAction.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
 
+        goalDetectionAction.getLimelight().close();
         cleanupRobot();
     }
 }
