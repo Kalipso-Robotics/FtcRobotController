@@ -15,20 +15,19 @@ import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@Disabled
+@TeleOp
 public class ShooterDataCollector extends KTeleOp {
 
     DriveTrain driveTrain;
 
     private Shooter shooter;
-    private Revolver revolver;
     private Stopper stopper;
     Turret turret = null;
     TurretAutoAlign turretAutoAlign = null;
     private Intake intake = null;
     private PushBall pushBall;
-    private RevolverTeleOp revolverTeleOp;
 
     private double targetRPS = 0.0;
     private double hoodPosition = 0.5;
@@ -54,11 +53,6 @@ public class ShooterDataCollector extends KTeleOp {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
-
-
-        // Initialize revolver module
-        revolver = new Revolver(opModeUtilities);
-        revolver.getRevolverServo().setPosition(Revolver.REVOLVER_INDEX_0);
 
         telemetry.addLine("ShooterDataCollector Initialized");
         telemetry.addLine("Controls:");
@@ -126,18 +120,6 @@ public class ShooterDataCollector extends KTeleOp {
             // Set hood position
             shooter.getHood().setPosition(hoodPosition);
 
-            // ========== Revolver Control with DPad Left/Right ==========
-            if (kGamePad1.isDpadLeftFirstPressed()) {
-                if (revolverTeleOp == null || revolverTeleOp.getIsDone()) {
-                    revolverTeleOp = new RevolverTeleOp(revolver, true);
-                    setLastRevolverAction(revolverTeleOp);
-                }
-            } else if (kGamePad1.isDpadRightFirstPressed()) {
-                if (revolverTeleOp == null || revolverTeleOp.getIsDone()) {
-                    revolverTeleOp = new RevolverTeleOp(revolver, false);
-                    setLastRevolverAction(revolverTeleOp);
-                }
-            }
 
             // ========== Kick Ball with Gamepad1 Y ==========
             if (gamepad1.y) {

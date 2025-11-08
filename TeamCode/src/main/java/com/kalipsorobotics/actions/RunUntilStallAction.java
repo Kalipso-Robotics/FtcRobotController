@@ -40,6 +40,7 @@ public class RunUntilStallAction extends Action {
     @Override
     public void update() {
         if (isDone) {
+            KLog.d("intake", "intake done");
             return;
         }
 
@@ -65,6 +66,9 @@ public class RunUntilStallAction extends Action {
         double currentDraw = motor.getCurrent(CurrentUnit.MILLIAMPS);
         double expectedVelocity = Math.abs(power) * MAX_VELOCITY_TICKS_PER_SEC;
         double stallVelocityThreshold = expectedVelocity * STALL_VELOCITY_PERCENTAGE;
+        KLog.d("intake", "curVelocity " + curVelocity);
+        KLog.d("intake", "curCurrentDraw " + currentDraw);
+
 
         if (Math.abs(motor.getPower()) > MIN_POWER_THRESHOLD
 
@@ -79,7 +83,7 @@ public class RunUntilStallAction extends Action {
 
         }
 
-        if (stallCount > 40) {
+        if (stallCount > 100) {
             KLog.d("intake", "identified stall " + stallCount);
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0);

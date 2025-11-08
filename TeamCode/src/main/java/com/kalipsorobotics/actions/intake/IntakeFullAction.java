@@ -8,13 +8,13 @@ import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
 
 public class IntakeFullAction extends KActionSet {
-    public IntakeFullAction(Intake intake){
+    public IntakeFullAction(Intake intake, int maxTimeout){
 
         IntakeRun intakeRun = new IntakeRun(intake);
         intakeRun.setName("intakeRun");
         this.addAction(intakeRun);
 
-        RunUntilStallAction intakeAll = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
+        RunUntilStallAction intakeAll = new RunUntilStallAction(intake.getIntakeMotor(), 1, maxTimeout);
         intakeAll.setName("intakeAll");
         intakeAll.setDependentActions(intakeRun);
         this.addAction(intakeAll);

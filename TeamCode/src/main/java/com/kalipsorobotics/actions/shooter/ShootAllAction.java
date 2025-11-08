@@ -24,11 +24,6 @@ public class ShootAllAction extends KActionSet {
         WaitAction waitDuringWarmup = new WaitAction(1000);
         this.addAction(waitDuringWarmup);
 
-        KServoAutoAction stopperOpen = new KServoAutoAction(stopper.getStopper(), STOPPER_SERVO_OPEN_POS);
-        stopperOpen.setName("stopperOpen");
-        stopperOpen.setDependentActions(shooterReady);
-        this.addAction(stopperOpen);
-
         PushBall pushAllBalls = new PushBall(stopper, intake);
         pushAllBalls.setName("pushAllBalls");
         pushAllBalls.setDependentActions(waitDuringWarmup);
@@ -38,11 +33,6 @@ public class ShootAllAction extends KActionSet {
         shooterStop.setName("shooterStop");
         shooterStop.setDependentActions(pushAllBalls);
         this.addAction(shooterStop);
-
-        KServoAutoAction stopperClose = new KServoAutoAction(stopper.getStopper(), STOPPER_SERVO_CLOSED_POS);
-        stopperClose.setName("stopperClose");
-        stopperClose.setDependentActions(shooterStop);
-        this.addAction(stopperClose);
 
     }
 }
