@@ -7,13 +7,13 @@ import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.Pusher;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class QuickShootAction extends KActionSet {
-    public QuickShootAction(Revolver revolver, Shooter shooter, Pusher pusher, Intake intake) {
+    public QuickShootAction(Revolver revolver, Shooter shooter, Stopper stopper, Intake intake) {
         ShooterReady shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
@@ -28,7 +28,7 @@ public class QuickShootAction extends KActionSet {
         waitAction1.setDependentActions(revolverTurn1);
         this.addAction(waitAction1);
 
-        PushBall pushBall = new PushBall(pusher, intake);
+        PushBall pushBall = new PushBall(stopper, intake);
         pushBall.setName("kickBall");
         pushBall.setDependentActions(revolverTurn1, waitAction1);
         this.addAction(pushBall);
@@ -48,7 +48,7 @@ public class QuickShootAction extends KActionSet {
         waitAction3.setDependentActions(revolverTurn2);
         this.addAction(waitAction3);
 
-        PushBall pushBall2 = new PushBall(pusher, intake);
+        PushBall pushBall2 = new PushBall(stopper, intake);
         pushBall2.setName("kickBall2");
         pushBall2.setDependentActions(revolverTurn2, waitAction3);
         this.addAction(pushBall2);
@@ -68,7 +68,7 @@ public class QuickShootAction extends KActionSet {
         this.addAction(waitAction5);
         waitAction5.setDependentActions(revolverTurn3);
 
-        PushBall pushBall3 = new PushBall(pusher, intake);
+        PushBall pushBall3 = new PushBall(stopper, intake);
         pushBall3.setName("kickBall3");
         pushBall3.setDependentActions(revolverTurn3, waitAction5);
         this.addAction(pushBall3);

@@ -7,7 +7,7 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.Pusher;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
@@ -23,7 +23,7 @@ public class ShooterDataCollector extends KTeleOp {
 
     private Shooter shooter;
     private Revolver revolver;
-    private Pusher pusher;
+    private Stopper stopper;
     Turret turret = null;
     TurretAutoAlign turretAutoAlign = null;
     private Intake intake = null;
@@ -49,7 +49,7 @@ public class ShooterDataCollector extends KTeleOp {
 
         // Initialize shooter module
         shooter = new Shooter(opModeUtilities);
-        pusher = new Pusher(opModeUtilities);
+        stopper = new Stopper(opModeUtilities);
         intake = new Intake(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
@@ -143,7 +143,7 @@ public class ShooterDataCollector extends KTeleOp {
             if (gamepad1.y) {
                 // Create a new KickBall action if one doesn't exist or has completed
                 if (pushBall == null || pushBall.getIsDone()) {
-                    pushBall = new PushBall(pusher, intake);
+                    pushBall = new PushBall(stopper, intake);
                     setLastKickerAction(pushBall);
                 }
             }

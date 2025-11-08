@@ -7,10 +7,9 @@ import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
-import com.kalipsorobotics.actions.revolverActions.FullShootMotifAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
-import com.kalipsorobotics.actions.shooter.ShootAction;
+import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -21,7 +20,7 @@ import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.Pusher;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.MotifColor;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
@@ -33,34 +32,38 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 
-@Disabled
-public class RedAutoNear extends KTeleOp {
+@Autonomous(name = "RedAutoFarZone")
+public class RedAutoFar extends KTeleOp {
     KActionSet redAutoNear;
 
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
-    final double DISTANCE_BETWEEN_BALLS = 609.6;
-    final double DISTANCE_TO_BALL_FROM_ORIGIN = 1066.8;
-    final double DEPOT_X = 10;
-    final double DEPOT_Y = 600;
+    final double DISTANCE_BETWEEN_BALLS = 630;
+    final double DISTANCE_TO_BALL_FROM_ORIGIN = 400;
+    final double SHOOT_FAR_X = 10;
+    final double SHOOT_FAR_Y = -20  * allianceSetup.getPolarity();
+    final double LEVER_X = 1574.8;
+    final double LEVER_Y = 1092  * allianceSetup.getPolarity();
+    final double DEPOT_X = 0;
+    final double DEPOT_Y = 630  * allianceSetup.getPolarity();
     final double FIRST_BALL_X = 304.8;
-    final double FIRST_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN;
+    final double FIRST_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN  * allianceSetup.getPolarity();
     final double SECOND_BALL_X = 304.8 + DISTANCE_BETWEEN_BALLS ;
-    final double SECOND_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN;
+    final double SECOND_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN  * allianceSetup.getPolarity();
     final double THIRD_BALL_X = 304.8 + DISTANCE_BETWEEN_BALLS*2;
-    final double THIRD_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN;
+    final double THIRD_BALL_Y = DISTANCE_TO_BALL_FROM_ORIGIN  * allianceSetup.getPolarity();
     private DriveTrain driveTrain;
     TripleColorSensor colorSensors = null;
     Shooter shooter = null;
     Intake intake = null;
-    Pusher pusher = null;
+    Stopper stopper = null;
     ShooterReady shooterReady = null;
     ShooterStop shooterStop = null;
-    ShootAction shootAction = null;
+    ShootAllAction shootAction = null;
 
     LaunchPosition launchPosition = LaunchPosition.AUTO;
     PushBall pushBall = null;
@@ -72,8 +75,6 @@ public class RedAutoNear extends KTeleOp {
     IntakeFullAction intakeFullAction = null;
 
     RevolverTeleOp revolverTeleOp = null;
-
-    FullShootMotifAction fullShootMotifAction = null;
 
     IntakeReverse intakeReverse = null;
 
@@ -107,16 +108,15 @@ public class RedAutoNear extends KTeleOp {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         revolver = new Revolver(opModeUtilities);
-        pusher = new Pusher(opModeUtilities);
+        stopper = new Stopper(opModeUtilities);
         revolver.getRevolverServo().setPosition(Revolver.REVOLVER_INDEX_0);
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake, revolver, colorSensors);
+        intakeFullAction = new IntakeFullAction(intake);
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
@@ -130,9 +130,9 @@ public class RedAutoNear extends KTeleOp {
 //        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
-        shootAction = new ShootAction(pusher, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
-        pushBall = new PushBall(pusher, intake);
+        pushBall = new PushBall(stopper, intake);
     }
 
     @Override
@@ -140,77 +140,88 @@ public class RedAutoNear extends KTeleOp {
         initializeRobot();
 
         // auto code here
-//        FullShootMotifAction firstShoot = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
-//        firstShoot.setName("firstShoot");
-//        redAutoNear.addAction(firstShoot);
+        ShootAllAction firstShoot = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+        firstShoot.setName("firstShoot");
+        redAutoNear.addAction(firstShoot);
 
-        PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
-        moveToDepotBalls.setName("moveToDepotBalls");
-//        moveToDepotBalls.setDependentActions(firstShoot);
-        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        moveToDepotBalls.addPoint(DEPOT_X + 200, (DEPOT_Y + 600) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        redAutoNear.addAction(moveToDepotBalls);
+        PurePursuitAction moveToLeverBalls = new PurePursuitAction(driveTrain);
+        moveToLeverBalls.setName("moveToLeverBalls");
+        moveToLeverBalls.setDependentActions(firstShoot);
+        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90 * allianceSetup.getPolarity());
+        // move to intake
+        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToLeverBalls);
 
-
-        IntakeFullAction first3Intake = new IntakeFullAction(intake, revolver, colorSensors);
+        IntakeFullAction first3Intake = new IntakeFullAction(intake);
         first3Intake.setName("first3Intake");
-        //first3Intake.setDependentActions(firstShoot);
+        first3Intake.setDependentActions(firstShoot);
         redAutoNear.addAction(first3Intake);
-//
 
-        PurePursuitAction moveToNearShoot = new PurePursuitAction(driveTrain);
-        moveToNearShoot.setName("moveToNearShoot");
-        moveToNearShoot.setDependentActions(moveToDepotBalls, first3Intake);
-        moveToNearShoot.addPoint(0,0,0); // turret should align to goal not sure, also pos can be not 0,0 for faster
-        redAutoNear.addAction(moveToNearShoot);
+        PurePursuitAction hitLever = new PurePursuitAction(driveTrain);
+        hitLever.setName("hitLever");
+        hitLever.setDependentActions(first3Intake);
+        hitLever.addPoint(LEVER_X, LEVER_Y, 90 * allianceSetup.getPolarity());
+        // move to intake
+        moveToLeverBalls.addPoint(LEVER_X, LEVER_Y + (220 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(hitLever);
 
-        FullShootMotifAction secondShoot = new FullShootMotifAction(revolver, shooter, pusher, intake, testingMotif, colorSensors, opModeUtilities);
+        PurePursuitAction moveToFarShoot = new PurePursuitAction(driveTrain);
+        moveToFarShoot.setName("moveToFarShoot");
+        moveToFarShoot.setDependentActions(hitLever);
+        moveToFarShoot.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToFarShoot);
+
+        ShootAllAction secondShoot = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         secondShoot.setName("secondShoot");
-        secondShoot.setDependentActions(moveToNearShoot);
+        secondShoot.setDependentActions(moveToFarShoot);
         redAutoNear.addAction(secondShoot);
 
         PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
-        moveToFirstBalls.setName("moveToFirstBalls");
+        moveToFirstBalls.setName("moveToFirstballs");
         moveToFirstBalls.setDependentActions(secondShoot);
-        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90);
+        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90 * allianceSetup.getPolarity());
+        // move to intake
+        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
         redAutoNear.addAction(moveToFirstBalls);
 
-        IntakeFullAction next6Intake = new IntakeFullAction(intake, revolver, colorSensors);
-        next6Intake.setName("next6Intake");
-        //next6Intake.setDependentActions(secondShoot);
-        redAutoNear.addAction(next6Intake);
+        IntakeFullAction second6Intake = new IntakeFullAction(intake);
+        second6Intake.setName("second6Intake");
+        second6Intake.setDependentActions(secondShoot);
+        redAutoNear.addAction(second6Intake);
 
-        PurePursuitAction moveToNearShoot2 = new PurePursuitAction(driveTrain);
-        moveToNearShoot2.setName("moveToNearShoot2");
-        moveToNearShoot2.setDependentActions(next6Intake);
-        moveToNearShoot2.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
-        redAutoNear.addAction(moveToNearShoot2);
+        PurePursuitAction moveToFarShoot2 = new PurePursuitAction(driveTrain);
+        moveToFarShoot2.setName("moveToFarShoot2");
+        moveToFarShoot2.setDependentActions(second6Intake);
+        moveToFarShoot2.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToFarShoot2);
 
-        FullShootMotifAction thirdShoot = new FullShootMotifAction(revolver, shooter, pusher, intake, testingMotif, colorSensors, opModeUtilities);
+        ShootAllAction thirdShoot = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         thirdShoot.setName("thirdShoot");
-        thirdShoot.setDependentActions(moveToNearShoot2);
+        thirdShoot.setDependentActions(moveToFarShoot2);
         redAutoNear.addAction(thirdShoot);
 
-        PurePursuitAction moveToSecondBalls = new PurePursuitAction(driveTrain);
-        moveToSecondBalls.setName("moveToSecondBalls");
-        moveToSecondBalls.setDependentActions(thirdShoot);
-        moveToSecondBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90);
-        redAutoNear.addAction(moveToSecondBalls);
+        PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
+        moveToDepotBalls.setName("moveToDepotBalls");
+        moveToDepotBalls.setDependentActions(thirdShoot);
+        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 90 * allianceSetup.getPolarity());
+        // move to intake
+        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToDepotBalls);
 
-        IntakeFullAction final9Intake = new IntakeFullAction(intake, revolver, colorSensors);
-        final9Intake.setName("final9Intake");
-        //final9Intake.setDependentActions(thirdShoot);
-        redAutoNear.addAction(final9Intake);
+        IntakeFullAction third9Intake = new IntakeFullAction(intake);
+        third9Intake.setName("third9Intake");
+        third9Intake.setDependentActions(thirdShoot);
+        redAutoNear.addAction(third9Intake);
 
-        PurePursuitAction moveToNearShoot3 = new PurePursuitAction(driveTrain);
-        moveToNearShoot3.setName("moveToNearShoot3");
-        moveToNearShoot3.setDependentActions(final9Intake);
-        moveToNearShoot3.addPoint(0,0,-15); // turret should align to goal not sure, also pos can be not 0,0 for faster
-        redAutoNear.addAction(moveToNearShoot3);
+        PurePursuitAction moveToFarShoot3 = new PurePursuitAction(driveTrain);
+        moveToFarShoot3.setName("moveToFarShoot3");
+        moveToFarShoot3.setDependentActions(third9Intake);
+        moveToFarShoot3.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToFarShoot3);
 
-        FullShootMotifAction fourthShoot = new FullShootMotifAction(revolver, shooter, pusher, intake, testingMotif, colorSensors, opModeUtilities);
+        ShootAllAction fourthShoot = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         fourthShoot.setName("fourthShoot");
-        fourthShoot.setDependentActions(moveToNearShoot3);
+        fourthShoot.setDependentActions(moveToFarShoot3);
         redAutoNear.addAction(fourthShoot);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);

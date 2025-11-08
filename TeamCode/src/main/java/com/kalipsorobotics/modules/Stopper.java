@@ -3,10 +3,9 @@ package com.kalipsorobotics.modules;
 import com.kalipsorobotics.utilities.KCRServo;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class Pusher {
+public class Stopper {
 
     private final OpModeUtilities opModeUtilities;
 
@@ -15,7 +14,7 @@ public class Pusher {
 
     private KServo stopper;
 
-    public Pusher(OpModeUtilities opModeUtilities) {
+    public Stopper(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 //        CRServo kickerRightHW = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        CRServo kickerLeftHW = opModeUtilities.getHardwareMap().crservo.get("pusherLeft");
