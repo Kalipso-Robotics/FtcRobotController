@@ -12,7 +12,7 @@ import com.kalipsorobotics.utilities.KLog;
 public class PushBall extends KActionSet {
 
     public PushBall(Pusher pusher, Intake intake) {
-        KServoAutoAction release = new KServoAutoAction(pusher.getStopper(), 1);
+        KServoAutoAction release = new KServoAutoAction(pusher.getStopper(), 0.7);
         release.setName("release");
         this.addAction(release);
 
@@ -35,7 +35,7 @@ public class PushBall extends KActionSet {
         wait.setDependentActions(untilShootingDone);
         this.addAction(wait);
 
-        KServoAutoAction block = new KServoAutoAction(pusher.getStopper(), 0.4);
+        KServoAutoAction block = new KServoAutoAction(pusher.getStopper(), 0.55);
         block.setName("block");
         this.addAction(block);
         block.setDependentActions(wait, untilShootingDone);
