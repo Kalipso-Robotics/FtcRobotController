@@ -2,7 +2,7 @@ package com.kalipsorobotics.decode.calibrations;
 
 import static com.kalipsorobotics.modules.Revolver.REVOLVER_INDEX_0;
 
-import com.kalipsorobotics.modules.Pusher;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KLog;
@@ -14,14 +14,14 @@ public class RevolverCalibration extends KTeleOp {
 
     private static final double POSITION_INCREMENT = 0.01;
 
-    Pusher pusher = null;
+    Stopper pusher = null;
 
 
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
 
-        pusher = new Pusher(opModeUtilities);
+        pusher = new Stopper(opModeUtilities);
     }
 
 

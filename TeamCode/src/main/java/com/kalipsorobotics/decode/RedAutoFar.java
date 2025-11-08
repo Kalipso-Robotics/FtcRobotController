@@ -43,7 +43,7 @@ public class RedAutoFar extends KTeleOp {
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
     final double DISTANCE_BETWEEN_BALLS = 630;
-    final double DISTANCE_TO_BALL_FROM_ORIGIN = 400;
+    final double DISTANCE_TO_BALL_FROM_ORIGIN = 350;
     final double SHOOT_FAR_X = 10;
     final double SHOOT_FAR_Y = -20  * allianceSetup.getPolarity();
     final double LEVER_X = 1574.8;
@@ -144,30 +144,22 @@ public class RedAutoFar extends KTeleOp {
         firstShoot.setName("firstShoot");
         redAutoNear.addAction(firstShoot);
 
-        PurePursuitAction moveToLeverBalls = new PurePursuitAction(driveTrain);
-        moveToLeverBalls.setName("moveToLeverBalls");
-        moveToLeverBalls.setDependentActions(firstShoot);
-        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90 * allianceSetup.getPolarity());
+        PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
+        moveToDepotBalls.setName("moveToDepotBalls");
+        moveToDepotBalls.setDependentActions(firstShoot);
+        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 90 * allianceSetup.getPolarity());
         // move to intake
-        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
-        redAutoNear.addAction(moveToLeverBalls);
+        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToDepotBalls);
 
         IntakeFullAction first3Intake = new IntakeFullAction(intake);
         first3Intake.setName("first3Intake");
         first3Intake.setDependentActions(firstShoot);
         redAutoNear.addAction(first3Intake);
 
-        PurePursuitAction hitLever = new PurePursuitAction(driveTrain);
-        hitLever.setName("hitLever");
-        hitLever.setDependentActions(first3Intake);
-        hitLever.addPoint(LEVER_X, LEVER_Y, 90 * allianceSetup.getPolarity());
-        // move to intake
-        moveToLeverBalls.addPoint(LEVER_X, LEVER_Y + (220 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
-        redAutoNear.addAction(hitLever);
-
         PurePursuitAction moveToFarShoot = new PurePursuitAction(driveTrain);
         moveToFarShoot.setName("moveToFarShoot");
-        moveToFarShoot.setDependentActions(hitLever);
+        moveToFarShoot.setDependentActions(first3Intake);
         moveToFarShoot.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
         redAutoNear.addAction(moveToFarShoot);
 
@@ -176,22 +168,30 @@ public class RedAutoFar extends KTeleOp {
         secondShoot.setDependentActions(moveToFarShoot);
         redAutoNear.addAction(secondShoot);
 
-        PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
-        moveToFirstBalls.setName("moveToFirstballs");
-        moveToFirstBalls.setDependentActions(secondShoot);
-        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90 * allianceSetup.getPolarity());
+        PurePursuitAction moveToLeverBalls = new PurePursuitAction(driveTrain);
+        moveToLeverBalls.setName("moveToLeverBalls");
+        moveToLeverBalls.setDependentActions(secondShoot);
+        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90 * allianceSetup.getPolarity());
         // move to intake
-        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
-        redAutoNear.addAction(moveToFirstBalls);
+        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToLeverBalls);
 
         IntakeFullAction second6Intake = new IntakeFullAction(intake);
         second6Intake.setName("second6Intake");
         second6Intake.setDependentActions(secondShoot);
         redAutoNear.addAction(second6Intake);
 
+        PurePursuitAction hitLever = new PurePursuitAction(driveTrain);
+        hitLever.setName("hitLever");
+        hitLever.setDependentActions(second6Intake);
+        hitLever.addPoint(LEVER_X, LEVER_Y, 90 * allianceSetup.getPolarity());
+        // move to intake
+        moveToLeverBalls.addPoint(LEVER_X, LEVER_Y + (220 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(hitLever);
+
         PurePursuitAction moveToFarShoot2 = new PurePursuitAction(driveTrain);
         moveToFarShoot2.setName("moveToFarShoot2");
-        moveToFarShoot2.setDependentActions(second6Intake);
+        moveToFarShoot2.setDependentActions(first3Intake);
         moveToFarShoot2.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
         redAutoNear.addAction(moveToFarShoot2);
 
@@ -200,13 +200,13 @@ public class RedAutoFar extends KTeleOp {
         thirdShoot.setDependentActions(moveToFarShoot2);
         redAutoNear.addAction(thirdShoot);
 
-        PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
-        moveToDepotBalls.setName("moveToDepotBalls");
-        moveToDepotBalls.setDependentActions(thirdShoot);
-        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 90 * allianceSetup.getPolarity());
+        PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
+        moveToFirstBalls.setName("moveToFirstballs");
+        moveToFirstBalls.setDependentActions(thirdShoot);
+        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90 * allianceSetup.getPolarity());
         // move to intake
-        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
-        redAutoNear.addAction(moveToDepotBalls);
+        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToFirstBalls);
 
         IntakeFullAction third9Intake = new IntakeFullAction(intake);
         third9Intake.setName("third9Intake");
@@ -221,8 +221,32 @@ public class RedAutoFar extends KTeleOp {
 
         ShootAllAction fourthShoot = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         fourthShoot.setName("fourthShoot");
-        fourthShoot.setDependentActions(moveToFarShoot3);
+        fourthShoot.setDependentActions(moveToFarShoot2);
         redAutoNear.addAction(fourthShoot);
+
+        PurePursuitAction moveToDepotBalls2 = new PurePursuitAction(driveTrain);
+        moveToDepotBalls2.setName("moveToDepotBalls2");
+        moveToDepotBalls2.setDependentActions(thirdShoot);
+        moveToDepotBalls2.addPoint(DEPOT_X, DEPOT_Y, 90 * allianceSetup.getPolarity());
+        // move to intake
+        moveToDepotBalls2.addPoint(DEPOT_X, DEPOT_Y + (520 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToDepotBalls2);
+
+        IntakeFullAction fourth12Intake = new IntakeFullAction(intake);
+        fourth12Intake.setName("fourth12Intake");
+        fourth12Intake.setDependentActions(thirdShoot);
+        redAutoNear.addAction(fourth12Intake);
+
+        PurePursuitAction moveToFarShoot4 = new PurePursuitAction(driveTrain);
+        moveToFarShoot4.setName("moveToFarShoot4");
+        moveToFarShoot4.setDependentActions(fourth12Intake);
+        moveToFarShoot4.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
+        redAutoNear.addAction(moveToFarShoot4);
+
+        ShootAllAction fifthShoot = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+        fifthShoot.setName("fifthShoot");
+        fifthShoot.setDependentActions(moveToFarShoot4);
+        redAutoNear.addAction(fifthShoot);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
