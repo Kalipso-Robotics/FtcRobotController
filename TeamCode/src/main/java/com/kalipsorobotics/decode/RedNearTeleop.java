@@ -2,6 +2,7 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
@@ -70,7 +71,9 @@ public class RedNearTeleop extends KTeleOp {
 
     DetectColorsAction detectColorsAction = null;
 
-    QuickShootAction quickShootAction = null;
+//    QuickShootAction quickShootAction = null;
+
+    GoalDetectionAction goalDetectionAction = null;
 
     double turretStickValue;
     boolean shootActionPressed = false;
@@ -88,7 +91,11 @@ public class RedNearTeleop extends KTeleOp {
     boolean shooterReadyRedMiddlePressed = false;
     boolean shooterReadyBlueMiddlePressed = false;
     private boolean shooterStopPressed = false;
-    boolean quickShootPressed = false;
+//    boolean quickShootPressed = false;
+    boolean useAprilTagPressed = false;
+    boolean useAprilTag = false;
+    boolean useWebcamPressed = false;
+    boolean useWebcam = false;
 
     MotifCamera.MotifPattern testingMotif;
 
@@ -129,6 +136,8 @@ public class RedNearTeleop extends KTeleOp {
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
+        goalDetectionAction = new GoalDetectionAction(opModeUtilities);
+
         //todo just fed in testing motif pattern change later
         testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
@@ -138,7 +147,7 @@ public class RedNearTeleop extends KTeleOp {
         shootAction = new ShootAction(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
         kickBall = new KickBall(shooter);
-        quickShootAction = new QuickShootAction(revolver, shooter);
+//        quickShootAction = new QuickShootAction(revolver, shooter);
     }
 
 
@@ -175,7 +184,10 @@ public class RedNearTeleop extends KTeleOp {
             shooterReadyRedMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadRightFirstPressed();
             shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
             shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
-            quickShootPressed = kGamePad2.isStartButtonPressed();
+//            quickShootPressed = kGamePad2.isStartButtonPressed();
+            useAprilTagPressed = kGamePad2.isBackButtonPressed();
+            useWebcamPressed = kGamePad2.isStartButtonPressed();
+
 
             boolean isWarmup = true;
 
@@ -226,7 +238,6 @@ public class RedNearTeleop extends KTeleOp {
             }
 
 
-
             if (fullShootPressed) {
                 if (fullShootMotifAction != null || fullShootMotifAction.getIsDone()) {
                     fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
@@ -236,14 +247,14 @@ public class RedNearTeleop extends KTeleOp {
                 }
             }
 
-            if (quickShootPressed) {
-                if (quickShootAction != null || quickShootAction.getIsDone()) {
-                    quickShootAction = new QuickShootAction(revolver, shooter);
-                    setLastShooterAction(quickShootAction);
-                    setLastRevolverAction(quickShootAction);
-                    setLastKickerAction(quickShootAction);
-                }
-            }
+//            if (quickShootPressed) {
+//                if (quickShootAction != null || quickShootAction.getIsDone()) {
+//                    quickShootAction = new QuickShootAction(revolver, shooter);
+//                    setLastShooterAction(quickShootAction);
+//                    setLastRevolverAction(quickShootAction);
+//                    setLastKickerAction(quickShootAction);
+//                }
+//            }
 
             if (kickPressed) {
                 if (kickBall != null || kickBall.getIsDone()) {
@@ -287,11 +298,26 @@ public class RedNearTeleop extends KTeleOp {
                 setLastRevolverAction(revolverTeleOp);
             }
 
+            if (useAprilTagPressed) {
+                useAprilTag = !useAprilTag;
+            }
+
+            turretAutoAlign.setUseAprilTag(useAprilTag);
+            shooterReady.setUseAprilTag(useAprilTag);
+
+            if (useWebcamPressed) {
+                useWebcam = !useWebcam;
+            }
+
+            goalDetectionAction.setUseWebcam(useWebcam);
+
+            goalDetectionAction.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
 
+        goalDetectionAction.getLimelight().close();
         cleanupRobot();
     }
 }

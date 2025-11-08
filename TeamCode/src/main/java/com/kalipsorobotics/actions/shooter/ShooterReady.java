@@ -20,11 +20,17 @@ public class ShooterReady extends Action {
 
     private static final double TARGET_RPS_TOLERANCE = 1.0;
 
+    private boolean useAprilTag = false;
+
     public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition) {
         this.shooter = shooter;
         this.target = target;
         this.launchPosition = launchPosition;
         this.name = "ShooterReady";
+    }
+
+    public void setUseAprilTag(boolean useAprilTag) {
+        this.useAprilTag = useAprilTag;
     }
 
     @SuppressLint("DefaultLocale")
@@ -69,7 +75,13 @@ public class ShooterReady extends Action {
             Position currentPosition = SharedData.getOdometryPosition();
             double dx = target.getX() - currentPosition.getX();
             double dy = target.getY() - currentPosition.getY();
-            distanceMM = Math.sqrt((dx * dx) + (dy * dy));
+
+            if (!useAprilTag) {
+                distanceMM = Math.sqrt((dx * dx) + (dy * dy));
+            } else {
+                distanceMM = SharedData.getDistanceToGoal();
+            }
+
         } else {
             KLog.d("shooter_ready", "Using launch position: " + launchPosition);
             // Use the distance from the launch position enum

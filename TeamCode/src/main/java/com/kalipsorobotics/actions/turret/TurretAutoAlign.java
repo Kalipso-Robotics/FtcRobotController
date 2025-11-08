@@ -34,8 +34,7 @@ public class TurretAutoAlign extends Action {
     private final double TOLERANCE_TICKS = (TICKS_PER_DEGREE);
 
     private boolean isWithinRange = false;
-
-
+    private boolean useAprilTag = false;
 
 
     public TurretAutoAlign(Turret turret, double xInitSetup, double yInitSetup) {
@@ -48,6 +47,10 @@ public class TurretAutoAlign extends Action {
 
     public boolean isWithinRange() {
         return isWithinRange;
+    }
+
+    public void setUseAprilTag(boolean useAprilTag) {
+        this.useAprilTag = useAprilTag;
     }
 
     @Override
@@ -71,21 +74,22 @@ public class TurretAutoAlign extends Action {
             return;
         }*/
 
-
-
-
         Position currentPosition = SharedData.getOdometryPosition();
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
-
 
         double yTargetGoal = yInitSetup - currentY;
         double xTargetGoal = xInitSetup - currentX;
         KLog.d("turret_angle", "y init setup" + yInitSetup + "current y" + currentY);
 
-        // Use atan2 for proper angle calculation in all quadrants
-        double angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
-        KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
+        double angleTargetRadian;
+        if (!useAprilTag) {
+            // Use atan2 for proper angle calculation in all quadrants
+            angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
+            KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
+        } else {
+            angleTargetRadian = SharedData.getAngleRadToGoal();
+        }
 
         double currentRobotAngleRadian = currentPosition.getTheta();
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
@@ -93,8 +97,6 @@ public class TurretAutoAlign extends Action {
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
         // Use angleWrapRad to normalize the turret angle to [-π, π]
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
-
-
 
         double targetTicks;
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
@@ -128,7 +130,6 @@ public class TurretAutoAlign extends Action {
          }*/
 
         KLog.d("turret_position", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
-
 
 
         if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
