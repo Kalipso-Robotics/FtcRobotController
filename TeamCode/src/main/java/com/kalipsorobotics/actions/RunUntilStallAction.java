@@ -1,6 +1,7 @@
 package com.kalipsorobotics.actions;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -42,10 +43,19 @@ public class RunUntilStallAction extends Action {
             return;
         }
 
+        if (!hasStarted) {
+            KLog.d("intake", "intake started");
+            motor.setPower(power);
+            hasStarted = true;
+            return;
+        }
+
+        KLog.d("intake", "set intake to power");
         motor.setPower(power);
 
         // Check timeout
         if (timeoutTimer.seconds() >= maxTimeoutSec) {
+            KLog.d("intake", "timeout timer " + timeoutTimer.seconds());
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0);
             isDone = true;
@@ -57,14 +67,20 @@ public class RunUntilStallAction extends Action {
         double stallVelocityThreshold = expectedVelocity * STALL_VELOCITY_PERCENTAGE;
 
         if (Math.abs(motor.getPower()) > MIN_POWER_THRESHOLD
+
             && currentDraw > STALL_CURRENT_THRESHOLD_MILLIAMPS
             && curVelocity < stallVelocityThreshold) {
             stallCount++;
+            KLog.d("intake", "stall detected " + stallCount);
+
         } else {
             stallCount = 0;
+            KLog.d("intake", "stall reset");
+
         }
 
-        if (stallCount > 30) {
+        if (stallCount > 40) {
+            KLog.d("intake", "identified stall " + stallCount);
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0);
             isDone = true;
