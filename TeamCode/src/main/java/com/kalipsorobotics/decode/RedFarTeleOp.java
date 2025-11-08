@@ -136,7 +136,7 @@ public class RedFarTeleOp extends KTeleOp {
 
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake);
+        intakeFullAction = new IntakeFullAction(intake, 8);
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
