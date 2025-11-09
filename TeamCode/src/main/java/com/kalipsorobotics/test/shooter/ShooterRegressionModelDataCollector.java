@@ -1,24 +1,39 @@
 package com.kalipsorobotics.test.shooter;
 
+import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.actions.intake.IntakeFullAction;
+import com.kalipsorobotics.actions.intake.IntakeReverse;
+import com.kalipsorobotics.actions.intake.IntakeRun;
+import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
+import com.kalipsorobotics.utilities.KGamePad;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+@TeleOp(name = "Regression Model Data Collector")
 public class ShooterRegressionModelDataCollector extends KTeleOp {
     KFileWriter kFileWriter = null;
     Shooter shooter = null;
     Intake intake = null;
+    IntakeRun intakeRun = null;
+    IntakeStop intakeStop = null;
+    TurretAutoAlign turretAutoAlign = null;
     Stopper stopper = null;
+    KServoAutoAction stop = null;
     ShootAllAction shootAction = null;
     OpModeUtilities opModeUtilities = null;
-    private double rps = 0;
+    Turret turret = null;
+    private double rps = 30;
     private double hoodPosition = 0;
     private double distance = 0;
     private boolean isIncrementRps = true;
@@ -26,11 +41,17 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     private double rpsIncrementation = 0.01;
     @Override
     public void initializeRobot() {
+        super.initializeRobot(); // Initialize base class components including kGamePad1
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         kFileWriter = new KFileWriter("shooter_data", opModeUtilities); //log destination
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
         intake = new Intake(opModeUtilities);
+        intakeRun = new IntakeRun(intake);
+        intakeStop = new IntakeStop(intake);
+        turret = Turret.getInstance(opModeUtilities);
+        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kFileWriter.writeLine("distance, rps, hood position");
     }
 
@@ -53,8 +74,6 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
              */
 
             //TODO make csv converter into array for easy coding
-            shooter.getHood().setPosition(hoodPosition);
-            shooter.goToRPS(rps);
             distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
@@ -62,6 +81,8 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             }
             if (kGamePad1.isButtonBFirstPressed()) { //shoot
                 if (shootAction != null || shootAction.getIsDone()) {
+                    shooter.getHood().setPosition(hoodPosition);
+                    shooter.goToRPS(rps);
                     KLog.d("Regression Module Data Collector", "Shooter Ready set");
                     shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
                     setLastShooterAction(shootAction);
@@ -86,6 +107,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             if (kGamePad1.isRightTriggerFirstPressed()) {
                 if (isIncrementRps) {
                     rps -= rpsIncrementation;
+                    rps = Math.max(0, rps);
                 } else {
                     hoodPosition -= hoodIncrementation;
                 }
@@ -94,6 +116,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             if (kGamePad1.isLeftBumperPressed()) {
                 if (isIncrementRps) {
                     rps += (rpsIncrementation*5);
+                    rps = Math.max(0, rps);
                 } else {
                     hoodPosition += (hoodIncrementation*5);
                 }
@@ -102,8 +125,25 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
                 if (isIncrementRps) {
                     rps -= (rpsIncrementation*5);
                 } else {
-                    hoodPosition -= (hoodIncrementation*5);
+                    hoodPosition -= (hoodIncrementation * 5);
                 }
+            }
+            if (kGamePad1.isYPressed()) {
+                // Create new intake action each time to ensure it runs
+                if (intakeRun != null || intakeRun.getIsDone()) {
+                    intakeRun = new IntakeRun(intake);
+                    stop = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                    setLastStopperAction(stop);
+                    setLastIntakeAction(intakeRun);
+                }
+            } else {
+                if (intakeStop != null || intakeStop.getIsDone()) {
+                    intakeStop = new IntakeStop(intake);
+                    setLastIntakeAction(intakeStop);
+                }
+            }
+            if (kGamePad1.isDpadDownFirstPressed()) {
+                shooter.stop();
             }
 
             if (isIncrementRps) {
@@ -114,6 +154,10 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             telemetry.addData("RPS: ", rps);
             telemetry.addData("Hood Position", hoodPosition);
             telemetry.update();
+            
+            // Update all actions
+            updateActions();
+            turretAutoAlign.updateCheckDone();
         }
         kFileWriter.close();
     }
