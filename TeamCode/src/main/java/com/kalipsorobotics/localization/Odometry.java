@@ -54,7 +54,7 @@ public class Odometry {
                      Position startPosMMRAD) {
         KLog.d("debug_OpMode_Transfer", "New Instance");
         this.opModeUtilities = opModeUtilities;
-        resetHardware(driveTrain, imuModule, this);
+        resetHardware(opModeUtilities, driveTrain, imuModule, this);
         this.rightOffset = this.getRightEncoderMM();
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = this.getBackEncoderMM();
@@ -81,7 +81,7 @@ public class Odometry {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
         } else {
             KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
-            resetHardware(driveTrain, imuModule, single_instance);
+            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
     }
@@ -92,7 +92,7 @@ public class Odometry {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startPosMMRAD);
         } else {
             KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
-            resetHardware(driveTrain, imuModule, single_instance);
+            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
     }
@@ -103,12 +103,13 @@ public class Odometry {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startX, startY, Math.toRadians(startThetaDeg));
         } else {
             KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
-            resetHardware(driveTrain, imuModule, single_instance);
+            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
     }
 
-    private static void resetHardware(DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
+    private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
+        odometry.opModeUtilities = opModeUtilities;
         odometry.imuModule = imuModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
@@ -279,6 +280,7 @@ public class Odometry {
 
     public HashMap<OdometrySensorCombinations, PositionHistory> updateAll() {
         if (!opModeUtilities.getOpMode().opModeIsActive()) {
+            KLog.d("Odometry", "OpMode Not Active. OpMode: " + opModeUtilities.getOpMode().getClass().getName());
             return odometryPositionHistoryHashMap;
         }
         double rightDistanceMM = getRightEncoderMM();

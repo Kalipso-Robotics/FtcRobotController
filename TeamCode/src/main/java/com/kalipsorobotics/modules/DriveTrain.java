@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class DriveTrain {
     private static DriveTrain single_instance = null;
 
-    private final OpModeUtilities opModeUtilities;
+    private OpModeUtilities opModeUtilities;
     private DcMotor fLeft = null;
     private DcMotor fRight = null;
     private DcMotor bLeft = null;
@@ -36,7 +36,7 @@ public class DriveTrain {
     private DriveTrain(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
-        resetHardwareMap(opModeUtilities.getHardwareMap(), this);
+        resetHardwareMap(opModeUtilities, opModeUtilities.getHardwareMap(), this);
 
         //sparkResetData(true, Math.toRadians(180));
 
@@ -49,7 +49,7 @@ public class DriveTrain {
         if (single_instance == null) {
             single_instance = new DriveTrain(opModeUtilities);
         } else {
-            resetHardwareMap(opModeUtilities.getHardwareMap(), single_instance);
+            resetHardwareMap(opModeUtilities, opModeUtilities.getHardwareMap(), single_instance);
         }
         return single_instance;
     }
@@ -58,7 +58,8 @@ public class DriveTrain {
         single_instance = null;
     }
 
-    private static void resetHardwareMap(HardwareMap hardwareMap, DriveTrain driveTrain) {
+    private static void resetHardwareMap(OpModeUtilities opModeUtilities, HardwareMap hardwareMap, DriveTrain driveTrain) {
+        driveTrain.opModeUtilities = opModeUtilities;
         driveTrain.fLeft = hardwareMap.dcMotor.get("fLeft");
         driveTrain.fRight = hardwareMap.dcMotor.get("fRight");
         driveTrain.bLeft = hardwareMap.dcMotor.get("bLeft");

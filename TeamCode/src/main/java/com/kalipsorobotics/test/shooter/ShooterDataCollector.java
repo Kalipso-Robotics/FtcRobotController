@@ -49,7 +49,7 @@ public class ShooterDataCollector extends KTeleOp {
         intake = new Intake(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
 
         telemetry.addLine("ShooterDataCollector Initialized");
         telemetry.addLine("Controls:");
