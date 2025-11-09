@@ -99,9 +99,7 @@ public class RedFarTeleOp extends KTeleOp {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
-        Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
 
@@ -109,7 +107,6 @@ public class RedFarTeleOp extends KTeleOp {
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
 
-        Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
         intakeRun = new IntakeRun(intake);

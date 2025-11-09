@@ -93,14 +93,15 @@ public class RedAutoFar extends KTeleOp {
         allianceSetup = AllianceSetup.RED;
 
         // Create your modules
+        DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
+        Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         colorSensors = new TripleColorSensor(opModeUtilities);

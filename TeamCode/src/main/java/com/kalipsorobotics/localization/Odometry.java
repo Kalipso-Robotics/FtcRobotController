@@ -103,7 +103,6 @@ public class Odometry {
     }
 
     private static void resetHardware(DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
-        SharedData.resetOdometryPosition();
         odometry.imuModule = imuModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
@@ -126,6 +125,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
+        KLog.d("encoder", "right encoder" + rightEncoder.getCurrentPosition());
         return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
@@ -133,12 +133,14 @@ public class Odometry {
         //corresponds to fLeft
         //direction FORWARD
         //positive because encoder directions
+        KLog.d("encoder", "left encoder" + leftEncoder.getCurrentPosition());
         return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
     }
     public double getBackEncoderMM() {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
+        KLog.d("encoder", "back encoder" + backEncoder.getCurrentPosition());
         return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
@@ -261,7 +263,6 @@ public class Odometry {
     }
 
     public HashMap<OdometrySensorCombinations, PositionHistory> updateAll() {
-        KLog.d("updatepos", "updatepos");
         double rightDistanceMM = getRightEncoderMM();
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
@@ -288,7 +289,6 @@ public class Odometry {
         prevImuHeading = currentImuHeading;
         SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
-        KLog.d("updatepos", "odometry pos " + SharedData.getOdometryPosition());
         return odometryPositionHistoryHashMap;
     }
 
@@ -307,6 +307,8 @@ public class Odometry {
     }
 
     public double getIMUHeading() {
-        return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
+        double imuHeading = -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
+        KLog.d("IMU_Heading", "Heading " + imuHeading);
+        return imuHeading;
     }
 }

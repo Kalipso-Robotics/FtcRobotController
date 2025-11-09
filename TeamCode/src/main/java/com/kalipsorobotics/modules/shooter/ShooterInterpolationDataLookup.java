@@ -44,9 +44,9 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
         add(new DataPoint(2825, 49, 0.55));
         add(new DataPoint(2952, 50, 0.55));
         add(new DataPoint(3076, 50.5, 0.55));
-        add(new DataPoint(3304, 51.5, 0.55));
-        add(new DataPoint(3389, 51.5, 0.55));
-        add(new DataPoint(3547, 52, 0.55));
+        add(new DataPoint(3304, 51, 0.55));
+        add(new DataPoint(3389, 51, 0.55));
+        add(new DataPoint(3547, 51.5, 0.55));
     }};
 
     /**
