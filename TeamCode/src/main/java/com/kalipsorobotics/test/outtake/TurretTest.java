@@ -8,10 +8,10 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "TurretTest", group = "Linear OpMode")
+@Disabled
 public class TurretTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

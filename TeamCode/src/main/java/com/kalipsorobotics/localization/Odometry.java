@@ -1,6 +1,8 @@
 package com.kalipsorobotics.localization;
 
 import android.os.SystemClock;
+
+import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.PositionHistory;
@@ -15,8 +17,6 @@ import com.kalipsorobotics.math.Velocity;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.modules.DriveTrain;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-
 import java.util.HashMap;
 
 
@@ -25,6 +25,7 @@ public class Odometry {
     //maybe double check BACK Distance
     static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
     private static Odometry single_instance = null;
+    final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
     OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
@@ -55,8 +56,9 @@ public class Odometry {
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = this.getBackEncoderMM();
 
+        this.wheelPositionHistory.setCurrentPosition(startPosMMRAD);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
-        ////KLog.d("purepursaction_debug_odo_wheel", "init jimmeh" + currentPosition.toString());
+
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
         currentImuHeading = prevImuHeading;
@@ -101,9 +103,7 @@ public class Odometry {
     }
 
     private static void resetHardware(DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
-        SharedData.resetOdometryPosition();
         odometry.imuModule = imuModule;
-        //odometry.goBildaOdoModule = goBildaOdoModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
@@ -125,6 +125,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
+        KLog.d("encoder", "right encoder" + rightEncoder.getCurrentPosition());
         return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
@@ -132,24 +133,64 @@ public class Odometry {
         //corresponds to fLeft
         //direction FORWARD
         //positive because encoder directions
+        KLog.d("encoder", "left encoder" + leftEncoder.getCurrentPosition());
         return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
     }
     public double getBackEncoderMM() {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
+        KLog.d("encoder", "back encoder" + backEncoder.getCurrentPosition());
         return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
+    public boolean allEncoderZero() {
+        return (rightEncoder.getCurrentPosition() == 0) && (leftEncoder.getCurrentPosition() == 0) && (backEncoder.getCurrentPosition() == 0);
+    }
 
+    public boolean anyEncoderZero() {
+        return (rightEncoder.getCurrentPosition() == 0) || (leftEncoder.getCurrentPosition() == 0) || (backEncoder.getCurrentPosition() == 0);
+    }
+
+    private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
+        double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
+        double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
+        double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
+        double deltaTheta = MathFunctions.angleWrapRad((deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM);
+
+
+
+        double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
+        double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * deltaTheta);
+
+        Velocity velocity = new Velocity(deltaX, deltaY, deltaTheta);
+
+        return velocity;
+    }
 
     private Velocity calculateRelativeDeltaWheelIMU(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
 
-        double imuDeltaTheta = currentImuHeading - prevImuHeading;
+        double imuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
+
+//
+//        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
+//        double wheelDeltaTheta  = (deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM;
+//
+//        //this limit should match your loop time; 20°/cycle is safe for FTC.
+//        double maxTurnPerStep = Math.toRadians(10);
+//
+//        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
+//            //this is likely an IMU shock / 180° wrap → fall back to wheel
+//            imuDeltaTheta = wheelDeltaTheta;
+//        } else {
+//            //IMU is usually better for heading, but we still keep 30% wheel
+//            // to improve continuity with the dead-wheel translation.
+//            imuDeltaTheta = rawImuDeltaTheta;
+//        }
 
         double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
         double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * imuDeltaTheta);
@@ -207,6 +248,16 @@ public class Odometry {
         return position;
     }
 
+    private void updateWheelPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double timeElapsedSeconds) {
+        Velocity wheelRelDelta = calculateRelativeDeltaWheel(rightDistanceMM, leftDistanceMM,
+                backDistanceMM, timeElapsedSeconds * 1000);
+        wheelRelDelta = linearToArcDelta(wheelRelDelta);
+        Position globalPosition = calculateGlobal(wheelRelDelta, wheelPositionHistory.getCurrentPosition());
+        wheelPositionHistory.setCurrentPosition(globalPosition);
+        wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds * 1000);
+        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
+    }
+
     private void updateWheelIMUPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
                                    double timeElapsedSeconds) {
         Velocity wheelIMURelDelta = calculateRelativeDeltaWheelIMU(rightDistanceMM, leftDistanceMM, backDistanceMM,
@@ -219,8 +270,7 @@ public class Odometry {
 
     }
 
-    public HashMap<OdometrySensorCombinations, PositionHistory> updatePositionAll() {
-        KLog.d("updatepos", "updatepos");
+    public HashMap<OdometrySensorCombinations, PositionHistory> updateAll() {
         double rightDistanceMM = getRightEncoderMM();
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
@@ -234,7 +284,7 @@ public class Odometry {
         long currentTime = SystemClock.elapsedRealtime();
         double timeElapsedSeconds = (currentTime - prevTime) / 1000.0;
 
-
+        updateWheelPos(rightDistanceMM,leftDistanceMM, backDistanceMM, timeElapsedSeconds);
         updateWheelIMUPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
 
         //KLog.d("currentpos", "current pos " + currentPosition.toString());
@@ -247,13 +297,12 @@ public class Odometry {
         prevImuHeading = currentImuHeading;
         SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition());
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
-        KLog.d("updatepos", "updatepos done");
         return odometryPositionHistoryHashMap;
     }
 
     public Position update() {
         //IMU
-        HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap = updatePositionAll();
+        HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap = updateAll();
         PositionHistory positionHistory = positionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU);
         if (positionHistory == null) {
             throw new RuntimeException("WHEEL_IMU Position History Null");
@@ -266,7 +315,8 @@ public class Odometry {
     }
 
     public double getIMUHeading() {
-        return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
+        double imuHeading = -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
+        KLog.d("IMU_Heading", "Heading " + imuHeading);
+        return imuHeading;
     }
-
 }

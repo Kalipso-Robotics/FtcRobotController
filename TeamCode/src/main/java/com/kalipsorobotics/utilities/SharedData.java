@@ -51,4 +51,24 @@ public class SharedData {
     public static void setAllianceColor(AllianceSetup allianceSetup) {
         SharedData.allianceSetup = allianceSetup;
     }
+
+    public static void setDistanceToGoal(double distanceToGoal) {
+        SharedData.distanceToGoal = distanceToGoal;
+    }
+
+    private static double distanceToGoal = 0.0;
+
+    public static double getDistanceToGoal() {
+        return distanceToGoal;
+    }
+
+    public static void setAngleRadToGoal(double distanceToGoal) {
+        SharedData.angleRadToGoal = angleRadToGoal;
+    }
+
+    private static double angleRadToGoal = 0.0;
+
+    public static double getAngleRadToGoal() {
+        return angleRadToGoal;
+    }
 }

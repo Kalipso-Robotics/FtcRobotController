@@ -36,12 +36,12 @@ public class OdometryFileWriter extends KFileWriter {
             stringBuilder.append(key + "_Y,");
             stringBuilder.append(key + "_Theta,");
             stringBuilder.append(key + "_DeltaTheta,");
+            stringBuilder.append(key + "_Action,");
 
         }
         super.writeLine(stringBuilder.toString());
     }
-
-    public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap) {
+    public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap, String action) {
         KLog.d("odometryData", "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(System.currentTimeMillis());
@@ -61,7 +61,12 @@ public class OdometryFileWriter extends KFileWriter {
             stringBuilder.append(",");
 
         }
+        stringBuilder.append(action);
+        KLog.d("odometry_file_writer_line", stringBuilder.toString());
         super.writeLine(stringBuilder.toString());
+    }
+    public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap) {
+        writeOdometryPositionHistory(positionHistoryHashMap, "");
     }
     public void close() {
         super.close();

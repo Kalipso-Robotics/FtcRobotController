@@ -23,8 +23,8 @@ import com.kalipsorobotics.navigation.PurePursuitTFLite;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 import org.json.JSONException;
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@TeleOp(name="Pure Pursuit Linear (TFLite Inverse)", group="Examples")
+@Disabled
 public class PurePursuitFollowerLinearOpMode extends LinearOpMode {
 
     private PurePursuitTFLite pp;

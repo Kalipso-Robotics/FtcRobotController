@@ -12,7 +12,7 @@ import com.kalipsorobotics.navigation.NavigationSystem;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -40,7 +40,7 @@ import java.util.concurrent.Executors;
  * 3. Adjust the path waypoints below as needed for your field/testing
  * 4. Deploy and run this autonomous OpMode
  */
-@Autonomous(name="NavigationTest_Complete", group="Navigation")
+@Disabled
 public class TestNavigation extends LinearOpMode {
 
     private static final String TAG = "NavTestAuto";

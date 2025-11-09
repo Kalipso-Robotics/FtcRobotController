@@ -3,15 +3,17 @@ package com.kalipsorobotics.actions.revolverActions;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
-import com.kalipsorobotics.actions.shooter.KickBall;
+import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
+import com.kalipsorobotics.modules.Intake;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class QuickShootAction extends KActionSet {
-    public QuickShootAction(Revolver revolver, Shooter shooter) {
+    public QuickShootAction(Revolver revolver, Shooter shooter, Stopper stopper, Intake intake) {
         ShooterReady shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
@@ -26,14 +28,14 @@ public class QuickShootAction extends KActionSet {
         waitAction1.setDependentActions(revolverTurn1);
         this.addAction(waitAction1);
 
-        KickBall kickBall = new KickBall(shooter);
-        kickBall.setName("kickBall");
-        kickBall.setDependentActions(revolverTurn1, waitAction1);
-        this.addAction(kickBall);
+        PushBall pushBall = new PushBall(stopper, intake);
+        pushBall.setName("kickBall");
+        pushBall.setDependentActions(revolverTurn1, waitAction1);
+        this.addAction(pushBall);
 
         WaitAction waitAction2 = new WaitAction(1);
         waitAction2.setName("waitAction2");
-        waitAction2.setDependentActions(kickBall);
+        waitAction2.setDependentActions(pushBall);
         this.addAction(waitAction2);
 
         KServoAutoAction revolverTurn2 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_1);
@@ -46,15 +48,15 @@ public class QuickShootAction extends KActionSet {
         waitAction3.setDependentActions(revolverTurn2);
         this.addAction(waitAction3);
 
-        KickBall kickBall2 = new KickBall(shooter);
-        kickBall2.setName("kickBall2");
-        kickBall2.setDependentActions(revolverTurn2, waitAction3);
-        this.addAction(kickBall2);
+        PushBall pushBall2 = new PushBall(stopper, intake);
+        pushBall2.setName("kickBall2");
+        pushBall2.setDependentActions(revolverTurn2, waitAction3);
+        this.addAction(pushBall2);
 
         WaitAction waitAction4 = new WaitAction(1);
         waitAction4.setName("waitAction4");
         this.addAction(waitAction4);
-        waitAction4.setDependentActions(kickBall2);
+        waitAction4.setDependentActions(pushBall2);
 
         KServoAutoAction revolverTurn3 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_2);
         revolverTurn3.setName("revolverTurn3");
@@ -66,15 +68,15 @@ public class QuickShootAction extends KActionSet {
         this.addAction(waitAction5);
         waitAction5.setDependentActions(revolverTurn3);
 
-        KickBall kickBall3 = new KickBall(shooter);
-        kickBall3.setName("kickBall3");
-        kickBall3.setDependentActions(revolverTurn3, waitAction5);
-        this.addAction(kickBall3);
+        PushBall pushBall3 = new PushBall(stopper, intake);
+        pushBall3.setName("kickBall3");
+        pushBall3.setDependentActions(revolverTurn3, waitAction5);
+        this.addAction(pushBall3);
 
         WaitAction waitAction6 = new WaitAction(1);
         waitAction6.setName("waitAction6");
         this.addAction(waitAction6);
-        waitAction6.setDependentActions(kickBall3);
+        waitAction6.setDependentActions(pushBall3);
 
         ShooterStop stop = new ShooterStop(shooter);
         stop.setName("stop");
