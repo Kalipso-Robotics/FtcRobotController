@@ -13,7 +13,7 @@ public class RunIntakeUntilFullSpeed extends Action {
     private static final double TICKS_PER_REV = ((1.0 + (46.0/11.0)) * 28.0); // ((1+(46/11)) * 28) = 145.09 ticks per revolution
     private static final double MAX_VELOCITY_TICKS_PER_SEC = RPM * TICKS_PER_REV / 60.0; // ~2781 ticks/sec
     private static final double TARGET_VELOCITY = MAX_VELOCITY_TICKS_PER_SEC;
-    private static final double FULL_SPEED_THRESHOLD = TARGET_VELOCITY * 0.50; // ~2642 ticks/sec
+    private static final double FULL_SPEED_THRESHOLD = TARGET_VELOCITY * 0.70; // ~2642 ticks/sec
     private static final double FULL_SPEED_DURATION_SEC = 0.2;
 
     private ElapsedTime fullSpeedTimer;
