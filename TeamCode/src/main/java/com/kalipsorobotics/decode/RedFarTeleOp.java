@@ -81,10 +81,10 @@ public class RedFarTeleOp extends KTeleOp {
     boolean shooterReadyRedMiddlePressed = false;
     boolean shooterReadyBlueMiddlePressed = false;
     private boolean shooterStopPressed = false;
-    boolean useAprilTagPressed = false;
-    boolean useAprilTag = false;
-    boolean useWebcamPressed = false;
-    boolean useWebcam = false;
+//    boolean useAprilTagPressed = false;
+//    boolean useAprilTag = false;
+//    boolean useWebcamPressed = false;
+//    boolean useWebcam = false;
     boolean runUntilStalledPressed = false;
 
 
@@ -119,7 +119,7 @@ public class RedFarTeleOp extends KTeleOp {
         turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
 
-        goalDetectionAction = new GoalDetectionAction(opModeUtilities);
+        //goalDetectionAction = new GoalDetectionAction(opModeUtilities);
         //todo just fed in testing motif pattern change later
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 
@@ -162,8 +162,8 @@ public class RedFarTeleOp extends KTeleOp {
             shooterReadyRedMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadRightFirstPressed();
             shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
             shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
-            useAprilTagPressed = kGamePad2.isBackButtonPressed();
-            useWebcamPressed = kGamePad2.isStartButtonPressed();
+            //useAprilTagPressed = kGamePad2.isBackButtonPressed();
+            //useWebcamPressed = kGamePad2.isStartButtonPressed();
 
             runUntilStalledPressed = kGamePad2.isButtonXFirstPressed();
 
@@ -255,26 +255,26 @@ public class RedFarTeleOp extends KTeleOp {
                 setLastIntakeAction(runUntilStallAction);
             }
 
-            if (useAprilTagPressed) {
-                useAprilTag = !useAprilTag;
-            }
+//            if (useAprilTagPressed) {
+//                useAprilTag = !useAprilTag;
+//            }
 
-            turretAutoAlign.setUseAprilTag(useAprilTag);
-            shooterReady.setUseAprilTag(useAprilTag);
+//            turretAutoAlign.setUseAprilTag(useAprilTag);
+//            shooterReady.setUseAprilTag(useAprilTag);
 
-            if (useWebcamPressed) {
-                useWebcam = !useWebcam;
-            }
-
-            goalDetectionAction.setUseWebcam(useWebcam);
-
-            goalDetectionAction.updateCheckDone();
+//            if (useWebcamPressed) {
+//                useWebcam = !useWebcam;
+//            }
+//
+//            goalDetectionAction.setUseWebcam(useWebcam);
+//
+//            goalDetectionAction.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
 
-        goalDetectionAction.getLimelight().close();
+        //goalDetectionAction.getLimelight().close();
         cleanupRobot();
     }
 }
