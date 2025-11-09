@@ -50,8 +50,8 @@ public class RedFarTeleOp extends KTeleOp {
     LaunchPosition launchPosition = LaunchPosition.AUTO;
     PushBall pushBall = null;
 
-    KServoAutoAction release = null;
-    KServoAutoAction stop = null;
+    KServoAutoAction openStopper = null;
+    KServoAutoAction closeStopper = null;
 
 
     IntakeRun intakeRun = null;
@@ -112,7 +112,7 @@ public class RedFarTeleOp extends KTeleOp {
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake, 8);
+        intakeFullAction = new IntakeFullAction(stopper, intake, 8);
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
@@ -125,8 +125,8 @@ public class RedFarTeleOp extends KTeleOp {
         shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
         pushBall = new PushBall(stopper, intake);
-        release = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-        stop = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+        openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+        closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3);
     }
 
@@ -218,8 +218,8 @@ public class RedFarTeleOp extends KTeleOp {
             if (intakePressed) {
                 if (intakeRun != null || intakeRun.getIsDone()) {
                     intakeRun = new IntakeRun(intake);
-                    stop = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-                    setLastStopperAction(stop);
+                    closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                    setLastStopperAction(closeStopper);
                     setLastIntakeAction(intakeRun);
 
                 }
@@ -237,9 +237,9 @@ public class RedFarTeleOp extends KTeleOp {
 
 
             if (releasePressed) {
-                if (release != null || release.getIsDone()) {
-                    release = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
-                    setLastStopperAction(release);
+                if (openStopper != null || openStopper.getIsDone()) {
+                    openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
+                    setLastStopperAction(openStopper);
                 }
             }
 

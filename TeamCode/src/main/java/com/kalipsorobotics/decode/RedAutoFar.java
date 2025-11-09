@@ -116,7 +116,7 @@ public class RedAutoFar extends KTeleOp {
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake, 10);
+        intakeFullAction = new IntakeFullAction(stopper, intake, 10);
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
@@ -162,7 +162,7 @@ public class RedAutoFar extends KTeleOp {
 
         KLog.d("purepursuit", "moveToFirstBalls done");
 
-        IntakeFullAction first3Intake = new IntakeFullAction(intake, 8);
+        IntakeFullAction first3Intake = new IntakeFullAction(stopper, intake, 8);
         first3Intake.setName("first3Intake");
         first3Intake.setDependentActions(shoot);
         redAutoNear.addAction(first3Intake);
@@ -203,7 +203,7 @@ public class RedAutoFar extends KTeleOp {
         ready2.setDependentActions(waitForShoot2);
         redAutoNear.addAction(ready2);
 
-        IntakeFullAction second6Intake = new IntakeFullAction(intake, 8);
+        IntakeFullAction second6Intake = new IntakeFullAction(stopper, intake, 8);
         second6Intake.setName("second6Intake");
         second6Intake.setDependentActions(shoot2);
         redAutoNear.addAction(second6Intake);
@@ -240,7 +240,7 @@ public class RedAutoFar extends KTeleOp {
         ready3.setDependentActions(waitForShoot3);
         redAutoNear.addAction(ready3);
 
-        IntakeFullAction third9Intake = new IntakeFullAction(intake, 8);
+        IntakeFullAction third9Intake = new IntakeFullAction(stopper, intake, 8);
         third9Intake.setName("third9Intake");
         third9Intake.setDependentActions(shoot3);
         redAutoNear.addAction(third9Intake);
