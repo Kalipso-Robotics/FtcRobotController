@@ -145,6 +145,14 @@ public class Odometry {
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
+    public boolean allEncoderZero() {
+        return (rightEncoder.getCurrentPosition() == 0) && (leftEncoder.getCurrentPosition() == 0) && (backEncoder.getCurrentPosition() == 0);
+    }
+
+    public boolean anyEncoderZero() {
+        return (rightEncoder.getCurrentPosition() == 0) || (leftEncoder.getCurrentPosition() == 0) || (backEncoder.getCurrentPosition() == 0);
+    }
+
     private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;

@@ -17,6 +17,8 @@ public class Turret {
         this.opModeUtilities = opModeUtilities;
 
         resetHardwareMap(opModeUtilities.getHardwareMap(), this);
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
     }
 
     public static synchronized Turret getInstance(OpModeUtilities opModeUtilities) {

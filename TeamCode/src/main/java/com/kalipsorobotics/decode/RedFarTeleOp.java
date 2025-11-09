@@ -100,6 +100,10 @@ public class RedFarTeleOp extends KTeleOp {
 
         // Create odometry
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        while (odometry.anyEncoderZero()) {
+            KLog.d("Waiting_Encoder", "Waiting for encoder to non zero");
+            sleep(10);
+        }
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
 
