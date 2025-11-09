@@ -47,10 +47,10 @@ public class RedAutoFar extends KTeleOp {
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
     final double SHOOT_FAR_X = 150;
     final double SHOOT_FAR_Y = -40  * allianceSetup.getPolarity();
-    final double LEVER_X = 1520;
+    final double LEVER_X = 1500;
     final double LEVER_Y = 1050  * allianceSetup.getPolarity();
-    final double DEPOT_X = 0; // final ending 0 x
-    final double DEPOT_Y = 1165  * allianceSetup.getPolarity(); // final ending 1,165.2 , 135degree heading
+    final double DEPOT_X = 200; // final ending 0 x
+    final double DEPOT_Y = 1100  * allianceSetup.getPolarity(); // final ending 1,165.2 , 135degree heading
     final double FIRST_BALL_X = 680;
     final double FIRST_BALL_Y = 1050  * allianceSetup.getPolarity();
     final double SECOND_BALL_X = 1230;
@@ -191,7 +191,7 @@ public class RedAutoFar extends KTeleOp {
         moveToLeverBalls.addPoint(LEVER_X, LEVER_Y-300, 0 * allianceSetup.getPolarity());
         moveToLeverBalls.addPoint(LEVER_X, LEVER_Y, 0 * allianceSetup.getPolarity());
         moveToLeverBalls.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 45 * allianceSetup.getPolarity());
-        moveToLeverBalls.setFinalSearchRadius(40);
+        moveToLeverBalls.setFinalSearchRadius(30);
         redAutoNear.addAction(moveToLeverBalls);
 
         WaitAction waitForShoot2 = new WaitAction(4000);
@@ -224,11 +224,11 @@ public class RedAutoFar extends KTeleOp {
         PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
         moveToDepotBalls.setName("moveToDepotBalls");
         moveToDepotBalls.setDependentActions(shoot3);
-        moveToDepotBalls.addPoint(DEPOT_X+100, DEPOT_Y-500, 145 * allianceSetup.getPolarity());
+        moveToDepotBalls.addPoint(DEPOT_X+300, DEPOT_Y, 145 * allianceSetup.getPolarity());
         // move to intake
         moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 145 * allianceSetup.getPolarity());
         moveToDepotBalls.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
-        moveToLeverBalls.setFinalSearchRadius(40);
+        moveToLeverBalls.setFinalSearchRadius(30);
         redAutoNear.addAction(moveToDepotBalls);
 
         WaitAction waitForShoot3 = new WaitAction(4000);
