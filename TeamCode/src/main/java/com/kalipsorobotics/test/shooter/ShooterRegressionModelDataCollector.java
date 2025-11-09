@@ -54,7 +54,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
         intakeStop = new IntakeStop(intake);
         runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
 //        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kFileWriter.writeLine("distance, rps, hood position");
     }
