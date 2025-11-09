@@ -14,10 +14,11 @@ import java.util.concurrent.TimeUnit;
 public class OpModeUtilities {
 
     private final HardwareMap hardwareMap;
-    private final LinearOpMode opMode;
+    private LinearOpMode opMode;
     private final Telemetry telemetry;
 
     public OpModeUtilities(HardwareMap hardwareMap, LinearOpMode opMode, Telemetry telemetry) {
+        KLog.d("OpModeUtilities", "Constructor called. OpMode: " + opMode.getClass().getName());
         this.hardwareMap = hardwareMap;
         this.opMode = opMode;
         this.telemetry = telemetry;

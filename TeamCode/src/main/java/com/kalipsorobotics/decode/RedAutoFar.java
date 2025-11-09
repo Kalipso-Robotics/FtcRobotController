@@ -35,8 +35,6 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.checkerframework.dataflow.qual.Pure;
-
 
 @Autonomous(name = "RedAutoFarZone")
 public class RedAutoFar extends KTeleOp {
@@ -122,7 +120,7 @@ public class RedAutoFar extends KTeleOp {
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
-        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 

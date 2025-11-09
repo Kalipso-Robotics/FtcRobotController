@@ -114,7 +114,7 @@ public class RedFarTeleOp extends KTeleOp {
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(intake, 8);
 
-        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
 
         //goalDetectionAction = new GoalDetectionAction(opModeUtilities);

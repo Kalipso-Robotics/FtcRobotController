@@ -10,13 +10,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Turret {
     private static Turret single_instance = null;
 
-    private final OpModeUtilities opModeUtilities;
+    private OpModeUtilities opModeUtilities;
 
     public DcMotor turretMotor;
     private Turret(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
-        resetHardwareMap(opModeUtilities.getHardwareMap(), this);
+        resetHardwareMap(opModeUtilities, opModeUtilities.getHardwareMap(), this);
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
     }
@@ -25,7 +25,7 @@ public class Turret {
         if (single_instance == null) {
             single_instance = new Turret(opModeUtilities);
         } else {
-            resetHardwareMap(opModeUtilities.getHardwareMap(), single_instance);
+            resetHardwareMap(opModeUtilities, opModeUtilities.getHardwareMap(), single_instance);
         }
         return single_instance;
     }
@@ -34,9 +34,9 @@ public class Turret {
         single_instance = null;
     }
 
-    private static void resetHardwareMap(HardwareMap hardwareMap, Turret turret) {
+    private static void resetHardwareMap(OpModeUtilities opModeUtilities, HardwareMap hardwareMap, Turret turret) {
+        turret.opModeUtilities = opModeUtilities;
         turret.turretMotor = hardwareMap.dcMotor.get("turret");
-        turret.turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.turretMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         turret.turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
