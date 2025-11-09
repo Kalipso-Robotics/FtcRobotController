@@ -59,7 +59,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
-                KLog.d("Regression Module Data Collector", "data logged into file");
+                KLog.d("Regression Module Data Collector", "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);
             }
             if (kGamePad1.isButtonBFirstPressed()) { //shoot
                 if (shootAction != null || shootAction.getIsDone()) {
