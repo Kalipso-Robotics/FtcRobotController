@@ -144,7 +144,7 @@ public class RedFarTeleOp extends KTeleOp {
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
-        goalDetectionAction = new GoalDetectionAction(opModeUtilities);
+//        goalDetectionAction = new GoalDetectionAction(opModeUtilities);
         //todo just fed in testing motif pattern change later
         testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
@@ -335,15 +335,15 @@ public class RedFarTeleOp extends KTeleOp {
                 useWebcam = !useWebcam;
             }
 
-            goalDetectionAction.setUseWebcam(useWebcam);
+//            goalDetectionAction.setUseWebcam(useWebcam);
 
-            goalDetectionAction.updateCheckDone();
+//            goalDetectionAction.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
 
-        goalDetectionAction.getLimelight().close();
+//        goalDetectionAction.getLimelight().close();
         cleanupRobot();
     }
 }
