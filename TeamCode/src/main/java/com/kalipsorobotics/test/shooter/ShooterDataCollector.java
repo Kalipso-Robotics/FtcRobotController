@@ -1,6 +1,5 @@
 package com.kalipsorobotics.test.shooter;
 
-import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.localization.Odometry;
@@ -8,13 +7,11 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
-import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
@@ -126,7 +123,7 @@ public class ShooterDataCollector extends KTeleOp {
                 // Create a new KickBall action if one doesn't exist or has completed
                 if (pushBall == null || pushBall.getIsDone()) {
                     pushBall = new PushBall(stopper, intake);
-                    setLastKickerAction(pushBall);
+                    setLastStopperAction(pushBall);
                 }
             }
 
