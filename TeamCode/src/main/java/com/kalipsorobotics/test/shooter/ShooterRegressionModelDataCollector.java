@@ -24,6 +24,8 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     private double hoodPosition = 0;
     private double distance = 0;
     private boolean isIncrementRps = true;
+    private double hoodIncrementation = 0.05;
+    private double rpsIncrementation = 0.01;
     @Override
     public void initializeRobot() {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
@@ -44,12 +46,14 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
 
                 BUTTON X: SWITCH CURRENT INCREMENT (RPS & HOOD POSITION)
 
-                RIGHT BUMPER: increment current selected incrementation by 0.1
-                RIGHT TRIGGER: increment current selected incrementation by -0.1
+                RIGHT BUMPER: increment current selected incrementation
+                RIGHT TRIGGER: increment current selected incrementation
 
-                LEFT BUMPER: increment current selected incrementation by 1
-                LEFT TRIGGER: increment current selected incrementation by -1
+                LEFT BUMPER: increment current selected incrementation
+                LEFT TRIGGER: increment current selected incrementation
              */
+
+            //TODO make csv converter into array for easy coding
             shooter.getHood().setPosition(hoodPosition);
             shooter.goToRPS(rps);
             distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR);
@@ -75,31 +79,31 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             }
             if (kGamePad1.isRightBumperPressed()) {
                 if (isIncrementRps) {
-                    rps += 0.1;
+                    rps += rpsIncrementation;
                 } else {
-                    hoodPosition += 0.1;
+                    hoodPosition += hoodIncrementation;
                 }
             }
             if (kGamePad1.isRightTriggerFirstPressed()) {
                 if (isIncrementRps) {
-                    rps -= 0.1;
+                    rps -= rpsIncrementation;
                 } else {
-                    hoodPosition -= 0.1;
+                    hoodPosition -= hoodIncrementation;
                 }
             }
 
             if (kGamePad1.isLeftBumperPressed()) {
                 if (isIncrementRps) {
-                    rps += 1;
+                    rps += (rpsIncrementation*5);
                 } else {
-                    hoodPosition += 1;
+                    hoodPosition += (hoodIncrementation*5);
                 }
             }
             if (kGamePad1.isLeftTriggerFirstPressed()) {
                 if (isIncrementRps) {
-                    rps -= 1;
+                    rps -= (rpsIncrementation*5);
                 } else {
-                    hoodPosition -= 1;
+                    hoodPosition -= (hoodIncrementation*5);
                 }
             }
 
@@ -112,5 +116,6 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             telemetry.addData("Hood Position", hoodPosition);
             telemetry.update();
         }
+        kFileWriter.close();
     }
 }
