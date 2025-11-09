@@ -16,14 +16,6 @@ public class PushBall extends KActionSet {
         release.setName("release");
         this.addAction(release);
 
-//        KLog.d("teleop", "pusher Started");
-//        KCRServoAutoAction pushRight = new KCRServoAutoAction(pusher.getKickerRight(), 1);
-//        pushRight.setName("pushRight");
-//        this.addAction(pushRight, release);
-//
-//        KCRServoAutoAction pushLeft = new KCRServoAutoAction(pusher.getKickerLeft(), 1);
-//        pushLeft.setName("pushLeft");
-//        this.addAction(pushLeft);
 
         RunIntakeUntilFullSpeed untilShootingDone = new RunIntakeUntilFullSpeed(intake);
         untilShootingDone.setName("untilShootingDone");
@@ -38,17 +30,8 @@ public class PushBall extends KActionSet {
         KServoAutoAction block = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         block.setName("block");
         this.addAction(block);
-        block.setDependentActions(wait, untilShootingDone);
+        block.setDependentActions(wait, untilShootingDone, release);
 
-//        KCRServoAutoAction stopPushRight = new KCRServoAutoAction(pusher.getKickerRight(), 0);
-//        stopPushRight.setName("stopPushRight");
-//        stopPushRight.setDependentActions(wait, untilShootingDone);
-//        this.addAction(stopPushRight);
-//
-//        KCRServoAutoAction stopPushLeft = new KCRServoAutoAction(pusher.getKickerLeft(), 0);
-//        stopPushLeft.setName("stopPushLeft");
-//        stopPushLeft.setDependentActions(wait, untilShootingDone);
-//        this.addAction(stopPushLeft);
 
         KLog.d("teleop", "pusher Stopped(based off intake)");
 
