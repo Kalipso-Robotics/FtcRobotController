@@ -27,10 +27,10 @@ public class PushBall extends KActionSet {
         wait.setDependentActions(untilShootingDone);
         this.addAction(wait);
 
-        KServoAutoAction block = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-        block.setName("block");
-        this.addAction(block);
-        block.setDependentActions(wait, untilShootingDone, release);
+//        KServoAutoAction block = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+//        block.setName("block");
+//        this.addAction(block);
+//        block.setDependentActions(wait, untilShootingDone, release);
 
 
         KLog.d("teleop", "pusher Stopped(based off intake)");
