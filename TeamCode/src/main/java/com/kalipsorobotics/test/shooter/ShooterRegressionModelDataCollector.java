@@ -1,10 +1,12 @@
 package com.kalipsorobotics.test.shooter;
 
+import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
+import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.modules.Intake;
@@ -27,10 +29,11 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     Intake intake = null;
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
+    RunIntakeUntilFullSpeed runUntilFullSpeed = null;
     TurretAutoAlign turretAutoAlign = null;
     Stopper stopper = null;
     KServoAutoAction stop = null;
-    ShootAllAction shootAction = null;
+//    ShootAllAction shootAction = null;
     OpModeUtilities opModeUtilities = null;
     Turret turret = null;
     private double rps = 26.2;
@@ -49,9 +52,10 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
         intake = new Intake(opModeUtilities);
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
+        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+//        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kFileWriter.writeLine("distance, rps, hood position");
     }
 
@@ -85,14 +89,16 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
                 KLog.d("Regression Module Data Collector", "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);
             }
             if (kGamePad1.isButtonBFirstPressed()) { //shoot
-                if (shootAction != null || shootAction.getIsDone()) {
                     shooter.getHood().setPosition(hoodPosition);
                     shooter.goToRPS(rps);
+                    stopper.getStopper().setTargetPosition(0.7);
+                    if (runUntilFullSpeed != null || runUntilFullSpeed.getIsDone()) {
+                        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
+                    }
                     KLog.d("Regression Module Data Collector", "Shooter Ready set");
                     //shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
-                    setLastShooterAction(shootAction);
                     KLog.d("Regression Module Data Collector", "ball shot");
-                }
+
             }
 
             if (kGamePad1.isButtonXFirstPressed()) {
