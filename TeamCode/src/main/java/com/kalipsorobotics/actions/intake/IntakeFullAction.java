@@ -8,7 +8,7 @@ import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.TripleColorSensor;
 
 public class IntakeFullAction extends KActionSet {
-    public IntakeFullAction(Intake intake, int maxTimeout){
+    public IntakeFullAction(Intake intake, double maxTimeout){
 
         IntakeRun intakeRun = new IntakeRun(intake);
         intakeRun.setName("intakeRun");

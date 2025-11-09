@@ -272,7 +272,7 @@ public class PurePursuitAction extends Action {
 
 
         if(xVelocity < 0.01 && yVelocity < 0.01 && thetaVelocity < 0.01) {
-            if(timeoutTimer.milliseconds() > 1000) {
+            if(timeoutTimer.milliseconds() > 2000) {
                 finishedMoving();
             }
         } else {
