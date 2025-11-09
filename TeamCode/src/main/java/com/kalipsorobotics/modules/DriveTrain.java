@@ -178,6 +178,15 @@ public class DriveTrain {
     }
 
     public void resetWheelOdom() {
+        KLog.d("debug_OpMode_Transfer", "Reset Encoders" + Thread.currentThread().getId());
+
+        // Print stack trace to see where this is being called from
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        KLog.d("debug_OpMode_Transfer", "resetWheelOdom() called from:");
+        for (int i = 0; i < stackTrace.length; i++) {
+            KLog.d("debug_OpMode_Transfer", "  [" + i + "] " + stackTrace[i].toString());
+        }
+
         fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

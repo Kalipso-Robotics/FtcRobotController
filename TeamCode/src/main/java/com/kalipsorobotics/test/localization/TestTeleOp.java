@@ -3,15 +3,14 @@ package com.kalipsorobotics.test.localization;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
-import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@Autonomous
-public class TestAuto extends KTeleOp {
+@TeleOp(name = "TestTeleOp", group = "Test")
+public class TestTeleOp extends KTeleOp {
     DriveTrain driveTrain;
     IMUModule imuModule;
 
@@ -20,11 +19,9 @@ public class TestAuto extends KTeleOp {
     protected void initializeRobot() {
         super.initializeRobot();
 
-        DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         imuModule = IMUModule.getInstance(opModeUtilities);
 
-        Odometry.setInstanceNull();
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
     }
@@ -33,30 +30,20 @@ public class TestAuto extends KTeleOp {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain);
-        purePursuitAction.addPoint(400, 400, 90);
+        KLog.d("debug_OpMode_Transfer", "TeleOp right " +
+                odometry.getRightEncoderMM() +
+                " left " + odometry.getLeftEncoderMM() +
+                " back " + odometry.getBackEncoderMM() +
+                " imu " + odometry.getIMUHeading());
+
+
+        KLog.d("debug_OpMode_Transfer", "TeleOp " + odometry.toString());
 
         waitForStart();
         while (opModeIsActive()) {
-            purePursuitAction.updateCheckDone();
-            KLog.d("debug_OpMode_Transfer", "Auto Position " + SharedData.getOdometryPosition());
+            KLog.d("debug_OpMode_Transfer", "TeleOp Position " + SharedData.getOdometryPosition());
         }
-        KLog.d("debug_OpMode_Transfer", "Auto End right (supposed to be 0)" +
-                odometry.getRightEncoderMM() +
-                " left " + odometry.getLeftEncoderMM() +
-                " back " + odometry.getBackEncoderMM() +
-                " imu " + odometry.getIMUHeading());
 
-
-        KLog.d("debug_OpMode_Transfer", "Auto End " + odometry.toString());
         cleanupRobot();
-        KLog.d("debug_OpMode_Transfer", "Auto After Cleanup right " +
-                odometry.getRightEncoderMM() +
-                " left " + odometry.getLeftEncoderMM() +
-                " back " + odometry.getBackEncoderMM() +
-                " imu " + odometry.getIMUHeading());
-
-
-        KLog.d("debug_OpMode_Transfer", "Auto After Cleanup " + odometry.toString());
     }
 }
