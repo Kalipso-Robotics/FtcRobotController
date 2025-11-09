@@ -33,8 +33,8 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     ShootAllAction shootAction = null;
     OpModeUtilities opModeUtilities = null;
     Turret turret = null;
-    private double rps = 30;
-    private double hoodPosition = 0;
+    private double rps = 26.2;
+    private double hoodPosition = 0.55;
     private double distance = 0;
     private boolean isIncrementRps = true;
     private double hoodIncrementation = 0.05;
@@ -66,11 +66,16 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
 
                 BUTTON X: SWITCH CURRENT INCREMENT (RPS & HOOD POSITION)
 
-                RIGHT BUMPER: increment current selected incrementation
-                RIGHT TRIGGER: increment current selected incrementation
+                RIGHT BUMPER: increment current selected incrementation +
+                RIGHT TRIGGER: increment current selected incrementation -
 
-                LEFT BUMPER: increment current selected incrementation
-                LEFT TRIGGER: increment current selected incrementation
+                LEFT BUMPER: increment current selected incrementation + bigi
+                LEFT TRIGGER: increment current selected incrementation - big
+
+                hood max is 0.55
+
+                rps: 26.2
+                hood: 0.55
              */
 
             //TODO make csv converter into array for easy coding
@@ -84,7 +89,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
                     shooter.getHood().setPosition(hoodPosition);
                     shooter.goToRPS(rps);
                     KLog.d("Regression Module Data Collector", "Shooter Ready set");
-                    shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+                    //shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
                     setLastShooterAction(shootAction);
                     KLog.d("Regression Module Data Collector", "ball shot");
                 }
