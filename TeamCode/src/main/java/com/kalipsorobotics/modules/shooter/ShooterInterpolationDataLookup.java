@@ -27,26 +27,27 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
     // Static data from ShooterTestedManualData.csv
     // Format: DistanceMM, RPS, Hood Position Relative
     private static final ArrayList<DataPoint> DATA_POINTS = new ArrayList<DataPoint>() {{
-        add(new DataPoint(540, 34, 0.1));
-        add(new DataPoint(682, 34, 0.31));
-        add(new DataPoint(913, 35, 0.38));
-        add(new DataPoint(1108, 36, 0.55));
-        add(new DataPoint(1323, 37, 0.55));
-        add(new DataPoint(1580, 38, 0.55));
-        add(new DataPoint(1698, 39, 0.55));
-        add(new DataPoint(1808, 40, 0.55));
-        add(new DataPoint(1955, 41, 0.55));
-        add(new DataPoint(2057, 42, 0.55));
-        add(new DataPoint(2179, 44, 0.55));
-        add(new DataPoint(2330, 45, 0.55));
-        add(new DataPoint(2516, 46, 0.55));
-        add(new DataPoint(2639, 48, 0.55));
-        add(new DataPoint(2825, 49, 0.55));
-        add(new DataPoint(2952, 50, 0.55));
-        add(new DataPoint(3076, 50.5, 0.55));
-        add(new DataPoint(3304, 51, 0.55));
-        add(new DataPoint(3389, 51, 0.55));
-        add(new DataPoint(3547, 51.5, 0.55));
+//        add(new DataPoint(540, 34, 0.1));
+//        add(new DataPoint(682, 34, 0.31));
+//        add(new DataPoint(913, 35, 0.38));
+//        add(new DataPoint(1108, 36, 0.55));
+//        add(new DataPoint(1323, 37, 0.55));
+//        add(new DataPoint(1580, 38, 0.55));
+//        add(new DataPoint(1698, 39, 0.55));
+//        add(new DataPoint(1808, 40, 0.55));
+//        add(new DataPoint(1955, 41, 0.55));
+//        add(new DataPoint(2057, 42, 0.55));
+//        add(new DataPoint(2179, 44, 0.55));
+//        add(new DataPoint(2330, 45, 0.55));
+//        add(new DataPoint(2516, 46, 0.55));
+//        add(new DataPoint(2639, 48, 0.55));
+//        add(new DataPoint(2825, 49, 0.55));
+//        add(new DataPoint(2952, 50, 0.55));
+//        add(new DataPoint(3076, 50.5, 0.55));
+//        add(new DataPoint(3304, 51, 0.55));
+//        add(new DataPoint(3389, 51, 0.55));
+//        add(new DataPoint(3547, 51.5, 0.55));
+        add(new DataPoint(3547, 54, 0.55));
     }};
 
     /**

@@ -9,10 +9,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-public class IntakeRun extends KActionSet {
+public class IntakeRun extends Action {
+    Intake intake;
     public IntakeRun(Intake intake) {
-        RunUntilStallAction runIntake = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3);
-        runIntake.setName("runIntake");
-        this.addAction(runIntake);
+        this.intake = intake;
+    }
+
+    @Override
+    protected void update() {
+        intake.getIntakeMotor().setPower(1);
+        isDone = true;
     }
 }

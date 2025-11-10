@@ -1,5 +1,6 @@
 package com.kalipsorobotics.test.shooter;
 
+import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.localization.Odometry;
@@ -29,6 +30,9 @@ public class ShooterDataCollector extends KTeleOp {
     private double targetRPS = 0.0;
     private double hoodPosition = 0.5;
 
+    KServoAutoAction stopperOpen = null;
+    KServoAutoAction stopperClose = null;
+
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
@@ -50,6 +54,9 @@ public class ShooterDataCollector extends KTeleOp {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
+
+        stopperOpen = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
+        stopperClose = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
 
         telemetry.addLine("ShooterDataCollector Initialized");
         telemetry.addLine("Controls:");
@@ -121,10 +128,15 @@ public class ShooterDataCollector extends KTeleOp {
             // ========== Kick Ball with Gamepad1 Y ==========
             if (gamepad1.y) {
                 // Create a new KickBall action if one doesn't exist or has completed
-                if (pushBall == null || pushBall.getIsDone()) {
-                    pushBall = new PushBall(stopper, intake);
-                    setLastStopperAction(pushBall);
-                }
+                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_OPEN_POS);
+            } else {
+                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
+            }
+
+            if (gamepad1.right_stick_y != 0) {
+                intake.getIntakeMotor().setPower(-gamepad1.right_stick_y);
+            } else {
+                intake.getIntakeMotor().setPower(0);
             }
 
             if (gamepad1.a) {

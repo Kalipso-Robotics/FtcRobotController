@@ -41,7 +41,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     private double distance = 0;
     private boolean isIncrementRps = true;
     private double hoodIncrementation = 0.05;
-    private double rpsIncrementation = 0.01;
+    private double rpsIncrementation = 0.5;
     @Override
     public void initializeRobot() {
         super.initializeRobot(); // Initialize base class components including kGamePad1
@@ -88,18 +88,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
                 KLog.d("Regression Module Data Collector", "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);
             }
-            if (kGamePad1.isButtonBFirstPressed()) { //shoot
-                    shooter.getHood().setPosition(hoodPosition);
-                    shooter.goToRPS(rps);
-                    stopper.getStopper().setTargetPosition(0.7);
-                    if (runUntilFullSpeed != null || runUntilFullSpeed.getIsDone()) {
-                        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
-                    }
-                    KLog.d("Regression Module Data Collector", "Shooter Ready set");
-                    //shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
-                    KLog.d("Regression Module Data Collector", "ball shot");
 
-            }
 
             if (kGamePad1.isButtonXFirstPressed()) {
                 if (isIncrementRps) {
@@ -157,18 +146,41 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
                 shooter.stop();
             }
 
+            if (kGamePad1.isDpadUpFirstPressed()) {
+                if (runUntilFullSpeed != null || runUntilFullSpeed.getIsDone()) {
+                    runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
+                    setLastIntakeAction(runUntilFullSpeed);
+                }
+                stopper.getStopper().setPosition(0.7);
+            }
+
+//            if (kGamePad1.isDpadLeftFirstPressed()) {
+//                stopper.getStopper().setPosition(0.7);
+//            }
+
             if (isIncrementRps) {
                 telemetry.addData("Current Increment: ", "RPS");
             } else {
                 telemetry.addData("Current Increment: ", "Hood Position");
             }
+
+            if (kGamePad1.isButtonBFirstPressed()) { //shoot
+                shooter.getHood().setPosition(hoodPosition);
+                shooter.goToRPS(rps);
+                KLog.d("Regression Module Data Collector", "Shooter Ready set");
+                //shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+                KLog.d("Regression Module Data Collector", "ball shot");
+
+            }
+
+
             telemetry.addData("RPS: ", rps);
             telemetry.addData("Hood Position", hoodPosition);
             telemetry.update();
-            
+
+            turretAutoAlign.updateCheckDone();
             // Update all actions
             updateActions();
-            turretAutoAlign.updateCheckDone();
         }
         kFileWriter.close();
     }
