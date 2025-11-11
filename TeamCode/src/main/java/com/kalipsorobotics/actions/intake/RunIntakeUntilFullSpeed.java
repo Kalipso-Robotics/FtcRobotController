@@ -37,7 +37,7 @@ public class RunIntakeUntilFullSpeed extends Action {
         double curVelocity = Math.abs(motor.getVelocity());
 
 
-        if (curVelocity >= FULL_SPEED_THRESHOLD) {
+        if (curVelocity > FULL_SPEED_THRESHOLD) {
             if (!atFullSpeed) {
                 // timer start
                 atFullSpeed = true;
@@ -46,7 +46,7 @@ public class RunIntakeUntilFullSpeed extends Action {
             }
 
             // time at max speed
-            if (fullSpeedTimer.seconds() >= FULL_SPEED_DURATION_SEC) {
+            if (fullSpeedTimer.seconds() > FULL_SPEED_DURATION_SEC) {
                 isDone = true;
                 KLog.d("intake", "Full speed maintained for " + FULL_SPEED_DURATION_SEC + " seconds");
             }

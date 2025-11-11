@@ -18,7 +18,7 @@ public class ShooterReady extends Action {
     private final Point target;
     private final LaunchPosition launchPosition;
 
-    private static final double TARGET_RPS_TOLERANCE = 1.0;
+    private static final double TARGET_RPS_TOLERANCE = 0.1;
 
     private boolean useAprilTag = false;
 
@@ -62,7 +62,9 @@ public class ShooterReady extends Action {
         // Check if we've reached target RPS
         if (shooter.getShooter1().isAtTargetRPS(TARGET_RPS_TOLERANCE)) {
             isDone = true;
-            KLog.d("shooter_ready", "RPS within tolerance - Ready!");
+            KLog.d("shooter_ready", "RPS within tolerance - Ready!" + shooter.getRPS());
+            KLog.d("shooterAdjust", "RPS within tolerance - Ready!" + shooter.getRPS());
+
         }
     }
 

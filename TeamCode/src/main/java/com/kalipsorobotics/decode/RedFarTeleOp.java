@@ -124,7 +124,7 @@ public class RedFarTeleOp extends KTeleOp {
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
-        pushBall = new PushBall(stopper, intake);
+        pushBall = new PushBall(stopper, intake, shooter);
         openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3);

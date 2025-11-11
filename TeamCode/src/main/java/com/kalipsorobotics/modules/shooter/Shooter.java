@@ -50,6 +50,9 @@ public class Shooter {
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
         motor1.setDirection(DcMotorSimple.Direction.REVERSE);
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
 
         shooter1 = new KMotor(motor1, 1.0/100.0, 0, 0);
         shooter2 = new KMotor(motor2, 1.0/100.0, 0, 0);
@@ -150,7 +153,7 @@ public class Shooter {
      */
     public void goToRPS(double targetRPS) {
         shooter1.goToRPS(targetRPS);
-        shooter2.setPower(shooter1.getPower());
+        shooter2.goToRPS(targetRPS);
     }
 
     /**

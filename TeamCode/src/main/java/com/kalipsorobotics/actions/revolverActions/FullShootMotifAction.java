@@ -21,7 +21,7 @@ public class FullShootMotifAction extends KActionSet {
         shooterReady1.setName("shooterReady1");
         this.addAction(shooterReady1);
 
-        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(revolver, stopper, intake, motifPattern.first, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(shooter, revolver, stopper, intake, motifPattern.first, detectColorsAction);
         revolverShootColorAction1.setName("revolverShootColorAction1");
         this.addAction(revolverShootColorAction1);
         revolverShootColorAction1.setDependentActions(shooterReady1);
@@ -31,7 +31,7 @@ public class FullShootMotifAction extends KActionSet {
         this.addAction(shooterReady2);
         shooterReady2.setDependentActions(revolverShootColorAction1);
 
-        RevolverShootColorAction revolverShootColorAction2 = new RevolverShootColorAction(revolver, stopper, intake, motifPattern.middle, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction2 = new RevolverShootColorAction(shooter, revolver, stopper, intake, motifPattern.middle, detectColorsAction);
         revolverShootColorAction2.setName("revolverShootColorAction2");
         revolverShootColorAction2.setDependentActions(revolverShootColorAction1, shooterReady2);
         this.addAction(revolverShootColorAction2);
@@ -41,7 +41,7 @@ public class FullShootMotifAction extends KActionSet {
         this.addAction(shooterReady3);
         shooterReady2.setDependentActions(revolverShootColorAction2);
 
-        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(revolver, stopper, intake, motifPattern.last, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(shooter, revolver, stopper, intake, motifPattern.last, detectColorsAction);
         revolverShootColorAction3.setName("revolverShootColorAction3");
         revolverShootColorAction3.setDependentActions(revolverShootColorAction2, shooterReady3);
         this.addAction(revolverShootColorAction3);

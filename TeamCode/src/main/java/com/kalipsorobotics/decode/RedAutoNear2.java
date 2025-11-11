@@ -132,7 +132,7 @@ public class RedAutoNear2 extends KTeleOp {
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
-        pushBall = new PushBall(stopper, intake);
+        pushBall = new PushBall(stopper, intake, shooter);
     }
 
     @Override
@@ -145,7 +145,7 @@ public class RedAutoNear2 extends KTeleOp {
         ready.setName("ready");
         redAutoNear.addAction(ready);
 
-        PushBall shoot = new PushBall(stopper, intake);
+        PushBall shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
         shoot.setDependentActions(ready);
         redAutoNear.addAction(shoot);
@@ -167,7 +167,7 @@ public class RedAutoNear2 extends KTeleOp {
         first3Intake.setDependentActions(shoot);
         redAutoNear.addAction(first3Intake);
 
-        PushBall shoot2 = new PushBall(stopper, intake);
+        PushBall shoot2 = new PushBall(stopper, intake, shooter);
         shoot2.setName("shoot2");
         shoot2.setDependentActions(moveToFirstBalls);
         redAutoNear.addAction(shoot2);

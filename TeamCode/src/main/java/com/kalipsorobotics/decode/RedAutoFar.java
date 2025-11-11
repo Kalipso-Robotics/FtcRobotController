@@ -9,6 +9,7 @@ import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
+import com.kalipsorobotics.actions.shooter.AdjustShooterSpeedAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
@@ -132,7 +133,7 @@ public class RedAutoFar extends KTeleOp {
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
-        pushBall = new PushBall(stopper, intake);
+        pushBall = new PushBall(stopper, intake, shooter);
     }
 
     @Override
@@ -145,7 +146,7 @@ public class RedAutoFar extends KTeleOp {
         ready.setName("ready");
         redAutoNear.addAction(ready);
 
-        PushBall shoot = new PushBall(stopper, intake);
+        PushBall shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
         shoot.setDependentActions(ready);
         redAutoNear.addAction(shoot);
@@ -167,7 +168,7 @@ public class RedAutoFar extends KTeleOp {
         first3Intake.setDependentActions(shoot);
         redAutoNear.addAction(first3Intake);
 
-        PushBall shoot2 = new PushBall(stopper, intake);
+        PushBall shoot2 = new PushBall(stopper, intake, shooter);
         shoot2.setName("shoot2");
         shoot2.setDependentActions(moveToFirstBalls);
         redAutoNear.addAction(shoot2);
@@ -208,7 +209,7 @@ public class RedAutoFar extends KTeleOp {
         second6Intake.setDependentActions(shoot2);
         redAutoNear.addAction(second6Intake);
 
-        PushBall shoot3 = new PushBall(stopper, intake);
+        PushBall shoot3 = new PushBall(stopper, intake, shooter);
         shoot3.setName("shoot3");
         shoot3.setDependentActions(moveToLeverBalls, ready2);
         redAutoNear.addAction(shoot3);
@@ -245,7 +246,7 @@ public class RedAutoFar extends KTeleOp {
         third9Intake.setDependentActions(shoot3);
         redAutoNear.addAction(third9Intake);
 
-        PushBall shoot4 = new PushBall(stopper, intake);
+        PushBall shoot4 = new PushBall(stopper, intake, shooter);
         shoot4.setName("shoot4");
         shoot4.setDependentActions(moveToDepotBalls);
         redAutoNear.addAction(shoot4);
