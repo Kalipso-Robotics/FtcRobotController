@@ -17,7 +17,7 @@ public class FullShootMotifAction extends KActionSet {
 
         DetectColorsAction detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
-        ShooterReady shooterReady1 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
+        ShooterReady shooterReady1 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
         shooterReady1.setName("shooterReady1");
         this.addAction(shooterReady1);
 
@@ -26,7 +26,7 @@ public class FullShootMotifAction extends KActionSet {
         this.addAction(revolverShootColorAction1);
         revolverShootColorAction1.setDependentActions(shooterReady1);
 
-        ShooterReady shooterReady2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
+        ShooterReady shooterReady2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
         shooterReady2.setName("shooterReady2");
         this.addAction(shooterReady2);
         shooterReady2.setDependentActions(revolverShootColorAction1);
@@ -36,7 +36,7 @@ public class FullShootMotifAction extends KActionSet {
         revolverShootColorAction2.setDependentActions(revolverShootColorAction1, shooterReady2);
         this.addAction(revolverShootColorAction2);
 
-        ShooterReady shooterReady3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
+        ShooterReady shooterReady3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
         shooterReady3.setName("shooterReady3");
         this.addAction(shooterReady3);
         shooterReady2.setDependentActions(revolverShootColorAction2);

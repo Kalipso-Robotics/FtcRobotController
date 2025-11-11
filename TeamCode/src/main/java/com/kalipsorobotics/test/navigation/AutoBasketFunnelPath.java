@@ -40,7 +40,7 @@ public class AutoBasketFunnelPath extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = new GoBildaOdoModule(opModeUtilities);
 
         Odometry.setInstanceNull();
-        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, 0, 0, 0);
+        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
         SharedData.resetOdometryPosition();
 
         final int INTAKE_SAMPLE_X = -590-300;

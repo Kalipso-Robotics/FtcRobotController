@@ -9,10 +9,10 @@ import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
-import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
+import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.cameraVision.AllianceSetup;
 import com.kalipsorobotics.cameraVision.MotifCamera;
@@ -21,9 +21,9 @@ import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.MotifColor;
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
@@ -36,25 +36,25 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 
-@Autonomous(name = "RedAutoFarZone")
-public class RedAutoFar extends KTeleOp {
+@Autonomous(name = "RedAutoNearZone2")
+public class RedAutoNear2 extends KTeleOp {
     KActionSet redAutoNear;
 
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_FAR;
     final double SHOOT_FAR_X = 150;
-    final double SHOOT_FAR_Y = -40  * allianceSetup.getPolarity();
+    final double SHOOT_FAR_Y = -40 * allianceSetup.getPolarity();
     final double LEVER_X = 1500;
-    final double LEVER_Y = 1050  * allianceSetup.getPolarity();
+    final double LEVER_Y = 1050 * allianceSetup.getPolarity();
     final double DEPOT_X = 200; // final ending 0 x
-    final double DEPOT_Y = 1100  * allianceSetup.getPolarity(); // final ending 1,165.2 , 135degree heading
-    final double FIRST_BALL_X = 680;
-    final double FIRST_BALL_Y = 1050  * allianceSetup.getPolarity();
+    final double DEPOT_Y = 1100 * allianceSetup.getPolarity(); // final ending 1,165.2 , 135degree heading
+    final double THIRD_BALL_X = 680;
+    final double THIRD_BALL_Y = 1050 * allianceSetup.getPolarity();
     final double SECOND_BALL_X = 1230;
-    final double SECOND_BALL_Y = 1000  * allianceSetup.getPolarity();
-    final double THIRD_BALL_X = 1830;
-    final double THIRD_BALL_Y = 1000  * allianceSetup.getPolarity();
+    final double SECOND_BALL_Y = 1000 * allianceSetup.getPolarity();
+    final double FIRST_BALL_X = 1830;
+    final double FIRST_BALL_Y = 1000 * allianceSetup.getPolarity();
     private DriveTrain driveTrain;
     TripleColorSensor colorSensors = null;
     Shooter shooter = null;
@@ -99,7 +99,7 @@ public class RedAutoFar extends KTeleOp {
 
         // Create odometry
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3028.98, 746.18, Math.toDegrees(-2.4137)); //3015.93, 765.86, -2.4030
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         colorSensors = new TripleColorSensor(opModeUtilities);
@@ -141,7 +141,7 @@ public class RedAutoFar extends KTeleOp {
 
         // ----------------- FIRST SHOOT ----------------------
 
-        ShooterReady ready = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.FAR); //TODO launch pos with polarity
+        ShooterReady ready = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.MIDDLE_RED); //TODO launch pos with polarity
         ready.setName("ready");
         redAutoNear.addAction(ready);
 
@@ -153,8 +153,8 @@ public class RedAutoFar extends KTeleOp {
         // ----------------- TRIP 1 ----------------------
 
         PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
-        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y-660, 90 * allianceSetup.getPolarity());
-        moveToFirstBalls.addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90 * allianceSetup.getPolarity());
+        moveToFirstBalls.addPoint(THIRD_BALL_X, FIRST_BALL_Y - 660, 90 * allianceSetup.getPolarity());
+        moveToFirstBalls.addPoint(THIRD_BALL_X, FIRST_BALL_Y, 90 * allianceSetup.getPolarity());
         moveToFirstBalls.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 30 * allianceSetup.getPolarity()); // move to shoot
         moveToFirstBalls.setName("moveToFirstBalls");
         moveToFirstBalls.setDependentActions(shoot);
@@ -178,91 +178,91 @@ public class RedAutoFar extends KTeleOp {
         redAutoNear.addAction(stop);
 
         // ----------------- TRIP 2 ----------------------
-
-        PurePursuitAction moveToLeverBalls = new PurePursuitAction(driveTrain);
-        moveToLeverBalls.setName("moveToLeverBalls");
-        moveToLeverBalls.setDependentActions(shoot2, moveToFirstBalls);
-        moveToLeverBalls.addPoint(SECOND_BALL_X, (SECOND_BALL_Y-660) *allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        // move to intake
-        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90 * allianceSetup.getPolarity());
-        moveToLeverBalls.addPoint(LEVER_X -200, LEVER_Y -300, 90 * allianceSetup.getPolarity());
-        // move to hit lever
-        moveToLeverBalls.addPoint(LEVER_X, LEVER_Y-300, 0 * allianceSetup.getPolarity());
-        moveToLeverBalls.addPoint(LEVER_X, LEVER_Y, 0 * allianceSetup.getPolarity());
-        moveToLeverBalls.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 45 * allianceSetup.getPolarity());
-        moveToLeverBalls.setFinalSearchRadius(30);
-        redAutoNear.addAction(moveToLeverBalls);
-
-        WaitAction waitForShoot2 = new WaitAction(4000);
-        waitForShoot2.setName("wait");
-        waitForShoot2.setDependentActions(shoot2);
-        redAutoNear.addAction(waitForShoot2);
-
-        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
-        ready2.setName("ready2");
-        ready2.setDependentActions(waitForShoot2);
-        redAutoNear.addAction(ready2);
-
-        IntakeFullAction second6Intake = new IntakeFullAction(stopper, intake, 8);
-        second6Intake.setName("second6Intake");
-        second6Intake.setDependentActions(shoot2);
-        redAutoNear.addAction(second6Intake);
-
-        PushBall shoot3 = new PushBall(stopper, intake);
-        shoot3.setName("shoot3");
-        shoot3.setDependentActions(moveToLeverBalls, ready2);
-        redAutoNear.addAction(shoot3);
-
-        ShooterStop stop2 = new ShooterStop(shooter);
-        stop2.setName("stop2");
-        stop2.setDependentActions(shoot3);
-        redAutoNear.addAction(stop2);
-
-        // ----------------- TRIP 3 ----------------------
-
-        PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
-        moveToDepotBalls.setName("moveToDepotBalls");
-        moveToDepotBalls.setDependentActions(shoot3);
-        moveToDepotBalls.addPoint(DEPOT_X+300, DEPOT_Y, 145 * allianceSetup.getPolarity());
-        // move to intake
-        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 145 * allianceSetup.getPolarity());
-        moveToDepotBalls.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
-        moveToLeverBalls.setFinalSearchRadius(30);
-        redAutoNear.addAction(moveToDepotBalls);
-
-        WaitAction waitForShoot3 = new WaitAction(4000);
-        waitForShoot3.setName("wait");
-        waitForShoot3.setDependentActions(shoot3);
-        redAutoNear.addAction(waitForShoot3);
-
-        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
-        ready3.setName("ready2");
-        ready3.setDependentActions(waitForShoot3);
-        redAutoNear.addAction(ready3);
-
-        IntakeFullAction third9Intake = new IntakeFullAction(stopper, intake, 8);
-        third9Intake.setName("third9Intake");
-        third9Intake.setDependentActions(shoot3);
-        redAutoNear.addAction(third9Intake);
-
-        PushBall shoot4 = new PushBall(stopper, intake);
-        shoot4.setName("shoot4");
-        shoot4.setDependentActions(moveToDepotBalls);
-        redAutoNear.addAction(shoot4);
-
-        ShooterStop stop3 = new ShooterStop(shooter);
-        stop3.setName("stop2");
-        stop3.setDependentActions(shoot4);
-        redAutoNear.addAction(stop3);
-
-        // ----------------- PARK ----------------------
-
-        PurePursuitAction park = new PurePursuitAction(driveTrain);
-        park.setName("park");
-        park.setDependentActions(shoot4);
-        park.addPoint(400, 400, 90);
-        park.setMaxCheckDoneCounter(20);
-        redAutoNear.addAction(park);
+//
+//        PurePursuitAction moveToLeverBalls = new PurePursuitAction(driveTrain);
+//        moveToLeverBalls.setName("moveToLeverBalls");
+//        moveToLeverBalls.setDependentActions(shoot2, moveToFirstBalls);
+//        moveToLeverBalls.addPoint(SECOND_BALL_X, (SECOND_BALL_Y-660) *allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+//        // move to intake
+//        moveToLeverBalls.addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90 * allianceSetup.getPolarity());
+//        moveToLeverBalls.addPoint(LEVER_X -200, LEVER_Y -300, 90 * allianceSetup.getPolarity());
+//        // move to hit lever
+//        moveToLeverBalls.addPoint(LEVER_X, LEVER_Y-300, 0 * allianceSetup.getPolarity());
+//        moveToLeverBalls.addPoint(LEVER_X, LEVER_Y, 0 * allianceSetup.getPolarity());
+//        moveToLeverBalls.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 45 * allianceSetup.getPolarity());
+//        moveToLeverBalls.setFinalSearchRadius(30);
+//        redAutoNear.addAction(moveToLeverBalls);
+//
+//        WaitAction waitForShoot2 = new WaitAction(4000);
+//        waitForShoot2.setName("wait");
+//        waitForShoot2.setDependentActions(shoot2);
+//        redAutoNear.addAction(waitForShoot2);
+//
+//        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.MIDDLE_RED);
+//        ready2.setName("ready2");
+//        ready2.setDependentActions(waitForShoot2);
+//        redAutoNear.addAction(ready2);
+//
+//        IntakeFullAction second6Intake = new IntakeFullAction(stopper, intake, 8);
+//        second6Intake.setName("second6Intake");
+//        second6Intake.setDependentActions(shoot2);
+//        redAutoNear.addAction(second6Intake);
+//
+//        PushBall shoot3 = new PushBall(stopper, intake);
+//        shoot3.setName("shoot3");
+//        shoot3.setDependentActions(moveToLeverBalls, ready2);
+//        redAutoNear.addAction(shoot3);
+//
+//        ShooterStop stop2 = new ShooterStop(shooter);
+//        stop2.setName("stop2");
+//        stop2.setDependentActions(shoot3);
+//        redAutoNear.addAction(stop2);
+//
+//        // ----------------- TRIP 3 ----------------------
+//
+//        PurePursuitAction moveToDepotBalls = new PurePursuitAction(driveTrain);
+//        moveToDepotBalls.setName("moveToDepotBalls");
+//        moveToDepotBalls.setDependentActions(shoot3);
+//        moveToDepotBalls.addPoint(DEPOT_X+300, DEPOT_Y, 145 * allianceSetup.getPolarity());
+//        // move to intake
+//        moveToDepotBalls.addPoint(DEPOT_X, DEPOT_Y, 145 * allianceSetup.getPolarity());
+//        moveToDepotBalls.addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
+//        moveToLeverBalls.setFinalSearchRadius(30);
+//        redAutoNear.addAction(moveToDepotBalls);
+//
+//        WaitAction waitForShoot3 = new WaitAction(4000);
+//        waitForShoot3.setName("wait");
+//        waitForShoot3.setDependentActions(shoot3);
+//        redAutoNear.addAction(waitForShoot3);
+//
+//        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.MIDDLE_RED);
+//        ready3.setName("ready2");
+//        ready3.setDependentActions(waitForShoot3);
+//        redAutoNear.addAction(ready3);
+//
+//        IntakeFullAction third9Intake = new IntakeFullAction(stopper, intake, 8);
+//        third9Intake.setName("third9Intake");
+//        third9Intake.setDependentActions(shoot3);
+//        redAutoNear.addAction(third9Intake);
+//
+//        PushBall shoot4 = new PushBall(stopper, intake);
+//        shoot4.setName("shoot4");
+//        shoot4.setDependentActions(moveToDepotBalls);
+//        redAutoNear.addAction(shoot4);
+//
+//        ShooterStop stop3 = new ShooterStop(shooter);
+//        stop3.setName("stop2");
+//        stop3.setDependentActions(shoot4);
+//        redAutoNear.addAction(stop3);
+//
+//        // ----------------- PARK ----------------------
+//
+//        PurePursuitAction park = new PurePursuitAction(driveTrain);
+//        park.setName("park");
+//        park.setDependentActions(shoot4);
+//        park.addPoint(400, 400, 90);
+//        park.setMaxCheckDoneCounter(20);
+//        redAutoNear.addAction(park);
 
         waitForStart();
         while (opModeIsActive()) {

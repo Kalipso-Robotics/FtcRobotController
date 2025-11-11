@@ -36,13 +36,13 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 
-@Autonomous(name = "RedAutoFarZone")
+@Autonomous(name = "RedAutoNearZone")
 public class RedAutoNear extends KTeleOp {
     KActionSet redAutoNear;
 
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
-    protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
+    protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_FAR;
 //    final double SHOOT_FAR_X = 150;
 //    final double SHOOT_FAR_Y = -40  * allianceSetup.getPolarity();
     final double SHOOT_NEAR_X = 0; //update
@@ -118,11 +118,11 @@ public class RedAutoNear extends KTeleOp {
         intakeRun = new IntakeRun(intake);
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(intake, 10);
+        intakeFullAction = new IntakeFullAction(stopper, intake, 10);
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
-        turretAutoAlign = new TurretAutoAlign(turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
@@ -143,7 +143,7 @@ public class RedAutoNear extends KTeleOp {
 
         // ----------------- FIRST SHOOT ----------------------
 
-        ShooterReady ready = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.MIDDLE); //TODO launch pos with polarity, update shooter red target far value
+        ShooterReady ready = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.MIDDLE); //TODO launch pos with polarity
         ready.setName("ready");
         redAutoNear.addAction(ready);
 
@@ -155,7 +155,7 @@ public class RedAutoNear extends KTeleOp {
         // ----------------- TRIP 1 ----------------------
 
         PurePursuitAction moveToFirstBalls = new PurePursuitAction(driveTrain);
-        moveToFirstBalls.addPoint(THIRD_BALL_X, THIRD_BALL_Y-660, 90 * allianceSetup.getPolarity());
+        moveToFirstBalls.addPoint(THIRD_BALL_X, THIRD_BALL_Y, 90 * allianceSetup.getPolarity());
         moveToFirstBalls.addPoint(THIRD_BALL_X, THIRD_BALL_Y, 90 * allianceSetup.getPolarity());
         //move to hit lever
         PurePursuitAction moveToLeverBalls = new PurePursuitAction(driveTrain);
@@ -178,7 +178,7 @@ public class RedAutoNear extends KTeleOp {
 
         KLog.d("purepursuit", "moveToFirstBalls done");
 
-        IntakeFullAction first3Intake = new IntakeFullAction(intake, 8);
+        IntakeFullAction first3Intake = new IntakeFullAction(stopper, intake, 8);
         first3Intake.setName("first3Intake");
         first3Intake.setDependentActions(shoot);
         redAutoNear.addAction(first3Intake);
@@ -200,12 +200,12 @@ public class RedAutoNear extends KTeleOp {
         moveToLeverBalls.addPoint(LEVER_X -200, LEVER_Y -300, 90 * allianceSetup.getPolarity());
         moveToLeverBalls.setDependentActions(shoot, moveToFirstBalls);
 
-        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.NEAR);
+        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
         ready2.setName("ready2");
         ready2.setDependentActions(waitForShoot, moveToLeverBalls);
         redAutoNear.addAction(ready2);
 
-        IntakeFullAction second6Intake = new IntakeFullAction(intake, 8);
+        IntakeFullAction second6Intake = new IntakeFullAction(stopper, intake, 8);
         second6Intake.setName("second6Intake");
         second6Intake.setDependentActions(shoot2);
         redAutoNear.addAction(second6Intake);
@@ -237,12 +237,12 @@ public class RedAutoNear extends KTeleOp {
         waitForShoot3.setDependentActions(shoot3);
         redAutoNear.addAction(waitForShoot3);
 
-        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.NEAR);
+        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
         ready3.setName("ready2");
         ready3.setDependentActions(waitForShoot3);
         redAutoNear.addAction(ready3);
 
-        IntakeFullAction third9Intake = new IntakeFullAction(intake, 8);
+        IntakeFullAction third9Intake = new IntakeFullAction(stopper, intake, 8);
         third9Intake.setName("third9Intake");
         third9Intake.setDependentActions(shoot3);
         redAutoNear.addAction(third9Intake);

@@ -36,7 +36,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class RedFarTeleOp extends KTeleOp {
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
-    protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_NEAR;
+    protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_FAR;
     private DriveTrain driveTrain;
     private Shooter shooter = null;
     private Intake intake = null;
@@ -121,8 +121,8 @@ public class RedFarTeleOp extends KTeleOp {
         //todo just fed in testing motif pattern change later
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 
-        shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
+        shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shooterStop = new ShooterStop(shooter);
         pushBall = new PushBall(stopper, intake);
         openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
@@ -177,7 +177,7 @@ public class RedFarTeleOp extends KTeleOp {
             }
 
             if (shooterReadyNearPressed) {
-                launchPosition = LaunchPosition.NEAR;
+                launchPosition = LaunchPosition.FAR;
             } else if (shooterReadyMiddlePressed) {
                 launchPosition = LaunchPosition.MIDDLE;
             } else if (shooterReadyWallPressed) {

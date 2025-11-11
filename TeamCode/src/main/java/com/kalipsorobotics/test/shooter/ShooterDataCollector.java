@@ -150,7 +150,7 @@ public class ShooterDataCollector extends KTeleOp {
             telemetry.addData("Hood Position", String.format("%.3f", hoodPosition));
             telemetry.addData("Actual Hood Pos", String.format("%.3f", shooter.getHoodPosition()));
             telemetry.addLine();
-            telemetry.addLine("Distance: " + shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR));
+            telemetry.addLine("Distance: " + shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_FAR));
             telemetry.addLine();
             telemetry.addLine("Controls:");
             telemetry.addLine("GP1 DPad Up/Down: Adjust RPS");

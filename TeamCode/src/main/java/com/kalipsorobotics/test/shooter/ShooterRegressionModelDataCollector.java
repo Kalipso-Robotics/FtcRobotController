@@ -1,21 +1,15 @@
 package com.kalipsorobotics.test.shooter;
 
-import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-import com.kalipsorobotics.actions.intake.IntakeFullAction;
-import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
-import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
-import com.kalipsorobotics.utilities.KGamePad;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -83,7 +77,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
              */
 
             //TODO make csv converter into array for easy coding
-            distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_NEAR);
+            distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_FAR);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
                 KLog.d("Regression Module Data Collector", "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);

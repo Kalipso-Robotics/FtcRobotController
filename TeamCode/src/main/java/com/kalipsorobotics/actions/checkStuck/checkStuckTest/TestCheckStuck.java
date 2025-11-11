@@ -22,7 +22,7 @@ public class TestCheckStuck extends LinearOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule goBildaOdoModule =  GoBildaOdoModule.getInstance(opModeUtilities);
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, new Position(0, 0, 0));
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain, 0.0, 0.0);
         DriveAction driveAction = new DriveAction(driveTrain);
         CheckStuckRobot checkStuck = new CheckStuckRobot(driveTrain, odometry, opModeUtilities, purePursuitAction);

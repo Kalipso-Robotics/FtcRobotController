@@ -85,8 +85,8 @@ public class ShooterLutPredictorTest {
     public void testMultiplePositions() throws Exception {
         // Test various positions to ensure predictor works across the range
         double[][] testPoints = {
-            {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_NEAR.getX(), Shooter.RED_TARGET_FROM_NEAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
-            {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_NEAR.getX()/2, Shooter.RED_TARGET_FROM_NEAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_FAR.getX(), Shooter.RED_TARGET_FROM_FAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
+            {Shooter.mmToPixel(Point.distance(Shooter.RED_TARGET_FROM_FAR.getX()/2, Shooter.RED_TARGET_FROM_FAR.getY(), 0, 0)), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(2500), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(2800), Shooter.GOAL_HEIGHT_PIXELS},
             {Shooter.mmToPixel(3000), Shooter.GOAL_HEIGHT_PIXELS},
