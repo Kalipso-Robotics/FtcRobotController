@@ -99,7 +99,7 @@ public class RedAutoNear2 extends KTeleOp {
 
         // Create odometry
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3028.98, 746.18, Math.toDegrees(-2.4137)); //3015.93, 765.86, -2.4030
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3028.98, 746.18, -2.4137); //3015.93, 765.86, -2.4030
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         colorSensors = new TripleColorSensor(opModeUtilities);

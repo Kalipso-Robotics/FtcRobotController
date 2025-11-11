@@ -71,8 +71,8 @@ public class Odometry {
     }
 
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule,
-                     double startXMM, double startYMM, double startThetaDeg) {
-        this(opModeUtilities, driveTrain, imuModule, new Position(startXMM, startYMM, Math.toRadians(startThetaDeg)));
+                     double startXMM, double startYMM, double startThetaRad) {
+        this(opModeUtilities, driveTrain, imuModule, new Position(startXMM, startYMM, startThetaRad));
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
@@ -98,9 +98,9 @@ public class Odometry {
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
-                                                    IMUModule imuModule, double startXMM, double startYMM, double startThetaDeg) {
+                                                    IMUModule imuModule, double startXMM, double startYMM, double startThetaRad) {
         if (single_instance == null) {
-            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startXMM, startYMM, Math.toRadians(startThetaDeg));
+            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startXMM, startYMM, startThetaRad);
         } else {
             KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
