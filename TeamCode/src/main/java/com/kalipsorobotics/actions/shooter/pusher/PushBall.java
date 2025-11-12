@@ -19,15 +19,14 @@ public class PushBall extends KActionSet {
         release.setName("release");
         this.addAction(release);
 
+        AdjustShooterSpeedAction check1 = new AdjustShooterSpeedAction(shooter);
+        check1.setName("check1");
+        this.addAction(check1);
+
         RunIntakeUntilFullSpeed untilShootingDone = new RunIntakeUntilFullSpeed(intake);
         untilShootingDone.setName("untilShootingDone");
 //        untilShootingDone.setDependentActions(pushLeft, pushRight);
         this.addAction(untilShootingDone);
-
-        AdjustShooterSpeedAction check1 = new AdjustShooterSpeedAction(shooter);
-        check1.setName("check1");
-        check1.setDependentActions(release);
-        this.addAction(check1);
 
         KLog.d("teleop", "shooting done.(based off intake)");
         WaitAction wait = new WaitAction(1000);

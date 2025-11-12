@@ -11,7 +11,7 @@ public class AdjustShooterSpeedAction extends Action {
     private double timeoutMS;
     private ElapsedTime timeoutTimer;
     private final Shooter shooter;
-    private static final double DEFAULT_DROP_BELOW_THRESHOLD_PERCENT = 0.92;
+    private static final double DEFAULT_DROP_BELOW_THRESHOLD_PERCENT = 0.99;
     private static final double DEFAULT_TIMEOUT_MS = 1000;
     private static final double MAX_RPS = 51;
     private double dropBelowThreshold;
@@ -49,7 +49,7 @@ public class AdjustShooterSpeedAction extends Action {
 
         if (shooter.getRPS() < targetRPS * dropBelowThreshold) {
                 double boostPower = calculateBoostPower();
-//                shooter.setPower(boostPower);
+                shooter.setPower(boostPower);
                 KLog.d("shooterAdjust", "BOOSTING started, boosted to : " + boostPower);
         }
 

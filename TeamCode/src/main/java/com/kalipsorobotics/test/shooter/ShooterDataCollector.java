@@ -140,16 +140,17 @@ public class ShooterDataCollector extends KTeleOp {
 //            } else {
 //                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
 //            }
-//
-//            if (gamepad1.right_stick_y != 0) {
-//                intake.getIntakeMotor().setPower(-gamepad1.right_stick_y);
-//            } else {
-//                intake.getIntakeMotor().setPower(0);
-//            }
-//
-//            if (gamepad1.a) {
-//                targetRPS = 0;
-//            }
+
+            if (gamepad1.right_stick_y != 0) {
+                intake.getIntakeMotor().setPower(-gamepad1.right_stick_y);
+                stopper.getStopper().setPosition(0.55);
+            } else {
+                intake.getIntakeMotor().setPower(0);
+            }
+
+            if (gamepad1.a) {
+                targetRPS = 0;
+            }
 
             // ========== Telemetry ==========
             telemetry.addLine("=== Shooter Data Collector ===");
