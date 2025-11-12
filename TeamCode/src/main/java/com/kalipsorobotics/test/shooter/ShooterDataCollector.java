@@ -126,22 +126,30 @@ public class ShooterDataCollector extends KTeleOp {
 
 
             // ========== Kick Ball with Gamepad1 Y ==========
-            if (gamepad1.y) {
-                // Create a new KickBall action if one doesn't exist or has completed
-                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_OPEN_POS);
-            } else {
-                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
+            if (kGamePad1.isButtonYFirstPressed()) {
+                if (pushBall == null || pushBall.getIsDone()) {
+                    pushBall = new PushBall(stopper, intake, shooter);
+                    setLastStopperAction(pushBall);
+                    setLastIntakeAction(pushBall);
+                    setLastShooterAction(pushBall);
+                }
             }
-
-            if (gamepad1.right_stick_y != 0) {
-                intake.getIntakeMotor().setPower(-gamepad1.right_stick_y);
-            } else {
-                intake.getIntakeMotor().setPower(0);
-            }
-
-            if (gamepad1.a) {
-                targetRPS = 0;
-            }
+//            if (gamepad1.y) {
+//                // Create a new KickBall action if one doesn't exist or has completed
+//                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_OPEN_POS);
+//            } else {
+//                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
+//            }
+//
+//            if (gamepad1.right_stick_y != 0) {
+//                intake.getIntakeMotor().setPower(-gamepad1.right_stick_y);
+//            } else {
+//                intake.getIntakeMotor().setPower(0);
+//            }
+//
+//            if (gamepad1.a) {
+//                targetRPS = 0;
+//            }
 
             // ========== Telemetry ==========
             telemetry.addLine("=== Shooter Data Collector ===");
