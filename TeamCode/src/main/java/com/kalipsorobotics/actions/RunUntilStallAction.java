@@ -12,7 +12,7 @@ public class RunUntilStallAction extends Action {
     private DcMotorEx motor;
     private DcMotor regMotor;
     private double power;
-    private int maxTimeoutSec;
+    private double maxTimeoutSec;
     private int stallCount;
     private ElapsedTime timeoutTimer;
 
@@ -28,7 +28,7 @@ public class RunUntilStallAction extends Action {
     private static final double MIN_POWER_THRESHOLD = 0.5; // only checks for motors that run with a power over 0.5
     private static final double STALL_VELOCITY_PERCENTAGE = 0.15; // Consider stalled if velocity < 15% of expected
 
-    public RunUntilStallAction(DcMotor motor, double power, int maxTimeoutSec) {
+    public RunUntilStallAction(DcMotor motor, double power, double maxTimeoutSec) {
         this.motor = (DcMotorEx) motor;
         this.regMotor = motor;
         this.power = power;
@@ -40,6 +40,7 @@ public class RunUntilStallAction extends Action {
     @Override
     public void update() {
         if (isDone) {
+            KLog.d("intake", "intake done");
             return;
         }
 
@@ -47,6 +48,7 @@ public class RunUntilStallAction extends Action {
             KLog.d("intake", "intake started");
             motor.setPower(power);
             hasStarted = true;
+            timeoutTimer.reset();
             return;
         }
 
@@ -54,17 +56,21 @@ public class RunUntilStallAction extends Action {
         motor.setPower(power);
 
         // Check timeout
-        if (timeoutTimer.seconds() >= maxTimeoutSec) {
+        if (timeoutTimer.seconds() > maxTimeoutSec) {
             KLog.d("intake", "timeout timer " + timeoutTimer.seconds());
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0);
             isDone = true;
         }
 
+
         double curVelocity = Math.abs(motor.getVelocity());
         double currentDraw = motor.getCurrent(CurrentUnit.MILLIAMPS);
         double expectedVelocity = Math.abs(power) * MAX_VELOCITY_TICKS_PER_SEC;
         double stallVelocityThreshold = expectedVelocity * STALL_VELOCITY_PERCENTAGE;
+        KLog.d("intake", "curVelocity " + curVelocity);
+        KLog.d("intake", "curCurrentDraw " + currentDraw);
+
 
         if (Math.abs(motor.getPower()) > MIN_POWER_THRESHOLD
 
@@ -79,7 +85,7 @@ public class RunUntilStallAction extends Action {
 
         }
 
-        if (stallCount > 40) {
+        if (stallCount > 100) {
             KLog.d("intake", "identified stall " + stallCount);
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0);

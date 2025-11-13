@@ -1,7 +1,5 @@
 package com.kalipsorobotics.utilities;
 
-import com.kalipsorobotics.utilities.KLog;
-
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -23,7 +21,7 @@ public abstract class KTeleOp extends LinearOpMode {
     protected Action lastMoveAction = null;
     protected Action lastShooterAction = null;
 
-    protected Action lastKickerAction = null;
+    protected Action lastStopperAction = null;
     protected Action lastRevolverAction = null;
 
     /**
@@ -80,11 +78,9 @@ public abstract class KTeleOp extends LinearOpMode {
         lastShooterAction = action;
     }
 
-    protected void setLastKickerAction(Action action) {
-        lastKickerAction = action;
+    protected void setLastStopperAction(Action action) {
+        lastStopperAction = action;
     }
-
-    protected void setLastRevolverAction(Action action) {lastRevolverAction = action;}
 
     /**
      * Update all active actions
@@ -104,13 +100,10 @@ public abstract class KTeleOp extends LinearOpMode {
             lastShooterAction.updateCheckDone();
         }
 
-        if (lastKickerAction != null && lastKickerAction != lastIntakeAction && lastKickerAction != lastMoveAction && lastKickerAction != lastShooterAction) {
-            lastKickerAction.updateCheckDone();
+        if (lastStopperAction != null && lastStopperAction != lastIntakeAction && lastStopperAction != lastMoveAction && lastStopperAction != lastShooterAction) {
+            lastStopperAction.updateCheckDone();
         }
 
-        if (lastRevolverAction != null && lastRevolverAction != lastIntakeAction && lastRevolverAction != lastMoveAction && lastRevolverAction != lastShooterAction && lastRevolverAction != lastKickerAction) {
-            lastRevolverAction.updateCheckDone();
-        }
     }
 
     /**

@@ -11,16 +11,16 @@ import com.kalipsorobotics.modules.shooter.IShooterPredictor;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterReady extends Action {
 
     private final Shooter shooter;
     private final Point target;
+
+    private ElapsedTime rpsInRangeTimer;
     private final LaunchPosition launchPosition;
-
-    private static final double TARGET_RPS_TOLERANCE = 1.0;
-
-    private boolean useAprilTag = false;
+    private static final double TARGET_RPS_TOLERANCE = 1;
 
     public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition) {
         this.shooter = shooter;
@@ -29,14 +29,11 @@ public class ShooterReady extends Action {
         this.name = "ShooterReady";
     }
 
-    public void setUseAprilTag(boolean useAprilTag) {
-        this.useAprilTag = useAprilTag;
-    }
-
     @SuppressLint("DefaultLocale")
     @Override
     public void update() {
         if (!hasStarted) {
+            rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
         }
 
@@ -61,8 +58,19 @@ public class ShooterReady extends Action {
 
         // Check if we've reached target RPS
         if (shooter.getShooter1().isAtTargetRPS(TARGET_RPS_TOLERANCE)) {
-            isDone = true;
-            KLog.d("shooter_ready", "RPS within tolerance - Ready!");
+            if (rpsInRangeTimer.milliseconds() > 10) {
+                KLog.d("shooterAdjust", "Shooter READY " + shooter.getRPS());
+                isDone = true;
+            }
+            else {
+                KLog.d("shooter_ready", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + params.rps);
+                KLog.d("shooterAdjust", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + params.rps);
+            }
+        }
+
+        else {
+            KLog.d("shooterAdjust", "Shooter ready timer reset " + shooter.getRPS() + " TARGET: " + params.rps);
+            rpsInRangeTimer.reset();
         }
     }
 

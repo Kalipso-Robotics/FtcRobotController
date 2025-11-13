@@ -7,9 +7,10 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.MotifColor;
 import com.kalipsorobotics.modules.Revolver;
+import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class RevolverShootColorAction extends KActionSet {
-    public RevolverShootColorAction(Revolver revolver, Stopper stopper, Intake intake, MotifColor shootColor, DetectColorsAction detectColorsAction) {
+    public RevolverShootColorAction(Shooter shooter, Revolver revolver, Stopper stopper, Intake intake, MotifColor shootColor, DetectColorsAction detectColorsAction) {
 
         RevolverMoveToColorAction revolverMoveToColorAction = new RevolverMoveToColorAction(revolver, shootColor, detectColorsAction);
         revolverMoveToColorAction.setName("revolverMoveToColorAction");
@@ -20,7 +21,7 @@ public class RevolverShootColorAction extends KActionSet {
         this.addAction(waitAction1);
         waitAction1.setDependentActions(revolverMoveToColorAction);
 
-        PushBall pushBall = new PushBall(stopper, intake);
+        PushBall pushBall = new PushBall(stopper, intake, shooter);
         pushBall.setName("kickBall");
         pushBall.setDependentActions(revolverMoveToColorAction, waitAction1);
         this.addAction(pushBall);

@@ -2,6 +2,8 @@ package com.kalipsorobotics.localization;
 
 import android.os.SystemClock;
 
+import androidx.annotation.NonNull;
+
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -40,24 +42,25 @@ public class Odometry {
     private final double rightOffset;
     private final double leftOffset;
     private final double backOffset;
-    private volatile double prevRightDistanceMM;
-    private volatile double prevLeftDistanceMM;
+    private double prevRightDistanceMM;
+    private double prevLeftDistanceMM;
     volatile private double prevBackDistanceMM;
-    private volatile long prevTime;
-    private volatile double currentImuHeading;
-    private volatile double prevImuHeading;
+    private long prevTime;
+    private double currentImuHeading;
+    private double prevImuHeading;
 //    private final double MM_TO_INCH = 1/25.4;
 
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule,
-                     Position startPosMMRAD) {
+                     Position startPosMMRad) {
+        KLog.d("debug_OpMode_Transfer", "New Instance");
         this.opModeUtilities = opModeUtilities;
-        resetHardware(driveTrain, imuModule, this);
+        resetHardware(opModeUtilities, driveTrain, imuModule, this);
         this.rightOffset = this.getRightEncoderMM();
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = this.getBackEncoderMM();
 
-        this.wheelPositionHistory.setCurrentPosition(startPosMMRAD);
-        this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRAD);
+        this.wheelPositionHistory.setCurrentPosition(startPosMMRad);
+        this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRad);
 
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
@@ -68,8 +71,8 @@ public class Odometry {
     }
 
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule,
-                     double startX, double startY, double startThetaDeg) {
-        this(opModeUtilities, driveTrain, imuModule, new Position(startX, startY, Math.toRadians(startThetaDeg)));
+                     double startXMM, double startYMM, double startThetaRad) {
+        this(opModeUtilities, driveTrain, imuModule, new Position(startXMM, startYMM, startThetaRad));
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
@@ -77,38 +80,42 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
         } else {
-            resetHardware(driveTrain, imuModule, single_instance);
+            KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
-                                                    IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, Position startPosMMRAD) {
+                                                    IMUModule imuModule, Position startPosMMRad) {
         if (single_instance == null) {
-            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startPosMMRAD);
+            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startPosMMRad);
         } else {
-            resetHardware(driveTrain, imuModule, single_instance);
+            KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
     }
 
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
-                                                    IMUModule imuModule, GoBildaOdoModule goBildaOdoModule, double startX, double startY, double startThetaDeg) {
+                                                    IMUModule imuModule, double startXMM, double startYMM, double startThetaRad) {
         if (single_instance == null) {
-            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startX, startY, Math.toRadians(startThetaDeg));
+            single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startXMM, startYMM, startThetaRad);
         } else {
-            resetHardware(driveTrain, imuModule, single_instance);
+            KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
     }
 
-    private static void resetHardware(DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
-        SharedData.resetOdometryPosition();
+    private static void resetHardware(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule, Odometry odometry) {
+        odometry.opModeUtilities = opModeUtilities;
         odometry.imuModule = imuModule;
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
     }
+
 
     public static void setInstanceNull() {
         single_instance = null;
@@ -126,6 +133,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
+        KLog.d("encoder", "right encoder" + rightEncoder.getCurrentPosition());
         return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
@@ -133,14 +141,24 @@ public class Odometry {
         //corresponds to fLeft
         //direction FORWARD
         //positive because encoder directions
+        KLog.d("encoder", "left encoder" + leftEncoder.getCurrentPosition());
         return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
     }
     public double getBackEncoderMM() {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
+        KLog.d("encoder", "back encoder" + backEncoder.getCurrentPosition());
         return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
         //return ticksToMM(backEncoder.getCurrentPosition());
+    }
+
+    public boolean allEncoderZero() {
+        return (rightEncoder.getCurrentPosition() == 0) && (leftEncoder.getCurrentPosition() == 0) && (backEncoder.getCurrentPosition() == 0);
+    }
+
+    public boolean anyEncoderZero() {
+        return (rightEncoder.getCurrentPosition() == 0) || (leftEncoder.getCurrentPosition() == 0) || (backEncoder.getCurrentPosition() == 0);
     }
 
     private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
@@ -261,7 +279,10 @@ public class Odometry {
     }
 
     public HashMap<OdometrySensorCombinations, PositionHistory> updateAll() {
-        KLog.d("updatepos", "updatepos");
+        if (!opModeUtilities.getOpMode().opModeIsActive()) {
+            KLog.d("Odometry", "OpMode Not Active. OpMode: " + opModeUtilities.getOpMode().getClass().getName());
+            return odometryPositionHistoryHashMap;
+        }
         double rightDistanceMM = getRightEncoderMM();
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
@@ -270,7 +291,6 @@ public class Odometry {
         KLog.d("IMU_Heading", "Heading " + Math.toDegrees(currentImuHeading));
         KLog.d("IMU_Prev_Heading", "PrevHeading" + Math.toDegrees(prevImuHeading));
 
-        //KLog.d("updatepos", rightDistanceMM + " " + leftDistanceMM + " " + backDistanceMM);
 
         long currentTime = SystemClock.elapsedRealtime();
         double timeElapsedSeconds = (currentTime - prevTime) / 1000.0;
@@ -278,17 +298,16 @@ public class Odometry {
         updateWheelPos(rightDistanceMM,leftDistanceMM, backDistanceMM, timeElapsedSeconds);
         updateWheelIMUPos(rightDistanceMM, leftDistanceMM, backDistanceMM, timeElapsedSeconds);
 
-        //KLog.d("currentpos", "current pos " + currentPosition.toString());
         prevTime = currentTime;
 
         prevRightDistanceMM = rightDistanceMM;
         prevLeftDistanceMM = leftDistanceMM;
         prevBackDistanceMM = backDistanceMM;
-
+        Position wheelIMUPosition = odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition();
+        KLog.d("OdometryPosition", wheelIMUPosition.toString());
         prevImuHeading = currentImuHeading;
-        SharedData.setOdometryPosition(odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition());
+        SharedData.setOdometryPosition(wheelIMUPosition);
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
-        KLog.d("updatepos", "odometry pos " + SharedData.getOdometryPosition());
         return odometryPositionHistoryHashMap;
     }
 
@@ -307,6 +326,23 @@ public class Odometry {
     }
 
     public double getIMUHeading() {
-        return -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
+        double imuHeading = -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
+        KLog.d("IMU_Heading", "Heading " + imuHeading);
+        return imuHeading;
+    }
+
+    @Override
+    public String toString() {
+        return "Odometry{" +
+                "rightOffset=" + rightOffset +
+                ", leftOffset=" + leftOffset +
+                ", backOffset=" + backOffset +
+                ", prevRightDistanceMM=" + prevRightDistanceMM +
+                ", prevLeftDistanceMM=" + prevLeftDistanceMM +
+                ", prevBackDistanceMM=" + prevBackDistanceMM +
+                ", prevTime=" + prevTime +
+                ", currentImuHeading=" + currentImuHeading +
+                ", prevImuHeading=" + prevImuHeading +
+                '}';
     }
 }

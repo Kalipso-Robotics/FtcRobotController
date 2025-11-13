@@ -1,6 +1,5 @@
 package com.kalipsorobotics.modules.shooter;
 
-import com.kalipsorobotics.utilities.KCRServo;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.Point;
@@ -8,7 +7,6 @@ import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -18,8 +16,9 @@ public class Shooter {
 
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
-    public static final Point RED_TARGET_FROM_NEAR = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
-    public static final Point RED_TARGET_FROM_FAR = new Point(0, 0);//TODO
+
+    public static final Point RED_TARGET_FROM_FAR = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
+
     public static final double HOOD_OFFSET = 0.25;
 
     private final OpModeUtilities opModeUtilities;
@@ -51,6 +50,9 @@ public class Shooter {
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
         motor1.setDirection(DcMotorSimple.Direction.REVERSE);
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
 
         shooter1 = new KMotor(motor1, 1.0/100.0, 0, 0);
         shooter2 = new KMotor(motor2, 1.0/100.0, 0, 0);
@@ -151,7 +153,7 @@ public class Shooter {
      */
     public void goToRPS(double targetRPS) {
         shooter1.goToRPS(targetRPS);
-        shooter2.setPower(shooter1.getPower());
+        shooter2.goToRPS(targetRPS);
     }
 
     /**

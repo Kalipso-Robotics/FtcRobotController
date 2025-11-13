@@ -132,6 +132,10 @@ public class KGamePad {
         return toggle;
     }
 
+    public boolean isYPressed() {
+        return gamepad.y;
+    }
+
     public boolean isToggleY() {
         if (isButtonYFirstPressed()) {
             toggleY = !toggleY;

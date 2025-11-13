@@ -6,13 +6,14 @@ import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 
 public class TurretAutoAlign extends Action {
+    OpModeUtilities opModeUtilities;
 
-    // you dont get odometry pos from here mini duong :)
     Turret turret;
     DcMotor turretMotor;
 
@@ -26,10 +27,9 @@ public class TurretAutoAlign extends Action {
     private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE);
 
     private boolean isWithinRange = false;
-    private boolean useAprilTag = false;
 
-
-    public TurretAutoAlign(Turret turret, double xInitSetup, double yInitSetup) {
+    public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, double xInitSetup, double yInitSetup) {
+        this.opModeUtilities = opModeUtilities;
         this.turret = turret;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
@@ -41,30 +41,13 @@ public class TurretAutoAlign extends Action {
         return isWithinRange;
     }
 
-    public void setUseAprilTag(boolean useAprilTag) {
-        this.useAprilTag = useAprilTag;
-    }
-
     @Override
     protected void update() {
-        // input: what i know
-        //   x_innit_setup
-        //   y_init-setup
-        //   x_odo
-        //   y_ooo
-
-        //cal
-        //  x_goal
-        // y_goal
-
-        //output
-        //  angleTargetRadian = arctan (x_goal/y_goal)
-
-//        double x_init_setup = 3445.14; //make static field
-//        double y_init_setup = -2028.8;
-       /* if(turretMotor.isBusy()){   //turn off if we need turret to be more responsive
+        if (!opModeUtilities.getOpMode().opModeIsActive()) {
+            KLog.d("Turret_Singleton", "OpModeNotActive Return");
             return;
-        }*/
+        }
+        KLog.d("Turret_Singleton", "Encoder position " + turretMotor.getCurrentPosition());
 
         Position currentPosition = SharedData.getOdometryPosition();
         double currentX = currentPosition.getX();

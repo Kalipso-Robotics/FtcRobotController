@@ -1,26 +1,20 @@
-package com.kalipsorobotics.test.outtake;
+package com.kalipsorobotics.test.localization;
 
-import com.kalipsorobotics.utilities.KLog;
-
-import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
-import com.kalipsorobotics.modules.Turret;
+import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
-public class TurretTest extends KTeleOp {
-
+@TeleOp(name = "TestTeleOp", group = "Test")
+public class TestTeleOp extends KTeleOp {
     DriveTrain driveTrain;
     IMUModule imuModule;
 
     Odometry odometry;
-
-    Turret turret;
-    TurretAutoAlign turretAutoAlign;
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
@@ -30,24 +24,26 @@ public class TurretTest extends KTeleOp {
 
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-
-        turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
-
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
-
         initializeRobot();
-        KLog.d("Turret_Singleton", "Starting TeleOp " + turret.turretMotor.getCurrentPosition());
+
+        KLog.d("debug_OpMode_Transfer", "TeleOp right " +
+                odometry.getRightEncoderMM() +
+                " left " + odometry.getLeftEncoderMM() +
+                " back " + odometry.getBackEncoderMM() +
+                " imu " + odometry.getIMUHeading());
+
+
+        KLog.d("debug_OpMode_Transfer", "TeleOp " + odometry.toString());
 
         waitForStart();
-        while(opModeIsActive()) {
-            KLog.d("Turret_Singleton", "In TeleOp " + turret.turretMotor.getCurrentPosition());
-
-            turretAutoAlign.updateCheckDone();
+        while (opModeIsActive()) {
+            KLog.d("debug_OpMode_Transfer", "TeleOp Position " + SharedData.getOdometryPosition());
         }
+
         cleanupRobot();
     }
 }

@@ -3,8 +3,6 @@ package com.kalipsorobotics.decode.calibrations;
 import static com.kalipsorobotics.modules.Revolver.REVOLVER_INDEX_0;
 
 import com.kalipsorobotics.modules.Stopper;
-import com.kalipsorobotics.modules.Revolver;
-import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

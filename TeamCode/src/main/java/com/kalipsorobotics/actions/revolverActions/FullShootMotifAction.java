@@ -17,31 +17,31 @@ public class FullShootMotifAction extends KActionSet {
 
         DetectColorsAction detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
-        ShooterReady shooterReady1 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
+        ShooterReady shooterReady1 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
         shooterReady1.setName("shooterReady1");
         this.addAction(shooterReady1);
 
-        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(revolver, stopper, intake, motifPattern.first, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction1 = new RevolverShootColorAction(shooter, revolver, stopper, intake, motifPattern.first, detectColorsAction);
         revolverShootColorAction1.setName("revolverShootColorAction1");
         this.addAction(revolverShootColorAction1);
         revolverShootColorAction1.setDependentActions(shooterReady1);
 
-        ShooterReady shooterReady2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
+        ShooterReady shooterReady2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
         shooterReady2.setName("shooterReady2");
         this.addAction(shooterReady2);
         shooterReady2.setDependentActions(revolverShootColorAction1);
 
-        RevolverShootColorAction revolverShootColorAction2 = new RevolverShootColorAction(revolver, stopper, intake, motifPattern.middle, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction2 = new RevolverShootColorAction(shooter, revolver, stopper, intake, motifPattern.middle, detectColorsAction);
         revolverShootColorAction2.setName("revolverShootColorAction2");
         revolverShootColorAction2.setDependentActions(revolverShootColorAction1, shooterReady2);
         this.addAction(revolverShootColorAction2);
 
-        ShooterReady shooterReady3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO); //todo set point
+        ShooterReady shooterReady3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
         shooterReady3.setName("shooterReady3");
         this.addAction(shooterReady3);
         shooterReady2.setDependentActions(revolverShootColorAction2);
 
-        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(revolver, stopper, intake, motifPattern.last, detectColorsAction);
+        RevolverShootColorAction revolverShootColorAction3 = new RevolverShootColorAction(shooter, revolver, stopper, intake, motifPattern.last, detectColorsAction);
         revolverShootColorAction3.setName("revolverShootColorAction3");
         revolverShootColorAction3.setDependentActions(revolverShootColorAction2, shooterReady3);
         this.addAction(revolverShootColorAction3);

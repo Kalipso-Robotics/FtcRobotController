@@ -45,7 +45,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
         Odometry.setInstanceNull();
-        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, goBildaOdoModule, new Position(0, 0, 0));
+        Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, new Position(0, 0, 0));
         SharedData.resetOdometryPosition();
 
         // Initialize CheckStuckRobot
