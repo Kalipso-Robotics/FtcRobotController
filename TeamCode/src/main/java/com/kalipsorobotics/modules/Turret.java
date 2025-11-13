@@ -13,6 +13,13 @@ public class Turret {
     private final OpModeUtilities opModeUtilities;
 
     public DcMotor turretMotor;
+
+    public static final double TICKS_PER_ROTATION = 384.5;
+    public static final double GEAR_RATIO = 125.0/32.0;
+
+    public static final double TICKS_PER_RADIAN = (TICKS_PER_ROTATION * GEAR_RATIO) / (2*Math.PI);
+    public static final double TICKS_PER_DEGREE = (TICKS_PER_ROTATION * GEAR_RATIO) / 360.0;
+
     private Turret(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
 
@@ -45,6 +52,10 @@ public class Turret {
 
     public OpModeUtilities getOpModeUtilities() {
         return opModeUtilities;
+    }
+
+    public double getCurrentAngleRad() {
+        return turretMotor.getCurrentPosition() / TICKS_PER_RADIAN;
     }
 
 }

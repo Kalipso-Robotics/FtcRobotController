@@ -144,7 +144,7 @@ public class RedFarTeleOp extends KTeleOp {
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
-        goalDetectionAction = new GoalDetectionAction(opModeUtilities);
+        goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret);
         //todo just fed in testing motif pattern change later
         testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
@@ -200,6 +200,12 @@ public class RedFarTeleOp extends KTeleOp {
 
             boolean isWarmup = true;
 
+            if (useAprilTagPressed) {
+                useAprilTag = !useAprilTag;
+            }
+//
+//            turretAutoAlign.setUseAprilTag(useAprilTag);
+//            shooterReady.setUseAprilTag(useAprilTag);
 
             if (shooterStopPressed) {
                 if (shooterStop != null || shooterStop.getIsDone()) {
@@ -228,11 +234,17 @@ public class RedFarTeleOp extends KTeleOp {
             }
 
             if (isWarmup) {
+                if (useAprilTag) {
+                    goalDetectionAction.getLimelight().start();
+                    goalDetectionAction.updateCheckDone();
+                }
                 if (shooterReady != null || shooterReady.getIsDone()) {
                     shooterReady = new ShooterReady(shooter, ROBOT_START_POINT_RED.multiplyY(allianceSetup.getPolarity()), launchPosition);
                     KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up For Position: " + launchPosition);
                     setLastShooterAction(shooterReady);
                 }
+            } else {
+                goalDetectionAction.getLimelight().stop();
             }
 
 
@@ -324,20 +336,17 @@ public class RedFarTeleOp extends KTeleOp {
                 setLastRevolverAction(revolverTeleOp);
             }
 
-            if (useAprilTagPressed) {
-                useAprilTag = !useAprilTag;
-            }
 
-            turretAutoAlign.setUseAprilTag(useAprilTag);
-            shooterReady.setUseAprilTag(useAprilTag);
+//            if (useWebcamPressed) {
+//                useWebcam = !useWebcam;
+//            }
+//
+//            goalDetectionAction.setUseWebcam(useWebcam);
 
-            if (useWebcamPressed) {
-                useWebcam = !useWebcam;
-            }
+//            if (useAprilTag) {
+//                goalDetectionAction.updateCheckDone();
+//            }
 
-            goalDetectionAction.setUseWebcam(useWebcam);
-
-            goalDetectionAction.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();

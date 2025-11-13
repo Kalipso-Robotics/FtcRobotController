@@ -76,11 +76,11 @@ public class ShooterReady extends Action {
             double dx = target.getX() - currentPosition.getX();
             double dy = target.getY() - currentPosition.getY();
 
-            if (!useAprilTag) {
+//            if (!useAprilTag) {
                 distanceMM = Math.sqrt((dx * dx) + (dy * dy));
-            } else {
-                distanceMM = SharedData.getDistanceToGoal();
-            }
+//            } else {
+//                distanceMM = SharedData.getDistanceToGoal();
+//            }
 
         } else {
             KLog.d("shooter_ready", "Using launch position: " + launchPosition);

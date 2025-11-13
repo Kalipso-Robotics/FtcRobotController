@@ -16,11 +16,6 @@ public class TurretAutoAlign extends Action {
     Turret turret;
     DcMotor turretMotor;
 
-    private final double ticksPerRotation = 384.5;
-    private final double gearRatio = 125.0/32.0;
-    private final double degreesPerRotation = 360.0;
-    private final double radiansPerRotation = 2 * Math.PI;
-
     private double xInitSetup;// = 3445.14;
     private double yInitSetup;// = 2028.8;
 
@@ -28,10 +23,7 @@ public class TurretAutoAlign extends Action {
 
     public static double RED_Y_INIT_SETUP = 46 * 25.4; //46inches
 
-    private final double TICKS_PER_RADIAN = (ticksPerRotation * gearRatio) / radiansPerRotation;
-    private final double TICKS_PER_DEGREE = (ticksPerRotation * gearRatio) / degreesPerRotation;
-
-    private final double TOLERANCE_TICKS = (TICKS_PER_DEGREE);
+    private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE);
 
     private boolean isWithinRange = false;
     private boolean useAprilTag = false;
@@ -83,13 +75,13 @@ public class TurretAutoAlign extends Action {
         KLog.d("turret_angle", "y init setup" + yInitSetup + "current y" + currentY);
 
         double angleTargetRadian;
-        if (!useAprilTag) {
+//        if (!useAprilTag) {
             // Use atan2 for proper angle calculation in all quadrants
             angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
             KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
-        } else {
-            angleTargetRadian = SharedData.getAngleRadToGoal();
-        }
+//        } else {
+//            angleTargetRadian = SharedData.getAngleRadToGoal();
+//        }
 
         double currentRobotAngleRadian = currentPosition.getTheta();
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
@@ -100,8 +92,8 @@ public class TurretAutoAlign extends Action {
 
         double targetTicks;
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
-        double motorRotation = turretRotation * gearRatio;
-        targetTicks = ticksPerRotation * motorRotation;
+        double motorRotation = turretRotation * Turret.GEAR_RATIO;
+        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
         KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
 
 
