@@ -19,6 +19,7 @@ public class ShooterReady extends Action {
     private final Point target;
 
     private ElapsedTime rpsInRangeTimer;
+    private ElapsedTime rampUpTimeTimer;
     private final LaunchPosition launchPosition;
 
     // For direct RPS mode
@@ -51,6 +52,7 @@ public class ShooterReady extends Action {
         if (!hasStarted) {
             rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
+            rampUpTimeTimer = new ElapsedTime();
         }
 
         double rps;
@@ -85,6 +87,7 @@ public class ShooterReady extends Action {
         if (shooter.isAtTargetRPS()) {
             if (rpsInRangeTimer.milliseconds() > 10) {
                 KLog.d("shooterAdjust", "Shooter READY " + shooter.getRPS());
+                KLog.d("shooter_ready", "it took " + rampUpTimeTimer.milliseconds() + " miliseconds to ramp up");
                 isDone = true;
             } else {
                 KLog.d("shooter_ready", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + rps);
