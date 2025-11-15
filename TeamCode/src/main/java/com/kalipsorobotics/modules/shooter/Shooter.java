@@ -29,7 +29,6 @@ public class Shooter {
     private final KMotor shooter1;
     private final KMotor shooter2;
 
-
     private final KServo hood;
 
 //    private final KCRServo pusherRight;
@@ -56,9 +55,8 @@ public class Shooter {
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-
-        shooter1 = new KMotor(motor1, 1.0/100.0, 0, 0);
-        shooter2 = new KMotor(motor2, 1.0/100.0, 0, 0);
+        shooter1 = new KMotor(motor1, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd);
+        shooter2 = new KMotor(motor2,  ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
         if (hood == null) {
             opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
