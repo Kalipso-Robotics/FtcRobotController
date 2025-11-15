@@ -21,10 +21,27 @@ public class ShooterReady extends Action {
     private ElapsedTime rpsInRangeTimer;
     private final LaunchPosition launchPosition;
 
+    // For direct RPS mode
+    private final Double targetRPS;
+    private final Double targetHoodPosition;
+
+    // Constructor with auto-prediction (existing behavior)
     public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition) {
         this.shooter = shooter;
         this.target = target;
         this.launchPosition = launchPosition;
+        this.targetRPS = null;
+        this.targetHoodPosition = null;
+        this.name = "ShooterReady";
+    }
+
+    // Constructor with direct RPS and hood position
+    public ShooterReady(Shooter shooter, double targetRPS, double targetHoodPosition) {
+        this.shooter = shooter;
+        this.target = null;
+        this.launchPosition = null;
+        this.targetRPS = targetRPS;
+        this.targetHoodPosition = targetHoodPosition;
         this.name = "ShooterReady";
     }
 
@@ -36,23 +53,32 @@ public class ShooterReady extends Action {
             hasStarted = true;
         }
 
-        // Get shooter parameters for target RPS and hood position
-        IShooterPredictor.ShooterParams params = getPrediction();
+        double rps;
+        double hoodPosition;
 
-        // Update hood position (offset already included in predictor)
-        shooter.getHood().setPosition(params.hoodPosition);
+        // Check if we're in direct RPS mode or auto-prediction mode
+        if (targetRPS != null && targetHoodPosition != null) {
+            // Direct RPS mode
+            rps = targetRPS;
+            hoodPosition = targetHoodPosition;
+            KLog.d("shooter_ready", "Using direct RPS mode");
+        } else {
+            // Auto-prediction mode (existing behavior)
+            IShooterPredictor.ShooterParams params = getPrediction();
+            rps = params.rps;
+            hoodPosition = params.hoodPosition;
+        }
+
+        // Update hood position
+        shooter.getHood().setPosition(hoodPosition);
 
         // Use KMotor's goToRPS for automatic PID control
-        shooter.goToRPS(params.rps);
+        shooter.goToRPS(rps);
 
-        // Get current RPS for logging and checking
-//        double currentRPS = shooter.getRPS();
-//        double error = params.rps - currentRPS;
-//
-//        // Log status
+        // Log status
         KLog.d("shooter_ready", String.format(
             "Target: %.2f RPS, Hood: %.3f",
-            params.rps, params.hoodPosition
+            rps, hoodPosition
         ));
 
         // Check if we've reached target RPS
@@ -61,11 +87,11 @@ public class ShooterReady extends Action {
                 KLog.d("shooterAdjust", "Shooter READY " + shooter.getRPS());
                 isDone = true;
             } else {
-                KLog.d("shooter_ready", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + params.rps);
-                KLog.d("shooterAdjust", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + params.rps);
+                KLog.d("shooter_ready", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + rps);
+                KLog.d("shooterAdjust", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + rps);
             }
         } else {
-            KLog.d("shooterAdjust", "Shooter ready timer reset " + shooter.getRPS() + " TARGET: " + params.rps);
+            KLog.d("shooterAdjust", "Shooter ready timer reset " + shooter.getRPS() + " TARGET: " + rps);
             rpsInRangeTimer.reset();
         }
     }

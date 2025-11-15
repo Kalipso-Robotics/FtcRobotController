@@ -2,6 +2,7 @@ package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
+import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -26,9 +27,12 @@ public class ShooterDataCollector extends KTeleOp {
     TurretAutoAlign turretAutoAlign = null;
     private Intake intake = null;
     private PushBall pushBall;
+    private ShooterReady shooterReady = null;
 
     private double targetRPS = 0.0;
     private double hoodPosition = 0.5;
+    private double prevRPS = -1.0;
+    private double prevHoodPosition = -1.0;
 
     KServoAutoAction stopperOpen = null;
     KServoAutoAction stopperClose = null;
@@ -93,13 +97,6 @@ public class ShooterDataCollector extends KTeleOp {
                 targetRPS = 0;
             }
 
-            // Set the shooter to target RPS
-            if (targetRPS > 0) {
-                shooter.goToRPS(targetRPS);
-            } else {
-                shooter.stop();
-            }
-
             // ========== Hood Position Control with Triggers ==========
             // Use left trigger to increase hood position, right trigger to decrease
             if (kGamePad1.isLeftTriggerFirstPressed()) {
@@ -121,8 +118,20 @@ public class ShooterDataCollector extends KTeleOp {
                 hoodPosition = 0.0;
             }
 
-            // Set hood position
-            shooter.getHood().setPosition(hoodPosition);
+            // ========== ShooterReady Action Management ==========
+            // Create a new ShooterReady action when RPS or hood position changes
+            if (targetRPS != prevRPS || hoodPosition != prevHoodPosition) {
+                if (targetRPS > 0) {
+                    // Use ShooterReady with direct RPS mode (same as RedFarTeleOp/RedAutos pattern)
+                    shooterReady = new ShooterReady(shooter, targetRPS, hoodPosition);
+                    setLastShooterAction(shooterReady);
+                } else {
+                    // Stop the shooter when targetRPS is 0
+                    shooter.stop();
+                }
+                prevRPS = targetRPS;
+                prevHoodPosition = hoodPosition;
+            }
 
 
             // ========== Kick Ball with Gamepad1 Y ==========
