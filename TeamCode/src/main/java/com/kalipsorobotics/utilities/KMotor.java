@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-
 /**
  * Utility class for DC motors with RPS control
  * Provides smart power ramping to achieve target RPS quickly
@@ -27,7 +25,8 @@ public class KMotor {
 
     // Power limits
     private static final double MAX_POWER = 1.0;
-    private static final double MIN_POWER = 0.0;
+    private static final double DEFAULT_MIN_POWER = 0.0;
+    private double minPowerScaleFactor;
 
     // Default PID constants - tune these values
     private static final double DEFAULT_KP = 0.0007;
@@ -39,11 +38,12 @@ public class KMotor {
     private final ElapsedTime elapsedTime;
 
     public KMotor(DcMotor motor) {
-        this(motor, DEFAULT_KP, DEFAULT_KI, DEFAULT_KD);
+        this(motor, DEFAULT_MIN_POWER, DEFAULT_KP, DEFAULT_KI, DEFAULT_KD);
     }
 
-    public KMotor(DcMotor motor, double kp, double ki, double kd) {
+    public KMotor(DcMotor motor, double minPowerScaleFactor, double kp, double ki, double kd) {
         this.motor = (DcMotorEx) motor;
+        this.minPowerScaleFactor = minPowerScaleFactor;
         this.prevTicks = motor.getCurrentPosition();
         this.prevTimeMS = System.currentTimeMillis();
         this.elapsedTime = new ElapsedTime();
@@ -115,16 +115,18 @@ public class KMotor {
         double currentPower = motor.getPower();
         double newPower =  currentPower + pidOutput;
 
+        double minPower = minPowerScaleFactor * targetRPS;
+
         // Clamp power to valid range
-        newPower = Math.max(MIN_POWER, Math.min(MAX_POWER, newPower));
+        newPower = Math.max(minPower, Math.min(MAX_POWER, newPower));
 
         // Set new power
         motor.setPower(newPower);
 
         // Log for debugging
         KLog.d("KMotor", String.format(
-            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDOutPut: %.2f, Power: %.3f -> %.3f",
-            targetRPS, currentRPS, (targetRPS - currentRPS), pidOutput, currentPower, newPower
+            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDOutPut: %.2f, Power: %.3f -> %.3f, MinPower: %.3f",
+            targetRPS, currentRPS, (targetRPS - currentRPS), pidOutput, currentPower, newPower, minPower
         ));
 
 //        double targetTPS = CalculateTickPer.rotationToTicks6000RPM(targetRPS);

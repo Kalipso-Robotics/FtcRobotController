@@ -1,5 +1,7 @@
 package com.kalipsorobotics.modules.shooter;
 
+import static com.kalipsorobotics.modules.shooter.ShooterConfig.targetRPS;
+
 import java.util.*;
 
 /**
@@ -46,7 +48,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
         add(new DataPoint(3076, 43.5, 0.55));
         add(new DataPoint(3304, 44, 0.55));
         add(new DataPoint(3389, 44, 0.55));
-        add(new DataPoint(3547, 44, 0.55));
+        add(new DataPoint(3547, targetRPS, 0.55));
         //add(new DataPoint(3547, 54, 0.55));
     }};
 

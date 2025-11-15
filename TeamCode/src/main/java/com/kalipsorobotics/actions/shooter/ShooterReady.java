@@ -3,6 +3,7 @@ package com.kalipsorobotics.actions.shooter;
 import android.annotation.SuppressLint;
 
 import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.modules.shooter.ShooterConfig;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
@@ -86,13 +87,13 @@ public class ShooterReady extends Action {
 
         // Check if we've reached target RPS
         if (shooter.isAtTargetRPS()) {
-            if (rpsInRangeTimer.milliseconds() > 10) {
+            if (rpsInRangeTimer.milliseconds() > ShooterConfig.timeToStabilize) {
                 KLog.d("shooterAdjust", "Shooter READY " + shooter.getRPS());
-                KLog.d("shooter_ready", "it took " + rampUpTimeTimer.milliseconds() + " miliseconds to ramp up");
+                KLog.d("shooter_ready", "ramp up time ms: " + rampUpTimeTimer.milliseconds());
                 isDone = true;
             } else {
-                KLog.d("shooter_ready", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + rps);
-                KLog.d("shooterAdjust", "RPS within tolerance, waiting for timer" + shooter.getRPS() + " TARGET: " + rps);
+                KLog.d("shooter_ready", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + rps);
+                KLog.d("shooterAdjust", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + rps);
             }
         } else {
             KLog.d("shooterAdjust", "Shooter ready timer reset " + shooter.getRPS() + " TARGET: " + rps);

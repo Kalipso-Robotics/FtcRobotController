@@ -49,7 +49,7 @@ public class AdjustShooterSpeedAction extends Action {
 
         if (shooter.getRPS() < targetRPS * dropBelowThreshold) {
                 double boostPower = calculateBoostPower();
-                shooter.setPower(boostPower);
+                //shooter.setPower(boostPower);
                 KLog.d("shooterAdjust", "BOOSTING started, boosted to : " + boostPower);
         }
 
