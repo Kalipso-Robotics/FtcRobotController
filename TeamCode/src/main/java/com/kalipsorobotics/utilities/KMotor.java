@@ -98,7 +98,7 @@ public class KMotor {
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
-       /* // Update target if changed significantly (>0.005 RPS)
+        // Update target if changed significantly (>0.005 RPS)
         if (Math.abs(targetRPS - this.targetRPS) > 0.005) {
             this.targetRPS = targetRPS;
             // Reset PID on target change to prevent overshoot
@@ -113,7 +113,7 @@ public class KMotor {
 
         // Get current power and adjust
         double currentPower = motor.getPower();
-        double newPower = currentPower + pidOutput;
+        double newPower =  currentPower + pidOutput;
 
         // Clamp power to valid range
         newPower = Math.max(MIN_POWER, Math.min(MAX_POWER, newPower));
@@ -125,11 +125,12 @@ public class KMotor {
         KLog.d("KMotor", String.format(
             "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDOutPut: %.2f, Power: %.3f -> %.3f",
             targetRPS, currentRPS, (targetRPS - currentRPS), pidOutput, currentPower, newPower
-        ));*/
-        double targetTPS = CalculateTickPer.rotationToTicks6000RPM(targetRPS);
-        this.targetRPS = targetRPS;
-        KLog.d("KMotor", "goToRPS: " + targetRPS);
-        motor.setVelocity(targetTPS);
+        ));
+
+//        double targetTPS = CalculateTickPer.rotationToTicks6000RPM(targetRPS);
+//        this.targetRPS = targetRPS;
+//        KLog.d("KMotor", "goToRPS: " + targetRPS);
+//        motor.setVelocity(targetTPS);
     }
 
     /**

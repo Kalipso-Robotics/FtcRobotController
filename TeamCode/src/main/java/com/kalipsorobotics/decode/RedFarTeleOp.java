@@ -206,7 +206,7 @@ public class RedFarTeleOp extends KTeleOp {
                     setLastShooterAction(shooterReady);
                 }
             } else {
-                goalDetectionAction.getLimelight().stop();
+                //goalDetectionAction.getLimelight().stop();
             }
 
 

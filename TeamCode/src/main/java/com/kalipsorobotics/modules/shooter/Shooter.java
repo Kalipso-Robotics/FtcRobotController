@@ -21,6 +21,9 @@ public class Shooter {
 
     public static final double HOOD_OFFSET = 0.25;
 
+    public final double TARGET_RPS_TOLERANCE = 1;
+
+
     private final OpModeUtilities opModeUtilities;
 
     private final KMotor shooter1;
@@ -90,7 +93,10 @@ public class Shooter {
         return shooter1.getRPS();
     }
 
-
+    public boolean isAtTargetRPS() {
+        boolean isWithinTarget = shooter1.isAtTargetRPS(TARGET_RPS_TOLERANCE);
+        return isWithinTarget;
+    }
 
 
     public KServo getHood() {
