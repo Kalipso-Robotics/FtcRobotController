@@ -31,8 +31,7 @@ public class ShooterReady extends Action {
     final private double timeOutMS;
 
 
-    // Constructor with auto-prediction (existing behavior)
-    private ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition, double targetRPS, double targetHoodPosition, double timeOutMS) {
+    public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition, double targetRPS, double targetHoodPosition, double timeOutMS) {
         this.shooter = shooter;
         this.target = target;
         this.launchPosition = launchPosition;
