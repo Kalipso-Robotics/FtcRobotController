@@ -1,5 +1,6 @@
 package com.kalipsorobotics.utilities;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -33,6 +34,7 @@ public abstract class KTeleOp extends LinearOpMode {
         executorService = Executors.newSingleThreadExecutor();
         kGamePad1 = new KGamePad(gamepad1);
         kGamePad2 = new KGamePad(gamepad2);
+        FtcDashboard dashboard = FtcDashboard.getInstance();
     }
 
 

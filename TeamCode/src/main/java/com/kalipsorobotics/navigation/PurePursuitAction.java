@@ -1,5 +1,6 @@
 package com.kalipsorobotics.navigation;
 
+import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.PID.PidNav;
@@ -15,6 +16,8 @@ import com.kalipsorobotics.math.Vector;
 
 import com.kalipsorobotics.modules.DriveTrain;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.internal.opengl.models.Geometry;
 
 import java.util.ArrayList;
 import java.util.List;
