@@ -32,7 +32,7 @@ public class RunIntakeUntilFullSpeed extends Action {
             return;
         }
 
-        motor.setVelocity(TARGET_VELOCITY);
+        motor.setPower(1);
 
         double curVelocity = Math.abs(motor.getVelocity());
 

@@ -24,27 +24,44 @@ public class ShooterReady extends Action {
     private final LaunchPosition launchPosition;
 
     // For direct RPS mode
-    private final Double targetRPS;
-    private final Double targetHoodPosition;
+    private final double targetRPS;
+    private final double targetHoodPosition;
+
+    ElapsedTime elapsedTime;
+    final private double timeOutMS;
+
 
     // Constructor with auto-prediction (existing behavior)
-    public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition) {
+    private ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition, double targetRPS, double targetHoodPosition, double timeOutMS) {
         this.shooter = shooter;
         this.target = target;
         this.launchPosition = launchPosition;
-        this.targetRPS = null;
-        this.targetHoodPosition = null;
-        this.name = "ShooterReady";
-    }
-
-    // Constructor with direct RPS and hood position
-    public ShooterReady(Shooter shooter, double targetRPS, double targetHoodPosition) {
-        this.shooter = shooter;
-        this.target = null;
-        this.launchPosition = null;
         this.targetRPS = targetRPS;
         this.targetHoodPosition = targetHoodPosition;
         this.name = "ShooterReady";
+        elapsedTime = new ElapsedTime();
+        this.timeOutMS = timeOutMS;
+    }
+
+    /**
+     * Use For Auto Warmup, and ready
+     */
+    public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition) {
+        this(shooter, target, launchPosition, 0, 0, 0);
+    }
+
+    /**
+     * Use For Maintain
+     */
+    public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition, double timeOutMS) {
+        this(shooter, target, launchPosition, 0, 0, timeOutMS);
+    }
+
+    /**
+     * Use For Data Collection
+     */
+    public ShooterReady(Shooter shooter, double targetRPS, double targetHoodPosition) {
+        this(shooter, null, null, targetRPS, targetHoodPosition, 0);
     }
 
     @SuppressLint("DefaultLocale")
@@ -55,13 +72,16 @@ public class ShooterReady extends Action {
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
             KLog.d(this.getClass().getName(), "PID: " + shooter.getShooter1().getPIDController());
+            elapsedTime.reset();
         }
+
+
 
         double rps;
         double hoodPosition;
 
         // Check if we're in direct RPS mode or auto-prediction mode
-        if (targetRPS != null && targetHoodPosition != null) {
+        if ((targetRPS > 0) && (targetHoodPosition > 0)) {
             // Direct RPS mode
             rps = targetRPS;
             hoodPosition = targetHoodPosition;
@@ -85,19 +105,26 @@ public class ShooterReady extends Action {
             rps, hoodPosition
         ));
 
-        // Check if we've reached target RPS
-        if (shooter.isAtTargetRPS()) {
-            if (rpsInRangeTimer.milliseconds() > ShooterConfig.timeToStabilize) {
-                KLog.d("shooterAdjust", "Shooter READY " + shooter.getRPS());
-                KLog.d("shooter_ready", "ramp up time ms: " + rampUpTimeTimer.milliseconds());
+        if (timeOutMS > 0) {
+            if (elapsedTime.milliseconds() > timeOutMS) {
+                KLog.d("shooter_ready", "ShooterReady timed out");
                 isDone = true;
-            } else {
-                KLog.d("shooter_ready", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + rps);
-                KLog.d("shooterAdjust", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + rps);
+                return;
             }
         } else {
-            KLog.d("shooterAdjust", "Shooter ready timer reset " + shooter.getRPS() + " TARGET: " + rps);
-            rpsInRangeTimer.reset();
+            if (shooter.isAtTargetRPS()) {
+                if ((rpsInRangeTimer.milliseconds() > ShooterConfig.timeToStabilize)) {
+                    KLog.d("shooterAdjust", "Shooter READY " + shooter.getRPS());
+                    KLog.d("shooter_ready", "ramp up time ms: " + rampUpTimeTimer.milliseconds());
+                    isDone = true;
+                } else {
+                    KLog.d("shooter_ready", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + rps);
+                    KLog.d("shooterAdjust", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + rps);
+                }
+            } else {
+                KLog.d("shooterAdjust", "Shooter ready timer reset " + shooter.getRPS() + " TARGET: " + rps);
+                rpsInRangeTimer.reset();
+            }
         }
     }
 

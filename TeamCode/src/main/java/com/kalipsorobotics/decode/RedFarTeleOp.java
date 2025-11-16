@@ -120,7 +120,7 @@ public class RedFarTeleOp extends KTeleOp {
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR);
         shooterStop = new ShooterStop(shooter);
         pushBall = new PushBall(stopper, intake, shooter);
         openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
@@ -214,7 +214,7 @@ public class RedFarTeleOp extends KTeleOp {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shootAction != null || shootAction.getIsDone()) {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shootAction = new ShootAllAction(stopper, intake, shooter, ROBOT_START_POINT_RED, launchPosition);
+                    shootAction = new ShootAllAction(stopper, intake, shooter, ROBOT_START_POINT_RED);
                     setLastShooterAction(shootAction);
                     setLastStopperAction(shootAction);
                 }

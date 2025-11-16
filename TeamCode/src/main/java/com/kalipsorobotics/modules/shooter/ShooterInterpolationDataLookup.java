@@ -1,6 +1,6 @@
 package com.kalipsorobotics.modules.shooter;
 
-import static com.kalipsorobotics.modules.shooter.ShooterConfig.targetRPS;
+import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.*;
 
 import java.util.*;
 
@@ -14,7 +14,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
     private static final double MIN_HOOD_POS = 0.0;
     private static final double MAX_HOOD_POS = 0.55;
 
-    private static class DataPoint {
+    public static class DataPoint {
         final double distanceMM;
         final double rps;
         final double hoodPosition;
@@ -29,34 +29,39 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
     // Static data from ShooterTestedManualData.csv
     // Format: DistanceMM, RPS, Hood Position Relative
     private static final ArrayList<DataPoint> DATA_POINTS = new ArrayList<DataPoint>() {{
-        add(new DataPoint(540, 34, 0.1));
-        add(new DataPoint(682, 34, 0.31));
-        add(new DataPoint(913, 35, 0.38));
-        add(new DataPoint(1108, 36, 0.55));
-        add(new DataPoint(1323, 37, 0.55));
-        add(new DataPoint(1580, 37.5, 0.55));
-        add(new DataPoint(1698, 38, 0.55));
-        add(new DataPoint(1808, 38, 0.55));
-        add(new DataPoint(1955, 39, 0.55));
-        add(new DataPoint(2057, 39, 0.55));
-        add(new DataPoint(2179, 40, 0.55));
-        add(new DataPoint(2330, 41, 0.55));
-        add(new DataPoint(2516, 42, 0.55));
-        add(new DataPoint(2639, 42, 0.55));
-        add(new DataPoint(2825, 42, 0.55));
-        add(new DataPoint(2952, 43.5, 0.55));
-        add(new DataPoint(3076, 43.5, 0.55));
-        add(new DataPoint(3304, 44, 0.55));
-        add(new DataPoint(3389, 44, 0.55));
-        add(new DataPoint(3547, targetRPS, 0.55));
-        //add(new DataPoint(3547, 54, 0.55));
+//        add(new DataPoint(540, 34, 0.1));
+//        add(new DataPoint(682, 34, 0.31));
+//        add(new DataPoint(913, 35, 0.38));
+//        add(new DataPoint(1108, 36, 0.55));
+//        add(new DataPoint(1323, 37, 0.55));
+//        add(new DataPoint(1580, 37.5, 0.55));
+//        add(new DataPoint(1698, 38, 0.55));
+//        add(new DataPoint(1808, 38, 0.55));
+//        add(new DataPoint(1955, 39, 0.55));
+//        add(new DataPoint(2057, 39, 0.55));
+//        add(new DataPoint(2179, 40, 0.55));
+//        add(new DataPoint(2330, 41, 0.55));
+//        add(new DataPoint(2516, 42, 0.55));
+//        add(new DataPoint(2639, 42, 0.55));
+//        add(new DataPoint(2825, 42, 0.55));
+//        add(new DataPoint(2952, 43.5, 0.55));
+//        add(new DataPoint(3076, 43.5, 0.55));
+//        add(new DataPoint(3304, 44, 0.55));
+//        add(new DataPoint(3389, 44, 0.55));
+//        add(new DataPoint(3547, 44, 0.55));
     }};
 
     /**
      * Default constructor - uses static data.
      */
     public ShooterInterpolationDataLookup() {
-        // Data is already loaded statically
+        for (int i = 0; i < shooterData.length; i += 3) {
+            DATA_POINTS.add(new DataPoint(ShooterInterpolationConfig.shooterData[i],
+                    ShooterInterpolationConfig.shooterData[i + 1],
+                    ShooterInterpolationConfig.shooterData[i + 2]));
+
+        }
+
     }
 
     /**

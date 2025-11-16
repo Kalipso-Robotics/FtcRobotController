@@ -9,7 +9,6 @@ import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
-import com.kalipsorobotics.actions.shooter.AdjustShooterSpeedAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
@@ -131,7 +130,7 @@ public class RedAutoFar extends KTeleOp {
 //        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR);
         shooterStop = new ShooterStop(shooter);
         pushBall = new PushBall(stopper, intake, shooter);
     }

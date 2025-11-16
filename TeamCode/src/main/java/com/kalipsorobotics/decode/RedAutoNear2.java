@@ -1,7 +1,6 @@
 package com.kalipsorobotics.decode;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
-import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
@@ -130,7 +129,7 @@ public class RedAutoNear2 extends KTeleOp {
 //        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
         shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR);
         shooterStop = new ShooterStop(shooter);
         pushBall = new PushBall(stopper, intake, shooter);
     }
