@@ -201,7 +201,7 @@ public class RedAutoNear extends KTeleOp {
         moveToLeverBalls.addPoint(LEVER_X -200, LEVER_Y -300, 90 * allianceSetup.getPolarity());
         moveToLeverBalls.setDependentActions(shoot, moveToFirstBalls);
 
-        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
+        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR_INNIT);
         ready2.setName("ready2");
         ready2.setDependentActions(waitForShoot, moveToLeverBalls);
         redAutoNear.addAction(ready2);
@@ -238,7 +238,7 @@ public class RedAutoNear extends KTeleOp {
         waitForShoot3.setDependentActions(shoot3);
         redAutoNear.addAction(waitForShoot3);
 
-        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
+        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR_INNIT);
         ready3.setName("ready2");
         ready3.setDependentActions(waitForShoot3);
         redAutoNear.addAction(ready3);

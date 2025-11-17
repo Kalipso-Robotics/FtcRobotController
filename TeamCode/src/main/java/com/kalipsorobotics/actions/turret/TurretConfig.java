@@ -7,6 +7,6 @@ public class TurretConfig {
 
     public static double RED_X_INIT_SETUP = 3250; //121 inches
 
-    public static double RED_Y_INIT_SETUP = 1000; //46inches
+    public static double RED_Y_INIT_SETUP = 1050; //46inches 1000
 
 }

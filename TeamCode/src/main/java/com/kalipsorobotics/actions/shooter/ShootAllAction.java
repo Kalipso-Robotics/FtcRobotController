@@ -33,7 +33,6 @@ public class ShootAllAction extends KActionSet {
         this.addAction(shooterMaintain);
         shooterMaintain.setDependentActions(shooterReady);
 
-
         PushBall pushAllBalls = new PushBall(stopper, intake, shooter);
         pushAllBalls.setName("pushAllBalls");
         pushAllBalls.setDependentActions(shooterReady);

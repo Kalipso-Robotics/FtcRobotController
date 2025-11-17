@@ -126,7 +126,7 @@ public class RedFarTeleOp extends KTeleOp {
         pushBall = new PushBall(stopper, intake, shooter);
         openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-        runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3);
+        runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3000);
     }
 
 
@@ -178,7 +178,7 @@ public class RedFarTeleOp extends KTeleOp {
             }
 
             if (shooterReadyNearPressed) {
-                launchPosition = LaunchPosition.FAR;
+                launchPosition = LaunchPosition.FAR_INNIT;
             } else if (shooterReadyMiddlePressed) {
                 launchPosition = LaunchPosition.MIDDLE;
             } else if (shooterReadyWallPressed) {
@@ -255,7 +255,7 @@ public class RedFarTeleOp extends KTeleOp {
             if (runUntilStalledPressed) {
                 KLog.d("teleop", "revolver pressed");
                 if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
-                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
+                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4000);
                 }
                 setLastIntakeAction(runUntilStallAction);
             }

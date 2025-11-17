@@ -35,7 +35,6 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-
 @Autonomous(name = "RedAutoFarZone")
 public class RedAutoFar extends KTeleOp {
     KActionSet redAutoFar;
@@ -44,17 +43,17 @@ public class RedAutoFar extends KTeleOp {
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_FAR;
     final double SHOOT_FAR_X = 150;
-    final double SHOOT_FAR_Y = -40  * allianceSetup.getPolarity();
+    final double SHOOT_FAR_Y = -40;
     final double LEVER_X = 1500;
-    final double LEVER_Y = 1050  * allianceSetup.getPolarity();
-    final double DEPOT_X = 200; // final ending 0 x
-    final double DEPOT_Y = 1100  * allianceSetup.getPolarity(); // final ending 1,165.2 , 135degree heading
+    final double LEVER_Y = 1060;
+    final double DEPOT_X = 150; // final ending 0 x
+    final double DEPOT_Y = 1100  ; // final ending 1,165.2 , 135degree heading
     final double FIRST_BALL_X = 680;
-    final double FIRST_BALL_Y = 1050  * allianceSetup.getPolarity();
+    final double FIRST_BALL_Y = 1050;
     final double SECOND_BALL_X = 1230;
-    final double SECOND_BALL_Y = 1000  * allianceSetup.getPolarity();
+    final double SECOND_BALL_Y = 1050;
     final double THIRD_BALL_X = 1830;
-    final double THIRD_BALL_Y = 1000  * allianceSetup.getPolarity();
+    final double THIRD_BALL_Y = 1000;
     private DriveTrain driveTrain;
     TripleColorSensor colorSensors = null;
     Shooter shooter = null;
@@ -138,10 +137,10 @@ public class RedAutoFar extends KTeleOp {
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
-
+        Point farLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity());
         // ----------------- FIRST SHOOT ----------------------
 
-        ShooterReady ready = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.FAR); //TODO launch pos with polarity
+        ShooterReady ready = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.FAR_INNIT); //TODO launch pos with polarity
         ready.setName("ready");
         redAutoFar.addAction(ready);
 
@@ -150,39 +149,44 @@ public class RedAutoFar extends KTeleOp {
         shoot.setDependentActions(ready);
         redAutoFar.addAction(shoot);
 
-        // ----------------- TRIP 1 ----------------------
-        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.FAR, 0);
+        ShooterStop stop = new ShooterStop(shooter);
+        stop.setName("stop");
+        stop.setDependentActions(shoot);
+        redAutoFar.addAction(stop);
+
+        // ----------------- TRIP 1 ---------------------- ~5 sec
+        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 4000);
         trip1.setName("trip1");
-        trip1.getMoveToBall().addPoint(FIRST_BALL_X, FIRST_BALL_Y + (660 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(FIRST_BALL_X, FIRST_BALL_Y, 90 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 30 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(FIRST_BALL_X, (FIRST_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(FIRST_BALL_X, FIRST_BALL_Y * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity(), 30 * allianceSetup.getPolarity());
         trip1.setDependentActions(shoot);
         redAutoFar.addAction(trip1);
 
 
-        // ----------------- TRIP 2 ----------------------
+        // ----------------- TRIP 2 ---------------------- ~8 sec
 
-        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.FAR, 0);
+        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()),  farLaunchPoint, 6500);
         trip2.setName("trip2");
-        trip2.getMoveToBall().addPoint(SECOND_BALL_X, (SECOND_BALL_Y+ (-660 *allianceSetup.getPolarity())), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(SECOND_BALL_X, (SECOND_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to intake
-        trip2.getMoveToBall().addPoint(SECOND_BALL_X, SECOND_BALL_Y, 90 * allianceSetup.getPolarity());
-        trip2.getMoveToBall().addPoint(LEVER_X -200, LEVER_Y + (300 * allianceSetup.getPolarity()), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(SECOND_BALL_X, SECOND_BALL_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(LEVER_X - 200, (LEVER_Y  -300) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to hit lever
-        trip2.getMoveToBall().addPoint(LEVER_X, LEVER_Y + (300 * allianceSetup.getPolarity()), 0);
-        trip2.getMoveToBall().addPoint(LEVER_X, LEVER_Y, 0);
-        trip2.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 45 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(LEVER_X, (LEVER_Y - 300) * allianceSetup.getPolarity(), 0);
+        trip2.getMoveToBall().addPoint(LEVER_X, LEVER_Y * allianceSetup.getPolarity(), 0);
+        trip2.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity(), 45 * allianceSetup.getPolarity());
         trip2.setDependentActions(trip1);
         redAutoFar.addAction(trip2);
 
-        // ----------------- TRIP 3 ----------------------
+        // ----------------- TRIP 3 ---------------------- ~5 sec
 
-        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.FAR, 0);
+        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 3500);
         trip3.setName("trip3");
-        trip3.getMoveToBall().addPoint(DEPOT_X + 300, DEPOT_Y, 145 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(DEPOT_X + 300, DEPOT_Y * allianceSetup.getPolarity(), 145 * allianceSetup.getPolarity());
         // move to intake
-        trip3.getMoveToBall().addPoint(DEPOT_X, DEPOT_Y, 145 * allianceSetup.getPolarity());
-        trip3.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y, 90 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(DEPOT_X, DEPOT_Y * allianceSetup.getPolarity(), 145 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip3.setDependentActions(trip2);
         redAutoFar.addAction(trip3);
 

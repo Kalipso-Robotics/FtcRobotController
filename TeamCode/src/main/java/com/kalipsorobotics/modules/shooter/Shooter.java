@@ -21,7 +21,7 @@ public class Shooter {
 
     public static final double HOOD_OFFSET = 0.25;
 
-    public final double TARGET_RPS_TOLERANCE = 1;
+    public final double TARGET_RPS_TOLERANCE = 0.5;
 
 
     private final OpModeUtilities opModeUtilities;

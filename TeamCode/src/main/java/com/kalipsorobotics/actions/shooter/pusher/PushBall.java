@@ -19,9 +19,9 @@ public class PushBall extends KActionSet {
         release.setName("release");
         this.addAction(release);
 
-        AdjustShooterSpeedAction check1 = new AdjustShooterSpeedAction(shooter);
-        check1.setName("check1");
-        this.addAction(check1);
+//        AdjustShooterSpeedAction check1 = new AdjustShooterSpeedAction(shooter);
+//        check1.setName("check1");
+//        this.addAction(check1);
 
         RunIntakeUntilFullSpeed untilShootingDone = new RunIntakeUntilFullSpeed(intake);
         untilShootingDone.setName("untilShootingDone");
