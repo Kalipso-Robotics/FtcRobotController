@@ -155,7 +155,7 @@ public class RedAutoFar extends KTeleOp {
         redAutoFar.addAction(stop);
 
         // ----------------- TRIP 1 ---------------------- ~5 sec
-        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 4000);
+        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 3000);
         trip1.setName("trip1");
         trip1.getMoveToBall().addPoint(FIRST_BALL_X, (FIRST_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip1.getMoveToBall().addPoint(FIRST_BALL_X, FIRST_BALL_Y * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
@@ -166,7 +166,7 @@ public class RedAutoFar extends KTeleOp {
 
         // ----------------- TRIP 2 ---------------------- ~8 sec
 
-        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()),  farLaunchPoint, 6500);
+        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()),  farLaunchPoint, 6000);
         trip2.setName("trip2");
         trip2.getMoveToBall().addPoint(SECOND_BALL_X, (SECOND_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to intake
@@ -181,7 +181,7 @@ public class RedAutoFar extends KTeleOp {
 
         // ----------------- TRIP 3 ---------------------- ~5 sec
 
-        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 3500);
+        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 3000);
         trip3.setName("trip3");
         trip3.getMoveToBall().addPoint(DEPOT_X + 300, DEPOT_Y * allianceSetup.getPolarity(), 145 * allianceSetup.getPolarity());
         // move to intake

@@ -26,7 +26,6 @@ public class RoundTripAction extends KActionSet {
 
     private ShooterReady shooterReady;
 
-
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
                            Point target, Point launchPos, double waitForShooterReadyMS) {
         WaitAction waitUntilShootReady = new WaitAction(waitForShooterReadyMS);
@@ -39,15 +38,17 @@ public class RoundTripAction extends KActionSet {
         this.moveToBall = moveToBalls;
         moveToBalls.setFinalSearchRadius(40);
 
+        //warm - shorter
         shooterReady = new ShooterReady(shooter, target, launchPos, 0);
         shooterReady.setName("shooterReady");
         shooterReady.setDependentActions(waitUntilShootReady);
         this.addAction(shooterReady);
 
+        //
         ShooterReady shooterMaintain = new ShooterReady(shooter, target, launchPos, ShooterConfig.maintainTimeOutMS);
         shooterMaintain.setName("ShooterMaintain");
         this.addAction(shooterMaintain);
-        shooterMaintain.setDependentActions(shooterReady);
+        shooterMaintain.setDependentActions(moveToBalls, shooterReady);
 
         intakeFullAction = new IntakeFullAction(stopper, intake, 10000);
         intakeFullAction.setName("intakeFullAction");
