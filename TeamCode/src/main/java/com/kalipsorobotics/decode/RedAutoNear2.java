@@ -13,6 +13,7 @@ import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceSetup;
 import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.localization.Odometry;
@@ -119,7 +120,7 @@ public class RedAutoNear2 extends KTeleOp {
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 

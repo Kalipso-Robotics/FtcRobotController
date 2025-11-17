@@ -1,9 +1,11 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -27,7 +29,7 @@ public class ShooterDataCollector extends KTeleOp {
     TurretAutoAlign turretAutoAlign = null;
     private Intake intake = null;
     private PushBall pushBall;
-    private ShooterReady shooterReady = null;
+    private ShootAllAction shootAllAction = null;
 
     private double targetRPS = 0.0;
     private double hoodPosition = 0.5;
@@ -55,9 +57,8 @@ public class ShooterDataCollector extends KTeleOp {
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
         intake = new Intake(opModeUtilities);
-        Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP);
 
         stopperOpen = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
         stopperClose = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
@@ -81,9 +82,9 @@ public class ShooterDataCollector extends KTeleOp {
             // ========== RPS Control with DPad ==========
             // Use dpad up to increase RPS, dpad down to decrease RPS
             if (kGamePad1.isDpadUpFirstPressed()) {
-                targetRPS += 0.5; // Increase by 0.5 RPS per loop
+                targetRPS += 0.1; // Increase by 0.5 RPS per loop
             } else if (kGamePad1.isDpadDownFirstPressed()) {
-                targetRPS -= 0.5; // Decrease by 0.5 RPS per loop
+                targetRPS -= 0.1; // Decrease by 0.5 RPS per loop
             }
 
             if (kGamePad1.isButtonXFirstPressed()) {
@@ -120,29 +121,31 @@ public class ShooterDataCollector extends KTeleOp {
 
             // ========== ShooterReady Action Management ==========
             // Create a new ShooterReady action when RPS or hood position changes
-            if (targetRPS != prevRPS || hoodPosition != prevHoodPosition) {
-                if (targetRPS > 0) {
-                    // Use ShooterReady with direct RPS mode (same as RedFarTeleOp/RedAutos pattern)
-                    shooterReady = new ShooterReady(shooter, targetRPS, hoodPosition);
-                    setLastShooterAction(shooterReady);
-                } else {
-                    // Stop the shooter when targetRPS is 0
-                    shooter.stop();
+            if (gamepad1.left_stick_button) {
+                if (true) {
+                    if (targetRPS > 0) {
+                        // Use ShooterReady with direct RPS mode (same as RedFarTeleOp/RedAutos pattern)
+                        shootAllAction = new ShootAllAction(stopper, intake, shooter, targetRPS, hoodPosition);
+                        setLastShooterAction(shootAllAction);
+                    } else {
+                        // Stop the shooter when targetRPS is 0
+                        shooter.stop();
+                    }
+                    prevRPS = targetRPS;
+                    prevHoodPosition = hoodPosition;
                 }
-                prevRPS = targetRPS;
-                prevHoodPosition = hoodPosition;
             }
 
 
             // ========== Kick Ball with Gamepad1 Y ==========
-            if (kGamePad1.isButtonYFirstPressed()) {
-                if (pushBall == null || pushBall.getIsDone()) {
-                    pushBall = new PushBall(stopper, intake, shooter);
-                    setLastStopperAction(pushBall);
-                    setLastIntakeAction(pushBall);
-                    setLastShooterAction(pushBall);
-                }
-            }
+//            if (kGamePad1.isButtonYFirstPressed()) {
+//                if (pushBall == null || pushBall.getIsDone()) {
+//                    pushBall = new PushBall(stopper, intake, shooter);
+//                    setLastStopperAction(pushBall);
+//                    setLastIntakeAction(pushBall);
+//                    setLastShooterAction(pushBall);
+//                }
+//            }
 //            if (gamepad1.y) {
 //                // Create a new KickBall action if one doesn't exist or has completed
 //                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_OPEN_POS);
@@ -153,7 +156,7 @@ public class ShooterDataCollector extends KTeleOp {
             if (gamepad1.right_stick_y != 0) {
                 intake.getIntakeMotor().setPower(-gamepad1.right_stick_y);
                 stopper.getStopper().setPosition(0.55);
-            } else {
+            } else if (gamepad1.right_stick_button) {
                 intake.getIntakeMotor().setPower(0);
             }
 

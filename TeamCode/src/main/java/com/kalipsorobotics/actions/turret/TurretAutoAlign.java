@@ -20,10 +20,6 @@ public class TurretAutoAlign extends Action {
     private double xInitSetup;// = 3445.14;
     private double yInitSetup;// = 2028.8;
 
-    public static double RED_X_INIT_SETUP = 121 *25.4; //121 inches
-
-    public static double RED_Y_INIT_SETUP = 46 * 25.4; //46inches
-
     private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE);
 
     private boolean isWithinRange = false;

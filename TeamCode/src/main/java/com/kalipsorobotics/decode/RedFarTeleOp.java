@@ -15,6 +15,7 @@ import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceSetup;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
@@ -112,7 +113,7 @@ public class RedFarTeleOp extends KTeleOp {
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(stopper, intake, 8);
 
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         //goalDetectionAction = new GoalDetectionAction(opModeUtilities);
 
@@ -125,7 +126,7 @@ public class RedFarTeleOp extends KTeleOp {
         pushBall = new PushBall(stopper, intake, shooter);
         openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-        runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3);
+        runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3000);
     }
 
 
@@ -177,7 +178,7 @@ public class RedFarTeleOp extends KTeleOp {
             }
 
             if (shooterReadyNearPressed) {
-                launchPosition = LaunchPosition.FAR;
+                launchPosition = LaunchPosition.FAR_INNIT;
             } else if (shooterReadyMiddlePressed) {
                 launchPosition = LaunchPosition.MIDDLE;
             } else if (shooterReadyWallPressed) {
@@ -254,7 +255,7 @@ public class RedFarTeleOp extends KTeleOp {
             if (runUntilStalledPressed) {
                 KLog.d("teleop", "revolver pressed");
                 if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
-                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4);
+                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4000);
                 }
                 setLastIntakeAction(runUntilStallAction);
             }

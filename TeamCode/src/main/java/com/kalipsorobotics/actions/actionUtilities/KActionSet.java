@@ -15,6 +15,7 @@ public class KActionSet extends Action {
 
     @Override
     public void update() {
+        beforeUpdate();
         for (Action a : actions) {
             if (a != null && a.dependentActionsDone()) {
                 KLog.d("action set log", "executing " + a);
@@ -23,6 +24,10 @@ public class KActionSet extends Action {
         }
     }
 
+    // this is a hook to open up update to other code
+    protected void beforeUpdate(){
+
+    }
 
     @Override
     public boolean updateCheckDone(){

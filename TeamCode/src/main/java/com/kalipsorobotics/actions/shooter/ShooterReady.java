@@ -21,28 +21,32 @@ public class ShooterReady extends Action {
 
     private ElapsedTime rpsInRangeTimer;
     private ElapsedTime rampUpTimeTimer;
-    private final LaunchPosition launchPosition;
-
     // For direct RPS mode
     private final double targetRPS;
+    private double distanceMM = -1;
     private final double targetHoodPosition;
 
     ElapsedTime elapsedTime;
     final private double timeOutMS;
 
 
-    // Constructor with auto-prediction (existing behavior)
-    private ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition, double targetRPS, double targetHoodPosition, double timeOutMS) {
+    public ShooterReady(Shooter shooter, Point target, double distanceMM, double targetRPS, double targetHoodPosition, double timeOutMS) {
         this.shooter = shooter;
         this.target = target;
-        this.launchPosition = launchPosition;
         this.targetRPS = targetRPS;
         this.targetHoodPosition = targetHoodPosition;
         this.name = "ShooterReady";
         elapsedTime = new ElapsedTime();
         this.timeOutMS = timeOutMS;
+        this.distanceMM = distanceMM;
     }
 
+    /**
+     * Use For Warmup
+     */
+    public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition, double targetRPS, double targetHoodPosition, double timeOutMS) {
+        this(shooter, target, launchPosition.getDistanceToTargetMM(), targetRPS, targetHoodPosition, timeOutMS);
+    }
     /**
      * Use For Auto Warmup, and ready
      */
@@ -64,6 +68,9 @@ public class ShooterReady extends Action {
         this(shooter, null, null, targetRPS, targetHoodPosition, 0);
     }
 
+    public ShooterReady(Shooter shooter, Point target, Point launchPos, double timeOutMS) {
+        this(shooter, target, launchPos.distanceTo(target), 0, 0, timeOutMS);
+    }
     @SuppressLint("DefaultLocale")
     @Override
     public void update() {
@@ -129,10 +136,8 @@ public class ShooterReady extends Action {
     }
 
     private IShooterPredictor.ShooterParams getPrediction() {
-        double distanceMM;
-
-        if (launchPosition == LaunchPosition.AUTO) {
-            KLog.d("shooter_ready", "Using target position: " + target);
+        if (distanceMM < 0) {
+            KLog.d("shooter_ready", "We using odo pos to target position: " + target);
             // Calculate distance from odometry position to target
             Position currentPosition = SharedData.getOdometryPosition();
             double dx = target.getX() - currentPosition.getX();
@@ -144,11 +149,8 @@ public class ShooterReady extends Action {
 //                distanceMM = SharedData.getDistanceToGoal();
 //            }
 
-        } else {
-            KLog.d("shooter_ready", "Using launch position: " + launchPosition);
-            // Use the distance from the launch position enum
-            distanceMM = launchPosition.getDistanceToTargetMM();
         }
+
         IShooterPredictor.ShooterParams params = shooter.getPrediction(distanceMM);
         KLog.d("shooter_ready", "Distance: " + distanceMM + " params: " + params);
         // Get shooter parameters from predictor using the distance

@@ -14,6 +14,7 @@ import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceSetup;
 import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.localization.Odometry;
@@ -122,7 +123,7 @@ public class RedAutoNear extends KTeleOp {
 
         revolverTeleOp = new RevolverTeleOp(revolver, false);
 
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretAutoAlign.RED_X_INIT_SETUP, TurretAutoAlign.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
         detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
 
@@ -200,7 +201,7 @@ public class RedAutoNear extends KTeleOp {
         moveToLeverBalls.addPoint(LEVER_X -200, LEVER_Y -300, 90 * allianceSetup.getPolarity());
         moveToLeverBalls.setDependentActions(shoot, moveToFirstBalls);
 
-        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
+        ShooterReady ready2 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR_INNIT);
         ready2.setName("ready2");
         ready2.setDependentActions(waitForShoot, moveToLeverBalls);
         redAutoNear.addAction(ready2);
@@ -237,7 +238,7 @@ public class RedAutoNear extends KTeleOp {
         waitForShoot3.setDependentActions(shoot3);
         redAutoNear.addAction(waitForShoot3);
 
-        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR);
+        ShooterReady ready3 = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.FAR_INNIT);
         ready3.setName("ready2");
         ready3.setDependentActions(waitForShoot3);
         redAutoNear.addAction(ready3);
