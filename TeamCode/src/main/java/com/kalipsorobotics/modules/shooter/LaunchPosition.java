@@ -3,6 +3,7 @@ package com.kalipsorobotics.modules.shooter;
 public enum LaunchPosition {
     AUTO(1.0),
     FAR_INNIT(Math.hypot(Shooter.RED_TARGET_FROM_FAR.getX(), Shooter.RED_TARGET_FROM_FAR.getY())),
+    NEAR_INIT(430),
     MIDDLE(2286),
     WALL(1676.4),
     BLUE(3048),
