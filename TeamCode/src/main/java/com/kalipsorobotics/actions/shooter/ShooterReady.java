@@ -78,7 +78,7 @@ public class ShooterReady extends Action {
             rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
-            KLog.d(this.getClass().getName(), "PID: " + shooter.getShooter1().getPIDController());
+            KLog.d(this.getClass().getName(), "PIDF: " + shooter.getShooter1().getPIDFController());
             elapsedTime.reset();
         }
 
