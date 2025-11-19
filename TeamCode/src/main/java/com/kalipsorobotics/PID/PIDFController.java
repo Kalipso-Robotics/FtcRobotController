@@ -3,6 +3,8 @@ package com.kalipsorobotics.PID;
 import android.os.SystemClock;
 import androidx.annotation.NonNull;
 
+import com.kalipsorobotics.utilities.KLog;
+
 /**
  * PIDF Controller for velocity control (e.g., motor RPS)
  * Adds feedforward term to standard PID for better setpoint tracking
@@ -13,6 +15,7 @@ public class PIDFController {
     private double ki;
     private double kd;
     private double kf;
+    private double kfBase;
 
     private double integralError;
     private double lastError;
@@ -28,12 +31,12 @@ public class PIDFController {
      * @param F Feedforward gain - provides base output proportional to target
      * @param controllerName Name for identification
      */
-    public PIDFController(double P, double I, double D, double F, String controllerName) {
+    public PIDFController(double P, double I, double D, double F, double baseF, String controllerName) {
         kp = P;
         ki = I;
         kd = D;
         kf = F;
-
+        this.kfBase = baseF;
         integralError = 0;
         lastError = 0;
         lastTime = SystemClock.elapsedRealtimeNanos();
@@ -72,12 +75,20 @@ public class PIDFController {
         double derivative = kd * (error - lastError) / timeDelta;
 
         // Feedforward component - base output for target velocity
-        double feedforward = kf * target;
+        double feedforward = kf * target + kfBase;
+
+        // Calculate total output
+        double output = proportional + integral + derivative + feedforward;
+
+        // Log calculated values
+        KLog.d("PIDF_" + name, String.format(
+            "Current: %.2f | Target: %.2f | Error: %.2f | P: %.4f | I: %.4f | D: %.4f | F: %.4f | Output: %.4f",
+            current, target, error, proportional, integral, derivative, feedforward, output));
 
         lastTime = currentTime;
         lastError = error;
 
-        return proportional + integral + derivative + feedforward;
+        return output;
     }
 
     /**

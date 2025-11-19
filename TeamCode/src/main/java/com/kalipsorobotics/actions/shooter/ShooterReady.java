@@ -51,14 +51,14 @@ public class ShooterReady extends Action {
      * Use For Auto Warmup, and ready
      */
     public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition) {
-        this(shooter, target, launchPosition, 0, 0, 0);
+        this(shooter, target, launchPosition, 0, 0.8, 0); // changed hood to 0.8 from 0
     }
 
     /**
      * Use For Maintain
      */
     public ShooterReady(Shooter shooter, Point target, LaunchPosition launchPosition, double timeOutMS) {
-        this(shooter, target, launchPosition, 0, 0, timeOutMS);
+        this(shooter, target, launchPosition, 0, 0.8, timeOutMS); // changed hood to 0.8 from 0
     }
 
     /**
@@ -69,7 +69,7 @@ public class ShooterReady extends Action {
     }
 
     public ShooterReady(Shooter shooter, Point target, Point launchPos, double timeOutMS) {
-        this(shooter, target, launchPos.distanceTo(target), 0, 0, timeOutMS);
+        this(shooter, target, launchPos.distanceTo(target), 0, 0.8, timeOutMS); // changed hood to 0.8 from 0
     }
     @SuppressLint("DefaultLocale")
     @Override

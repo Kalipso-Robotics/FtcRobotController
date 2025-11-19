@@ -25,8 +25,6 @@ public class KMotor {
 
     // Power limits
     private static final double MAX_POWER = 1.0;
-    private static final double DEFAULT_MIN_POWER = 0.0;
-    private double minPowerScaleFactor;
 
     // Default PIDF constants - tune these values for optimal RPS control
     // These values are designed to prevent overshoot while reaching target quickly
@@ -39,17 +37,12 @@ public class KMotor {
 
     private final ElapsedTime elapsedTime;
 
-    public KMotor(DcMotor motor) {
-        this(motor, DEFAULT_MIN_POWER, DEFAULT_KP, DEFAULT_KI, DEFAULT_KD, DEFAULT_KF);
-    }
-
-    public KMotor(DcMotor motor, double minPowerScaleFactor, double kp, double ki, double kd, double kf) {
+    public KMotor(DcMotor motor, double kp, double ki, double kd, double kf, double kfBase) {
         this.motor = (DcMotorEx) motor;
-        this.minPowerScaleFactor = minPowerScaleFactor;
         this.prevTicks = motor.getCurrentPosition();
         this.prevTimeMS = System.currentTimeMillis();
         this.elapsedTime = new ElapsedTime();
-        this.pidfController = new PIDFController(kp, ki, kd, kf, "KMotor_" + motor.getDeviceName());
+        this.pidfController = new PIDFController(kp, ki, kd, kf, kfBase, "KMotor_" + motor.getDeviceName());
     }
 
     /**
@@ -113,10 +106,8 @@ public class KMotor {
         // Calculate PIDF output (includes feedforward for faster response)
         double pidfOutput = pidfController.calculate(currentRPS, targetRPS);
 
-        double minPower = minPowerScaleFactor * targetRPS;
-
         // Clamp power to valid range
-        double newPower = Math.max(minPower, Math.min(MAX_POWER, pidfOutput));
+        double newPower = Math.max(0.0, Math.min(MAX_POWER, pidfOutput));
 
         // Set new power
         motor.setPower(newPower);
@@ -124,7 +115,7 @@ public class KMotor {
         // Log for debugging
         KLog.d("KMotor", String.format(
             "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDFOutput: %.2f, Power: %.3f, MinPower: %.3f",
-            targetRPS, currentRPS, (targetRPS - currentRPS), pidfOutput, newPower, minPower
+            targetRPS, currentRPS, (targetRPS - currentRPS), pidfOutput, newPower, 0.0
         ));
     }
 
