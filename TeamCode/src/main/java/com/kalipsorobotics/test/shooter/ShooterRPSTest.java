@@ -59,7 +59,7 @@ public class ShooterRPSTest extends LinearOpMode {
         fileWriter = new KFileWriter("ShooterRPSTestData", opModeUtilities);
 
         // Write CSV header
-        fileWriter.writeLine("targetRPS,rampUpTimeMs,minRPS,maxRPS,avgRPS");
+        fileWriter.writeLine("targetRPS,rampUpTimeMs,minRPS,maxRPS,avgRPS,kp,ki,kd,kf");
 
         // Calculate test info
         int totalTests = (int) ((RPS_END - RPS_START) / RPS_STEP) + 1;
@@ -104,8 +104,9 @@ public class ShooterRPSTest extends LinearOpMode {
             TestResult result = runSingleTest(targetRPS);
 
             // Log results to file
-            String line = String.format("%.1f,%.0f,%.2f,%.2f,%.2f",
-                targetRPS, result.rampUpTimeMs, result.minRPS, result.maxRPS, result.avgRPS);
+            String line = String.format("%.1f,%.0f,%.2f,%.2f,%.2f,%.6f,%.6f,%.6f,%.6f",
+                targetRPS, result.rampUpTimeMs, result.minRPS, result.maxRPS, result.avgRPS,
+                ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
             fileWriter.writeLine(line);
 
             // Display results
@@ -296,7 +297,7 @@ public class ShooterRPSTest extends LinearOpMode {
         motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter1 = new KMotor(motor1,
-            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf, ShooterConfig.kfBase);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         // Initialize shooter2
         DcMotor motor2 = hardwareMap.dcMotor.get("shooter2");
@@ -306,7 +307,7 @@ public class ShooterRPSTest extends LinearOpMode {
         motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter2 = new KMotor(motor2,
-            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf, ShooterConfig.kfBase);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         KLog.d("ShooterRPSTest", "Motors initialized successfully");
     }

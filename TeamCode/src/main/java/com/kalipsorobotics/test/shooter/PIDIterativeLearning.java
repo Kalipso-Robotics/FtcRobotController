@@ -693,7 +693,7 @@ public class PIDIterativeLearning extends LinearOpMode {
         motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter1 = new KMotor(motor1,
-            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf,  ShooterConfig.kfBase);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         // Initialize shooter2
         DcMotor motor2 = hardwareMap.dcMotor.get("shooter2");
@@ -703,7 +703,7 @@ public class PIDIterativeLearning extends LinearOpMode {
         motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter2 = new KMotor(motor2,
-            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf,  ShooterConfig.kfBase);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         KLog.d("PIDIterativeLearning", "Motors initialized successfully");
     }

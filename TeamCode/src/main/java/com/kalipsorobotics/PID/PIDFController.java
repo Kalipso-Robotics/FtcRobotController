@@ -15,7 +15,6 @@ public class PIDFController {
     private double ki;
     private double kd;
     private double kf;
-    private double kfBase;
 
     private double integralError;
     private double lastError;
@@ -31,12 +30,11 @@ public class PIDFController {
      * @param F Feedforward gain - provides base output proportional to target
      * @param controllerName Name for identification
      */
-    public PIDFController(double P, double I, double D, double F, double baseF, String controllerName) {
+    public PIDFController(double P, double I, double D, double F, String controllerName) {
         kp = P;
         ki = I;
         kd = D;
         kf = F;
-        this.kfBase = baseF;
         integralError = 0;
         lastError = 0;
         lastTime = SystemClock.elapsedRealtimeNanos();
@@ -75,7 +73,7 @@ public class PIDFController {
         double derivative = kd * (error - lastError) / timeDelta;
 
         // Feedforward component - base output for target velocity
-        double feedforward = kf * target + kfBase;
+        double feedforward = kf * target;
 
         // Calculate total output
         double output = proportional + integral + derivative + feedforward;
