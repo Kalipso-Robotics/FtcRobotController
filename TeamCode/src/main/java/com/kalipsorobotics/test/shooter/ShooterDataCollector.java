@@ -3,7 +3,6 @@ package com.kalipsorobotics.test.shooter;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
-import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.localization.Odometry;

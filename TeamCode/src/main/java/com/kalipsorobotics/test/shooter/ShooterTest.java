@@ -2,7 +2,7 @@ package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
-import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -12,7 +12,6 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KGamePad;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -52,7 +51,7 @@ public class ShooterTest extends LinearOpMode {
 //        kickerRight.setPosition(0.5);
 //        kickerLeft.setPosition(0.5);
         Shooter shooter = new Shooter(opModeUtilities);
-        ShooterReady shooterReady = new ShooterReady(shooter, new Point(3600, 1200), LaunchPosition.AUTO);
+        ShooterRun shooterRun = new ShooterRun(shooter, new Point(3600, 1200), LaunchPosition.AUTO);
 
 
         //Servo pusher = hardwareMap.servo.get("hood");
@@ -89,11 +88,11 @@ public class ShooterTest extends LinearOpMode {
             if (gamepad1.dpad_left) {
 //                shooter.getShooter1().setPower(power);
 //                shooter.getShooter2().setPower(power);
-                shooterReady = new ShooterReady(shooter, new Point(3600, 1200), LaunchPosition.AUTO);
-                teleOp.addAction(shooterReady);
+                shooterRun = new ShooterRun(shooter, new Point(3600, 1200), LaunchPosition.AUTO);
+                teleOp.addAction(shooterRun);
             } else {
-                shooterReady = null;
-                teleOp.addAction(shooterReady);
+                shooterRun = null;
+                teleOp.addAction(shooterRun);
             }
 
             if (gamepad1.left_bumper) {

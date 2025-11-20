@@ -12,7 +12,7 @@ import com.kalipsorobotics.actions.intake.IntakeRun;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
-import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretConfig;
@@ -44,7 +44,7 @@ public class RedFarTeleOp extends KTeleOp {
     Turret turret = null;
     private Stopper stopper = null;
 
-    ShooterReady shooterReady = null;
+    ShooterRun shooterRun = null;
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
 
@@ -120,9 +120,9 @@ public class RedFarTeleOp extends KTeleOp {
         //todo just fed in testing motif pattern change later
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 
-        shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
+        shooterRun = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR);
-        shooterStop = new ShooterStop(shooter);
+        shooterStop = new ShooterStop(shooterRun);
         pushBall = new PushBall(stopper, intake, shooter);
         openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
@@ -172,7 +172,7 @@ public class RedFarTeleOp extends KTeleOp {
 
             if (shooterStopPressed) {
                 if (shooterStop != null || shooterStop.getIsDone()) {
-                    shooterStop = new ShooterStop(shooter);
+                    shooterStop = new ShooterStop(shooterRun);
                     setLastShooterAction(shooterStop);
                 }
             }
@@ -201,10 +201,10 @@ public class RedFarTeleOp extends KTeleOp {
                     goalDetectionAction.getLimelight().start();
                     goalDetectionAction.updateCheckDone();
                 }
-                if (shooterReady != null || shooterReady.getIsDone()) {
-                    shooterReady = new ShooterReady(shooter, ROBOT_START_POINT_RED.multiplyY(allianceSetup.getPolarity()), launchPosition);
+                if (shooterRun != null || shooterRun.getIsDone()) {
+                    shooterRun = new ShooterRun(shooter, ROBOT_START_POINT_RED.multiplyY(allianceSetup.getPolarity()), launchPosition);
                     KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up For Position: " + launchPosition);
-                    setLastShooterAction(shooterReady);
+                    setLastShooterAction(shooterRun);
                 }
             } else {
                 //goalDetectionAction.getLimelight().stop();

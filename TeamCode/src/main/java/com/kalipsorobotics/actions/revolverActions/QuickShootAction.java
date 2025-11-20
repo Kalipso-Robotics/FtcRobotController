@@ -4,7 +4,7 @@ import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
-import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
@@ -14,13 +14,13 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class QuickShootAction extends KActionSet {
     public QuickShootAction(Revolver revolver, Shooter shooter, Stopper stopper, Intake intake) {
-        ShooterReady shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
-        shooterReady.setName("shooterReady");
-        this.addAction(shooterReady);
+        ShooterRun shooterRun = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
+        shooterRun.setName("shooterReady");
+        this.addAction(shooterRun);
 
         KServoAutoAction revolverTurn1 = new KServoAutoAction(revolver.getRevolverServo(), Revolver.REVOLVER_INDEX_0);
         revolverTurn1.setName("revolverTurn1");
-        revolverTurn1.setDependentActions(shooterReady);
+        revolverTurn1.setDependentActions(shooterRun);
         this.addAction(revolverTurn1);
 
         WaitAction waitAction1 = new WaitAction(50);
@@ -78,7 +78,7 @@ public class QuickShootAction extends KActionSet {
         this.addAction(waitAction6);
         waitAction6.setDependentActions(pushBall3);
 
-        ShooterStop stop = new ShooterStop(shooter);
+        ShooterStop stop = new ShooterStop(shooterRun);
         stop.setName("stop");
         stop.setDependentActions(waitAction6);
         this.addAction(stop);

@@ -5,15 +5,18 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 
 public class ShooterStop extends Action {
-    Shooter shooter = null;
+    ShooterRun shooterRun = null;
 
-    public ShooterStop(Shooter shooter) {
-        this.shooter = shooter;
+    public ShooterStop(ShooterRun shooterRun) {
+        this.shooterRun = shooterRun;
     }
 
     @Override
     protected void update() {
-        shooter.stop();
+        if (isDone) {
+            return;
+        }
+        shooterRun.stop();
         isDone = true;
     }
 }

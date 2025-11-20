@@ -9,7 +9,7 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
-import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -59,7 +59,7 @@ public class RedAutoNear extends KTeleOp {
     Shooter shooter = null;
     Intake intake = null;
     Stopper stopper = null;
-    ShooterReady shooterReady = null;
+    ShooterRun shooterRun = null;
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
 
@@ -128,9 +128,9 @@ public class RedAutoNear extends KTeleOp {
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
-        shooterReady = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
+        shooterRun = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
         shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR);
-        shooterStop = new ShooterStop(shooter);
+        shooterStop = new ShooterStop(shooterRun);
         pushBall = new PushBall(stopper, intake, shooter);
     }
 
@@ -140,7 +140,7 @@ public class RedAutoNear extends KTeleOp {
         Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceSetup.getPolarity());
 
         // ----------------- FIRST SHOOT ----------------------
-        ShooterReady ready = new ShooterReady(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.NEAR_INIT); //TODO launch pos with polarity
+        ShooterRun ready = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.NEAR_INIT); //TODO launch pos with polarity
         ready.setName("ready");
         redAutoNear.addAction(ready);
 
@@ -149,7 +149,7 @@ public class RedAutoNear extends KTeleOp {
         shoot.setDependentActions(ready);
         redAutoNear.addAction(shoot);
 
-        ShooterStop stop = new ShooterStop(shooter);
+        ShooterStop stop = new ShooterStop(shooterRun);
         stop.setName("stop");
         stop.setDependentActions(shoot);
         redAutoNear.addAction(stop);

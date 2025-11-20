@@ -1,7 +1,5 @@
 package com.kalipsorobotics.actions.shooter;
 
-import android.graphics.Bitmap;
-
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.math.Point;
@@ -10,7 +8,6 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterConfig;
-import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 
 
 public class ShootAllAction extends KActionSet {
@@ -24,21 +21,21 @@ public class ShootAllAction extends KActionSet {
     }
 
     private ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, Point target, double targetRPS, double targetHoodPos) {
-        ShooterReady shooterReady = new ShooterReady(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, 0);
-        shooterReady.setName("ShooterReady");
-        this.addAction(shooterReady);
+        ShooterRun shooterRun = new ShooterRun(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, 0);
+        shooterRun.setName("ShooterReady");
+        this.addAction(shooterRun);
 
-        ShooterReady shooterMaintain = new ShooterReady(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, ShooterConfig.maintainTimeOutMS);
+        ShooterRun shooterMaintain = new ShooterRun(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, ShooterConfig.maintainTimeOutMS);
         shooterMaintain.setName("ShooterMaintain");
         this.addAction(shooterMaintain);
-        shooterMaintain.setDependentActions(shooterReady);
+        shooterMaintain.setDependentActions(shooterRun);
 
         PushBall pushAllBalls = new PushBall(stopper, intake, shooter);
         pushAllBalls.setName("pushAllBalls");
-        pushAllBalls.setDependentActions(shooterReady);
+        pushAllBalls.setDependentActions(shooterRun);
         this.addAction(pushAllBalls);
 
-        ShooterStop shooterStop = new ShooterStop(shooter);
+        ShooterStop shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
         shooterStop.setDependentActions(pushAllBalls, shooterMaintain);
         this.addAction(shooterStop);
