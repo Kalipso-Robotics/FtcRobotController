@@ -153,9 +153,18 @@ public class Shooter {
 
     /**
      * Set target RPS for both motors using PID control
+     * Uses adaptive kF based on target RPS from lookup table
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
+        // Get optimal kF for this target RPS
+        double optimalKf = ShooterConfig.getShooterKf(targetRPS);
+
+        // Update kF in both motors' PIDF controllers
+        shooter1.getPIDFController().setKf(optimalKf);
+        shooter2.getPIDFController().setKf(optimalKf);
+
+        // Set target RPS
         shooter1.goToRPS(targetRPS);
         shooter2.goToRPS(targetRPS);
     }
