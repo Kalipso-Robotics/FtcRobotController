@@ -7,7 +7,7 @@ public class ShooterConfig {
     public static double timeToStabilize = 0;
     // PID: this combo is working well; leave it
     public static double kp = 0.014000;
-    public static double ki = 0.001000;
+    public static double ki = 0.001000 * 5;
     public static double kd = 0.002000;
 
     public static double kf = 0.009338;   // <-- Global optimum (fallback, not used with lookup table)
@@ -50,7 +50,6 @@ public class ShooterConfig {
         // Above highest test point
         return SHOOTER_KF_POINTS[SHOOTER_KF_POINTS.length - 1];
     }
-
     public static double maintainTimeOutMS = 1000;
     //  kp=0.000190 ki=0.000003 kd=0.000028 BEST VALUES from Iterative Learning
     //  kp=0.000363 ki=0.000003 kd=0.000016 BEST VALUES 2

@@ -21,7 +21,7 @@ public class Shooter {
 
     public static final double HOOD_OFFSET = 0.25;
 
-    public final double TARGET_RPS_TOLERANCE = 0.5;
+    public final double TARGET_RPS_TOLERANCE = 1;
 
 
     private final OpModeUtilities opModeUtilities;
@@ -62,6 +62,7 @@ public class Shooter {
             opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
         }
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
+
 
 //        CRServo kickerRight = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        if (kickerRight == null) {
@@ -140,6 +141,7 @@ public class Shooter {
     public void stop() {
         shooter1.stop();
         shooter2.stop();
+        KLog.d("ShooterStop", "shooter stopped");
     }
 
     /**

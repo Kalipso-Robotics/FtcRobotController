@@ -29,7 +29,7 @@ public class ShooterRun extends Action {
     // For direct RPS mode
     private double targetRPS;
     private double distanceMM = -1;
-    private final double targetHoodPosition;
+    private double targetHoodPosition;
 
     ElapsedTime elapsedTime;
     final private double timeOutMS;
@@ -86,14 +86,15 @@ public class ShooterRun extends Action {
     @Override
     public void update() {
         if (!hasStarted) {
+            shooter.getShooter1().resetPID();
+            shooter.getShooter2().resetPID();
+
             rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
             KLog.d(this.getClass().getName(), "PIDF: " + shooter.getShooter1().getPIDFController());
             elapsedTime.reset();
         }
-
-
 
         double rps;
         double hoodPosition;
@@ -166,6 +167,13 @@ public class ShooterRun extends Action {
         KLog.d("shooter_ready", "Distance: " + distanceMM + " params: " + params);
         // Get shooter parameters from predictor using the distance
         return shooter.getPrediction(distanceMM);
+    }
+
+    public void setNewLaunchPosition(Point current, Point target) {
+        distanceMM = Math.hypot(target.getX() - current.getX(), target.getY() - current.getY());
+        IShooterPredictor.ShooterParams params = getPrediction();
+        targetRPS = params.rps;
+        targetHoodPosition = params.hoodPosition;
     }
 
 

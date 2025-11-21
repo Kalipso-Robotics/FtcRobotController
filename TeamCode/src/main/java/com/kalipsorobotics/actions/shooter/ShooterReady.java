@@ -16,8 +16,11 @@ public class ShooterReady extends Action {
         if (isDone) {
             return;
         }
-        KLog.d("ShooterReady", "Shooter Within Range" + shooterRun.isWithinRange());
-        isDone = shooterRun.isWithinRange();
+        KLog.d("ShooterReady", "Shooter Within Range " + shooterRun.isWithinRange());
+        if (shooterRun.isWithinRange()) {
+            isDone = true;
+            KLog.d("ShooterReady", "Done");
+        }
 
     }
 }

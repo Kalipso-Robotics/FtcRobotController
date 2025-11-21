@@ -66,9 +66,9 @@ public class Position {
         return new Position(this.getX() + vector.getX(), this.getY() + vector.getY(), Math.atan2(vector.getY(),vector.getX()));
     }
 
-//    public Point toPoint() {
-//        return new Point(getX(), getY());
-//    }
+    public Point toPoint() {
+        return new Point(getX(), getY());
+    }
 
 //    public static List<Point> toPointList(List<Position> positions) {
 //        List<Point> points = new ArrayList<Point>();
