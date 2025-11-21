@@ -16,6 +16,7 @@ import com.kalipsorobotics.modules.shooter.ShooterConfig;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 
 public class RoundTripAction extends KActionSet {
 
@@ -25,8 +26,12 @@ public class RoundTripAction extends KActionSet {
 
     private ShooterRun shooterRun;
 
+    Point target;
+
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
                            Point target, Point launchPos, double waitForShooterReadyMS) {
+        this.target = target;
+
         WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
         waitUntilShootRun.setName("waitUntilShootReady");
         this.addAction(waitUntilShootRun);
@@ -35,7 +40,7 @@ public class RoundTripAction extends KActionSet {
         PurePursuitAction moveToBalls = new PurePursuitAction(drivetrain);
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
-        moveToBalls.setFinalSearchRadius(40);
+        moveToBalls.setFinalSearchRadius(100);
 
         //warm - shorter
         shooterRun = new ShooterRun(shooter, target, launchPos, 0);
@@ -46,12 +51,7 @@ public class RoundTripAction extends KActionSet {
         ShooterReady shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
         shooterReady.setDependentActions(moveToBalls);
-
-        //
-        ShooterRun shooterMaintain = new ShooterRun(shooter, target, launchPos, ShooterConfig.maintainTimeOutMS);
-        shooterMaintain.setName("ShooterMaintain");
-        this.addAction(shooterMaintain);
-        shooterMaintain.setDependentActions(moveToBalls, shooterReady);
+        this.addAction(shooterReady);
 
         intakeFullAction = new IntakeFullAction(stopper, intake, 10000);
         intakeFullAction.setName("intakeFullAction");
@@ -64,7 +64,7 @@ public class RoundTripAction extends KActionSet {
 
         ShooterStop shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
-        shooterStop.setDependentActions(shoot, shooterMaintain);
+        shooterStop.setDependentActions(shoot);
         this.addAction(shooterStop);
 
     }
@@ -83,6 +83,12 @@ public class RoundTripAction extends KActionSet {
             KLog.d("RoundTrip", "Shooter Ready Done" + shooterRun.getIsDone());
 
             intakeFullAction.setIsDone(true);
+            shooterRun.setNewLaunchPosition(SharedData.getOdometryPosition().toPoint(), target);
         }
+
+        KLog.d("RoundTrip", "MoveToBall isDone " + moveToBall.getIsDone());
+        KLog.d("RoundTrip", "Intake isDone " + intakeFullAction.getIsDone());
+        KLog.d("RoundTrip", "Shooter isDone " + shooterRun.getIsDone());
+
     }
 }

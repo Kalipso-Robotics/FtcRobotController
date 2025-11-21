@@ -93,12 +93,8 @@ public class KMotor {
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
-//        // Update target if changed significantly (>0.005 RPS)
-//        if (Math.abs(targetRPS - this.targetRPS) > 0.005) {
-//            this.targetRPS = targetRPS;
-//            // Reset PIDF on target change to prevent overshoot
-//            pidfController.reset();
-//        }
+
+        this.targetRPS = targetRPS;
 
         // Get current RPS
         double currentRPS = getRPS();

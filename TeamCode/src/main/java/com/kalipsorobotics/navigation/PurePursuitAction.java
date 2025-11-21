@@ -276,8 +276,9 @@ public class PurePursuitAction extends Action {
 
         if(xVelocity < 0.01 && yVelocity < 0.01 && thetaVelocity < 0.01) {
             if(timeoutTimer.milliseconds() > 4000) {
-                KLog.d("purepursuit", "pp timeout due to low velocity, xVelocity " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
-                finishedMoving();
+                KLog.d("purepursuit", "pp timeout due to low velocity, incrementing to next way point, xVelocity " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
+//                    finishedMoving();
+                path.incrementCurrentSearchWayPointIndex();
             }
         } else {
             timeoutTimer.reset();

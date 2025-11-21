@@ -84,8 +84,8 @@ public class PIDFController {
             current, target, error, proportional, integral, derivative, feedforward, output));
 
         KLog.d("PIDF_" + name, String.format(
-                "Current: %.2f | Target: %.2f | Error: %.2f | kP: %.4f | kI: %.4f | kD: %.4f | kF: %.4f",
-                current, target, error, kp, ki, kd, kf));
+                "Current: %.2f | Target: %.2f | Error: %.2f | kP: %.4f | kI: %.4f | kD: %.4f | kF: %.4f | DeltaT: %.4f",
+                current, target, error, kp, ki, kd, kf, timeDelta));
 
         lastTime = currentTime;
         lastError = error;

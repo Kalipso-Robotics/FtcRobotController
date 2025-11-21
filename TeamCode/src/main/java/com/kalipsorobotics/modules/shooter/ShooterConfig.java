@@ -7,7 +7,7 @@ public class ShooterConfig {
     public static double timeToStabilize = 0;
     // PID: this combo is working well; leave it
     public static double kp = 0.014000;
-    public static double ki = 0.001000;
+    public static double ki = 0.001000 * 5;
     public static double kd = 0.002000;
 
     public static double kf = 0.009338;   // <-- Global optimum

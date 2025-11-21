@@ -104,4 +104,7 @@ public class Path {
         return path;
     }
 
+    public void incrementCurrentSearchWayPointIndex() {
+        currentSearchWayPointIndex++;
+    }
 }
