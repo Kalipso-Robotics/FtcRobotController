@@ -9,6 +9,7 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
+import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
@@ -140,7 +141,12 @@ public class RedAutoNear extends KTeleOp {
         Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceSetup.getPolarity());
 
         // ----------------- FIRST SHOOT ----------------------
-        ShooterRun ready = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.NEAR_INIT); //TODO launch pos with polarity
+
+        ShooterRun shooterRun = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), LaunchPosition.NEAR_INIT); //TODO launch pos with polarity
+        shooterRun.setName("run");
+        redAutoNear.addAction(shooterRun);
+
+        ShooterReady ready = new ShooterReady(shooterRun);
         ready.setName("ready");
         redAutoNear.addAction(ready);
 
@@ -155,6 +161,7 @@ public class RedAutoNear extends KTeleOp {
         redAutoNear.addAction(stop);
 
         // ----------------- TRIP 1 ----------------------
+
         RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), nearLaunchPoint, 4000);
         trip1.setName("trip1");
         trip1.getMoveToBall().addPoint(THIRD_BALL_X, (THIRD_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
@@ -176,7 +183,6 @@ public class RedAutoNear extends KTeleOp {
         trip2.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip2.setDependentActions(trip1);
         redAutoNear.addAction(trip2);
-
 
         // ----------------- TRIP 3 ----------------------
 

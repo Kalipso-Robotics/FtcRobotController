@@ -86,14 +86,15 @@ public class ShooterRun extends Action {
     @Override
     public void update() {
         if (!hasStarted) {
+            shooter.getShooter1().resetPID();
+            shooter.getShooter2().resetPID();
+
             rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
             KLog.d(this.getClass().getName(), "PIDF: " + shooter.getShooter1().getPIDFController());
             elapsedTime.reset();
         }
-
-
 
         double rps;
         double hoodPosition;

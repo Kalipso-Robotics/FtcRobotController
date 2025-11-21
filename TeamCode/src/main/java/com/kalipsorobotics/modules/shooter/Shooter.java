@@ -63,6 +63,7 @@ public class Shooter {
         }
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
 
+
 //        CRServo kickerRight = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        if (kickerRight == null) {
 //            opModeUtilities.getTelemetry().addData("Error", "Kicker1 servo not found in hardware map");

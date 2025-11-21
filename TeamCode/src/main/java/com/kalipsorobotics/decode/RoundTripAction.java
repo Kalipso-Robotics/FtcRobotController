@@ -3,6 +3,7 @@ package com.kalipsorobotics.decode;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
+import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
@@ -26,9 +27,9 @@ public class RoundTripAction extends KActionSet {
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
                            Point target, Point launchPos, double waitForShooterReadyMS) {
-        WaitAction waitUntilShootReady = new WaitAction(waitForShooterReadyMS);
-        waitUntilShootReady.setName("waitUntilShootReady");
-        this.addAction(waitUntilShootReady);
+        WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
+        waitUntilShootRun.setName("waitUntilShootReady");
+        this.addAction(waitUntilShootRun);
 
         // check if this is the correct way to get drivetrain
         PurePursuitAction moveToBalls = new PurePursuitAction(drivetrain);
@@ -39,14 +40,18 @@ public class RoundTripAction extends KActionSet {
         //warm - shorter
         shooterRun = new ShooterRun(shooter, target, launchPos, 0);
         shooterRun.setName("shooterReady");
-        shooterRun.setDependentActions(waitUntilShootReady);
+        shooterRun.setDependentActions(waitUntilShootRun);
         this.addAction(shooterRun);
+
+        ShooterReady shooterReady = new ShooterReady(shooterRun);
+        shooterReady.setName("shooterReady");
+        shooterReady.setDependentActions(moveToBalls);
 
         //
         ShooterRun shooterMaintain = new ShooterRun(shooter, target, launchPos, ShooterConfig.maintainTimeOutMS);
         shooterMaintain.setName("ShooterMaintain");
         this.addAction(shooterMaintain);
-        shooterMaintain.setDependentActions(moveToBalls, shooterRun);
+        shooterMaintain.setDependentActions(moveToBalls, shooterReady);
 
         intakeFullAction = new IntakeFullAction(stopper, intake, 10000);
         intakeFullAction.setName("intakeFullAction");
@@ -54,7 +59,7 @@ public class RoundTripAction extends KActionSet {
 
         PushBall shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
-        shoot.setDependentActions(intakeFullAction, shooterRun, moveToBalls);
+        shoot.setDependentActions(intakeFullAction, shooterReady, moveToBalls);
         this.addAction(shoot);
 
         ShooterStop shooterStop = new ShooterStop(shooterRun);

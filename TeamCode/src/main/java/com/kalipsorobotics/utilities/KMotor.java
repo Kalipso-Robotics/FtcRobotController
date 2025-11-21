@@ -28,10 +28,10 @@ public class KMotor {
 
     // Default PIDF constants - tune these values for optimal RPS control
     // These values are designed to prevent overshoot while reaching target quickly
-    private static final double DEFAULT_KP = 0.05;   // Proportional - moderate correction
-    private static final double DEFAULT_KI = 0.0001; // Integral - small to prevent wind-up
-    private static final double DEFAULT_KD = 0.01;   // Derivative - strong to prevent overshoot
-    private static final double DEFAULT_KF = 0.01;   // Feedforward - base power per RPS
+//    private static final double DEFAULT_KP = 0.05;   // Proportional - moderate correction
+//    private static final double DEFAULT_KI = 0.0001; // Integral - small to prevent wind-up
+//    private static final double DEFAULT_KD = 0.01;   // Derivative - strong to prevent overshoot
+//    private static final double DEFAULT_KF = 0.01;   // Feedforward - base power per RPS
 
 
 
@@ -93,12 +93,12 @@ public class KMotor {
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
-        // Update target if changed significantly (>0.005 RPS)
-        if (Math.abs(targetRPS - this.targetRPS) > 0.005) {
-            this.targetRPS = targetRPS;
-            // Reset PIDF on target change to prevent overshoot
-            pidfController.reset();
-        }
+//        // Update target if changed significantly (>0.005 RPS)
+//        if (Math.abs(targetRPS - this.targetRPS) > 0.005) {
+//            this.targetRPS = targetRPS;
+//            // Reset PIDF on target change to prevent overshoot
+//            pidfController.reset();
+//        }
 
         // Get current RPS
         double currentRPS = getRPS();

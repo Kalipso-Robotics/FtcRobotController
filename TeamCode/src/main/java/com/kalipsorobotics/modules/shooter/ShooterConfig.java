@@ -12,8 +12,6 @@ public class ShooterConfig {
 
     public static double kf = 0.009338;   // <-- Global optimum
 
-
-
     public static double maintainTimeOutMS = 1000;
     //  kp=0.000190 ki=0.000003 kd=0.000028 BEST VALUES from Iterative Learning
     //  kp=0.000363 ki=0.000003 kd=0.000016 BEST VALUES 2
