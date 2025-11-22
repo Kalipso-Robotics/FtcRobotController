@@ -8,6 +8,7 @@ import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
@@ -25,7 +26,7 @@ public class RoundTripAction extends KActionSet {
     private IntakeFullAction intakeFullAction;
 
     private ShooterRun shooterRun;
-
+    private Shooter shooter;
     private boolean hasUpdatedShooterReady = false;
 
     Point target;
@@ -33,6 +34,7 @@ public class RoundTripAction extends KActionSet {
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
                            Point target, Point launchPos, double waitForShooterReadyMS) {
         this.target = target;
+        this.shooter = shooter;
 
         WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
         waitUntilShootRun.setName("waitUntilShootReady");
@@ -55,13 +57,13 @@ public class RoundTripAction extends KActionSet {
         shooterReady.setDependentActions(moveToBalls);
         this.addAction(shooterReady);
 
-        intakeFullAction = new IntakeFullAction(stopper, intake, 10000);
+        intakeFullAction = new IntakeFullAction(stopper, intake, 8000);
         intakeFullAction.setName("intakeFullAction");
         this.addAction(intakeFullAction);
 
         PushBall shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
-        shoot.setDependentActions(intakeFullAction, shooterReady, moveToBalls);
+        shoot.setDependentActions(shooterReady, moveToBalls);
         this.addAction(shoot);
 
         ShooterStop shooterStop = new ShooterStop(shooterRun);
@@ -79,21 +81,33 @@ public class RoundTripAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
+        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterRun: %s, ShooterReadyUpdated: %b",
+            getName() != null ? getName() : "unnamed",
+            moveToBall.getIsDone() ? "DONE" : "RUNNING",
+            intakeFullAction.getIsDone() ? "DONE" : "RUNNING",
+            shooterRun.getIsDone() ? "DONE" : "RUNNING",
+            hasUpdatedShooterReady));
+
         if (moveToBall.getIsDone()){
-            KLog.d("intake", "IntakeFullAction set done by pure pursuit");
-            KLog.d("RoundTrip", "MoveToBall Done");
-            KLog.d("RoundTrip", "Shooter Ready Done" + shooterRun.getIsDone());
+            KLog.d("RoundTrip", String.format("[%s] MoveToBall COMPLETED - Stopping intake and updating shooter position",
+                getName() != null ? getName() : "unnamed"));
 
             intakeFullAction.stop();
+            KLog.d("RoundTrip", String.format("[%s] IntakeFullAction stopped by pure pursuit completion",
+                getName() != null ? getName() : "unnamed"));
+
             if (!hasUpdatedShooterReady) {
-                shooterRun.setNewLaunchPosition(SharedData.getOdometryPosition().toPoint(), target);
+                Point currentPos = new Position(SharedData.getOdometryPosition()).toPoint();
+                KLog.d("RoundTrip", String.format("[%s] Updating shooter position - Current: (%.1f, %.1f), Target: (%.1f, %.1f)",
+                    getName() != null ? getName() : "unnamed",
+                    currentPos.getX(), currentPos.getY(),
+                    target.getX(), target.getY()));
+                shooterRun.setNewLaunchPosition(currentPos, target);
                 hasUpdatedShooterReady = true;
+                KLog.d("RoundTrip", String.format("[%s] Shooter position updated successfully",
+                    getName() != null ? getName() : "unnamed"));
             }
         }
-
-        KLog.d("RoundTrip", "MoveToBall isDone " + moveToBall.getIsDone());
-        KLog.d("RoundTrip", "Intake isDone " + intakeFullAction.getIsDone());
-        KLog.d("RoundTrip", "Shooter isDone " + shooterRun.getIsDone());
 
     }
 }

@@ -65,7 +65,6 @@ public class RedAutoFar extends KTeleOp {
 
     LaunchPosition launchPosition = LaunchPosition.AUTO;
     PushBall pushBall = null;
-    Revolver revolver = null;
     Turret turret = null;
 
     IntakeRun intakeRun = null;
@@ -106,9 +105,7 @@ public class RedAutoFar extends KTeleOp {
         redAutoFar = new KActionSet();
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
-        revolver = new Revolver(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        revolver.getRevolverServo().setPosition(Revolver.REVOLVER_INDEX_0);
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
@@ -116,8 +113,6 @@ public class RedAutoFar extends KTeleOp {
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(stopper, intake, 10);
-
-        revolverTeleOp = new RevolverTeleOp(revolver, false);
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
@@ -200,7 +195,27 @@ public class RedAutoFar extends KTeleOp {
         redAutoFar.addAction(park);
 
         waitForStart();
+        long startTime = System.currentTimeMillis();
+        int loopCount = 0;
         while (opModeIsActive()) {
+            loopCount++;
+            double elapsedSec = (System.currentTimeMillis() - startTime) / 1000.0;
+
+            // Log overall progress every 500ms
+            if (loopCount % 25 == 0) {  // Assuming ~50Hz loop rate
+                KLog.d("AutoProgress", String.format("=== RedAutoFar - Time: %.1fs, Loop: %d, AutoDone: %b ===",
+                    elapsedSec, loopCount, redAutoFar.getIsDone()));
+                KLog.d("AutoProgress", String.format("Status -> Ready: %s, Shoot: %s, Stop: %s",
+                    ready.getIsDone() ? "✓" : "...",
+                    shoot.getIsDone() ? "✓" : "...",
+                    stop.getIsDone() ? "✓" : "..."));
+                KLog.d("AutoProgress", String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s, Park: %s",
+                    trip1.getIsDone() ? "✓" : "...",
+                    trip2.getIsDone() ? "✓" : "...",
+                    trip3.getIsDone() ? "✓" : "...",
+                    park.getIsDone() ? "✓" : "..."));
+            }
+
             redAutoFar.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             KLog.d("Odometry", "Position: " + SharedData.getOdometryPosition());
