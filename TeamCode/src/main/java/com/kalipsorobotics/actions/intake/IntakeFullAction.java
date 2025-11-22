@@ -10,7 +10,10 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.TripleColorSensor;
 
 public class IntakeFullAction extends KActionSet {
+    private IntakeStop stopIntake;
+
     public IntakeFullAction(Stopper stopper, Intake intake, double maxTimeoutMS){
+
         KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         closeStopper.setName("closeStopper");
         this.addAction(closeStopper);
@@ -24,10 +27,15 @@ public class IntakeFullAction extends KActionSet {
         intakeAll.setDependentActions(intakeRun);
         this.addAction(intakeAll);
 
-        IntakeStop intakeStop = new IntakeStop(intake);
-        intakeStop.setName("intakeStop");
-        intakeStop.setDependentActions(intakeAll);
-        this.addAction(intakeStop);
+        stopIntake = new IntakeStop(intake);
+        stopIntake.setName("stopIntake");
+        stopIntake.setDependentActions(intakeAll);
+        this.addAction(stopIntake);
 
+    }
+
+    public void stop() {
+        stopIntake.update();
+        this.isDone = true;
     }
 }

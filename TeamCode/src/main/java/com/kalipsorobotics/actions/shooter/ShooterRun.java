@@ -78,9 +78,11 @@ public class ShooterRun extends Action {
     }
 
     public boolean isWithinRange() {
-        return shooter.isAtTargetRPS();
+        boolean atTarget = shooter.isAtTargetRPS();
+        KLog.d("ShooterRun", "isWithinRange called - Current RPS: " + shooter.getRPS() +
+               ", At Target: " + atTarget + ", Target RPS: " + targetRPS);
+        return atTarget;
     }
-
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -92,9 +94,13 @@ public class ShooterRun extends Action {
             rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
+            KLog.d("ShooterRun", "*** SHOOTER RUN STARTED ***");
+            KLog.d("ShooterRun", "Target RPS: " + targetRPS + ", Target Hood: " + targetHoodPosition + ", Distance: " + distanceMM);
             KLog.d(this.getClass().getName(), "PIDF: " + shooter.getShooter1().getPIDFController());
             elapsedTime.reset();
         }
+
+        KLog.d("ShooterRun", "update() called - hasStarted: " + hasStarted + ", isDone: " + isDone);
 
         double rps;
         double hoodPosition;
@@ -109,7 +115,9 @@ public class ShooterRun extends Action {
             // Auto-prediction mode (existing behavior)
             IShooterPredictor.ShooterParams params = getPrediction();
             rps = params.rps;
+            this.targetRPS = rps;
             hoodPosition = params.hoodPosition;
+            this.targetHoodPosition = hoodPosition;
         }
 
         // Update hood position

@@ -36,7 +36,6 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-
 @Autonomous(name = "RedAutoNearZone")
 public class RedAutoNear extends KTeleOp {
     KActionSet redAutoNear;
@@ -63,26 +62,17 @@ public class RedAutoNear extends KTeleOp {
     ShooterRun shooterRun = null;
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
-
     LaunchPosition launchPosition = LaunchPosition.AUTO;
     PushBall pushBall = null;
-    Revolver revolver = null;
     Turret turret = null;
-
     IntakeRun intakeRun = null;
     IntakeStop intakeStop = null;
     IntakeFullAction intakeFullAction = null;
-
     RevolverTeleOp revolverTeleOp = null;
-
     IntakeReverse intakeReverse = null;
-
     DriveAction driveAction = null;
-
     TurretAutoAlign turretAutoAlign = null;
-
     DetectColorsAction detectColorsAction = null;
-
     MotifCamera.MotifPattern testingMotif;
 
     @Override
@@ -107,9 +97,7 @@ public class RedAutoNear extends KTeleOp {
         redAutoNear = new KActionSet();
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
-        revolver = new Revolver(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        revolver.getRevolverServo().setPosition(Revolver.REVOLVER_INDEX_0);
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
@@ -117,8 +105,6 @@ public class RedAutoNear extends KTeleOp {
         intakeStop = new IntakeStop(intake);
         intakeReverse = new IntakeReverse(intake);
         intakeFullAction = new IntakeFullAction(stopper, intake, 10);
-
-        revolverTeleOp = new RevolverTeleOp(revolver, false);
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 

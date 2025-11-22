@@ -26,6 +26,8 @@ public class RoundTripAction extends KActionSet {
 
     private ShooterRun shooterRun;
 
+    private boolean hasUpdatedShooterReady = false;
+
     Point target;
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
@@ -82,8 +84,11 @@ public class RoundTripAction extends KActionSet {
             KLog.d("RoundTrip", "MoveToBall Done");
             KLog.d("RoundTrip", "Shooter Ready Done" + shooterRun.getIsDone());
 
-            intakeFullAction.setIsDone(true);
-            shooterRun.setNewLaunchPosition(SharedData.getOdometryPosition().toPoint(), target);
+            intakeFullAction.stop();
+            if (!hasUpdatedShooterReady) {
+                shooterRun.setNewLaunchPosition(SharedData.getOdometryPosition().toPoint(), target);
+                hasUpdatedShooterReady = true;
+            }
         }
 
         KLog.d("RoundTrip", "MoveToBall isDone " + moveToBall.getIsDone());

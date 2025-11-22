@@ -123,7 +123,7 @@ public class KMotor {
     public boolean isAtTargetRPS(double tolerance) {
         double currentRPS = getRPS();
         KLog.d("KMotor", "Current RPS: " + currentRPS + " Target RPS: " + targetRPS);
-        boolean isAtTarget = (Math.abs(currentRPS - targetRPS) <= tolerance);
+        boolean isAtTarget = (Math.abs(currentRPS - targetRPS) < tolerance); // changed <= to < (11/21)
         if (isAtTarget) {
             KLog.d("ShooterReady", "RPS within tolerance - Ready!");
         }

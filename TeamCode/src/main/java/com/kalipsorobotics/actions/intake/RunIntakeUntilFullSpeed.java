@@ -36,7 +36,6 @@ public class RunIntakeUntilFullSpeed extends Action {
 
         double curVelocity = Math.abs(motor.getVelocity());
 
-
         if (curVelocity > FULL_SPEED_THRESHOLD) {
             if (!atFullSpeed) {
                 // timer start

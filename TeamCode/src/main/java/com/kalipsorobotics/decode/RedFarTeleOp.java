@@ -235,7 +235,7 @@ public class RedFarTeleOp extends KTeleOp {
                     intakeReverse = new IntakeReverse(intake);
                     setLastIntakeAction(intakeReverse);
                 }
-            } else {
+            } else if (!shootActionPressed){
                 if (intakeStop != null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
