@@ -25,19 +25,18 @@ public class ShootAllAction extends KActionSet {
         shooterRun.setName("ShooterReady");
         this.addAction(shooterRun);
 
-        ShooterRun shooterMaintain = new ShooterRun(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, ShooterConfig.maintainTimeOutMS);
-        shooterMaintain.setName("ShooterMaintain");
-        this.addAction(shooterMaintain);
-        shooterMaintain.setDependentActions(shooterRun);
+        ShooterReady ready = new ShooterReady(shooterRun);
+        ready.setName("ready");
+        this.addAction(ready);
 
         PushBall pushAllBalls = new PushBall(stopper, intake, shooter);
         pushAllBalls.setName("pushAllBalls");
-        pushAllBalls.setDependentActions(shooterRun);
+        pushAllBalls.setDependentActions(ready);
         this.addAction(pushAllBalls);
 
         ShooterStop shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
-        shooterStop.setDependentActions(pushAllBalls, shooterMaintain);
+        shooterStop.setDependentActions(pushAllBalls, ready);
         this.addAction(shooterStop);
 
     }
