@@ -8,19 +8,19 @@ public class KLog {
 
     public static void d(String tag, String message) {
         if (DEBUG) {
-            Log.d(tag, message);
+            Log.d("KLog_" + tag, message);
         }
     }
 
     public static void e(String tag, String message, Exception e) {
         if (DEBUG) {
-            Log.e(tag, message, e);
+            Log.e("KLog_" + tag, message, e);
         }
     }
 
     public static void e(String tag, String message) {
         if (DEBUG) {
-            Log.e(tag, message);
+            Log.e("KLog_" +tag, message);
         }
     }
 

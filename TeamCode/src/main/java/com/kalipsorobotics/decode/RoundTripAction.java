@@ -13,7 +13,6 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.modules.shooter.ShooterConfig;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -27,12 +26,16 @@ public class RoundTripAction extends KActionSet {
 
     private ShooterRun shooterRun;
     private Shooter shooter;
+    private ShooterReady shooterReady;
+    private PushBall shoot;
+
+    private ShooterStop shooterStop;
     private boolean hasUpdatedShooterReady = false;
 
     Point target;
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
-                           Point target, Point launchPos, double waitForShooterReadyMS) {
+                           Point target, Point launchPos, double waitForShooterReadyMS, boolean shouldRunIntake) {
         this.target = target;
         this.shooter = shooter;
 
@@ -42,17 +45,18 @@ public class RoundTripAction extends KActionSet {
 
         // check if this is the correct way to get drivetrain
         PurePursuitAction moveToBalls = new PurePursuitAction(drivetrain);
+        moveToBalls.setName("moveToBall");  // FIX: Name the action!
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
         moveToBalls.setFinalSearchRadius(100);
 
         //warm - shorter
         shooterRun = new ShooterRun(shooter, target, launchPos, 0);
-        shooterRun.setName("shooterReady");
+        shooterRun.setName("shooterRun");  // FIX: Correct name (was "shooterReady")
         shooterRun.setDependentActions(waitUntilShootRun);
         this.addAction(shooterRun);
 
-        ShooterReady shooterReady = new ShooterReady(shooterRun);
+        shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
         shooterReady.setDependentActions(moveToBalls);
         this.addAction(shooterReady);
@@ -61,16 +65,25 @@ public class RoundTripAction extends KActionSet {
         intakeFullAction.setName("intakeFullAction");
         this.addAction(intakeFullAction);
 
-        PushBall shoot = new PushBall(stopper, intake, shooter);
+        if (!shouldRunIntake) {
+            intakeFullAction.setIsDone(true);
+        }
+
+        shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
         shoot.setDependentActions(shooterReady, moveToBalls);
         this.addAction(shoot);
 
-        ShooterStop shooterStop = new ShooterStop(shooterRun);
-        shooterStop.setName("shooterStop");
+        shooterStop = new ShooterStop(shooterRun);
+        shooterStop.setName("stop");
         shooterStop.setDependentActions(shoot);
         this.addAction(shooterStop);
 
+    }
+
+    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
+                           Point target, Point launchPos, double waitForShooterReadyMS) {
+        this(opModeUtilities, drivetrain, shooter, stopper, intake, target, launchPos, waitForShooterReadyMS, true);
     }
 
     public PurePursuitAction getMoveToBall() {
@@ -81,11 +94,14 @@ public class RoundTripAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
-        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterRun: %s, ShooterReadyUpdated: %b",
+        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, ShooterStop: %s, ShooterReadyUpdated: %b",
             getName() != null ? getName() : "unnamed",
-            moveToBall.getIsDone() ? "DONE" : "RUNNING",
-            intakeFullAction.getIsDone() ? "DONE" : "RUNNING",
-            shooterRun.getIsDone() ? "DONE" : "RUNNING",
+            moveToBall.getIsDone() ? "DONE" : "NOT DONE",
+            intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
+            shooterReady.getIsDone() ? "DONE" : "NOT DONE",
+            shooterRun.getIsDone() ? "DONE" : "NOT DONE",
+            shoot.getIsDone() ? "DONE" : "NOT DONE",
+            shooterStop.getIsDone() ? "DONE" : "NOT DONE",
             hasUpdatedShooterReady));
 
         if (moveToBall.getIsDone()){
@@ -108,6 +124,5 @@ public class RoundTripAction extends KActionSet {
                     getName() != null ? getName() : "unnamed"));
             }
         }
-
     }
 }

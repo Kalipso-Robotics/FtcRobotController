@@ -25,7 +25,7 @@ public class Stopper {
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
         this.stopper = new KServo(stopper,KServo.AXON_MAX_SPEED, 255, 0, false);
-
+        stopper.setPosition(STOPPER_SERVO_CLOSED_POS);
     }
 
     public KCRServo getKickerLeft() {

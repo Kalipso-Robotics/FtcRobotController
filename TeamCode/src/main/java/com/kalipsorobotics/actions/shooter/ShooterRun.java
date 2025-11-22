@@ -186,6 +186,9 @@ public class ShooterRun extends Action {
 
 
     public void stop() {
+        if (isDone) {
+            return;
+        }
         shooter.stop();
         isDone = true;
     }

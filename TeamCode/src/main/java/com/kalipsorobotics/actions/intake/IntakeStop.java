@@ -14,6 +14,9 @@ public class IntakeStop extends Action {
 
     @Override
     public void update() {
+        if (isDone) {
+            return;
+        }
         intake.getIntakeMotor().setPower(0);
         isDone = true;
     }

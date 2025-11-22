@@ -35,6 +35,9 @@ public class IntakeFullAction extends KActionSet {
     }
 
     public void stop() {
+        if (isDone) {
+            return;
+        }
         stopIntake.update();
         this.isDone = true;
     }

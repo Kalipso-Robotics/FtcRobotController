@@ -116,8 +116,8 @@ public class PurePursuitAction extends Action {
         double headingRad = Math.toRadians(headingDeg);
         //double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
         double adaptivePAngel = calcAdaptivePAngle(headingRad);
-        double[] adaptiveP = {P_XY, P_ANGLE};
-        pathPoints.add(new Position(x, y, headingRad, adaptiveP[0], adaptivePAngel));
+        //double[] adaptiveP = {P_XY, P_ANGLE};
+        pathPoints.add(new Position(x, y, headingRad, P_XY, adaptivePAngel));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
 
@@ -128,8 +128,8 @@ public class PurePursuitAction extends Action {
     private double calcAdaptivePAngle(double theta) {
         Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
         double headingDelta = Math.abs(pos.getTheta() - theta);
-        if (headingDelta == 0) {
-            return 0;
+        if (headingDelta < FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) {
+            return P_ANGLE_SLOW;
         }
         return 1.0 / headingDelta;
     }
@@ -189,7 +189,7 @@ public class PurePursuitAction extends Action {
         double powerX = target.getPidX().getPower(xError);
         double powerY = target.getPidY().getPower(yError);
 
-        KLog.d("directionalpower", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
+        KLog.d("directionalpowerlook", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
                 powerAngle));
 
         double fLeftPower = powerX + powerY + powerAngle;
@@ -253,17 +253,21 @@ public class PurePursuitAction extends Action {
 
         if (follow.isPresent()) {
             KLog.d("purepursaction_debug_follow",
-                    "follow point:  " + follow.get());
-            KLog.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+                    "Follow lookahead point:  " + follow.get() + "current pos:    " + currentPosition.toString());
             targetPosition(follow.get(), currentPosition);
 
         } else {
-            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) <= Math.toRadians(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) ) {
+            KLog.d("purepursaction_debug_follow",
+                    "Lookahead returns nothing. Last point " + lastPoint + "current pos:    " + currentPosition.toString());
+            //11-22 13:04:54.212  3107  3301 D KLog_purepursaction_debug_follow: locking final angle:  x=2598.00 (102.28 in), y=441.38 (17.38 in), theta=-2.4136 (-138.3 deg)
+            //11-22 13:04:54.213  3107  3301 D KLog_purepursaction_debug_follow: current pos:    x=2616.11 (103.00 in), y=432.30 (17.02 in), theta=-2.4347 (-139.5 deg)
+            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) < Math.toRadians(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) ) {
+                KLog.d("purepursaction_debug_follow",
+                        "Final angle is within range. Finish moving. Last point  " + lastPoint + "current pos:    " + currentPosition.toString());
                 finishedMoving();
             } else {
                 KLog.d("purepursaction_debug_follow",
-                        "locking final angle:  " + lastPoint);
-                KLog.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+                        "Locking final angle:  " + lastPoint + "current pos:    " + currentPosition.toString());
                 targetPosition(lastPoint, currentPosition);
             }
         }

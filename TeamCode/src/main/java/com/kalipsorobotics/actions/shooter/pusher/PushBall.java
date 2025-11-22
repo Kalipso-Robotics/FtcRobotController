@@ -34,20 +34,6 @@ public class PushBall extends KActionSet {
         wait.setDependentActions(untilShootingDone);
         this.addAction(wait);
 
-        KCRServoAutoAction runKicker = new KCRServoAutoAction(shooter.getKicker(), -1);
-        runKicker.setName("runKicker");
-        this.addAction(runKicker);
-
-        WaitAction letKickerRun = new WaitAction(5000);
-        letKickerRun.setName("letKickerRun");
-        letKickerRun.setDependentActions(runKicker);
-        this.addAction(letKickerRun);
-
-        KCRServoAutoAction stopKicker = new KCRServoAutoAction(shooter.getKicker(), 0);
-        runKicker.setName("stopKicker");
-        stopKicker.setDependentActions(letKickerRun);
-        this.addAction(stopKicker);
-
 //        KServoAutoAction block = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
 //        block.setName("block");
 //        this.addAction(block);
