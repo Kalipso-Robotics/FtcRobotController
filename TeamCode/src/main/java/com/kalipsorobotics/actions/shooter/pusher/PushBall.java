@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.shooter.pusher;
 
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.actionUtilities.KCRServoAutoAction;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
@@ -32,6 +33,20 @@ public class PushBall extends KActionSet {
         WaitAction wait = new WaitAction(1000);
         wait.setDependentActions(untilShootingDone);
         this.addAction(wait);
+
+        KCRServoAutoAction runKicker = new KCRServoAutoAction(shooter.getKicker(), 1);
+        runKicker.setName("runKicker");
+        this.addAction(runKicker);
+
+        WaitAction letKickerRun = new WaitAction(5000);
+        letKickerRun.setName("letKickerRun");
+        letKickerRun.setDependentActions(runKicker);
+        this.addAction(runKicker);
+
+        KCRServoAutoAction stopKicker = new KCRServoAutoAction(shooter.getKicker(), 0);
+        runKicker.setName("stopKicker");
+        stopKicker.setDependentActions(letKickerRun);
+        this.addAction(stopKicker);
 
 //        KServoAutoAction block = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
 //        block.setName("block");

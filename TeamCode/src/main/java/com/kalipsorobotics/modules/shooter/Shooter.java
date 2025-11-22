@@ -1,5 +1,6 @@
 package com.kalipsorobotics.modules.shooter;
 
+import com.kalipsorobotics.utilities.KCRServo;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.Point;
@@ -7,9 +8,12 @@ import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.checkerframework.checker.units.qual.K;
 
 public class Shooter {
     public static final double MM_TO_PIXEL_RATIO = 0.2608;
@@ -30,6 +34,8 @@ public class Shooter {
     private final KMotor shooter2;
 
     private final KServo hood;
+
+    private final KCRServo kicker;
 
 //    private final KCRServo pusherRight;
 //    private final KCRServo pusherLeft;
@@ -63,6 +69,8 @@ public class Shooter {
         }
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
 
+        CRServo kicker = opModeUtilities.getHardwareMap().crservo.get("kicker");
+        this.kicker = new KCRServo(kicker, false);
 
 //        CRServo kickerRight = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        if (kickerRight == null) {
@@ -102,6 +110,9 @@ public class Shooter {
         return hood;
     }
 
+    public KCRServo getKicker() {
+        return kicker;
+    }
 
     public KMotor getShooter1() {
         return shooter1;
