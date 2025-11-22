@@ -74,13 +74,7 @@ public class RedFarTeleOp extends KTeleOp {
     boolean releasePressed = false;
     boolean intakePressed = false;
     boolean intakeReversePressed = false;
-    boolean shooterReadyNearPressed = false;
-    boolean shooterReadyMiddlePressed = false;
-    boolean shooterReadyWallPressed = false;
-    boolean shooterReadyBluePressed = false;
-    boolean shooterReadyRedPressed = false;
-    boolean shooterReadyRedMiddlePressed = false;
-    boolean shooterReadyBlueMiddlePressed = false;
+    boolean shooterWarmupPressed = false;
     private boolean shooterStopPressed = false;
     boolean useAprilTagPressed = false;
     boolean useAprilTag = false;
@@ -152,57 +146,32 @@ public class RedFarTeleOp extends KTeleOp {
             intakePressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
 
-            shooterReadyNearPressed = kGamePad2.isDpadUpFirstPressed();
-            shooterReadyMiddlePressed = kGamePad2.isDpadDownFirstPressed();
-            shooterReadyWallPressed = kGamePad2.isDpadUpFirstPressed() && kGamePad2.isLeftBumperPressed();
-            shooterReadyRedPressed = kGamePad2.isDpadRightFirstPressed();
-            shooterReadyBluePressed = kGamePad2.isDpadLeftFirstPressed();
-            shooterReadyRedMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadRightFirstPressed();
-            shooterReadyBlueMiddlePressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isDpadLeftFirstPressed();
-            shooterStopPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
+            shooterWarmupPressed = kGamePad2.isDpadUpFirstPressed();
+
             useAprilTagPressed = kGamePad2.isBackButtonPressed();
 
             runUntilStalledPressed = kGamePad2.isButtonXFirstPressed();
 
-            boolean isWarmup = true;
 
             if (useAprilTagPressed) {
                 useAprilTag = !useAprilTag;
             }
 
             if (shooterStopPressed) {
-                if (shooterStop != null || shooterStop.getIsDone()) {
+                if (shooterStop == null || shooterStop.getIsDone()) {
                     shooterStop = new ShooterStop(shooterRun);
                     setLastShooterAction(shooterStop);
                 }
             }
 
-            if (shooterReadyNearPressed) {
-                launchPosition = LaunchPosition.FAR_INNIT;
-            } else if (shooterReadyMiddlePressed) {
-                launchPosition = LaunchPosition.MIDDLE;
-            } else if (shooterReadyWallPressed) {
-                launchPosition = LaunchPosition.WALL;
-            } else if (shooterReadyRedPressed) {
-                launchPosition = LaunchPosition.RED;
-            } else if (shooterReadyBluePressed) {
-                launchPosition = LaunchPosition.BLUE;
-            } else if (shooterReadyRedMiddlePressed) {
-                launchPosition = LaunchPosition.MIDDLE_RED;
-            } else if (shooterReadyBlueMiddlePressed) {
-                launchPosition = LaunchPosition.MIDDLE_BLUE;
-            } else {
-                isWarmup = false;
-                launchPosition = LaunchPosition.AUTO;
-            }
 
-            if (isWarmup) {
+            if (shooterWarmupPressed) {
                 if (useAprilTag) {
                     goalDetectionAction.getLimelight().start();
                     goalDetectionAction.updateCheckDone();
                 }
-                if (shooterRun != null || shooterRun.getIsDone()) {
-                    shooterRun = new ShooterRun(shooter, ROBOT_START_POINT_RED.multiplyY(allianceSetup.getPolarity()), launchPosition);
+                if (shooterRun == null || shooterRun.getIsDone()) {
+                    shooterRun = new ShooterRun(shooter, 20, 0.8);
                     KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up For Position: " + launchPosition);
                     setLastShooterAction(shooterRun);
                 }
@@ -213,7 +182,7 @@ public class RedFarTeleOp extends KTeleOp {
 
             if (shootActionPressed) {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
-                if (shootAction != null || shootAction.getIsDone()) {
+                if (shootAction == null || shootAction.getIsDone()) {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
                     shootAction = new ShootAllAction(stopper, intake, shooter, ROBOT_START_POINT_RED);
                     setLastShooterAction(shootAction);
@@ -221,9 +190,13 @@ public class RedFarTeleOp extends KTeleOp {
                 }
             }
 
+            if (shootAction != null && !shootAction.getIsDone()) {
+                turretAutoAlign.updateCheckDone();
+            }
+
 
             if (intakePressed) {
-                if (intakeRun != null || intakeRun.getIsDone()) {
+                if (intakeRun == null || intakeRun.getIsDone()) {
                     intakeRun = new IntakeRun(intake);
                     closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
                     setLastStopperAction(closeStopper);
@@ -231,12 +204,12 @@ public class RedFarTeleOp extends KTeleOp {
 
                 }
             } else if (intakeReversePressed) {
-                if (intakeReverse != null || intakeReverse.getIsDone()) {
+                if (intakeReverse == null || intakeReverse.getIsDone()) {
                     intakeReverse = new IntakeReverse(intake);
                     setLastIntakeAction(intakeReverse);
                 }
             } else if (!shootActionPressed){
-                if (intakeStop != null || intakeStop.getIsDone()) {
+                if (intakeStop == null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
                     setLastIntakeAction(intakeStop);
                 }
@@ -244,7 +217,7 @@ public class RedFarTeleOp extends KTeleOp {
 
 
             if (releasePressed) {
-                if (openStopper != null || openStopper.getIsDone()) {
+                if (openStopper == null || openStopper.getIsDone()) {
                     openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
                     setLastStopperAction(openStopper);
                 }
@@ -254,7 +227,7 @@ public class RedFarTeleOp extends KTeleOp {
             //mostly for 3 ball
             if (runUntilStalledPressed) {
                 KLog.d("teleop", "revolver pressed");
-                if (runUntilStallAction != null || runUntilStallAction.getIsDone()) {
+                if (runUntilStallAction == null || runUntilStallAction.getIsDone()) {
                     runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4000);
                 }
                 setLastIntakeAction(runUntilStallAction);
@@ -265,7 +238,6 @@ public class RedFarTeleOp extends KTeleOp {
                 goalDetectionAction.updateCheckDone();
             }
 
-            turretAutoAlign.updateCheckDone();
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
             updateActions();
         }
