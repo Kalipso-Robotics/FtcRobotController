@@ -102,10 +102,10 @@ public class RedFarTeleOp extends KTeleOp {
 
         turret = Turret.getInstance(opModeUtilities);
 
-        intakeRun = new IntakeRun(intake);
-        intakeStop = new IntakeStop(intake);
-        intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(stopper, intake, 8);
+        intakeRun = null;
+        intakeStop = null;
+        intakeReverse = null;
+        intakeFullAction = null;
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
 
@@ -114,13 +114,13 @@ public class RedFarTeleOp extends KTeleOp {
         //todo just fed in testing motif pattern change later
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 
-        shooterRun = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_FAR);
-        shooterStop = new ShooterStop(shooterRun);
-        pushBall = new PushBall(stopper, intake, shooter);
-        openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-        closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-        runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 3000);
+        shooterRun = null;
+        shootAction = null;
+        shooterStop = null;
+        pushBall = null;
+        openStopper = null;
+        closeStopper = null;
+        runUntilStallAction = null;
     }
 
 
