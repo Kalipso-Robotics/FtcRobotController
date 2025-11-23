@@ -9,6 +9,7 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 public class TurretAutoAlign extends Action {
@@ -37,9 +38,36 @@ public class TurretAutoAlign extends Action {
         return isWithinRange;
     }
 
+    public void initBlocking() {
+        ElapsedTime timer = new ElapsedTime();
+        int count = 0;
+
+        while (timer.milliseconds() < 3000 && !isWithinRange) {
+            count++;
+            if (timer.milliseconds() > 1000) {
+                this.updateCheckDone();
+            }
+            opModeUtilities.getTelemetry().addData("count ", count);
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().update();
+        }
+        opModeUtilities.getTelemetry().addData("isWithinRange ", isWithinRange);
+        opModeUtilities.getTelemetry().addLine("TURRET ALIGNED READY");
+        opModeUtilities.getTelemetry().update();
+    }
+
     @Override
     protected void update() {
-        if (!opModeUtilities.getOpMode().opModeIsActive()) {
+        if (!opModeUtilities.getOpMode().opModeIsActive() && !opModeUtilities.getOpMode().opModeInInit()) {
             KLog.d("Turret_Singleton", "OpModeNotActive Return");
             return;
         }

@@ -43,7 +43,7 @@ public class ShooterReady extends Action {
             isDone = true;
             KLog.d("ShooterReady", "*** SHOOTER READY MARKED AS DONE ***");
         } else {
-            KLog.d("ShooterReady", "Still waiting for shooter to reach target RPS");
+            KLog.d("ShooterReady", "** Still waiting for shooter to reach target RPS **");
         }
 
     }
