@@ -58,7 +58,7 @@ public class  PurePursuitAction extends Action {
 
     private double maxTimeOutMS = 1000000000;
 
-    final private int maxUnstuckCounter = 1;
+    final private int maxUnstuckCounter = 2;
 
     private int unstuckCounter = 0;
 
