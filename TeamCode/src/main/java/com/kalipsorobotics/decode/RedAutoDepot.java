@@ -163,16 +163,16 @@ public class RedAutoDepot extends KTeleOp {
 
         //-------------------TRIP 4 ------------------- ~ 19qp01
 
-        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
-        trip4.setName("trip4");
-        trip4.setDependentActions(trip3);
-        autoDepot.addAction(trip4);
+//        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
+//        trip4.setName("trip4");
+//        trip4.setDependentActions(trip3);
+//        autoDepot.addAction(trip4);
 
         // ----------------- PARK ----------------------
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
-        park.setDependentActions(trip4);
+        park.setDependentActions(trip3);
         park.addPoint(SHOOT_FAR_X + 400, SHOOT_FAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);

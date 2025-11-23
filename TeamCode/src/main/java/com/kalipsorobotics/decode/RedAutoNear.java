@@ -44,8 +44,8 @@ public class RedAutoNear extends KTeleOp {
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
     final double FIRST_SHOOT_X = 2598;
     final double FIRST_SHOOT_Y = 441.38;
-    final double SHOOT_NEAR_X = 2250; //2400
-    final double SHOOT_NEAR_Y = 500; //300
+    final double SHOOT_NEAR_X = 2130; //2400
+    final double SHOOT_NEAR_Y = 135; //300
     final double LEVER_X = 1700; // 1700,
     final double LEVER_Y = 1080; //1125, 1040
     final double DEPOT_X = 150; // final ending 0 x
@@ -151,12 +151,12 @@ public class RedAutoNear extends KTeleOp {
 
         RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), nearLaunchPoint, 0);
         trip1.setName("trip1");
-        trip1.getMoveToBall().addPoint(THIRD_BALL_X, (THIRD_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(THIRD_BALL_X, THIRD_BALL_Y * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(1950, 385 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(1950, 800 * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(1950, 1015 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to hit lever
-//        trip1.getMoveToBall().addPoint(LEVER_X, (LEVER_Y - 400) * allianceSetup.getPolarity(), 0);
-        trip1.getMoveToBall().addPoint(LEVER_X, LEVER_Y * allianceSetup.getPolarity(), -5);
-        trip1.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(1685, 1055 * allianceSetup.getPolarity(), -20);
+        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip1.setDependentActions(trip0);
         redAutoNear.addAction(trip1);
 
@@ -164,11 +164,11 @@ public class RedAutoNear extends KTeleOp {
 
         RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), nearLaunchPoint, 0);
         trip2.setName("trip2");
-        trip2.getMoveToBall().addPoint(SECOND_BALL_X, (SECOND_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        // move to intake
-        trip2.getMoveToBall().addPoint(SECOND_BALL_X, SECOND_BALL_Y * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
-        trip2.getMoveToBall().addPoint(SECOND_BALL_X, (SECOND_BALL_Y - 200) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip2.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(1280, 200 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(1280, 820 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(1280, 1220 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(1280, 820 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip2.setDependentActions(trip1);
         redAutoNear.addAction(trip2);
 
@@ -176,10 +176,12 @@ public class RedAutoNear extends KTeleOp {
 
         RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), nearLaunchPoint, 500);
         trip3.setName("trip3");
-        trip3.getMoveToBall().addPoint(FIRST_BALL_X, (FIRST_BALL_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(680, 315 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to intake
-        trip3.getMoveToBall().addPoint(FIRST_BALL_X, FIRST_BALL_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip3.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(680, 835 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(680, 1220 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(1040, 800 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip3.setDependentActions(trip2);
         redAutoNear.addAction(trip3);
 
@@ -188,7 +190,7 @@ public class RedAutoNear extends KTeleOp {
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
         park.setDependentActions(trip3);
-        park.addPoint(SHOOT_NEAR_X - 200, (SHOOT_NEAR_Y) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        park.addPoint(SHOOT_NEAR_X - 700, (SHOOT_NEAR_Y) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         park.setMaxCheckDoneCounter(20);
         redAutoNear.addAction(park);
 
