@@ -58,6 +58,10 @@ public class  PurePursuitAction extends Action {
 
     private double maxTimeOutMS = 1000000000;
 
+    final private int maxUnstuckCounter = 1;
+
+    private int unstuckCounter = 0;
+
     private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 1;
 
     private double startTimeMS = System.currentTimeMillis();
@@ -278,11 +282,21 @@ public class  PurePursuitAction extends Action {
         thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
 
         // this is not smart
-        if(xVelocity < 0.01 && yVelocity < 0.01 && thetaVelocity < 0.01) {
-            if(timeoutTimer.milliseconds() > 1000) {
-                KLog.d("purepursuit", "pp timeout due to low velocity, incrementing to next way point, xVelocity " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
+        if((xVelocity < 0.01 && yVelocity < 0.01 && thetaVelocity < 0.01)) {
+            KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
-                path.decrementCurrentSearchWayPointIndex();
+            if (timeoutTimer.milliseconds() > 1000) {
+                if (unstuckCounter < maxUnstuckCounter) {
+                    unstuckCounter++;
+                    path.decrementCurrentSearchWayPointIndex();
+                    KLog.d("purepursuit", "unstucking decrementing to previous way point");
+                } else {
+                    unstuckCounter = 0;
+                    path.incrementCurrentSearchWayPointIndex();
+                    KLog.d("purepursuit", "unstucking incrementing to next way point");
+                }
+            } else {
+                KLog.d("purepursuit", "Waiting for velocity timeout");
             }
         } else {
             timeoutTimer.reset();

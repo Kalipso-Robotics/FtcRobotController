@@ -105,10 +105,14 @@ public class Path {
     }
 
     public void incrementCurrentSearchWayPointIndex() {
-        currentSearchWayPointIndex++;
+        if ((currentSearchWayPointIndex) < path.size() - 1) {
+            currentSearchWayPointIndex++;
+        }
     }
 
     public void decrementCurrentSearchWayPointIndex() {
-        currentSearchWayPointIndex--;
+        if ((currentSearchWayPointIndex) > 0) {
+            currentSearchWayPointIndex--;
+        }
     }
 }
