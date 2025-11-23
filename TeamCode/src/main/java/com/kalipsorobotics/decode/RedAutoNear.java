@@ -145,6 +145,7 @@ public class RedAutoNear extends KTeleOp {
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), firstShootPoint, 0, false);
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(FIRST_SHOOT_X, FIRST_SHOOT_Y*allianceSetup.getPolarity(), -138.29);
+        trip0.setDependentActions(delayBeforeStart);
         redAutoNear.addAction(trip0);
 
         // ----------------- TRIP 1 ----------------------
@@ -155,7 +156,7 @@ public class RedAutoNear extends KTeleOp {
         trip1.getMoveToBall().addPoint(1950, 800 * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
         trip1.getMoveToBall().addPoint(1950, 1015 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to hit lever
-        trip1.getMoveToBall().addPoint(1685, 1055 * allianceSetup.getPolarity(), -20);
+        trip1.getMoveToBall().addPoint(1735, 1055 * allianceSetup.getPolarity(), -20);
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip1.setDependentActions(trip0);
         redAutoNear.addAction(trip1);
@@ -180,7 +181,7 @@ public class RedAutoNear extends KTeleOp {
         // move to intake
         trip3.getMoveToBall().addPoint(680, 835 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip3.getMoveToBall().addPoint(680, 1220 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip3.getMoveToBall().addPoint(1040, 800 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+//        trip3.getMoveToBall().addPoint(1040, 800 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip3.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip3.setDependentActions(trip2);
         redAutoNear.addAction(trip3);
@@ -190,7 +191,7 @@ public class RedAutoNear extends KTeleOp {
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
         park.setDependentActions(trip3);
-        park.addPoint(SHOOT_NEAR_X - 700, (SHOOT_NEAR_Y) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        park.addPoint(SHOOT_NEAR_X + 400, (SHOOT_NEAR_Y) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         park.setMaxCheckDoneCounter(20);
         redAutoNear.addAction(park);
 
