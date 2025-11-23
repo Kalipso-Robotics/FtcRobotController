@@ -376,13 +376,13 @@ public class AdaptivePurePursuitAction extends Action {
             if (follow.isPresent()) {
                 KLog.d("ppDebugFollow", "is follow.get() == path.getLastPoint()? " + (follow.get() == path.getLastPoint()));
 
-                int followIndex = path.findIndex(follow.get());
+                int followIndex = path.getIndex(follow.get());
                 int lastIndex = path.numPoints() - 1;
                 KLog.d("ppDebugFollow", "follow index: " + followIndex + " | last index: " + lastIndex);
 
                 // We have a point to follow
                 targetPosition(follow.get(), currentPosition);
-                KLog.d("ppDebugFollow", "follow found point: " + path.findIndex(follow.get()) + ": " + follow.get().getPoint());
+                KLog.d("ppDebugFollow", "follow found point: " + path.getIndex(follow.get()) + ": " + follow.get().getPoint());
 
             } else {
                 KLog.d("ppDebugFollow", "No lookahead found, switching to final lock");

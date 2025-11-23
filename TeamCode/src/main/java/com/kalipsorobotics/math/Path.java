@@ -86,10 +86,10 @@ public class Path {
     }
 
     public Segment getSegmentIndex(Position position) {
-        return new Segment(getPoint(findIndex(position)), getPoint(findIndex(position) + 1));
+        return new Segment(getPoint(getIndex(position)), getPoint(getIndex(position) + 1));
     }
 
-    public int findIndex(Position position) {
+    public int getIndex(Position position) {
         for (int i = 0; i < path.size(); i++) {
 
             if (position == path.get(i)) {
@@ -104,15 +104,17 @@ public class Path {
         return path;
     }
 
-    public void incrementCurrentSearchWayPointIndex() {
+    public double incrementCurrentSearchWayPointIndex() {
         if ((currentSearchWayPointIndex) < path.size() - 1) {
             currentSearchWayPointIndex++;
         }
+        return currentSearchWayPointIndex;
     }
 
-    public void decrementCurrentSearchWayPointIndex() {
+    public double decrementCurrentSearchWayPointIndex() {
         if ((currentSearchWayPointIndex) > 0) {
             currentSearchWayPointIndex--;
         }
+        return currentSearchWayPointIndex;
     }
 }

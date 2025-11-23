@@ -1,13 +1,11 @@
 package com.kalipsorobotics.navigation;
 
-import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.PID.PidNav;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Path;
 import com.kalipsorobotics.math.Position;
@@ -16,8 +14,6 @@ import com.kalipsorobotics.math.Vector;
 
 import com.kalipsorobotics.modules.DriveTrain;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.internal.opengl.models.Geometry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,9 +54,11 @@ public class  PurePursuitAction extends Action {
 
     private double maxTimeOutMS = 1000000000;
 
-    final private int maxUnstuckCounter = 3;
+    final private int maxUnstuckCounter = 1;
 
     private int unstuckCounter = 0;
+
+    private int farthestPointReached = 0;
 
     private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 1;
 
@@ -249,11 +247,12 @@ public class  PurePursuitAction extends Action {
 
         Position lastPoint = path.getLastPoint();
 
-        if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
+        if (prevFollow.isPresent() && (path.getIndex(prevFollow.get()) > (path.numPoints() - 2))) {
             currentLookAheadRadius = lastSearchRadius;
         }
-
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
+
+        prevFollow.ifPresent(position -> farthestPointReached = path.getIndex(position));
 
         if (follow.isPresent()) {
             KLog.d("purepursaction_debug_follow",
@@ -286,12 +285,12 @@ public class  PurePursuitAction extends Action {
             KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
             if (timeoutTimer.milliseconds() > 1000) {
-                if (unstuckCounter < maxUnstuckCounter) {
+                if (unstuckCounter < maxUnstuckCounter && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)) {
                     unstuckCounter++;
                     path.decrementCurrentSearchWayPointIndex();
                     KLog.d("purepursuit", "unstucking decrementing to previous way point");
                 } else {
-                    //unstuckCounter = 0;
+                    unstuckCounter = 0;
                     path.incrementCurrentSearchWayPointIndex();
                     KLog.d("purepursuit", "unstucking incrementing to next way point");
                 }
