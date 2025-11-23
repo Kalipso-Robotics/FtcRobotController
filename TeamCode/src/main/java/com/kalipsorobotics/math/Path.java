@@ -107,4 +107,8 @@ public class Path {
     public void incrementCurrentSearchWayPointIndex() {
         currentSearchWayPointIndex++;
     }
+
+    public void decrementCurrentSearchWayPointIndex() {
+        currentSearchWayPointIndex--;
+    }
 }

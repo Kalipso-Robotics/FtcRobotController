@@ -191,9 +191,9 @@ public class RedFarTeleOp extends KTeleOp {
                 }
             }
 
-            if (shootAction != null && !shootAction.getIsDone()) {
+            //if (shootAction != null && !shootAction.getIsDone()) {
                 turretAutoAlign.updateCheckDone();
-            }
+            //}
 
 
             if (intakePressed) {
