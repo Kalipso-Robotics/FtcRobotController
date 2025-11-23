@@ -4,7 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class ShooterConfig {
-    public static double timeToStabilize = 0;
+    public static double timeToStabilize = 500;
     // PID: this combo is working well; leave it
     public static double kp = 0.014000 * 1;
     public static double ki = 0.001000 * 15;
