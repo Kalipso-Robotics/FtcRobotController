@@ -54,12 +54,12 @@ public class  PurePursuitAction extends Action {
 
     private double maxTimeOutMS = 1000000000;
 
-    final private int maxUnstuckCounter = 1;
+    final private int maxUnstuckCounter = 3;
 
 
     private int unstuckCounter = 0;
 
-    private int farthestPointReached = 0;
+    //private int farthestPointReached = 0;
 
     private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 1;
 
@@ -253,7 +253,7 @@ public class  PurePursuitAction extends Action {
         }
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
-        prevFollow.ifPresent(position -> farthestPointReached = path.getIndex(position));
+        //prevFollow.ifPresent(position -> farthestPointReached = path.getIndex(position));
 
         if (follow.isPresent()) {
             KLog.d("purepursaction_debug_follow",
@@ -286,7 +286,7 @@ public class  PurePursuitAction extends Action {
             KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
             if (timeoutTimer.milliseconds() > 500) {
-                if (unstuckCounter < maxUnstuckCounter && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)) {
+                if (unstuckCounter < maxUnstuckCounter/* && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)*/) {
                     unstuckCounter++;
                     path.decrementCurrentSearchWayPointIndex();
                     KLog.d("purepursuit", "unstucking decrementing to previous way point");
