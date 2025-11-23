@@ -291,7 +291,7 @@ public class  PurePursuitAction extends Action {
                     path.decrementCurrentSearchWayPointIndex();
                     KLog.d("purepursuit", "unstucking decrementing to previous way point");
                 } else {
-                    unstuckCounter = 0;
+                    //unstuckCounter = 0;
                     path.incrementCurrentSearchWayPointIndex();
                     KLog.d("purepursuit", "unstucking incrementing to next way point");
                 }

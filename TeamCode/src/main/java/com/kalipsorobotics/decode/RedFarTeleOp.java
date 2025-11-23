@@ -180,6 +180,9 @@ public class RedFarTeleOp extends KTeleOp {
                 //goalDetectionAction.getLimelight().stop();
             }
 
+            if ((shootAction != null && !shootAction.getIsDone()) || (shooterRun != null && !shooterRun.getIsDone())) {
+                turretAutoAlign.updateCheckDone();
+            }
 
             if (shootActionPressed) {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
@@ -191,9 +194,7 @@ public class RedFarTeleOp extends KTeleOp {
                 }
             }
 
-            //if (shootAction != null && !shootAction.getIsDone()) {
-                turretAutoAlign.updateCheckDone();
-            //}
+
 
 
             if (intakePressed) {

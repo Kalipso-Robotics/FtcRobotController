@@ -11,7 +11,7 @@ public class SetAutoDelayAction extends Action {
     int delayMS = 0;
 
     /**
-     * This block contains the initialization code for setting an autonomous delay.
+     * Remember to set dependency for first action after wait.
      *
      * <pre>
      * SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
