@@ -1,6 +1,7 @@
 package com.kalipsorobotics.decode;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
@@ -36,16 +37,18 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "RedAutoDepot")
-public class AutoDepot extends KTeleOp {
+public class RedAutoDepot extends KTeleOp {
     KActionSet autoDepot;
 
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
     protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_FAR;
-    final double SHOOT_FAR_X = 150;
-    final double SHOOT_FAR_Y = -40;
+    public final static double SHOOT_FAR_X = 80;
+    public final static double SHOOT_FAR_Y = 89;
     final double DEPOT_X = 150; // final ending 0 x
     final double DEPOT_Y = 1100; // final ending 1,165.2 , 135degree heading
+    final double DEPOT_Y_OFFSET = -100;
+    final double DEPOT_X_OFFSET = -185;
     private DriveTrain driveTrain;
     TripleColorSensor colorSensors = null;
     Shooter shooter = null;
@@ -132,49 +135,43 @@ public class AutoDepot extends KTeleOp {
 
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), firstShootPoint, 0, false);
         trip0.setName("trip0");
-        trip0.getMoveToBall().addPoint(firstShootPoint.getX(), firstShootPoint.getY()*allianceSetup.getPolarity(), 0);
+        trip0.getMoveToBall().addPoint(0, 0, 0);
         autoDepot.addAction(trip0);
 
         // ----------------- TRIP 1 ---------------------- ~5 sec
 
-        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 3000);
+        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
         trip1.setName("trip1");
-        trip1.getMoveToBall().addPoint(DEPOT_X + 50, (DEPOT_Y - 300) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(DEPOT_X + 50, (DEPOT_Y-50) * allianceSetup.getPolarity() , 110 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(DEPOT_X - 130, (DEPOT_Y-50) * allianceSetup.getPolarity() , 110 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(DEPOT_X - 130, (DEPOT_Y-100) * allianceSetup.getPolarity() , 110 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(DEPOT_X - 160, (DEPOT_Y-100) * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(DEPOT_X - 160, (DEPOT_Y-25) * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
-        trip1.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity(), 30 * allianceSetup.getPolarity());
         trip1.setDependentActions(trip0);
         autoDepot.addAction(trip1);
 
 
         // ----------------- TRIP 2 ---------------------- ~8 sec
 
-        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()),  farLaunchPoint, 6000);
+        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
         trip2.setName("trip2");
-        trip2.getMoveToBall().addPoint((DEPOT_X + 150), (DEPOT_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip2.getMoveToBall().addPoint((DEPOT_X + 150), (DEPOT_Y - 50) * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
-        trip2.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity(), 30 * allianceSetup.getPolarity());
         trip2.setDependentActions(trip1);
         autoDepot.addAction(trip2);
 
         // ----------------- TRIP 3 ---------------------- ~5 sec
 
-        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 3000);
+        DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
         trip3.setName("trip3");
-        trip3.getMoveToBall().addPoint((DEPOT_X + 150), (DEPOT_Y - 660) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip3.getMoveToBall().addPoint((DEPOT_X + 150), (DEPOT_Y - 50) * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
-        trip3.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity(), 30 * allianceSetup.getPolarity());
         trip3.setDependentActions(trip2);
         autoDepot.addAction(trip3);
+
+        //-------------------TRIP 4 ------------------- ~ 19qp01
+
+        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
+        trip4.setName("trip4");
+        trip4.setDependentActions(trip3);
+        autoDepot.addAction(trip4);
 
         // ----------------- PARK ----------------------
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
-        park.setDependentActions(trip3);
+        park.setDependentActions(trip4);
         park.addPoint(SHOOT_FAR_X + 400, SHOOT_FAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);

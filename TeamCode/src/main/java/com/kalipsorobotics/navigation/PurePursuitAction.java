@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class PurePursuitAction extends Action {
+public class  PurePursuitAction extends Action {
     public static final double P_XY = 1.0/350.0;
     public static final double P_ANGLE = (1.0 / Math.toRadians(90));
     public static final double P_XY_FAST = P_XY * 2;
@@ -277,9 +277,9 @@ public class PurePursuitAction extends Action {
         yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
         thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
 
-
+        // this is not smart
         if(xVelocity < 0.01 && yVelocity < 0.01 && thetaVelocity < 0.01) {
-            if(timeoutTimer.milliseconds() > 4000) {
+            if(timeoutTimer.milliseconds() > 1000) {
                 KLog.d("purepursuit", "pp timeout due to low velocity, incrementing to next way point, xVelocity " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
                 path.incrementCurrentSearchWayPointIndex();

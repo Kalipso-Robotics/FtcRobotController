@@ -147,6 +147,7 @@ public class RedFarTeleOp extends KTeleOp {
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
 
             shooterWarmupPressed = kGamePad2.isDpadUpFirstPressed();
+            shooterStopPressed =  kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
 
             useAprilTagPressed = kGamePad2.isBackButtonPressed();
 
