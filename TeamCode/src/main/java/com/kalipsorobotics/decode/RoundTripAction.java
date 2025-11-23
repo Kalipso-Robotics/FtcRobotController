@@ -28,7 +28,6 @@ public class RoundTripAction extends KActionSet {
     private Shooter shooter;
     private ShooterReady shooterReady;
     private PushBall shoot;
-
     private ShooterStop shooterStop;
     private boolean hasUpdatedShooterReady = false;
 
@@ -118,7 +117,7 @@ public class RoundTripAction extends KActionSet {
                     getName() != null ? getName() : "unnamed",
                     currentPos.getX(), currentPos.getY(),
                     target.getX(), target.getY()));
-                shooterRun.setNewLaunchPosition(currentPos, target);
+//                shooterRun.setNewLaunchPosition(currentPos, target);
                 hasUpdatedShooterReady = true;
                 KLog.d("RoundTrip", String.format("[%s] Shooter position updated successfully",
                     getName() != null ? getName() : "unnamed"));

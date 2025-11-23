@@ -115,9 +115,9 @@ public class PurePursuitAction extends Action {
     public void addPoint(double x, double y, double headingDeg) {
         double headingRad = Math.toRadians(headingDeg);
         //double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
-        double adaptivePAngel = calcAdaptivePAngle(headingRad);
+       // double adaptivePAngel = calcAdaptivePAngle(headingRad);
         //double[] adaptiveP = {P_XY, P_ANGLE};
-        pathPoints.add(new Position(x, y, headingRad, P_XY, adaptivePAngel));
+        pathPoints.add(new Position(x, y, headingRad, P_XY, P_ANGLE));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
 

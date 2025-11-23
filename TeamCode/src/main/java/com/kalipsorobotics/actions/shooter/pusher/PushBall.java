@@ -29,10 +29,10 @@ public class PushBall extends KActionSet {
 //        untilShootingDone.setDependentActions(pushLeft, pushRight);
         this.addAction(untilShootingDone);
 
-        KLog.d("teleop", "shooting done.(based off intake)");
-        WaitAction wait = new WaitAction(1000);
-        wait.setDependentActions(untilShootingDone);
-        this.addAction(wait);
+//        KLog.d("teleop", "shooting done.(based off intake)");
+//        WaitAction wait = new WaitAction(1000);
+//        wait.setDependentActions(untilShootingDone);
+//        this.addAction(wait);
 
 //        KServoAutoAction block = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
 //        block.setName("block");
