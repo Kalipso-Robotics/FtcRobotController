@@ -5,7 +5,6 @@ import static com.kalipsorobotics.decode.RedAutoDepot.SHOOT_FAR_Y;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.cameraVision.AllianceSetup;
-import com.kalipsorobotics.decode.RoundTripAction;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.Intake;

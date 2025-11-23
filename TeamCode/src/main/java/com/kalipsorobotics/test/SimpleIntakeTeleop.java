@@ -1,4 +1,4 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.test;
 
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;

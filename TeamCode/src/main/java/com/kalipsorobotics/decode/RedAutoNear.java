@@ -1,6 +1,9 @@
 package com.kalipsorobotics.decode;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
+import com.kalipsorobotics.actions.actionUtilities.WaitAction;
+import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
@@ -9,7 +12,6 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
 import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
-import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
@@ -23,7 +25,6 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.MotifColor;
-import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.Turret;
@@ -128,6 +129,18 @@ public class RedAutoNear extends KTeleOp {
         Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceSetup.getPolarity());
         Point firstShootPoint = new Point(FIRST_SHOOT_X, FIRST_SHOOT_Y * allianceSetup.getPolarity());
 
+        SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
+        setAutoDelayAction.setName("setAutoDelayAction");
+
+        while(!setAutoDelayAction.getIsDone() && opModeInInit()) {
+            setAutoDelayAction.updateCheckDone();
+        }
+
+        WaitAction delayBeforeStart = new WaitAction(setAutoDelayAction.getTimeMS());
+        delayBeforeStart.setName("delayBeforeStart");
+        redAutoNear.addAction(delayBeforeStart);
+
+
         // ----------------- FIRST SHOOT ----------------------
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), firstShootPoint, 0, false);
         trip0.setName("trip0");
@@ -180,6 +193,8 @@ public class RedAutoNear extends KTeleOp {
         redAutoNear.addAction(park);
 
         turretAutoAlign.initBlocking();
+
+
         waitForStart();
         long startTime = System.currentTimeMillis();
         int loopCount = 0;
