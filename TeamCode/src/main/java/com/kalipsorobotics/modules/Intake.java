@@ -2,6 +2,7 @@ package com.kalipsorobotics.modules;
 
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class Intake {
@@ -18,5 +19,9 @@ public class Intake {
 
     public DcMotor getIntakeMotor() {
         return intakeMotor;
+    }
+
+    public DcMotorEx getIntakeMotorEx() {
+        return (DcMotorEx) intakeMotor;
     }
 }
