@@ -33,7 +33,7 @@ public class TurretTest extends KTeleOp {
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP);
 
     }
 

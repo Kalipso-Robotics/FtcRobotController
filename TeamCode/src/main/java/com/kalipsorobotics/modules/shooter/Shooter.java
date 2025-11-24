@@ -13,15 +13,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.checkerframework.checker.units.qual.K;
-
 public class Shooter {
     public static final double MM_TO_PIXEL_RATIO = 0.2608;
 
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
 
-    public static final Point RED_TARGET_FROM_FAR = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
+    public static final Point TARGET_POINT = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
 
     public static final double HOOD_OFFSET = 0.25;
 

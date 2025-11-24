@@ -37,7 +37,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class RedFarTeleOp extends KTeleOp {
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
 
-    protected final Point ROBOT_START_POINT_RED = Shooter.RED_TARGET_FROM_FAR;
+    protected final Point ROBOT_START_POINT_RED = Shooter.TARGET_POINT;
     private DriveTrain driveTrain;
     private Shooter shooter = null;
     private Intake intake = null;
@@ -107,7 +107,7 @@ public class RedFarTeleOp extends KTeleOp {
         intakeReverse = null;
         intakeFullAction = null;
 
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP * allianceSetup.getPolarity());
 
         //goalDetectionAction = new GoalDetectionAction(opModeUtilities);
 

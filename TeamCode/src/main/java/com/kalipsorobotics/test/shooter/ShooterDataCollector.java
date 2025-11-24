@@ -57,7 +57,7 @@ public class ShooterDataCollector extends KTeleOp {
         stopper = new Stopper(opModeUtilities);
         intake = new Intake(opModeUtilities);
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP);
 
         stopperOpen = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
         stopperClose = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
@@ -170,7 +170,7 @@ public class ShooterDataCollector extends KTeleOp {
             telemetry.addData("Hood Position", String.format("%.3f", hoodPosition));
             telemetry.addData("Actual Hood Pos", String.format("%.3f", shooter.getHoodPosition()));
             telemetry.addLine();
-            telemetry.addLine("Distance: " + shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_FAR));
+            telemetry.addLine("Distance: " + shooter.getDistance(SharedData.getOdometryPosition(), Shooter.TARGET_POINT));
             telemetry.addLine();
             telemetry.addLine("Controls:");
             telemetry.addLine("GP1 DPad Up/Down: Adjust RPS");

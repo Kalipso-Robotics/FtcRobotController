@@ -14,7 +14,7 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 
 public class QuickShootAction extends KActionSet {
     public QuickShootAction(Revolver revolver, Shooter shooter, Stopper stopper, Intake intake) {
-        ShooterRun shooterRun = new ShooterRun(shooter, Shooter.RED_TARGET_FROM_FAR, LaunchPosition.AUTO); //todo set point
+        ShooterRun shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT, LaunchPosition.AUTO); //todo set point
         shooterRun.setName("shooterReady");
         this.addAction(shooterRun);
 

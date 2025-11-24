@@ -37,11 +37,11 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "RedAutoNearZone")
-public class RedAutoNear extends KTeleOp {
-    KActionSet redAutoNear;
+@Autonomous(name = "BlueAutoNearZone")
+public class BlueAutoNear extends KTeleOp {
+    KActionSet blueAutoNear;
 
-    protected AllianceSetup allianceSetup = AllianceSetup.RED;
+    protected AllianceSetup allianceSetup = AllianceSetup.BLUE;
     final double FIRST_SHOOT_X = 2598;
     final double FIRST_SHOOT_Y = 441.38;
     final double SHOOT_NEAR_X = 2130; //2400
@@ -80,7 +80,7 @@ public class RedAutoNear extends KTeleOp {
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
-        allianceSetup = AllianceSetup.RED;
+        allianceSetup = AllianceSetup.BLUE;
 
         // Create your modules
         DriveTrain.setInstanceNull();
@@ -91,12 +91,12 @@ public class RedAutoNear extends KTeleOp {
 
         // Create odometry
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3028.98, 746.18, -2.4137); //3015.93, 765.86, -2.4030
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3028.98, 746.18 * allianceSetup.getPolarity(), -2.4137 * allianceSetup.getPolarity()); //3015.93, 765.86, -2.4030
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         colorSensors = new TripleColorSensor(opModeUtilities);
 
-        redAutoNear = new KActionSet();
+        blueAutoNear = new KActionSet();
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
@@ -117,8 +117,8 @@ public class RedAutoNear extends KTeleOp {
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 //        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
 
-        shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT, LaunchPosition.AUTO);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.TARGET_POINT);
+        shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), LaunchPosition.AUTO);
+        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()));
         shooterStop = new ShooterStop(shooterRun);
         pushBall = new PushBall(stopper, intake, shooter);
     }
@@ -138,15 +138,15 @@ public class RedAutoNear extends KTeleOp {
 
         WaitAction delayBeforeStart = new WaitAction(setAutoDelayAction.getTimeMS());
         delayBeforeStart.setName("delayBeforeStart");
-        redAutoNear.addAction(delayBeforeStart);
+        blueAutoNear.addAction(delayBeforeStart);
 
 
         // ----------------- FIRST SHOOT ----------------------
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), firstShootPoint, 0, false);
         trip0.setName("trip0");
-        trip0.getMoveToBall().addPoint(FIRST_SHOOT_X, FIRST_SHOOT_Y*allianceSetup.getPolarity(), -138.29);
+        trip0.getMoveToBall().addPoint(FIRST_SHOOT_X, FIRST_SHOOT_Y*allianceSetup.getPolarity(), -138.29 * allianceSetup.getPolarity());
         trip0.setDependentActions(delayBeforeStart);
-        redAutoNear.addAction(trip0);
+        blueAutoNear.addAction(trip0);
 
         // ----------------- TRIP 1 ----------------------
 
@@ -156,10 +156,10 @@ public class RedAutoNear extends KTeleOp {
         trip1.getMoveToBall().addPoint(1950, 800 * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
         trip1.getMoveToBall().addPoint(1950, 1015 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to hit lever
-        trip1.getMoveToBall().addPoint(1735, 1055 * allianceSetup.getPolarity(), -20);
-        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(1735, 1055 * allianceSetup.getPolarity(), -20 * allianceSetup.getPolarity());
+        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY(), 90 * allianceSetup.getPolarity());
         trip1.setDependentActions(trip0);
-        redAutoNear.addAction(trip1);
+        blueAutoNear.addAction(trip1);
 
         // ----------------- TRIP 2 ----------------------
 
@@ -169,9 +169,9 @@ public class RedAutoNear extends KTeleOp {
         trip2.getMoveToBall().addPoint(1280, 820 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip2.getMoveToBall().addPoint(1280, 1220 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip2.getMoveToBall().addPoint(1280, 820 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY(), 90 * allianceSetup.getPolarity());
         trip2.setDependentActions(trip1);
-        redAutoNear.addAction(trip2);
+        blueAutoNear.addAction(trip2);
 
         // ----------------- TRIP 3 ----------------------
 
@@ -182,18 +182,9 @@ public class RedAutoNear extends KTeleOp {
         trip3.getMoveToBall().addPoint(680, 835 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         trip3.getMoveToBall().addPoint(680, 1220 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
 //        trip3.getMoveToBall().addPoint(1040, 800 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip3.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip3.getMoveToBall().addPoint(nearLaunchPoint.getX() + 400, nearLaunchPoint.getY(), 90 * allianceSetup.getPolarity());
         trip3.setDependentActions(trip2);
-        redAutoNear.addAction(trip3);
-
-        // ----------------- PARK ----------------------
-
-        PurePursuitAction park = new PurePursuitAction(driveTrain);
-        park.setName("park");
-        park.setDependentActions(trip3);
-        park.addPoint(SHOOT_NEAR_X + 400, (SHOOT_NEAR_Y) * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        park.setMaxCheckDoneCounter(20);
-        redAutoNear.addAction(park);
+        blueAutoNear.addAction(trip3);
 
         turretAutoAlign.initBlocking();
 
@@ -207,17 +198,16 @@ public class RedAutoNear extends KTeleOp {
 
             // Log overall progress every 500ms
             if (loopCount % 25 == 0) {  // Assuming ~50Hz loop rate
-                KLog.d("AutoProgress", String.format("=== RedAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
-                    elapsedSec, loopCount, redAutoNear.getIsDone()));
-                KLog.d("AutoProgress", String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s, Park: %s",
-                    trip1.getIsDone() ? "✓" : "...",
-                    trip2.getIsDone() ? "✓" : "...",
-                    trip3.getIsDone() ? "✓" : "...",
-                    park.getIsDone() ? "✓" : "..."));
+                KLog.d("AutoProgress", String.format("=== BlueAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
+                        elapsedSec, loopCount, blueAutoNear.getIsDone()));
+                KLog.d("AutoProgress", String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
+                        trip1.getIsDone() ? "✓" : "...",
+                        trip2.getIsDone() ? "✓" : "...",
+                        trip3.getIsDone() ? "✓" : "..."));
                 KLog.d("AutoProgress", "NOTE: Trip3 is commented out in code - Park depends on Trip3!");
             }
 
-            redAutoNear.updateCheckDone();
+            blueAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             KLog.d("Odometry", "Position: " + SharedData.getOdometryPosition());
         }

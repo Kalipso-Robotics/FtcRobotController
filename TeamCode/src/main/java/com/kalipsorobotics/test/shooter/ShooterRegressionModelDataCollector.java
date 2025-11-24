@@ -49,7 +49,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
         intakeStop = new IntakeStop(intake);
         runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP);
 //        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kFileWriter.writeLine("distance, rps, hood position");
     }
@@ -78,7 +78,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
              */
 
             //TODO make csv converter into array for easy coding
-            distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.RED_TARGET_FROM_FAR);
+            distance = shooter.getDistance(SharedData.getOdometryPosition(), Shooter.TARGET_POINT);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
                 KLog.d("Regression Module Data Collector", "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);
