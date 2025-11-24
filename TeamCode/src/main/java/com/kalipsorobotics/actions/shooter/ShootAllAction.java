@@ -12,6 +12,8 @@ import com.kalipsorobotics.modules.shooter.ShooterConfig;
 
 public class ShootAllAction extends KActionSet {
 
+    ShooterRun shooterRun;
+
     public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, Point target) {
         this(stopper, intake, shooter, target, 0, 0);
     }
@@ -21,7 +23,7 @@ public class ShootAllAction extends KActionSet {
     }
 
     private ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, Point target, double targetRPS, double targetHoodPos) {
-        ShooterRun shooterRun = new ShooterRun(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, 0);
+        shooterRun = new ShooterRun(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, 0);
         shooterRun.setName("ShooterReady");
         this.addAction(shooterRun);
 
@@ -39,5 +41,9 @@ public class ShootAllAction extends KActionSet {
         shooterStop.setDependentActions(pushAllBalls, ready);
         this.addAction(shooterStop);
 
+    }
+
+    public ShooterRun getShooterRun() {
+        return shooterRun;
     }
 }

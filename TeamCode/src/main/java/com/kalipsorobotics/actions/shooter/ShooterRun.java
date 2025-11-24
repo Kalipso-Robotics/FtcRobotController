@@ -70,7 +70,7 @@ public class ShooterRun extends Action {
      * Use For Data Collection
      */
     public ShooterRun(Shooter shooter, double targetRPS, double targetHoodPosition) {
-        this(shooter, null, null, targetRPS, targetHoodPosition, 0);
+        this(shooter, null, LaunchPosition.AUTO, targetRPS, targetHoodPosition, 0);
     }
 
     public ShooterRun(Shooter shooter, Point target, Point launchPos, double timeOutMS) {

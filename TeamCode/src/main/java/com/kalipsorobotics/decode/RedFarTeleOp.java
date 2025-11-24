@@ -160,7 +160,7 @@ public class RedFarTeleOp extends KTeleOp {
 
             if (shooterStopPressed) {
                 if (shooterStop == null || shooterStop.getIsDone()) {
-                    shooterStop = new ShooterStop(shooterRun);
+                    shooterStop = new ShooterStop(shooterRun, shootAction);
                     setLastShooterAction(shooterStop);
                 }
             }
@@ -195,15 +195,12 @@ public class RedFarTeleOp extends KTeleOp {
             }
 
 
-
-
             if (intakePressed) {
                 if (intakeRun == null || intakeRun.getIsDone()) {
                     intakeRun = new IntakeRun(intake);
                     closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
                     setLastStopperAction(closeStopper);
                     setLastIntakeAction(intakeRun);
-
                 }
             } else if (intakeReversePressed) {
                 if (intakeReverse == null || intakeReverse.getIsDone()) {
@@ -219,10 +216,10 @@ public class RedFarTeleOp extends KTeleOp {
 
 
             if (releasePressed) {
-                if (openStopper == null || openStopper.getIsDone()) {
+//                if (openStopper == null || openStopper.getIsDone()) {
                     openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
                     setLastStopperAction(openStopper);
-                }
+//                }
             }
 
 
