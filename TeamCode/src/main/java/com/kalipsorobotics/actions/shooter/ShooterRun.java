@@ -184,7 +184,9 @@ public class ShooterRun extends Action {
         targetHoodPosition = params.hoodPosition;
     }
 
-
+    public double getTargetRPS() {
+        return targetRPS;
+    }
     public void stop() {
         if (isDone) {
             return;

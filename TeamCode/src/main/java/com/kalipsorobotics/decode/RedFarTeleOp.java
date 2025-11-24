@@ -33,11 +33,10 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
-@TeleOp(name = "RedFarTeleop")
+@TeleOp(name = "Red Teleop")
 public class RedFarTeleOp extends KTeleOp {
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
-
-    protected final Point ROBOT_START_POINT_RED = Shooter.TARGET_POINT;
+    protected final Point SHOOTER_TARGET_POINT = Shooter.TARGET_POINT;
     private DriveTrain driveTrain;
     private Shooter shooter = null;
     private Intake intake = null;
@@ -47,7 +46,6 @@ public class RedFarTeleOp extends KTeleOp {
     ShooterRun shooterRun = null;
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
-
     LaunchPosition launchPosition = LaunchPosition.AUTO;
     PushBall pushBall = null;
 
@@ -188,7 +186,8 @@ public class RedFarTeleOp extends KTeleOp {
                 KLog.d("ShooterReadyPressed", "Shooter Ready Pressed");
                 if (shootAction == null || shootAction.getIsDone()) {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
-                    shootAction = new ShootAllAction(stopper, intake, shooter, ROBOT_START_POINT_RED);
+                    shootAction = new ShootAllAction(stopper, intake, shooter, SHOOTER_TARGET_POINT.multiplyY(allianceSetup.getPolarity()));
+                    KLog.d("ShooterReadyPressed", "Target RPS : " + shootAction.getShooterRun().getTargetRPS());
                     setLastShooterAction(shootAction);
                     setLastStopperAction(shootAction);
                 }
