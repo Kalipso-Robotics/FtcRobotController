@@ -83,8 +83,6 @@ public class RedAutoDepot extends KTeleOp {
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
-        allianceSetup = AllianceSetup.RED;
-
         // Create your modules
         DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);

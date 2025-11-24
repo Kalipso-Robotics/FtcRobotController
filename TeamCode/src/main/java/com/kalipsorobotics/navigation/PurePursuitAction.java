@@ -269,6 +269,7 @@ public class  PurePursuitAction extends Action {
                 KLog.d("purepursaction_debug_follow",
                         "Final angle is within range. Finish moving. Last point  " + lastPoint + "current pos:    " + currentPosition.toString());
                 finishedMoving();
+                return;
             } else {
                 KLog.d("purepursaction_debug_follow",
                         "Locking final angle:  " + lastPoint + "current pos:    " + currentPosition.toString());
@@ -282,10 +283,10 @@ public class  PurePursuitAction extends Action {
         thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
 
         // this is not smart
-        if((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.005)) {
+        if((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
             KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
-            if (timeoutTimer.milliseconds() > 1000) {
+            if (timeoutTimer.milliseconds() > 200) {
                 if (unstuckCounter < maxUnstuckCounter/* && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)*/) {
                     unstuckCounter++;
                     path.decrementCurrentSearchWayPointIndex();
