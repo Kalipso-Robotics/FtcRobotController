@@ -127,7 +127,8 @@ public class RedAutoDepot extends KTeleOp {
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
-        Point farLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity());
+        //No polarity here because multiplied externally
+        Point farLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y);
         Point firstShootPoint = new Point(0,0);
 
         // ----------------- FIRST SHOOT ----------------------
@@ -139,7 +140,7 @@ public class RedAutoDepot extends KTeleOp {
 
         // ----------------- TRIP 1 ---------------------- ~5 sec
 
-        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
+        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint.multiplyY(allianceSetup.getPolarity()), 2000, allianceSetup);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
         autoDepot.addAction(trip1);
@@ -147,21 +148,21 @@ public class RedAutoDepot extends KTeleOp {
 
         // ----------------- TRIP 2 ---------------------- ~8 sec
 
-        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
+        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint.multiplyY(allianceSetup.getPolarity()), 2000, allianceSetup);
         trip2.setName("trip2");
         trip2.setDependentActions(trip1);
         autoDepot.addAction(trip2);
 
         // ----------------- TRIP 3 ---------------------- ~5 sec
 
-        DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
+        DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint.multiplyY(allianceSetup.getPolarity()), 2000, allianceSetup);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2);
         autoDepot.addAction(trip3);
 
         //-------------------TRIP 4 ------------------- ~ 19qp01
 
-//        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint, 2000, allianceSetup);
+//        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.RED_TARGET_FROM_FAR.multiplyY(allianceSetup.getPolarity()), farLaunchPoint.multiplyY(allianceSetup.getPolarity()), 2000, allianceSetup);
 //        trip4.setName("trip4");
 //        trip4.setDependentActions(trip3);
 //        autoDepot.addAction(trip4);

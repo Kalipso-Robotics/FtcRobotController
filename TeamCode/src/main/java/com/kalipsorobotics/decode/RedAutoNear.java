@@ -161,6 +161,7 @@ public class RedAutoNear extends KTeleOp {
         trip1.getMoveToBall().addPoint(1950, 800 * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
         trip1.getMoveToBall().addPoint(1950, 1015 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
         // move to hit lever
+        trip1.getMoveToBall().addPoint(1735, 1100 * allianceSetup.getPolarity(), 10 * allianceSetup.getPolarity());
         trip1.getMoveToBall().addPoint(1735, 1100 * allianceSetup.getPolarity(), -20 * allianceSetup.getPolarity());
         // move to launch
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
