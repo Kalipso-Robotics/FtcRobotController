@@ -31,11 +31,11 @@ public class RoundTripAction extends KActionSet {
     private ShooterStop shooterStop;
     private boolean hasUpdatedShooterReady = false;
 
-    Point target;
+    Point targetPoint;
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
-                           Point target, Point launchPos, double waitForShooterReadyMS, boolean shouldRunIntake) {
-        this.target = target;
+                           Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake) {
+        this.targetPoint = targetPoint;
         this.shooter = shooter;
 
         WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
@@ -50,7 +50,7 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setFinalSearchRadius(100);
 
         //warm - shorter
-        shooterRun = new ShooterRun(shooter, target, launchPos, 0);
+        shooterRun = new ShooterRun(shooter, targetPoint, launchPoint);
         shooterRun.setName("shooterRun");  // FIX: Correct name (was "shooterReady")
         shooterRun.setDependentActions(waitUntilShootRun);
         this.addAction(shooterRun);
@@ -81,8 +81,8 @@ public class RoundTripAction extends KActionSet {
     }
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
-                           Point target, Point launchPos, double waitForShooterReadyMS) {
-        this(opModeUtilities, drivetrain, shooter, stopper, intake, target, launchPos, waitForShooterReadyMS, true);
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
+        this(opModeUtilities, drivetrain, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, true);
     }
 
     public PurePursuitAction getMoveToBall() {
@@ -116,7 +116,7 @@ public class RoundTripAction extends KActionSet {
                 KLog.d("RoundTrip", String.format("[%s] Updating shooter position - Current: (%.1f, %.1f), Target: (%.1f, %.1f)",
                     getName() != null ? getName() : "unnamed",
                     currentPos.getX(), currentPos.getY(),
-                    target.getX(), target.getY()));
+                    targetPoint.getX(), targetPoint.getY()));
 //                shooterRun.setNewLaunchPosition(currentPos, target);
                 hasUpdatedShooterReady = true;
                 KLog.d("RoundTrip", String.format("[%s] Shooter position updated successfully",

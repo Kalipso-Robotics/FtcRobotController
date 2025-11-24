@@ -3,11 +3,8 @@ package com.kalipsorobotics.actions.intake;
 import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-import com.kalipsorobotics.actions.revolverActions.RevolverIntakeAction;
 import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.Revolver;
 import com.kalipsorobotics.modules.Stopper;
-import com.kalipsorobotics.modules.TripleColorSensor;
 
 public class IntakeFullAction extends KActionSet {
     private IntakeStop stopIntake;

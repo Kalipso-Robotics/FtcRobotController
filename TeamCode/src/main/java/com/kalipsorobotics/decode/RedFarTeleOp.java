@@ -24,7 +24,6 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
@@ -46,7 +45,6 @@ public class RedFarTeleOp extends KTeleOp {
     ShooterRun shooterRun = null;
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
-    LaunchPosition launchPosition = LaunchPosition.AUTO;
     PushBall pushBall = null;
 
     KServoAutoAction openStopper = null;
@@ -171,7 +169,7 @@ public class RedFarTeleOp extends KTeleOp {
                 }
                 if (shooterRun == null || shooterRun.getIsDone()) {
                     shooterRun = new ShooterRun(shooter, 20, 0.8);
-                    KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up For Position: " + launchPosition);
+                    KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up");
                     setLastShooterAction(shooterRun);
                 }
             } else {

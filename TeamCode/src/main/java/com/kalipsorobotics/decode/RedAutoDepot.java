@@ -3,32 +3,16 @@ package com.kalipsorobotics.decode;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
-import com.kalipsorobotics.actions.drivetrain.DriveAction;
-import com.kalipsorobotics.actions.intake.IntakeFullAction;
-import com.kalipsorobotics.actions.intake.IntakeReverse;
-import com.kalipsorobotics.actions.intake.IntakeRun;
-import com.kalipsorobotics.actions.intake.IntakeStop;
-import com.kalipsorobotics.actions.revolverActions.DetectColorsAction;
-import com.kalipsorobotics.actions.revolverActions.RevolverTeleOp;
-import com.kalipsorobotics.actions.shooter.pusher.PushBall;
-import com.kalipsorobotics.actions.shooter.ShootAllAction;
-import com.kalipsorobotics.actions.shooter.ShooterRun;
-import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceSetup;
-import com.kalipsorobotics.cameraVision.MotifCamera;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
-import com.kalipsorobotics.modules.MotifColor;
-import com.kalipsorobotics.modules.Revolver;
-import com.kalipsorobotics.modules.TripleColorSensor;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
@@ -42,43 +26,15 @@ public class RedAutoDepot extends KTeleOp {
     KActionSet autoDepot;
 
     protected AllianceSetup allianceSetup = AllianceSetup.RED;
-
-    protected final Point ROBOT_START_POINT_RED = Shooter.TARGET_POINT;
     public final static double SHOOT_FAR_X = 80;
     public final static double SHOOT_FAR_Y = 89;
-    final double DEPOT_X = 150; // final ending 0 x
-    final double DEPOT_Y = 1100; // final ending 1,165.2 , 135degree heading
-    final double DEPOT_Y_OFFSET = -100;
-    final double DEPOT_X_OFFSET = -185;
     private DriveTrain driveTrain;
-    TripleColorSensor colorSensors = null;
     Shooter shooter = null;
     Intake intake = null;
     Stopper stopper = null;
-    ShooterRun shooterRun = null;
-    ShooterStop shooterStop = null;
-    ShootAllAction shootAction = null;
-
-    LaunchPosition launchPosition = LaunchPosition.AUTO;
-    PushBall pushBall = null;
-    Revolver revolver = null;
     Turret turret = null;
 
-    IntakeRun intakeRun = null;
-    IntakeStop intakeStop = null;
-    IntakeFullAction intakeFullAction = null;
-
-    RevolverTeleOp revolverTeleOp = null;
-
-    IntakeReverse intakeReverse = null;
-
-    DriveAction driveAction = null;
-
     TurretAutoAlign turretAutoAlign = null;
-
-    DetectColorsAction detectColorsAction = null;
-
-    MotifCamera.MotifPattern testingMotif;
 
     @Override
     protected void initializeRobot() {
@@ -95,8 +51,6 @@ public class RedAutoDepot extends KTeleOp {
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
-        colorSensors = new TripleColorSensor(opModeUtilities);
-
         autoDepot = new KActionSet();
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
@@ -104,24 +58,7 @@ public class RedAutoDepot extends KTeleOp {
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        intakeRun = new IntakeRun(intake);
-        intakeStop = new IntakeStop(intake);
-        intakeReverse = new IntakeReverse(intake);
-        intakeFullAction = new IntakeFullAction(stopper, intake, 10);
-
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP * allianceSetup.getPolarity());
-
-        detectColorsAction = new DetectColorsAction(colorSensors, opModeUtilities);
-
-        //todo just fed in testing motif pattern change later
-        testingMotif = new MotifCamera.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
-//        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
-//        fullShootMotifAction = new FullShootMotifAction(revolver, shooter, testingMotif, colorSensors, opModeUtilities);
-
-        shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT, LaunchPosition.AUTO);
-        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.TARGET_POINT);
-        shooterStop = new ShooterStop(shooterRun);
-        pushBall = new PushBall(stopper, intake, shooter);
     }
 
     @Override

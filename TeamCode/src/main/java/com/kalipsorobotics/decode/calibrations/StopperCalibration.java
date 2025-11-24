@@ -1,25 +1,23 @@
 package com.kalipsorobotics.decode.calibrations;
 
-import static com.kalipsorobotics.modules.Revolver.REVOLVER_INDEX_0;
-
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KTeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class RevolverCalibration extends KTeleOp {
+public class StopperCalibration extends KTeleOp {
 
     private static final double POSITION_INCREMENT = 0.01;
 
-    Stopper pusher = null;
+    Stopper stopper = null;
 
 
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
 
-        pusher = new Stopper(opModeUtilities);
+        stopper = new Stopper(opModeUtilities);
     }
 
 
@@ -33,10 +31,10 @@ public class RevolverCalibration extends KTeleOp {
         while (opModeIsActive()) {
             if (kGamePad2.isDpadLeftFirstPressed()) {
                 stopperPosition += POSITION_INCREMENT;
-                pusher.getStopper().setPosition(stopperPosition);
+                stopper.getStopper().setPosition(stopperPosition);
             } else if (kGamePad2.isDpadRightFirstPressed()) {
                 stopperPosition -= POSITION_INCREMENT;
-                pusher.getStopper().setPosition(stopperPosition);
+                stopper.getStopper().setPosition(stopperPosition);
             }
 
 
