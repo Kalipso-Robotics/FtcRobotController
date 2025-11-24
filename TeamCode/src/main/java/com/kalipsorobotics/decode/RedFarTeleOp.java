@@ -154,6 +154,52 @@ public class RedFarTeleOp extends KTeleOp {
                 useAprilTag = !useAprilTag;
             }
 
+
+            if (intakePressed) {
+                if (intakeRun == null || intakeRun.getIsDone()) {
+                    intakeRun = new IntakeRun(intake);
+                    setLastIntakeAction(intakeRun);
+                }
+                if (closeStopper == null || closeStopper.getIsDone()) {
+                    closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                    setLastStopperAction(closeStopper);
+                }
+            } else if (intakeReversePressed) {
+                if (intakeReverse == null || intakeReverse.getIsDone()) {
+                    intakeReverse = new IntakeReverse(intake);
+                    setLastIntakeAction(intakeReverse);
+                }
+            } else if (!shootActionPressed && (shootAction == null || shootAction.getIsDone())){
+                if (intakeStop == null || intakeStop.getIsDone()) {
+                    intakeStop = new IntakeStop(intake);
+                    setLastIntakeAction(intakeStop);
+                }
+            }
+
+
+            if (releasePressed) {
+                if (openStopper == null || openStopper.getIsDone()) {
+                    openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
+                    setLastStopperAction(openStopper);
+                }
+            }
+
+
+            //mostly for 3 ball
+            if (runUntilStalledPressed) {
+                KLog.d("teleop", "revolver pressed");
+                if (runUntilStallAction == null || runUntilStallAction.getIsDone()) {
+                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4000);
+                }
+                setLastIntakeAction(runUntilStallAction);
+            }
+
+
+            if (useAprilTag) {
+                goalDetectionAction.updateCheckDone();
+            }
+
+
             if (shooterStopPressed) {
                 if (shooterStop == null || shooterStop.getIsDone()) {
                     shooterStop = new ShooterStop(shooterRun, shootAction);
@@ -187,51 +233,8 @@ public class RedFarTeleOp extends KTeleOp {
                     shootAction = new ShootAllAction(stopper, intake, shooter, SHOOTER_TARGET_POINT.multiplyY(allianceSetup.getPolarity()));
                     KLog.d("ShooterReadyPressed", "Target RPS : " + shootAction.getShooterRun().getTargetRPS());
                     setLastShooterAction(shootAction);
-                    setLastStopperAction(shootAction);
+                    setLastStopperAction(null);
                 }
-            }
-
-
-            if (intakePressed) {
-                if (intakeRun == null || intakeRun.getIsDone()) {
-                    intakeRun = new IntakeRun(intake);
-                    closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-                    setLastStopperAction(closeStopper);
-                    setLastIntakeAction(intakeRun);
-                }
-            } else if (intakeReversePressed) {
-                if (intakeReverse == null || intakeReverse.getIsDone()) {
-                    intakeReverse = new IntakeReverse(intake);
-                    setLastIntakeAction(intakeReverse);
-                }
-            } else if (!shootActionPressed && (shootAction == null || shootAction.getIsDone())){
-                if (intakeStop == null || intakeStop.getIsDone()) {
-                    intakeStop = new IntakeStop(intake);
-                    setLastIntakeAction(intakeStop);
-                }
-            }
-
-
-            if (releasePressed) {
-//                if (openStopper == null || openStopper.getIsDone()) {
-                    openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
-                    setLastStopperAction(openStopper);
-//                }
-            }
-
-
-            //mostly for 3 ball
-            if (runUntilStalledPressed) {
-                KLog.d("teleop", "revolver pressed");
-                if (runUntilStallAction == null || runUntilStallAction.getIsDone()) {
-                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4000);
-                }
-                setLastIntakeAction(runUntilStallAction);
-            }
-
-
-            if (useAprilTag) {
-                goalDetectionAction.updateCheckDone();
             }
 
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
