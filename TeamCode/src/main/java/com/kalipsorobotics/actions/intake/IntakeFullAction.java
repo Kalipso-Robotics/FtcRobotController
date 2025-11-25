@@ -15,13 +15,13 @@ public class IntakeFullAction extends KActionSet {
         closeStopper.setName("closeStopper");
         this.addAction(closeStopper);
 
-        IntakeRun intakeRun = new IntakeRun(intake);
-        intakeRun.setName("intakeRun");
-        this.addAction(intakeRun);
+        IntakeRunFullSpeed intakeRunFullSpeed = new IntakeRunFullSpeed(intake);
+        intakeRunFullSpeed.setName("intakeRun");
+        this.addAction(intakeRunFullSpeed);
 
         RunUntilStallAction intakeAll = new RunUntilStallAction(intake.getIntakeMotor(), 1, maxTimeoutMS);
         intakeAll.setName("intakeAll");
-        intakeAll.setDependentActions(intakeRun);
+        intakeAll.setDependentActions(intakeRunFullSpeed);
         this.addAction(intakeAll);
 
         stopIntake = new IntakeStop(intake);

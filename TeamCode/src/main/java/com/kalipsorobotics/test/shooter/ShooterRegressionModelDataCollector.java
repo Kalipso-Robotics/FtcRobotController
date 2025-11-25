@@ -1,7 +1,7 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-import com.kalipsorobotics.actions.intake.IntakeRun;
+import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -22,7 +22,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
     KFileWriter kFileWriter = null;
     Shooter shooter = null;
     Intake intake = null;
-    IntakeRun intakeRun = null;
+    IntakeRunFullSpeed intakeRunFullSpeed = null;
     IntakeStop intakeStop = null;
     RunIntakeUntilFullSpeed runUntilFullSpeed = null;
     TurretAutoAlign turretAutoAlign = null;
@@ -45,7 +45,7 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
         intake = new Intake(opModeUtilities);
-        intakeRun = new IntakeRun(intake);
+        intakeRunFullSpeed = new IntakeRunFullSpeed(intake);
         intakeStop = new IntakeStop(intake);
         runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
         turret = Turret.getInstance(opModeUtilities);
@@ -125,11 +125,11 @@ public class ShooterRegressionModelDataCollector extends KTeleOp {
             }
             if (kGamePad1.isYPressed()) {
                 // Create new intake action each time to ensure it runs
-                if (intakeRun != null || intakeRun.getIsDone()) {
-                    intakeRun = new IntakeRun(intake);
+                if (intakeRunFullSpeed != null || intakeRunFullSpeed.getIsDone()) {
+                    intakeRunFullSpeed = new IntakeRunFullSpeed(intake);
                     stop = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
                     setLastStopperAction(stop);
-                    setLastIntakeAction(intakeRun);
+                    setLastIntakeAction(intakeRunFullSpeed);
                 }
             } else {
                 if (intakeStop != null || intakeStop.getIsDone()) {

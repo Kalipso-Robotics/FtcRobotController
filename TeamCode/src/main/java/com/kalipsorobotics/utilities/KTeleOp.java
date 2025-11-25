@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,13 +18,9 @@ public abstract class KTeleOp extends LinearOpMode {
     protected KGamePad kGamePad1;
     protected KGamePad kGamePad2;
 
-    // Action tracking - only one action per category can be active at a time
-    protected Action lastIntakeAction = null;
-    protected Action lastMoveAction = null;
-    protected Action lastShooterAction = null;
+    protected ArrayList<Action> pendingActions = new ArrayList<>();
+    protected ArrayList<Action> actionsToBeExecuted = new ArrayList<>();
 
-    protected Action lastStopperAction = null;
-    protected Action lastRevolverAction = null;
 
     /**
      * Initialize hardware and utilities before waitForStart()
@@ -54,58 +51,14 @@ public abstract class KTeleOp extends LinearOpMode {
 
 
     /**
-     * Set the last intake action and update it
-     * Cancels any previous intake action
-     * @param action the new action to set, or null to cancel current action
-     */
-    protected void setLastIntakeAction(Action action) {
-        lastIntakeAction = action;
-    }
-
-    /**
-     * Set the last move action and update it
-     * Cancels any previous move action
-     * @param action the new action to set, or null to cancel current action
-     */
-    protected void setLastMoveAction(Action action) {
-        lastMoveAction = action;
-    }
-
-    /**
-     * Set the last shooter action and update it
-     * Cancels any previous shooter action
-     * @param action the new action to set, or null to cancel current action
-     */
-    protected void setLastShooterAction(Action action) {
-        lastShooterAction = action;
-    }
-
-    protected void setLastStopperAction(Action action) {
-        lastStopperAction = action;
-    }
-
-    /**
      * Update all active actions
      * Call this at the end of your loop() method
      * Automatically prevents duplicate updates if the same action is referenced in multiple slots
      */
     protected void updateActions() {
-        if (lastIntakeAction != null) {
-            lastIntakeAction.updateCheckDone();
+        for (Action a: actionsToBeExecuted) {
+            a.updateCheckDone();
         }
-
-        if (lastMoveAction != null && lastMoveAction != lastIntakeAction) {
-            lastMoveAction.updateCheckDone();
-        }
-
-        if (lastShooterAction != null && lastShooterAction != lastIntakeAction && lastShooterAction != lastMoveAction) {
-            lastShooterAction.updateCheckDone();
-        }
-
-        if (lastStopperAction != null && lastStopperAction != lastIntakeAction && lastStopperAction != lastMoveAction && lastStopperAction != lastShooterAction) {
-            lastStopperAction.updateCheckDone();
-        }
-
     }
 
     /**
@@ -122,6 +75,17 @@ public abstract class KTeleOp extends LinearOpMode {
      */
     protected boolean isDriving() {
         return !isGamePadDriveJoystickZero();
+    }
+
+    protected boolean isPending(Action action) {
+        return (action != null && !action.getIsDone());
+    }
+
+    protected void addPendingAction(Action action) {
+        if (action == null) {
+            return;
+        }
+        pendingActions.add(action);
     }
 
 }

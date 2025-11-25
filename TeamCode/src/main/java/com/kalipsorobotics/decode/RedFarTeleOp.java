@@ -6,9 +6,8 @@ import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
 import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
-import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
-import com.kalipsorobotics.actions.intake.IntakeRun;
+import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
@@ -42,7 +41,7 @@ public class RedFarTeleOp extends KTeleOp {
     Turret turret = null;
     private Stopper stopper = null;
 
-    ShooterRun shooterRun = null;
+    ShooterRun shooterWarmup = null;
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
     PushBall pushBall = null;
@@ -51,9 +50,8 @@ public class RedFarTeleOp extends KTeleOp {
     KServoAutoAction closeStopper = null;
 
 
-    IntakeRun intakeRun = null;
+    IntakeRunFullSpeed intakeRunFullSpeed = null;
     IntakeStop intakeStop = null;
-    IntakeFullAction intakeFullAction = null;
 
     IntakeReverse intakeReverse = null;
 
@@ -94,14 +92,12 @@ public class RedFarTeleOp extends KTeleOp {
 
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
-        stopper = new Stopper(opModeUtilities);
 
         turret = Turret.getInstance(opModeUtilities);
 
-        intakeRun = null;
+        intakeRunFullSpeed = null;
         intakeStop = null;
         intakeReverse = null;
-        intakeFullAction = null;
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP * allianceSetup.getPolarity());
 
@@ -110,7 +106,7 @@ public class RedFarTeleOp extends KTeleOp {
         //todo just fed in testing motif pattern change later
 //        testingMotif = new ObiliskDetection.MotifPattern(MotifColor.PURPLE, MotifColor.PURPLE, MotifColor.GREEN);
 
-        shooterRun = null;
+        shooterWarmup = null;
         shootAction = null;
         shooterStop = null;
         pushBall = null;
@@ -128,12 +124,9 @@ public class RedFarTeleOp extends KTeleOp {
         while (opModeIsActive()) {
 
             if(kGamePad1.getLeftStickY() != 0 || kGamePad1.getRightStickX() != 0 || kGamePad1.getLeftStickX() != 0) {
-                setLastMoveAction(null);
                 driveAction.move(gamepad1);
             } else {
-                if (lastMoveAction == null || lastMoveAction.getIsDone()) {
-                    driveTrain.setPower(0);
-                }
+                driveTrain.setPower(0);
             }
 
             shootActionPressed = kGamePad2.isLeftTriggerPressed();
@@ -156,73 +149,48 @@ public class RedFarTeleOp extends KTeleOp {
 
 
             if (intakePressed) {
-                if (intakeRun == null || intakeRun.getIsDone()) {
-                    intakeRun = new IntakeRun(intake);
-                    setLastIntakeAction(intakeRun);
-                }
-                if (closeStopper == null || closeStopper.getIsDone()) {
-                    closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-                    setLastStopperAction(closeStopper);
+                if (intakeRunFullSpeed == null || intakeRunFullSpeed.getIsDone()) {
+                    intakeRunFullSpeed = new IntakeRunFullSpeed(intake, stopper);
+                    addPendingAction(intakeRunFullSpeed);
                 }
             } else if (intakeReversePressed) {
                 if (intakeReverse == null || intakeReverse.getIsDone()) {
                     intakeReverse = new IntakeReverse(intake);
-                    setLastIntakeAction(intakeReverse);
+                    addPendingAction(intakeReverse);
                 }
-            } else if (!shootActionPressed && (shootAction == null || shootAction.getIsDone())){
+            } else {
                 if (intakeStop == null || intakeStop.getIsDone()) {
                     intakeStop = new IntakeStop(intake);
-                    setLastIntakeAction(intakeStop);
+                    addPendingAction(intakeStop);
                 }
             }
-
-
-            if (releasePressed) {
-                if (openStopper == null || openStopper.getIsDone()) {
-                    openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
-                    setLastStopperAction(openStopper);
-                }
-            }
-
-
-            //mostly for 3 ball
-            if (runUntilStalledPressed) {
-                KLog.d("teleop", "revolver pressed");
-                if (runUntilStallAction == null || runUntilStallAction.getIsDone()) {
-                    runUntilStallAction = new RunUntilStallAction(intake.getIntakeMotor(), 1, 4000);
-                }
-                setLastIntakeAction(runUntilStallAction);
-            }
-
 
             if (useAprilTag) {
                 goalDetectionAction.updateCheckDone();
             }
 
-
             if (shooterStopPressed) {
                 if (shooterStop == null || shooterStop.getIsDone()) {
-                    shooterStop = new ShooterStop(shooterRun, shootAction);
-                    setLastShooterAction(shooterStop);
+                    shooterStop = new ShooterStop(shooterWarmup, shootAction);
+                    addPendingAction(shooterStop);
                 }
             }
-
 
             if (shooterWarmupPressed) {
                 if (useAprilTag) {
                     goalDetectionAction.getLimelight().start();
                     goalDetectionAction.updateCheckDone();
                 }
-                if (shooterRun == null || shooterRun.getIsDone()) {
-                    shooterRun = new ShooterRun(shooter, 20, 0.8);
+                if (shooterWarmup == null || shooterWarmup.getIsDone()) {
+                    shooterWarmup = new ShooterRun(shooter, 20, 0.8);
                     KLog.d("ShooterReadyPressed", "Shooter Ready set Warming Up");
-                    setLastShooterAction(shooterRun);
+                    addPendingAction(shooterWarmup);
                 }
             } else {
                 //goalDetectionAction.getLimelight().stop();
             }
 
-            if ((shootAction != null && !shootAction.getIsDone()) || (shooterRun != null && !shooterRun.getIsDone())) {
+            if ((shootAction != null && !shootAction.getIsDone()) || (shooterWarmup != null && !shooterWarmup.getIsDone())) {
                 turretAutoAlign.updateCheckDone();
             }
 
@@ -232,16 +200,43 @@ public class RedFarTeleOp extends KTeleOp {
                     KLog.d("ShooterReadyPressed", "Shooter Ready set");
                     shootAction = new ShootAllAction(stopper, intake, shooter, SHOOTER_TARGET_POINT.multiplyY(allianceSetup.getPolarity()));
                     KLog.d("ShooterReadyPressed", "Target RPS : " + shootAction.getShooterRun().getTargetRPS());
-                    setLastShooterAction(shootAction);
-                    setLastStopperAction(null);
+                    addPendingAction(shootAction);
                 }
             }
 
             Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
-            updateActions();
+            updateActionsToBeExecuted();
         }
 
         //goalDetectionAction.getLimelight().close();
         cleanupRobot();
     }
+
+    private void updateActionsToBeExecuted() {
+        //shooter
+        if (isPending(shooterStop)) {
+            actionsToBeExecuted.add(shooterStop);
+        } else if (isPending(shootAction)) {
+            actionsToBeExecuted.add(shootAction);
+        } else if (isPending(shooterWarmup)) {
+            actionsToBeExecuted.add(shooterWarmup);
+        }
+
+        //intake
+        if (!isPending(shootAction)) {
+            if (isPending(intakeRunFullSpeed)) {
+                actionsToBeExecuted.add(intakeRunFullSpeed);
+            } else if (isPending(intakeReverse)) {
+                actionsToBeExecuted.add(intakeReverse);
+            } else if (isPending(intakeStop)) {
+                actionsToBeExecuted.add(intakeStop);
+            }
+        }
+
+        pendingActions.clear();
+        super.updateActions();
+        actionsToBeExecuted.clear();
+    }
+
+
 }
