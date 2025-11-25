@@ -4,13 +4,13 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.KLog;
-import com.kalipsorobotics.utilities.KTeleOp;
+import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "TestTeleOp", group = "Test")
-public class TestTeleOp extends KTeleOp {
+public class TestOpMode extends KOpMode {
     DriveTrain driveTrain;
     IMUModule imuModule;
 

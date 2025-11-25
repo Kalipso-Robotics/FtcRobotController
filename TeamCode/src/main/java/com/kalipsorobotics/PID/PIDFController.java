@@ -15,6 +15,7 @@ public class PIDFController {
     private double ki;
     private double kd;
     private double kf;
+    private double kb; // Back-calculation coefficient for anti-windup
 
     private double integralError;
     private double lastError;
@@ -35,6 +36,7 @@ public class PIDFController {
         ki = I;
         kd = D;
         kf = F;
+        kb = I; // Set back-calculation coefficient to ki (common practice)
         integralError = 0;
         lastError = 0;
         lastTime = SystemClock.elapsedRealtimeNanos();
@@ -56,9 +58,11 @@ public class PIDFController {
      * Calculate control output based on current and target values
      * @param current Current process variable (e.g., current RPS)
      * @param target Target setpoint (e.g., target RPS)
-     * @return Control output to apply
+     * @param minOutput Minimum allowed output (for saturation)
+     * @param maxOutput Maximum allowed output (for saturation)
+     * @return Control output clamped to [minOutput, maxOutput] with anti-windup
      */
-    public double calculate(double current, double target) {
+    public double calculate(double current, double target, double minOutput, double maxOutput) {
         double error = target - current;
 
         double currentTime = SystemClock.elapsedRealtimeNanos();
@@ -75,13 +79,27 @@ public class PIDFController {
         // Feedforward component - base output for target velocity
         double feedforward = kf * target;
 
-        // Calculate total output
-        double output = proportional + integral + derivative + feedforward;
+        // Calculate unclamped output
+        double unclampedOutput = proportional + integral + derivative + feedforward;
+
+        // Clamp output to valid range
+        double clampedOutput = Math.max(minOutput, Math.min(maxOutput, unclampedOutput));
+
+        // Back-calculation anti-windup: if output was saturated, reduce integral
+        double saturationError = unclampedOutput - clampedOutput;
+        if (Math.abs(saturationError) > 0.001) { // Small threshold to avoid floating point issues
+            // Reduce integral proportional to saturation using SAME timeDelta
+            integralError -= kb * saturationError * timeDelta;
+
+            KLog.d("PIDF_AntiWindup_" + name, String.format(
+                "Saturation! Unclamped: %.4f, Clamped: %.4f, Integral reduced by: %.4f, New integral: %.4f",
+                unclampedOutput, clampedOutput, kb * saturationError * timeDelta, integralError));
+        }
 
         // Log calculated values
         KLog.d("PIDF_" + name, String.format(
             "Current: %.2f | Target: %.2f | Error: %.2f | P: %.4f | I: %.4f | D: %.4f | F: %.4f | Output: %.4f",
-            current, target, error, proportional, integral, derivative, feedforward, output));
+            current, target, error, proportional, integral, derivative, feedforward, clampedOutput));
 
         KLog.d("PIDF_" + name, String.format(
                 "Current: %.2f | Target: %.2f | Error: %.2f | kP: %.4f | kI: %.4f | kD: %.4f | kF: %.4f | DeltaT: %.4f",
@@ -90,7 +108,19 @@ public class PIDFController {
         lastTime = currentTime;
         lastError = error;
 
-        return output;
+        return clampedOutput;
+    }
+
+    /**
+     * Calculate control output based on current and target values (no saturation limits)
+     * WARNING: Without saturation limits, anti-windup cannot be applied!
+     * @param current Current process variable (e.g., current RPS)
+     * @param target Target setpoint (e.g., target RPS)
+     * @return Control output (unclamped)
+     */
+    public double calculate(double current, double target) {
+        // Call the main method with no limits (effectively no clamping)
+        return calculate(current, target, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
     }
 
     /**
@@ -109,11 +139,13 @@ public class PIDFController {
         double integral = ki * integralError;
         double derivative = kd * (error - lastError) / timeDelta;
 
+        double output = proportional + integral + derivative;
+
         lastTime = currentTime;
         lastError = error;
 
         // No feedforward when only error is provided
-        return proportional + integral + derivative;
+        return output;
     }
 
     // Tuning methods

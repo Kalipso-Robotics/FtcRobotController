@@ -1,12 +1,6 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
-import com.kalipsorobotics.cameraVision.AllianceSetup;
-import com.kalipsorobotics.math.Position;
-import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;

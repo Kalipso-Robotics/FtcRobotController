@@ -5,7 +5,7 @@ import com.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretConfig;
-import com.kalipsorobotics.cameraVision.AllianceSetup;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -16,16 +16,15 @@ import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
-import com.kalipsorobotics.utilities.KTeleOp;
+import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "RedAutoDepot")
-public class RedAutoDepot extends KTeleOp {
+public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
 
-    protected AllianceSetup allianceSetup = AllianceSetup.RED;
     public final static double SHOOT_FAR_X = 80;
     public final static double SHOOT_FAR_Y = 89;
     private DriveTrain driveTrain;
@@ -38,7 +37,10 @@ public class RedAutoDepot extends KTeleOp {
 
     @Override
     protected void initializeRobot() {
+        this.allianceColor = AllianceColor.RED;
+        SharedData.setAllianceColor(allianceColor);
         super.initializeRobot();
+
         // Create your modules
         DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);
@@ -58,7 +60,7 @@ public class RedAutoDepot extends KTeleOp {
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP * allianceSetup.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP * allianceColor.getPolarity());
     }
 
     @Override
@@ -70,14 +72,14 @@ public class RedAutoDepot extends KTeleOp {
 
         // ----------------- FIRST SHOOT ----------------------
 
-        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), firstShootPoint, 0, false);
+        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false);
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
         autoDepot.addAction(trip0);
 
         // ----------------- TRIP 1 ---------------------- ~5 sec
 
-        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint.multiplyY(allianceSetup.getPolarity()), 2000, allianceSetup);
+        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
         autoDepot.addAction(trip1);
@@ -85,14 +87,14 @@ public class RedAutoDepot extends KTeleOp {
 
         // ----------------- TRIP 2 ---------------------- ~8 sec
 
-        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint.multiplyY(allianceSetup.getPolarity()), 2000, allianceSetup);
+        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip2.setName("trip2");
         trip2.setDependentActions(trip1);
         autoDepot.addAction(trip2);
 
         // ----------------- TRIP 3 ---------------------- ~5 sec
 
-        DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceSetup.getPolarity()), farLaunchPoint.multiplyY(allianceSetup.getPolarity()), 2000, allianceSetup);
+        DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2);
         autoDepot.addAction(trip3);
@@ -109,7 +111,7 @@ public class RedAutoDepot extends KTeleOp {
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
         park.setDependentActions(trip3);
-        park.addPoint(SHOOT_FAR_X + 400, SHOOT_FAR_Y * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        park.addPoint(SHOOT_FAR_X + 400, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);
 

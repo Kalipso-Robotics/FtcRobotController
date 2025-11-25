@@ -5,13 +5,13 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
-import com.kalipsorobotics.utilities.KTeleOp;
+import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous
-public class TestAuto extends KTeleOp {
+public class TestAuto extends KOpMode {
     DriveTrain driveTrain;
     IMUModule imuModule;
 

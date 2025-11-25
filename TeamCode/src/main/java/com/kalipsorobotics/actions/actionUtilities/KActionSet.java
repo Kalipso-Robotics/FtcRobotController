@@ -57,12 +57,12 @@ public class KActionSet extends Action {
     }
 
     // this is a hook to open up update to other code
-    protected void beforeUpdate(){
+    protected void beforeUpdate() {
 
     }
 
     @Override
-    public boolean updateCheckDone(){
+    public boolean updateCheckDone() {
         if (isDone) {
             KLog.d("action set log", "done for " + name);
             return true;

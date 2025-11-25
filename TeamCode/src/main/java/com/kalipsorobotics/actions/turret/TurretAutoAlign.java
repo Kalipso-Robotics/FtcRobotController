@@ -133,11 +133,9 @@ public class TurretAutoAlign extends Action {
 
         if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
             isWithinRange = true;
-            SharedData.setIsTurretWithinRange(isWithinRange);
             turretMotor.setPower(0);
         } else {
             isWithinRange = false;
-            SharedData.setIsTurretWithinRange(isWithinRange);
             turretMotor.setTargetPosition((int) targetTicks);
             turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             turretMotor.setPower(0.7);

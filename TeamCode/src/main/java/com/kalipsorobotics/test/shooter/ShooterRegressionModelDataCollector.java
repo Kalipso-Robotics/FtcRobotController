@@ -12,13 +12,13 @@ import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
-import com.kalipsorobotics.utilities.KTeleOp;
+import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Regression Model Data Collector")
-public class ShooterRegressionModelDataCollector extends KTeleOp {
+public class ShooterRegressionModelDataCollector extends KOpMode {
     KFileWriter kFileWriter = null;
     Shooter shooter = null;
     Intake intake = null;

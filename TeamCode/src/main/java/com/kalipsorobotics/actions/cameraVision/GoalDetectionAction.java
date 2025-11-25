@@ -1,10 +1,9 @@
 package com.kalipsorobotics.actions.cameraVision;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
-import com.kalipsorobotics.cameraVision.AllianceSetup;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -96,8 +95,8 @@ public class GoalDetectionAction extends Action {
                 for (LLResultTypes.FiducialResult fr : fiducialResults) {
 
                     int tagId = fr.getFiducialId();
-                    boolean isRedGoal  = SharedData.getAllianceColor() == AllianceSetup.RED  && tagId == 24;
-                    boolean isBlueGoal = SharedData.getAllianceColor() == AllianceSetup.BLUE && tagId == 21;
+                    boolean isRedGoal  = SharedData.getAllianceColor() == AllianceColor.RED  && tagId == 24;
+                    boolean isBlueGoal = SharedData.getAllianceColor() == AllianceColor.BLUE && tagId == 21;
 
                     if (isRedGoal || isBlueGoal) {
                         Pose3D tagCamPose = fr.getTargetPoseCameraSpace();

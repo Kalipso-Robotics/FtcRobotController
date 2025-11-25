@@ -6,11 +6,15 @@ import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.utilities.KLog;
 
 
 public class ShootAllAction extends KActionSet {
 
     ShooterRun shooterRun;
+    ShooterReady ready;
+    PushBall pushAllBalls;
+    ShooterStop shooterStop;
 
     public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, double targetRPS, double targetHoodPos) {
         shooterRun = new ShooterRun(shooter, targetRPS, targetHoodPos);
@@ -32,17 +36,22 @@ public class ShootAllAction extends KActionSet {
         return shooterRun;
     }
 
+    @Override
+    protected void beforeUpdate() {
+        KLog.d("ShootAllAction", "is Done: " + isDone + " ready: " + ready.getIsDone() + " pushAllBalls: " + pushAllBalls.getIsDone() + " shooterStop: " + shooterStop.getIsDone());
+    }
+
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter) {
-        ShooterReady ready = new ShooterReady(shooterRun);
+        ready = new ShooterReady(shooterRun);
         ready.setName("ready");
         this.addAction(ready);
 
-        PushBall pushAllBalls = new PushBall(stopper, intake, shooter);
+        pushAllBalls = new PushBall(stopper, intake, shooter);
         pushAllBalls.setName("pushAllBalls");
         pushAllBalls.setDependentActions(ready);
         this.addAction(pushAllBalls);
 
-        ShooterStop shooterStop = new ShooterStop(shooterRun);
+        shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
         shooterStop.setDependentActions(pushAllBalls, ready);
         this.addAction(shooterStop);

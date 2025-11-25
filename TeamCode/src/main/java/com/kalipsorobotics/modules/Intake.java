@@ -14,7 +14,7 @@ public class Intake {
     public Intake(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
         this.intakeMotor = opModeUtilities.getHardwareMap().dcMotor.get("intake");
-        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     public DcMotor getIntakeMotor() {

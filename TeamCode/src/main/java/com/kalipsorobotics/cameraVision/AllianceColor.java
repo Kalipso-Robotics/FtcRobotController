@@ -1,13 +1,13 @@
 package com.kalipsorobotics.cameraVision;
 
-public enum AllianceSetup {
+public enum AllianceColor {
 
     RED(1),
     BLUE(-1);
 
     private final int polarity;
 
-    AllianceSetup(int polarity) {
+    AllianceColor(int polarity) {
         this.polarity = polarity;
     }
 

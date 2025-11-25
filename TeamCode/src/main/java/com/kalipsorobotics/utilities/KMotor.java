@@ -25,6 +25,7 @@ public class KMotor {
 
     // Power limits
     private static final double MAX_POWER = 1.0;
+    private static final double MIN_POWER = -1;
 
     // Default PIDF constants - tune these values for optimal RPS control
     // These values are designed to prevent overshoot while reaching target quickly
@@ -99,19 +100,17 @@ public class KMotor {
         // Get current RPS
         double currentRPS = getRPS();
 
-        // Calculate PIDF output (includes feedforward for faster response)
-        double pidfOutput = pidfController.calculate(currentRPS, targetRPS);
-
-        // Clamp power to valid range
-        double newPower = Math.max(0.0, Math.min(MAX_POWER, pidfOutput));
+        // Calculate PIDF output with saturation limits
+        // Back-calculation anti-windup is applied internally
+        double newPower = pidfController.calculate(currentRPS, targetRPS, -1.0, MAX_POWER);
 
         // Set new power
         motor.setPower(newPower);
 
         // Log for debugging
         KLog.d("KMotor", String.format(
-            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDFOutput: %.2f, Power: %.3f, MinPower: %.3f",
-            targetRPS, currentRPS, (targetRPS - currentRPS), pidfOutput, newPower, 0.0
+            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
+            targetRPS, currentRPS, (targetRPS - currentRPS), newPower, -1.0, MAX_POWER
         ));
     }
 

@@ -4,7 +4,7 @@ import static com.kalipsorobotics.decode.RedAutoDepot.SHOOT_FAR_X;
 import static com.kalipsorobotics.decode.RedAutoDepot.SHOOT_FAR_Y;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
-import com.kalipsorobotics.cameraVision.AllianceSetup;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.Intake;
@@ -23,7 +23,7 @@ SHOOT_FAR_X SHOOT_FAR_Y
 
 
 public class DepotRoundTrip extends KActionSet {
-    public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceSetup allianceSetup) {
+    public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
         RoundTripAction trip = new RoundTripAction(opModeUtilities, drivetrain, shooter, stopper, intake, target, launchPos, 2000);
         trip.setName("trip");
 //        trip.getMoveToBall().addPoint(175, 1145 * allianceSetup.getPolarity(), 111 * allianceSetup.getPolarity());
@@ -34,11 +34,11 @@ public class DepotRoundTrip extends KActionSet {
 ////        trip.getMoveToBall().addPoint(25, 1225 * allianceSetup.getPolarity() , 175 * allianceSetup.getPolarity());
 //        trip.getMoveToBall().addPoint(130, 780 * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
 
-        trip.getMoveToBall().addPoint(105, 600 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip.getMoveToBall().addPoint(115, 900 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
-        trip.getMoveToBall().addPoint(130, 1200 * allianceSetup.getPolarity(), 90 * allianceSetup.getPolarity());
+        trip.getMoveToBall().addPoint(105, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(115, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(130, 1200 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
-        trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
+        trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         this.addAction(trip);
     }
 }

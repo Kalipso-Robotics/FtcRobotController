@@ -2,11 +2,11 @@ package com.kalipsorobotics.decode.calibrations;
 
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.utilities.KLog;
-import com.kalipsorobotics.utilities.KTeleOp;
+import com.kalipsorobotics.utilities.KOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class StopperCalibration extends KTeleOp {
+public class StopperCalibration extends KOpMode {
 
     private static final double POSITION_INCREMENT = 0.01;
 

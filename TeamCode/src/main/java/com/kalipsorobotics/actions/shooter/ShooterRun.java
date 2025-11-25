@@ -38,7 +38,7 @@ public class ShooterRun extends Action {
         this.targetPoint = null;
         this.name = "ShooterReady";
         elapsedTime = new ElapsedTime();
-        this.distanceMM = 0;
+        this.distanceMM = -1;
         this.targetRPS = targetRPS;
         this.targetHoodPosition = targetHoodPosition;
     }
@@ -71,6 +71,8 @@ public class ShooterRun extends Action {
     @SuppressLint("DefaultLocale")
     @Override
     public void update() {
+        KLog.d("ShooterRun", "update() called - hasStarted: " + hasStarted + ", Current RPS: " + shooter.getRPS());
+
         if (!hasStarted) {
             shooter.getShooter1().resetPID();
             shooter.getShooter2().resetPID();
