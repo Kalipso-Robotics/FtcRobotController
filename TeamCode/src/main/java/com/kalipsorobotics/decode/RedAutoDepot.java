@@ -1,6 +1,7 @@
 package com.kalipsorobotics.decode;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -116,6 +117,11 @@ public class RedAutoDepot extends KOpMode {
 //        autoDepot.addAction(trip4);
 
         // ----------------- PARK ----------------------
+
+        KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+        closeStopper.setName("closeStopper");
+        closeStopper.setDependentActions(trip3);
+        autoDepot.addAction(closeStopper);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
