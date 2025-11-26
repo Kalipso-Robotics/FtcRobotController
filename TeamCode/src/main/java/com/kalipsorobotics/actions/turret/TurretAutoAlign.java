@@ -7,6 +7,7 @@ import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,7 +18,7 @@ public class TurretAutoAlign extends Action {
     OpModeUtilities opModeUtilities;
 
     Turret turret;
-    DcMotor turretMotor;
+    KMotor turretMotor;
 
     private double xInitSetupMM; //121 inches
 
@@ -144,9 +145,7 @@ public class TurretAutoAlign extends Action {
             turretMotor.setPower(0);
         } else {
             isWithinRange = false;
-            turretMotor.setTargetPosition((int) targetTicks);
-            turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            turretMotor.setPower(0.7);
+            turretMotor.goToTargetTicks((int) targetTicks);
         }
         KLog.d("turret_in_range", "is the turret in range " + isWithinRange);
 
