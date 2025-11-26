@@ -184,7 +184,7 @@ public class Odometry {
 
         double imuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
 
-//
+
 //        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
 //        double wheelDeltaTheta  = (deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM;
 //
@@ -204,7 +204,6 @@ public class Odometry {
         double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * imuDeltaTheta);
 
         Velocity velocity = new Velocity(deltaX, deltaY, imuDeltaTheta);
-
         return velocity;
     }
 
