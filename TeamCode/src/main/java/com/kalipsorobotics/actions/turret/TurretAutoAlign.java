@@ -19,6 +19,9 @@ public class TurretAutoAlign extends Action {
     Turret turret;
     DcMotor turretMotor;
 
+    private double xInitSetupMM; //121 inches
+
+    private double yInitSetupMM; //46inches 1000
     private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE);
 
     private boolean isWithinRange = false;
@@ -31,7 +34,8 @@ public class TurretAutoAlign extends Action {
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
         this.allianceColor = allianceColor;
-
+        xInitSetupMM = TurretConfig.X_INIT_SETUP_MM;
+        yInitSetupMM = TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity();
     }
 
     public boolean isWithinRange() {
@@ -65,6 +69,10 @@ public class TurretAutoAlign extends Action {
         opModeUtilities.getTelemetry().update();
     }
 
+    public void incrementYInitSetupMM(double increment) {
+        yInitSetupMM += increment;
+    }
+
     @Override
     protected void update() {
         if (!opModeUtilities.getOpMode().opModeIsActive() && !opModeUtilities.getOpMode().opModeInInit()) {
@@ -77,8 +85,8 @@ public class TurretAutoAlign extends Action {
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
 
-        double yTargetGoal = (TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity()) - currentY;
-        double xTargetGoal = TurretConfig.X_INIT_SETUP_MM - currentX;
+        double yTargetGoal = yInitSetupMM - currentY;
+        double xTargetGoal = xInitSetupMM - currentX;
         KLog.d("turret_angle", "y init setup" + TurretConfig.Y_INIT_SETUP_MM + "current y" + currentY);
 
         double angleTargetRadian;
@@ -141,6 +149,7 @@ public class TurretAutoAlign extends Action {
             turretMotor.setPower(0.7);
         }
         KLog.d("turret_in_range", "is the turret in range " + isWithinRange);
+
 
 
 

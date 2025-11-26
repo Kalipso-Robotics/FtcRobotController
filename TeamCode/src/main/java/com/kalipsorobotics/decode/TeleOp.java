@@ -116,9 +116,15 @@ public class TeleOp extends KOpMode {
             }
 
             if (kGamePad2.isDpadLeftFirstPressed()) {
-                TurretConfig.Y_INIT_SETUP_MM -= 10;
+                turretAutoAlign.incrementYInitSetupMM(-100);
+                if (turretAutoAlign != null) {
+                    turretAutoAlign.updateCheckDone();
+                }
             } else if (kGamePad2.isDpadRightFirstPressed()) {
-                TurretConfig.Y_INIT_SETUP_MM += 10;
+                turretAutoAlign.incrementYInitSetupMM(100);
+                if (turretAutoAlign != null) {
+                    turretAutoAlign.updateCheckDone();
+                }
             }
 
             // ========== HANDLE INTAKE (Priority Order: Shoot > Stall > Manual > Idle) ==========
