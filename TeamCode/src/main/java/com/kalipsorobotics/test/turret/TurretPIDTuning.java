@@ -32,6 +32,13 @@ import java.util.ArrayList;
  * for ONE set of PID values across many target positions. You can then manually
  * analyze the data to identify patterns and determine smarter PID adjustments.
  *
+ * IMPLEMENTATION:
+ * ==============
+ * - Implements MANUAL PID control loop (not using RUN_TO_POSITION)
+ * - This allows testing the exact PID values from TurretConfig
+ * - Motor runs in RUN_USING_ENCODER mode with calculated power output
+ * - PID controller calculates motor power based on position error
+ *
  * FEATURES:
  * =========
  * - Uses current TurretConfig PID values (kP, kI, kD)
@@ -196,11 +203,11 @@ public class TurretPIDTuning extends LinearOpMode {
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // Apply PID values from TurretConfig
-        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(kp, ki, kd, 0.0);
-        turretMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
-
-        KLog.d("TurretPIDData", "PID coefficients applied, starting tests...");
+        // Note: We implement manual PID control loop (not using motor's built-in PID)
+        // This allows us to test the exact PID values from TurretConfig
+        KLog.d("TurretPIDData", String.format(
+            "Using manual PID control with kp=%.6f, ki=%.6f, kd=%.6f from TurretConfig",
+            kp, ki, kd));
         KLog.d("TurretPIDData", "SAFETY: Current position set as 0°. Will move from -180° to +180° sequentially.");
 
         // Start runtime timer
@@ -363,16 +370,54 @@ public class TurretPIDTuning extends LinearOpMode {
         boolean reachedTarget = false;
         double timeWhenReachedTarget = 0;
 
-        // Start movement
-        testTimer.reset();
-        turretMotor.setTargetPosition(targetTicks);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.8);  // Use reasonable power
+        // PID control variables
+        double integralSum = 0.0;
+        double lastError = 0.0;
+        double lastTime = 0.0;
 
-        // Monitor movement phase
+        // Start movement with MANUAL PID CONTROL
+        // We use RUN_USING_ENCODER and calculate power ourselves to test TurretConfig PID values
+        testTimer.reset();
+        turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Monitor movement phase with manual PID control
         while (opModeIsActive() && testTimer.milliseconds() < MAX_MOVEMENT_TIME_MS) {
             int currentTicks = turretMotor.getCurrentPosition();
+            double currentTime = testTimer.milliseconds();
             allTicksSamples.add((double)currentTicks);
+
+            // Calculate PID error
+            double error = targetTicks - currentTicks;
+            double deltaTime = (currentTime - lastTime) / 1000.0; // Convert to seconds
+
+            // PID calculations (using TurretConfig values)
+            if (deltaTime > 0) {
+                // Proportional term
+                double p = kp * error;
+
+                // Integral term (with anti-windup)
+                integralSum += error * deltaTime;
+                // Limit integral to prevent windup
+                double maxIntegral = 0.3 / (ki + 0.000001); // Prevent division by zero
+                integralSum = Math.max(-maxIntegral, Math.min(maxIntegral, integralSum));
+                double i = ki * integralSum;
+
+                // Derivative term
+                double derivative = (error - lastError) / deltaTime;
+                double d = kd * derivative;
+
+                // Calculate motor power (PID output)
+                double power = p + i + d;
+
+                // Clamp power to [-1.0, 1.0]
+                power = Math.max(-1.0, Math.min(1.0, power));
+
+                // Apply power to motor
+                turretMotor.setPower(power);
+
+                lastError = error;
+                lastTime = currentTime;
+            }
 
             // Check if reached target
             if (!reachedTarget && Math.abs(currentTicks - targetTicks) <= POSITION_TOLERANCE_TICKS) {
