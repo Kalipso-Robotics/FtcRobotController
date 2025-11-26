@@ -16,7 +16,7 @@ public class PIDFController {
     private double kd;
     private double kf;
     private double kb; // Back-calculation coefficient for anti-windup
-
+    private double ks;
     private double integralError;
     private double lastError;
     private double lastTime;
@@ -31,17 +31,22 @@ public class PIDFController {
      * @param F Feedforward gain - provides base output proportional to target
      * @param controllerName Name for identification
      */
-    public PIDFController(double P, double I, double D, double F, String controllerName) {
+    public PIDFController(double P, double I, double D, double F, double S, String controllerName) {
         kp = P;
         ki = I;
         kd = D;
         kf = F;
         kb = I; // Set back-calculation coefficient to ki (common practice)
+        ks = S;
         integralError = 0;
         lastError = 0;
         lastTime = SystemClock.elapsedRealtimeNanos();
 
         name = controllerName;
+    }
+
+    public PIDFController(double P, double I, double D, double F, String controllerName) {
+        this(P, I, D, F, 0, controllerName);
     }
 
     /**
@@ -138,8 +143,9 @@ public class PIDFController {
         double proportional = kp * error;
         double integral = ki * integralError;
         double derivative = kd * (error - lastError) / timeDelta;
+        double staticPower = ks * Math.signum(error);
 
-        double output = proportional + integral + derivative;
+        double output = staticPower + proportional + integral + derivative;
 
         lastTime = currentTime;
         lastError = error;

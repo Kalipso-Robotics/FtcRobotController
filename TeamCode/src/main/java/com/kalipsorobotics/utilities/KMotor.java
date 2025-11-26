@@ -40,12 +40,16 @@ public class KMotor {
 
     private final ElapsedTime elapsedTime;
 
-    public KMotor(DcMotor motor, double kp, double ki, double kd, double kf) {
+    public KMotor(DcMotor motor, double kp, double ki, double kd, double kf, double ks) {
         this.motor = (DcMotorEx) motor;
         this.prevTicks = motor.getCurrentPosition();
         this.prevTimeMS = System.currentTimeMillis();
         this.elapsedTime = new ElapsedTime();
-        this.pidfController = new PIDFController(kp, ki, kd, kf, "KMotor_" + motor.getDeviceName());
+        this.pidfController = new PIDFController(kp, ki, kd, kf, ks, "KMotor_" + motor.getDeviceName());
+    }
+
+    public KMotor(DcMotor motor, double kp, double ki, double kd, double kf) {
+        this(motor, kp, ki, kd, kf, 0);
     }
 
     /**

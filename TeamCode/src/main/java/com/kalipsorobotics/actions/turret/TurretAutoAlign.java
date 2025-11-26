@@ -20,10 +20,12 @@ public class TurretAutoAlign extends Action {
     Turret turret;
     KMotor turretMotor;
 
+    private double targetTicks;
+
     private double xInitSetupMM; //121 inches
 
     private double yInitSetupMM; //46inches 1000
-    private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE);
+    private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*0.5;
 
     private boolean isWithinRange = false;
 
@@ -37,12 +39,16 @@ public class TurretAutoAlign extends Action {
         this.allianceColor = allianceColor;
         xInitSetupMM = TurretConfig.X_INIT_SETUP_MM;
         yInitSetupMM = TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity();
+        this.targetTicks = 0;
     }
 
     public boolean isWithinRange() {
         return isWithinRange;
     }
 
+    public void stop() {
+        turretMotor.stop();
+    }
     public void initBlocking() {
         ElapsedTime timer = new ElapsedTime();
         int count = 0;
@@ -53,15 +59,6 @@ public class TurretAutoAlign extends Action {
                 this.updateCheckDone();
             }
             opModeUtilities.getTelemetry().addData("count ", count);
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
             opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
             opModeUtilities.getTelemetry().update();
         }
@@ -74,12 +71,22 @@ public class TurretAutoAlign extends Action {
         yInitSetupMM += increment;
     }
 
+    public Turret getTurret() {
+        return turret;
+    }
+
     @Override
     protected void update() {
         if (!opModeUtilities.getOpMode().opModeIsActive() && !opModeUtilities.getOpMode().opModeInInit()) {
             KLog.d("Turret_Singleton", "OpModeNotActive Return");
+            turretMotor.stop();
             return;
         }
+
+        if (!hasStarted) {
+            hasStarted = true;
+        }
+
         KLog.d("Turret_Singleton", "Encoder position " + turretMotor.getCurrentPosition());
 
         Position currentPosition = SharedData.getOdometryPosition();
@@ -106,7 +113,6 @@ public class TurretAutoAlign extends Action {
         // Use angleWrapRad to normalize the turret angle to [-π, π]
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
-        double targetTicks;
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
         double motorRotation = turretRotation * Turret.GEAR_RATIO;
         targetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
@@ -142,10 +148,13 @@ public class TurretAutoAlign extends Action {
 
         if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
             isWithinRange = true;
-            turretMotor.setPower(0);
+            turretMotor.stop();
+            KLog.d("turret_position", "Within RANGE, ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+
         } else {
             isWithinRange = false;
             turretMotor.goToTargetTicks((int) targetTicks);
+            KLog.d("turret_position", "NOT WITHIN RANGE, ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
         }
         KLog.d("turret_in_range", "is the turret in range " + isWithinRange);
 
@@ -169,5 +178,9 @@ public class TurretAutoAlign extends Action {
 
         //check to see if turret is aligned with the goal
 
+    }
+
+    public double getTargetTicks() {
+        return targetTicks;
     }
 }

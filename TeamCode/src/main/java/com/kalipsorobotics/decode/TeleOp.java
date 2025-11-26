@@ -212,8 +212,6 @@ public class TeleOp extends KOpMode {
                 setLastStopperAction(closeStopper);
             }
         }
-
-
     }
 
     /**
@@ -221,8 +219,11 @@ public class TeleOp extends KOpMode {
      */
     private void handleShooting() {
         // Update turret when shooting or warmup
-        if ((isPending(shooterWarmup)) || (isPending(shootAction))) {
+        if ((shooter.isRunning()) || (isPending(shooterWarmup)) || (isPending(shootAction))) {
             turretAutoAlign.updateCheckDone();
+        } else {
+            // Stop turret motor when not shooting to prevent drift
+            turretAutoAlign.stop();
         }
 
         // Priority 1- Stop shooter

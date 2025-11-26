@@ -7,6 +7,7 @@ import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -14,6 +15,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
+import com.kalipsorobotics.test.turret.TurretReady;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -29,14 +31,17 @@ public class RoundTripAction extends KActionSet {
     private ShooterReady shooterReady;
     private PushBall shoot;
     private ShooterStop shooterStop;
+    private TurretAutoAlign turretAutoAlign;
+    private TurretReady turretReady;
     private boolean hasUpdatedShooterReady = false;
 
     Point targetPoint;
 
-    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
+    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
                            Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake) {
         this.targetPoint = targetPoint;
         this.shooter = shooter;
+        this.turretAutoAlign = turretAutoAlign;
 
         WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
         waitUntilShootRun.setName("waitUntilShootReady");
@@ -68,9 +73,14 @@ public class RoundTripAction extends KActionSet {
             intakeFullAction.setIsDone(true);
         }
 
+        turretReady = new TurretReady(turretAutoAlign);
+        turretReady.setName("turretReady");
+        turretReady.setDependentActions(moveToBalls);
+        this.addAction(turretReady);
+
         shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
-        shoot.setDependentActions(shooterReady, moveToBalls);
+        shoot.setDependentActions(shooterReady, moveToBalls, turretReady);
         this.addAction(shoot);
 
         shooterStop = new ShooterStop(shooterRun);
@@ -80,9 +90,9 @@ public class RoundTripAction extends KActionSet {
 
     }
 
-    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake,
+    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
                            Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
-        this(opModeUtilities, drivetrain, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, true);
+        this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, true);
     }
 
     public PurePursuitAction getMoveToBall() {
@@ -93,7 +103,7 @@ public class RoundTripAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
-        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, ShooterStop: %s, ShooterReadyUpdated: %b",
+        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, ShooterStop: %s, TurretReady: %s, ShooterReadyUpdated: %b",
             getName() != null ? getName() : "unnamed",
             moveToBall.getIsDone() ? "DONE" : "NOT DONE",
             intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
@@ -101,6 +111,7 @@ public class RoundTripAction extends KActionSet {
             shooterRun.getIsDone() ? "DONE" : "NOT DONE",
             shoot.getIsDone() ? "DONE" : "NOT DONE",
             shooterStop.getIsDone() ? "DONE" : "NOT DONE",
+            turretReady.getIsDone() ? "DONE" : "NOT DONE",
             hasUpdatedShooterReady));
 
         if (moveToBall.getIsDone()){

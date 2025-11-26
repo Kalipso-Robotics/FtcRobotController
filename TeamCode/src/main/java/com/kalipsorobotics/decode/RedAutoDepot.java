@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
 
-    public final static double SHOOT_FAR_X = 30;
+    public final static double SHOOT_FAR_X = 80;
     public final static double SHOOT_FAR_Y = 89;
     private DriveTrain driveTrain;
     Shooter shooter = null;
@@ -73,22 +73,22 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- FIRST SHOOT ----------------------
 
-        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false);
+        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false);
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
         autoDepot.addAction(trip0);
 
         // ----------------- TRIP 1 ---------------------- ~5 sec
 
-        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
         trip1.getTrip().getMoveToBall().clearPoint();
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X - 25, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X - 25, 1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 
@@ -97,14 +97,14 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- TRIP 2 ---------------------- ~8 sec
 
-        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip2.setName("trip2");
         trip2.setDependentActions(trip1);
         autoDepot.addAction(trip2);
 
         // ----------------- TRIP 3 ---------------------- ~5 sec
 
-        DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2);
         autoDepot.addAction(trip3);

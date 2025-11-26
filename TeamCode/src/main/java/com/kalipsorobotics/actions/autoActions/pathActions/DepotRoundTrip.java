@@ -4,6 +4,8 @@ import static com.kalipsorobotics.decode.RedAutoDepot.SHOOT_FAR_X;
 import static com.kalipsorobotics.decode.RedAutoDepot.SHOOT_FAR_Y;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -25,8 +27,8 @@ SHOOT_FAR_X SHOOT_FAR_Y
 public class DepotRoundTrip extends KActionSet {
 
     RoundTripAction trip;
-    public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
-        trip = new RoundTripAction(opModeUtilities, drivetrain, shooter, stopper, intake, target, launchPos, 2000);
+    public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
+        trip = new RoundTripAction(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, target, launchPos, 2000);
         trip.setName("trip");
 //        trip.getMoveToBall().addPoint(175, 1145 * allianceSetup.getPolarity(), 111 * allianceSetup.getPolarity());
 //        trip.getMoveToBall().addPoint(65, 1145 * allianceSetup.getPolarity() , 109 * allianceSetup.getPolarity());
@@ -39,8 +41,7 @@ public class DepotRoundTrip extends KActionSet {
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-
-
+        trip.getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         this.addAction(trip);
     }

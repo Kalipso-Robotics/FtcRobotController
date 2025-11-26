@@ -26,6 +26,8 @@ public class Turret {
         this.opModeUtilities = opModeUtilities;
 
         resetHardwareMap(opModeUtilities, opModeUtilities.getHardwareMap(), this);
+        // only once
+        turretMotor.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public static synchronized Turret getInstance(OpModeUtilities opModeUtilities) {
@@ -48,7 +50,7 @@ public class Turret {
         turretDcMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         turretDcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        turret.turretMotor = new KMotor(turretDcMotor, TurretConfig.kP, TurretConfig.kI, TurretConfig.kD, 0);
+        turret.turretMotor = new KMotor(turretDcMotor, TurretConfig.kP, TurretConfig.kI, TurretConfig.kD, 0, TurretConfig.kS);
     }
 
     public KMotor getTurretMotor(){

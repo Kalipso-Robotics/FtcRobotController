@@ -56,6 +56,8 @@ public class Shooter {
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
         motor1.setDirection(DcMotorSimple.Direction.REVERSE);
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -101,6 +103,13 @@ public class Shooter {
     public boolean isAtTargetRPS() {
         boolean isWithinTarget = shooter1.isAtTargetRPS(TARGET_RPS_TOLERANCE);
         return isWithinTarget;
+    }
+
+    public boolean isRunning() {
+        if (Math.abs(shooter1.getPower()) > 0) {
+            return true;
+        }
+        return false;
     }
 
 
