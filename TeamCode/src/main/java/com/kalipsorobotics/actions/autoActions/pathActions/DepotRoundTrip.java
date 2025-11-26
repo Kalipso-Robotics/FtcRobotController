@@ -23,8 +23,10 @@ SHOOT_FAR_X SHOOT_FAR_Y
 
 
 public class DepotRoundTrip extends KActionSet {
+
+    RoundTripAction trip;
     public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
-        RoundTripAction trip = new RoundTripAction(opModeUtilities, drivetrain, shooter, stopper, intake, target, launchPos, 2000);
+        trip = new RoundTripAction(opModeUtilities, drivetrain, shooter, stopper, intake, target, launchPos, 2000);
         trip.setName("trip");
 //        trip.getMoveToBall().addPoint(175, 1145 * allianceSetup.getPolarity(), 111 * allianceSetup.getPolarity());
 //        trip.getMoveToBall().addPoint(65, 1145 * allianceSetup.getPolarity() , 109 * allianceSetup.getPolarity());
@@ -34,11 +36,16 @@ public class DepotRoundTrip extends KActionSet {
 ////        trip.getMoveToBall().addPoint(25, 1225 * allianceSetup.getPolarity() , 175 * allianceSetup.getPolarity());
 //        trip.getMoveToBall().addPoint(130, 780 * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
 
-        trip.getMoveToBall().addPoint(105, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(115, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(130, 1200 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(SHOOT_FAR_X, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(SHOOT_FAR_X,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+
 
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         this.addAction(trip);
+    }
+
+    public RoundTripAction getTrip() {
+        return trip;
     }
 }

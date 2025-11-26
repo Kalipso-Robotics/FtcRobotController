@@ -25,7 +25,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
 
-    public final static double SHOOT_FAR_X = 80;
+    public final static double SHOOT_FAR_X = 30;
     public final static double SHOOT_FAR_Y = 89;
     private DriveTrain driveTrain;
     Shooter shooter = null;
@@ -60,7 +60,7 @@ public class RedAutoDepot extends KOpMode {
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP * allianceColor.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
     }
 
     @Override
@@ -82,6 +82,15 @@ public class RedAutoDepot extends KOpMode {
         DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
+        trip1.getTrip().getMoveToBall().clearPoint();
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, 1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+
         autoDepot.addAction(trip1);
 
 

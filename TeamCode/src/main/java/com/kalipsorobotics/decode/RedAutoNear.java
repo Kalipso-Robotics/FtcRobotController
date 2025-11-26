@@ -5,7 +5,6 @@ import com.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
@@ -64,7 +63,7 @@ public class RedAutoNear extends KOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP * allianceColor.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
     }
 
     @Override

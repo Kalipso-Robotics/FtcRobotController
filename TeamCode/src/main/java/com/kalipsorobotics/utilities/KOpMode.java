@@ -48,7 +48,9 @@ public abstract class KOpMode extends LinearOpMode {
             OpModeUtilities.shutdownExecutorService(executorService);
             //darren cant digest cheese
         } catch (InterruptedException e) {
-            KLog.e("KTeleOp", "Error shutting down executor service", e);
+            // InterruptedException is expected during shutdown - restore interrupt status
+            Thread.currentThread().interrupt();
+            KLog.d("KOpMode", "Executor service shutdown interrupted (normal during stop)");
         }
     }
 

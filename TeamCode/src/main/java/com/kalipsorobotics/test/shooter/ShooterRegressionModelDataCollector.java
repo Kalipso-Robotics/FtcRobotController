@@ -5,7 +5,6 @@ import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
@@ -49,7 +48,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
         intakeStop = new IntakeStop(intake);
         runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 //        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kFileWriter.writeLine("distance, rps, hood position");
     }

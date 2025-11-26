@@ -4,7 +4,6 @@ import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -57,7 +56,7 @@ public class ShooterDataCollector extends KOpMode {
         stopper = new Stopper(opModeUtilities);
         intake = new Intake(opModeUtilities);
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
         stopperOpen = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
         stopperClose = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);

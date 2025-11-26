@@ -2,18 +2,22 @@ package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 
 public class ShooterStop extends Action {
-    ShooterRun shooterRun;
+    Shooter shooter;
     ShootAllAction shootAllAction;
+
+    ShooterRun shooterRun;
 
     public ShooterStop(ShooterRun shooterRun) {
         this.shooterRun = shooterRun;
+        this.shooter = shooterRun.getShooter();
     }
 
-    public ShooterStop(ShooterRun shooterRun, ShootAllAction shootAllAction) {
-        this.shooterRun = shooterRun;
+    public ShooterStop(Shooter shooter, ShootAllAction shootAllAction) {
+        this.shooter = shooter;
         this.shootAllAction = shootAllAction;
     }
 
@@ -22,10 +26,7 @@ public class ShooterStop extends Action {
         if (isDone) {
             return;
         }
-        if (shooterRun != null) {
-            shooterRun.stop();
-            shooterRun.setIsDone(true);
-        }
+        shooter.stop();
         if (shootAllAction != null) {
             shootAllAction.getShooterRun().stop();
             shootAllAction.setIsDone(true);

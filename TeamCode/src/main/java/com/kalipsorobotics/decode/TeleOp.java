@@ -8,8 +8,8 @@ import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
-import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
+import com.kalipsorobotics.actions.shooter.ShooterWarmupAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.localization.Odometry;
@@ -44,7 +44,7 @@ public class TeleOp extends KOpMode {
     private Turret turret = null;
     private Stopper stopper = null;
 
-    ShooterRun shooterWarmup = null;
+    ShooterWarmupAction shooterWarmup = null;
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
 
@@ -86,9 +86,7 @@ public class TeleOp extends KOpMode {
         stopper = new Stopper(opModeUtilities);
         turret = Turret.getInstance(opModeUtilities);
 
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret,
-                TurretConfig.X_INIT_SETUP,
-                TurretConfig.Y_INIT_SETUP * this.allianceColor.getPolarity());
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
     }
 
     @Override
@@ -115,6 +113,12 @@ public class TeleOp extends KOpMode {
                 driveAction.move(gamepad1);
             } else {
                 driveTrain.setPower(0);
+            }
+
+            if (kGamePad2.isDpadLeftFirstPressed()) {
+                TurretConfig.Y_INIT_SETUP_MM -= 10;
+            } else if (kGamePad2.isDpadRightFirstPressed()) {
+                TurretConfig.Y_INIT_SETUP_MM += 10;
             }
 
             // ========== HANDLE INTAKE (Priority Order: Shoot > Stall > Manual > Idle) ==========
@@ -218,7 +222,7 @@ public class TeleOp extends KOpMode {
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
             if (!isPending(shooterStop)) {
-                shooterStop = new ShooterStop(shooterWarmup, shootAction);
+                shooterStop = new ShooterStop(shooter, shootAction);
                 shooterWarmup = null;
                 shootAction = null;
                 setLastShooterAction(shooterStop);
@@ -246,9 +250,8 @@ public class TeleOp extends KOpMode {
 
         //  Priority 3 -Warmup shooter
         if (warmupPressed) {
-            KLog.d("Warmup", "Warmup pressed - shooterWarmup is: " + (shooterWarmup == null ? "null" : "not null, done=" + shooterWarmup.getIsDone()));
             if (!isPending(shooterWarmup)) {
-                shooterWarmup = new ShooterRun(shooter, 20, 0.8);
+                shooterWarmup = new ShooterWarmupAction(shooter, 0.4);
                 setLastShooterAction(shooterWarmup);
                 KLog.d("Shooting", "Warmup started");
             }

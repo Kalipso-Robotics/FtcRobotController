@@ -20,7 +20,7 @@ public class KLog {
 
     public static void e(String tag, String message) {
         if (DEBUG) {
-            Log.e("KLog_" +tag, message);
+            Log.e("KLog_" + tag, message);
         }
     }
 

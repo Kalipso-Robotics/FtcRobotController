@@ -1,6 +1,5 @@
 package com.kalipsorobotics.test.outtake;
 
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -36,7 +35,7 @@ public class TurretAutoTest extends KOpMode {
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.X_INIT_SETUP, TurretConfig.Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
     }
 

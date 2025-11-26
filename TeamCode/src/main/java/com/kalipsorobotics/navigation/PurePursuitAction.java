@@ -128,6 +128,11 @@ public class  PurePursuitAction extends Action {
         pathPoints.add(new Position(x, y, Math.toRadians(headingDeg), pXY, pAngle));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
+
+    public void clearPoint() {
+        pathPoints.clear();
+    }
+
     private double calcAdaptivePAngle(double theta) {
         Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
         double headingDelta = Math.abs(pos.getTheta() - theta);
@@ -346,4 +351,6 @@ public class  PurePursuitAction extends Action {
     public void setMaxTimeOutMS(double maxTimeOutMS) {
         this.maxTimeOutMS = maxTimeOutMS;
     }
+
+
 }

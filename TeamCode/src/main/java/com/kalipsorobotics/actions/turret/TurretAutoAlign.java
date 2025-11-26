@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
@@ -18,20 +19,19 @@ public class TurretAutoAlign extends Action {
     Turret turret;
     DcMotor turretMotor;
 
-    private double xInitSetup;// = 3445.14;
-    private double yInitSetup;// = 2028.8;
-
     private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE);
 
     private boolean isWithinRange = false;
 
-    public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, double xInitSetup, double yInitSetup) {
+    private AllianceColor allianceColor;
+
+    public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
-        this.xInitSetup = xInitSetup;
-        this.yInitSetup = yInitSetup;
+        this.allianceColor = allianceColor;
+
     }
 
     public boolean isWithinRange() {
@@ -77,9 +77,9 @@ public class TurretAutoAlign extends Action {
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
 
-        double yTargetGoal = yInitSetup - currentY;
-        double xTargetGoal = xInitSetup - currentX;
-        KLog.d("turret_angle", "y init setup" + yInitSetup + "current y" + currentY);
+        double yTargetGoal = (TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity()) - currentY;
+        double xTargetGoal = TurretConfig.X_INIT_SETUP_MM - currentX;
+        KLog.d("turret_angle", "y init setup" + TurretConfig.Y_INIT_SETUP_MM + "current y" + currentY);
 
         double angleTargetRadian;
 //        if (!useAprilTag) {

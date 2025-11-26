@@ -102,7 +102,7 @@ public class KMotor {
 
         // Calculate PIDF output with saturation limits
         // Back-calculation anti-windup is applied internally
-        double newPower = pidfController.calculate(currentRPS, targetRPS, -1.0, MAX_POWER);
+        double newPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
 
         // Set new power
         motor.setPower(newPower);
@@ -110,7 +110,7 @@ public class KMotor {
         // Log for debugging
         KLog.d("KMotor", String.format(
             "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
-            targetRPS, currentRPS, (targetRPS - currentRPS), newPower, -1.0, MAX_POWER
+            targetRPS, currentRPS, (targetRPS - currentRPS), newPower, 0.0, MAX_POWER
         ));
     }
 

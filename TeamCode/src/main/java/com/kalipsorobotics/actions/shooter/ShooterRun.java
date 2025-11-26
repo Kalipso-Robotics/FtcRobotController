@@ -167,6 +167,11 @@ public class ShooterRun extends Action {
     public double getTargetRPS() {
         return targetRPS;
     }
+
+    public Shooter getShooter() {
+        return shooter;
+    }
+
     public void stop() {
         if (isDone) {
             return;
