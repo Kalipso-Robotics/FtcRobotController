@@ -41,7 +41,8 @@ public class DepotRoundTrip extends KActionSet {
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(SHOOT_FAR_X + 150, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(SHOOT_FAR_X + 150,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         this.addAction(trip);
     }

@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
 
-    public final static double SHOOT_FAR_X = 80;
+    public final static double SHOOT_FAR_X = 50;
     public final static double SHOOT_FAR_Y = 89;
     private DriveTrain driveTrain;
     Shooter shooter = null;
