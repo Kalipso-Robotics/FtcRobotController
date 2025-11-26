@@ -26,7 +26,11 @@ public class ShooterStop extends Action {
         if (isDone) {
             return;
         }
-        shooter.stop();
+        shooter.setPower(0);
+        if (shooterRun != null) {
+            shooterRun.stop();
+            shooterRun.setIsDone(true);
+        }
         if (shootAllAction != null) {
             shootAllAction.getShooterRun().stop();
             shootAllAction.setIsDone(true);
