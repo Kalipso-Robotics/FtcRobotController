@@ -23,6 +23,8 @@ public class KMotor {
     private final PIDFController pidfController;
     private double targetRPS = 0;
 
+    private int targetTicks = 0;
+
     // Power limits
     private static final double MAX_POWER = 1.0;
     private static final double MIN_POWER = -1;
@@ -111,6 +113,27 @@ public class KMotor {
         KLog.d("KMotor", String.format(
             "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
             targetRPS, currentRPS, (targetRPS - currentRPS), newPower, 0.0, MAX_POWER
+        ));
+    }
+
+    public double clampPower(double power, double max_power, double min_power) {
+        return Math.max(min_power, Math.min(power, max_power));
+    }
+    public double clampPower(double power) {
+        return clampPower(power, 1, -1);
+    }
+    public void goToTargetTicks(int targetTicks) {
+        this.targetTicks = targetTicks;
+
+        int currentTicks = motor.getCurrentPosition();
+        // Error = where we want to be - where we are
+        int error = targetTicks - currentTicks;
+        double newPower = pidfController.calculate(error);
+        newPower = clampPower(newPower);
+        motor.setPower(newPower);
+        KLog.d("KMotor", String.format(
+                "Target: %d Ticks, Current: %d Ticks, Error: %d, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
+                targetTicks, currentTicks, error, newPower, -1.0, 1.0
         ));
     }
 
