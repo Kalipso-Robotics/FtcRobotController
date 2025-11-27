@@ -106,7 +106,7 @@ public class RedAutoNear extends KOpMode {
 //        trip1.getMoveToBall().addPoint(1735, 1100 * allianceColor.getPolarity(), 10 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(1735, 1090 * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
         // move to launch
-        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip1.setDependentActions(trip0);
         redAutoNear.addAction(trip1);
 
@@ -118,7 +118,7 @@ public class RedAutoNear extends KOpMode {
         trip2.getMoveToBall().addPoint(1280, 820 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(1280, 1220 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(1280, 820 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
         redAutoNear.addAction(trip2);
 
