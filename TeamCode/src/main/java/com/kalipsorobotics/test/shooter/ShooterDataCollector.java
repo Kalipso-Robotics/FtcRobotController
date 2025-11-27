@@ -123,7 +123,7 @@ public class ShooterDataCollector extends KOpMode {
                 if (true) {
                     if (targetRPS > 0) {
                         // Use ShooterReady with direct RPS mode (same as RedFarTeleOp/RedAutos pattern)
-                        shootAllAction = new ShootAllAction(stopper, intake, shooter, targetRPS, hoodPosition);
+                        shootAllAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, targetRPS, hoodPosition);
                         setLastShooterAction(shootAllAction);
                     } else {
                         // Stop the shooter when targetRPS is 0

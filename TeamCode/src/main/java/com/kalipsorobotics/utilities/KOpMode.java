@@ -49,7 +49,6 @@ public abstract class KOpMode extends LinearOpMode {
             //darren cant digest cheese
         } catch (InterruptedException e) {
             // InterruptedException is expected during shutdown - restore interrupt status
-            Thread.currentThread().interrupt();
             KLog.d("KOpMode", "Executor service shutdown interrupted (normal during stop)");
         }
     }

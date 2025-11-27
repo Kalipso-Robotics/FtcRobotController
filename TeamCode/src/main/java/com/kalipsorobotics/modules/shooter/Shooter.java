@@ -49,6 +49,10 @@ public class Shooter {
 //        return pusherLeft;
 //    }
 
+    private double prevRPS = 0;
+    private double currentRPS;
+    private final double UNDERSHOOT_TOLERANCE = 5;
+
     public Shooter(OpModeUtilities opModeUtilities) {
 
         this.opModeUtilities = opModeUtilities;
@@ -184,9 +188,20 @@ public class Shooter {
         shooter1.getPIDFController().setKf(optimalKf);
         shooter2.getPIDFController().setKf(optimalKf);
 
-        // Set target RPS
-        shooter1.goToRPS(targetRPS);
-        shooter2.goToRPS(targetRPS);
+        currentRPS = getRPS();
+
+        if ((prevRPS < targetRPS && currentRPS < (targetRPS - UNDERSHOOT_TOLERANCE)) && prevRPS > currentRPS) {
+            //bang bang
+            shooter1.setPower(1);
+            shooter2.setPower(1);
+            KLog.d("Shooter", "Using bang bang");
+        } else {
+            // Set target RPS
+            shooter1.goToRPS(targetRPS);
+            shooter2.goToRPS(targetRPS);
+        }
+
+        prevRPS = currentRPS;
     }
 
     /**

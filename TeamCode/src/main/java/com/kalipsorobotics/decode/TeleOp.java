@@ -246,7 +246,7 @@ public class TeleOp extends KOpMode {
         // Priority 2- Execute shoot sequence
         if (shootPressed) {
             if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
