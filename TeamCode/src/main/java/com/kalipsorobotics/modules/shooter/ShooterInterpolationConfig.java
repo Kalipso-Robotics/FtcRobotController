@@ -13,8 +13,8 @@ public class ShooterInterpolationConfig {
             820, 30, 0.3,
             //01
             1000, 31.5, 0.35,
-            //02
-            1154, 32, 0.45,
+            //02 around first shoot for Red Near
+            1154, 32.5, 0.40,
             //03
             1290, 32.5, 0.55,
             //04
