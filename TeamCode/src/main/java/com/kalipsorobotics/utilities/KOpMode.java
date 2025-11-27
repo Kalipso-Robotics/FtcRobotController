@@ -5,7 +5,6 @@ import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -18,7 +17,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected ExecutorService executorService;
     protected KGamePad kGamePad1;
     protected KGamePad kGamePad2;
-    protected AllianceColor allianceColor;
+    protected AllianceColor allianceColor = AllianceColor.RED; //defaults to red
     protected Action lastIntakeAction = null;
     protected Action lastMoveAction = null;
     protected Action lastShooterAction = null;
@@ -31,6 +30,7 @@ public abstract class KOpMode extends LinearOpMode {
      * This is called automatically - override to add custom initialization after calling super.initializeRobot()
      */
     protected void initializeRobot() {
+        initializeAllianceColor();
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         executorService = Executors.newSingleThreadExecutor();
         kGamePad1 = new KGamePad(gamepad1);
@@ -38,6 +38,8 @@ public abstract class KOpMode extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
     }
 
+    protected void initializeAllianceColor() {
+    }
 
     /**
      * Cleanup after opMode ends

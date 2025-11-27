@@ -8,19 +8,19 @@ import java.util.ArrayList;
 public class ShooterInterpolationConfig {
 
     public static double[] shooterData = {
-            546, 30, 0,
-            672, 30, 0.2,
-            820, 30, 0.3,
+            546, 32, 0,
+            672, 32, 0.2,
+            820, 32, 0.3,
             //01
-            1068, 32, 0.35,
-            //02 around first shoot for Red Near
-            1154, 33, 0.40,
+            1068, 33.3, 0.35,
+            //02
+            1154, 33.3, 0.40,  // around first shoot for NEAR
             //03
             1309, 33.5, 0.55,
             //04
             1457, 33.5, 0.55,
             //05
-            1552, 34, 0.55,
+            1552, 34, 0.55, // around second shoot for NEAR
             //06
             1665, 35, 0.55,
             //07

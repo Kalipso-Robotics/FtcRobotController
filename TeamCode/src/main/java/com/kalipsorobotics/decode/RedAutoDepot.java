@@ -37,9 +37,13 @@ public class RedAutoDepot extends KOpMode {
     TurretAutoAlign turretAutoAlign = null;
 
     @Override
-    protected void initializeRobot() {
+    protected void initializeAllianceColor() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
+    }
+
+    @Override
+    protected void initializeRobot() {
         super.initializeRobot();
 
         // Create your modules
@@ -129,7 +133,7 @@ public class RedAutoDepot extends KOpMode {
         park.addPoint(SHOOT_FAR_X + 400, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);
-
+        KLog.d("auto", "--------------DEPOT AUTO STARTED-------------");
         waitForStart();
         while (opModeIsActive()) {
             autoDepot.updateCheckDone();

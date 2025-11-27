@@ -68,8 +68,12 @@ public class TeleOp extends KOpMode {
     private boolean releasePressed = false;
 
     @Override
-    protected void initializeRobot() {
+    protected void initializeAllianceColor() {
         this.allianceColor = SharedData.getAllianceColor();
+    }
+
+    @Override
+    protected void initializeRobot() {
         super.initializeRobot();
 
         driveTrain = DriveTrain.getInstance(opModeUtilities);
@@ -88,15 +92,15 @@ public class TeleOp extends KOpMode {
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
-        stopper.getStopper().setPosition(Stopper.STOPPER_SERVO_CLOSED_POS);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
+        KLog.d("teleop", "--------------TELEOP STARTED-------------");
         waitForStart();
-
+        stopper.getStopper().setPosition(Stopper.STOPPER_SERVO_CLOSED_POS);
         while (opModeIsActive()) {
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticks = kGamePad1.getLeftStickY() != 0 ||

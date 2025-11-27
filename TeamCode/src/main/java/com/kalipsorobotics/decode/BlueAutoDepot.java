@@ -1,11 +1,14 @@
 package com.kalipsorobotics.decode;
 
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "BlueAutoDepot")
 public class BlueAutoDepot extends RedAutoDepot {
-    public BlueAutoDepot() {
+    @Override
+    protected void initializeAllianceColor() {
         this.allianceColor = AllianceColor.BLUE;
+        SharedData.setAllianceColor(allianceColor);
     }
 }

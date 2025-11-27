@@ -6,22 +6,29 @@ import com.acmerobotics.dashboard.config.Config;
 public class ShooterConfig {
     public static double timeToStabilize = 500;
     // PID: this combo is working well; leave it
-    public static double kp = 0.014000 * 1;
-    public static double ki = 0.001000 * 15;
-    public static double kd = 0.002000;
+//    public static double kp = 0.014000 ;
+//    public static double ki = 0.005000;
+//    public static double kd = 0.002000;
+
+    // Recommended starting point (no algorithm changes)
+    public static double kp = 0.014;
+    public static double ki = 0.003;
+    public static double kd = 0.001;
 
     public static double kf = 0.009338;   // <-- Global optimum (fallback, not used with lookup table)
 
     // Discrete RPS breakpoints from shooter tests
     private static final double[] SHOOTER_RPS_POINTS = {
-        20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54
+        20, 22, 24, 26, 28, 30,
+        32, 34, 36, 38, 40, 42,
+        44, 46, 48, 50, 52, 54
     };
 
     // Per-RPS kF values derived from all data (smoothed)
     private static final double[] SHOOTER_KF_POINTS = {
-        0.00757, 0.00784, 0.00809, 0.00719, 0.00748, 0.00751,
-        0.00726, 0.00671, 0.00767, 0.00761, 0.00801, 0.00835,
-        0.00907, 0.00933, 0.00950, 0.00970, 0.00985, 0.00983
+        0.00757 * 1.3, 0.00784 * 1.3, 0.00809 * 1.3, 0.00719 * 1.3, 0.00748 * 1.3, 0.00751 * 1.3,
+        0.00755 * 1.3, 0.00765 * 1.3, 0.00767 * 1.3, 0.00770 * 1.3, 0.00801 * 1.3, 0.00835 * 1.3,
+        0.00907 * 1.1, 0.00933 * 1.1, 0.00950 * 1.1, 0.00970 * 1.1, 0.00985 * 1.1, 0.00983 * 1.1
     };
 
     /**
