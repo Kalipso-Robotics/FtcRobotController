@@ -191,10 +191,12 @@ public class Shooter {
         currentRPS = getRPS();
 
         if ((prevRPS < targetRPS && currentRPS < (targetRPS - UNDERSHOOT_TOLERANCE)) && prevRPS > currentRPS) {
-            //bang bang
-            shooter1.setPower(1);
-            shooter2.setPower(1);
-            KLog.d("Shooter", "Using bang bang");
+            if (targetRPS > 40) {
+                //bang bang
+                shooter1.setPower(1);
+                shooter2.setPower(1);
+                KLog.d("Shooter", "Using bang bang");
+            }
         } else {
             // Set target RPS
             shooter1.goToRPS(targetRPS);
