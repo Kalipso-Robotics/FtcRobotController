@@ -1,5 +1,7 @@
 package com.kalipsorobotics.math;
 
+import com.kalipsorobotics.utilities.KLog;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -47,17 +49,22 @@ public class Path {
         for (int i = currentSearchWayPointIndex; i < numPoints(); i++) {
             Position currentFollowPosition = getPoint(i);
 
+            // has a point to follow
             if (!lastFollowPosition.isPresent()) {
                 currentSearchWayPointIndex = i;
                 return Optional.of(currentFollowPosition);
             }
 
+            // not within distance
             if (currentPosition.distanceTo(currentFollowPosition) > radiusInch) {
                 currentSearchWayPointIndex = i;
                 return Optional.of(currentFollowPosition);
             }else {
+                // within distance and try to lock angle
                 if (Math.abs(currentPosition.getTheta() - currentFollowPosition.getTheta()) > PATH_ANGLE_TOLERANCE) {
                     currentSearchWayPointIndex = i;
+                    KLog.d("purepursaction_debug_follow", "Achieved Point, trying to lock angle | Current Position: " + currentPosition.getPoint()
+                    + " Follow Point: " + currentFollowPosition.getPoint());
                     return Optional.of(currentFollowPosition);
                 }
             }
