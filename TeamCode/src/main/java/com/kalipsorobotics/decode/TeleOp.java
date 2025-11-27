@@ -87,6 +87,8 @@ public class TeleOp extends KOpMode {
         turret = Turret.getInstance(opModeUtilities);
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+
+        stopper.getStopper().setPosition(Stopper.STOPPER_SERVO_CLOSED_POS);
     }
 
     @Override
