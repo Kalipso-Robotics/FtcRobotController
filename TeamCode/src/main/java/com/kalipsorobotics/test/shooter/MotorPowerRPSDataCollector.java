@@ -33,12 +33,12 @@ import java.util.ArrayList;
 public class MotorPowerRPSDataCollector extends LinearOpMode {
 
     // Test parameters
-    private static final double POWER_START = 0.05;
-    private static final double POWER_END = 1.0;
+    private static final double POWER_START = 0.15;
+    private static final double POWER_END = 0.65;
     private static final double POWER_INCREMENT = 0.05;
     private static final long STABILIZATION_TIME_MS = 4000; // 2 seconds
     private static final long DATA_COLLECTION_TIME_MS = 1000; // 1 second
-    private static final long SAMPLE_INTERVAL_MS = 10; // Sample every 50ms
+    private static final long SAMPLE_INTERVAL_MS = 10; // Sample every 50ms/
     private KMotor shooter1;
     private KMotor shooter2;
     private KFileWriter fileWriter;

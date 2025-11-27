@@ -48,7 +48,7 @@ public class Shooter {
 //    public KCRServo getPusherLeft() {
 //        return pusherLeft;
 //    }
-
+    private double targetRPS;
     private double prevRPS = 0;
     private double currentRPS;
     private final double UNDERSHOOT_TOLERANCE = 5;
@@ -75,6 +75,8 @@ public class Shooter {
 
         CRServo kicker = opModeUtilities.getHardwareMap().crservo.get("kicker");
         this.kicker = new KCRServo(kicker, false);
+
+        this.targetRPS = 0;
 
 //        CRServo kickerRight = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        if (kickerRight == null) {
@@ -105,7 +107,11 @@ public class Shooter {
     }
 
     public boolean isAtTargetRPS() {
-        boolean isWithinTarget = shooter1.isAtTargetRPS(TARGET_RPS_TOLERANCE);
+        double effectiveTolerance = TARGET_RPS_TOLERANCE;
+        if (targetRPS != 0) {
+            effectiveTolerance = (targetRPS / ShooterConfig.MAX_RPS) * TARGET_RPS_TOLERANCE;
+        }
+        boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
         return isWithinTarget;
     }
 
@@ -181,9 +187,9 @@ public class Shooter {
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
+        this.targetRPS = targetRPS;
         // Get optimal kF for this target RPS
         double optimalKf = ShooterConfig.getShooterKf(targetRPS);
-
         // Update kF in both motors' PIDF controllers
         shooter1.getPIDFController().setKf(optimalKf);
         shooter2.getPIDFController().setKf(optimalKf);

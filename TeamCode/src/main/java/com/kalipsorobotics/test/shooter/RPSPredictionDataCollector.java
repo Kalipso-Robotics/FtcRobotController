@@ -1,12 +1,15 @@
 package com.kalipsorobotics.test.shooter;
 
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
@@ -19,18 +22,25 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
  * RPS Prediction Data Collection TeleOp
  *
  * This program collects data for shooter RPS prediction by allowing manual
- * power control and logging shooter performance metrics along with distance to target.
+ * power control and selective data recording.
+ *
+ * Workflow:
+ * 1. Adjust shooter power using DPad/A/B buttons
+ * 2. Press X to run the shooter at the set power
+ * 3. Press Left Trigger to record shoot data (RPS, Power, Distance)
+ * 4. Press Y to save the last recorded shoot to file
  *
  * Controls:
  * - DPad Up: Increase shooter power by 0.05
  * - DPad Down: Decrease shooter power by 0.05
  * - A Button: Increase shooter power by 0.01
  * - B Button: Decrease shooter power by 0.01
+ * - X Button: Run shooter at current power
  * - Right Trigger: Run intake full speed + Close stopper
- * - Left Trigger: Open stopper + Run intake + Run shooter at current power
- * - Else: Stop shooter
+ * - Left Trigger: Record shoot data (RPS, Power, Distance to target)
+ * - Y Button: Save last recorded shoot to file
  *
- * Data logged:
+ * Data recorded per shoot:
  * - Current RPS
  * - Current Power
  * - Current Voltage
@@ -39,17 +49,47 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 @TeleOp(name = "RPS Prediction Data Collector", group = "Test")
 public class RPSPredictionDataCollector extends LinearOpMode {
 
+    /**
+     * Inner class to hold shoot data
+     */
+    private static class ShootData {
+        double currentRPS;
+        double currentPower;
+        double currentVoltage;
+        double distanceToTargetMM;
+
+        ShootData(double rps, double power, double voltage, double distance) {
+            this.currentRPS = rps;
+            this.currentPower = power;
+            this.currentVoltage = voltage;
+            this.distanceToTargetMM = distance;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("RPS=%.2f, Power=%.2f, Voltage=%.2fV, Distance=%.2fmm",
+                currentRPS, currentPower, currentVoltage, distanceToTargetMM);
+        }
+
+        String toCSV() {
+            return String.format("%.2f,%.2f,%.2f,%.2f", currentRPS, currentPower, currentVoltage, distanceToTargetMM);
+        }
+    }
+
     private Shooter shooter;
     private Intake intake;
     private Stopper stopper;
     private Odometry odometry;
     private DriveTrain driveTrain;
     private IMUModule imuModule;
-
+    private TurretAutoAlign turretAutoAlign;
+    private Turret turret;
     private KFileWriter fileWriter;
     private OpModeUtilities opModeUtilities;
 
     private double shooterPower = 0.0;
+    private ShootData lastShoot = null;
+    private boolean wasLeftTriggerPressed = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -63,7 +103,9 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         // Initialize file writer
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         fileWriter = new KFileWriter("RPSPredictionData", opModeUtilities);
-
+        Turret.setInstanceNull();
+        turret = Turret.getInstance(opModeUtilities);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, AllianceColor.RED);
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,DistanceToTargetMM");
 
@@ -74,8 +116,10 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         telemetry.addLine("- DPad Down: -0.05 power");
         telemetry.addLine("- A Button: +0.01 power");
         telemetry.addLine("- B Button: -0.01 power");
+        telemetry.addLine("- X Button: Run shooter");
         telemetry.addLine("- Right Trigger: Intake + Close stopper");
-        telemetry.addLine("- Left Trigger: Open stopper + Intake + Shoot");
+        telemetry.addLine("- Left Trigger: Record shoot data");
+        telemetry.addLine("- Y Button: Save last shoot to file");
         telemetry.addLine();
         telemetry.addLine("Press PLAY to start");
         telemetry.update();
@@ -88,6 +132,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         while (opModeIsActive()) {
             // Update odometry
             odometry.updateAll();
+            turretAutoAlign.updateCheckDone();
 
             // ========== Power Control ==========
             if (gamepad1.dpad_up) {
@@ -117,44 +162,71 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                 intake.getIntakeMotor().setPower(1.0);
                 stopper.getStopper().setPosition(Stopper.STOPPER_SERVO_CLOSED_POS);
             } else if (gamepad1.left_trigger > 0.1) {
-                // Left trigger: Open stopper + Run intake + Run shooter
+                // Left trigger: Record shoot data
                 stopper.getStopper().setPosition(Stopper.STOPPER_SERVO_OPEN_POS);
                 intake.getIntakeMotor().setPower(1.0);
-                shooter.setPower(shooterPower);
+
+                // Record shoot data when trigger is first pressed (edge detection)
+                if (!wasLeftTriggerPressed) {
+                    double currentRPS = shooter.getRPS();
+                    double currentVoltage = getBatteryVoltage();
+                    double distanceToTargetMM = calculateDistanceToTarget();
+
+                    lastShoot = new ShootData(currentRPS, shooterPower, currentVoltage, distanceToTargetMM);
+
+                    // Log to KLog
+                    KLog.d("RPSPredictionData", "SHOOT RECORDED: " + lastShoot.toString());
+
+                    wasLeftTriggerPressed = true;
+                }
             } else {
-                // No triggers: Stop shooter and intake
-                shooter.stop();
+                // No triggers: Stop intake
                 intake.getIntakeMotor().setPower(0);
+                wasLeftTriggerPressed = false;
             }
 
-            // ========== Data Collection ==========
-            double currentRPS = shooter.getRPS();
-            double currentVoltage = getBatteryVoltage();
-            double distanceToTargetMM = calculateDistanceToTarget();
+            if (gamepad1.x) {
+                shooter.setPower(shooterPower);
+            }
 
-            // Log data to file
-            String dataLine = String.format("%.2f,%.2f,%.2f,%.2f",
-                currentRPS, shooterPower, currentVoltage, distanceToTargetMM);
-            fileWriter.writeLine(dataLine);
-
-            // Also log to KLog
-            KLog.d("RPSPredictionData", String.format(
-                "RPS=%.2f, Power=%.2f, Voltage=%.2fV, Distance=%.2fmm",
-                currentRPS, shooterPower, currentVoltage, distanceToTargetMM));
+            // ========== Y Button: Save Last Shoot to File ==========
+            if (gamepad1.y) {
+                if (lastShoot != null) {
+                    fileWriter.writeLine(lastShoot.toCSV());
+                    KLog.d("RPSPredictionData", "SAVED TO FILE: " + lastShoot.toString());
+                    telemetry.addLine("*** SAVED TO FILE ***");
+                } else {
+                    KLog.d("RPSPredictionData", "No shoot data to save!");
+                    telemetry.addLine("*** NO DATA TO SAVE ***");
+                }
+            }
 
             // ========== Telemetry ==========
             telemetry.addLine("=== RPS Prediction Data Collector ===");
             telemetry.addLine();
             telemetry.addData("Shooter Power", "%.2f", shooterPower);
-            telemetry.addData("Current RPS", "%.2f", currentRPS);
-            telemetry.addData("Battery Voltage", "%.2f V", currentVoltage);
-            telemetry.addData("Distance to Target", "%.2f mm", distanceToTargetMM);
+            telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
+            telemetry.addData("Distance to Target", "%.2f mm", calculateDistanceToTarget());
+            telemetry.addLine();
+
+            if (lastShoot != null) {
+                telemetry.addLine("--- Last Recorded Shoot ---");
+                telemetry.addData("Last RPS", "%.2f", lastShoot.currentRPS);
+                telemetry.addData("Last Power", "%.2f", lastShoot.currentPower);
+                telemetry.addData("Last Voltage", "%.2f V", lastShoot.currentVoltage);
+                telemetry.addData("Last Distance", "%.2f mm", lastShoot.distanceToTargetMM);
+            } else {
+                telemetry.addLine("--- No Shoot Recorded Yet ---");
+            }
+
             telemetry.addLine();
             telemetry.addLine("Controls:");
             telemetry.addLine("DPad Up/Down: ±0.05 power");
             telemetry.addLine("A/B: ±0.01 power");
+            telemetry.addLine("X: Run shooter");
             telemetry.addLine("Right Trigger: Intake + Close");
-            telemetry.addLine("Left Trigger: Shoot");
+            telemetry.addLine("Left Trigger: Record shoot");
+            telemetry.addLine("Y: Save to file");
             telemetry.update();
         }
 
