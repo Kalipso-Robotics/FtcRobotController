@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous(name = "BlueAutoNearZone")
 public class BlueAutoNear extends RedAutoNear {
     @Override
-    protected void initializeAllianceColor() {
+    protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(this.allianceColor);
     }

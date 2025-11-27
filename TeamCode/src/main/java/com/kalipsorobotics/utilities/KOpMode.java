@@ -30,7 +30,7 @@ public abstract class KOpMode extends LinearOpMode {
      * This is called automatically - override to add custom initialization after calling super.initializeRobot()
      */
     protected void initializeRobot() {
-        initializeAllianceColor();
+        initializeRobotConfig();
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         executorService = Executors.newSingleThreadExecutor();
         kGamePad1 = new KGamePad(gamepad1);
@@ -38,7 +38,7 @@ public abstract class KOpMode extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
     }
 
-    protected void initializeAllianceColor() {
+    protected void initializeRobotConfig() {
     }
 
     /**

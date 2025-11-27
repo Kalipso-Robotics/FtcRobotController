@@ -16,6 +16,17 @@ public class MathFunctions {
         return Math.toDegrees(angleWrapRad(Math.toRadians(angle)));
     }
 
+    public static double angleWrapRadForce0ToPi(double angle) {
+        angle = angle % (2 * Math.PI);
+        if (angle < 0) {
+            angle += 2 * Math.PI;
+        }
+        if (angle > Math.PI) {
+            angle = 2 * Math.PI - angle;
+        }
+        return angle;
+    }
+
     public static double maxAbsValueDouble(double a, double... others) {
 
         double max = a;

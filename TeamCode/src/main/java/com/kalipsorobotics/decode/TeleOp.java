@@ -68,7 +68,7 @@ public class TeleOp extends KOpMode {
     private boolean releasePressed = false;
 
     @Override
-    protected void initializeAllianceColor() {
+    protected void initializeRobotConfig() {
         this.allianceColor = SharedData.getAllianceColor();
     }
 

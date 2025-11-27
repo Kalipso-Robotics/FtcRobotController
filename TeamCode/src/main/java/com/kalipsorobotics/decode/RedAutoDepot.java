@@ -37,7 +37,7 @@ public class RedAutoDepot extends KOpMode {
     TurretAutoAlign turretAutoAlign = null;
 
     @Override
-    protected void initializeAllianceColor() {
+    protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
     }

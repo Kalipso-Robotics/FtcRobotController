@@ -115,8 +115,9 @@ public class TurretAutoAlign extends Action {
 
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
         double motorRotation = turretRotation * Turret.GEAR_RATIO;
-        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
+        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation - TurretConfig.TICKS_INIT_OFFSET;
         KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
+        KLog.d("turret", "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
 
 
         /*
