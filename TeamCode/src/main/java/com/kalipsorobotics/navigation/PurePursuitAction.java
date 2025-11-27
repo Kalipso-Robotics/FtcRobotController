@@ -265,6 +265,31 @@ public class  PurePursuitAction extends Action {
                     "Follow lookahead point:  " + follow.get() + "current pos:    " + currentPosition.toString());
             targetPosition(follow.get(), currentPosition);
 
+            xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+            yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+            thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+
+            // this is not smart
+            if((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
+                KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
+//                    finishedMoving();
+                if (timeoutTimer.milliseconds() > 200) {
+                    if (unstuckCounter < maxUnstuckCounter/* && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)*/) {
+                        unstuckCounter++;
+                        path.decrementCurrentSearchWayPointIndex();
+                        KLog.d("purepursuit", "unstucking decrementing to previous way point");
+                    } else {
+                        //unstuckCounter = 0;
+                        path.incrementCurrentSearchWayPointIndex();
+                        KLog.d("purepursuit", "unstucking incrementing to next way point");
+                    }
+                } else {
+                    KLog.d("purepursuit", "Waiting for velocity timeout");
+                }
+            } else {
+                timeoutTimer.reset();
+            }
+
         } else {
             KLog.d("purepursaction_debug_follow",
                     "Lookahead returns nothing. Last point " + lastPoint + "current pos:    " + currentPosition.toString());
@@ -283,30 +308,6 @@ public class  PurePursuitAction extends Action {
         }
 
 
-        xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-        yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-        thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-
-        // this is not smart
-        if((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
-            KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
-//                    finishedMoving();
-            if (timeoutTimer.milliseconds() > 200) {
-                if (unstuckCounter < maxUnstuckCounter/* && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)*/) {
-                    unstuckCounter++;
-                    path.decrementCurrentSearchWayPointIndex();
-                    KLog.d("purepursuit", "unstucking decrementing to previous way point");
-                } else {
-                    //unstuckCounter = 0;
-                    path.incrementCurrentSearchWayPointIndex();
-                    KLog.d("purepursuit", "unstucking incrementing to next way point");
-                }
-            } else {
-                KLog.d("purepursuit", "Waiting for velocity timeout");
-            }
-        } else {
-            timeoutTimer.reset();
-        }
 
         lastMilli = timeoutTimer.milliseconds();
         lastPosition = currentPosition;
