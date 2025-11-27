@@ -190,18 +190,22 @@ public class Shooter {
 
         currentRPS = getRPS();
 
-        if ((prevRPS < targetRPS && currentRPS < (targetRPS - UNDERSHOOT_TOLERANCE)) && prevRPS > currentRPS) {
-            if (targetRPS > 40) {
-                //bang bang
-                shooter1.setPower(1);
-                shooter2.setPower(1);
-                KLog.d("Shooter", "Using bang bang");
-            }
-        } else {
-            // Set target RPS
-            shooter1.goToRPS(targetRPS);
-            shooter2.goToRPS(targetRPS);
-        }
+        // Set target RPS
+        shooter1.goToRPS(targetRPS);
+        shooter2.goToRPS(targetRPS);
+
+//        if ((prevRPS < targetRPS && currentRPS < (targetRPS - UNDERSHOOT_TOLERANCE)) && prevRPS > currentRPS) {
+//            if (targetRPS > 40) {
+//                //bang bang
+//                shooter1.setPower(0.7);
+//                shooter2.setPower(0.7);
+//                KLog.d("Shooter", "Using bang bang");
+//            }
+//        } else {
+//            // Set target RPS
+//            shooter1.goToRPS(targetRPS);
+//            shooter2.goToRPS(targetRPS);
+//        }
 
         prevRPS = currentRPS;
     }

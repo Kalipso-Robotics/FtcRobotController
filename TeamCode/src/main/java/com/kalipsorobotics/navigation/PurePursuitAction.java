@@ -274,15 +274,18 @@ public class  PurePursuitAction extends Action {
                 KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
                 if (timeoutTimer.milliseconds() > 200) {
-                    if (unstuckCounter < maxUnstuckCounter/* && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)*/) {
-                        unstuckCounter++;
-                        path.decrementCurrentSearchWayPointIndex();
-                        KLog.d("purepursuit", "unstucking decrementing to previous way point");
-                    } else {
-                        //unstuckCounter = 0;
-                        path.incrementCurrentSearchWayPointIndex();
-                        KLog.d("purepursuit", "unstucking incrementing to next way point");
-                    }
+                    path.incrementCurrentSearchWayPointIndex();
+                    KLog.d("purepursuit", "unstucking incrementing to next way point");
+
+//                    if (unstuckCounter < maxUnstuckCounter/* && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)*/) {
+//                        unstuckCounter++;
+//                        path.decrementCurrentSearchWayPointIndex();
+//                        KLog.d("purepursuit", "unstucking decrementing to previous way point");
+//                    } else {
+//                        //unstuckCounter = 0;
+//                        path.incrementCurrentSearchWayPointIndex();
+//                        KLog.d("purepursuit", "unstucking incrementing to next way point");
+//                    }
                 } else {
                     KLog.d("purepursuit", "Waiting for velocity timeout");
                 }

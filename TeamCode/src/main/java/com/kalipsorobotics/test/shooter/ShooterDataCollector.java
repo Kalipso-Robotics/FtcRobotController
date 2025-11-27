@@ -39,6 +39,7 @@ public class ShooterDataCollector extends KOpMode {
 
     @Override
     protected void initializeRobot() {
+        this.allianceColor = SharedData.getAllianceColor();
         super.initializeRobot();
 
         driveTrain = DriveTrain.getInstance(opModeUtilities);

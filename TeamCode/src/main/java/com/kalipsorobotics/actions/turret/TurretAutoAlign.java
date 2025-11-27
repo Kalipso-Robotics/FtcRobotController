@@ -25,7 +25,7 @@ public class TurretAutoAlign extends Action {
     private double xInitSetupMM; //121 inches
 
     private double yInitSetupMM; //46inches 1000
-    private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*0.5;
+    private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
 
     private boolean isWithinRange = false;
 
@@ -53,7 +53,7 @@ public class TurretAutoAlign extends Action {
         ElapsedTime timer = new ElapsedTime();
         int count = 0;
 
-        while (timer.milliseconds() < 3000 && !isWithinRange) {
+        while (timer.milliseconds() < 3000) {
             count++;
             if (timer.milliseconds() > 1000) {
                 this.updateCheckDone();

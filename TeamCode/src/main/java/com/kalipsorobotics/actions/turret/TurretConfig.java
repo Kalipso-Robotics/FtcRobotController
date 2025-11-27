@@ -10,6 +10,6 @@ public class TurretConfig { //
     public static double kP = 0.0021;
     public static double kI = 0; //0.000030
     public static double kD = 0.000090;
-    public static double kS = 0.05; // static base
+    public static double kS = 0.1; // static base
 
 }
