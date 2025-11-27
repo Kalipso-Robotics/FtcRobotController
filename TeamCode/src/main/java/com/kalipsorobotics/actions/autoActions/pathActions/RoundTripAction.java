@@ -53,6 +53,7 @@ public class RoundTripAction extends KActionSet {
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
         moveToBalls.setFinalSearchRadius(100);
+        moveToBalls.setMaxTimeOutMS(8000);
 
         //warm - shorter
         shooterRun = new ShooterRun(shooter, targetPoint, launchPoint);

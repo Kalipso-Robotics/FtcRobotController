@@ -85,9 +85,9 @@ public class  PurePursuitAction extends Action {
 
     public PurePursuitAction(DriveTrain driveTrain) {
         this.driveTrain = driveTrain;
-        this.pidX = new PidNav(P_XY, 0, 0);
-        this.pidY = new PidNav(P_XY, 0, 0);
-        this.pidAngle = new PidNav(P_ANGLE, 0, 0);
+        this.pidX = new PidNav(P_XY, 0, 0, 0.1000);
+        this.pidY = new PidNav(P_XY, 0, 0, 0.1000);
+        this.pidAngle = new PidNav(P_ANGLE, 0, 0, 0.0050);
 
 
 
@@ -102,9 +102,9 @@ public class  PurePursuitAction extends Action {
 
     public PurePursuitAction(DriveTrain driveTrain, double pidXY, double pidAngle) {
         this.driveTrain = driveTrain;
-        this.pidX = new PidNav(pidXY, 0, 0);
-        this.pidY = new PidNav(pidXY, 0, 0);
-        this.pidAngle = new PidNav(pidAngle, 0, 0);
+        this.pidX = new PidNav(pidXY, 0,0,0.1000);
+        this.pidY = new PidNav(pidXY, 0, 0, 0.1000);
+        this.pidAngle = new PidNav(pidAngle, 0, 0, 0.0050);
 
         this.timeoutTimer = new ElapsedTime();
 
