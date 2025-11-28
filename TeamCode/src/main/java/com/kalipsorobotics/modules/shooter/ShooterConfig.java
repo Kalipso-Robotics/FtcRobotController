@@ -13,7 +13,7 @@ public class ShooterConfig {
 //    public static double kd = 0.002000;
 
     // Recommended starting point (no algorithm changes)
-    public static double kp = 0.01;
+    public static double kp = 0.012;
     public static double ki = 0.001;
     public static double kd = 0.005;
     public static double kf = 0.01205432614;   // <-- Global optimum (fallback, not used with lookup table) 0.009338 OLD
