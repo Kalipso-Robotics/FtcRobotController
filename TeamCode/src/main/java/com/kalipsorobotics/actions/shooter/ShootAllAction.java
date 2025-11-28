@@ -39,6 +39,10 @@ public class ShootAllAction extends KActionSet {
         return shooterRun;
     }
 
+    public ShooterReady getShooterReady() {
+        return ready;
+    }
+
     @Override
     protected void beforeUpdate() {
         KLog.d("ShootAllAction", "is Done: " + isDone + " ready: " + ready.getIsDone() + " pushAllBalls: " + pushAllBalls.getIsDone() + " shooterStop: " + shooterStop.getIsDone());

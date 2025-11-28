@@ -11,7 +11,6 @@ import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.ShooterWarmupAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -24,6 +23,7 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.kalipsorobotics.modules.shooter.ShotLogger;
 
 /**
  * Simplified redesign of RedFarTeleOp
@@ -58,6 +58,8 @@ public class TeleOp extends KOpMode {
     DriveAction driveAction = null;
     TurretAutoAlign turretAutoAlign = null;
 
+    ShotLogger shotLogger = null;
+
     // Button state variables
     private boolean drivingSticks = false;
     private boolean shootPressed = false;
@@ -66,6 +68,9 @@ public class TeleOp extends KOpMode {
     private boolean stopShooterPressed = false;
     private boolean warmupPressed = false;
     private boolean releasePressed = false;
+    private boolean markUndershotPressed = false;
+    private boolean markOvershotPressed = false;
+    private boolean shooterReadyWasNotDone = false;
 
     @Override
     protected void initializeRobotConfig() {
@@ -92,6 +97,8 @@ public class TeleOp extends KOpMode {
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
+        shotLogger = new ShotLogger(opModeUtilities);
+
     }
 
     @Override
@@ -113,6 +120,8 @@ public class TeleOp extends KOpMode {
             stopShooterPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
             warmupPressed = kGamePad2.isDpadUpFirstPressed();
             releasePressed = kGamePad2.isYPressed();
+            markUndershotPressed = kGamePad2.isButtonXFirstPressed();
+            markOvershotPressed = kGamePad2.isButtonBFirstPressed();
 
             // ========== HANDLE DRIVING ==========
             if (drivingSticks) {
@@ -141,6 +150,9 @@ public class TeleOp extends KOpMode {
 
             // ========== HANDLE SHOOTING ==========
             handleShooting();
+
+            // ========== HANDLE SHOT LOGGING ==========
+            handleShotLogging();
 
             // ========== UPDATE ACTIONS ==========
             updateActions();
@@ -221,6 +233,40 @@ public class TeleOp extends KOpMode {
     }
 
     /**
+     * Handle shot logging and quality marking
+     */
+    private void handleShotLogging() {
+        // Track when ShooterReady transitions from not done to done
+        if (isPending(shootAction) && shootAction.getShooterReady() != null) {
+            boolean shooterReadyIsDone = shootAction.getShooterReady().getIsDone();
+
+            // Log when ShooterReady just became done (transition from false to true)
+            if (shooterReadyWasNotDone && shooterReadyIsDone) {
+                double targetRps = shootAction.getShooterRun().getTargetRPS();
+                double actualRps = shootAction.getShooterRun().getShooter().getRPS();
+                double hoodPos = shootAction.getShooterRun().getTargetHoodPosition();
+                double distMM = shootAction.getShooterRun().getDistanceMM();
+
+                shotLogger.logShot(targetRps, actualRps, hoodPos, distMM);
+                shooterReadyWasNotDone = false; // Reset for next shot
+            } else if (!shooterReadyIsDone) {
+                // Track that shooter ready is not done yet
+                shooterReadyWasNotDone = true;
+            }
+        } else {
+            // Reset when no shoot action is pending
+            shooterReadyWasNotDone = false;
+        }
+
+        // Handle X/Y keys for marking shot quality
+        if (markUndershotPressed) {
+            shotLogger.markLastShotAsUndershot();
+        } else if (markOvershotPressed) {
+            shotLogger.markLastShotAsOvershot();
+        }
+    }
+
+    /**
      * Handle shooting sequence
      */
     private void handleShooting() {
@@ -270,6 +316,18 @@ public class TeleOp extends KOpMode {
             }
         }
 
+    }
+
+    @Override
+    protected void cleanupRobot() {
+        // Write all accumulated shot data to file
+        if (shotLogger != null) {
+            shotLogger.writeToFile();
+            KLog.d("TeleOp", "Shot logger data written to file");
+        }
+
+        // Call parent cleanup
+        super.cleanupRobot();
     }
 
 }

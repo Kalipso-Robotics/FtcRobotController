@@ -168,6 +168,14 @@ public class ShooterRun extends Action {
         return targetRPS;
     }
 
+    public double getTargetHoodPosition() {
+        return targetHoodPosition;
+    }
+
+    public double getDistanceMM() {
+        return distanceMM;
+    }
+
     public Shooter getShooter() {
         return shooter;
     }
