@@ -67,9 +67,9 @@ public class RedAutoNear extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
+
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
     }
 

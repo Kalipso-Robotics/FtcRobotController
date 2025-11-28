@@ -132,11 +132,21 @@ public class ShotLogger {
                 fileWriter.writeLine(shot.toCsvLine());
             }
 
+            // Flush to ensure all data is written to disk before closing
+            try {
+                fileWriter.flush();
+            } catch (Exception flushException) {
+                KLog.e("ShotLogger", "Failed to flush data to file", flushException);
+            }
+
             fileWriter.close();
 
-            KLog.d("ShotLogger", String.format("Wrote %d shots to file", shots.size()));
+            KLog.d("ShotLogger", String.format("Successfully wrote %d shots to file", shots.size()));
         } catch (Exception e) {
             KLog.e("ShotLogger", "Failed to write shots to file", e);
+            if (fileWriter != null) {
+                fileWriter.close();
+            }
         }
     }
 

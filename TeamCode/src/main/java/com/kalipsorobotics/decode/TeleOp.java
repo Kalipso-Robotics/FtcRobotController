@@ -107,7 +107,7 @@ public class TeleOp extends KOpMode {
 
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         waitForStart();
-        stopper.getStopper().setPosition(Stopper.STOPPER_SERVO_CLOSED_POS);
+        closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
         while (opModeIsActive()) {
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticks = kGamePad1.getLeftStickY() != 0 ||
