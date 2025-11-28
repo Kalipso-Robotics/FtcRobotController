@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 
 import com.kalipsorobotics.utilities.KLog;
 
+import org.opencv.core.Mat;
+
 /**
  * PIDF Controller for velocity control (e.g., motor RPS)
  * Adds feedforward term to standard PID for better setpoint tracking
@@ -15,7 +17,6 @@ public class PIDFController {
     private double ki;
     private double kd;
     private double kf;
-    private double kb; // Back-calculation coefficient for anti-windup
     private double ks;
     private double integralError;
     private double lastError;
@@ -36,7 +37,6 @@ public class PIDFController {
         ki = I;
         kd = D;
         kf = F;
-        kb = I; // Set back-calculation coefficient to ki (common practice)
         ks = S;
         integralError = 0;
         lastError = 0;
@@ -65,7 +65,7 @@ public class PIDFController {
      * @param target Target setpoint (e.g., target RPS)
      * @param minOutput Minimum allowed output (for saturation)
      * @param maxOutput Maximum allowed output (for saturation)
-     * @return Control output clamped to [minOutput, maxOutput] with anti-windup
+     * @return Control output clamped to [minOutput, maxOutput]
      */
     public double calculate(double current, double target, double minOutput, double maxOutput) {
         double error = target - current;
@@ -73,9 +73,10 @@ public class PIDFController {
         double currentTime = SystemClock.elapsedRealtimeNanos();
         double timeDelta = (currentTime - lastTime) / 1e9;
 
-        // Accumulate integral error
-        integralError += error * timeDelta;
-
+        if (Math.abs(error) <= Math.abs(target * 0.1)){
+            // Accumulate integral error
+            integralError += error * timeDelta;
+        }
         // Calculate PID components
         double proportional = kp * error;
         double integral = ki * integralError;
@@ -84,27 +85,19 @@ public class PIDFController {
         // Feedforward component - base output for target velocity
         double feedforward = kf * target;
 
-        // Calculate unclamped output
-        double unclampedOutput = proportional + integral + derivative + feedforward;
+        // Clamp integral to ±10% of feedforward to prevent windup
+        double maxIntegral = Math.abs(feedforward * 0.1);
+        integral = Math.max(-maxIntegral, Math.min(maxIntegral, integral));
+
+        double totalRawOutput = proportional + integral + derivative + feedforward;
 
         // Clamp output to valid range
-        double clampedOutput = Math.max(minOutput, Math.min(maxOutput, unclampedOutput));
-
-        // Back-calculation anti-windup: if output was saturated, reduce integral
-        double saturationError = unclampedOutput - clampedOutput;
-        if (Math.abs(saturationError) > 0.001) { // Small threshold to avoid floating point issues
-            // Reduce integral proportional to saturation using SAME timeDelta
-            integralError -= kb * saturationError * timeDelta;
-
-            KLog.d("PIDF_AntiWindup_" + name, String.format(
-                "Saturation! Unclamped: %.4f, Clamped: %.4f, Integral reduced by: %.4f, New integral: %.4f",
-                unclampedOutput, clampedOutput, kb * saturationError * timeDelta, integralError));
-        }
+        double clampedOutput = Math.max(minOutput, Math.min(maxOutput, totalRawOutput));
 
         // Log calculated values
         KLog.d("PIDF_" + name, String.format(
-            "Current: %.2f | Target: %.2f | Error: %.2f | P: %.4f | I: %.4f | D: %.4f | F: %.4f | Output: %.4f",
-            current, target, error, proportional, integral, derivative, feedforward, clampedOutput));
+            "Current: %.2f | Target: %.2f | Error: %.2f | P: %.4f | I: %.4f | D: %.4f | F: %.4f | RawOutput: %.4f | Output: %.4f",
+            current, target, error, proportional, integral, derivative, feedforward, totalRawOutput, clampedOutput));
 
         KLog.d("PIDF_" + name, String.format(
                 "Current: %.2f | Target: %.2f | Error: %.2f | kP: %.4f | kI: %.4f | kD: %.4f | kF: %.4f | DeltaT: %.4f",
