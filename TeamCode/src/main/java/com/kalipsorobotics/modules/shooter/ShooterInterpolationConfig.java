@@ -15,7 +15,7 @@ public class ShooterInterpolationConfig {
             853.96, 27.86, 0.5,
             975.8, 29.29, 0.55,
             1024.07, 31.43, 0.6,
-            1104, 30.7, 0.55, // FIRST SHOOT RedAutNear
+            1104, 30.7, 0.55, // FIRST SHOOT NEAR
             1143.96, 30.71, 0.55,
             1251.09, 32.14, 0.55,
             1290.48, 31.43, 0.55,
@@ -26,7 +26,7 @@ public class ShooterInterpolationConfig {
             1496.56, 33.4, 0.55,
             1496.59, 33.6, 0.55,
             1526.71, 33.8, 0.55,
-            1595.31, 34.29, 0.55,  // a bit under shoot point 2 RedAutoNear
+            1595.31, 34.29, 0.55,  // a bit under shoot point 2 NEAR
             1647, 33, 0.55,
             1700.15, 33, 0.55,
             1813.77, 33, 0.55,
@@ -43,7 +43,9 @@ public class ShooterInterpolationConfig {
             3001.9, 45, 0.55,
             3138.04, 45, 0.55,
             3283.8, 47.14, 0.55,
-            3441.86, 47.14, 0.55,
+            3375, 47.5, 0.55, // second and third shoot depot, often has low battery and needs higher RPS
+            3441.86, 47.4, 0.55,
+            3560, 46.6, 0.55, // First shoot depot, usually overshoot because of battery, so its lower to compensate
     };
 
 }

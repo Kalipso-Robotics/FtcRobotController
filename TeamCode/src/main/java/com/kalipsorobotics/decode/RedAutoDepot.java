@@ -91,8 +91,8 @@ public class RedAutoDepot extends KOpMode {
         trip1.getTrip().getMoveToBall().addPoint(110, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(110, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(110, 1110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(25, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(25, 1118 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(15, 1118 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 
@@ -114,11 +114,11 @@ public class RedAutoDepot extends KOpMode {
         autoDepot.addAction(trip3);
 
         //-------------------TRIP 4 ------------------- ~ 19qp01
-
-        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
-        trip4.setName("trip4");
-        trip4.setDependentActions(trip3);
-        autoDepot.addAction(trip4);
+//
+//        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+//        trip4.setName("trip4");
+//        trip4.setDependentActions(trip3);
+//        autoDepot.addAction(trip4);
 
         // ----------------- PARK ----------------------
 
@@ -129,7 +129,7 @@ public class RedAutoDepot extends KOpMode {
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
-        park.setDependentActions(trip4);
+        park.setDependentActions(trip3);
         park.addPoint(SHOOT_FAR_X + 400, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);

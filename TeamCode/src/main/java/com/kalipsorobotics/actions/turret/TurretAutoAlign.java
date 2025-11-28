@@ -25,8 +25,8 @@ public class TurretAutoAlign extends Action {
     private double xInitSetupMM; //121 inches
 
     private double yInitSetupMM; //46inches 1000
-    private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
-
+    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
+    private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
 
     private AllianceColor allianceColor;
@@ -147,7 +147,7 @@ public class TurretAutoAlign extends Action {
         KLog.d("turret_position", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
 
-        if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
+        if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turretMotor.stop();
             KLog.d("turret_position", "Within RANGE, ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
@@ -183,5 +183,9 @@ public class TurretAutoAlign extends Action {
 
     public double getTargetTicks() {
         return targetTicks;
+    }
+
+    public void setToleranceDeg(double newToleranceDeg) {
+        toleranceTicks = newToleranceDeg * Turret.TICKS_PER_DEGREE;
     }
 }

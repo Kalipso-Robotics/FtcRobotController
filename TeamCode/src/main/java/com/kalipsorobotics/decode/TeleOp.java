@@ -260,9 +260,9 @@ public class TeleOp extends KOpMode {
 
         // Handle X/Y keys for marking shot quality
         if (markUndershotPressed) {
-            shotLogger.markLastShotAsUndershot();
+            shotLogger.markLastShotAsUndershot(); // X
         } else if (markOvershotPressed) {
-            shotLogger.markLastShotAsOvershot();
+            shotLogger.markLastShotAsOvershot(); // Y
         }
     }
 

@@ -33,13 +33,15 @@ public class DepotRoundTrip extends KActionSet {
         trip.getMoveToBall().setLookAheadRadius(75);
         trip.getMoveToBall().setMaxTimeOutMS(8000);
         trip.getMoveToBall().setFinalSearchRadius(150);
-        trip.getMoveToBall().addPoint(106, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(106, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(106,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(223, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(223,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         this.addAction(trip);
+
+        turretAutoAlign.setToleranceDeg(0.5);
     }
 
     public RoundTripAction getTrip() {
