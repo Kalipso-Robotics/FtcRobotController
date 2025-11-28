@@ -30,19 +30,14 @@ public class DepotRoundTrip extends KActionSet {
     public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
         trip = new RoundTripAction(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, target, launchPos, 2000);
         trip.setName("trip");
-//        trip.getMoveToBall().addPoint(175, 1145 * allianceSetup.getPolarity(), 111 * allianceSetup.getPolarity());
-//        trip.getMoveToBall().addPoint(65, 1145 * allianceSetup.getPolarity() , 109 * allianceSetup.getPolarity());
-//        trip.getMoveToBall().addPoint(25, 1145 * allianceSetup.getPolarity(), 109 * allianceSetup.getPolarity());
-//        trip.getMoveToBall().addPoint(130, 1145 * allianceSetup.getPolarity(), 175 * allianceSetup.getPolarity());
-////        trip.getMoveToBall().addPoint(265, 1185 * allianceSetup.getPolarity() , 175 * allianceSetup.getPolarity());
-////        trip.getMoveToBall().addPoint(25, 1225 * allianceSetup.getPolarity() , 175 * allianceSetup.getPolarity());
-//        trip.getMoveToBall().addPoint(130, 780 * allianceSetup.getPolarity() , 90 * allianceSetup.getPolarity());
-
-        trip.getMoveToBall().addPoint(SHOOT_FAR_X, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(SHOOT_FAR_X, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(SHOOT_FAR_X,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(SHOOT_FAR_X + 150, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(SHOOT_FAR_X + 150,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().setLookAheadRadius(75);
+        trip.getMoveToBall().setMaxTimeOutMS(8000);
+        trip.getMoveToBall().setFinalSearchRadius(150);
+        trip.getMoveToBall().addPoint(106, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(106, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(106,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(223, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(223,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         this.addAction(trip);
     }
