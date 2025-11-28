@@ -270,7 +270,7 @@ public class  PurePursuitAction extends Action {
             thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
 
             // this is not smart
-            if((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
+            if ((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
                 KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
                 if (timeoutTimer.milliseconds() > 200) {

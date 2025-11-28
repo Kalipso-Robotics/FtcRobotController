@@ -59,13 +59,18 @@ public class Path {
             if (currentPosition.distanceTo(currentFollowPosition) > radiusInch) {
                 currentSearchWayPointIndex = i;
                 return Optional.of(currentFollowPosition);
-            }else {
+            } else {
                 // within distance and try to lock angle
                 if (Math.abs(currentPosition.getTheta() - currentFollowPosition.getTheta()) > PATH_ANGLE_TOLERANCE) {
                     currentSearchWayPointIndex = i;
                     KLog.d("purepursaction_debug_follow", "Achieved Point, trying to lock angle | Current Position: " + currentPosition.getPoint()
                     + " Follow Point: " + currentFollowPosition.getPoint());
                     return Optional.of(currentFollowPosition);
+                } else {
+                    // Waypoint achieved (within distance and angle good) - mark as passed
+                    currentSearchWayPointIndex = i + 1;
+                    KLog.d("purepursaction_debug_follow", "Waypoint achieved, moving to next | Achieved: " + currentFollowPosition.getPoint()
+                    + " Current Position: " + currentPosition.getPoint());
                 }
             }
         }
