@@ -33,6 +33,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
  * Controls:
  * - DPad Up: Increase shooter power by 0.05
  * - DPad Down: Decrease shooter power by 0.05
+ * - DPad Left: Decrease hood position by 0.05
+ * - DPad Right: Increase hood position by 0.05
  * - A Button: Increase shooter power by 0.01
  * - B Button: Decrease shooter power by 0.01
  * - X Button: Run shooter at current power
@@ -44,6 +46,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
  * - Current RPS
  * - Current Power
  * - Current Voltage
+ * - Hood Position
  * - Distance to target (MM)
  */
 @TeleOp(name = "RPS Prediction Data Collector", group = "Test")
@@ -56,23 +59,25 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         double currentRPS;
         double currentPower;
         double currentVoltage;
+        double hoodPosition;
         double distanceToTargetMM;
 
-        ShootData(double rps, double power, double voltage, double distance) {
+        ShootData(double rps, double power, double voltage, double hood, double distance) {
             this.currentRPS = rps;
             this.currentPower = power;
             this.currentVoltage = voltage;
+            this.hoodPosition = hood;
             this.distanceToTargetMM = distance;
         }
 
         @Override
         public String toString() {
-            return String.format("RPS=%.2f, Power=%.2f, Voltage=%.2fV, Distance=%.2fmm",
-                currentRPS, currentPower, currentVoltage, distanceToTargetMM);
+            return String.format("RPS=%.2f, Power=%.2f, Voltage=%.2fV, Hood=%.2f, Distance=%.2fmm",
+                currentRPS, currentPower, currentVoltage, hoodPosition, distanceToTargetMM);
         }
 
         String toCSV() {
-            return String.format("%.2f,%.2f,%.2f,%.2f", currentRPS, currentPower, currentVoltage, distanceToTargetMM);
+            return String.format("%.2f,%.2f,%.2f,%.2f,%.2f", currentRPS, currentPower, currentVoltage, hoodPosition, distanceToTargetMM);
         }
     }
 
@@ -88,6 +93,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
     private OpModeUtilities opModeUtilities;
 
     private double shooterPower = 0.0;
+    private double hoodPosition = 0.8;
     private ShootData lastShoot = null;
     private boolean wasLeftTriggerPressed = false;
 
@@ -107,13 +113,13 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, AllianceColor.RED);
         // Write CSV header
-        fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,DistanceToTargetMM");
+        fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
 
         telemetry.addLine("Initialization complete!");
         telemetry.addLine();
         telemetry.addLine("Controls:");
-        telemetry.addLine("- DPad Up: +0.05 power");
-        telemetry.addLine("- DPad Down: -0.05 power");
+        telemetry.addLine("- DPad Up/Down: ±0.05 power");
+        telemetry.addLine("- DPad Left/Right: ±0.05 hood");
         telemetry.addLine("- A Button: +0.01 power");
         telemetry.addLine("- B Button: -0.01 power");
         telemetry.addLine("- X Button: Run shooter");
@@ -125,7 +131,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         telemetry.update();
 
         KLog.d("RPSPredictionDataCollector", "Initialization complete. Waiting for start...");
-
+        shooter.getHood().setPosition(0.8);
         waitForStart();
 
         // Main control loop
@@ -156,6 +162,25 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                 shooterPower = 1.0;
             }
 
+            // ========== Hood Control ==========
+            if (gamepad1.dpad_right) {
+                hoodPosition += 0.05;
+            }
+            if (gamepad1.dpad_left) {
+                hoodPosition -= 0.05;
+            }
+
+            // Clamp hood position between 0 and 1
+            if (hoodPosition < 0) {
+                hoodPosition = 0;
+            }
+            if (hoodPosition > 1.0) {
+                hoodPosition = 1.0;
+            }
+
+            // Apply hood position
+            shooter.getHood().setPosition(hoodPosition);
+
             // ========== Trigger Controls ==========
             if (gamepad1.right_trigger > 0.1) {
                 // Right trigger: Run intake + Close stopper
@@ -172,7 +197,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                     double currentVoltage = getBatteryVoltage();
                     double distanceToTargetMM = calculateDistanceToTarget();
 
-                    lastShoot = new ShootData(currentRPS, shooterPower, currentVoltage, distanceToTargetMM);
+                    lastShoot = new ShootData(currentRPS, shooterPower, currentVoltage, hoodPosition, distanceToTargetMM);
 
                     // Log to KLog
                     KLog.d("RPSPredictionData", "SHOOT RECORDED: " + lastShoot.toString());
@@ -187,6 +212,8 @@ public class RPSPredictionDataCollector extends LinearOpMode {
 
             if (gamepad1.x) {
                 shooter.setPower(shooterPower);
+            } else {
+                shooter.setPower(0);
             }
 
             // ========== Y Button: Save Last Shoot to File ==========
@@ -205,6 +232,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             telemetry.addLine("=== RPS Prediction Data Collector ===");
             telemetry.addLine();
             telemetry.addData("Shooter Power", "%.2f", shooterPower);
+            telemetry.addData("Hood Position", "%.2f", hoodPosition);
             telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
             telemetry.addData("Distance to Target", "%.2f mm", calculateDistanceToTarget());
             telemetry.addLine();
@@ -214,6 +242,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                 telemetry.addData("Last RPS", "%.2f", lastShoot.currentRPS);
                 telemetry.addData("Last Power", "%.2f", lastShoot.currentPower);
                 telemetry.addData("Last Voltage", "%.2f V", lastShoot.currentVoltage);
+                telemetry.addData("Last Hood", "%.2f", lastShoot.hoodPosition);
                 telemetry.addData("Last Distance", "%.2f mm", lastShoot.distanceToTargetMM);
             } else {
                 telemetry.addLine("--- No Shoot Recorded Yet ---");
@@ -222,6 +251,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             telemetry.addLine();
             telemetry.addLine("Controls:");
             telemetry.addLine("DPad Up/Down: ±0.05 power");
+            telemetry.addLine("DPad Left/Right: ±0.05 hood");
             telemetry.addLine("A/B: ±0.01 power");
             telemetry.addLine("X: Run shooter");
             telemetry.addLine("Right Trigger: Intake + Close");
