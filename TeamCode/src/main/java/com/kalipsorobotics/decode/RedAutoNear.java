@@ -43,7 +43,7 @@ public class RedAutoNear extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-       TurretConfig.TICKS_INIT_OFFSET = (Turret.TICKS_PER_ROTATION*Turret.GEAR_RATIO) / 2; //offset by 180 deg
+       //TurretConfig.TICKS_INIT_OFFSET = (Turret.TICKS_PER_ROTATION*Turret.GEAR_RATIO) / 2; //offset by 180 deg
     }
 
     @Override
@@ -104,7 +104,7 @@ public class RedAutoNear extends KOpMode {
         trip1.getMoveToBall().addPoint(1970, 250 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(1970, 890 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         // move to hit lever
-        trip1.getMoveToBall().addPoint(1684, 1095 * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1805, 1210 * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
         // move to launch
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip1.setDependentActions(trip0);
@@ -126,7 +126,7 @@ public class RedAutoNear extends KOpMode {
         trip3.setName("trip3");
         // move to intake
         trip3.getMoveToBall().addPoint(785, 400 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(785, 1181 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(785, 1280 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
  //     potential chunking point (x 13168, y 276, head 142)
         trip3.getMoveToBall().addPoint(thirdTripLaunchPoint.getX(), thirdTripLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip3.setDependentActions(trip2);

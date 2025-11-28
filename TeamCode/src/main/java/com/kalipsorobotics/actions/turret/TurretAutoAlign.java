@@ -111,7 +111,7 @@ public class TurretAutoAlign extends Action {
 
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
         // Use angleWrapRad to normalize the turret angle to [-π, π]
-        double totalTurretAngleWrap = MathFunctions.angleWrapRadForce0ToPi(totalTurretAngle);
+        double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
         double motorRotation = turretRotation * Turret.GEAR_RATIO;
