@@ -43,7 +43,7 @@ public class RedAutoNear extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        //TurretConfig.TICKS_INIT_OFFSET = Turret.TICKS_PER_ROTATION / 2; //offset by 180 deg
+       TurretConfig.TICKS_INIT_OFFSET = (Turret.TICKS_PER_ROTATION*Turret.GEAR_RATIO) / 2; //offset by 180 deg
     }
 
     @Override
