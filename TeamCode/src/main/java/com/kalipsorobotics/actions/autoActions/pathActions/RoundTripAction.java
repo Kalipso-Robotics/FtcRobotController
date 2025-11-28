@@ -52,6 +52,7 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setName("moveToBall");  // FIX: Name the action!
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
+        moveToBalls.setLookAheadRadius(150);  // Increased from default 75 to reduce oscillation during heading changes
         moveToBalls.setFinalSearchRadius(100);
         moveToBalls.setMaxTimeOutMS(8000);
 

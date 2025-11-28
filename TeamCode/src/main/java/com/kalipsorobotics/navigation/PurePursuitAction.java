@@ -29,6 +29,7 @@ public class  PurePursuitAction extends Action {
     private static final double MINIMUM_POWER = 0.12;
 
     private double lastSearchRadius = LAST_RADIUS_MM;
+    private double lookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
     List<Position> pathPoints = new ArrayList<>();
 
@@ -176,6 +177,9 @@ public class  PurePursuitAction extends Action {
     public void setFinalSearchRadius(double searchRadiusMM){
         this.lastSearchRadius = searchRadiusMM;
     }
+    public void setLookAheadRadius(double radiusMM){
+        this.lookAheadRadius = radiusMM;
+    }
     public void setPAngle(double p) {
         this.pidAngle = new PidNav(p, 0,0);
     }
@@ -249,7 +253,7 @@ public class  PurePursuitAction extends Action {
         }
 
 
-        currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
+        currentLookAheadRadius = lookAheadRadius;
 
         Position lastPoint = path.getLastPoint();
 

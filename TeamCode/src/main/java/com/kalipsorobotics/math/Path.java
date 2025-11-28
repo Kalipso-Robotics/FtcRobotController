@@ -67,10 +67,12 @@ public class Path {
                     + " Follow Point: " + currentFollowPosition.getPoint());
                     return Optional.of(currentFollowPosition);
                 } else {
-                    // Waypoint achieved (within distance and angle good) - mark as passed
+                    // Waypoint achieved (within distance and angle good) - move to next waypoint on next update cycle
                     currentSearchWayPointIndex = i + 1;
-                    KLog.d("purepursaction_debug_follow", "Waypoint achieved, moving to next | Achieved: " + currentFollowPosition.getPoint()
+                    KLog.d("purepursaction_debug_follow", "Waypoint achieved, targeting next on next cycle | Achieved: " + currentFollowPosition.getPoint()
                     + " Current Position: " + currentPosition.getPoint());
+                    // Continue to check if there's a next waypoint we can target in this iteration
+                    // This prevents returning the just-achieved waypoint
                 }
             }
         }
