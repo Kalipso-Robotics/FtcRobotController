@@ -3,6 +3,7 @@ package com.kalipsorobotics.test.turret;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.utilities.SharedData;
 
 public class TurretReady extends Action {
 
@@ -19,6 +20,7 @@ public class TurretReady extends Action {
 
         if (!hasStarted) {
             hasStarted = true;
+            KLog.d(this.getName(), "current pos " + SharedData.getOdometryPosition());
         }
 
         if (turretAutoAlign.isWithinRange()) {

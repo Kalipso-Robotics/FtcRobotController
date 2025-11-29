@@ -43,9 +43,12 @@ public class ShooterInterpolationConfig {
             3001.9, 45, 0.55,
             3138.04, 45, 0.55,
             3283.8, 47.14, 0.55,
-            3375, 47.5, 0.55, // second and third shoot depot, often has low battery and needs higher RPS
-            3441.86, 47.4, 0.55,
+            3375, 47.2, 0.55, // second and third shoot depot, often has low battery and needs higher RPS
+            3441.86, 46.5, 0.55,
+            3495, 46.5, 0.55,
             3560, 46.6, 0.55, // First shoot depot, usually overshoot because of battery, so its lower to compensate
+            3618, 46.6, 0.55,
+            3768, 46.6, 0.55,
     };
 
 }

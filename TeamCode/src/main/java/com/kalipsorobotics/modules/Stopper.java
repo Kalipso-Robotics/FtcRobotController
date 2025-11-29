@@ -1,6 +1,7 @@
 package com.kalipsorobotics.modules;
 
 import com.kalipsorobotics.utilities.KCRServo;
+import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -18,14 +19,22 @@ public class Stopper {
     private KServo stopper;
 
     public Stopper(OpModeUtilities opModeUtilities) {
+        KLog.d("Stopper", "Constructor called - starting initialization");
         this.opModeUtilities = opModeUtilities;
 //        CRServo kickerRightHW = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        CRServo kickerLeftHW = opModeUtilities.getHardwareMap().crservo.get("pusherLeft");
-        Servo stopper = opModeUtilities.getHardwareMap().servo.get("stopper");
+        try {
+            Servo stopper = opModeUtilities.getHardwareMap().servo.get("stopper");
+            KLog.d("Stopper", "Hardware servo retrieved: " + (stopper != null ? "SUCCESS" : "NULL"));
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
-        this.stopper = new KServo(stopper,KServo.AXON_MAX_SPEED, 255, 0, false);
-        this.stopper.setPosition(STOPPER_SERVO_CLOSED_POS);
+            this.stopper = new KServo(stopper,KServo.AXON_MAX_SPEED, 255, 0, false);
+            this.stopper.setPosition(STOPPER_SERVO_CLOSED_POS);
+            KLog.d("Stopper", "Constructor completed successfully");
+        } catch (Exception e) {
+            KLog.e("Stopper", "ERROR in constructor: " + e.getMessage());
+            throw e;
+        }
     }
 
     public KCRServo getKickerLeft() {

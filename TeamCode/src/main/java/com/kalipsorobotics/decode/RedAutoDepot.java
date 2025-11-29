@@ -46,6 +46,8 @@ public class RedAutoDepot extends KOpMode {
     protected void initializeRobot() {
         super.initializeRobot();
 
+        KLog.d("RedAutoDepot-Init", "Starting initializeRobot()");
+
         // Create your modules
         DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);
@@ -59,13 +61,18 @@ public class RedAutoDepot extends KOpMode {
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         autoDepot = new KActionSet();
+        KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");
+        KLog.d("RedAutoDepot-Init", "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
+        KLog.d("RedAutoDepot-Init", "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+
+        KLog.d("RedAutoDepot-Init", "Finished initializeRobot()");
     }
 
     @Override
@@ -134,12 +141,17 @@ public class RedAutoDepot extends KOpMode {
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);
         KLog.d("auto", "--------------DEPOT AUTO STARTED-------------");
+        KLog.d("RedAutoDepot-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         waitForStart();
+        KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
         while (opModeIsActive()) {
             autoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             KLog.d("Odometry", "Position: " + SharedData.getOdometryPosition());
         }
+        KLog.d("RedAutoDepot-Run", "Autonomous loop ended - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        KLog.d("RedAutoDepot-Run", "Calling cleanupRobot()");
         cleanupRobot();
+        KLog.d("RedAutoDepot-Run", "After cleanupRobot() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
     }
 }

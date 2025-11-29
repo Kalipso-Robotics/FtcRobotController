@@ -37,7 +37,7 @@ import com.kalipsorobotics.modules.shooter.ShotLogger;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
 public class TeleOp extends KOpMode {
     protected final Point SHOOTER_TARGET_POINT = Shooter.TARGET_POINT;
-
+    private boolean hasClosedStopperInnit = false;
     private DriveTrain driveTrain;
     private Shooter shooter = null;
     private Intake intake = null;
@@ -81,6 +81,8 @@ public class TeleOp extends KOpMode {
     protected void initializeRobot() {
         super.initializeRobot();
 
+        KLog.d("TeleOp-Init", "Starting initializeRobot()");
+
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
@@ -90,14 +92,20 @@ public class TeleOp extends KOpMode {
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
 
+        KLog.d("TeleOp-Init", "Creating intake, shooter, stopper, turret modules");
+        KLog.d("TeleOp-Init", "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
+        KLog.d("TeleOp-Init", "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
+
         turret = Turret.getInstance(opModeUtilities);
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
         shotLogger = new ShotLogger(opModeUtilities);
+
+        KLog.d("TeleOp-Init", "Finished initializeRobot()");
 
     }
 
@@ -106,9 +114,25 @@ public class TeleOp extends KOpMode {
         initializeRobot();
 
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
+        KLog.d("TeleOp-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         waitForStart();
-        closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+        KLog.d("TeleOp-Run", "After waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+
+//        turretAutoAlign.setToleranceDeg(0.5);
+
+        if (stopper == null) {
+            KLog.e("TeleOp-Run", "ERROR: Stopper is NULL when trying to create closeStopper action!");
+        } else {
+            KLog.d("TeleOp-Run", "Creating closeStopper action - stopper is valid");
+        }
+
+        KLog.d("TeleOp-Run", "closeStopper created successfully");
+
         while (opModeIsActive()) {
+            if (!hasClosedStopperInnit) {
+                stopper.setPosition(Stopper.STOPPER_SERVO_CLOSED_POS);
+                hasClosedStopperInnit = true;
+            }
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticks = kGamePad1.getLeftStickY() != 0 ||
                     kGamePad1.getRightStickX() != 0 ||
@@ -121,7 +145,7 @@ public class TeleOp extends KOpMode {
             warmupPressed = kGamePad2.isDpadUpFirstPressed();
             releasePressed = kGamePad2.isYPressed();
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
-            markOvershotPressed = kGamePad2.isButtonBFirstPressed();
+            markOvershotPressed = kGamePad2.isButtonYFirstPressed();
 
             // ========== HANDLE DRIVING ==========
             if (drivingSticks) {

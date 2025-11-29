@@ -9,10 +9,14 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.test.turret.TurretReady;
 import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.utilities.SharedData;
 
 public class PushBall extends KActionSet {
 
     public PushBall(Stopper stopper, Intake intake, Shooter shooter) {
+
+        KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryPosition());
+
         KServoAutoAction openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
         openStopper.setName("openStopper");
         this.addAction(openStopper);
