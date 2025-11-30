@@ -49,8 +49,6 @@ public class GoalDetectionAction extends Action {
 
         limelight = opModeUtilities.getHardwareMap().get(Limelight3A.class, "limelight");
 
-        telemetry.setMsTransmissionInterval(11);
-
         limelight.pipelineSwitch(0);
 
         this.turret = turret;
@@ -62,6 +60,14 @@ public class GoalDetectionAction extends Action {
 
     public Limelight3A getLimelight() {
         return limelight;
+    }
+
+    /**
+     * Public method to trigger odometry update from vision
+     * For use in testing and manual triggering
+     */
+    public void updateOdometryFromVision() {
+        update();
     }
 
     @Override
@@ -155,7 +161,7 @@ public class GoalDetectionAction extends Action {
 
 //        }
 
-//        limelight.stop();
+        limelight.stop();
     }
 
 }
