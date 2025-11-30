@@ -334,7 +334,7 @@ public class TeleOp extends KOpMode {
         //  Priority 3 -Warmup shooter
         if (warmupPressed) {
             if (!isPending(shooterWarmup)) {
-                shooterWarmup = new ShooterWarmupAction(shooter, 0.4);
+                shooterWarmup = new ShooterWarmupAction(shooter, 0.3);
                 setLastShooterAction(shooterWarmup);
                 KLog.d("Shooting", "Warmup started");
             }

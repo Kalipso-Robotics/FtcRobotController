@@ -30,7 +30,7 @@ public class RedAutoNear extends KOpMode {
     final double SHOOT_NEAR_X = 2130; //2400
     final double SHOOT_NEAR_Y = 135; //300
 
-    final double THIRD_SHOOT_NEAR_X = 2530; //2400
+    final double THIRD_SHOOT_NEAR_X = 2560; //2400
     final double THIRD_SHOOT_NEAR_Y = 135; //300
     private DriveTrain driveTrain;
     Shooter shooter = null;
