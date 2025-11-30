@@ -18,8 +18,10 @@ import com.kalipsorobotics.math.Velocity;
 
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.modules.DriveTrain;
+import com.qualcomm.hardware.lynx.LynxModule;
 
 import java.util.HashMap;
+import java.util.List;
 
 
 public class Odometry {
@@ -38,6 +40,7 @@ public class Odometry {
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
     private DcMotor backEncoder;
+    private List<LynxModule> allHubs;
 
     private final double rightOffset;
     private final double leftOffset;
@@ -114,6 +117,13 @@ public class Odometry {
         odometry.rightEncoder = driveTrain.getRightEncoder();
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
+
+        // Initialize bulk read for improved encoder reading performance
+        odometry.allHubs = opModeUtilities.getHardwareMap().getAll(LynxModule.class);
+        for (LynxModule module : odometry.allHubs) {
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+        KLog.d("Odometry_BulkRead", "Initialized MANUAL bulk caching for " + odometry.allHubs.size() + " hub(s)");
     }
 
 
@@ -133,24 +143,45 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        KLog.d("encoder", "right encoder" + rightEncoder.getCurrentPosition());
-        return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
-        //return ticksToMM(rightEncoder.getCurrentPosition());
+        try {
+            int position = rightEncoder.getCurrentPosition();
+            KLog.d("encoder", "right encoder" + position);
+            return ticksToMM(position) - rightOffset;
+        } catch (Exception e) {
+            KLog.d("Odometry_Encoder_Error", "Right encoder read failed: " + e.getMessage());
+            // Return last known value to avoid position jumps
+            return prevRightDistanceMM;
+        }
     }
+
     public double getLeftEncoderMM() {
         //corresponds to fLeft
         //direction FORWARD
         //positive because encoder directions
-        KLog.d("encoder", "left encoder" + leftEncoder.getCurrentPosition());
-        return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
+        try {
+            int position = leftEncoder.getCurrentPosition();
+            KLog.d("encoder", "left encoder" + position);
+            return ticksToMM(position) - leftOffset;
+        } catch (Exception e) {
+            KLog.d("Odometry_Encoder_Error", "Left encoder read failed: " + e.getMessage());
+            // Return last known value to avoid position jumps
+            return prevLeftDistanceMM;
+        }
     }
+
     public double getBackEncoderMM() {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        KLog.d("encoder", "back encoder" + backEncoder.getCurrentPosition());
-        return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
-        //return ticksToMM(backEncoder.getCurrentPosition());
+        try {
+            int position = backEncoder.getCurrentPosition();
+            KLog.d("encoder", "back encoder" + position);
+            return ticksToMM(position) - backOffset;
+        } catch (Exception e) {
+            KLog.d("Odometry_Encoder_Error", "Back encoder read failed: " + e.getMessage());
+            // Return last known value to avoid position jumps
+            return prevBackDistanceMM;
+        }
     }
 
     public boolean allEncoderZero() {
@@ -259,7 +290,23 @@ public class Odometry {
         Velocity wheelRelDelta = calculateRelativeDeltaWheel(rightDistanceMM, leftDistanceMM,
                 backDistanceMM, timeElapsedSeconds * 1000);
         wheelRelDelta = linearToArcDelta(wheelRelDelta);
-        Position globalPosition = calculateGlobal(wheelRelDelta, wheelPositionHistory.getCurrentPosition());
+        Position prevPosition = wheelPositionHistory.getCurrentPosition();
+        Position globalPosition = calculateGlobal(wheelRelDelta, prevPosition);
+
+        // Position jump filter - check for unrealistic movements
+        double dx = globalPosition.getX() - prevPosition.getX();
+        double dy = globalPosition.getY() - prevPosition.getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        double maxSpeed = 1500; // mm/s (realistic max robot speed)
+        double maxDistance = maxSpeed * timeElapsedSeconds;
+
+        if (distance > maxDistance && timeElapsedSeconds > 0) {
+            KLog.d("Odometry_Jump", "WHEEL position jump rejected: " + String.format("%.1f", distance) +
+                   "mm in " + String.format("%.3f", timeElapsedSeconds) + "s (max: " +
+                   String.format("%.1f", maxDistance) + "mm)");
+            return; // Skip this update to prevent corruption
+        }
+
         wheelPositionHistory.setCurrentPosition(globalPosition);
         wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds * 1000);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
@@ -270,11 +317,26 @@ public class Odometry {
         Velocity wheelIMURelDelta = calculateRelativeDeltaWheelIMU(rightDistanceMM, leftDistanceMM, backDistanceMM,
                 timeElapsedSeconds * 1000);
         wheelIMURelDelta = linearToArcDelta(wheelIMURelDelta);
-        Position globalPosition = calculateGlobal(wheelIMURelDelta, wheelIMUPositionHistory.getCurrentPosition());
+        Position prevPosition = wheelIMUPositionHistory.getCurrentPosition();
+        Position globalPosition = calculateGlobal(wheelIMURelDelta, prevPosition);
+
+        // Position jump filter - check for unrealistic movements
+        double dx = globalPosition.getX() - prevPosition.getX();
+        double dy = globalPosition.getY() - prevPosition.getY();
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        double maxSpeed = 1500; // mm/s (realistic max robot speed)
+        double maxDistance = maxSpeed * timeElapsedSeconds;
+
+        if (distance > maxDistance && timeElapsedSeconds > 0) {
+            KLog.d("Odometry_Jump", "WHEEL_IMU position jump rejected: " + String.format("%.1f", distance) +
+                   "mm in " + String.format("%.3f", timeElapsedSeconds) + "s (max: " +
+                   String.format("%.1f", maxDistance) + "mm)");
+            return; // Skip this update to prevent corruption
+        }
+
         wheelIMUPositionHistory.setCurrentPosition(globalPosition);
         wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds * 1000); //mm/ms
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
-
     }
 
     public HashMap<OdometrySensorCombinations, PositionHistory> updateAll() {
@@ -282,6 +344,13 @@ public class Odometry {
             KLog.d("Odometry", "OpMode Not Active. OpMode: " + opModeUtilities.getOpMode().getClass().getName());
             return odometryPositionHistoryHashMap;
         }
+
+        // Clear bulk cache for MANUAL mode - ensures atomic encoder reads
+        for (LynxModule module : allHubs) {
+            module.clearBulkCache();
+        }
+
+        // Read all encoders atomically - they now come from the same bulk read
         double rightDistanceMM = getRightEncoderMM();
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
