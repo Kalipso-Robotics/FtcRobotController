@@ -57,6 +57,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
      */
     @Override
     public IShooterPredictor.ShooterParams predict(double distanceMM) {
+
         // If distance is below minimum, return first point
         if (distanceMM <= DATA_POINTS.get(0).distanceMM) {
             DataPoint dp = DATA_POINTS.get(0);
