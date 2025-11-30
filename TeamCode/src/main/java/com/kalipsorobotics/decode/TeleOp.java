@@ -11,6 +11,7 @@ import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.ShooterWarmupAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.localization.LimelightLocalization;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -43,6 +44,8 @@ public class TeleOp extends KOpMode {
     private Intake intake = null;
     private Turret turret = null;
     private Stopper stopper = null;
+    private LimelightLocalization limelight = null;
+    private Odometry odometry = null;
 
     ShooterWarmupAction shooterWarmup = null;
     ShooterStop shooterStop = null;
@@ -71,6 +74,7 @@ public class TeleOp extends KOpMode {
     private boolean markUndershotPressed = false;
     private boolean markOvershotPressed = false;
     private boolean shooterReadyWasNotDone = false;
+    private boolean limelightCorrectionPressed = false;
 
     @Override
     protected void initializeRobotConfig() {
@@ -88,9 +92,18 @@ public class TeleOp extends KOpMode {
 
         sleep(1000);
 
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
+
+        // Initialize Limelight for vision-based odometry correction
+        try {
+            limelight = LimelightLocalization.getInstance(opModeUtilities, odometry);
+            KLog.d("TeleOp-Init", "Limelight initialized successfully");
+        } catch (Exception e) {
+            KLog.e("TeleOp-Init", "Failed to initialize Limelight: " + e.getMessage());
+            limelight = null;  // Continue without limelight
+        }
 
         KLog.d("TeleOp-Init", "Creating intake, shooter, stopper, turret modules");
         KLog.d("TeleOp-Init", "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
@@ -146,6 +159,7 @@ public class TeleOp extends KOpMode {
             releasePressed = kGamePad2.isYPressed();
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
+            limelightCorrectionPressed = kGamePad1.isBackPressed();  // Back button for vision correction
 
             // ========== HANDLE DRIVING ==========
             if (drivingSticks) {
@@ -153,6 +167,9 @@ public class TeleOp extends KOpMode {
             } else {
                 driveTrain.setPower(0);
             }
+
+            // ========== HANDLE LIMELIGHT ODOMETRY CORRECTION ==========
+            handleLimelightCorrection();
 
             if (kGamePad2.isDpadLeftPressed()) {
                 turretAutoAlign.incrementYInitSetupMM(-10);
@@ -287,6 +304,51 @@ public class TeleOp extends KOpMode {
             shotLogger.markLastShotAsUndershot(); // X
         } else if (markOvershotPressed) {
             shotLogger.markLastShotAsOvershot(); // Y
+        }
+    }
+
+    /**
+     * Handle Limelight odometry correction
+     *
+     * When back button is pressed on gamepad1:
+     * - Activates Limelight vision
+     * - Detects AprilTag fiducials
+     * - Corrects odometry position based on tag locations
+     * - Provides feedback to driver via gamepad rumble
+     *
+     * Power-saving: Limelight only runs when button is pressed
+     */
+    private void handleLimelightCorrection() {
+        if (limelight == null) {
+            // Limelight not available (initialization failed or not configured)
+            return;
+        }
+
+        if (limelightCorrectionPressed) {
+            KLog.d("Limelight", "Back button pressed - attempting odometry correction");
+
+            // Attempt to update odometry from vision
+            boolean success = limelight.updateOdometry();
+
+            if (success) {
+                // Success feedback: short rumble
+                gamepad1.rumble(200);
+                KLog.d("Limelight", "Odometry corrected successfully");
+
+                // Display updated position on telemetry
+                telemetry.addLine("Vision correction: SUCCESS");
+                int[] visibleTags = limelight.getVisibleTagIds();
+                if (visibleTags.length > 0) {
+                    telemetry.addData("Tags detected", java.util.Arrays.toString(visibleTags));
+                }
+            } else {
+                // Failure feedback: long rumble-rumble pattern
+                gamepad1.rumble(100);
+                KLog.d("Limelight", "Odometry correction failed - no tags visible");
+
+                telemetry.addLine("Vision correction: NO TAGS");
+            }
+            telemetry.update();
         }
     }
 
