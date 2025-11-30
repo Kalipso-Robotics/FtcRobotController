@@ -55,6 +55,14 @@ public class KGamePad {
         return toggle;
     }
 
+    public boolean isDpadLeftPressed() {
+        return gamepad.dpad_left;
+    }
+
+    public boolean isDpadRightPressed() {
+        return gamepad.dpad_right;
+    }
+
     public boolean isDpadRightFirstPressed(){
         boolean current = gamepad.dpad_right;
         boolean toggle = false;

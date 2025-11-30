@@ -2,6 +2,8 @@ package com.kalipsorobotics.modules.shooter;
 
 import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.*;
 
+import com.kalipsorobotics.test.shooter.RampUpTimeInterpolation;
+
 import java.util.*;
 
 /**
@@ -44,6 +46,8 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
         }
 
     }
+
+
 
     /**
      * Get shooter parameters for a given distance using linear interpolation.

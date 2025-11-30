@@ -13,6 +13,9 @@ public class ShooterWarmupAction extends Action {
 
     @Override
     protected void update() {
+        if (isDone) {
+            return;
+        }
         shooter.setPower(this.power);
         isDone = true;
     }

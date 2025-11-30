@@ -154,13 +154,13 @@ public class TeleOp extends KOpMode {
                 driveTrain.setPower(0);
             }
 
-            if (kGamePad2.isDpadLeftFirstPressed()) {
-                turretAutoAlign.incrementYInitSetupMM(-100);
+            if (kGamePad2.isDpadLeftPressed()) {
+                turretAutoAlign.incrementYInitSetupMM(-10);
                 if (turretAutoAlign != null) {
                     turretAutoAlign.updateCheckDone();
                 }
-            } else if (kGamePad2.isDpadRightFirstPressed()) {
-                turretAutoAlign.incrementYInitSetupMM(100);
+            } else if (kGamePad2.isDpadRightPressed()) {
+                turretAutoAlign.incrementYInitSetupMM(10);
                 if (turretAutoAlign != null) {
                     turretAutoAlign.updateCheckDone();
                 }
@@ -339,7 +339,6 @@ public class TeleOp extends KOpMode {
                 KLog.d("Shooting", "Warmup started");
             }
         }
-
     }
 
     @Override

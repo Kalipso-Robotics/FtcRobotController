@@ -4,6 +4,7 @@ import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
+import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
@@ -129,10 +130,10 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- PARK ----------------------
 
-        KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-        closeStopper.setName("closeStopper");
-        closeStopper.setDependentActions(trip3);
-        autoDepot.addAction(closeStopper);
+        IntakeStop stopIntake = new IntakeStop(intake);
+        stopIntake.setName("stopIntake");
+        stopIntake.setDependentActions(trip3);
+        autoDepot.addAction(stopIntake);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");

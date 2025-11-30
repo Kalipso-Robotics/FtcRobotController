@@ -13,9 +13,6 @@ public class Stopper {
 
     private final OpModeUtilities opModeUtilities;
 
-    private KCRServo kickerRight;
-    private KCRServo kickerLeft;
-
     private KServo stopper;
 
     public Stopper(OpModeUtilities opModeUtilities) {
@@ -35,14 +32,6 @@ public class Stopper {
             KLog.e("Stopper", "ERROR in constructor: " + e.getMessage());
             throw e;
         }
-    }
-
-    public KCRServo getKickerLeft() {
-        return kickerLeft;
-    }
-
-    public KCRServo getKickerRight() {
-        return kickerRight;
     }
 
     public KServo getStopper() {return stopper;}

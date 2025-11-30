@@ -285,10 +285,26 @@ public class Odometry {
         double rightDistanceMM = getRightEncoderMM();
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
-        currentImuHeading = getIMUHeading();
 
-        KLog.d("IMU_Heading", "Heading " + Math.toDegrees(currentImuHeading));
-        KLog.d("IMU_Prev_Heading", "PrevHeading" + Math.toDegrees(prevImuHeading));
+        // Read IMU heading only once per cycle
+        currentImuHeading = getIMUHeading();
+        if (isBadReading(currentImuHeading)) {
+            KLog.d("Odometry_IMU_Skip", "Imu Heading is BAD, SKIPPING UPDATE " + currentImuHeading);
+            return odometryPositionHistoryHashMap;
+        }
+        // Validate IMU reading - skip update if spurious
+        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
+        double maxTurnPerStep = Math.toRadians(20); // 20°/cycle is safe for FTC loop times
+
+        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
+            // IMU glitch detected - skip this update cycle to avoid corrupting odometry
+            KLog.d("Odometry_IMU_Skip", "IMU spike detected: " + Math.toDegrees(rawImuDeltaTheta) +
+                   "° - SKIPPING UPDATE to prevent corruption");
+            return odometryPositionHistoryHashMap;
+        }
+
+        KLog.d("IMU_Heading", "Heading (rad): " + currentImuHeading + " (deg): " + Math.toDegrees(currentImuHeading));
+        KLog.d("IMU_Prev_Heading", "PrevHeading (rad): " + prevImuHeading + " (deg): " + Math.toDegrees(prevImuHeading));
 
 
         long currentTime = SystemClock.elapsedRealtime();
@@ -326,8 +342,14 @@ public class Odometry {
 
     public double getIMUHeading() {
         double imuHeading = -Math.toRadians(imuModule.getIMU().getRobotYawPitchRollAngles().getYaw());
-        KLog.d("IMU_Heading", "Heading " + imuHeading);
         return imuHeading;
+    }
+
+    public boolean isBadReading(double reading) {
+        if (Double.isNaN(reading) || Double.isInfinite(reading)) {
+            return true;
+        }
+        return false;
     }
 
     @Override
