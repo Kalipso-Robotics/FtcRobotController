@@ -7,11 +7,10 @@ import java.util.ArrayList;
 @Config
 public class ShooterInterpolationConfig {
     public static double[] shooterData = {
-            602.23, 28.57, 0.55,
-            701.54, 30, 0.7,
-            853.96, 27.86, 0.75,
-            975.8, 29.29, 0.8,
-            1024.07, 31.43, 0.8,
+            602.23, 28.57, 0.25,
+            724, 32, 0.25,
+            918, 33.4, 0.35,
+            1126, 32, 0.45,
             1143.96, 31.5, 0.8, // FIRST SHOOT NEAR,
             1251.09, 32.14, 0.8,
             1290.48, 31.43, 0.8,

@@ -2,13 +2,10 @@ package com.kalipsorobotics.localization;
 
 import android.os.SystemClock;
 
-import androidx.annotation.NonNull;
-
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.PositionHistory;
-import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -25,6 +22,7 @@ import java.util.List;
 
 
 public class Odometry {
+    private boolean shouldFallbackToWheelTheta = true;
     final static private double TRACK_WIDTH_MM = 297;
     //maybe double check BACK Distance
     static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
@@ -196,9 +194,8 @@ public class Odometry {
         double deltaRightDistance = rightDistanceMM - prevRightDistanceMM;
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
+
         double deltaTheta = MathFunctions.angleWrapRad((deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM);
-
-
 
         double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
         double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * deltaTheta);
@@ -216,20 +213,28 @@ public class Odometry {
         double imuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
 
 
-//        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
-//        double wheelDeltaTheta  = (deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM;
-//
+
+        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
+        double wheelDeltaTheta  = (deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM;
+
 //        //this limit should match your loop time; 20°/cycle is safe for FTC.
-//        double maxTurnPerStep = Math.toRadians(10);
+        double maxTurnPerStep = Math.toRadians(10);
 //
-//        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
-//            //this is likely an IMU shock / 180° wrap → fall back to wheel
-//            imuDeltaTheta = wheelDeltaTheta;
-//        } else {
-//            //IMU is usually better for heading, but we still keep 30% wheel
-//            // to improve continuity with the dead-wheel translation.
-//            imuDeltaTheta = rawImuDeltaTheta;
-//        }
+        if (isBadReading(rawImuDeltaTheta ) || isWabiSabi(rawImuDeltaTheta, wheelDeltaTheta)) {
+            if (shouldFallbackToWheelTheta) {
+                //this is likely an IMU shock / 180° wrap → fall back to wheel
+                imuDeltaTheta = wheelDeltaTheta;
+                KLog.d("Odometry_IMU_Spike", "Fallback Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
+
+            } else {
+                KLog.d("Odometry_IMU_Spike", "Fallback is off. NOT override Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
+            }
+            KLog.d("Odometry_IMU_Spike", "Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
+        } else {
+            //IMU is usually better for heading, but we still keep 30% wheel
+            // to improve continuity with the dead-wheel translation.
+            imuDeltaTheta = rawImuDeltaTheta;
+        }
 
         double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
         double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * imuDeltaTheta);
@@ -314,6 +319,7 @@ public class Odometry {
 
     private void updateWheelIMUPos(double rightDistanceMM, double leftDistanceMM, double backDistanceMM,
                                    double timeElapsedSeconds) {
+
         Velocity wheelIMURelDelta = calculateRelativeDeltaWheelIMU(rightDistanceMM, leftDistanceMM, backDistanceMM,
                 timeElapsedSeconds * 1000);
         wheelIMURelDelta = linearToArcDelta(wheelIMURelDelta);
@@ -355,22 +361,22 @@ public class Odometry {
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
 
+
         // Read IMU heading only once per cycle
         currentImuHeading = getIMUHeading();
-        if (isBadReading(currentImuHeading)) {
-            KLog.d("Odometry_IMU_Skip", "Imu Heading is BAD, SKIPPING UPDATE " + currentImuHeading);
-            return odometryPositionHistoryHashMap;
-        }
+
+
+
         // Validate IMU reading - skip update if spurious
         double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
         double maxTurnPerStep = Math.toRadians(20); // 20°/cycle is safe for FTC loop times
 
-        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
-            // IMU glitch detected - skip this update cycle to avoid corrupting odometry
-            KLog.d("Odometry_IMU_Skip", "IMU spike detected: " + Math.toDegrees(rawImuDeltaTheta) +
-                   "° - SKIPPING UPDATE to prevent corruption");
-            return odometryPositionHistoryHashMap;
-        }
+//        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
+//            // IMU glitch detected - skip this update cycle to avoid corrupting odometry
+//            KLog.d("Odometry_IMU_Skip", "IMU spike detected: " + Math.toDegrees(rawImuDeltaTheta) +
+//                   "° - SKIPPING UPDATE to prevent corruption");
+//            return odometryPositionHistoryHashMap;
+//        }
 
         KLog.d("IMU_Heading", "Heading (rad): " + currentImuHeading + " (deg): " + Math.toDegrees(currentImuHeading));
         KLog.d("IMU_Prev_Heading", "PrevHeading (rad): " + prevImuHeading + " (deg): " + Math.toDegrees(prevImuHeading));
@@ -421,6 +427,15 @@ public class Odometry {
         return false;
     }
 
+    public boolean isShouldFallbackToWheelTheta() {
+        return shouldFallbackToWheelTheta;
+    }
+
+    public void setShouldFallbackToWheelTheta(boolean shouldFallbackToWheelTheta) {
+        this.shouldFallbackToWheelTheta = shouldFallbackToWheelTheta;
+    }
+
+
     @Override
     public String toString() {
         return "Odometry{" +
@@ -434,5 +449,11 @@ public class Odometry {
                 ", currentImuHeading=" + currentImuHeading +
                 ", prevImuHeading=" + prevImuHeading +
                 '}';
+    }
+
+
+    private boolean isWabiSabi(double imuThetaAngleRad, double wheelThetaAngleRad) {
+        boolean wabiness = (Math.abs(imuThetaAngleRad - wheelThetaAngleRad) > Math.toRadians(11)) && wheelThetaAngleRad != 0.0;
+        return wabiness;
     }
 }

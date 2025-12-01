@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.turret;
 
+import android.os.SystemClock;
+
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
@@ -37,9 +39,11 @@ public class TurretAutoAlign extends Action {
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
         this.allianceColor = allianceColor;
+
         xInitSetupMM = TurretConfig.X_INIT_SETUP_MM;
         yInitSetupMM = TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity();
         this.targetTicks = 0;
+
     }
 
     public boolean isWithinRange() {
@@ -118,6 +122,7 @@ public class TurretAutoAlign extends Action {
         targetTicks = Turret.TICKS_PER_ROTATION * motorRotation - TurretConfig.TICKS_INIT_OFFSET;
         KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
         KLog.d("turret", "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
+
 
 
         /*

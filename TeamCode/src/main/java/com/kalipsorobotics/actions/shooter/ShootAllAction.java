@@ -49,6 +49,9 @@ public class ShootAllAction extends KActionSet {
     }
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlign turretAutoAlign) {
+
+
+
         ready = new ShooterReady(shooterRun);
         ready.setName("ready");
         this.addAction(ready);

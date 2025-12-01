@@ -140,10 +140,10 @@ public class TeleOp extends KOpMode {
                     kGamePad1.getRightStickX() != 0 ||
                     kGamePad1.getLeftStickX() != 0;
 
-            shootPressed = kGamePad2.isLeftTriggerPressed();
+            shootPressed = kGamePad1.isLeftBumperFirstPressed();
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
-            stopShooterPressed = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed();
+            stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isRightBumperFirstPressed();
             warmupPressed = kGamePad2.isDpadUpFirstPressed();
             releasePressed = kGamePad2.isYPressed();
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();

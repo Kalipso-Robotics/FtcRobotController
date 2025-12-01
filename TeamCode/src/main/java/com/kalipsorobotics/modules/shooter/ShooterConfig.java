@@ -7,6 +7,8 @@ public class ShooterConfig {
     public static double timeToStabilize = 500;
     public static double MAX_RPS = 55;
 
+    public static boolean shouldUseLimelight = false;
+
     // PID: this combo is working well; leave it
 //    public static double kp = 0.014000 ;
 //    public static double ki = 0.005000;
