@@ -111,6 +111,14 @@ public class TurretAutoAlign extends Action {
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
 
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
+
+//        if (SharedData.getOdometryUnhealthy()) {
+//            double currentTicks = turretMotor.getCurrentPosition();
+//            double targetDeltaTicks = TurretConfig.TICKS_INIT_OFFSET - currentTicks;
+//            double targetAngleRad = (targetDeltaTicks / Turret.TICKS_PER_RADIAN);
+//            totalTurretAngle = -targetAngleRad;
+//            KLog.d("Turret_Reset", "Unhealthy Odometry Resetting Turret Angle: " + totalTurretAngle);
+//        }
         // Use angleWrapRad to normalize the turret angle to [-π, π]
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
