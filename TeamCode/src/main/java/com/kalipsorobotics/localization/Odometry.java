@@ -15,16 +15,14 @@ import com.kalipsorobotics.math.Velocity;
 
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.modules.DriveTrain;
-import com.qualcomm.hardware.lynx.LynxModule;
 
 import java.util.HashMap;
-import java.util.List;
 
 
 public class Odometry {
     private boolean isOdometryUnhealthy = false;
     private int unhealthyCounter = 0;
-    private boolean shouldFallbackToWheelTheta = true;
+    private boolean shouldFallbackToWheelTheta = false;
     final static private double TRACK_WIDTH_MM = 297;
     //maybe double check BACK Distance
     static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
@@ -40,7 +38,6 @@ public class Odometry {
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
     private DcMotor backEncoder;
-    private List<LynxModule> allHubs;
 
     private final double rightOffset;
     private final double leftOffset;
@@ -118,13 +115,7 @@ public class Odometry {
         odometry.leftEncoder = driveTrain.getLeftEncoder();
         odometry.backEncoder = driveTrain.getBackEncoder();
 
-        // Initialize bulk read for improved encoder reading performance
-        odometry.allHubs = opModeUtilities.getHardwareMap().getAll(LynxModule.class);
-        for (LynxModule module : odometry.allHubs) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
-        KLog.d("Odometry_BulkRead", "Initialized MANUAL bulk caching for " + odometry.allHubs.size() + " hub(s)");
-    }
+         }
 
 
     public static void setInstanceNull() {
@@ -140,48 +131,15 @@ public class Odometry {
     }
 
     public double getRightEncoderMM() {
-        //corresponds to fRight
-        //direction FORWARD
-        //negative because encoder directions
-        try {
-            int position = rightEncoder.getCurrentPosition();
-            KLog.d("Odometry_Encoder", "right encoder" + position);
-            return ticksToMM(position) - rightOffset;
-        } catch (Exception e) {
-            KLog.d("Odometry_Encoder_Error", "Right encoder read failed: " + e.getMessage());
-            // Return last known value to avoid position jumps
-            return prevRightDistanceMM;
-        }
+        return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
     }
 
     public double getLeftEncoderMM() {
-        //corresponds to fLeft
-        //direction FORWARD
-        //positive because encoder directions
-        try {
-            int position = leftEncoder.getCurrentPosition();
-            KLog.d("Odometry_Encoder", "left encoder" + position);
-            return ticksToMM(position) - leftOffset;
-        } catch (Exception e) {
-            KLog.d("Odometry_Encoder_Error", "Left encoder read failed: " + e.getMessage());
-            // Return last known value to avoid position jumps
-            return prevLeftDistanceMM;
-        }
+        return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
     }
 
     public double getBackEncoderMM() {
-        //corresponds to bRight
-        //direction REVERSE
-        //positive because encoder directions
-        try {
-            int position = backEncoder.getCurrentPosition();
-            KLog.d("Odometry_Encoder", "back encoder" + position);
-            return ticksToMM(position) - backOffset;
-        } catch (Exception e) {
-            KLog.d("Odometry_Encoder_Error", "Back encoder read failed: " + e.getMessage());
-            // Return last known value to avoid position jumps
-            return prevBackDistanceMM;
-        }
+        return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
     }
 
     public boolean allEncoderZero() {
@@ -222,7 +180,13 @@ public class Odometry {
 
 //        //this limit should match your loop time; 20°/cycle is safe for FTC.
         double maxTurnPerStep = Math.toRadians(10);
-//
+
+        if (isBadReading(rawImuDeltaTheta)) {
+            unhealthyCounter++;
+            KLog.d("Odometry_IMU_Health", "Bad Reading IMU delta theta " + rawImuDeltaTheta + " wheel delta theta " + wheelDeltaTheta);
+            imuDeltaTheta = wheelDeltaTheta;
+        }
+
         if (isIMUUnhealthy(rawImuDeltaTheta, wheelDeltaTheta)) {
             if (shouldFallbackToWheelTheta) {
                 //this is likely an IMU shock / 180° wrap → fall back to wheel
@@ -446,11 +410,6 @@ public class Odometry {
         if (isFreezing) {
             unhealthyCounter++;
             KLog.d("Odometry_IMU_Health", "Freezing IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
-            return true;
-        }
-        if (isBadReading(imuThetaAngleRad)) {
-            unhealthyCounter++;
-            KLog.d("Odometry_IMU_Health", "Bad Reading IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
             return true;
         }
         return false;

@@ -87,7 +87,6 @@ public class TeleOp extends KOpMode {
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
-
         KLog.d("TeleOp-Init", "Starting initializeRobot()");
 
         driveTrain = DriveTrain.getInstance(opModeUtilities);
@@ -96,6 +95,7 @@ public class TeleOp extends KOpMode {
         sleep(1000);
 
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        odometry.setShouldFallbackToWheelTheta(true);
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
 
