@@ -95,7 +95,7 @@ public class TeleOp extends KOpMode {
         sleep(1000);
 
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        odometry.setShouldFallbackToWheelTheta(true);
+//        odometry.setShouldFallbackToWheelTheta(true);
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
         driveAction = new DriveAction(driveTrain);
 
