@@ -22,6 +22,8 @@ import java.util.List;
 
 
 public class Odometry {
+    private boolean isOdometryUnhealthy = false;
+    private int unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
     final static private double TRACK_WIDTH_MM = 297;
     //maybe double check BACK Distance
@@ -53,7 +55,7 @@ public class Odometry {
 
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule,
                      Position startPosMMRad) {
-        KLog.d("debug_OpMode_Transfer", "New Instance");
+        KLog.d("Odometry_debug_OpMode_Transfer", "New Instance");
         this.opModeUtilities = opModeUtilities;
         resetHardware(opModeUtilities, driveTrain, imuModule, this);
         this.rightOffset = this.getRightEncoderMM();
@@ -81,7 +83,7 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
         } else {
-            KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
@@ -92,7 +94,7 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startPosMMRad);
         } else {
-            KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
@@ -103,7 +105,7 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startXMM, startYMM, startThetaRad);
         } else {
-            KLog.d("debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
@@ -143,7 +145,7 @@ public class Odometry {
         //negative because encoder directions
         try {
             int position = rightEncoder.getCurrentPosition();
-            KLog.d("encoder", "right encoder" + position);
+            KLog.d("Odometry_Encoder", "right encoder" + position);
             return ticksToMM(position) - rightOffset;
         } catch (Exception e) {
             KLog.d("Odometry_Encoder_Error", "Right encoder read failed: " + e.getMessage());
@@ -158,7 +160,7 @@ public class Odometry {
         //positive because encoder directions
         try {
             int position = leftEncoder.getCurrentPosition();
-            KLog.d("encoder", "left encoder" + position);
+            KLog.d("Odometry_Encoder", "left encoder" + position);
             return ticksToMM(position) - leftOffset;
         } catch (Exception e) {
             KLog.d("Odometry_Encoder_Error", "Left encoder read failed: " + e.getMessage());
@@ -173,7 +175,7 @@ public class Odometry {
         //positive because encoder directions
         try {
             int position = backEncoder.getCurrentPosition();
-            KLog.d("encoder", "back encoder" + position);
+            KLog.d("Odometry_Encoder", "back encoder" + position);
             return ticksToMM(position) - backOffset;
         } catch (Exception e) {
             KLog.d("Odometry_Encoder_Error", "Back encoder read failed: " + e.getMessage());
@@ -210,6 +212,7 @@ public class Odometry {
         double deltaLeftDistance = leftDistanceMM - prevLeftDistanceMM;
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
 
+        KLog.d("Odometry_Delta_Theta", "Raw IMU Current Heading" + currentImuHeading + " Prev IMU Heading " + prevImuHeading);
         double imuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
 
 
@@ -220,16 +223,16 @@ public class Odometry {
 //        //this limit should match your loop time; 20°/cycle is safe for FTC.
         double maxTurnPerStep = Math.toRadians(10);
 //
-        if (isBadReading(rawImuDeltaTheta ) || isWabiSabi(rawImuDeltaTheta, wheelDeltaTheta)) {
+        if (isIMUUnhealthy(rawImuDeltaTheta, wheelDeltaTheta)) {
             if (shouldFallbackToWheelTheta) {
                 //this is likely an IMU shock / 180° wrap → fall back to wheel
                 imuDeltaTheta = wheelDeltaTheta;
-                KLog.d("Odometry_IMU_Spike", "Fallback Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
+                KLog.d("Odometry_IMU_Health", "Fallback Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
 
             } else {
-                KLog.d("Odometry_IMU_Spike", "Fallback is off. NOT override Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
+                KLog.d("Odometry_IMU_Health", "Fallback is off. NOT override Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
             }
-            KLog.d("Odometry_IMU_Spike", "Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
+            KLog.d("Odometry_IMU_Health", "Raw IMU " + rawImuDeltaTheta + " wheel " + wheelDeltaTheta);
         } else {
             //IMU is usually better for heading, but we still keep 30% wheel
             // to improve continuity with the dead-wheel translation.
@@ -347,7 +350,7 @@ public class Odometry {
 
     public HashMap<OdometrySensorCombinations, PositionHistory> updateAll() {
         if (!opModeUtilities.getOpMode().opModeIsActive()) {
-            KLog.d("Odometry", "OpMode Not Active. OpMode: " + opModeUtilities.getOpMode().getClass().getName());
+            KLog.d("Odometry_debug_OpMode_Transfer", "OpMode Not Active. OpMode: " + opModeUtilities.getOpMode().getClass().getName());
             return odometryPositionHistoryHashMap;
         }
 
@@ -366,20 +369,8 @@ public class Odometry {
         currentImuHeading = getIMUHeading();
 
 
-
-        // Validate IMU reading - skip update if spurious
-        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
-        double maxTurnPerStep = Math.toRadians(20); // 20°/cycle is safe for FTC loop times
-
-//        if (Math.abs(rawImuDeltaTheta) > maxTurnPerStep) {
-//            // IMU glitch detected - skip this update cycle to avoid corrupting odometry
-//            KLog.d("Odometry_IMU_Skip", "IMU spike detected: " + Math.toDegrees(rawImuDeltaTheta) +
-//                   "° - SKIPPING UPDATE to prevent corruption");
-//            return odometryPositionHistoryHashMap;
-//        }
-
-        KLog.d("IMU_Heading", "Heading (rad): " + currentImuHeading + " (deg): " + Math.toDegrees(currentImuHeading));
-        KLog.d("IMU_Prev_Heading", "PrevHeading (rad): " + prevImuHeading + " (deg): " + Math.toDegrees(prevImuHeading));
+        KLog.d("Odometry_IMU_Heading", "Heading (rad): " + currentImuHeading + " (deg): " + Math.toDegrees(currentImuHeading));
+        KLog.d("Odometry_IMU_Prev_Heading", "PrevHeading (rad): " + prevImuHeading + " (deg): " + Math.toDegrees(prevImuHeading));
 
 
         long currentTime = SystemClock.elapsedRealtime();
@@ -394,10 +385,14 @@ public class Odometry {
         prevLeftDistanceMM = leftDistanceMM;
         prevBackDistanceMM = backDistanceMM;
         Position wheelIMUPosition = odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition();
-        KLog.d("OdometryPosition", wheelIMUPosition.toString());
+        Position wheelPosition = odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL).getCurrentPosition();
+
+        KLog.d("Odometry_IMU_Position", wheelIMUPosition.toString() + " UnhealthyCounter " + unhealthyCounter + " Unhealthyness " + isOdometryUnhealthy);
+        KLog.d("Odometry_Wheel_Position", wheelPosition.toString() + " UnhealthyCounter " + unhealthyCounter + " Unhealthyness " + isOdometryUnhealthy);
         prevImuHeading = currentImuHeading;
         SharedData.setOdometryPosition(wheelIMUPosition);
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
+        SharedData.setIsOdometryUnhealthy(this.isOdometryUnhealthy);
         return odometryPositionHistoryHashMap;
     }
 
@@ -420,7 +415,7 @@ public class Odometry {
         return imuHeading;
     }
 
-    public boolean isBadReading(double reading) {
+    private boolean isBadReading(double reading) {
         if (Double.isNaN(reading) || Double.isInfinite(reading)) {
             return true;
         }
@@ -435,6 +430,47 @@ public class Odometry {
         this.shouldFallbackToWheelTheta = shouldFallbackToWheelTheta;
     }
 
+
+    private boolean isIMUUnhealthy(double imuThetaAngleRad, double wheelThetaAngleRad) {
+        KLog.d("Odometry_Delta_Theta", "Checking IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+        if (unhealthyCounter > 2000 || isOutsideFieldBoundaries(getCurrentPositionHistory().getCurrentPosition())) {
+            isOdometryUnhealthy = true;
+        }
+        boolean isSpike = (Math.abs(imuThetaAngleRad - wheelThetaAngleRad) > Math.toRadians(11)) && wheelThetaAngleRad != 0.0;
+        if (isSpike) {
+            unhealthyCounter++;
+            KLog.d("Odometry_IMU_Health", "Spike IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+            return true;
+        }
+        boolean isFreezing = (Math.abs(imuThetaAngleRad) < 1e-10) && (Math.abs(wheelThetaAngleRad) > 1e-3);
+        if (isFreezing) {
+            unhealthyCounter++;
+            KLog.d("Odometry_IMU_Health", "Freezing IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+            return true;
+        }
+        if (isBadReading(imuThetaAngleRad)) {
+            unhealthyCounter++;
+            KLog.d("Odometry_IMU_Health", "Bad Reading IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isOutsideFieldBoundaries(Position position) {
+        if (Math.abs(position.getX()) > (3657.6 * 1.4) || Math.abs(position.getY()) > (3657.6 * 1.4)) {
+            KLog.d("Odometry_IMU_Health", "Outside Field Boundaries" + position);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isOdometryUnhealthy() {
+        return isOdometryUnhealthy;
+    }
+
+    public void setOdometryUnhealthy(boolean odometryUnhealthy) {
+        isOdometryUnhealthy = odometryUnhealthy;
+    }
 
     @Override
     public String toString() {
@@ -452,8 +488,4 @@ public class Odometry {
     }
 
 
-    private boolean isWabiSabi(double imuThetaAngleRad, double wheelThetaAngleRad) {
-        boolean wabiness = (Math.abs(imuThetaAngleRad - wheelThetaAngleRad) > Math.toRadians(11)) && wheelThetaAngleRad != 0.0;
-        return wabiness;
-    }
 }

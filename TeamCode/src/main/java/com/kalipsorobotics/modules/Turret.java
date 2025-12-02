@@ -3,11 +3,9 @@ package com.kalipsorobotics.modules;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 public class Turret {
     private static Turret single_instance = null;
@@ -17,10 +15,10 @@ public class Turret {
     public KMotor turretMotor;
 
     public static final double TICKS_PER_ROTATION = 384.5;
-    public static final double GEAR_RATIO = 125.0/32.0;
+    public static final double BIG_TO_SMALL_PULLEY = 125.0/32.0;
 
-    public static final double TICKS_PER_RADIAN = (TICKS_PER_ROTATION * GEAR_RATIO) / (2*Math.PI);
-    public static final double TICKS_PER_DEGREE = (TICKS_PER_ROTATION * GEAR_RATIO) / 360.0;
+    public static final double TICKS_PER_RADIAN = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / (2 * Math.PI);
+    public static final double TICKS_PER_DEGREE = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / 360.0;
 
     private Turret(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;

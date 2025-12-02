@@ -33,6 +33,16 @@ public class SharedData {
         SharedData.odometryPositionMap.putAll(odometryPositionMap);
     }
 
+    private static boolean isOdometryUnhealthy = false;
+
+    public static boolean getOdometryUnhealthy() {
+        return isOdometryUnhealthy;
+    }
+
+    public static void setIsOdometryUnhealthy(boolean isOdometryUnhealthy) {
+        SharedData.isOdometryUnhealthy = isOdometryUnhealthy;
+    }
+
     private static AllianceColor allianceColor = AllianceColor.RED;
 
     public static AllianceColor getAllianceColor() {

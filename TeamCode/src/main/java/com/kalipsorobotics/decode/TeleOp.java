@@ -19,6 +19,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -38,6 +39,7 @@ import com.kalipsorobotics.modules.shooter.ShotLogger;
 public class TeleOp extends KOpMode {
     protected final Point SHOOTER_TARGET_POINT = Shooter.TARGET_POINT;
     private boolean hasClosedStopperInnit = false;
+    private boolean turretReset = false;
     private DriveTrain driveTrain;
     private Shooter shooter = null;
     private Intake intake = null;
@@ -64,6 +66,8 @@ public class TeleOp extends KOpMode {
     // Button state variables
     private boolean drivingSticks = false;
     private boolean shootPressed = false;
+    private boolean forceShootFarPressed = false;
+
     private boolean intakeRunPressed = false;
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
@@ -73,6 +77,7 @@ public class TeleOp extends KOpMode {
     private boolean markOvershotPressed = false;
     private boolean shooterReadyWasNotDone = false;
     private boolean limelightCorrectionPressed = false;
+    private boolean manualTurretControlToggled = false;
 
     @Override
     protected void initializeRobotConfig() {
@@ -140,12 +145,18 @@ public class TeleOp extends KOpMode {
                     kGamePad1.getRightStickX() != 0 ||
                     kGamePad1.getLeftStickX() != 0;
 
+            forceShootFarPressed = kGamePad1.isLeftTriggerPressed();
             shootPressed = kGamePad1.isLeftBumperFirstPressed();
-            intakeRunPressed = kGamePad2.isRightTriggerPressed();
-            intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isRightBumperFirstPressed();
             warmupPressed = kGamePad2.isDpadUpFirstPressed();
+
+            intakeRunPressed = kGamePad2.isRightTriggerPressed();
+            intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
+
             releasePressed = kGamePad2.isYPressed();
+
+            manualTurretControlToggled = kGamePad2.isToggleX();
+
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
 //            limelightCorrectionPressed = kGamePad1.isBackPressed();  // Back button for vision correction
@@ -159,18 +170,7 @@ public class TeleOp extends KOpMode {
 
             // ========== HANDLE LIMELIGHT ODOMETRY CORRECTION ==========
 
-            if (kGamePad2.isDpadLeftPressed()) {
-                turretAutoAlign.incrementYInitSetupMM(-10);
-                if (turretAutoAlign != null) {
-                    turretAutoAlign.updateCheckDone();
-                }
-            } else if (kGamePad2.isDpadRightPressed()) {
-                turretAutoAlign.incrementYInitSetupMM(10);
-                if (turretAutoAlign != null) {
-                    turretAutoAlign.updateCheckDone();
-                }
-            }
-
+            handleTurret();
             // ========== HANDLE INTAKE (Priority Order: Shoot > Stall > Manual > Idle) ==========
             handleIntake();
 
@@ -190,6 +190,23 @@ public class TeleOp extends KOpMode {
         }
 
         cleanupRobot();
+    }
+
+    private void handleTurret() {
+
+        if (manualTurretControlToggled) {
+            turretAutoAlign.setIsDone(true);
+            if (kGamePad2.isDpadLeftPressed()) {
+                turret.turretMotor.setPower(-0.25);
+            } else if (kGamePad2.isDpadRightPressed()) {
+                turret.turretMotor.setPower(0.25);
+            } else if (turretAutoAlign.getIsDone()) {
+                turret.turretMotor.setPower(0);
+            }
+        } else {
+            turretAutoAlign.setIsDone(false);
+        }
+        KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
     }
 
     /**
@@ -305,8 +322,10 @@ public class TeleOp extends KOpMode {
         if ((shooter.isRunning()) || (isPending(shooterWarmup)) || (isPending(shootAction))) {
             turretAutoAlign.updateCheckDone();
         } else {
-            // Stop turret motor when not shooting to prevent drift
-            turretAutoAlign.stop();
+            // Stop turret motor when not shooting to prevent drift, but only if manual control isn't active
+            if (!manualTurretControlToggled) {
+                turretAutoAlign.stop();
+            }
         }
 
         // Priority 1- Stop shooter
@@ -334,6 +353,18 @@ public class TeleOp extends KOpMode {
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 KLog.d("Shooting", "Shoot action started - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
+            }
+            return;
+        }
+
+        //
+        if (forceShootFarPressed) {
+            if (!isPending(shootAction)) {
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
+                shooterWarmup = null;
+                setLastShooterAction(shootAction);
+                setLastStopperAction(null);  // Clear stopper - shoot action controls it
+                KLog.d("Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
             }
             return;
         }

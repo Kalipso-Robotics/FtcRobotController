@@ -28,7 +28,7 @@ public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
 
     public final static double SHOOT_FAR_X = 150;
-    public final static double SHOOT_FAR_Y = 89;
+    public final static double SHOOT_FAR_Y = 0;
     private DriveTrain driveTrain;
     Shooter shooter = null;
     Intake intake = null;

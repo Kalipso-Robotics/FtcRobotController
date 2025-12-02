@@ -38,4 +38,9 @@ public class ShooterInterpolationConfig {
             3283.8, 46, 0.8, // 2 + 3 SHOOT FAR,
             3441.86, 46.6, 0.8, // FIRST SHOOT FAR,
     };
+
+    public static double[] getMaxValue() {
+        return new double[] {46.6, 0.8};
+    }
+
 }

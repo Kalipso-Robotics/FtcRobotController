@@ -1,7 +1,5 @@
 package com.kalipsorobotics.actions.turret;
 
-import android.os.SystemClock;
-
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
@@ -12,7 +10,6 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
@@ -118,8 +115,8 @@ public class TurretAutoAlign extends Action {
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
-        double motorRotation = turretRotation * Turret.GEAR_RATIO;
-        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation - TurretConfig.TICKS_INIT_OFFSET;
+        double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
+        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation + TurretConfig.TICKS_INIT_OFFSET;
         KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
         KLog.d("turret", "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
 
