@@ -11,7 +11,7 @@ import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
+//@TeleOp
 public class TurretTest extends KOpMode {
 
     DriveTrain driveTrain;

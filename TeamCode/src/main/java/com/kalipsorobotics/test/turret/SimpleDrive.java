@@ -1,8 +1,6 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.test.turret;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
@@ -14,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
  *   - Right stick X: Turn left/right
  */
 
-@TeleOp(name = "Simple Drive Test")
+//@TeleOp(name = "Simple Drive Test")
 public class SimpleDrive extends LinearOpMode {
 
     private DcMotor fLeft = null;

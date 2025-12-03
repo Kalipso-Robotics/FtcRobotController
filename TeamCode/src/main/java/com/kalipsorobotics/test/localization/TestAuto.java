@@ -10,7 +10,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
+//@Autonomous
 public class TestAuto extends KOpMode {
     DriveTrain driveTrain;
     IMUModule imuModule;

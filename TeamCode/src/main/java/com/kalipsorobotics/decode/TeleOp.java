@@ -199,6 +199,8 @@ public class TeleOp extends KOpMode {
     private void handleTurret() {
 
         if (manualTurretControlToggled) {
+            odometry.setOdometryUnhealthy(true);
+            SharedData.setIsOdometryUnhealthy(true);
             turretAutoAlign.setIsDone(true);
             if (kGamePad2.isDpadLeftPressed()) {
                 turret.turretMotor.setPower(-0.25);
@@ -355,7 +357,7 @@ public class TeleOp extends KOpMode {
         if (shootPressed) {
             if (!isPending(shootAction)) {
                 shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
-                shootAction.shooterRun.setUseLimelight(true);
+                shootAction.shooterRun.setUseLimelight(false);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -371,7 +373,7 @@ public class TeleOp extends KOpMode {
         if (forceShootFarPressed) {
             if (!isPending(shootAction)) {
                 shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
-                shootAction.shooterRun.setUseLimelight(true);
+                shootAction.shooterRun.setUseLimelight(false);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it

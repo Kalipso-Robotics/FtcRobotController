@@ -11,7 +11,7 @@ import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
+//@Autonomous
 public class TurretAutoTest extends KOpMode {
 
     DriveTrain driveTrain;

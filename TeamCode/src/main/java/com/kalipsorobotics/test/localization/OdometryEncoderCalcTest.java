@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@TeleOp
+//@TeleOp
 public class OdometryEncoderCalcTest extends LinearOpMode {
 
     @Override

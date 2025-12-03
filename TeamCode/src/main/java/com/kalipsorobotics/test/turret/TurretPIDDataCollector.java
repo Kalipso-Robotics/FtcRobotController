@@ -49,7 +49,7 @@ import java.util.ArrayList;
  * 4. Pull CSV from /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/
  * 5. Analyze data to tune PID values in TurretConfig
  */
-@TeleOp(name = "Turret PID Data Collector", group = "Test")
+//@TeleOp(name = "Turret PID Data Collector", group = "Test")
 public class TurretPIDDataCollector extends LinearOpMode {
 
     // Target range (in ticks)

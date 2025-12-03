@@ -9,7 +9,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "TestTeleOp", group = "Test")
+//@TeleOp(name = "TestTeleOp", group = "Test")
 public class TestOpMode extends KOpMode {
     DriveTrain driveTrain;
     IMUModule imuModule;
