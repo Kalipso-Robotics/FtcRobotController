@@ -37,7 +37,7 @@ public class GoalDetectionAction extends Action {
     final double TAG_HEIGHT_M = 29.5 * 25.4;
     final double deltaH = TAG_HEIGHT_M - CAM_HEIGHT_M;
 
-    final double kDistanceScale = (30.0 + 25) / (32 + 27); //can add more data values
+    double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
     public GoalDetectionAction(OpModeUtilities opModeUtilities, Turret turret) {
 //        camera = opModeUtilities.getHardwareMap().get(WebcamName.class, "Webcam 1");
