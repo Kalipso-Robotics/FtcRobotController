@@ -1,11 +1,10 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.test.turret;
 
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.io.BufferedWriter;
@@ -30,7 +29,7 @@ import java.util.Locale;
  *
  * Data is automatically saved periodically to prevent loss if program stops.
  */
-@TeleOp(name = "Turret kS Tuner", group = "Tuning")
+//@TeleOp(name = "Turret kS Tuner", group = "Tuning")
 public class TurretKsTuner extends LinearOpMode {
 
     private OpModeUtilities opModeUtilities;

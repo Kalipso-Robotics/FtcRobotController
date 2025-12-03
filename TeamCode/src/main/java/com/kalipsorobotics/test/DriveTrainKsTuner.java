@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import java.util.ArrayList;
 import java.util.List;
 
-@TeleOp(name = "DriveTrainKsTuner", group = "Test")
+//@TeleOp(name = "DriveTrainKsTuner", group = "Test")
 public class DriveTrainKsTuner extends KOpMode {
     private DriveTrain driveTrain;
     private IMU imu;

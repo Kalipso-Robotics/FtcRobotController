@@ -5,7 +5,7 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp
+//@TeleOp
 public class StopperCalibration extends KOpMode {
 
     private static final double POSITION_INCREMENT = 0.01;
