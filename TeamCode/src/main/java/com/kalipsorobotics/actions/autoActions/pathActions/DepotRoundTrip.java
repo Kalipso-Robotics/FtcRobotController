@@ -32,7 +32,7 @@ public class DepotRoundTrip extends KActionSet {
         trip.setName("trip");
         trip.getMoveToBall().setLookAheadRadius(75);
         trip.getMoveToBall().setMaxTimeOutMS(8000);
-        trip.getMoveToBall().setFinalSearchRadius(150);
+        trip.getMoveToBall().setFinalSearchRadius(100);
         trip.getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());

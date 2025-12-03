@@ -28,7 +28,7 @@ public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
 
     public final static double SHOOT_FAR_X = 150;
-    public final static double SHOOT_FAR_Y = 0;
+    public final static double SHOOT_FAR_Y = 100;
     private DriveTrain driveTrain;
     Shooter shooter = null;
     Intake intake = null;
@@ -138,7 +138,7 @@ public class RedAutoDepot extends KOpMode {
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
         park.setDependentActions(trip3);
-        park.addPoint(SHOOT_FAR_X + 400, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        park.addPoint(170, 590 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);
         KLog.d("auto", "--------------DEPOT AUTO STARTED-------------");
