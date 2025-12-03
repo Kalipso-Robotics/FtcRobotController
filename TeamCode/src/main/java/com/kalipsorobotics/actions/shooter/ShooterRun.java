@@ -32,6 +32,8 @@ public class ShooterRun extends Action {
 
     ElapsedTime elapsedTime;
 
+    private boolean useLimelight = false;
+
 
     public ShooterRun(Shooter shooter, double targetRPS, double targetHoodPosition) {
         this.shooter = shooter;
@@ -139,15 +141,19 @@ public class ShooterRun extends Action {
         if (distanceMM < 0) {
             KLog.d("shooter_ready", "We using odo pos to target position: " + targetPoint);
             // Calculate distance from odometry position to target
-            Position currentPosition = SharedData.getOdometryPosition();
+
+            Position currentPosition;
+            if (!useLimelight) {
+                currentPosition = SharedData.getOdometryPosition();
+            } else {
+                currentPosition = SharedData.getLimelightOdometryPosition();
+            }
+
             double dx = targetPoint.getX() - currentPosition.getX();
             double dy = targetPoint.getY() - currentPosition.getY();
 
-//            if (!useAprilTag) {
-                distanceMM = Math.sqrt((dx * dx) + (dy * dy));
-//            } else {
-//                distanceMM = SharedData.getDistanceToGoal();
-//            }
+            distanceMM = Math.sqrt((dx * dx) + (dy * dy));
+
 
         }
 
@@ -186,5 +192,9 @@ public class ShooterRun extends Action {
         }
         shooter.stop();
         isDone = true;
+    }
+
+    public void setUseLimelight(boolean useLimelight){
+        this.useLimelight = useLimelight;
     }
 }

@@ -38,6 +38,8 @@ public class Shooter {
 
     private final KCRServo kicker;
 
+
+
 //    private final KCRServo pusherRight;
 //    private final KCRServo pusherLeft;
 //

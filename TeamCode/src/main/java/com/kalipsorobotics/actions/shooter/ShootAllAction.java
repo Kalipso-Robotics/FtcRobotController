@@ -13,7 +13,7 @@ import com.kalipsorobotics.utilities.KLog;
 
 public class ShootAllAction extends KActionSet {
 
-    ShooterRun shooterRun;
+    public ShooterRun shooterRun;
     ShooterReady ready;
     PushBall pushAllBalls;
     ShooterStop shooterStop;
