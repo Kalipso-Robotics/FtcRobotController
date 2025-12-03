@@ -100,9 +100,9 @@ public class TurretAutoAlign extends Action {
 
         double angleTargetRadian;
 //        if (!useAprilTag) {
-            // Use atan2 for proper angle calculation in all quadrants
-            angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
-            KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
+        // Use atan2 for proper angle calculation in all quadrants
+        angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
+        KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
 //        } else {
 //            angleTargetRadian = SharedData.getAngleRadToGoal();
 //        }
@@ -154,22 +154,20 @@ public class TurretAutoAlign extends Action {
 
          }*/
 
-        KLog.d("turret_position", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+        KLog.d("turret_position", " ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
 
         if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turretMotor.stop();
-            KLog.d("turret_position", "Within RANGE, ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+            KLog.d("turret_position", "Within RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
         } else {
             isWithinRange = false;
             turretMotor.goToTargetTicks((int) targetTicks);
-            KLog.d("turret_position", "NOT WITHIN RANGE, ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+            KLog.d("turret_position", "NOT WITHIN RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
         }
         KLog.d("turret_in_range", "is the turret in range " + isWithinRange);
-
-
 
 
 //read position of robot in the field
@@ -184,12 +182,10 @@ public class TurretAutoAlign extends Action {
 //need odometry
 
 
-
-
-
         //check to see if turret is aligned with the goal
 
     }
+
 
     public double getTargetTicks() {
         return targetTicks;
