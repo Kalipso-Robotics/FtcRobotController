@@ -199,6 +199,8 @@ public class TeleOp extends KOpMode {
     private void handleTurret() {
 
         if (manualTurretControlToggled) {
+            odometry.setOdometryUnhealthy(true);
+            SharedData.setIsOdometryUnhealthy(true);
             turretAutoAlign.setIsDone(true);
             if (kGamePad2.isDpadLeftPressed()) {
                 turret.turretMotor.setPower(-0.25);
