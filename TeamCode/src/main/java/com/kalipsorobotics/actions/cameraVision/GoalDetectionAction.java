@@ -98,11 +98,13 @@ public class GoalDetectionAction extends Action {
                     double tagCamFlatDist = Math.hypot(xCam, zCam) * kDistanceScale;
 
 //                        double flatDist = Math.sqrt(tagCamFlatDist*tagCamFlatDist - deltaH*deltaH) * kDistanceScale;
+//
+//                    double headingRad = -(Math.atan2(xCam, zCam));
+//                    turret.getOpModeUtilities().getTelemetry().addData("Heading to tag (rad)", "%.3f", headingRad);
 
-                    double headingRad = -(Math.atan2(xCam, zCam));
-                    turret.getOpModeUtilities().getTelemetry().addData("Heading to tag (rad)", "%.3f", headingRad);
+                    double tagYawCamRad = tagCamPose.getOrientation().getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
 
-                    double camHeadingField = normRad(APRIL_YAW_FIELD_RAD + Math.PI - headingRad);
+                    double camHeadingField = normRad(APRIL_YAW_FIELD_RAD + Math.PI - tagYawCamRad);
 
                     double currentTurretRad = turret.getCurrentAngleRad();
 
@@ -113,7 +115,7 @@ public class GoalDetectionAction extends Action {
 
                     //------------- ================= -----------------
 
-                    double bearingField = normRad(camHeadingField + headingRad);
+                    double bearingField = normRad(camHeadingField + tagYawCamRad);
 
                     double xDistCamToTag = Math.cos(bearingField) * tagCamFlatDist;
                     double yDistCamToTag = Math.sin(bearingField) * tagCamFlatDist;
