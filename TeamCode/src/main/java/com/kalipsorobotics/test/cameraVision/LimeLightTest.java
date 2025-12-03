@@ -55,10 +55,10 @@ public class LimeLightTest extends LinearOpMode {
                     Pose3D tagCamPose = fr.getTargetPoseCameraSpace();
 
                     double xCam = tagCamPose.getPosition().x * 1000;
-                    double yCam = tagCamPose.getPosition().y * 1000;
+//                    double yCam = tagCamPose.getPosition().y * 1000;
                     double zCam = tagCamPose.getPosition().z * 1000;
 
-                    double goalDist3D = Math.sqrt(xCam*xCam + yCam*yCam + zCam*zCam);
+//                    double goalDist3D = Math.sqrt(xCam*xCam + yCam*yCam + zCam*zCam);
 
                     final double CAM_HEIGHT_M = 12.5 * 25.4; // example: 30 cm off floor
                     final double TAG_HEIGHT_M = 29.5 * 25.4; // example: 40 cm off floor
@@ -69,7 +69,7 @@ public class LimeLightTest extends LinearOpMode {
 
                     double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
-                    double flatDist = Math.sqrt(goalDist3D*goalDist3D - deltaH*deltaH) * kDistanceScale; //flat distance on floor with scaling
+                    double flatDist = Math.hypot(xCam,zCam) * kDistanceScale; //flat distance on floor with scaling
 
                     KLog.d("limelight", "got flat dist at " + elapsedTime.milliseconds());
 
@@ -78,7 +78,7 @@ public class LimeLightTest extends LinearOpMode {
                     telemetry.addData("Goal Z (offset forward-back)", "%.3fmm, %.3fin", zCam, zCam/25.4);
                     telemetry.addData("Goal Flat Distance", "%.3fmm, %.3fin", flatDist, flatDist/25.4);
 
-                    double headingRad = (Math.atan2(xCam, zCam));
+                    double headingRad = -(Math.atan2(xCam, zCam));
                     telemetry.addData("Heading to tag (rad)", "%.3f", headingRad);
 //
 //                    // existing debug

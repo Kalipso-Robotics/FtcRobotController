@@ -3,6 +3,7 @@ package com.kalipsorobotics.decode;
 import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
@@ -63,6 +64,8 @@ public class TeleOp extends KOpMode {
 
     ShotLogger shotLogger = null;
 
+    GoalDetectionAction goalDetectionAction = null;
+
     // Button state variables
     private boolean drivingSticks = false;
     private boolean shootPressed = false;
@@ -109,6 +112,7 @@ public class TeleOp extends KOpMode {
         turret = Turret.getInstance(opModeUtilities);
 
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret);
 
         shotLogger = new ShotLogger(opModeUtilities);
 
@@ -159,7 +163,7 @@ public class TeleOp extends KOpMode {
 
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
-//            limelightCorrectionPressed = kGamePad1.isBackPressed();  // Back button for vision correction
+//            limelightCorrectionPressed = kGamePad1.isBackButtonPressed();  // Back button for vision correction
 
             // ========== HANDLE DRIVING ==========
             if (drivingSticks) {
@@ -320,6 +324,8 @@ public class TeleOp extends KOpMode {
     private void handleShooting() {
         // Update turret when shooting or warmup
         if ((shooter.isRunning()) || (isPending(shooterWarmup)) || (isPending(shootAction))) {
+            goalDetectionAction.updateCheckDone();
+            KLog.d("limelight", "limelight odometry position is " + SharedData.getLimelightOdometryPosition().toString());
             turretAutoAlign.updateCheckDone();
         } else {
             // Stop turret motor when not shooting to prevent drift, but only if manual control isn't active
@@ -349,6 +355,7 @@ public class TeleOp extends KOpMode {
         if (shootPressed) {
             if (!isPending(shootAction)) {
                 shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+                shootAction.shooterRun.setUseLimelight(true);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -364,6 +371,7 @@ public class TeleOp extends KOpMode {
         if (forceShootFarPressed) {
             if (!isPending(shootAction)) {
                 shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
+                shootAction.shooterRun.setUseLimelight(true);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it

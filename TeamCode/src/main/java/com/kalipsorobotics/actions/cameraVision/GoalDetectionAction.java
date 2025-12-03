@@ -25,6 +25,10 @@ public class GoalDetectionAction extends Action {
     private Limelight3A limelight;
     private Turret turret;
 
+
+    // Field-facing yaw of each goal tag (absolute field frame, +CCW from field X)
+    private final double APRIL_YAW_FIELD_RAD = Math.toRadians(45); // todo measure final
+
     private final double APRILTAG_X_FROM_INIT = (15 + 24*4 + 10) * 25.4; //todo measure final
 
     private final double APRILTAG_Y_FROM_INIT = (7+32) * 25.4; //todo measure final
@@ -72,96 +76,90 @@ public class GoalDetectionAction extends Action {
 
     @Override
     protected void update() {
+        limelight.start(); //todo turn off later
+        LLResult result = limelight.getLatestResult();
+        if (result != null && result.isValid()) {
 
-//        limelight.start();
-//        List<AprilTagDetection> currentDetections = aprilTagProcessor.getDetections();
+            // Access fiducial results
+            List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+            for (LLResultTypes.FiducialResult fr : fiducialResults) {
 
-//        if (useWebcam) {
-//            for (AprilTagDetection detection : currentDetections) {
-//                if (detection.metadata != null) {
-//                    double distanceXMidGoal = detection.ftcPose.x + 25.4;
-//                    double distanceYMidGoal = detection.ftcPose.y + 25.4;
-//                    double distanceToGoal = Math.sqrt((distanceXMidGoal * distanceXMidGoal) + (distanceYMidGoal * distanceYMidGoal));
-//                    if ((SharedData.getAllianceColor() == AllianceSetup.RED && detection.id == 24) || (SharedData.getAllianceColor() == AllianceSetup.BLUE && detection.id == 21)) {
-//                        SharedData.setDistanceToGoal(distanceToGoal);
-//                    }
+                int tagId = fr.getFiducialId();
+                boolean isRedGoal  = SharedData.getAllianceColor() == AllianceColor.RED  && tagId == 24;
+                boolean isBlueGoal = SharedData.getAllianceColor() == AllianceColor.BLUE && tagId == 21;
+
+                if (isRedGoal || isBlueGoal) {
+                    Pose3D tagCamPose = fr.getTargetPoseCameraSpace();
+
+                    double xCam = tagCamPose.getPosition().x * 1000;
+//                        double yCam = tagCamPose.getPosition().y * 1000;
+                    double zCam = tagCamPose.getPosition().z * 1000;
+
+                    double tagCamFlatDist = Math.hypot(xCam, zCam) * kDistanceScale;
+
+//                        double flatDist = Math.sqrt(tagCamFlatDist*tagCamFlatDist - deltaH*deltaH) * kDistanceScale;
 //
-//                    double angleTargetRadian = Math.atan2(distanceYMidGoal, distanceXMidGoal);
-//                    SharedData.setAngleRadToGoal(angleTargetRadian);
-//                } else {
-//                    KLog.d("goaldetection", "camera cannot find apriltag");
-//                }
-//            }
-//        } else {
-            LLResult result = limelight.getLatestResult();
-            if (result != null && result.isValid()) {
+//                    double headingRad = -(Math.atan2(xCam, zCam));
+//                    turret.getOpModeUtilities().getTelemetry().addData("Heading to tag (rad)", "%.3f", headingRad);
 
-                // Access fiducial results
-                List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
+                    double tagYawCamRad = tagCamPose.getOrientation().getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
 
-                    int tagId = fr.getFiducialId();
-                    boolean isRedGoal  = SharedData.getAllianceColor() == AllianceColor.RED  && tagId == 24;
-                    boolean isBlueGoal = SharedData.getAllianceColor() == AllianceColor.BLUE && tagId == 21;
+                    double camHeadingField = normRad(APRIL_YAW_FIELD_RAD + Math.PI - tagYawCamRad);
 
-                    if (isRedGoal || isBlueGoal) {
-                        Pose3D tagCamPose = fr.getTargetPoseCameraSpace();
+                    double currentTurretRad = turret.getCurrentAngleRad();
 
-                        double xCam = tagCamPose.getPosition().x * 1000;
-                        double yCam = tagCamPose.getPosition().y * 1000;
-                        double zCam = tagCamPose.getPosition().z * 1000;
+                    //------------- current robot rad -----------------
+//                        double currentRobotRad = SharedData.getOdometryPosition().getTheta();
 
-                        double goalDist3D = Math.sqrt(xCam*xCam + yCam*yCam + zCam*zCam);
+                    double currentRobotRad  = normRad(camHeadingField - currentTurretRad);
 
-                        double flatDist = Math.sqrt(goalDist3D*goalDist3D - deltaH*deltaH) * kDistanceScale;
+                    //------------- ================= -----------------
 
-                        double headingRad = (Math.atan2(xCam, zCam));
-                        telemetry.addData("Heading to tag (rad)", "%.3f", headingRad);
+                    double bearingField = normRad(camHeadingField + tagYawCamRad);
 
-                        double currentTurretRad = turret.getCurrentAngleRad();
-                        double currentRobotRad = SharedData.getOdometryPosition().getTheta();
-                        double totalAngleToTag = currentRobotRad + currentTurretRad + headingRad;
+                    double xDistCamToTag = Math.cos(bearingField) * tagCamFlatDist;
+                    double yDistCamToTag = Math.sin(bearingField) * tagCamFlatDist;
 
-                        double xDistCamToTag = Math.cos(totalAngleToTag) * flatDist;
-                        double yDistCamToTag = Math.sin(totalAngleToTag) * flatDist;
+                    double xDistTurretToLimelight = Math.cos(currentTurretRad + currentRobotRad) * TURRET_CENTER_TO_LIMELIGHT_DIST;
+                    double yDistTurretToLimeLight = Math.sin(currentTurretRad + currentRobotRad) * TURRET_CENTER_TO_LIMELIGHT_DIST;
 
-                        double xDistTurretToLimelight = Math.cos(currentTurretRad) * TURRET_CENTER_TO_LIMELIGHT_DIST;
-                        double yDistTurretToLimeLight = Math.sin(currentTurretRad) * TURRET_CENTER_TO_LIMELIGHT_DIST;
+                    double xDistCenterToTurret = Math.cos(currentRobotRad) * ROBOT_CENTER_TO_TURRET_DISTANCE;
+                    double yDistCenterToTurret = Math.sin(currentRobotRad) * ROBOT_CENTER_TO_TURRET_DISTANCE;
 
-                        double xDistCenterToTurret = Math.cos(currentRobotRad) * ROBOT_CENTER_TO_TURRET_DISTANCE;
-                        double yDistCenterToTurret = Math.sin(currentRobotRad) * ROBOT_CENTER_TO_TURRET_DISTANCE;
+                    double totalX = xDistCamToTag + xDistTurretToLimelight + xDistCenterToTurret;
+                    double totalY = yDistCamToTag + yDistTurretToLimeLight + yDistCenterToTurret;
 
-                        double totalX = xDistCamToTag + xDistTurretToLimelight + xDistCenterToTurret;
-                        double totalY = yDistCamToTag + yDistTurretToLimeLight + yDistCenterToTurret;
+                    SharedData.setLimelightOdometryPosition(new Position(APRILTAG_X_FROM_INIT - totalX, APRILTAG_Y_FROM_INIT - totalY, currentRobotRad));
 
-                        SharedData.setOdometryPosition(new Position(APRILTAG_X_FROM_INIT - totalX, APRILTAG_Y_FROM_INIT - totalY, SharedData.getOdometryPosition().getTheta()));
-
-                        // 2D distance ignoring height
+                    // 2D distance ignoring height
 //                        double distance = Math.hypot(totalX, totalY);
 
 //                        SharedData.setDistanceToGoal(distance);
 //                        SharedData.setAngleRadToGoal(angleRad);
 
-                        telemetry.addData("LL GOAL TAG", tagId);
-                        telemetry.addData("Goal X (mm)", "%.3f", xCam);
-                        telemetry.addData("Goal Z (mm)", "%.3f", zCam);
-                    }
-
-                    // existing debug
-                    telemetry.addData("Fiducial", "ID: %d, Family: %s, Xdeg: %.2f, Ydeg: %.2f",
-                            fr.getFiducialId(), fr.getFamily(),
-                            fr.getTargetXDegrees(), fr.getTargetYDegrees());
+                    turret.getOpModeUtilities().getTelemetry().addData("LL GOAL TAG", tagId);
+                    turret.getOpModeUtilities().getTelemetry().addData("Goal X (left-right mm)", "%.3f", xCam);
+                    turret.getOpModeUtilities().getTelemetry().addData("Goal Z (front-back mm)", "%.3f", zCam);
                 }
 
-            } else {
-                telemetry.addLine("Results invalid.");
+                // existing debug
+                turret.getOpModeUtilities().getTelemetry().addData("Fiducial", "ID: %d, Family: %s, Xdeg: %.2f, Ydeg: %.2f",
+                        fr.getFiducialId(), fr.getFamily(),
+                        fr.getTargetXDegrees(), fr.getTargetYDegrees());
             }
 
-            telemetry.update();
+        } else {
+            turret.getOpModeUtilities().getTelemetry().addLine("Results invalid.");
+        }
 
-//        }
+        turret.getOpModeUtilities().getTelemetry().update();
 
         limelight.stop();
     }
 
+    private static double normRad(double a){
+        while (a <= -Math.PI) a += 2*Math.PI;
+        while (a >   Math.PI) a -= 2*Math.PI;
+        return a;
+    }
 }
