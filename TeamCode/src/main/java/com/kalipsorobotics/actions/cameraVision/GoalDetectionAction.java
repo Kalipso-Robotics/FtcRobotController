@@ -91,20 +91,18 @@ public class GoalDetectionAction extends Action {
                 if (isRedGoal || isBlueGoal) {
                     Pose3D tagCamPose = fr.getTargetPoseCameraSpace();
 
-                    double xCam = tagCamPose.getPosition().x * 1000;
+                    double xCam = tagCamPose.getPosition().x * 1000; // left right offset from tag
 //                        double yCam = tagCamPose.getPosition().y * 1000;
-                    double zCam = tagCamPose.getPosition().z * 1000;
+                    double zCam = tagCamPose.getPosition().z * 1000; // front back offset from tag
 
-                    double tagCamFlatDist = Math.hypot(xCam, zCam) * kDistanceScale;
+                    double tagCamFlatDist = Math.hypot(xCam, zCam) * kDistanceScale; //distance from apriltag center to camera center FLAT WITHOUT HEIGHT
 
 //                        double flatDist = Math.sqrt(tagCamFlatDist*tagCamFlatDist - deltaH*deltaH) * kDistanceScale;
 //
-                    double headingRad = -(Math.atan2(xCam, zCam));
+                    double headingRad = -(Math.atan2(xCam, zCam)); // angle of incidence from apriltag center to camera center
                     turret.getOpModeUtilities().getTelemetry().addData("Heading to tag (rad)", "%.3f", headingRad);
 
-//                    double tagYawCamRad = tagCamPose.getOrientation().getYaw(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
-
-                    double camHeadingField = normRad(APRIL_YAW_FIELD_RAD + Math.PI - headingRad);
+                    double camHeadingField = normRad(APRIL_YAW_FIELD_RAD + Math.PI - headingRad); // heading of limelight in relation to field
 
                     double currentTurretRad = turret.getCurrentAngleRad();
 
