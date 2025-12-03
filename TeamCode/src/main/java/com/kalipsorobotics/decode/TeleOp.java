@@ -355,7 +355,7 @@ public class TeleOp extends KOpMode {
         if (shootPressed) {
             if (!isPending(shootAction)) {
                 shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
-                shootAction.shooterRun.setUseLimelight(true);
+                shootAction.shooterRun.setUseLimelight(false);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -371,7 +371,7 @@ public class TeleOp extends KOpMode {
         if (forceShootFarPressed) {
             if (!isPending(shootAction)) {
                 shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
-                shootAction.shooterRun.setUseLimelight(true);
+                shootAction.shooterRun.setUseLimelight(false);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
