@@ -352,6 +352,9 @@ public class TeleOp extends KOpMode {
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
+                if (manualTurretControlToggled) {
+                    shootAction.setTurretReady(true);
+                }
                 KLog.d("Shooting", "Shoot action started - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
             }
             return;
@@ -364,6 +367,9 @@ public class TeleOp extends KOpMode {
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
+                if (manualTurretControlToggled) {
+                    shootAction.setTurretReady(true);
+                }
                 KLog.d("Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
             }
             return;

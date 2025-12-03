@@ -14,6 +14,7 @@ import com.kalipsorobotics.utilities.KLog;
 public class ShootAllAction extends KActionSet {
 
     ShooterRun shooterRun;
+    TurretReady turretReady;
     ShooterReady ready;
     PushBall pushAllBalls;
     ShooterStop shooterStop;
@@ -54,7 +55,7 @@ public class ShootAllAction extends KActionSet {
         ready.setName("ready");
         this.addAction(ready);
 
-        TurretReady turretReady = new TurretReady(turretAutoAlign);
+        turretReady = new TurretReady(turretAutoAlign);
         turretReady.setName("turretReady");
         this.addAction(turretReady);
 
@@ -67,5 +68,9 @@ public class ShootAllAction extends KActionSet {
         shooterStop.setName("shooterStop");
         shooterStop.setDependentActions(pushAllBalls, ready);
         this.addAction(shooterStop);
+    }
+
+    public void setTurretReady(boolean isDone) {
+        turretReady.setIsDone(isDone);
     }
 }
