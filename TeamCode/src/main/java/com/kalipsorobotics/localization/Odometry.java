@@ -184,11 +184,13 @@ public class Odometry {
         double deltaMecanumDistance = backDistanceMM - prevBackDistanceMM;
 
         KLog.d("Odometry_Delta_Theta", "Raw IMU Current Heading" + currentImuHeading + " Prev IMU Heading " + prevImuHeading);
-        double imuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
 
+        // Ensure both headings are properly wrapped before computing delta
+        double wrappedCurrentHeading = MathFunctions.angleWrapRad(currentImuHeading);
+        double wrappedPrevHeading = MathFunctions.angleWrapRad(prevImuHeading);
+        double rawImuDeltaTheta = MathFunctions.angleWrapRad(wrappedCurrentHeading - wrappedPrevHeading);
 
-
-        double rawImuDeltaTheta = MathFunctions.angleWrapRad(currentImuHeading - prevImuHeading);
+        double imuDeltaTheta = rawImuDeltaTheta;
         double wheelDeltaTheta  = MathFunctions.angleWrapRad((deltaLeftDistance - deltaRightDistance) / TRACK_WIDTH_MM);
         KLog.d("Odometry_Delta_Theta", "Imu Delta Theta: " + rawImuDeltaTheta + " Wheel Delta Theta: " + wheelDeltaTheta);
 
@@ -403,19 +405,20 @@ public class Odometry {
         }
         if (isBadReading(imuThetaAngleRad)) {
             unhealthyCounter++;
-            KLog.d("Odometry_IMU_Health", "Bad Reading IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+            KLog.d("Odometry_IMU_Unhealthy", "Bad Reading IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
             return true;
         }
-        boolean isSpike = (Math.abs(imuThetaAngleRad - wheelThetaAngleRad) > Math.toRadians(11)) && wheelThetaAngleRad != 0.0;
+        double angleDiff = MathFunctions.angleWrapRad(imuThetaAngleRad - wheelThetaAngleRad);
+        boolean isSpike = (Math.abs(angleDiff) > Math.toRadians(11)) && wheelThetaAngleRad != 0.0;
         if (isSpike) {
             unhealthyCounter++;
-            KLog.d("Odometry_IMU_Health", "Spike IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+            KLog.d("Odometry_IMU_Unhealthy", "Spike IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
             return true;
         }
         boolean isFreezing = (Math.abs(imuThetaAngleRad) < 1e-10) && (Math.abs(wheelThetaAngleRad) > 1e-3);
         if (isFreezing) {
             unhealthyCounter++;
-            KLog.d("Odometry_IMU_Health", "Freezing IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+            KLog.d("Odometry_IMU_Unhealthy", "Freezing IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
             return true;
         }
 

@@ -4,7 +4,7 @@ import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "BlueAutoNearZone")
+@Autonomous(name = "BlueAutoNear")
 public class BlueAutoNear extends RedAutoNear {
     @Override
     protected void initializeRobotConfig() {
