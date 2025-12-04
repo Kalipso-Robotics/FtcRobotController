@@ -114,17 +114,16 @@ public class TeleOp extends KOpMode {
 
         turret = Turret.getInstance(opModeUtilities);
 
-        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, goalDetectionAction);
-
         int tagId;
         if (allianceColor == AllianceColor.RED) {
             tagId = 24;
         }
         else {
-            tagId = 21;
+            tagId = 20;
         }
 
         goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret, tagId);
+        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, goalDetectionAction);
 
         shotLogger = new ShotLogger(opModeUtilities);
 
@@ -176,7 +175,7 @@ public class TeleOp extends KOpMode {
 
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
-//            limelightCorrectionPressed = kGamePad1.isBackButtonPressed();  // Back button for vision correction
+            limelightCorrectionPressed = kGamePad1.isBackButtonPressed();  // Back button for vision correction
 
             // ========== HANDLE DRIVING ==========
             if (drivingSticks) {

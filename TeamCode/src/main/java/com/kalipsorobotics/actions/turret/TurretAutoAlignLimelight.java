@@ -76,11 +76,15 @@ public class TurretAutoAlignLimelight extends Action {
         goalDetectionAction.updateCheckDone();
 
         double targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
+        KLog.d("Turret_Limelight", "Limelight angle" + targetAngleLimelight);
         double currentAngleRad = turret.getCurrentAngleRad();
         double totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
-        double turretRotation = (totalAngleWrap) / (2 * Math.PI);
-        double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
-        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
+
+//        double turretRotation = (totalAngleWrap) / (2 * Math.PI);
+//        double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
+//        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
+
+        targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
         if (!hasStarted) {
             hasStarted = true;
