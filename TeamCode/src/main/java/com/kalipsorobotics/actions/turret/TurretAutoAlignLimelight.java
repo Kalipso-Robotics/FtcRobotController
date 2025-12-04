@@ -25,6 +25,9 @@ public class TurretAutoAlignLimelight extends Action {
     private boolean isWithinRange = false;
 
     private final double SEARCH_DEGREES = 180;
+    private boolean hasSearched = false;
+    double targetAngleLimelight = 0;
+
 
     public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, GoalDetectionAction goalDetectionAction) {
         this.opModeUtilities = opModeUtilities;
@@ -74,8 +77,17 @@ public class TurretAutoAlignLimelight extends Action {
         }
 
         goalDetectionAction.updateCheckDone();
-
-        double targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
+        if (SharedData.getLimelightPosition().isEmpty()) {
+            turretMotor.getPIDFController().setKp(TurretConfig.kP / 10);
+            if (!hasSearched) {
+                hasSearched = true;
+                targetAngleLimelight = Math.toRadians(180);
+            }
+        } else {
+            targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
+            hasSearched = false;
+            turretMotor.getPIDFController().setKp(TurretConfig.kP);
+        }
         KLog.d("Turret_Limelight", "Limelight angle" + targetAngleLimelight);
         double currentAngleRad = turret.getCurrentAngleRad();
         double totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);

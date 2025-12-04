@@ -141,6 +141,8 @@ public class KMotor {
         ));
     }
 
+
+
     /**
      * Check if motor has reached target RPS within tolerance
      * @param tolerance acceptable error in RPS

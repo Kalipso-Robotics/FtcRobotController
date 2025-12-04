@@ -44,6 +44,13 @@ public class LimelightPos {
         return angleToGoalRad;
     }
 
+    public boolean isEmpty() {
+        if (getxMM() == 0 && getyMM() == 0 && getzMM() == 0 && getAngleToGoalRad() == 0) {
+            return true;
+        }
+        return false;
+    }
+
     public double getxMM() {
         return xMM;
     }
