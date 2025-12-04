@@ -84,6 +84,7 @@ public class TeleOp extends KOpMode {
     private boolean manualTurretControlToggled = false;
 
     private boolean useLimelight = true;
+    private boolean forceShootNearPressed = false;
 
     @Override
     protected void initializeRobotConfig() {
@@ -161,9 +162,10 @@ public class TeleOp extends KOpMode {
                     kGamePad1.getRightStickX() != 0 ||
                     kGamePad1.getLeftStickX() != 0;
 
-            forceShootFarPressed = kGamePad1.isLeftTriggerPressed();
+            forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
+            forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
             shootPressed = kGamePad1.isLeftBumperFirstPressed();
-            stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isRightBumperFirstPressed();
+            stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
             warmupPressed = kGamePad2.isDpadUpFirstPressed();
 
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
@@ -211,8 +213,6 @@ public class TeleOp extends KOpMode {
     private void handleTurret() {
 
         if (manualTurretControlToggled) {
-            odometry.setOdometryUnhealthy(true);
-            SharedData.setIsOdometryUnhealthy(true);
             turretAutoAlign.setIsDone(true);
             if (kGamePad2.isDpadLeftPressed()) {
                 turret.turretMotor.setPower(-0.25);
@@ -395,6 +395,24 @@ public class TeleOp extends KOpMode {
             }
             return;
         }
+
+        if (forceShootNearPressed) {
+            if (!isPending(shootAction)) {
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
+                shootAction.shooterRun.setUseLimelight(useLimelight);
+                shooterWarmup = null;
+                setLastShooterAction(shootAction);
+                setLastStopperAction(null);  // Clear stopper - shoot action controls it
+                if (manualTurretControlToggled) {
+                    shootAction.setTurretReady(true);
+                }
+                KLog.d("Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
+            }
+            return;
+        }
+
+
+
 
         //  Priority 3 -Warmup shooter
         if (warmupPressed) {

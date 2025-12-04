@@ -42,5 +42,8 @@ public class ShooterInterpolationConfig {
     public static double[] getMaxValue() {
         return new double[] {46.6, 0.8};
     }
+    public static double[] getNearValue() {
+        return new double[] {32.86, 0.8};
+    }
 
 }
