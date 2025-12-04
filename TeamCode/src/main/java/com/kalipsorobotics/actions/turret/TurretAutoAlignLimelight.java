@@ -24,9 +24,10 @@ public class TurretAutoAlignLimelight extends Action {
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
 
-    private final double SEARCH_DEGREES = 180;
+    private double searchAngleDeg = 180;
     private boolean hasSearched = false;
-    double targetAngleLimelight = 0;
+
+    double totalAngleWrap;
 
 
     public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, GoalDetectionAction goalDetectionAction) {
@@ -77,20 +78,30 @@ public class TurretAutoAlignLimelight extends Action {
         }
 
         goalDetectionAction.updateCheckDone();
+        double targetAngleLimelight = 0;
+        double currentAngleRad = turret.getCurrentAngleRad();
+
+
         if (SharedData.getLimelightPosition().isEmpty()) {
             turretMotor.getPIDFController().setKp(TurretConfig.kP / 10);
             if (!hasSearched) {
                 hasSearched = true;
-                targetAngleLimelight = Math.toRadians(180);
+                targetAngleLimelight = Math.toRadians(searchAngleDeg);
+                totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
+            } else {
+                if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
+                    searchAngleDeg = searchAngleDeg * -1;
+                    targetAngleLimelight = Math.toRadians(searchAngleDeg);
+                }
             }
         } else {
             targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
             hasSearched = false;
             turretMotor.getPIDFController().setKp(TurretConfig.kP);
+            totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
+
         }
         KLog.d("Turret_Limelight", "Limelight angle" + targetAngleLimelight);
-        double currentAngleRad = turret.getCurrentAngleRad();
-        double totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
 
 //        double turretRotation = (totalAngleWrap) / (2 * Math.PI);
 //        double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
