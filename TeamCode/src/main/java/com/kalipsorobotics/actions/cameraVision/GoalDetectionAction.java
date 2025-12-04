@@ -96,7 +96,7 @@ public class GoalDetectionAction extends Action {
                 int tagId = fr.getFiducialId();
 
 //                boolean isRedGoal  = SharedData.getAllianceColor() == AllianceColor.RED  && tagId == 24;
-//                boolean isBlueGoal = SharedData.getAllianceColor() == AllianceColor.BLUE && tagId == 21;
+//                boolean isBlueGoal = SharedData.getAllianceColor() == AllianceColor.BLUE && tagId == 20;
                 KLog.d("limelight_pos", "tagId " + tagId);
                 if (tagId == targetAprilTagId) {
                     KLog.d("limelight_pos", "tagId matches targetId " + targetAprilTagId);

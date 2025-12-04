@@ -23,7 +23,7 @@ public class KMotor {
     private final PIDFController pidfController;
     private double targetRPS = 0;
 
-    private int targetTicks = 0;
+    private double targetTicks = 0;
 
     // Power limits
     private static final double MAX_POWER = 1.0;
