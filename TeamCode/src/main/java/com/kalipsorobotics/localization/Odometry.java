@@ -409,13 +409,13 @@ public class Odometry {
             return true;
         }
         double angleDiff = MathFunctions.angleWrapRad(imuThetaAngleRad - wheelThetaAngleRad);
-        boolean isSpike = (Math.abs(angleDiff) > Math.toRadians(11)) && wheelThetaAngleRad != 0.0;
+        boolean isSpike = (Math.abs(angleDiff) > Math.toRadians(11)) && wheelThetaAngleRad > 1e-3;
         if (isSpike) {
             unhealthyCounter++;
             KLog.d("Odometry_IMU_Unhealthy", "Spike IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
             return true;
         }
-        boolean isFreezing = (Math.abs(imuThetaAngleRad) < 1e-10) && (Math.abs(wheelThetaAngleRad) > 1e-3);
+        boolean isFreezing = (Math.abs(imuThetaAngleRad) < Math.toRadians(0.1)) && (Math.abs(wheelThetaAngleRad) > Math.toRadians(0.5));
         if (isFreezing) {
             unhealthyCounter++;
             KLog.d("Odometry_IMU_Unhealthy", "Freezing IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
