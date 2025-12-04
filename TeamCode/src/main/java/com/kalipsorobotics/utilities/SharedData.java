@@ -11,8 +11,7 @@ public class SharedData {
 
     private static final Position odometryPosition = new Position(0, 0, 0);
 
-    private static final Position limelightOdometryPosition = new Position(0,0,0);
-
+    private static final LimelightPos limelightPosition = new LimelightPos(0,0,0,0,0);
     private static final HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionMap = new HashMap<>();
 
     public static Position getOdometryPosition() {
@@ -23,12 +22,12 @@ public class SharedData {
         odometryPosition.reset(position);
     }
 
-    public static void setLimelightOdometryPosition(Position position) {
-        limelightOdometryPosition.reset(position);
+    public static void setLimelightPosition(LimelightPos position) {
+        limelightPosition.setPos(position);
     }
 
-    public static Position getLimelightOdometryPosition() {
-        return new Position(limelightOdometryPosition);
+    public static LimelightPos getLimelightPosition() {
+        return limelightPosition;
     }
 
     public static void resetOdometryPosition() {
