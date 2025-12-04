@@ -1,17 +1,7 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import android.graphics.Path;
-
-import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
-import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.modules.DriveTrain;
-import com.kalipsorobotics.modules.IMUModule;
-import com.kalipsorobotics.modules.Intake;
-import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -24,13 +14,14 @@ public class GoalDetectionActionTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         OpModeUtilities opModeUtilities = new OpModeUtilities(this.hardwareMap, this, this.telemetry);
         Turret turret = Turret.getInstance(opModeUtilities);
-        GoalDetectionAction goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret);
+        // TEST ON RED or change tagId
+        GoalDetectionAction goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret, 24);
 
         waitForStart();
 
         while (opModeIsActive()) {
             goalDetectionAction.updateCheckDone();
-            telemetry.addData("current limelight position ", SharedData.getLimelightOdometryPosition().toString());
+            telemetry.addData("current limelight position ", SharedData.getLimelightPosition().toString());
         }
     }
 }

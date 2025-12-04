@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.shooter;
 
+import static com.kalipsorobotics.modules.shooter.ShooterConfig.APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
+
 import android.annotation.SuppressLint;
 
 import com.kalipsorobotics.math.Position;
@@ -143,18 +145,22 @@ public class ShooterRun extends Action {
             // Calculate distance from odometry position to target
 
             Position currentPosition;
-            if (!useLimelight) {
-                currentPosition = SharedData.getOdometryPosition();
+            if (useLimelight) {
+                if (SharedData.getLimelightPosition().getDistanceToAprilTagMM() != 0) {
+                    distanceMM = SharedData.getLimelightPosition().getDistanceToAprilTagMM() + APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
+                    KLog.d("shooter_run", "Shooting with limelight, distance: " + distanceMM);
+                }
+                else {
+                    distanceMM = Shooter.FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY;
+                    KLog.d("shooter_run", "FAILED TO FETCH LIMELIGHT DISTANCEMM " + distanceMM);
+                }
             } else {
-                currentPosition = SharedData.getLimelightOdometryPosition();
+                currentPosition = SharedData.getOdometryPosition();
+                double dx = targetPoint.getX() - currentPosition.getX();
+                double dy = targetPoint.getY() - currentPosition.getY();
+
+                distanceMM = Math.sqrt((dx * dx) + (dy * dy));
             }
-
-            double dx = targetPoint.getX() - currentPosition.getX();
-            double dy = targetPoint.getY() - currentPosition.getY();
-
-            distanceMM = Math.sqrt((dx * dx) + (dy * dy));
-
-
         }
 
         IShooterPredictor.ShooterParams params = shooter.getPrediction(distanceMM);

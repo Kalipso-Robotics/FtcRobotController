@@ -26,7 +26,7 @@ public class Shooter {
 
     public final double TARGET_RPS_TOLERANCE = 1;
 
-    public final double FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY = 2370.0 / 2.0;
+    public static final double FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY = 2370.0 / 2.0;
 
 
     private final OpModeUtilities opModeUtilities;
