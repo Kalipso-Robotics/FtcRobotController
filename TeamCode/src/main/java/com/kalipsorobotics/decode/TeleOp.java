@@ -12,6 +12,7 @@ import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.ShooterWarmupAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
@@ -61,10 +62,8 @@ public class TeleOp extends KOpMode {
     IntakeReverse intakeReverse = null;
 
     DriveAction driveAction = null;
-    TurretAutoAlign turretAutoAlign = null;
-
+    TurretAutoAlignLimelight turretAutoAlignLimelight = null;
     ShotLogger shotLogger = null;
-
     GoalDetectionAction goalDetectionAction = null;
 
     // Button state variables
@@ -115,7 +114,7 @@ public class TeleOp extends KOpMode {
 
         turret = Turret.getInstance(opModeUtilities);
 
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, goalDetectionAction);
 
         int tagId;
         if (allianceColor == AllianceColor.RED) {
@@ -213,16 +212,16 @@ public class TeleOp extends KOpMode {
     private void handleTurret() {
 
         if (manualTurretControlToggled) {
-            turretAutoAlign.setIsDone(true);
+            turretAutoAlignLimelight.setIsDone(true);
             if (kGamePad2.isDpadLeftPressed()) {
                 turret.turretMotor.setPower(-0.25);
             } else if (kGamePad2.isDpadRightPressed()) {
                 turret.turretMotor.setPower(0.25);
-            } else if (turretAutoAlign.getIsDone()) {
+            } else if (turretAutoAlignLimelight.getIsDone()) {
                 turret.turretMotor.setPower(0);
             }
         } else {
-            turretAutoAlign.setIsDone(false);
+            turretAutoAlignLimelight.setIsDone(false);
         }
         KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
     }
@@ -339,11 +338,11 @@ public class TeleOp extends KOpMode {
         // Update turret when shooting or warmup
         if ((shooter.isRunning()) || (isPending(shooterWarmup)) || (isPending(shootAction))) {
             goalDetectionAction.updateCheckDone();
-            turretAutoAlign.updateCheckDone();
+            turretAutoAlignLimelight.updateCheckDone();
         } else {
             // Stop turret motor when not shooting to prevent drift, but only if manual control isn't active
             if (!manualTurretControlToggled) {
-                turretAutoAlign.stop();
+                turretAutoAlignLimelight.stop();
             }
         }
 
@@ -367,7 +366,7 @@ public class TeleOp extends KOpMode {
         // Priority 2- Execute shoot sequence
         if (shootPressed) {
             if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
                 shootAction.shooterRun.setUseLimelight(useLimelight);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
@@ -383,7 +382,7 @@ public class TeleOp extends KOpMode {
         //
         if (forceShootFarPressed) {
             if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
                 shootAction.shooterRun.setUseLimelight(useLimelight);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
@@ -398,7 +397,7 @@ public class TeleOp extends KOpMode {
 
         if (forceShootNearPressed) {
             if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlign, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
                 shootAction.shooterRun.setUseLimelight(useLimelight);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
