@@ -273,19 +273,19 @@ public class Odometry {
         Position prevPosition = wheelPositionHistory.getCurrentPosition();
         Position globalPosition = calculateGlobal(wheelRelDelta, prevPosition);
 
-        // Position jump filter - check for unrealistic movements
-        double dx = globalPosition.getX() - prevPosition.getX();
-        double dy = globalPosition.getY() - prevPosition.getY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
-        double maxSpeed = 1500; // mm/s (realistic max robot speed)
-        double maxDistance = maxSpeed * timeElapsedSeconds;
-
-        if (distance > maxDistance && timeElapsedSeconds > 0) {
-            KLog.d("Odometry_Jump", "WHEEL position jump rejected: " + String.format("%.1f", distance) +
-                    "mm in " + String.format("%.3f", timeElapsedSeconds) + "s (max: " +
-                    String.format("%.1f", maxDistance) + "mm)");
-            return; // Skip this update to prevent corruption
-        }
+//        // Position jump filter - check for unrealistic movements
+//        double dx = globalPosition.getX() - prevPosition.getX();
+//        double dy = globalPosition.getY() - prevPosition.getY();
+//        double distance = Math.sqrt(dx * dx + dy * dy);
+//        double maxSpeed = 2400; // mm/s (realistic max robot speed)
+//        double maxDistance = maxSpeed * timeElapsedSeconds;
+//
+//        if (distance > maxDistance && timeElapsedSeconds > 0) {
+//            KLog.d("Odometry_Jump", "WHEEL position jump rejected: " + String.format("%.1f", distance) +
+//                    "mm in " + String.format("%.3f", timeElapsedSeconds) + "s (max: " +
+//                    String.format("%.1f", maxDistance) + "mm)");
+//            return; // Skip this update to prevent corruption
+//        }
 
         wheelPositionHistory.setCurrentPosition(globalPosition);
         wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds * 1000);
@@ -301,19 +301,21 @@ public class Odometry {
         Position prevPosition = wheelIMUPositionHistory.getCurrentPosition();
         Position globalPosition = calculateGlobal(wheelIMURelDelta, prevPosition);
 
-        // Position jump filter - check for unrealistic movements
-        double dx = globalPosition.getX() - prevPosition.getX();
-        double dy = globalPosition.getY() - prevPosition.getY();
-        double distance = Math.sqrt(dx * dx + dy * dy);
-        double maxSpeed = 1500; // mm/s (realistic max robot speed)
-        double maxDistance = maxSpeed * timeElapsedSeconds;
-
-        if (distance > maxDistance && timeElapsedSeconds > 0) {
-            KLog.d("Odometry_Jump", "WHEEL_IMU position jump rejected: " + String.format("%.1f", distance) +
-                    "mm in " + String.format("%.3f", timeElapsedSeconds) + "s (max: " +
-                    String.format("%.1f", maxDistance) + "mm)");
-            return; // Skip this update to prevent corruption
-        }
+//        // Position jump filter - check for unrealistic movements
+//        double dx = globalPosition.getX() - prevPosition.getX();
+//        double dy = globalPosition.getY() - prevPosition.getY();
+//        double distance = Math.sqrt(dx * dx + dy * dy);
+//        double maxSpeed = 1500; // mm/s (realistic max robot speed)
+//        double maxDistance = maxSpeed * timeElapsedSeconds;
+//
+//        if (distance > maxDistance && timeElapsedSeconds > 0) {
+//            KLog.d("Odometry_Jump", "WHEEL_IMU position jump rejected: " + String.format("%.1f", distance) +
+//                    "mm in " + String.format("%.3f", timeElapsedSeconds) + "s (max: " +
+//                    String.format("%.1f", maxDistance) + "mm)");
+//            //12-03 20:51:20.099   997  1247 D KLog_Odometry_Jump: WHEEL_IMU position jump rejected: 680.5mm in 0.026s (max: 39.0mm)
+//
+//            return; // Skip this update to prevent corruption
+//        }
 
         wheelIMUPositionHistory.setCurrentPosition(globalPosition);
         wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds * 1000); //mm/ms

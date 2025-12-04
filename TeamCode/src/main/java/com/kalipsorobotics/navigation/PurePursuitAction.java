@@ -130,7 +130,7 @@ public class  PurePursuitAction extends Action {
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
 
-    public void clearPoint() {
+    public void clearPoints() {
         pathPoints.clear();
     }
 
