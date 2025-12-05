@@ -5,6 +5,7 @@ import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
  * targetRPS,rampUpTimeMs,minRPS,maxRPS,avgRPS,kp,ki,kd,kf
  */
 @TeleOp(name = "Shooter RPS Test", group = "Test")
+@Disabled
 public class ShooterRPSTest extends LinearOpMode {
 
     // Test parameters

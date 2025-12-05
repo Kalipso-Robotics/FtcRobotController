@@ -8,7 +8,7 @@ public class ShooterConfig {
     public static double MAX_RPS = 55;
 
     public static boolean shouldUseLimelight = false;
-    public static double APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM = 451;
+    public static double APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM = 451 + 150;
 
     // PID: this combo is working well; leave it
 //    public static double kp = 0.014000 ;

@@ -5,10 +5,12 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KGamePad;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Simple TeleOp")
+@Disabled
 public class SimpleIntakeTeleop extends LinearOpMode {
 
     private Intake intake;

@@ -5,6 +5,7 @@ import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
  * - Progress file is cleared when all tests complete successfully
  */
 @TeleOp(name = "Kp Tuning Data Collector", group = "Test")
+@Disabled
 public class KPTuning extends LinearOpMode {
 
     // Kp test parameters - ADJUST THESE AS NEEDED

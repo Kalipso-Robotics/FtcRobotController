@@ -14,9 +14,11 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "Regression Model Data Collector")
+@Disabled
 public class ShooterRegressionModelDataCollector extends KOpMode {
     KFileWriter kFileWriter = null;
     Shooter shooter = null;

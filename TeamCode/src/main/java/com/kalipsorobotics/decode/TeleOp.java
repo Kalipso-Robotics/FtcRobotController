@@ -169,7 +169,7 @@ public class TeleOp extends KOpMode {
 
             releasePressed = kGamePad2.isYPressed();
 
-            manualTurretControlToggled = kGamePad2.isToggleX();  // ----------------- SET TO FALSE FOR TESTING ----------------------
+            manualTurretControlToggled = kGamePad2.isToggleX();
 
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
@@ -209,27 +209,26 @@ public class TeleOp extends KOpMode {
     private void handleTurret() {
         goalDetectionAction.updateCheckDone();
 
-
-
-        if (kGamePad2.isDpadLeftPressed()) {
+        if (manualTurretControlToggled) {
             turretAutoAlignLimelight.setIsDone(true);
-            turret.turretMotor.setPower(-0.25);
-        } else if (kGamePad2.isDpadRightPressed()) {
-            turretAutoAlignLimelight.setIsDone(true);
-            turret.turretMotor.setPower(0.25);
-        } else {
-            turretAutoAlignLimelight.setIsDone(manualTurretControlToggled);
-
-            if (turretAutoAlignLimelight.isAprilTagFound()) {
-                turretAutoAlignLimelight.updateCheckDone();
-            } else {
-                turret.getTurretMotor().setPower(0);
-            }
-
-
+        }
+        else {
+            turretAutoAlignLimelight.setIsDone(false);
+            turretAutoAlignLimelight.updateCheckDone();
         }
 
-
+        if (kGamePad2.isDpadLeftPressed()) {
+            turret.turretMotor.setPower(-0.25);
+        } else if (kGamePad2.isDpadRightPressed()) {
+            turret.turretMotor.setPower(0.25);
+        } else {
+            if (manualTurretControlToggled) {
+                turret.getTurretMotor().setPower(0);
+            }
+            else {
+                turretAutoAlignLimelight.updateCheckDone();
+            }
+        }
 
         KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
     }

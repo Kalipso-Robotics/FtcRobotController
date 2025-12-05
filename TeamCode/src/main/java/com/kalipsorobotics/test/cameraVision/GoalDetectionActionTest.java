@@ -4,10 +4,12 @@ import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
+@Disabled
 public class GoalDetectionActionTest extends LinearOpMode {
 
     @Override

@@ -2,6 +2,7 @@ package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -17,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * Outputs results to CSV with expected vs actual values
  */
 @TeleOp(name = "RampUpTime Interpolation Test", group = "Test")
+@Disabled
 public class RampUpTimeInterpolationTest extends LinearOpMode {
 
     private KFileWriter fileWriter;

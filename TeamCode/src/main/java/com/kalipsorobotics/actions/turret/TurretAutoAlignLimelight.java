@@ -26,7 +26,7 @@ public class TurretAutoAlignLimelight extends Action {
     private boolean aprilTagFound = false;
     private double searchAngleDeg = 180;
     private boolean hasSearched = false;
-    private final boolean shouldSearch = true;
+    private final boolean shouldSearch = false;
     double totalAngleWrap;
     double lastLimit;
     TurretRunningMode runningMode;
