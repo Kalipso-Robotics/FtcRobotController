@@ -24,7 +24,7 @@ public class TurretAutoAlign extends Action {
     private double xInitSetupMM; //121 inches
 
     private double yInitSetupMM; //46inches 1000
-    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
+    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
 
