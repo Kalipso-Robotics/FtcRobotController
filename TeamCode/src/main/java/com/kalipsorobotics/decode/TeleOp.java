@@ -70,7 +70,6 @@ public class TeleOp extends KOpMode {
     private boolean drivingSticks = false;
     private boolean shootPressed = false;
     private boolean forceShootFarPressed = false;
-
     private boolean intakeRunPressed = false;
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
@@ -81,7 +80,6 @@ public class TeleOp extends KOpMode {
     private boolean shooterReadyWasNotDone = false;
     private boolean limelightCorrectionPressed = false;
     private boolean manualTurretControlToggled = false;
-
     private boolean useLimelight = true;
     private boolean forceShootNearPressed = false;
 
@@ -171,7 +169,7 @@ public class TeleOp extends KOpMode {
 
             releasePressed = kGamePad2.isYPressed();
 
-            manualTurretControlToggled = kGamePad2.isToggleX();
+            manualTurretControlToggled = kGamePad2.isToggleX();  // ----------------- SET TO FALSE FOR TESTING ----------------------
 
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
@@ -209,19 +207,30 @@ public class TeleOp extends KOpMode {
     }
 
     private void handleTurret() {
+        goalDetectionAction.updateCheckDone();
 
-        if (manualTurretControlToggled) {
+
+
+        if (kGamePad2.isDpadLeftPressed()) {
             turretAutoAlignLimelight.setIsDone(true);
-            if (kGamePad2.isDpadLeftPressed()) {
-                turret.turretMotor.setPower(-0.25);
-            } else if (kGamePad2.isDpadRightPressed()) {
-                turret.turretMotor.setPower(0.25);
-            } else if (turretAutoAlignLimelight.getIsDone()) {
-                turret.turretMotor.setPower(0);
-            }
+            turret.turretMotor.setPower(-0.25);
+        } else if (kGamePad2.isDpadRightPressed()) {
+            turretAutoAlignLimelight.setIsDone(true);
+            turret.turretMotor.setPower(0.25);
         } else {
-            turretAutoAlignLimelight.setIsDone(false);
+            turretAutoAlignLimelight.setIsDone(manualTurretControlToggled);
+
+            if (turretAutoAlignLimelight.isAprilTagFound()) {
+                turretAutoAlignLimelight.updateCheckDone();
+            } else {
+                turret.getTurretMotor().setPower(0);
+            }
+
+
         }
+
+
+
         KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
     }
 

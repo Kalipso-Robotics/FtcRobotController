@@ -19,7 +19,6 @@ public class ShooterRun extends Action {
 
     private final Shooter shooter;
     private final Point targetPoint;
-
     private ElapsedTime rpsInRangeTimer;
     private ElapsedTime rampUpTimeTimer;
 

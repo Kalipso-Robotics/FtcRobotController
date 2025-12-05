@@ -23,10 +23,10 @@ public class TurretAutoAlignLimelight extends Action {
     private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
-
+    private boolean aprilTagFound = false;
     private double searchAngleDeg = 180;
     private boolean hasSearched = false;
-
+    private final boolean shouldSearch = true;
     double totalAngleWrap;
     double lastLimit;
     TurretRunningMode runningMode;
@@ -85,11 +85,11 @@ public class TurretAutoAlignLimelight extends Action {
         }
 
         goalDetectionAction.updateCheckDone();
+        aprilTagFound = !SharedData.getLimelightPosition().isEmpty();
         double targetAngleLimelight = 0;
         double currentAngleRad = turret.getCurrentAngleRad();
 
-
-        if (SharedData.getLimelightPosition().isEmpty()) {
+        if (SharedData.getLimelightPosition().isEmpty() && shouldSearch) {
             //searchibg
             turretMotor.getPIDFController().setKp(TurretConfig.kP / 10);
 
@@ -107,7 +107,6 @@ public class TurretAutoAlignLimelight extends Action {
                 if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
                    runningMode = TurretRunningMode.GO_TO_CENTER;
                 }
-
             }
 
             if (runningMode == TurretRunningMode.GO_TO_CENTER) {
@@ -140,8 +139,6 @@ public class TurretAutoAlignLimelight extends Action {
 
         targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
-
-
         if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turretMotor.stop();
@@ -164,4 +161,7 @@ public class TurretAutoAlignLimelight extends Action {
         toleranceTicks = newToleranceDeg * Turret.TICKS_PER_DEGREE;
     }
 
+    public boolean isAprilTagFound() {
+        return aprilTagFound;
+    }
 }

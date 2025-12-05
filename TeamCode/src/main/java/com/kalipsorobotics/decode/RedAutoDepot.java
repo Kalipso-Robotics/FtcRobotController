@@ -124,7 +124,7 @@ public class RedAutoDepot extends KOpMode {
         trip3.getTrip().getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getTrip().getMoveToBall().addPoint(223, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getTrip().getMoveToBall().addPoint(223,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y + 100) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        trip3.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y + 50) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip3);
 
         //-------------------TRIP 4 ------------------- ~ 19qp01
