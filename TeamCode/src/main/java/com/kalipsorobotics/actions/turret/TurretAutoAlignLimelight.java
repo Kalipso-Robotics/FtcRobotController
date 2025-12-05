@@ -28,6 +28,8 @@ public class TurretAutoAlignLimelight extends Action {
     private boolean hasSearched = false;
 
     double totalAngleWrap;
+    double lastLimit;
+    TurretRunningMode runningMode;
 
 
     public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, GoalDetectionAction goalDetectionAction) {
@@ -77,24 +79,53 @@ public class TurretAutoAlignLimelight extends Action {
             return;
         }
 
+        if (!hasStarted) {
+            hasStarted = true;
+            runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
+        }
+
         goalDetectionAction.updateCheckDone();
         double targetAngleLimelight = 0;
         double currentAngleRad = turret.getCurrentAngleRad();
 
 
         if (SharedData.getLimelightPosition().isEmpty()) {
+            //searchibg
             turretMotor.getPIDFController().setKp(TurretConfig.kP / 10);
-            if (!hasSearched) {
-                hasSearched = true;
-                targetAngleLimelight = Math.toRadians(searchAngleDeg);
-                totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
-            } else {
+
+            if (runningMode == TurretRunningMode.GO_TO_NEAREST_LIMIT) {
+                //runing mode - go to neaeres limit
+                if (currentAngleRad < 0) {
+                    totalAngleWrap = Math.toRadians(-180);
+                }
+                if (currentAngleRad > 0) {
+                    totalAngleWrap = Math.toRadians(180);
+                }
+
+                lastLimit = totalAngleWrap;
+
                 if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
-                    searchAngleDeg = searchAngleDeg * -1;
-                    targetAngleLimelight = Math.toRadians(searchAngleDeg);
+                   runningMode = TurretRunningMode.GO_TO_CENTER;
+                }
+
+            }
+
+            if (runningMode == TurretRunningMode.GO_TO_CENTER) {
+                totalAngleWrap = 0;
+                if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
+                    runningMode = TurretRunningMode.GO_TO_OPPOSITE_LIMIT;
                 }
             }
+            if (runningMode == TurretRunningMode.GO_TO_OPPOSITE_LIMIT){
+                totalAngleWrap = lastLimit * -1;
+                if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
+                    runningMode = TurretRunningMode.GO_TO_CENTER;
+                    lastLimit = totalAngleWrap;
+                }
+            }
+
         } else {
+            //April tag found - lockikng angle
             targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
             hasSearched = false;
             turretMotor.getPIDFController().setKp(TurretConfig.kP);
@@ -109,9 +140,7 @@ public class TurretAutoAlignLimelight extends Action {
 
         targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
-        if (!hasStarted) {
-            hasStarted = true;
-        }
+
 
         if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
