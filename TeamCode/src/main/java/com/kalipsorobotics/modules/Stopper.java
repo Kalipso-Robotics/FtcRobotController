@@ -26,7 +26,7 @@ public class Stopper {
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
             this.stopper = new KServo(stopper, KServo.AXON_MAX_SPEED, 255, 0, false);
-            this.stopper.setPosition(STOPPER_SERVO_CLOSED_POS);
+            this.stopper.setTargetPosition(STOPPER_SERVO_CLOSED_POS);
             KLog.d("Stopper", "Constructor completed successfully");
         } catch (Exception e) {
             KLog.e("Stopper", "ERROR in constructor: " + e.getMessage());
