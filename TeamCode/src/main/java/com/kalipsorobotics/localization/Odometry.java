@@ -16,10 +16,8 @@ import com.kalipsorobotics.math.Velocity;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.modules.DriveTrain;
 
-import org.opencv.core.Mat;
-
 import java.util.HashMap;
-import java.util.List;
+
 
 
 public class Odometry {
@@ -32,7 +30,12 @@ public class Odometry {
     private static Odometry single_instance = null;
     final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
-    OpModeUtilities opModeUtilities;
+
+    public OpModeUtilities getOpModeUtilities() {
+        return opModeUtilities;
+    }
+
+    private OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
     IMUModule imuModule;
     //200-182 offset compare to line between parallel odo pods
@@ -289,6 +292,8 @@ public class Odometry {
 
         wheelPositionHistory.setCurrentPosition(globalPosition);
         wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds * 1000);
+        wheelPositionHistory.setEncoderTicks(leftEncoder.getCurrentPosition(),
+                rightEncoder.getCurrentPosition(), backEncoder.getCurrentPosition());
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
     }
 
@@ -319,6 +324,8 @@ public class Odometry {
 
         wheelIMUPositionHistory.setCurrentPosition(globalPosition);
         wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds * 1000); //mm/ms
+        wheelIMUPositionHistory.setEncoderTicks(leftEncoder.getCurrentPosition(),
+                rightEncoder.getCurrentPosition(), backEncoder.getCurrentPosition());
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
     }
 

@@ -3,7 +3,7 @@ package com.kalipsorobotics.actions.cameraVision;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
-import com.kalipsorobotics.utilities.LimelightPos;
+import com.kalipsorobotics.math.LimelightPos;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.hardware.limelightvision.LLResult;

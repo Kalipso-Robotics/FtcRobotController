@@ -6,9 +6,13 @@ import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class OdometryFileWriter extends KFileWriter {
+
+    private final List<String> bufferedLines = new ArrayList<>();
 
     /**
      * Creates a new OdometryFileWriter <p>
@@ -17,6 +21,7 @@ public class OdometryFileWriter extends KFileWriter {
      * Write using writeOdometryPositionHistory() <p>
      * get OdometryPositionMap from SharedData <p>
      * Close using close() <p>
+     * Data is buffered in memory and written to file when close() is called <p>
      */
     public OdometryFileWriter(String name, OpModeUtilities opModeUtilities) {
         super(name, opModeUtilities);
@@ -36,10 +41,18 @@ public class OdometryFileWriter extends KFileWriter {
             stringBuilder.append(key + "_Y,");
             stringBuilder.append(key + "_Theta,");
             stringBuilder.append(key + "_DeltaTheta,");
+            stringBuilder.append(key + "_LeftTicks,");
+            stringBuilder.append(key + "_RightTicks,");
+            stringBuilder.append(key + "_BackTicks,");
             stringBuilder.append(key + "_Action,");
 
         }
         super.writeLine(stringBuilder.toString());
+        try {
+            super.flush();
+        } catch (Exception e) {
+            KLog.e("OdometryFileWriter", "Failed to flush header", e);
+        }
     }
     public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap, String action) {
         KLog.d("odometryData", "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
@@ -63,12 +76,17 @@ public class OdometryFileWriter extends KFileWriter {
         }
         stringBuilder.append(action);
         KLog.d("odometry_file_writer_line", stringBuilder.toString());
-        super.writeLine(stringBuilder.toString());
+        bufferedLines.add(stringBuilder.toString());
     }
     public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap) {
         writeOdometryPositionHistory(positionHistoryHashMap, "");
     }
     public void close() {
+        KLog.d("OdometryFileWriter", "Writing " + bufferedLines.size() + " buffered lines to file");
+        for (String line : bufferedLines) {
+            super.writeLine(line);
+        }
+        bufferedLines.clear();
         super.close();
     }
 }
