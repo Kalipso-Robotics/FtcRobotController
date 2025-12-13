@@ -1,4 +1,4 @@
-package com.kalipsorobotics.utilities;
+package com.kalipsorobotics.math;
 
 public class LimelightPos {
 
