@@ -4,7 +4,9 @@ import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
+import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
@@ -16,6 +18,7 @@ import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
@@ -25,6 +28,7 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
+import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.modules.shooter.ShotLogger;
@@ -44,6 +48,8 @@ public class TeleOp extends KOpMode {
     private boolean hasClosedStopperInnit = false;
     private boolean turretReset = false;
     private DriveTrain driveTrain;
+    private DriveBrake driveBrake;
+
     private Shooter shooter = null;
     private Intake intake = null;
     private Turret turret = null;
@@ -83,6 +89,9 @@ public class TeleOp extends KOpMode {
     private boolean useLimelight = true;
     private boolean forceShootNearPressed = false;
 
+
+
+
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = SharedData.getAllianceColor();
@@ -94,6 +103,8 @@ public class TeleOp extends KOpMode {
         KLog.d("TeleOp-Init", "Starting initializeRobot()");
 
         driveTrain = DriveTrain.getInstance(opModeUtilities);
+        driveBrake = new DriveBrake(opModeUtilities);
+
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
         sleep(1000);

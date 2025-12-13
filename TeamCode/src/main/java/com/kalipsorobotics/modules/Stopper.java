@@ -13,7 +13,7 @@ public class Stopper {
 
     private final OpModeUtilities opModeUtilities;
 
-    private KServo stopper;
+    private final KServo stopper;
 
     public Stopper(OpModeUtilities opModeUtilities) {
         KLog.d("Stopper", "Constructor called - starting initialization");
@@ -25,7 +25,7 @@ public class Stopper {
             KLog.d("Stopper", "Hardware servo retrieved: " + (stopper != null ? "SUCCESS" : "NULL"));
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
-            this.stopper = new KServo(stopper,KServo.AXON_MAX_SPEED, 255, 0, false);
+            this.stopper = new KServo(stopper, KServo.AXON_MAX_SPEED, 255, 0, false);
             this.stopper.setPosition(STOPPER_SERVO_CLOSED_POS);
             KLog.d("Stopper", "Constructor completed successfully");
         } catch (Exception e) {
