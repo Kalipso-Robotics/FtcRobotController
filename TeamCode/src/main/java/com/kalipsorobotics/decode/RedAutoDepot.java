@@ -124,7 +124,7 @@ public class RedAutoDepot extends KOpMode {
         trip3.getTrip().getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getTrip().getMoveToBall().addPoint(223, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getTrip().getMoveToBall().addPoint(223,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y + 50) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        trip3.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip3);
 
         //-------------------TRIP 4 ------------------- ~ 19qp01
@@ -144,7 +144,7 @@ public class RedAutoDepot extends KOpMode {
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
         park.setDependentActions(trip3);
-        park.addPoint(170, 590 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        park.addPoint(170, 540 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);
         KLog.d("auto", "--------------DEPOT AUTO STARTED-------------");

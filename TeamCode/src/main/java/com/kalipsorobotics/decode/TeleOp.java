@@ -60,6 +60,9 @@ public class TeleOp extends KOpMode {
     ShooterStop shooterStop = null;
     ShootAllAction shootAction = null;
 
+    ActivateBraking activateBraking = null;
+    ReleaseBraking releaseBraking = null;
+
     KServoAutoAction openStopper = null;
     KServoAutoAction closeStopper = null;
 
@@ -384,7 +387,7 @@ public class TeleOp extends KOpMode {
         // Priority 2- Execute shoot sequence
         if (shootPressed) {
             if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()), driveBrake, activateBraking, releaseBraking);
                 shootAction.shooterRun.setUseLimelight(useLimelight);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
@@ -400,7 +403,7 @@ public class TeleOp extends KOpMode {
         //
         if (forceShootFarPressed) {
             if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1], driveBrake, activateBraking, releaseBraking);
                 shootAction.shooterRun.setUseLimelight(useLimelight);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
@@ -415,7 +418,7 @@ public class TeleOp extends KOpMode {
 
         if (forceShootNearPressed) {
             if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
+                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1], driveBrake, activateBraking, releaseBraking);
                 shootAction.shooterRun.setUseLimelight(useLimelight);
                 shooterWarmup = null;
                 setLastShooterAction(shootAction);
