@@ -32,6 +32,10 @@ public class KServo {
         this.lastPosition = servo.getPosition();
     }
 
+    public KServo(Servo servo) {
+        this(servo, KServo.AXON_MAX_SPEED, 255, 0, false);
+    }
+
     private final int counter = 0;
 
     public double estimateTimeMs(double currentPosition, double targetPosition) {

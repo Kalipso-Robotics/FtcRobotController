@@ -1,47 +1,78 @@
 package com.kalipsorobotics.actions.shooter;
 
-import android.graphics.Bitmap;
-
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
+import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
+import com.kalipsorobotics.actions.turret.TurretReadyLimelight;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
-import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.modules.shooter.ShooterConfig;
-import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
+import com.kalipsorobotics.test.turret.TurretReady;
+import com.kalipsorobotics.utilities.KLog;
 
 
 public class ShootAllAction extends KActionSet {
 
-    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, Point target) {
-        this(stopper, intake, shooter, target, 0, 0);
+    public ShooterRun shooterRun;
+    TurretReadyLimelight turretReadyLimelight;
+    ShooterReady ready;
+    PushBall pushAllBalls;
+    ShooterStop shooterStop;
+    TurretAutoAlign turretAutoAlign;
+
+    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight, double targetRPS, double targetHoodPos) {
+        shooterRun = new ShooterRun(shooter, targetRPS, targetHoodPos);
+        shooterRun.setName("ShooterReady");
+        this.addAction(shooterRun);
+
+        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignLimelight);
     }
 
-    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, double targetRPS, double targetHoodPos) {
-        this(stopper, intake, shooter, null, targetRPS, targetHoodPos);
+    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight, Point targetPoint) {
+        shooterRun = new ShooterRun(shooter, targetPoint);
+        shooterRun.setName("ShooterReady");
+        this.addAction(shooterRun);
+
+        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignLimelight);
     }
 
-    private ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, Point target, double targetRPS, double targetHoodPos) {
-        ShooterReady shooterReady = new ShooterReady(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, 0);
-        shooterReady.setName("ShooterReady");
-        this.addAction(shooterReady);
+    public ShooterRun getShooterRun() {
+        return shooterRun;
+    }
 
-        ShooterReady shooterMaintain = new ShooterReady(shooter, target, LaunchPosition.AUTO, targetRPS, targetHoodPos, ShooterConfig.maintainTimeOutMS);
-        shooterMaintain.setName("ShooterMaintain");
-        this.addAction(shooterMaintain);
-        shooterMaintain.setDependentActions(shooterReady);
+    public ShooterReady getShooterReady() {
+        return ready;
+    }
 
-        PushBall pushAllBalls = new PushBall(stopper, intake, shooter);
+    @Override
+    protected void beforeUpdate() {
+        KLog.d("ShootAllAction", "is Done: " + isDone + " ready: " + ready.getIsDone() + " pushAllBalls: " + pushAllBalls.getIsDone() + " shooterStop: " + shooterStop.getIsDone());
+    }
+
+    private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight) {
+
+        ready = new ShooterReady(shooterRun);
+        ready.setName("ready");
+        this.addAction(ready);
+
+        turretReadyLimelight = new TurretReadyLimelight(turretAutoAlignLimelight);
+        turretReadyLimelight.setName("turretReady");
+        this.addAction(turretReadyLimelight);
+
+        pushAllBalls = new PushBall(stopper, intake, shooter);
         pushAllBalls.setName("pushAllBalls");
-        pushAllBalls.setDependentActions(shooterReady);
+        pushAllBalls.setDependentActions(ready, turretReadyLimelight);
         this.addAction(pushAllBalls);
 
-        ShooterStop shooterStop = new ShooterStop(shooter);
+        shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
-        shooterStop.setDependentActions(pushAllBalls, shooterMaintain);
+        shooterStop.setDependentActions(pushAllBalls, ready);
         this.addAction(shooterStop);
+    }
 
+    public void setTurretReady(boolean isDone) {
+        turretReadyLimelight.setIsDone(isDone);
     }
 }

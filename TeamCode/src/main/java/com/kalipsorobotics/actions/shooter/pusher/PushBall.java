@@ -3,40 +3,32 @@ package com.kalipsorobotics.actions.shooter.pusher;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
-import com.kalipsorobotics.actions.shooter.AdjustShooterSpeedAction;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
-import com.kalipsorobotics.modules.shooter.LaunchPosition;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.test.turret.TurretReady;
 import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.utilities.SharedData;
 
 public class PushBall extends KActionSet {
 
     public PushBall(Stopper stopper, Intake intake, Shooter shooter) {
-        KServoAutoAction release = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
-        release.setName("release");
-        this.addAction(release);
 
-//        AdjustShooterSpeedAction check1 = new AdjustShooterSpeedAction(shooter);
-//        check1.setName("check1");
-//        this.addAction(check1);
+        KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryPosition());
+
+        KServoAutoAction openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
+        openStopper.setName("openStopper");
+        this.addAction(openStopper);
+
+        KLog.d("PushAllBalls", "openStopper " + openStopper.getIsDone());
 
         RunIntakeUntilFullSpeed untilShootingDone = new RunIntakeUntilFullSpeed(intake);
         untilShootingDone.setName("untilShootingDone");
 //        untilShootingDone.setDependentActions(pushLeft, pushRight);
         this.addAction(untilShootingDone);
 
-        KLog.d("teleop", "shooting done.(based off intake)");
-        WaitAction wait = new WaitAction(1000);
-        wait.setDependentActions(untilShootingDone);
-        this.addAction(wait);
-
-//        KServoAutoAction block = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-//        block.setName("block");
-//        this.addAction(block);
-//        block.setDependentActions(wait, untilShootingDone, release);
+        KLog.d("PushAllBalls", "run intake " + untilShootingDone.getIsDone());
 
 
         KLog.d("teleop", "pusher Stopped(based off intake)");

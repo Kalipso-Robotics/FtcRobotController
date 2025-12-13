@@ -17,6 +17,13 @@ public abstract class Action {
 
     protected Telemetry telemetry;
 
+    // Timing and logging fields
+    private long startTimeMs = 0;
+    private long lastUpdateTimeMs = 0;
+    private long blockedStartTimeMs = 0;
+    private boolean wasBlockedLastUpdate = false;
+    private int updateCount = 0;
+
     public boolean getIsDone() {
         return isDone;
     }
@@ -59,14 +66,65 @@ public abstract class Action {
             return true;
         } //if done never update
 
+        // Check if blocked by dependent actions
+        boolean isBlocked = false;
+        StringBuilder blockedBy = new StringBuilder();
+
         for (Action action : dependentActions) {
             if (action != null && !action.getIsDone()) {
-                return false;
-            } //if dependent action is not done never update
-            //dont start if dependant action not finished
+                isBlocked = true;
+                if (blockedBy.length() > 0) blockedBy.append(", ");
+                blockedBy.append(action.getName() != null ? action.getName() : "unnamed");
+            }
+        }
+
+        if (isBlocked) {
+            // Track when blocking started
+            if (!wasBlockedLastUpdate) {
+                blockedStartTimeMs = System.currentTimeMillis();
+                wasBlockedLastUpdate = true;
+                KLog.d("ActionBlocking", String.format("[%s] BLOCKED - Waiting on: [%s]",
+                    getName() != null ? getName() : "unnamed", blockedBy.toString()));
+            } else {
+                // Log periodic updates while blocked
+                long blockedDurationMs = System.currentTimeMillis() - blockedStartTimeMs;
+                if (blockedDurationMs > 0 && blockedDurationMs % 1000 < 50) { // Log every ~1 second
+                    KLog.d("ActionBlocking", String.format("[%s] STILL BLOCKED for %.1fs - Waiting on: [%s]",
+                        getName() != null ? getName() : "unnamed",
+                        blockedDurationMs / 1000.0,
+                        blockedBy.toString()));
+                }
+            }
+            return false;
+        }
+
+        // No longer blocked
+        if (wasBlockedLastUpdate) {
+            long totalBlockedMs = System.currentTimeMillis() - blockedStartTimeMs;
+            KLog.d("ActionBlocking", String.format("[%s] UNBLOCKED after %.1fs - Dependencies completed",
+                getName() != null ? getName() : "unnamed", totalBlockedMs / 1000.0));
+            wasBlockedLastUpdate = false;
+        }
+
+        // Track action start
+        if (!hasStarted) {
+            startTimeMs = System.currentTimeMillis();
+            KLog.d("ActionLifecycle", String.format("[%s] STARTED", getName() != null ? getName() : "unnamed"));
         }
 
         update();
+        updateCount++;
+        lastUpdateTimeMs = System.currentTimeMillis();
+
+        // Check if completed
+        boolean justCompleted = !isDone && isUpdateDone();
+        if (justCompleted) {
+            long totalDurationMs = System.currentTimeMillis() - startTimeMs;
+            KLog.d("ActionLifecycle", String.format("[%s] COMPLETED after %.1fs (%d updates)",
+                getName() != null ? getName() : "unnamed",
+                totalDurationMs / 1000.0,
+                updateCount));
+        }
 
         return isUpdateDone();
 

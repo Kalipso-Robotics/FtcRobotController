@@ -2,62 +2,107 @@ package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 public class TurretAutoAlign extends Action {
     OpModeUtilities opModeUtilities;
 
     Turret turret;
-    DcMotor turretMotor;
+    KMotor turretMotor;
 
-    private double xInitSetup;// = 3445.14;
-    private double yInitSetup;// = 2028.8;
+    private double targetTicks;
 
-    private final double TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE);
+    private double xInitSetupMM; //121 inches
 
+    private double yInitSetupMM; //46inches 1000
+    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 1;
+    private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
 
-    public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, double xInitSetup, double yInitSetup) {
+    private AllianceColor allianceColor;
+
+    public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
-        this.xInitSetup = xInitSetup;
-        this.yInitSetup = yInitSetup;
+        this.allianceColor = allianceColor;
+
+        xInitSetupMM = TurretConfig.X_INIT_SETUP_MM;
+        yInitSetupMM = TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity();
+        this.targetTicks = 0;
+
     }
 
     public boolean isWithinRange() {
         return isWithinRange;
     }
 
+    public void stop() {
+        turretMotor.stop();
+    }
+    public void initBlocking() {
+        ElapsedTime timer = new ElapsedTime();
+        int count = 0;
+
+        while (timer.milliseconds() < 3000) {
+            count++;
+            if (timer.milliseconds() > 1000) {
+                this.updateCheckDone();
+            }
+            opModeUtilities.getTelemetry().addData("count ", count);
+            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
+            opModeUtilities.getTelemetry().update();
+        }
+        opModeUtilities.getTelemetry().addData("isWithinRange ", isWithinRange);
+        opModeUtilities.getTelemetry().addLine("TURRET ALIGNED READY");
+        opModeUtilities.getTelemetry().update();
+    }
+
+    public void incrementYInitSetupMM(double increment) {
+        yInitSetupMM += increment;
+    }
+
+    public Turret getTurret() {
+        return turret;
+    }
+
     @Override
     protected void update() {
-        if (!opModeUtilities.getOpMode().opModeIsActive()) {
+        if (!opModeUtilities.getOpMode().opModeIsActive() && !opModeUtilities.getOpMode().opModeInInit()) {
             KLog.d("Turret_Singleton", "OpModeNotActive Return");
+            turretMotor.stop();
             return;
         }
+
+        if (!hasStarted) {
+            hasStarted = true;
+        }
+
         KLog.d("Turret_Singleton", "Encoder position " + turretMotor.getCurrentPosition());
 
         Position currentPosition = SharedData.getOdometryPosition();
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
 
-        double yTargetGoal = yInitSetup - currentY;
-        double xTargetGoal = xInitSetup - currentX;
-        KLog.d("turret_angle", "y init setup" + yInitSetup + "current y" + currentY);
+        double yTargetGoal = yInitSetupMM - currentY;
+        double xTargetGoal = xInitSetupMM - currentX;
+        KLog.d("turret_angle", "y init setup" + TurretConfig.Y_INIT_SETUP_MM + "current y" + currentY);
 
         double angleTargetRadian;
 //        if (!useAprilTag) {
-            // Use atan2 for proper angle calculation in all quadrants
-            angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
-            KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
+        // Use atan2 for proper angle calculation in all quadrants
+        angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
+        KLog.d("target_turret_angle", "target radian " + angleTargetRadian + " degrees " + Math.toDegrees(angleTargetRadian));
 //        } else {
 //            angleTargetRadian = SharedData.getAngleRadToGoal();
 //        }
@@ -66,14 +111,23 @@ public class TurretAutoAlign extends Action {
         double reverseTurretAngleRadian = -currentRobotAngleRadian;
 
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
+
+//        if (SharedData.getOdometryUnhealthy()) {
+//            double currentTicks = turretMotor.getCurrentPosition();
+//            double targetDeltaTicks = TurretConfig.TICKS_INIT_OFFSET - currentTicks;
+//            double targetAngleRad = (targetDeltaTicks / Turret.TICKS_PER_RADIAN);
+//            totalTurretAngle = -targetAngleRad;
+//            KLog.d("Turret_Reset", "Unhealthy Odometry Resetting Turret Angle: " + totalTurretAngle);
+//        }
         // Use angleWrapRad to normalize the turret angle to [-π, π]
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
-        double targetTicks;
         double turretRotation = (totalTurretAngleWrap) / (2 * Math.PI);
-        double motorRotation = turretRotation * Turret.GEAR_RATIO;
-        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
+        double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
+        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation + TurretConfig.TICKS_INIT_OFFSET;
         KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
+        KLog.d("turret", "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
+
 
 
         /*
@@ -100,22 +154,20 @@ public class TurretAutoAlign extends Action {
 
          }*/
 
-        KLog.d("turret_position", " ticks " + targetTicks + " motor position "+ turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+        KLog.d("turret_position", " ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
 
-        if (turretMotor.getCurrentPosition() > targetTicks - TOLERANCE_TICKS && turretMotor.getCurrentPosition() < targetTicks + TOLERANCE_TICKS) {
+        if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
-            SharedData.setIsTurretWithinRange(isWithinRange);
-            turretMotor.setPower(0);
+            turretMotor.stop();
+            KLog.d("turret_position", "Within RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+
         } else {
             isWithinRange = false;
-            SharedData.setIsTurretWithinRange(isWithinRange);
-            turretMotor.setTargetPosition((int) targetTicks);
-            turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            turretMotor.setPower(0.7);
+            turretMotor.goToTargetTicks((int) targetTicks);
+            KLog.d("turret_position", "NOT WITHIN RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
         }
         KLog.d("turret_in_range", "is the turret in range " + isWithinRange);
-
 
 
 //read position of robot in the field
@@ -130,10 +182,16 @@ public class TurretAutoAlign extends Action {
 //need odometry
 
 
-
-
-
         //check to see if turret is aligned with the goal
 
+    }
+
+
+    public double getTargetTicks() {
+        return targetTicks;
+    }
+
+    public void setToleranceDeg(double newToleranceDeg) {
+        toleranceTicks = newToleranceDeg * Turret.TICKS_PER_DEGREE;
     }
 }

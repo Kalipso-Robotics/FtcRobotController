@@ -6,6 +6,7 @@ import static com.kalipsorobotics.modules.ColorSensorPosition.FRONT;
 
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import java.util.HashMap;
 
@@ -20,6 +21,7 @@ public class TripleColorSensor {
         this.bLeft = opModeUtilities.getHardwareMap().get(RevColorSensorV3.class, "bLeftColor");
         this.bRight = opModeUtilities.getHardwareMap().get(RevColorSensorV3.class, "bRightColor");
         this.front = opModeUtilities.getHardwareMap().get(RevColorSensorV3.class, "frontColor");
+
         this.sensors = new HashMap<>();
         sensors.put(BLEFT, bLeft);
         sensors.put(BRIGHT, bRight);

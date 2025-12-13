@@ -1,5 +1,6 @@
 package com.kalipsorobotics.modules.shooter;
 
+import com.kalipsorobotics.utilities.KCRServo;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.Point;
@@ -7,6 +8,8 @@ import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -17,11 +20,13 @@ public class Shooter {
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
 
-    public static final Point RED_TARGET_FROM_FAR = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
+    public static final Point TARGET_POINT = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
 
     public static final double HOOD_OFFSET = 0.25;
 
-    public final double TARGET_RPS_TOLERANCE = 0.5;
+    public final double TARGET_RPS_TOLERANCE = 1;
+
+    public static final double FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY = 2370.0 / 2.0;
 
 
     private final OpModeUtilities opModeUtilities;
@@ -30,6 +35,10 @@ public class Shooter {
     private final KMotor shooter2;
 
     private final KServo hood;
+
+    private final KCRServo kicker;
+
+
 
 //    private final KCRServo pusherRight;
 //    private final KCRServo pusherLeft;
@@ -44,6 +53,10 @@ public class Shooter {
 //    public KCRServo getPusherLeft() {
 //        return pusherLeft;
 //    }
+    private double targetRPS;
+    private double prevRPS = 0;
+    private double currentRPS;
+    private final double UNDERSHOOT_TOLERANCE = 5;
 
     public Shooter(OpModeUtilities opModeUtilities) {
 
@@ -52,16 +65,23 @@ public class Shooter {
         DcMotor motor2 = opModeUtilities.getHardwareMap().dcMotor.get("shooter2");
         motor1.setDirection(DcMotorSimple.Direction.REVERSE);
         motor2.setDirection(DcMotorSimple.Direction.FORWARD);
+        motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        shooter1 = new KMotor(motor1, ShooterConfig.minPowerScaleFactor, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd);
-        shooter2 = new KMotor(motor2,  ShooterConfig.minPowerScaleFactor, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd);
+        shooter1 = new KMotor(motor1, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
+        shooter2 = new KMotor(motor2, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
         if (hood == null) {
             opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
         }
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
+
+        CRServo kicker = opModeUtilities.getHardwareMap().crservo.get("kicker");
+        this.kicker = new KCRServo(kicker, false);
+
+        this.targetRPS = 0;
 
 //        CRServo kickerRight = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        if (kickerRight == null) {
@@ -92,8 +112,19 @@ public class Shooter {
     }
 
     public boolean isAtTargetRPS() {
-        boolean isWithinTarget = shooter1.isAtTargetRPS(TARGET_RPS_TOLERANCE);
+        double effectiveTolerance = TARGET_RPS_TOLERANCE;
+        if (targetRPS != 0) {
+            effectiveTolerance = (targetRPS / ShooterConfig.MAX_RPS) * TARGET_RPS_TOLERANCE;
+        }
+        boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
         return isWithinTarget;
+    }
+
+    public boolean isRunning() {
+        if (Math.abs(shooter1.getPower()) > 0) {
+            return true;
+        }
+        return false;
     }
 
 
@@ -101,6 +132,9 @@ public class Shooter {
         return hood;
     }
 
+    public KCRServo getKicker() {
+        return kicker;
+    }
 
     public KMotor getShooter1() {
         return shooter1;
@@ -117,6 +151,10 @@ public class Shooter {
      * @return shooter parameters containing RPS and hood position
      */
     public IShooterPredictor.ShooterParams getPrediction(double distanceMM) {
+        if (distanceMM > 4200 || SharedData.getOdometryUnhealthy()) {
+            KLog.d("shooter_ready", "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY + " Distance: " + distanceMM);
+            return predictor.predict(FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY);
+        }
         return predictor.predict(distanceMM);
     }
 
@@ -140,6 +178,7 @@ public class Shooter {
     public void stop() {
         shooter1.stop();
         shooter2.stop();
+        KLog.d("ShooterStop", "shooter stopped");
     }
 
     /**
@@ -153,11 +192,37 @@ public class Shooter {
 
     /**
      * Set target RPS for both motors using PID control
+     * Uses adaptive kF based on target RPS from lookup table
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
+        this.targetRPS = targetRPS;
+        // Get optimal kF for this target RPS
+        double optimalKf = ShooterConfig.getShooterKf(targetRPS);
+        // Update kF in both motors' PIDF controllers
+        shooter1.getPIDFController().setKf(optimalKf);
+        shooter2.getPIDFController().setKf(optimalKf);
+
+        currentRPS = getRPS();
+
+        // Set target RPS
         shooter1.goToRPS(targetRPS);
         shooter2.goToRPS(targetRPS);
+
+//        if ((prevRPS < targetRPS && currentRPS < (targetRPS - UNDERSHOOT_TOLERANCE)) && prevRPS > currentRPS) {
+//            if (targetRPS > 40) {
+//                //bang bang
+//                shooter1.setPower(0.7);
+//                shooter2.setPower(0.7);
+//                KLog.d("Shooter", "Using bang bang");
+//            }
+//        } else {
+//            // Set target RPS
+//            shooter1.goToRPS(targetRPS);
+//            shooter2.goToRPS(targetRPS);
+//        }
+
+        prevRPS = currentRPS;
     }
 
     /**

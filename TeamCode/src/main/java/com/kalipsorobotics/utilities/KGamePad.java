@@ -25,6 +25,7 @@ public class KGamePad {
     private boolean previousRightStickButton = false;
 
     private boolean toggleY = false;
+    private boolean toggleX = false;
 
 
     public KGamePad(Gamepad gamepad){
@@ -53,6 +54,14 @@ public class KGamePad {
 
         this.previousDpadLeft = current;
         return toggle;
+    }
+
+    public boolean isDpadLeftPressed() {
+        return gamepad.dpad_left;
+    }
+
+    public boolean isDpadRightPressed() {
+        return gamepad.dpad_right;
     }
 
     public boolean isDpadRightFirstPressed(){
@@ -134,6 +143,18 @@ public class KGamePad {
 
     public boolean isYPressed() {
         return gamepad.y;
+    }
+
+    public boolean isXPressed() {
+        return gamepad.x;
+    }
+
+    public boolean isToggleX() {
+        if (isButtonXFirstPressed()) {
+            toggleX = !toggleX;
+        }
+        KLog.d("KGamePad_Toggle", "Toggle X: " + toggleX);
+        return toggleX;
     }
 
     public boolean isToggleY() {

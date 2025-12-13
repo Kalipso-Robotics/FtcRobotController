@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import com.kalipsorobotics.PID.PIDController;
+import com.kalipsorobotics.PID.PIDFController;
 import com.kalipsorobotics.math.CalculateTickPer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -19,35 +19,37 @@ public class KMotor {
 
     private double prevRPS = 0;
 
-    // PID controller for RPS control
-    private final PIDController pidController;
+    // PIDF controller for RPS control
+    private final PIDFController pidfController;
     private double targetRPS = 0;
+
+    private double targetTicks = 0;
 
     // Power limits
     private static final double MAX_POWER = 1.0;
-    private static final double DEFAULT_MIN_POWER = 0.0;
-    private double minPowerScaleFactor;
+    private static final double MIN_POWER = -1;
 
-    // Default PID constants - tune these values
-    private static final double DEFAULT_KP = 0.0007;
-    private static final double DEFAULT_KI = 0.0001;
-    private static final double DEFAULT_KD = 0.0005;
+    // Default PIDF constants - tune these values for optimal RPS control
+    // These values are designed to prevent overshoot while reaching target quickly
+//    private static final double DEFAULT_KP = 0.05;   // Proportional - moderate correction
+//    private static final double DEFAULT_KI = 0.0001; // Integral - small to prevent wind-up
+//    private static final double DEFAULT_KD = 0.01;   // Derivative - strong to prevent overshoot
+//    private static final double DEFAULT_KF = 0.01;   // Feedforward - base power per RPS
 
 
 
     private final ElapsedTime elapsedTime;
 
-    public KMotor(DcMotor motor) {
-        this(motor, DEFAULT_MIN_POWER, DEFAULT_KP, DEFAULT_KI, DEFAULT_KD);
-    }
-
-    public KMotor(DcMotor motor, double minPowerScaleFactor, double kp, double ki, double kd) {
+    public KMotor(DcMotor motor, double kp, double ki, double kd, double kf, double ks) {
         this.motor = (DcMotorEx) motor;
-        this.minPowerScaleFactor = minPowerScaleFactor;
         this.prevTicks = motor.getCurrentPosition();
         this.prevTimeMS = System.currentTimeMillis();
         this.elapsedTime = new ElapsedTime();
-        this.pidController = new PIDController(kp, ki, kd, "KMotor_" + motor.getDeviceName());
+        this.pidfController = new PIDFController(kp, ki, kd, kf, ks, "KMotor_" + motor.getDeviceName());
+    }
+
+    public KMotor(DcMotor motor, double kp, double ki, double kd, double kf) {
+        this(motor, kp, ki, kd, kf, 0);
     }
 
     /**
@@ -98,42 +100,48 @@ public class KMotor {
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
-        // Update target if changed significantly (>0.005 RPS)
-        if (Math.abs(targetRPS - this.targetRPS) > 0.005) {
-            this.targetRPS = targetRPS;
-            // Reset PID on target change to prevent overshoot
-            pidController.reset();
-        }
+
+        this.targetRPS = targetRPS;
 
         // Get current RPS
         double currentRPS = getRPS();
 
-        // Calculate PID output
-        double pidOutput = pidController.calculate(currentRPS, targetRPS);
-
-        // Get current power and adjust
-        double currentPower = motor.getPower();
-        double newPower =  currentPower + pidOutput;
-
-        double minPower = minPowerScaleFactor * targetRPS;
-
-        // Clamp power to valid range
-        newPower = Math.max(minPower, Math.min(MAX_POWER, newPower));
+        // Calculate PIDF output with saturation limits
+        // Back-calculation anti-windup is applied internally
+        double newPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
 
         // Set new power
         motor.setPower(newPower);
 
         // Log for debugging
         KLog.d("KMotor", String.format(
-            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, PIDOutPut: %.2f, Power: %.3f -> %.3f, MinPower: %.3f",
-            targetRPS, currentRPS, (targetRPS - currentRPS), pidOutput, currentPower, newPower, minPower
+            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
+            targetRPS, currentRPS, (targetRPS - currentRPS), newPower, 0.0, MAX_POWER
         ));
-
-//        double targetTPS = CalculateTickPer.rotationToTicks6000RPM(targetRPS);
-//        this.targetRPS = targetRPS;
-//        KLog.d("KMotor", "goToRPS: " + targetRPS);
-//        motor.setVelocity(targetTPS);
     }
+
+    public double clampPower(double power, double max_power, double min_power) {
+        return Math.max(min_power, Math.min(power, max_power));
+    }
+    public double clampPower(double power) {
+        return clampPower(power, 1, -1);
+    }
+    public void goToTargetTicks(int targetTicks) {
+        this.targetTicks = targetTicks;
+
+        int currentTicks = motor.getCurrentPosition();
+        // Error = where we want to be - where we are
+        int error = targetTicks - currentTicks;
+        double newPower = pidfController.calculate(error);
+        newPower = clampPower(newPower);
+        motor.setPower(newPower);
+        KLog.d("KMotor", String.format(
+                "Target: %d Ticks, Current: %d Ticks, Error: %d, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
+                targetTicks, currentTicks, error, newPower, -1.0, 1.0
+        ));
+    }
+
+
 
     /**
      * Check if motor has reached target RPS within tolerance
@@ -143,18 +151,21 @@ public class KMotor {
     public boolean isAtTargetRPS(double tolerance) {
         double currentRPS = getRPS();
         KLog.d("KMotor", "Current RPS: " + currentRPS + " Target RPS: " + targetRPS);
-        boolean isAtTarget = (Math.abs(currentRPS - targetRPS) <= tolerance);
+        boolean isAtTarget = (Math.abs(currentRPS - targetRPS) < tolerance); // changed <= to < (11/21)
         if (isAtTarget) {
             KLog.d("ShooterReady", "RPS within tolerance - Ready!");
         }
+
+
+
         return isAtTarget;
     }
 
     /**
-     * Reset PID state (useful when starting a new control sequence)
+     * Reset PIDF state (useful when starting a new control sequence)
      */
     public void resetPID() {
-        pidController.reset();
+        pidfController.reset();
         prevTicks = motor.getCurrentPosition();
         prevTimeMS = System.currentTimeMillis();
     }
@@ -192,11 +203,11 @@ public class KMotor {
     }
 
     /**
-     * Get the PID controller for tuning
-     * @return the PID controller
+     * Get the PIDF controller for tuning
+     * @return the PIDF controller
      */
-    public PIDController getPIDController() {
-        return pidController;
+    public PIDFController getPIDFController() {
+        return pidfController;
     }
 
     /**

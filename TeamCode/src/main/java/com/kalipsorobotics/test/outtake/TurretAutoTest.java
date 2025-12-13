@@ -1,6 +1,5 @@
 package com.kalipsorobotics.test.outtake;
 
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -8,12 +7,12 @@ import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.utilities.KTeleOp;
+import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous
-public class TurretAutoTest extends KTeleOp {
+//@Autonomous
+public class TurretAutoTest extends KOpMode {
 
     DriveTrain driveTrain;
     IMUModule imuModule;
@@ -36,7 +35,7 @@ public class TurretAutoTest extends KTeleOp {
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, TurretConfig.RED_X_INIT_SETUP, TurretConfig.RED_Y_INIT_SETUP);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
     }
 

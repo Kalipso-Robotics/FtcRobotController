@@ -1,6 +1,6 @@
 package com.kalipsorobotics.utilities;
 
-import com.kalipsorobotics.cameraVision.AllianceSetup;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.math.PositionHistory;
@@ -11,15 +11,7 @@ public class SharedData {
 
     private static final Position odometryPosition = new Position(0, 0, 0);
 
-    public static boolean isIsTurretWithinRange() {
-        return isTurretWithinRange;
-    }
-
-    public static void setIsTurretWithinRange(boolean isTurretWithinRange) {
-        SharedData.isTurretWithinRange = isTurretWithinRange;
-    }
-
-    private static boolean isTurretWithinRange = false;
+    private static final LimelightPos limelightPosition = new LimelightPos(0,0,0,0,0);
     private static final HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionMap = new HashMap<>();
 
     public static Position getOdometryPosition() {
@@ -28,6 +20,14 @@ public class SharedData {
 
     public static void setOdometryPosition(Position position) {
         odometryPosition.reset(position);
+    }
+
+    public static void setLimelightPosition(LimelightPos position) {
+        limelightPosition.setPos(position);
+    }
+
+    public static LimelightPos getLimelightPosition() {
+        return limelightPosition;
     }
 
     public static void resetOdometryPosition() {
@@ -42,33 +42,24 @@ public class SharedData {
         SharedData.odometryPositionMap.putAll(odometryPositionMap);
     }
 
-    private static AllianceSetup allianceSetup = AllianceSetup.RED;
+    private static boolean isOdometryUnhealthy = false;
 
-    public static AllianceSetup getAllianceColor() {
-        return allianceSetup;
+    public static boolean getOdometryUnhealthy() {
+        return isOdometryUnhealthy;
     }
 
-    public static void setAllianceColor(AllianceSetup allianceSetup) {
-        SharedData.allianceSetup = allianceSetup;
+    public static void setIsOdometryUnhealthy(boolean isOdometryUnhealthy) {
+        SharedData.isOdometryUnhealthy = isOdometryUnhealthy;
     }
 
-    public static void setDistanceToGoal(double distanceToGoal) {
-        SharedData.distanceToGoal = distanceToGoal;
+    private static AllianceColor allianceColor = AllianceColor.RED;
+
+    public static AllianceColor getAllianceColor() {
+        return allianceColor;
     }
 
-    private static double distanceToGoal = 0.0;
-
-    public static double getDistanceToGoal() {
-        return distanceToGoal;
+    public static void setAllianceColor(AllianceColor allianceColor) {
+        SharedData.allianceColor = allianceColor;
     }
 
-    public static void setAngleRadToGoal(double distanceToGoal) {
-        SharedData.angleRadToGoal = angleRadToGoal;
-    }
-
-    private static double angleRadToGoal = 0.0;
-
-    public static double getAngleRadToGoal() {
-        return angleRadToGoal;
-    }
 }

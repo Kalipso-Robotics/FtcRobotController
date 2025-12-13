@@ -48,14 +48,14 @@ public class KFileWriter {
             }
         }
 
-        File file = new File(path, name + "—" + formattedDateTime + ".csv");
+        File file = new File(path, name + "_" + formattedDateTime + ".csv");
 
         try {
             writer = new BufferedWriter(new FileWriter(file));
         } catch (IOException ioException) {
-            KLog.e("IOException", "Failed Initializing File Writer For " + name + "—" + formattedDateTime + ".csv",
+            KLog.e("KFileWriter", "Failed Initializing File Writer For " + name + "_" + formattedDateTime + ".csv",
                     ioException);
-            throw new RuntimeException("Failed to initialize KFileWriter for " + name + "—" + formattedDateTime + ".csv", ioException);
+            throw new RuntimeException("Failed to initialize KFileWriter for " + name + "_" + formattedDateTime + ".csv", ioException);
         }
 
 
@@ -66,15 +66,20 @@ public class KFileWriter {
             writer.write(string);
             writer.newLine();
         } catch (IOException ioException) {
-            KLog.d("IOException", "Caught IOException While Writing");
+            KLog.e("KFileWriter", "Failed to write line to " + name, ioException);
         }
+    }
+
+    public void flush() throws IOException {
+        writer.flush();
     }
 
     public void close() {
         try {
+            writer.flush();
             writer.close();
         } catch (IOException e) {
-            KLog.d("IOException", "Caught IOException While Closing");
+            KLog.e("KFileWriter", "Failed to close file writer for " + name, e);
         }
     }
 

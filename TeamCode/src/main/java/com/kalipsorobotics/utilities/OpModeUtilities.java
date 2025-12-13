@@ -39,6 +39,7 @@ public class OpModeUtilities {
     public static void shutdownExecutorService(ExecutorService executorService) throws InterruptedException {
         executorService.shutdownNow();
         executorService.awaitTermination(1, TimeUnit.SECONDS);
+        KLog.d("ExecutorService", "Shut down executor service");
     }
 
     /**

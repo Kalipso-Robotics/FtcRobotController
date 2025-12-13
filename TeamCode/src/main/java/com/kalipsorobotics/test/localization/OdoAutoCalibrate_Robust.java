@@ -1,6 +1,7 @@
 package com.kalipsorobotics.test.localization;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -9,7 +10,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import java.util.ArrayList;
 import java.util.List;
 
-@Autonomous(name = "OdoAutoCalibrate_Robust", group = "Calibration")
+@Disabled
+//@Autonomous(name = "OdoAutoCalibrate_Robust", group = "Calibration")
 public class OdoAutoCalibrate_Robust extends LinearOpMode {
 
     // ---- CONFIGURE THESE ----

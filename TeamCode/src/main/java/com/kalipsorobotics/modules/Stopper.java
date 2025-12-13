@@ -1,41 +1,43 @@
 package com.kalipsorobotics.modules;
 
 import com.kalipsorobotics.utilities.KCRServo;
+import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Stopper {
 
-    public final double STOPPER_SERVO_CLOSED_POS = 0.55;
-    public final double STOPPER_SERVO_OPEN_POS = 0.7;
+    public static final double STOPPER_SERVO_CLOSED_POS = 0.55;
+    public static final double STOPPER_SERVO_OPEN_POS = 0.7;
 
     private final OpModeUtilities opModeUtilities;
 
-    private KCRServo kickerRight;
-    private KCRServo kickerLeft;
-
-    private KServo stopper;
+    private final KServo stopper;
 
     public Stopper(OpModeUtilities opModeUtilities) {
+        KLog.d("Stopper", "Constructor called - starting initialization");
         this.opModeUtilities = opModeUtilities;
 //        CRServo kickerRightHW = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
 //        CRServo kickerLeftHW = opModeUtilities.getHardwareMap().crservo.get("pusherLeft");
-        Servo stopper = opModeUtilities.getHardwareMap().servo.get("stopper");
+        try {
+            Servo stopper = opModeUtilities.getHardwareMap().servo.get("stopper");
+            KLog.d("Stopper", "Hardware servo retrieved: " + (stopper != null ? "SUCCESS" : "NULL"));
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
-        this.stopper = new KServo(stopper,KServo.AXON_MAX_SPEED, 255, 0, false);
-
-    }
-
-    public KCRServo getKickerLeft() {
-        return kickerLeft;
-    }
-
-    public KCRServo getKickerRight() {
-        return kickerRight;
+            this.stopper = new KServo(stopper, KServo.AXON_MAX_SPEED, 255, 0, false);
+            this.stopper.setPosition(STOPPER_SERVO_CLOSED_POS);
+            KLog.d("Stopper", "Constructor completed successfully");
+        } catch (Exception e) {
+            KLog.e("Stopper", "ERROR in constructor: " + e.getMessage());
+            throw e;
+        }
     }
 
     public KServo getStopper() {return stopper;}
+
+    public void setPosition(double target) {
+        stopper.setPosition(target);
+    }
 
 }

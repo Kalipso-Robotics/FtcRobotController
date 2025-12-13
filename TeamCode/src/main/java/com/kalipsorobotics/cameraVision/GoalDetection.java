@@ -14,13 +14,13 @@ public class GoalDetection {
     private static final int[] GOAL_APRILTAG_IDS = {24, 25};
     
     public static class GoalInfo {
-        public final AllianceSetup color;
+        public final AllianceColor color;
         public final double distance;
         public final double bearing;
         public final double elevation;
         public final int aprilTagId;
         
-        public GoalInfo(AllianceSetup color, double distance, double bearing, double elevation, int aprilTagId) {
+        public GoalInfo(AllianceColor color, double distance, double bearing, double elevation, int aprilTagId) {
             this.color = color;
             this.distance = distance;
             this.bearing = bearing;
@@ -76,15 +76,15 @@ public class GoalDetection {
             return null;
         }
         
-        AllianceSetup color = getGoalColor(closest.id);
+        AllianceColor color = getGoalColor(closest.id);
         return new GoalInfo(color, closest.ftcPose.range, closest.ftcPose.bearing, 
                            closest.ftcPose.elevation, closest.id);
     }
     
-    public AllianceSetup getGoalColor(int aprilTagId) {
+    public AllianceColor getGoalColor(int aprilTagId) {
         switch (aprilTagId) {
-            case 24: return AllianceSetup.RED;
-            case 25: return AllianceSetup.BLUE;
+            case 24: return AllianceColor.RED;
+            case 25: return AllianceColor.BLUE;
             default: return null;
         }
     }
@@ -174,7 +174,7 @@ public class GoalDetection {
         }
         
         for (AprilTagDetection detection : goalDetections) {
-            AllianceSetup color = getGoalColor(detection.id);
+            AllianceColor color = getGoalColor(detection.id);
             telemetry.addLine(String.format("\n==== %s Goal (ID %d)", 
                 color != null ? color.toString() : "UNKNOWN", detection.id));
             

@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
  * - Press PLAY to start motor at 50 RPS
  * - Press STOP to stop the motor
  */
-@TeleOp(name = "Shooter Motor Test", group = "Test")
+//@TeleOp(name = "Shooter Motor Test", group = "Test")
 public class ShooterMotorTest extends LinearOpMode {
 
     private static final double TARGET_RPS = 50.0;

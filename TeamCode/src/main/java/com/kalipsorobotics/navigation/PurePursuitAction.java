@@ -1,13 +1,11 @@
 package com.kalipsorobotics.navigation;
 
-import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.PID.PidNav;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Path;
 import com.kalipsorobotics.math.Position;
@@ -17,13 +15,11 @@ import com.kalipsorobotics.math.Vector;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.internal.opengl.models.Geometry;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class PurePursuitAction extends Action {
+public class  PurePursuitAction extends Action {
     public static final double P_XY = 1.0/350.0;
     public static final double P_ANGLE = (1.0 / Math.toRadians(90));
     public static final double P_XY_FAST = P_XY * 2;
@@ -33,6 +29,7 @@ public class PurePursuitAction extends Action {
     private static final double MINIMUM_POWER = 0.12;
 
     private double lastSearchRadius = LAST_RADIUS_MM;
+    private double lookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
     List<Position> pathPoints = new ArrayList<>();
 
@@ -58,6 +55,13 @@ public class PurePursuitAction extends Action {
 
     private double maxTimeOutMS = 1000000000;
 
+    final private int maxUnstuckCounter = 2;
+
+
+    private int unstuckCounter = 0;
+
+    //private int farthestPointReached = 0;
+
     private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 1;
 
     private double startTimeMS = System.currentTimeMillis();
@@ -82,9 +86,9 @@ public class PurePursuitAction extends Action {
 
     public PurePursuitAction(DriveTrain driveTrain) {
         this.driveTrain = driveTrain;
-        this.pidX = new PidNav(P_XY, 0, 0);
-        this.pidY = new PidNav(P_XY, 0, 0);
-        this.pidAngle = new PidNav(P_ANGLE, 0, 0);
+        this.pidX = new PidNav(P_XY, 0, 0, 0.1000);
+        this.pidY = new PidNav(P_XY, 0, 0, 0.1000);
+        this.pidAngle = new PidNav(P_ANGLE, 0, 0, 0.0050);
 
 
 
@@ -99,9 +103,9 @@ public class PurePursuitAction extends Action {
 
     public PurePursuitAction(DriveTrain driveTrain, double pidXY, double pidAngle) {
         this.driveTrain = driveTrain;
-        this.pidX = new PidNav(pidXY, 0, 0);
-        this.pidY = new PidNav(pidXY, 0, 0);
-        this.pidAngle = new PidNav(pidAngle, 0, 0);
+        this.pidX = new PidNav(pidXY, 0,0,0.1000);
+        this.pidY = new PidNav(pidXY, 0, 0, 0.1000);
+        this.pidAngle = new PidNav(pidAngle, 0, 0, 0.0050);
 
         this.timeoutTimer = new ElapsedTime();
 
@@ -115,9 +119,9 @@ public class PurePursuitAction extends Action {
     public void addPoint(double x, double y, double headingDeg) {
         double headingRad = Math.toRadians(headingDeg);
         //double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
-        double adaptivePAngel = calcAdaptivePAngle(headingRad);
-        double[] adaptiveP = {P_XY, P_ANGLE};
-        pathPoints.add(new Position(x, y, headingRad, adaptiveP[0], adaptivePAngel));
+       // double adaptivePAngel = calcAdaptivePAngle(headingRad);
+        //double[] adaptiveP = {P_XY, P_ANGLE};
+        pathPoints.add(new Position(x, y, headingRad, P_XY, P_ANGLE));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
 
@@ -125,11 +129,16 @@ public class PurePursuitAction extends Action {
         pathPoints.add(new Position(x, y, Math.toRadians(headingDeg), pXY, pAngle));
         //Log.d("purepursaction", "added point " + x + ", " + y);
     }
+
+    public void clearPoints() {
+        pathPoints.clear();
+    }
+
     private double calcAdaptivePAngle(double theta) {
         Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
         double headingDelta = Math.abs(pos.getTheta() - theta);
-        if (headingDelta == 0) {
-            return 0;
+        if (headingDelta < FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) {
+            return P_ANGLE_SLOW;
         }
         return 1.0 / headingDelta;
     }
@@ -168,6 +177,9 @@ public class PurePursuitAction extends Action {
     public void setFinalSearchRadius(double searchRadiusMM){
         this.lastSearchRadius = searchRadiusMM;
     }
+    public void setLookAheadRadius(double radiusMM){
+        this.lookAheadRadius = radiusMM;
+    }
     public void setPAngle(double p) {
         this.pidAngle = new PidNav(p, 0,0);
     }
@@ -189,7 +201,7 @@ public class PurePursuitAction extends Action {
         double powerX = target.getPidX().getPower(xError);
         double powerY = target.getPidY().getPower(yError);
 
-        KLog.d("directionalpower", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
+        KLog.d("directionalpowerlook", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
                 powerAngle));
 
         double fLeftPower = powerX + powerY + powerAngle;
@@ -241,47 +253,68 @@ public class PurePursuitAction extends Action {
         }
 
 
-        currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
+        currentLookAheadRadius = lookAheadRadius;
 
         Position lastPoint = path.getLastPoint();
 
-        if (prevFollow.isPresent() && (path.findIndex(prevFollow.get()) > (path.numPoints() - 2))) {
+        if (prevFollow.isPresent() && (path.getIndex(prevFollow.get()) > (path.numPoints() - 2))) {
             currentLookAheadRadius = lastSearchRadius;
         }
-
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
+
+        //prevFollow.ifPresent(position -> farthestPointReached = path.getIndex(position));
 
         if (follow.isPresent()) {
             KLog.d("purepursaction_debug_follow",
-                    "follow point:  " + follow.get());
-            KLog.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+                    "Follow lookahead point:  " + follow.get() + "current pos:    " + currentPosition.toString());
             targetPosition(follow.get(), currentPosition);
 
+            xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+            yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+            thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
+
+            // this is not smart
+            if ((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
+                KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
+//                    finishedMoving();
+                if (timeoutTimer.milliseconds() > 200) {
+                    path.incrementCurrentSearchWayPointIndex();
+                    KLog.d("purepursuit", "unstucking incrementing to next way point");
+
+//                    if (unstuckCounter < maxUnstuckCounter/* && !(path.decrementCurrentSearchWayPointIndex() < farthestPointReached - 2)*/) {
+//                        unstuckCounter++;
+//                        path.decrementCurrentSearchWayPointIndex();
+//                        KLog.d("purepursuit", "unstucking decrementing to previous way point");
+//                    } else {
+//                        //unstuckCounter = 0;
+//                        path.incrementCurrentSearchWayPointIndex();
+//                        KLog.d("purepursuit", "unstucking incrementing to next way point");
+//                    }
+                } else {
+                    KLog.d("purepursuit", "Waiting for velocity timeout");
+                }
+            } else {
+                timeoutTimer.reset();
+            }
+
         } else {
-            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) <= Math.toRadians(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) ) {
+            KLog.d("purepursaction_debug_follow",
+                    "Lookahead returns nothing. Last point " + lastPoint + "current pos:    " + currentPosition.toString());
+            //11-22 13:04:54.212  3107  3301 D KLog_purepursaction_debug_follow: locking final angle:  x=2598.00 (102.28 in), y=441.38 (17.38 in), theta=-2.4136 (-138.3 deg)
+            //11-22 13:04:54.213  3107  3301 D KLog_purepursaction_debug_follow: current pos:    x=2616.11 (103.00 in), y=432.30 (17.02 in), theta=-2.4347 (-139.5 deg)
+            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) < Math.toRadians(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) ) {
+                KLog.d("purepursaction_debug_follow",
+                        "Final angle is within range. Finish moving. Last point  " + lastPoint + "current pos:    " + currentPosition.toString());
                 finishedMoving();
+                return;
             } else {
                 KLog.d("purepursaction_debug_follow",
-                        "locking final angle:  " + lastPoint);
-                KLog.d("purepursaction_debug_follow", "current pos:    " + currentPosition.toString());
+                        "Locking final angle:  " + lastPoint + "current pos:    " + currentPosition.toString());
                 targetPosition(lastPoint, currentPosition);
             }
         }
 
 
-        xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-        yVelocity = (Math.abs(lastPosition.getY() - currentPosition.getY())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-        thetaVelocity = (Math.abs(lastPosition.getTheta() - currentPosition.getTheta())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
-
-
-        if(xVelocity < 0.01 && yVelocity < 0.01 && thetaVelocity < 0.01) {
-            if(timeoutTimer.milliseconds() > 4000) {
-                KLog.d("purepursuit", "pp timeout due to low velocity, xVelocity " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
-                finishedMoving();
-            }
-        } else {
-            timeoutTimer.reset();
-        }
 
         lastMilli = timeoutTimer.milliseconds();
         lastPosition = currentPosition;
@@ -326,4 +359,6 @@ public class PurePursuitAction extends Action {
     public void setMaxTimeOutMS(double maxTimeOutMS) {
         this.maxTimeOutMS = maxTimeOutMS;
     }
+
+
 }
