@@ -86,6 +86,7 @@ public class ShootAllAction extends KActionSet {
         releaseBraking.setName("ReleaseBraking");
         releaseBraking.setDependentActions(shooterStop);
         this.addAction(releaseBraking);
+
     }
 
     public void setTurretReady(boolean isDone) {

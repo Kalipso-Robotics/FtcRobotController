@@ -21,7 +21,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastIntakeAction = null;
     protected Action lastMoveAction = null;
     protected Action lastShooterAction = null;
-
+    protected Action lastBrakingAction = null;
     protected Action lastStopperAction = null;
 
 
@@ -83,7 +83,9 @@ public abstract class KOpMode extends LinearOpMode {
     protected void setLastShooterAction(Action action) {
         lastShooterAction = action;
     }
-
+    protected void setLastBrakingAction(Action action) {
+        lastBrakingAction = action;
+    }
     protected void setLastStopperAction(Action action) {
         lastStopperAction = action;
     }
@@ -110,6 +112,9 @@ public abstract class KOpMode extends LinearOpMode {
             lastStopperAction.updateCheckDone();
         }
 
+        if (lastBrakingAction != null) {
+            lastBrakingAction.updateCheckDone();
+        }
     }
 
 

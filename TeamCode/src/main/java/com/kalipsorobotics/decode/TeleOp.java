@@ -6,6 +6,7 @@ import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
@@ -62,6 +63,7 @@ public class TeleOp extends KOpMode {
 
     ActivateBraking activateBraking = null;
     ReleaseBraking releaseBraking = null;
+    ReleaseBrakeAction releaseBrakeAction = null;
 
     KServoAutoAction openStopper = null;
     KServoAutoAction closeStopper = null;
@@ -190,11 +192,8 @@ public class TeleOp extends KOpMode {
             limelightCorrectionPressed = kGamePad1.isBackButtonPressed();  // Back button for vision correction
 
             // ========== HANDLE DRIVING ==========
-            if (drivingSticks) {
-                driveAction.move(gamepad1);
-            } else {
-                driveTrain.setPower(0);
-            }
+
+            handleDriving();
 
             // ========== HANDLE LIMELIGHT ODOMETRY CORRECTION ==========
 
@@ -219,7 +218,17 @@ public class TeleOp extends KOpMode {
 
         cleanupRobot();
     }
-
+    private void handleDriving() {
+        if (drivingSticks) {
+            driveAction.move(gamepad1);
+            if (releaseBrakeAction == null || releaseBrakeAction.getIsDone()) {
+                releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
+                setLastBrakingAction(releaseBrakeAction);
+            }
+        } else {
+            driveTrain.setPower(0);
+        }
+    }
     private void handleTurret() {
         goalDetectionAction.updateCheckDone();
 
@@ -371,9 +380,11 @@ public class TeleOp extends KOpMode {
         if (stopShooterPressed) {
             if (!isPending(shooterStop)) {
                 shooterStop = new ShooterStop(shooter, shootAction);
+                releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
                 shooterWarmup = null;
                 shootAction = null;
                 setLastShooterAction(shooterStop);
+                setLastBrakingAction(releaseBrakeAction);
                 KLog.d("Shooting", "Shooter stop");
             }
             return;

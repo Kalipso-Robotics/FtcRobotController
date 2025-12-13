@@ -8,6 +8,7 @@ import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
@@ -28,6 +29,7 @@ public class RedAutoDepot extends KOpMode {
     public final static double SHOOT_FAR_X = 150;
     public final static double SHOOT_FAR_Y = 100;
     private DriveTrain driveTrain;
+    private DriveBrake driveBrake;
     Shooter shooter = null;
     Intake intake = null;
     Stopper stopper = null;
@@ -50,6 +52,8 @@ public class RedAutoDepot extends KOpMode {
         // Create your modules
         DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);
+        driveBrake = new DriveBrake(opModeUtilities);
+
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
         sleep(1000); // Optional: let hardware initialize
