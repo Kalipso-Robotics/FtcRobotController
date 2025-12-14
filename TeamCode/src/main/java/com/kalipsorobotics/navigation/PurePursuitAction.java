@@ -134,6 +134,12 @@ public class  PurePursuitAction extends Action {
         pathPoints.clear();
     }
 
+    public boolean nearEndPoint(Position robotPosition) {
+        Position endPoint = pathPoints.get(pathPoints.size()-1);
+        double distance = Math.sqrt(Math.pow(Math.abs(robotPosition.getX() - endPoint.getX()), 2) + Math.pow(Math.abs(robotPosition.getY() - endPoint.getX()), 2));
+        return distance < 500;
+    }
+
     private double calcAdaptivePAngle(double theta) {
         Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
         double headingDelta = Math.abs(pos.getTheta() - theta);
@@ -208,6 +214,15 @@ public class  PurePursuitAction extends Action {
         double bLeftPower = powerX - powerY + powerAngle;
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
+
+//        if (!nearEndPoint(currentPosition)) {
+//            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
+//            double scale = 1/max;
+//            fLeftPower = fLeftPower * scale;
+//            bLeftPower = bLeftPower * scale;
+//            fRightPower = fRightPower * scale;
+//            bRightPower = bRightPower * scale;
+//        }
 
         KLog.d("PurePursuit_Log",
                 "running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
