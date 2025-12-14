@@ -20,8 +20,7 @@ public class RedAutoNearTwoLeverPush extends RedAutoNear{
     @Override
     public void handleTrip3() {
         //just purepsuit - not a round trip
-        PurePursuitAction trip2_1 = null;
-        trip2_1 = new PurePursuitAction(driveTrain);
+        PurePursuitAction trip2_1 = new PurePursuitAction(driveTrain);
         trip2_1.setName("trip2.5");
         trip2_1.setDependentActions(trip2);
         trip2_1.setFinalSearchRadius(50);
