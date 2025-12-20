@@ -140,7 +140,8 @@ public class PIDFController {
 
         double output = proportional + integral + derivative;
 
-        output = Math.min(Math.abs(staticPower), Math.abs(output)) * Math.signum(output);
+        //clamp to make staticPower min
+        output = Math.max(Math.abs(staticPower), Math.abs(output)) * Math.signum(output);
 
         lastTime = currentTime;
         lastError = error;

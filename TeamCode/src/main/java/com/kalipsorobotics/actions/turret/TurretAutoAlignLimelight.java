@@ -137,6 +137,9 @@ public class TurretAutoAlignLimelight extends Action {
             turretMotor.getPIDFController().setKp(TurretConfig.kP);
             totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
             runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
+            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
+            KLog.d("TurretAutoAlignLimelight_Camera_Calc", "targetTicks " + targetTicks);
+
         }
         KLog.d("TurretAutoAlignLimelight", "Limelight angle" + targetAngleLimelight);
 
@@ -144,12 +147,11 @@ public class TurretAutoAlignLimelight extends Action {
 //        double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
 //        targetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
 
-        targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
         if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turretMotor.stop();
-            KLog.d("turret_position", String.format("Within RANGE - motor position %.2f, target ticks %.2f", (double)turretMotor.getCurrentPosition(), targetTicks));
+            KLog.d("turret_position", String.format("Within RANGE - motor position %.2f, target ticks %.2f", (double) turretMotor.getCurrentPosition(), targetTicks));
 
         } else {
             isWithinRange = false;
