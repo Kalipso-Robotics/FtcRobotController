@@ -138,7 +138,9 @@ public class PIDFController {
         double derivative = kd * (error - lastError) / timeDelta;
         double staticPower = ks * Math.signum(error);
 
-        double output = staticPower + proportional + integral + derivative;
+        double output = proportional + integral + derivative;
+
+        output = Math.min(Math.abs(staticPower), Math.abs(output)) * Math.signum(output);
 
         lastTime = currentTime;
         lastError = error;
