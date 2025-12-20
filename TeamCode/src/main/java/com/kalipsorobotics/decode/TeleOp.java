@@ -137,7 +137,7 @@ public class TeleOp extends KOpMode {
         }
 
         goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret, tagId);
-        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, goalDetectionAction);
+        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, goalDetectionAction, allianceColor);
 
         shotLogger = new ShotLogger(opModeUtilities);
 
@@ -232,6 +232,7 @@ public class TeleOp extends KOpMode {
     private void handleTurret() {
         goalDetectionAction.updateCheckDone();
 
+        //Manual
         if (manualTurretControlToggled) {
             turretAutoAlignLimelight.setIsDone(true);
         }
