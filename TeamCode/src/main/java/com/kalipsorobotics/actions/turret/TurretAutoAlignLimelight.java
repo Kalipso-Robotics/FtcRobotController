@@ -129,7 +129,7 @@ public class TurretAutoAlignLimelight extends Action {
             hasSearched = false;
             turretMotor.getPIDFController().setKp(TurretConfig.kP);
             totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
-
+            runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
         }
         KLog.d("Turret_Limelight", "Limelight angle" + targetAngleLimelight);
 
