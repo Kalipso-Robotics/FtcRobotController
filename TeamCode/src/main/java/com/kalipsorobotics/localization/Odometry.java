@@ -24,9 +24,9 @@ public class Odometry {
     private boolean isOdometryUnhealthy = false;
     private int unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
-    final static private double TRACK_WIDTH_MM = 297;
+    final static private double TRACK_WIDTH_MM = 301; //297;
     //maybe double check BACK Distance
-    static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -70;
+    static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -91; //-70;
     private static Odometry single_instance = null;
     final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
@@ -175,6 +175,7 @@ public class Odometry {
 
         double deltaX = (deltaLeftDistance + deltaRightDistance) / 2;
         double deltaY = (deltaMecanumDistance - BACK_DISTANCE_TO_MID_ROBOT_MM * deltaTheta);
+        //BackDistanceToMid = (backDistance - deltaY)/deltaTheta
 
         Velocity velocity = new Velocity(deltaX, deltaY, deltaTheta);
 
