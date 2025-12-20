@@ -93,8 +93,7 @@ public class TeleOp extends KOpMode {
     private boolean manualTurretControlToggled = false;
     private boolean useLimelight = true;
     private boolean forceShootNearPressed = false;
-
-
+    private boolean odometryTurretOverrideToggle = false;
 
 
     @Override
@@ -186,6 +185,7 @@ public class TeleOp extends KOpMode {
             releasePressed = kGamePad2.isYPressed();
 
             manualTurretControlToggled = kGamePad2.isToggleX();
+            odometryTurretOverrideToggle = kGamePad2.isBackButtonToggle();
 
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
@@ -230,6 +230,9 @@ public class TeleOp extends KOpMode {
         }
     }
     private void handleTurret() {
+        turretAutoAlignLimelight.setUseOdometrySearch(!odometryTurretOverrideToggle);
+
+
         goalDetectionAction.updateCheckDone();
 
         //Manual

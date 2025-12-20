@@ -26,6 +26,7 @@ public class KGamePad {
 
     private boolean toggleY = false;
     private boolean toggleX = false;
+    private boolean toggleBack = false;
 
 
     public KGamePad(Gamepad gamepad){
@@ -247,6 +248,14 @@ public class KGamePad {
         }
         this.previousBackButton = current;
         return toggle;
+    }
+
+    public boolean isBackButtonToggle() {
+        if (isBackButtonPressed()) {
+            toggleBack = !toggleBack;
+        }
+        KLog.d("KGamePad_Toggle", "Toggle Back: " + toggleBack);
+        return toggleBack;
     }
 
     public boolean isStartButtonPressed(){

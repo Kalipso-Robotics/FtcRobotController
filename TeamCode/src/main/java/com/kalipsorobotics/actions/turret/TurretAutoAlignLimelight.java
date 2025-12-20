@@ -33,6 +33,7 @@ public class TurretAutoAlignLimelight extends Action {
     TurretRunningMode runningMode;
 
     Point targetPoint;
+    private boolean useOdometrySearch;
 
 
     public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, GoalDetectionAction goalDetectionAction, AllianceColor allianceColor) {
@@ -94,7 +95,7 @@ public class TurretAutoAlignLimelight extends Action {
         double targetAngleLimelight = 0;
         double currentAngleRad = turret.getCurrentAngleRad();
 
-        if (SharedData.getLimelightPosition().isEmpty()) {
+        if (SharedData.getLimelightPosition().isEmpty() && useOdometrySearch) {
             /*//searching
             turretMotor.getPIDFController().setKp(TurretConfig.kP / 10);
 
@@ -172,5 +173,9 @@ public class TurretAutoAlignLimelight extends Action {
 
     public boolean isAprilTagFound() {
         return aprilTagFound;
+    }
+
+    public void setUseOdometrySearch(boolean useOdometrySearch) {
+        this.useOdometrySearch = useOdometrySearch;
     }
 }

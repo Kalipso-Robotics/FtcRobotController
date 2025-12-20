@@ -13,7 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class OpModeUtilities {
-
     private final HardwareMap hardwareMap;
     private LinearOpMode opMode;
     private final Telemetry telemetry;
