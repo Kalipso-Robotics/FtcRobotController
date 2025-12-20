@@ -63,9 +63,9 @@ public class DriveAction {
     }
     public double[] calculatePower(Gamepad gamepad) {
         //negative because gamepad y is flip
-        double forward = 1 * -gamepad.left_stick_y * -gamepad.left_stick_y * -gamepad.left_stick_y; //cube so slower is slower and faster is faster
-        double turn = 1 * gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x;
-        double strafe = 1 * gamepad.left_stick_x * gamepad.left_stick_x * gamepad.left_stick_x;
+        double forward = 1 * -gamepad.left_stick_y; //cube so fast is fast and slow is slow       * -gamepad.left_stick_y * -gamepad.left_stick_y
+        double turn = 1 * gamepad.right_stick_x; //* gamepad.right_stick_x * gamepad.right_stick_x
+        double strafe = 1 * gamepad.left_stick_x; //* gamepad.left_stick_x * gamepad.left_stick_x
 
         KLog.d("drive", "forward " + forward);
         KLog.d("drive", "turn " + turn);
@@ -102,11 +102,7 @@ public class DriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        KLog.d("drive", "fLeft power " + driveTrainPower[0]);
-        KLog.d("drive", "fRight power " + driveTrainPower[1]);
-        KLog.d("drive", "bLeft power " + driveTrainPower[2]);
-        KLog.d("drive", "bRight power " + driveTrainPower[3]);
-
+        KLog.d("drive", "fLeft power " + driveTrainPower[0] + "fRight power " + driveTrainPower[1] + "bLeft power " + driveTrainPower[2] + "bRight power " + driveTrainPower[3]);
     }
     public void moveWithXYValues(double x, double y, Gamepad gamepad) {
         double[] driveTrainPower = calculatePower1(x, y, gamepad);
