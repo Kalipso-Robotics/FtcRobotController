@@ -22,9 +22,10 @@ import java.util.HashMap;
 
 public class Odometry {
 
-    private static double DEAD_WHEEL_RADIUS_MM = 24;
-    private static double TICKS_PER_REV = 2000;
-    private static double TICKS_TO_MM = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
+    private static final double DEAD_WHEEL_RADIUS_MM = 24;
+    private static final double TICKS_PER_REV = 2000;
+    //private static final double MM_PER_TICK = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
+    private static final double MM_PER_TICK = 0.0744953182; //Effective Constant
 
     private long unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
@@ -139,10 +140,10 @@ public class Odometry {
     }
 
     private static double ticksToMM(double ticks) {
-        return ticks * TICKS_TO_MM;
+        return ticks * MM_PER_TICK;
     }
     private static int mmToTicks(double mm) {
-        return (int) (mm / TICKS_TO_MM);
+        return (int) (mm / MM_PER_TICK);
     }
 
     public double getRightEncoderMM() {
