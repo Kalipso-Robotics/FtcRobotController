@@ -22,7 +22,7 @@ public class Shooter {
 
     public static final Point TARGET_POINT = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
 
-    public static final double HOOD_OFFSET = 0.25;
+    public static final double HOOD_OFFSET = 0; // 0.25
 
     public final double TARGET_RPS_TOLERANCE = 1;
 
