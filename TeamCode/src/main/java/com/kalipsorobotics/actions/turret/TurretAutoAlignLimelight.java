@@ -6,6 +6,7 @@ import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
@@ -34,6 +35,10 @@ public class TurretAutoAlignLimelight extends Action {
 
     Point targetPoint;
     private boolean useOdometrySearch;
+    private double previousTotalAngle;
+    private double currentAngularVelocity;
+    private ElapsedTime velocityTimer;
+    private boolean isFirstVelocityUpdate;
 
 
     public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, GoalDetectionAction goalDetectionAction, AllianceColor allianceColor) {
@@ -46,6 +51,12 @@ public class TurretAutoAlignLimelight extends Action {
 
 
         targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
+
+        // Initialize velocity tracking
+        this.velocityTimer = new ElapsedTime();
+        this.previousTotalAngle = 0;
+        this.currentAngularVelocity = 0;
+        this.isFirstVelocityUpdate = true;
     }
 
     public boolean isWithinRange() {
@@ -87,9 +98,11 @@ public class TurretAutoAlignLimelight extends Action {
 
         if (!hasStarted) {
             hasStarted = true;
+            velocityTimer.reset();
             runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
         }
 
+        updateAngularVelocity();
         goalDetectionAction.updateCheckDone();
         aprilTagFound = !SharedData.getLimelightPosition().isEmpty();
         double targetAngleLimelight = 0;
@@ -140,7 +153,6 @@ public class TurretAutoAlignLimelight extends Action {
             runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
             KLog.d("TurretAutoAlignLimelight_Camera_Calc", "targetTicks " + targetTicks);
-
         }
         KLog.d("TurretAutoAlignLimelight", "Limelight angle" + targetAngleLimelight);
 
@@ -156,9 +168,15 @@ public class TurretAutoAlignLimelight extends Action {
 
         } else {
             isWithinRange = false;
-            turretMotor.goToTargetTicks((int) targetTicks);
-            KLog.d("turretLL", String.format("current angle rad %.3f, target ticks %.2f, limelight angle rad %.3f", currentAngleRad, targetTicks, targetAngleLimelight));
-            KLog.d("turret_position", String.format("NOT WITHIN RANGE - motor position %.2f, target ticks %.2f", (double)turretMotor.getCurrentPosition(), targetTicks));
+//             turretMotor.goToTargetTicks((int) targetTicks);
+
+            int currentTicks = turretMotor.getCurrentPosition();
+            int error = (int) targetTicks - currentTicks;
+            double pidOutput = turretMotor.getPIDFController().calculate(error, currentAngularVelocity);
+            double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput));
+
+            turretMotor.setPower(totalPower);
+
         }
     }
 
@@ -177,5 +195,59 @@ public class TurretAutoAlignLimelight extends Action {
 
     public void setUseOdometrySearch(boolean useOdometrySearch) {
         this.useOdometrySearch = useOdometrySearch;
+    }
+
+    private void updateAngularVelocity() {
+        Position currentPosition = SharedData.getOdometryPosition();
+        double currentX = currentPosition.getX();
+        double currentY = currentPosition.getY();
+        double currentRobotHeading = currentPosition.getTheta();
+
+        // Log robot position and target
+        KLog.d("AngVel", String.format("Robot: (%.1f, %.1f) mm, Heading: %.3f rad (%.1f deg)",
+            currentX, currentY, currentRobotHeading, Math.toDegrees(currentRobotHeading)));
+        KLog.d("AngVel", String.format("Target: (%.1f, %.1f) mm",
+            targetPoint.getX(), targetPoint.getY()));
+
+        double yToGoal = targetPoint.getY() - currentY;
+        double xToGoal = targetPoint.getX() - currentX;
+        double distanceToGoal = Math.sqrt(xToGoal * xToGoal + yToGoal * yToGoal);
+        double angleToGoal = Math.atan2(yToGoal, xToGoal);
+
+        // Log vector to goal
+        KLog.d("AngVel", String.format("Delta: (%.1f, %.1f) mm, Distance: %.1f mm, Angle: %.3f rad (%.1f deg)",
+            xToGoal, yToGoal, distanceToGoal, angleToGoal, Math.toDegrees(angleToGoal)));
+
+        // total angle
+        double totalAngleToGoal = MathFunctions.angleWrapRad(angleToGoal - currentRobotHeading);
+        KLog.d("AngVel", String.format("Angle Error: %.3f rad (%.1f deg) = angleToGoal(%.3f) - robotHeading(%.3f)",
+            totalAngleToGoal, Math.toDegrees(totalAngleToGoal), angleToGoal, currentRobotHeading));
+
+        if (isFirstVelocityUpdate) {
+            // first time
+            previousTotalAngle = totalAngleToGoal;
+            currentAngularVelocity = 0;
+            velocityTimer.reset();
+            isFirstVelocityUpdate = false;
+            KLog.d("AngVel", "First update - initializing velocity tracking");
+        } else {
+            // update velocity
+            double deltaTime = velocityTimer.milliseconds() ; // Convert to seconds (bruh, for what?)
+            if (deltaTime > 0) {
+                double deltaAngle = totalAngleToGoal - previousTotalAngle;
+                currentAngularVelocity = deltaAngle / deltaTime;
+
+                // Log velocity calculation components
+                KLog.d("AngVel", String.format("ΔAngle: %.4f rad, ΔTime: %.1f ms, Velocity: %.3f rad/ms (%.3f rad/s)",
+                    deltaAngle, deltaTime, currentAngularVelocity, currentAngularVelocity * 1000.0));
+
+                previousTotalAngle = totalAngleToGoal;
+                velocityTimer.reset();
+            }
+        }
+
+        // Summary log
+        KLog.d("AngVel", String.format("Angular Velocity: %.3f rad/ms, Angle Error: %.3f rad (%.1f deg)",
+            currentAngularVelocity, totalAngleToGoal, Math.toDegrees(totalAngleToGoal)));
     }
 }

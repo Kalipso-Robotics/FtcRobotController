@@ -22,7 +22,7 @@ public class Shooter {
 
     public static final Point TARGET_POINT = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
 
-    public static final double HOOD_OFFSET = 0.25;
+    public static final double HOOD_OFFSET = 0; // 0.25
 
     public final double TARGET_RPS_TOLERANCE = 1;
 
@@ -151,7 +151,7 @@ public class Shooter {
      * @return shooter parameters containing RPS and hood position
      */
     public IShooterPredictor.ShooterParams getPrediction(double distanceMM) {
-        if (distanceMM > 4200 || SharedData.getOdometryUnhealthy()) {
+        if (distanceMM > 4200) {
             KLog.d("shooter_ready", "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY + " Distance: " + distanceMM);
             return predictor.predict(FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY);
         }

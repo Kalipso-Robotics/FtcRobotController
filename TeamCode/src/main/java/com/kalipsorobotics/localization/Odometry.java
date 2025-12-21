@@ -21,8 +21,13 @@ import java.util.HashMap;
 
 
 public class Odometry {
-    private boolean isOdometryUnhealthy = false;
-    private int unhealthyCounter = 0;
+
+    private static final double DEAD_WHEEL_RADIUS_MM = 24;
+    private static final double TICKS_PER_REV = 2000;
+    //private static final double MM_PER_TICK = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
+    private static final double MM_PER_TICK = 0.0744953182; //Effective Constant
+
+    private long unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
     final static private double TRACK_WIDTH_MM = 301; //297;
     //maybe double check BACK Distance
@@ -44,6 +49,10 @@ public class Odometry {
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
     private DcMotor backEncoder;
+
+    private int currentLeftTicks = 0;
+    private int currentRightTicks = 0;
+    private int currentBackTicks = 0;
     private final double rightOffset;
     private final double leftOffset;
     private final double backOffset;
@@ -83,10 +92,14 @@ public class Odometry {
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
                                                     IMUModule imuModule) {
         if (single_instance == null) {
+            KLog.d("Auto→TeleOp", "Creating NEW odometry instance at (0,0,0)");
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
         } else {
+            KLog.d("Auto→TeleOp", "REUSING existing odometry instance");
             KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            KLog.d("Auto→TeleOp", "Position before resetHardware: " + single_instance.wheelIMUPositionHistory.getCurrentPosition());
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
+            KLog.d("Auto→TeleOp", "Position after resetHardware: " + single_instance.wheelIMUPositionHistory.getCurrentPosition());
         }
         return single_instance;
     }
@@ -127,43 +140,45 @@ public class Odometry {
     }
 
     private static double ticksToMM(double ticks) {
-        final double DEAD_WHEEL_RADIUS_MM = 24;
-        final double TICKS_PER_REV = 2000;
-        final double TICKS_TO_MM = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
-
-        return ticks * TICKS_TO_MM;
+        return ticks * MM_PER_TICK;
+    }
+    private static int mmToTicks(double mm) {
+        return (int) (mm / MM_PER_TICK);
     }
 
     public double getRightEncoderMM() {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        KLog.d("Odometry_Encoder", "right encoder " + rightEncoder.getCurrentPosition());
-        return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
+        currentRightTicks = rightEncoder.getCurrentPosition();
+        KLog.d("Odometry_Encoder", "right encoder " + currentRightTicks);
+        return ticksToMM(currentRightTicks) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
     public double getLeftEncoderMM() {
         //corresponds to fLeft
         //direction FORWARD
         //positive because encoder directions
-        KLog.d("Odometry_Encoder", "left encoder " + leftEncoder.getCurrentPosition());
-        return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
+        currentLeftTicks = leftEncoder.getCurrentPosition();
+        KLog.d("Odometry_Encoder", "left encoder " + currentLeftTicks);
+        return ticksToMM(currentLeftTicks) - leftOffset;
     }
     public double getBackEncoderMM() {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        KLog.d("Odometry_Encoder", "back encoder " + backEncoder.getCurrentPosition());
-        return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
+        currentBackTicks = backEncoder.getCurrentPosition();
+        KLog.d("Odometry_Encoder", "back encoder " + currentBackTicks);
+        return ticksToMM(currentBackTicks) - backOffset;
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
     public boolean allEncoderZero() {
-        return (rightEncoder.getCurrentPosition() == 0) && (leftEncoder.getCurrentPosition() == 0) && (backEncoder.getCurrentPosition() == 0);
+        return (currentRightTicks == 0) && (currentLeftTicks == 0) && (currentBackTicks == 0);
     }
 
     public boolean anyEncoderZero() {
-        return (rightEncoder.getCurrentPosition() == 0) || (leftEncoder.getCurrentPosition() == 0) || (backEncoder.getCurrentPosition() == 0);
+        return (currentRightTicks == 0) || (currentLeftTicks == 0) || (currentBackTicks == 0);
     }
 
     private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
@@ -290,11 +305,12 @@ public class Odometry {
 //                    String.format("%.1f", maxDistance) + "mm)");
 //            return; // Skip this update to prevent corruption
 //        }
-
+        wheelPositionHistory.setRawIMU(currentImuHeading);
+        wheelPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);
         wheelPositionHistory.setCurrentPosition(globalPosition);
         wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds * 1000);
-        wheelPositionHistory.setEncoderTicks(leftEncoder.getCurrentPosition(),
-                rightEncoder.getCurrentPosition(), backEncoder.getCurrentPosition());
+        wheelPositionHistory.setEncoderTicks(currentLeftTicks,
+                currentRightTicks, currentBackTicks);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
     }
 
@@ -322,11 +338,12 @@ public class Odometry {
 //
 //            return; // Skip this update to prevent corruption
 //        }
-
+        wheelIMUPositionHistory.setRawIMU(currentImuHeading);
+        wheelIMUPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);
         wheelIMUPositionHistory.setCurrentPosition(globalPosition);
         wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds * 1000); //mm/ms
-        wheelIMUPositionHistory.setEncoderTicks(leftEncoder.getCurrentPosition(),
-                rightEncoder.getCurrentPosition(), backEncoder.getCurrentPosition());
+        wheelIMUPositionHistory.setEncoderTicks(currentLeftTicks,
+                currentRightTicks, currentBackTicks);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
     }
 
@@ -341,6 +358,10 @@ public class Odometry {
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
 
+        if (allEncoderZero()) {
+            KLog.d("Odometry_debug_OpMode_Transfer", "All encoders zero. Returning..");
+            return odometryPositionHistoryHashMap;
+        }
 
         // Read IMU heading only once per cycle
         currentImuHeading = getIMUHeading();
@@ -364,12 +385,12 @@ public class Odometry {
         Position wheelIMUPosition = odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition();
         Position wheelPosition = odometryPositionHistoryHashMap.get(OdometrySensorCombinations.WHEEL).getCurrentPosition();
 
-        KLog.d("Odometry_IMU_Position", wheelIMUPosition.toString() + " UnhealthyCounter " + unhealthyCounter + " Unhealthyness " + isOdometryUnhealthy);
-        KLog.d("Odometry_Wheel_Position", wheelPosition.toString() + " UnhealthyCounter " + unhealthyCounter + " Unhealthyness " + isOdometryUnhealthy);
+        KLog.d("Odometry_IMU_Position", wheelIMUPosition.toString() + " UnhealthyCounter " + unhealthyCounter);
+        KLog.d("Odometry_Wheel_Position", wheelPosition.toString() + " UnhealthyCounter " + unhealthyCounter);
         prevImuHeading = currentImuHeading;
         SharedData.setOdometryPosition(wheelIMUPosition);
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
-        SharedData.setIsOdometryUnhealthy(this.isOdometryUnhealthy);
+        SharedData.setUnhealthyCounter(unhealthyCounter);
         return odometryPositionHistoryHashMap;
     }
 
@@ -410,8 +431,7 @@ public class Odometry {
 
     private boolean isIMUUnhealthy(double imuThetaAngleRad, double wheelThetaAngleRad) {
         KLog.d("Odometry_Delta_Theta", "Checking IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
-        if (unhealthyCounter > 2000 || isOutsideFieldBoundaries(getCurrentPositionHistory().getCurrentPosition())) {
-            isOdometryUnhealthy = true;
+        if (unhealthyCounter > 20000  || isOutsideFieldBoundaries(getCurrentPositionHistory().getCurrentPosition())) {
         }
         if (isBadReading(imuThetaAngleRad)) {
             unhealthyCounter++;
@@ -419,7 +439,7 @@ public class Odometry {
             return true;
         }
         double angleDiff = MathFunctions.angleWrapRad(imuThetaAngleRad - wheelThetaAngleRad);
-        boolean isSpike = (Math.abs(angleDiff) > Math.toRadians(11)) && wheelThetaAngleRad != 0.0;
+        boolean isSpike = (Math.abs(angleDiff) > Math.toRadians(11));
         if (isSpike) {
             unhealthyCounter++;
             KLog.d("Odometry_IMU_Unhealthy", "Spike IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
@@ -429,6 +449,12 @@ public class Odometry {
         if (isFreezing) {
             unhealthyCounter++;
             KLog.d("Odometry_IMU_Unhealthy", "Freezing IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
+            return true;
+        }
+        boolean  isIMUPhantom = (Math.abs(wheelThetaAngleRad) == 0) && (Math.abs(imuThetaAngleRad) != 0);
+        if (isIMUPhantom) {
+            unhealthyCounter++;
+            KLog.d("Odometry_IMU_Unhealthy", "IMUPhantom IMU delta theta " + imuThetaAngleRad + " wheel delta theta " + wheelThetaAngleRad);
             return true;
         }
 
@@ -443,13 +469,6 @@ public class Odometry {
         return false;
     }
 
-    public boolean isOdometryUnhealthy() {
-        return isOdometryUnhealthy;
-    }
-
-    public void setOdometryUnhealthy(boolean odometryUnhealthy) {
-        isOdometryUnhealthy = odometryUnhealthy;
-    }
 
     @Override
     public String toString() {

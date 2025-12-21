@@ -4,6 +4,7 @@ import com.kalipsorobotics.math.PositionHistory;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,6 @@ import java.util.List;
 public class OdometryLogger extends KFileWriter {
 
     private final List<String> bufferedLines = new ArrayList<>();
-    private final Odometry odometry;
     private final boolean LOGGING_ENABLED = true;
 
     /**
@@ -21,9 +21,8 @@ public class OdometryLogger extends KFileWriter {
      * Data is buffered in memory and written to file when close() is called <p>
      * Use setLoggingEnabled(false) to disable logging for competition-ready code <p>
      */
-    public OdometryLogger(String name, OpModeUtilities opModeUtilities, Odometry odometry) {
+    public OdometryLogger(String name, OpModeUtilities opModeUtilities) {
         super(name, opModeUtilities);
-        this.odometry = odometry;
         writeHeader();
     }
 
@@ -45,7 +44,7 @@ public class OdometryLogger extends KFileWriter {
         stringBuilder.append("Wheel_IMU_Y,");
         stringBuilder.append("Wheel_IMU_Theta,");
         stringBuilder.append("Wheel_IMU_DeltaTheta,");
-        stringBuilder.append("IMUUnhealthy");
+        stringBuilder.append("IMUUnhealthyCounter");
 
         super.writeLine(stringBuilder.toString());
         try {
@@ -87,15 +86,15 @@ public class OdometryLogger extends KFileWriter {
         stringBuilder.append(",");
 
         // Encoder distances in MM
-        stringBuilder.append(odometry.getBackEncoderMM());
+        stringBuilder.append(wheelHistory.getBackDistanceMM());
         stringBuilder.append(",");
-        stringBuilder.append(odometry.getLeftEncoderMM());
+        stringBuilder.append(wheelHistory.getLeftDistanceMM());
         stringBuilder.append(",");
-        stringBuilder.append(odometry.getRightEncoderMM());
+        stringBuilder.append(wheelHistory.getRightDistanceMM());
         stringBuilder.append(",");
 
         // Raw IMU reading in radians
-        stringBuilder.append(odometry.getIMUHeading());
+        stringBuilder.append(wheelIMUHistory.getRawIMU());
         stringBuilder.append(",");
 
         // Wheel position data
@@ -119,9 +118,10 @@ public class OdometryLogger extends KFileWriter {
         stringBuilder.append(",");
 
         // IMU health status
-        stringBuilder.append(odometry.isOdometryUnhealthy());
+        stringBuilder.append(SharedData.getUnhealthyCounter());
 
         bufferedLines.add(stringBuilder.toString());
+        KLog.d("OdometryLogger_Line", stringBuilder.toString());
         KLog.d("OdometryLogger", "Buffered line " + bufferedLines.size());
     }
 

@@ -18,6 +18,7 @@ import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -151,6 +152,9 @@ public class TeleOp extends KOpMode {
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         KLog.d("TeleOp-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         waitForStart();
+        sleep(50);
+        //Wait for Executor Thread to start
+
         KLog.d("TeleOp-Run", "After waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
 
 //        turretAutoAlign.setToleranceDeg(0.5);
@@ -192,7 +196,6 @@ public class TeleOp extends KOpMode {
             limelightCorrectionPressed = kGamePad1.isBackButtonPressed();  // Back button for vision correction
 
             // ========== HANDLE DRIVING ==========
-
             handleDriving();
 
             // ========== HANDLE LIMELIGHT ODOMETRY CORRECTION ==========

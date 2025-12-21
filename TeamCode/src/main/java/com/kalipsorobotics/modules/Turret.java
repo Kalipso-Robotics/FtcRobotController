@@ -49,7 +49,7 @@ public class Turret {
         turretDcMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         turretDcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        turret.turretMotor = new KMotor(turretDcMotor, TurretConfig.kP, TurretConfig.kI, TurretConfig.kD, 0, TurretConfig.kS);
+        turret.turretMotor = new KMotor(turretDcMotor, TurretConfig.kP, TurretConfig.kI, TurretConfig.kD, TurretConfig.kF, TurretConfig.kS);
     }
 
     public KMotor getTurretMotor(){

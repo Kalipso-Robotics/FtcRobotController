@@ -43,6 +43,23 @@ public class SharedData {
         SharedData.odometryPositionMap.putAll(odometryPositionMap);
     }
 
+    private static long unhealthyCounter = 0;
+
+    public static long getUnhealthyCounter() {
+        return unhealthyCounter;
+    }
+
+    public static void setUnhealthyCounter(long unhealthyCounter) {
+        SharedData.unhealthyCounter = unhealthyCounter;
+    }
+
+
+    public static boolean isIsOdometryUnhealthy() {
+        return isOdometryUnhealthy;
+    }
+
+
+
     private static boolean isOdometryUnhealthy = false;
 
     public static boolean getOdometryUnhealthy() {
