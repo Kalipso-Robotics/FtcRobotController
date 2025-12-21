@@ -59,7 +59,7 @@ public class OpModeUtilities {
         KLog.d("ExecutorService_Run", "odometry instance: " + odometry);
         KLog.d("ExecutorService_Run", "odometry.getOpModeUtilities(): " + odometry.getOpModeUtilities());
 
-        OdometryLogger odometryLogger = new OdometryLogger("OdometryDataCollector", odometry.getOpModeUtilities(), odometry);
+        OdometryLogger odometryLogger = new OdometryLogger("OdometryDataCollector", odometry.getOpModeUtilities());
         KLog.d("ExecutorService_Run", "OdometryLogger created successfully");
 
         executorService.submit(() -> {

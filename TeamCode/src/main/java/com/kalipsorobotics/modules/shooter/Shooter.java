@@ -151,7 +151,7 @@ public class Shooter {
      * @return shooter parameters containing RPS and hood position
      */
     public IShooterPredictor.ShooterParams getPrediction(double distanceMM) {
-        if (distanceMM > 4200 || SharedData.getOdometryUnhealthy()) {
+        if (distanceMM > 4200) {
             KLog.d("shooter_ready", "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY + " Distance: " + distanceMM);
             return predictor.predict(FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY);
         }
