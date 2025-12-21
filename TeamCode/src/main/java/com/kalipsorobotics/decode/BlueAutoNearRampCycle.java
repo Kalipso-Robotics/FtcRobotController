@@ -22,13 +22,16 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name="RedAutoNearRampCycle")
+@Autonomous(name="BlueAutoNearRampCycle")
 public class BlueAutoNearRampCycle extends KOpMode {
     KActionSet blueAutoNear;
     final double FIRST_SHOOT_X = 2598;
     final double FIRST_SHOOT_Y = 441.38;
     final double SHOOT_NEAR_X = 2130; //2400
     final double SHOOT_NEAR_Y = 135; //300
+
+    final double THIRD_SHOOT_NEAR_X = 2860; //2400
+    final double THIRD_SHOOT_NEAR_Y = 135; //300
 
     public DriveTrain driveTrain;
     Shooter shooter = null;
@@ -80,6 +83,7 @@ public class BlueAutoNearRampCycle extends KOpMode {
         //No polarity here because multiplied externally
         Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y);
         Point firstShootPoint = new Point(FIRST_SHOOT_X, FIRST_SHOOT_Y);
+        Point thirdTripLaunchPoint = new Point(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y);
 
         SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
         setAutoDelayAction.setName("setAutoDelayAction");
@@ -101,7 +105,7 @@ public class BlueAutoNearRampCycle extends KOpMode {
         RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip1.setName("trip1");
         trip1.getMoveToBall().addPoint(1970, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1970, 840 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1970, 900 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         // move to hit lever
 //        trip1.getMoveToBall().addPoint(1755, 1200 * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
         // move to launch
@@ -112,22 +116,17 @@ public class BlueAutoNearRampCycle extends KOpMode {
         // ----------------- TRIP 2 ----------------------
         RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip2.setName("trip2");
-        trip2.getMoveToBall().addPoint(1161.85, 982.76 * allianceColor.getPolarity(), 47 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(1370.28, 1230.37 * allianceColor.getPolarity(), 40 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1223.23, 458.98 * allianceColor.getPolarity(), 70 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1446.37, 1127.61 * allianceColor.getPolarity(), 40 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
 
         blueAutoNear.addAction(trip2);
 
         // ----------------- TRIP 3 ----------------------
-        RampCycleAction trip3 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor);
+        RampCycleAction trip3 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, thirdTripLaunchPoint);
         trip3.setDependentActions(trip2);
         blueAutoNear.addAction(trip3);
-
-        // ----------------- TRIP 4 ----------------------
-        RampCycleAction trip4 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor);
-        trip4.setDependentActions(trip3);
-        blueAutoNear.addAction(trip4);
 
         while(!setAutoDelayAction.getIsDone() && opModeInInit()) {
             setAutoDelayAction.updateCheckDone();
