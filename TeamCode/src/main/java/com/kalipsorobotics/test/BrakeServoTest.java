@@ -35,7 +35,7 @@ public class BrakeServoTest extends LinearOpMode {
             if (gamepad1.dpad_down) {
                 activateBraking.updateCheckDone();
             } else if (gamepad1.dpad_up) {
-                releaseBraking.updateCheckDone();
+                activateBraking.updateCheckDone();
             }
 
             if (gamepad1.a) {

@@ -22,18 +22,18 @@ public class RampCycleAction extends KActionSet {
 
     RoundTripAction trip3 = null;
 
-    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, AllianceColor allianceColor) {
+    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, AllianceColor allianceColor, Point shooterPoint) {
         trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(2860, 135 * allianceColor.getPolarity()), 500);
-        autoActionPath(driveTrain, allianceColor, stopper, intake, opModeUtilities, turretAutoAlign, shooter);
+        autoActionPath(driveTrain, allianceColor, stopper, intake, opModeUtilities, turretAutoAlign, shooter, shooterPoint);
     }
-    private void autoActionPath(DriveTrain driveTrain, AllianceColor allianceColor, Stopper stopper, Intake intake, OpModeUtilities opModeUtilities, TurretAutoAlign turretAutoAlign, Shooter shooter) {
+    private void autoActionPath(DriveTrain driveTrain, AllianceColor allianceColor, Stopper stopper, Intake intake, OpModeUtilities opModeUtilities, TurretAutoAlign turretAutoAlign, Shooter shooter, Point shooterPoint) {
         PurePursuitAction trip2_1 = new PurePursuitAction(driveTrain);
         trip2_1.setName("trip2.5");
-        trip2_1.setFinalSearchRadius(50);
+        trip2_1.setFinalSearchRadius(40);
         trip2_1.addPoint(1161.85, 982.76 * allianceColor.getPolarity(), 47 * allianceColor.getPolarity());
-        trip2_1.addPoint(1370.28, 1230.37 * allianceColor.getPolarity(), 40 * allianceColor.getPolarity());
+        trip2_1.addPoint(1405, 1201 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity());
         this.addAction(trip2_1);
-
+        //x=1405.56 (55.34 in), y=-1201.27 (-47.29 in), theta=-0.8324 (-4
         CloseStopperAction closeStopperAction = new CloseStopperAction(stopper);
         closeStopperAction.setName("closeStopper");
         this.addAction(closeStopperAction);
@@ -53,7 +53,7 @@ public class RampCycleAction extends KActionSet {
         trip3.setName("trip3");
         trip3.setDependentActions(waitAction);
         trip3.getMoveToBall().clearPoints();
-        trip3.getMoveToBall().addPoint(2130, 135 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(shooterPoint.getX(), shooterPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         this.addAction(trip3);
     }
 }
