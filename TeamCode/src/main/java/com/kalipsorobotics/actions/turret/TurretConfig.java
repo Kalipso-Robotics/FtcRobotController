@@ -12,5 +12,5 @@ public class TurretConfig { //
     public static double kI = 0; //0.00003; //0.000030
     public static double kD = 0; // 0.000165; //
     public static double kS = 0.1; // static base // was 0.15
-    public static double kF = 0; //TODO find real value
+    public static double kF = 500; // velocity feedforward gain (power per rad/ms)
 }

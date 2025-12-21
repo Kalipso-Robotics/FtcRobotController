@@ -172,8 +172,17 @@ public class TurretAutoAlignLimelight extends Action {
 
             int currentTicks = turretMotor.getCurrentPosition();
             int error = (int) targetTicks - currentTicks;
-            double pidOutput = turretMotor.getPIDFController().calculate(error, currentAngularVelocity);
-            double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput));
+
+            // PID for position control
+            double pidOutput = turretMotor.getPIDFController().calculate(error);
+
+            // Velocity feedforward - helps turret track smoothly as robot/target moves
+            double feedforward = TurretConfig.kF * currentAngularVelocity;
+
+            double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
+
+            KLog.d("AngVel", String.format("Error: %d ticks, PID: %.3f, FF: %.3f (AngVel: %.6f rad/ms), Total: %.3f",
+                error, pidOutput, feedforward, currentAngularVelocity, totalPower));
 
             turretMotor.setPower(totalPower);
 
