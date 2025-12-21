@@ -374,7 +374,7 @@ public class TeleOp extends KOpMode {
         } else {
             // Stop turret motor when not shooting to prevent drift, but only if manual control isn't active
             if (!manualTurretControlToggled) {
-                turretAutoAlignLimelight.stop();
+//                turretAutoAlignLimelight.stop();
             }
         }
 

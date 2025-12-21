@@ -164,7 +164,7 @@ public class TurretAutoAlignLimelight extends Action {
         if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turretMotor.stop();
-            KLog.d("turret_position", String.format("Within RANGE - motor position %.2f, target ticks %.2f", (double) turretMotor.getCurrentPosition(), targetTicks));
+            KLog.d("AngVel_withinRange", String.format("Within RANGE - motor position %.2f, target ticks %.2f", (double) turretMotor.getCurrentPosition(), targetTicks));
 
         } else {
             isWithinRange = false;
@@ -181,7 +181,7 @@ public class TurretAutoAlignLimelight extends Action {
 
             double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
 
-            KLog.d("AngVel", String.format("Error: %d ticks, PID: %.3f, FF: %.3f (AngVel: %.6f rad/ms), Total: %.3f",
+            KLog.d("AngVel_Power", String.format("Error: %d ticks, PID: %.3f, FF: %.3f (AngVel: %.6f rad/ms), Total: %.3f",
                 error, pidOutput, feedforward, currentAngularVelocity, totalPower));
 
             turretMotor.setPower(totalPower);
