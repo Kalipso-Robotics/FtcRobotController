@@ -12,8 +12,8 @@ import com.kalipsorobotics.actions.intake.IntakeReverse;
 import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
-import com.kalipsorobotics.actions.shooter.ShooterWarmupAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
@@ -26,6 +26,7 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
+import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -55,9 +56,9 @@ public class TeleOp extends KOpMode {
     private Stopper stopper = null;
     private Odometry odometry = null;
 
-    ShooterWarmupAction shooterWarmup = null;
+
     ShooterStop shooterStop = null;
-    ShootAllAction shootAction = null;
+    ShootAllAction shootAllAction = null;
 
     ActivateBraking activateBraking = null;
     ReleaseBraking releaseBraking = null;
@@ -77,12 +78,12 @@ public class TeleOp extends KOpMode {
 
     // Button state variables
     private boolean drivingSticksActive = false;
-    private boolean shootPressed = false;
+    private boolean shootAllPressed = false;
     private boolean forceShootFarPressed = false;
     private boolean intakeRunPressed = false;
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
-    private boolean warmupPressed = false;
+    private boolean warmupFarToggled = false;
     private boolean releasePressed = false;
     private boolean markUndershotPressed = false;
     private boolean markOvershotPressed = false;
@@ -133,6 +134,8 @@ public class TeleOp extends KOpMode {
             tagId = 20;
         }
 
+        shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+
         goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret, tagId);
         turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, goalDetectionAction, allianceColor);
 
@@ -174,9 +177,9 @@ public class TeleOp extends KOpMode {
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
-            shootPressed = kGamePad1.isLeftBumperFirstPressed();
+            shootAllPressed = kGamePad1.isLeftBumperFirstPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
-            warmupPressed = kGamePad2.isDpadUpFirstPressed();
+            warmupFarToggled = kGamePad2.isToggleDpadUp();
 
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
@@ -267,7 +270,7 @@ public class TeleOp extends KOpMode {
      */
     private void handleIntake() {
         // PRIORITY 1: If shooting, don't interfere (shoot action controls intake)
-        if (isPending(shootAction) || shootPressed) {
+        if (isPending(shootAllAction) || shootAllPressed) {
             return;  // Exit early - shoot has control
         }
 
@@ -301,7 +304,7 @@ public class TeleOp extends KOpMode {
      */
     private void handleStopper() {
         // PRIORITY 1: If shooting, don't interfere (shoot action controls intake)
-        if (isPending(shootAction) || shootPressed) {
+        if (isPending(shootAllAction) || shootAllPressed) {
             return;  // Exit early - shoot has control
         }
 
@@ -332,15 +335,15 @@ public class TeleOp extends KOpMode {
      */
     private void handleShotLogging() {
         // Track when ShooterReady transitions from not done to done
-        if (isPending(shootAction) && shootAction.getShooterReady() != null) {
-            boolean shooterReadyIsDone = shootAction.getShooterReady().getIsDone();
+        if (isPending(shootAllAction) && shootAllAction.getShooterReady() != null) {
+            boolean shooterReadyIsDone = shootAllAction.getShooterReady().getIsDone();
 
             // Log when ShooterReady just became done (transition from false to true)
             if (shooterReadyWasNotDone && shooterReadyIsDone) {
-                double targetRps = shootAction.getShooterRun().getTargetRPS();
-                double actualRps = shootAction.getShooterRun().getShooter().getRPS();
-                double hoodPos = shootAction.getShooterRun().getTargetHoodPosition();
-                double distMM = shootAction.getShooterRun().getDistanceMM();
+                double targetRps = shootAllAction.getShooterRun().getTargetRPS();
+                double actualRps = shootAllAction.getShooterRun().getShooter().getRPS();
+                double hoodPos = shootAllAction.getShooterRun().getTargetHoodPosition();
+                double distMM = shootAllAction.getShooterRun().getDistanceMM();
 
                 shotLogger.logShot(targetRps, actualRps, hoodPos, distMM);
                 shooterReadyWasNotDone = false; // Reset for next shot
@@ -367,94 +370,84 @@ public class TeleOp extends KOpMode {
      * Handle shooting sequence
      */
     private void handleShooting() {
-        // Update turret when shooting or warmup
-        if ((shooter.isRunning()) || (isPending(shooterWarmup)) || (isPending(shootAction))) {
-            goalDetectionAction.updateCheckDone();
-            turretAutoAlignLimelight.updateCheckDone();
-        } else {
-            // Stop turret motor when not shooting to prevent drift, but only if manual control isn't active
-            if (!manualTurretControlToggled) {
-//                turretAutoAlignLimelight.stop();
-            }
-        }
-
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
-            if (!isPending(shooterStop)) {
-                shooterStop = new ShooterStop(shooter, shootAction);
-                releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
-                shooterWarmup = null;
-                shootAction = null;
-                setLastShooterAction(shooterStop);
-                setLastBrakingAction(releaseBrakeAction);
-                KLog.d("Shooting", "Shooter stop");
-            }
+            shooterRun.stop();
+
+            shootAllAction = null;
+            setLastShooterAction(shooterStop);
+
+            releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
+            setLastBrakingAction(releaseBrakeAction);
+
+            KLog.d("TeleOp_Shooting", "Shooter stop");
             return;
         }
 
         //Shooting Running --> return;
-        if (isPending(shootAction)) {
+        if (isPending(shootAllAction)) {
             return;
         }
 
         // Priority 2- Execute shoot sequence
-        if (shootPressed) {
-            if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, SHOOTER_TARGET_POINT.multiplyY(allianceColor.getPolarity()), driveBrake, activateBraking, releaseBraking);
-                shootAction.shooterRun.setUseLimelight(useLimelight);
-                shooterWarmup = null;
-                setLastShooterAction(shootAction);
+        if (shootAllPressed) {
+            if (!isPending(shootAllAction)) {
+                shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignLimelight);
+                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
+                shooterRun.setUseLimelight(useLimelight);
+                setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 if (manualTurretControlToggled) {
-                    shootAction.setTurretReady(true);
+                    shootAllAction.setTurretReady(true);
                 }
-                KLog.d("Shooting", "Shoot action started - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
+                KLog.d("TeleOp_Shooting", "Shoot action started - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
             return;
         }
 
         //
         if (forceShootFarPressed) {
-            if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1], driveBrake, activateBraking, releaseBraking);
-                shootAction.shooterRun.setUseLimelight(useLimelight);
-                shooterWarmup = null;
-                setLastShooterAction(shootAction);
+            if (!isPending(shootAllAction)) {
+                shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignLimelight, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
+                shooterRun.setUseLimelight(useLimelight);
+                setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 if (manualTurretControlToggled) {
-                    shootAction.setTurretReady(true);
+                    shootAllAction.setTurretReady(true);
                 }
-                KLog.d("Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
+                KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
             return;
         }
 
         if (forceShootNearPressed) {
-            if (!isPending(shootAction)) {
-                shootAction = new ShootAllAction(stopper, intake, shooter, turretAutoAlignLimelight, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1], driveBrake, activateBraking, releaseBraking);
-                shootAction.shooterRun.setUseLimelight(useLimelight);
-                shooterWarmup = null;
-                setLastShooterAction(shootAction);
+            if (!isPending(shootAllAction)) {
+                shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignLimelight, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
+                shooterRun.setUseLimelight(useLimelight);
+                setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 if (manualTurretControlToggled) {
-                    shootAction.setTurretReady(true);
+                    shootAllAction.setTurretReady(true);
                 }
-                KLog.d("Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAction.getShooterRun().getTargetRPS());
+                KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
             return;
         }
 
-
-
-
-        //  Priority 3 -Warmup shooter
-        if (warmupPressed) {
-            if (!isPending(shooterWarmup)) {
-                shooterWarmup = new ShooterWarmupAction(shooter, 0.3);
-                setLastShooterAction(shooterWarmup);
-                KLog.d("Shooting", "Warmup started");
+        if (warmupFarToggled) {
+            if (!isPending(shootAllAction)) {
+                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
+                shooterRun.setTargetRPS(ShooterInterpolationConfig.getMaxValue()[0]);
+                shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getMaxValue()[1]);
+                KLog.d("TeleOp_Shooting_Warmup", "Warmup For Far Shoot");
+            }
+        } else {
+            if (!isPending(shootAllAction)) {
+                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
+                KLog.d("TeleOp_Shooting_Warmup", "Warmup For Auto Shoot");
             }
         }
+
     }
 
     @Override

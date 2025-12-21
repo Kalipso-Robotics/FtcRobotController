@@ -2,10 +2,8 @@ package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
-import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
-import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.actions.turret.TurretReadyLimelight;
 import com.kalipsorobotics.math.Point;
@@ -13,38 +11,53 @@ import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.test.turret.TurretReady;
-import com.kalipsorobotics.utilities.KLog;
+import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 
 
 public class ShootAllAction extends KActionSet {
 
-    public ShooterRun shooterRun;
-    TurretReadyLimelight turretReadyLimelight;
-    ShooterReady ready;
-    PushBall pushAllBalls;
-    ShooterStop shooterStop;
-    TurretAutoAlign turretAutoAlign;
+    private Stopper stopper;
+    private Intake intake;
+    private Shooter shooter;
+    private DriveBrake driveBrake;
 
-    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight, double targetRPS, double targetHoodPos, DriveBrake driveBrake, ActivateBraking activateBraking, ReleaseBraking releaseBraking) {
+    private ShooterRun shooterRun;
+    private TurretAutoAlignLimelight turretAutoAlignLimelight;
+    private double targetRPS;
+    private double targetHoodPos;
 
-        activateBraking = new ActivateBraking(driveBrake);
-        releaseBraking = new ReleaseBraking(driveBrake);
-        shooterRun = new ShooterRun(shooter, targetRPS, targetHoodPos);
-        shooterRun.setName("ShooterReady");
-        this.addAction(shooterRun);
-        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignLimelight, activateBraking, releaseBraking);
+    private ShooterReady shooterReady;
+
+    private TurretReadyLimelight turretReadyLimelight;
+
+    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignLimelight turretAutoAlignLimelight, double targetRPS, double targetHoodPos) {
+        this.stopper = stopper;
+        this.intake = intake;
+        this.shooter = shooter;
+        this.driveBrake = driveBrake;
+        this.shooterRun = shooterRun;
+        this.turretAutoAlignLimelight = turretAutoAlignLimelight;
+        this.targetRPS = targetRPS;
+        this.targetHoodPos = targetHoodPos;
+
+        shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
+        shooterRun.setTargetRPS(targetRPS);
+        shooterRun.setTargetHoodPosition(targetHoodPos);
+
+        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignLimelight);
     }
 
-    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight, Point targetPoint, DriveBrake driveBrake, ActivateBraking activateBraking, ReleaseBraking releaseBraking) {
+    public ShootAllAction(Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignLimelight turretAutoAlignLimelight) {
+        this.stopper = stopper;
+        this.intake = intake;
+        this.shooter = shooter;
+        this.driveBrake = driveBrake;
+        this.shooterRun = shooterRun;
+        this.turretAutoAlignLimelight = turretAutoAlignLimelight;
 
-        activateBraking = new ActivateBraking(driveBrake);
-        releaseBraking = new ReleaseBraking(driveBrake);
-        shooterRun = new ShooterRun(shooter, targetPoint);
-        shooterRun.setName("ShooterReady");
-        this.addAction(shooterRun);
+        shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_FIXED_POINT);
 
-        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignLimelight, activateBraking, releaseBraking);
+        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignLimelight);
     }
 
     public ShooterRun getShooterRun() {
@@ -52,39 +65,34 @@ public class ShootAllAction extends KActionSet {
     }
 
     public ShooterReady getShooterReady() {
-        return ready;
+        return shooterReady;
     }
 
-    @Override
-    protected void beforeUpdate() {
-        KLog.d("ShootAllAction", "is Done: " + isDone + " ready: " + ready.getIsDone() + " pushAllBalls: " + pushAllBalls.getIsDone() + " shooterStop: " + shooterStop.getIsDone());
-    }
 
-    private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight, ActivateBraking activateBraking, ReleaseBraking releaseBraking) {
+    private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight) {
 
+        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
         activateBraking.setName("ActivateBraking");
         this.addAction(activateBraking);
 
-        ready = new ShooterReady(shooterRun);
-        ready.setName("ready");
-        this.addAction(ready);
+        shooterReady = new ShooterReady(shooterRun);
+        shooterReady.setName("ready");
+        this.addAction(shooterReady);
 
         turretReadyLimelight = new TurretReadyLimelight(turretAutoAlignLimelight);
         turretReadyLimelight.setName("turretReady");
         this.addAction(turretReadyLimelight);
 
-        pushAllBalls = new PushBall(stopper, intake, shooter);
+        PushBall pushAllBalls = new PushBall(stopper, intake, shooter);
         pushAllBalls.setName("pushAllBalls");
-        pushAllBalls.setDependentActions(ready, turretReadyLimelight);
+        pushAllBalls.setDependentActions(shooterReady, turretReadyLimelight);
         this.addAction(pushAllBalls);
 
-        shooterStop = new ShooterStop(shooterRun);
-        shooterStop.setName("shooterStop");
-        shooterStop.setDependentActions(pushAllBalls, ready);
-        this.addAction(shooterStop);
+        shooterRun.setShooterRunMode(ShooterRunMode.STOP);
 
+        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
         releaseBraking.setName("ReleaseBraking");
-        releaseBraking.setDependentActions(shooterStop);
+        releaseBraking.setDependentActions(pushAllBalls);
         this.addAction(releaseBraking);
 
     }

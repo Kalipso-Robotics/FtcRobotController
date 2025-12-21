@@ -2,6 +2,7 @@ package com.kalipsorobotics.utilities;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -23,6 +24,8 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastShooterAction = null;
     protected Action lastBrakingAction = null;
     protected Action lastStopperAction = null;
+    protected ShooterRun shooterRun = null;
+
 
 
     /**
@@ -116,6 +119,11 @@ public abstract class KOpMode extends LinearOpMode {
         if (lastBrakingAction != null) {
             lastBrakingAction.updateCheckDone();
         }
+
+        if (shooterRun !=null) {
+            shooterRun.updateCheckDone();
+        }
+
     }
 
 
