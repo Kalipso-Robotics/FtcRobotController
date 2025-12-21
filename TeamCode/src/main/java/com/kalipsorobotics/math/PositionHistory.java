@@ -8,6 +8,33 @@ public class PositionHistory {
     private int leftTicks;
     private int rightTicks;
     private int backTicks;
+    private double leftDistanceMM;
+    private double rightDistanceMM;
+    private double backDistanceMM;
+
+    public double getRawIMU() {
+        return rawIMU;
+    }
+
+    public void setRawIMU(double rawIMU) {
+        this.rawIMU = rawIMU;
+    }
+
+    private double rawIMU;
+
+
+    public double getBackDistanceMM() {
+        return backDistanceMM;
+    }
+
+    public double getRightDistanceMM() {
+        return rightDistanceMM;
+    }
+
+    public double getLeftDistanceMM() {
+        return leftDistanceMM;
+    }
+
 
     public PositionHistory() {}
 
@@ -33,6 +60,12 @@ public class PositionHistory {
         this.leftTicks = leftTicks;
         this.rightTicks = rightTicks;
         this.backTicks = backTicks;
+    }
+
+    public void setDistanceMM(double leftDistanceMM, double rightDistanceMM, double backDistanceMM) {
+        this.leftDistanceMM = leftDistanceMM;
+        this.rightDistanceMM = rightDistanceMM;
+        this.backDistanceMM = backDistanceMM;
     }
 
     public int getLeftTicks() {

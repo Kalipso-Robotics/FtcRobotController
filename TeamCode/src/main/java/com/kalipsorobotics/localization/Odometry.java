@@ -21,6 +21,11 @@ import java.util.HashMap;
 
 
 public class Odometry {
+
+    private static double DEAD_WHEEL_RADIUS_MM = 24;
+    private static double TICKS_PER_REV = 2000;
+    private static double TICKS_TO_MM = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
+
     private boolean isOdometryUnhealthy = false;
     private int unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
@@ -44,6 +49,10 @@ public class Odometry {
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
     private DcMotor backEncoder;
+
+    private int currentLeftTicks = 0;
+    private int currentRightTicks = 0;
+    private int currentBackTicks = 0;
     private final double rightOffset;
     private final double leftOffset;
     private final double backOffset;
@@ -83,10 +92,14 @@ public class Odometry {
     public static synchronized Odometry getInstance(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
                                                     IMUModule imuModule) {
         if (single_instance == null) {
+            KLog.d("Auto→TeleOp", "Creating NEW odometry instance at (0,0,0)");
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
         } else {
+            KLog.d("Auto→TeleOp", "REUSING existing odometry instance");
             KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            KLog.d("Auto→TeleOp", "Position before resetHardware: " + single_instance.wheelIMUPositionHistory.getCurrentPosition());
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
+            KLog.d("Auto→TeleOp", "Position after resetHardware: " + single_instance.wheelIMUPositionHistory.getCurrentPosition());
         }
         return single_instance;
     }
@@ -127,43 +140,45 @@ public class Odometry {
     }
 
     private static double ticksToMM(double ticks) {
-        final double DEAD_WHEEL_RADIUS_MM = 24;
-        final double TICKS_PER_REV = 2000;
-        final double TICKS_TO_MM = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
-
         return ticks * TICKS_TO_MM;
+    }
+    private static int mmToTicks(double mm) {
+        return (int) (mm / TICKS_TO_MM);
     }
 
     public double getRightEncoderMM() {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        KLog.d("Odometry_Encoder", "right encoder " + rightEncoder.getCurrentPosition());
-        return ticksToMM(rightEncoder.getCurrentPosition()) - rightOffset;
+        currentRightTicks = rightEncoder.getCurrentPosition();
+        KLog.d("Odometry_Encoder", "right encoder " + currentRightTicks);
+        return ticksToMM(currentRightTicks) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
     }
     public double getLeftEncoderMM() {
         //corresponds to fLeft
         //direction FORWARD
         //positive because encoder directions
-        KLog.d("Odometry_Encoder", "left encoder " + leftEncoder.getCurrentPosition());
-        return ticksToMM(leftEncoder.getCurrentPosition()) - leftOffset;
+        currentLeftTicks = leftEncoder.getCurrentPosition();
+        KLog.d("Odometry_Encoder", "left encoder " + currentLeftTicks);
+        return ticksToMM(currentLeftTicks) - leftOffset;
     }
     public double getBackEncoderMM() {
         //corresponds to bRight
         //direction REVERSE
         //positive because encoder directions
-        KLog.d("Odometry_Encoder", "back encoder " + backEncoder.getCurrentPosition());
-        return ticksToMM(backEncoder.getCurrentPosition()) - backOffset;
+        currentBackTicks = backEncoder.getCurrentPosition();
+        KLog.d("Odometry_Encoder", "back encoder " + currentBackTicks);
+        return ticksToMM(currentBackTicks) - backOffset;
         //return ticksToMM(backEncoder.getCurrentPosition());
     }
 
     public boolean allEncoderZero() {
-        return (rightEncoder.getCurrentPosition() == 0) && (leftEncoder.getCurrentPosition() == 0) && (backEncoder.getCurrentPosition() == 0);
+        return (currentRightTicks == 0) && (currentLeftTicks == 0) && (currentBackTicks == 0);
     }
 
     public boolean anyEncoderZero() {
-        return (rightEncoder.getCurrentPosition() == 0) || (leftEncoder.getCurrentPosition() == 0) || (backEncoder.getCurrentPosition() == 0);
+        return (currentRightTicks == 0) || (currentLeftTicks == 0) || (currentBackTicks == 0);
     }
 
     private Velocity calculateRelativeDeltaWheel(double rightDistanceMM, double leftDistanceMM, double backDistanceMM, double deltaTimeMS) {
@@ -290,11 +305,12 @@ public class Odometry {
 //                    String.format("%.1f", maxDistance) + "mm)");
 //            return; // Skip this update to prevent corruption
 //        }
-
+        wheelPositionHistory.setRawIMU(currentImuHeading);
+        wheelPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);
         wheelPositionHistory.setCurrentPosition(globalPosition);
         wheelPositionHistory.setCurrentVelocity(wheelRelDelta, timeElapsedSeconds * 1000);
-        wheelPositionHistory.setEncoderTicks(leftEncoder.getCurrentPosition(),
-                rightEncoder.getCurrentPosition(), backEncoder.getCurrentPosition());
+        wheelPositionHistory.setEncoderTicks(currentLeftTicks,
+                currentRightTicks, currentBackTicks);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
     }
 
@@ -322,11 +338,12 @@ public class Odometry {
 //
 //            return; // Skip this update to prevent corruption
 //        }
-
+        wheelIMUPositionHistory.setRawIMU(currentImuHeading);
+        wheelIMUPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);
         wheelIMUPositionHistory.setCurrentPosition(globalPosition);
         wheelIMUPositionHistory.setCurrentVelocity(wheelIMURelDelta, timeElapsedSeconds * 1000); //mm/ms
-        wheelIMUPositionHistory.setEncoderTicks(leftEncoder.getCurrentPosition(),
-                rightEncoder.getCurrentPosition(), backEncoder.getCurrentPosition());
+        wheelIMUPositionHistory.setEncoderTicks(currentLeftTicks,
+                currentRightTicks, currentBackTicks);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
     }
 

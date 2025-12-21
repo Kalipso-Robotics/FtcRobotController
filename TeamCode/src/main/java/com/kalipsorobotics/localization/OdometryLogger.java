@@ -87,15 +87,15 @@ public class OdometryLogger extends KFileWriter {
         stringBuilder.append(",");
 
         // Encoder distances in MM
-        stringBuilder.append(odometry.getBackEncoderMM());
+        stringBuilder.append(wheelHistory.getBackDistanceMM());
         stringBuilder.append(",");
-        stringBuilder.append(odometry.getLeftEncoderMM());
+        stringBuilder.append(wheelHistory.getLeftDistanceMM());
         stringBuilder.append(",");
-        stringBuilder.append(odometry.getRightEncoderMM());
+        stringBuilder.append(wheelHistory.getRightDistanceMM());
         stringBuilder.append(",");
 
         // Raw IMU reading in radians
-        stringBuilder.append(odometry.getIMUHeading());
+        stringBuilder.append(wheelIMUHistory.getRawIMU());
         stringBuilder.append(",");
 
         // Wheel position data

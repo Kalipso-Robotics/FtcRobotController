@@ -3,15 +3,11 @@ package com.kalipsorobotics.modules;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.MathFunctions;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class DriveTrain {
     private static DriveTrain single_instance = null;
@@ -25,7 +21,7 @@ public class DriveTrain {
     private DcMotor backEncoder;
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
-    private GoBildaPinpointDriver odo;
+    private GoBildaPinpointDriver goBildaPinpointDriver;
 
 
     private double fLeftPower;
@@ -80,7 +76,7 @@ public class DriveTrain {
         driveTrain.fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         driveTrain.bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        driveTrain.odo = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
+        //driveTrain.goBildaPinpointDriver = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 
         driveTrain.rightEncoder = driveTrain.bRight;
         driveTrain.leftEncoder = driveTrain.bLeft;
