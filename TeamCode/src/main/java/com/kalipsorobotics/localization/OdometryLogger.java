@@ -122,6 +122,7 @@ public class OdometryLogger extends KFileWriter {
         stringBuilder.append(odometry.isOdometryUnhealthy());
 
         bufferedLines.add(stringBuilder.toString());
+        KLog.d("OdometryLogger_Line", stringBuilder.toString());
         KLog.d("OdometryLogger", "Buffered line " + bufferedLines.size());
     }
 

@@ -152,6 +152,9 @@ public class TeleOp extends KOpMode {
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         KLog.d("TeleOp-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         waitForStart();
+        sleep(50);
+        //Wait for Executor Thread to start
+
         KLog.d("TeleOp-Run", "After waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
 
 //        turretAutoAlign.setToleranceDeg(0.5);

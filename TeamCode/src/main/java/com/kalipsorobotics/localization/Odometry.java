@@ -358,6 +358,10 @@ public class Odometry {
         double leftDistanceMM = getLeftEncoderMM();
         double backDistanceMM = getBackEncoderMM();
 
+        if (allEncoderZero()) {
+            KLog.d("Odometry_debug_OpMode_Transfer", "All encoders zero. Returning..");
+            return odometryPositionHistoryHashMap;
+        }
 
         // Read IMU heading only once per cycle
         currentImuHeading = getIMUHeading();

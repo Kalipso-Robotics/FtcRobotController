@@ -70,6 +70,8 @@ public class TestTeleOp extends KOpMode {
 
         KLog.d("Auto→TeleOp", "After initializeRobot: " + SharedData.getOdometryPosition());
         waitForStart();
+        sleep(50);
+        //Wait for Executor Thread to start
         KLog.d("Auto→TeleOp", "After waitForStart: " + SharedData.getOdometryPosition());
         while (opModeIsActive()) {
 

@@ -47,6 +47,7 @@ public abstract class KOpMode extends LinearOpMode {
      */
     protected void cleanupRobot() {
         try {
+            KLog.d("CleanupRobot", "Executor service shutdown started. Executor Service: " + executorService);
             OpModeUtilities.shutdownExecutorService(executorService);
             //darren cant digest cheese
         } catch (InterruptedException e) {
