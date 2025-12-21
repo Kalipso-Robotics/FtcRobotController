@@ -168,7 +168,7 @@ public class TurretAutoAlignLimelight extends Action {
 
         } else {
             isWithinRange = false;
-            // turretMotor.goToTargetTicks((int) targetTicks);
+//             turretMotor.goToTargetTicks((int) targetTicks);
 
             int currentTicks = turretMotor.getCurrentPosition();
             int error = (int) targetTicks - currentTicks;
@@ -204,9 +204,9 @@ public class TurretAutoAlignLimelight extends Action {
         double currentRobotHeading = currentPosition.getTheta();
 
         // Log robot position and target
-        KLog.d("AngVel_Position", String.format("Robot: (%.1f, %.1f) mm, Heading: %.3f rad (%.1f deg)",
+        KLog.d("AngVel", String.format("Robot: (%.1f, %.1f) mm, Heading: %.3f rad (%.1f deg)",
             currentX, currentY, currentRobotHeading, Math.toDegrees(currentRobotHeading)));
-        KLog.d("AngVel_Target", String.format("Target: (%.1f, %.1f) mm",
+        KLog.d("AngVel", String.format("Target: (%.1f, %.1f) mm",
             targetPoint.getX(), targetPoint.getY()));
 
         double yToGoal = targetPoint.getY() - currentY;
@@ -215,12 +215,12 @@ public class TurretAutoAlignLimelight extends Action {
         double angleToGoal = Math.atan2(yToGoal, xToGoal);
 
         // Log vector to goal
-        KLog.d("AngVel_ToGoal", String.format("Delta: (%.1f, %.1f) mm, Distance: %.1f mm, Angle: %.3f rad (%.1f deg)",
+        KLog.d("AngVel", String.format("Delta: (%.1f, %.1f) mm, Distance: %.1f mm, Angle: %.3f rad (%.1f deg)",
             xToGoal, yToGoal, distanceToGoal, angleToGoal, Math.toDegrees(angleToGoal)));
 
         // total angle
         double totalAngleToGoal = MathFunctions.angleWrapRad(angleToGoal - currentRobotHeading);
-        KLog.d("AngVel_Error", String.format("Angle Error: %.3f rad (%.1f deg) = angleToGoal(%.3f) - robotHeading(%.3f)",
+        KLog.d("AngVel", String.format("Angle Error: %.3f rad (%.1f deg) = angleToGoal(%.3f) - robotHeading(%.3f)",
             totalAngleToGoal, Math.toDegrees(totalAngleToGoal), angleToGoal, currentRobotHeading));
 
         if (isFirstVelocityUpdate) {
@@ -229,7 +229,7 @@ public class TurretAutoAlignLimelight extends Action {
             currentAngularVelocity = 0;
             velocityTimer.reset();
             isFirstVelocityUpdate = false;
-            KLog.d("AngVel_Init", "First update - initializing velocity tracking");
+            KLog.d("AngVel", "First update - initializing velocity tracking");
         } else {
             // update velocity
             double deltaTime = velocityTimer.milliseconds() ; // Convert to seconds (bruh, for what?)
@@ -238,7 +238,7 @@ public class TurretAutoAlignLimelight extends Action {
                 currentAngularVelocity = deltaAngle / deltaTime;
 
                 // Log velocity calculation components
-                KLog.d("AngVel_Calc", String.format("ΔAngle: %.4f rad, ΔTime: %.1f ms, Velocity: %.3f rad/ms (%.3f rad/s)",
+                KLog.d("AngVel", String.format("ΔAngle: %.4f rad, ΔTime: %.1f ms, Velocity: %.3f rad/ms (%.3f rad/s)",
                     deltaAngle, deltaTime, currentAngularVelocity, currentAngularVelocity * 1000.0));
 
                 previousTotalAngle = totalAngleToGoal;
@@ -247,7 +247,7 @@ public class TurretAutoAlignLimelight extends Action {
         }
 
         // Summary log
-        KLog.d("AngVel_Summary", String.format("Angular Velocity: %.3f rad/ms, Angle Error: %.3f rad (%.1f deg)",
+        KLog.d("AngVel", String.format("Angular Velocity: %.3f rad/ms, Angle Error: %.3f rad (%.1f deg)",
             currentAngularVelocity, totalAngleToGoal, Math.toDegrees(totalAngleToGoal)));
     }
 }

@@ -51,7 +51,6 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
  * - Distance to target (MM)
  */
 @TeleOp(name = "RPS Prediction Data Collector", group = "Test")
-@Disabled
 public class RPSPredictionDataCollector extends LinearOpMode {
 
     /**
