@@ -112,9 +112,8 @@ public class BlueAutoNearRampCycle extends KOpMode {
         // ----------------- TRIP 2 ----------------------
         RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip2.setName("trip2");
-        trip2.getMoveToBall().addPoint(1264.64, 509.85 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(1399.00, 848.38 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(1753.27, 1069.35 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1161.85, 982.76 * allianceColor.getPolarity(), 47 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1370.28, 1230.37 * allianceColor.getPolarity(), 40 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
 
