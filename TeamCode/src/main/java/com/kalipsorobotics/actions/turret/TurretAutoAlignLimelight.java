@@ -102,8 +102,9 @@ public class TurretAutoAlignLimelight extends Action {
             runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
         }
 
-        updateAngularVelocity();
+
         goalDetectionAction.updateCheckDone();
+        updateAngularVelocity();
         aprilTagFound = !SharedData.getLimelightPosition().isEmpty();
         double targetAngleLimelight = 0;
         double currentAngleRad = turret.getCurrentAngleRad();
