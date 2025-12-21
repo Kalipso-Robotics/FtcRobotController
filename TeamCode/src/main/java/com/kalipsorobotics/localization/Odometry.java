@@ -25,13 +25,18 @@ public class Odometry {
     private static final double DEAD_WHEEL_RADIUS_MM = 24;
     private static final double TICKS_PER_REV = 2000;
     //private static final double MM_PER_TICK = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
-    private static final double MM_PER_TICK = 0.0744953182; //Effective Constant
+    private static final double MM_PER_TICK = 0.0744953182; //Effective Constant  DistanceMM/Ticks
 
     private long unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
-    final static private double TRACK_WIDTH_MM = 301; //297;
-    //maybe double check BACK Distance
-    static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -91; //-70;
+
+//  Calibration Instruction
+//  (LeftTicks-RightTicks) * MM_PER_TICKS/Angle = TRACK_WIDTH_MM
+    final static private double TRACK_WIDTH_MM = 297.5; //301; //297;
+
+//  Calibration Instruction **Y change should be ~0**
+//  (BackTicks * MM_PER_TICK)/Angle = BACK_DISTANCE_TO_MID_ROBOT_MM
+    static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -90; //-70;
     private static Odometry single_instance = null;
     final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
