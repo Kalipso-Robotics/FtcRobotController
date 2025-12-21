@@ -100,7 +100,7 @@ public class ColorCalibration extends LinearOpMode {
                 telemetry.addLine("Calibration Stopped.");
             }
 
-            if (kPad.isStartButtonPressed()) {
+            if (kPad.isStartButtonFirstPressed()) {
                 saveCalibrationData();
                 telemetry.addLine("Calibration Saved!");
             }

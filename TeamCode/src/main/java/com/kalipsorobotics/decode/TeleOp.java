@@ -14,11 +14,9 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.ShooterWarmupAction;
-import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -30,7 +28,6 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
-import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.modules.shooter.ShotLogger;
@@ -79,7 +76,7 @@ public class TeleOp extends KOpMode {
     GoalDetectionAction goalDetectionAction = null;
 
     // Button state variables
-    private boolean drivingSticks = false;
+    private boolean drivingSticksActive = false;
     private boolean shootPressed = false;
     private boolean forceShootFarPressed = false;
     private boolean intakeRunPressed = false;
@@ -173,9 +170,7 @@ public class TeleOp extends KOpMode {
                 hasClosedStopperInnit = true;
             }
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
-            drivingSticks = kGamePad1.getLeftStickY() != 0 ||
-                    kGamePad1.getRightStickX() != 0 ||
-                    kGamePad1.getLeftStickX() != 0;
+            drivingSticksActive = kGamePad1.isAnyStickActive();
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
@@ -193,7 +188,7 @@ public class TeleOp extends KOpMode {
 
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
             markOvershotPressed = kGamePad2.isButtonYFirstPressed();
-            limelightCorrectionPressed = kGamePad1.isBackButtonPressed();  // Back button for vision correction
+            limelightCorrectionPressed = kGamePad1.isBackButtonFirstPressed();  // Back button for vision correction
 
             // ========== HANDLE DRIVING ==========
             handleDriving();
@@ -222,7 +217,7 @@ public class TeleOp extends KOpMode {
         cleanupRobot();
     }
     private void handleDriving() {
-        if (drivingSticks) {
+        if (drivingSticksActive) {
             driveAction.move(gamepad1);
             if (releaseBrakeAction == null || releaseBrakeAction.getIsDone()) {
                 releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
