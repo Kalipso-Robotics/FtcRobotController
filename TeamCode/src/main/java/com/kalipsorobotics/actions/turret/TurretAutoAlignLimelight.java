@@ -182,8 +182,8 @@ public class TurretAutoAlignLimelight extends Action {
 
             double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
 
-            KLog.d("AngVel_Power", String.format("Error: %d ticks, PID: %.3f, FF: %.3f (AngVel: %.6f rad/ms), Total: %.3f",
-                error, pidOutput, feedforward, currentAngularVelocity, totalPower));
+            KLog.d("AngVel_Power", String.format("Target: %.0f ticks, Current: %d ticks, Error: %d ticks, PID: %.3f, FF: %.3f (AngVel: %.6f rad/ms), Total: %.3f",
+                targetTicks, currentTicks, error, pidOutput, feedforward, currentAngularVelocity, totalPower));
 
             turretMotor.setPower(totalPower);
 
@@ -242,7 +242,7 @@ public class TurretAutoAlignLimelight extends Action {
             KLog.d("AngVel", "First update - initializing velocity tracking");
         } else {
             // update velocity
-            double deltaTime = velocityTimer.milliseconds() ; // Convert to seconds (bruh, for what?)
+            double deltaTime = velocityTimer.milliseconds() ;
             if (deltaTime > 0) {
                 double deltaAngle = totalAngleToGoal - previousTotalAngle;
                 currentAngularVelocity = deltaAngle / deltaTime;

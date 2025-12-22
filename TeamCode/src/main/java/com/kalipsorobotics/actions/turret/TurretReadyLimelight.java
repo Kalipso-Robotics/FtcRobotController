@@ -21,6 +21,7 @@ public class TurretReadyLimelight extends Action {
     @Override
     protected void update() {
         if (isDone) {
+            KLog.d(this.getName(), "time to done: " + timeoutTimer.milliseconds());
             return;
         }
 
