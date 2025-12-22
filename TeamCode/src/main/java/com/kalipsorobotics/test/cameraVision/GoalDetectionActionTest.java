@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -17,12 +17,12 @@ public class GoalDetectionActionTest extends LinearOpMode {
         OpModeUtilities opModeUtilities = new OpModeUtilities(this.hardwareMap, this, this.telemetry);
         Turret turret = Turret.getInstance(opModeUtilities);
         // TEST ON RED or change tagId
-        GoalDetectionAction goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret, 24);
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24);
 
         waitForStart();
 
         while (opModeIsActive()) {
-            goalDetectionAction.updateCheckDone();
+            aprilTagDetectionAction.updateCheckDone();
             telemetry.addData("current limelight position ", SharedData.getLimelightPosition().toString());
         }
     }

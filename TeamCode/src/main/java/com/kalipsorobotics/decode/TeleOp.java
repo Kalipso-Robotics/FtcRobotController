@@ -3,7 +3,7 @@ package com.kalipsorobotics.decode;
 import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
@@ -16,7 +16,6 @@ import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -71,7 +70,7 @@ public class TeleOp extends KOpMode {
     DriveAction driveAction = null;
     TurretAutoAlignLimelight turretAutoAlignLimelight = null;
     ShotLogger shotLogger = null;
-    GoalDetectionAction goalDetectionAction = null;
+    AprilTagDetectionAction aprilTagDetectionAction = null;
 
     // Button state variables
     private boolean drivingSticksActive = false;
@@ -134,8 +133,8 @@ public class TeleOp extends KOpMode {
 
         shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
 
-        goalDetectionAction = new GoalDetectionAction(opModeUtilities, turret, tagId);
-        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, goalDetectionAction, allianceColor);
+        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId);
+        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, aprilTagDetectionAction, allianceColor);
 
         shotLogger = new ShotLogger(opModeUtilities);
 
@@ -233,7 +232,7 @@ public class TeleOp extends KOpMode {
         turretAutoAlignLimelight.setUseOdometrySearch(!odometryTurretOverrideToggle);
 
 
-        goalDetectionAction.updateCheckDone();
+        aprilTagDetectionAction.updateCheckDone();
 
         //Manual
         if (isTurretEnabled) {

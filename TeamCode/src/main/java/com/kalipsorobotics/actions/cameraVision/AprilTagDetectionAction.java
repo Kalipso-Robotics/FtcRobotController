@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 
-public class GoalDetectionAction extends Action {
+public class AprilTagDetectionAction extends Action {
 
     private boolean useWebcam = false;
 
@@ -22,9 +22,9 @@ public class GoalDetectionAction extends Action {
 //    private VisionPortal visionPortal;
 //    WebcamName camera;
 
-    private Limelight3A limelight;
-    private Turret turret;
-    private int targetAprilTagId;
+    private final Limelight3A limelight;
+    private final Turret turret;
+    private final int targetAprilTagId;
     private boolean hasStarted = false;
 
 
@@ -45,7 +45,7 @@ public class GoalDetectionAction extends Action {
 
     double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
-    public GoalDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId) {
+    public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId) {
 //        camera = opModeUtilities.getHardwareMap().get(WebcamName.class, "Webcam 1");
 //        this.aprilTagProcessor = AprilTagProcessor.easyCreateWithDefaults();
 //        visionPortal = VisionPortal.easyCreateWithDefaults(
@@ -178,4 +178,5 @@ public class GoalDetectionAction extends Action {
         while (a >   Math.PI) a -= 2*Math.PI;
         return a;
     }
+
 }
