@@ -2,7 +2,7 @@ package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
@@ -20,7 +20,7 @@ public class TurretAutoAlignLimelight extends Action {
     OpModeUtilities opModeUtilities;
     Turret turret;
     KMotor turretMotor;
-    private GoalDetectionAction goalDetectionAction;
+    private AprilTagDetectionAction aprilTagDetectionAction;
     private TurretRunMode turretRunMode;
     private double targetTicks;
     private double targetPower;
@@ -41,10 +41,10 @@ public class TurretAutoAlignLimelight extends Action {
     private boolean isFirstVelocityUpdate;
 
 
-    public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, GoalDetectionAction goalDetectionAction, AllianceColor allianceColor) {
+    public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
-        this.goalDetectionAction = goalDetectionAction;
+        this.aprilTagDetectionAction = aprilTagDetectionAction;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
         this.turretRunMode = TurretRunMode.STOP; // inital mode
@@ -119,7 +119,7 @@ public class TurretAutoAlignLimelight extends Action {
     }
 
     private void updateAlignToTarget() {
-        goalDetectionAction.updateCheckDone();
+        aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
         aprilTagFound = !SharedData.getLimelightPosition().isEmpty();
         double currentAngleRad = turret.getCurrentAngleRad();
