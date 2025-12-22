@@ -90,6 +90,7 @@ public class RedAutoDepotRampCycle extends KOpMode {
         DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
+        trip1.getTrip().getMoveToBall().clearPoints();
         trip1.getTrip().getMoveToBall().addPoint(727, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(727, 1150 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
@@ -107,21 +108,23 @@ public class RedAutoDepotRampCycle extends KOpMode {
         RampCycleAction trip3 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2);
+        blueAutoDepot.addAction(trip3);
 
         // ----------------- TRIP 4 ---------------------- ~5 sec
 
         RampCycleAction trip4 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
         trip4.setName("trip4");
         trip4.setDependentActions(trip3);
+        blueAutoDepot.addAction(trip4);
 
         IntakeStop stopIntake = new IntakeStop(intake);
         stopIntake.setName("stopIntake");
-        stopIntake.setDependentActions(trip3);
+        stopIntake.setDependentActions(trip4);
         blueAutoDepot.addAction(stopIntake);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
-        park.setDependentActions(trip3);
+        park.setDependentActions(trip4);
         park.addPoint(170, 540 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         blueAutoDepot.addAction(park);
