@@ -12,7 +12,7 @@ public class ActivateBraking extends Action {
     public static final double BRAKE_RIGHT_POS = 0.8449; //0.8135
     public static final double BRAKE_LEFT_POS = 0.663; //0.7195
 
-    private DriveBrake driveBrake;
+    private final DriveBrake driveBrake;
     public ActivateBraking(DriveBrake driveBrake) {
         this.driveBrake = driveBrake;
     }

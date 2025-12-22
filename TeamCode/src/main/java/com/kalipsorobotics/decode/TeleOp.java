@@ -43,7 +43,6 @@ import com.kalipsorobotics.modules.shooter.ShotLogger;
  */
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
 public class TeleOp extends KOpMode {
-    protected final Point SHOOTER_TARGET_POINT = Shooter.TARGET_POINT;
     private boolean hasClosedStopperInnit = false;
     private boolean turretReset = false;
     private DriveTrain driveTrain;
