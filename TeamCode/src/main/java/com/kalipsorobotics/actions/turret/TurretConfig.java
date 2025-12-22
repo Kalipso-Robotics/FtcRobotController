@@ -8,10 +8,10 @@ public class TurretConfig { //
     public static double X_INIT_SETUP_MM = 3357; //3400
     public static double Y_INIT_SETUP_MM = 1350; // 1400
     public static double TICKS_INIT_OFFSET = 0;
-    public static double kP = 0.005;   // faster response
+    public static double kP = 0.004;   // faster response
     public static double kI = 0;       // keep at 0
     public static double kD = 0.0003;  // reduces overshoot (main time saver)
     public static double kS = 0.10;    // faster final approach
-    public static double kF = 375;     // for tracking moving targets
+    public static double kF = 350;     // 375 // for tracking moving targets
 
 }
