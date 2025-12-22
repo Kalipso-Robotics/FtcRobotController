@@ -1,7 +1,9 @@
 package com.kalipsorobotics.decode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+@Disabled
 @Autonomous(name = "RedAutoDepotSpikeMark")
 public class RedAutoDepotSpikeMark extends RedAutoDepot {
 

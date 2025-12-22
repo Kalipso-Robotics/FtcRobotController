@@ -10,11 +10,13 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.checkerframework.dataflow.qual.Pure;
 
 import java.nio.channels.ClosedByInterruptException;
 
+@Disabled
 @Autonomous(name="RedAutoNearTwoLeverPush")
 public class RedAutoNearTwoLeverPush extends RedAutoNear{
     @Override
