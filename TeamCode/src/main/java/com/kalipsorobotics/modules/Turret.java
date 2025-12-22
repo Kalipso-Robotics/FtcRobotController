@@ -1,6 +1,7 @@
 package com.kalipsorobotics.modules;
 
 import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -65,7 +66,10 @@ public class Turret {
     }
 
     public void stop() {
+        KLog.d("TurretPower", "Current Power before Stopping: " + turretMotor.getPower());
         turretMotor.stop();
+        KLog.d("TurretPower", "Power after STOP: " + turretMotor.getPower());
+
     }
 
 }

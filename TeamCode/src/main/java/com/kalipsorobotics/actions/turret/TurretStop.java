@@ -14,8 +14,7 @@ public class TurretStop extends Action {
         if (isDone) {
             return;
         }
-
-        turretAutoAlignLimelight.stopAndSetDone();
+        turretAutoAlignLimelight.stop();
         isDone = true;
     }
 

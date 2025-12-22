@@ -183,6 +183,10 @@ public class PIDFController {
         return kf = val;
     }
 
+    public void setKs(double ks) {
+        this.ks = ks;
+    }
+
     // Getters
     public double getKp() {
         return kp;

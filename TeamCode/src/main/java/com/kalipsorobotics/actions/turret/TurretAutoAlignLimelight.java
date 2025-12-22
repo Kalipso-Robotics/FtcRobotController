@@ -23,7 +23,7 @@ public class TurretAutoAlignLimelight extends Action {
     private AprilTagDetectionAction aprilTagDetectionAction;
     private TurretRunMode turretRunMode;
     private double targetTicks;
-    private double targetPower;
+    private double targetTicksIncrement;
     private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
@@ -49,8 +49,7 @@ public class TurretAutoAlignLimelight extends Action {
         this.dependentActions.add(new DoneStateAction());
         this.turretRunMode = TurretRunMode.STOP; // inital mode
         this.targetTicks = 0;
-        this.targetPower = 0;
-
+        this.targetTicksIncrement = 0;
 
         targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
 
@@ -59,10 +58,18 @@ public class TurretAutoAlignLimelight extends Action {
         this.previousTotalAngle = 0;
         this.currentAngularVelocity = 0;
         this.isFirstVelocityUpdate = true;
+
+        KLog.d("TurretStateMachine", "CONSTRUCTOR called - initial mode: " + turretRunMode);
     }
 
     public boolean isWithinRange() {
         return isWithinRange;
+    }
+
+    public void debugState() {
+        KLog.d("TurretStateMachine", String.format(
+            "DEBUG: mode=%s, isDone=%b, hasStarted=%b, targetPower=%.2f, targetTicks=%.0f, motorPos=%d, isWithinRange=%b",
+            turretRunMode, isDone, hasStarted, targetTicksIncrement, targetTicks, turretMotor.getCurrentPosition(), isWithinRange));
     }
 
     public void initBlocking() {
@@ -89,8 +96,10 @@ public class TurretAutoAlignLimelight extends Action {
 
     @Override
     protected void update() {
+        KLog.d("TurretStateMachine", "update() called - turretRunMode: " + turretRunMode);
+
         if (!opModeUtilities.getOpMode().opModeIsActive() && !opModeUtilities.getOpMode().opModeInInit()) {
-            KLog.d("Turret_Singleton", "OpModeNotActive Return");
+            KLog.d("TurretStateMachine", "OpMode NOT active and NOT in init - returning early");
             turretMotor.stop();
             return;
         }
@@ -98,49 +107,69 @@ public class TurretAutoAlignLimelight extends Action {
         if (!hasStarted) {
             hasStarted = true;
             velocityTimer.reset();
-            runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
+            KLog.d("TurretStateMachine", "First update - hasStarted set to true");
         }
+
+        KLog.d("TurretStateMachine", "Switching on turretRunMode: " + turretRunMode);
 
         switch (turretRunMode) {
             case STOP:
+                KLog.d("TurretStateMachine", "STOP mode - calling turret.stop()");
                 turret.stop();
                 isWithinRange = true;
-                return;
-
-            case RUN_WITH_POWER:
-                turretMotor.setPower(targetPower);
+                break;
+            case RUN_WITH_MANUAL_CONTROL:
+                turretMotor.goToTargetTicks((int) (turretMotor.getCurrentPosition() + targetTicksIncrement));
+                KLog.d("TurretStateMachine", "RUN_WITH_POWER mode - setting power to: " + turretMotor.getPower());
                 isWithinRange = true;
-                return;
-
-            case RUN_USING_ODOMETRY_AND_LL:
+                break;
+            case RUN_USING_LIMELIGHT:
+                KLog.d("TurretStateMachine", "RUN_USING_LimeLight mode - useOdometrySearch=false");
+                useOdometrySearch = false;
                 updateAlignToTarget();
-                return;
+                break;
+            case RUN_USING_ODOMETRY_AND_LIMELIGHT:
+                KLog.d("TurretStateMachine", "RUN_USING_ODOMETRY_AND_LimeLight mode - useOdometrySearch=true");
+                useOdometrySearch = true;
+                updateAlignToTarget();
+                break;
         }
+        KLog.d("TurretStateMachine", "CURRENT TURRET POWER IS: " + turretMotor.getPower());
+        KLog.d("TurretStateMachine", "update() complete - isWithinRange: " + isWithinRange);
     }
 
     private void updateAlignToTarget() {
+        KLog.d("TurretStateMachine", "updateAlignToTarget() - useOdometrySearch: " + useOdometrySearch);
+
         aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
         aprilTagFound = !SharedData.getLimelightPosition().isEmpty();
         double currentAngleRad = turret.getCurrentAngleRad();
 
+        KLog.d("TurretStateMachine", "aprilTagFound: " + aprilTagFound + ", currentAngleRad: " + currentAngleRad);
+
+        // ONLY FOR DASHBOARD TUNING TO UPDATE WITHOUT RECONSTUCTING
+        // -------------------------------------------
+        turretMotor.getPIDFController().setKp(TurretConfig.kP);
+        turretMotor.getPIDFController().setKf(TurretConfig.kF);
+        turretMotor.getPIDFController().setKs(TurretConfig.kS);
+        // -------------------------------------------
+
         if (aprilTagFound) {
             double targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
             hasSearched = false;
-            turretMotor.getPIDFController().setKp(TurretConfig.kP);
             totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
-            runningMode = TurretRunningMode.GO_TO_NEAREST_LIMIT;
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
-            KLog.d("TurretAutoAlignLimelight_Camera_Calc", "targetTicks " + targetTicks);
-            KLog.d("TurretAutoAlignLimelight", "Limelight angle " + targetAngleLimelight);
+            KLog.d("TurretStateMachine", "Using LIMELIGHT - targetAngle: " + targetAngleLimelight + ", targetTicks: " + targetTicks);
         } else if (useOdometrySearch) {
             targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint);
-            KLog.d("TurretAutoAlignLimelight_Odometry_Calc", "targetTicks " + targetTicks);
+            KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
         } else {
-            KLog.d("TurretAutoAlignLimelight", "No april tag and odometry search disabled");
+            KLog.d("TurretStateMachine", "No april tag and odometry disabled - NOT moving");
             return;
         }
 
+        KLog.d("TurretStateMachine", "Calling moveToTargetTicks() - targetTicks: " + targetTicks);
         moveToTargetTicks();
     }
 
@@ -148,10 +177,12 @@ public class TurretAutoAlignLimelight extends Action {
         int currentTicks = turretMotor.getCurrentPosition();
         int error = (int) targetTicks - currentTicks;
 
+        KLog.d("TurretStateMachine", "moveToTargetTicks() - currentTicks: " + currentTicks + ", targetTicks: " + targetTicks + ", error: " + error + ", tolerance: " + toleranceTicks);
+
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turretMotor.stop();
-            KLog.d("TurretAlign_WithinRange", String.format("Within RANGE - current: %d ticks, target: %.0f ticks", currentTicks, targetTicks));
+            KLog.d("TurretStateMachine", "WITHIN RANGE - stopping motor");
         } else {
             isWithinRange = false;
 
@@ -161,29 +192,37 @@ public class TurretAutoAlignLimelight extends Action {
 
             double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
 
-            KLog.d("TurretAlign_Power", String.format("Target: %.0f, Current: %d, Error: %d, PID: %.3f, FF: %.3f, Total: %.3f",
-                targetTicks, currentTicks, error, pidOutput, feedforward, totalPower));
+            KLog.d("TurretStateMachine", String.format("MOVING - PID: %.3f, FF: %.3f, totalPower: %.3f", pidOutput, feedforward, totalPower));
 
             turretMotor.setPower(totalPower);
         }
     }
 
-    public void runWithPower(double power) {
-        this.turretRunMode = TurretRunMode.RUN_WITH_POWER;
-        this.targetPower = power;
+    public void runWithTicksIncrement(double ticks) {
+        KLog.d("TurretStateMachine", "runWithPower() called - ticks: " + ticks + ", previous mode: " + turretRunMode);
+        this.turretRunMode = TurretRunMode.RUN_WITH_MANUAL_CONTROL;
+        this.targetTicksIncrement = ticks;
+        KLog.d("TurretStateMachine", "runWithPower() - mode now: " + turretRunMode + ", targetPower: " + targetTicksIncrement);
     }
-    public void runWithCurrentPos() {
-        this.turretRunMode = TurretRunMode.RUN_USING_ODOMETRY_AND_LL;
+
+    public void runWithOdometryAndLimelight() {
+        KLog.d("TurretStateMachine", "runWithOdometryAndLimelight() called - previous mode: " + turretRunMode);
+        this.turretRunMode = TurretRunMode.RUN_USING_ODOMETRY_AND_LIMELIGHT;
+        KLog.d("TurretStateMachine", "runWithOdometryAndLimelight() - mode now: " + turretRunMode);
+    }
+
+    public void runWithLimelight() {
+        KLog.d("TurretStateMachine", "runWithLimelight() called - previous mode: " + turretRunMode);
+        this.turretRunMode = TurretRunMode.RUN_USING_LIMELIGHT;
+        KLog.d("TurretStateMachine", "runWithLimelight() - mode now: " + turretRunMode);
     }
 
     public void stop() {
+        KLog.d("TurretStateMachine", "stop() called - previous mode: " + turretRunMode);
         this.turretRunMode = TurretRunMode.STOP;
+        KLog.d("TurretStateMachine", "stop() - mode now: " + turretRunMode);
     }
 
-    public void stopAndSetDone() {
-        turretMotor.setPower(0);
-        isDone = true;
-    }
     public double getTargetTicks() {
         return targetTicks;
     }
@@ -192,65 +231,35 @@ public class TurretAutoAlignLimelight extends Action {
         toleranceTicks = newToleranceDeg * Turret.TICKS_PER_DEGREE;
     }
 
-    public boolean isAprilTagFound() {
-        return aprilTagFound;
-    }
-
-    public void setUseOdometrySearch(boolean useOdometrySearch) {
-        this.useOdometrySearch = useOdometrySearch;
-    }
-
     private void updateAngularVelocity() {
         Position currentPosition = SharedData.getOdometryIMUPosition();
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
         double currentRobotHeading = currentPosition.getTheta();
 
-        // Log robot position and target
-        KLog.d("AngVel", String.format("Robot: (%.1f, %.1f) mm, Heading: %.3f rad (%.1f deg)",
-            currentX, currentY, currentRobotHeading, Math.toDegrees(currentRobotHeading)));
-        KLog.d("AngVel", String.format("Target: (%.1f, %.1f) mm",
-            targetPoint.getX(), targetPoint.getY()));
-
         double yToGoal = targetPoint.getY() - currentY;
         double xToGoal = targetPoint.getX() - currentX;
         double distanceToGoal = Math.sqrt(xToGoal * xToGoal + yToGoal * yToGoal);
         double angleToGoal = Math.atan2(yToGoal, xToGoal);
 
-        // Log vector to goal
-        KLog.d("AngVel", String.format("Delta: (%.1f, %.1f) mm, Distance: %.1f mm, Angle: %.3f rad (%.1f deg)",
-            xToGoal, yToGoal, distanceToGoal, angleToGoal, Math.toDegrees(angleToGoal)));
-
-        // total angle
         double totalAngleToGoal = MathFunctions.angleWrapRad(angleToGoal - currentRobotHeading);
-        KLog.d("AngVel", String.format("Angle Error: %.3f rad (%.1f deg) = angleToGoal(%.3f) - robotHeading(%.3f)",
-            totalAngleToGoal, Math.toDegrees(totalAngleToGoal), angleToGoal, currentRobotHeading));
 
         if (isFirstVelocityUpdate) {
-            // first time
             previousTotalAngle = totalAngleToGoal;
             currentAngularVelocity = 0;
             velocityTimer.reset();
             isFirstVelocityUpdate = false;
-            KLog.d("AngVel", "First update - initializing velocity tracking");
         } else {
-            // update velocity
-            double deltaTime = velocityTimer.milliseconds() ;
+            double deltaTime = velocityTimer.milliseconds();
             if (deltaTime > 0) {
                 double deltaAngle = totalAngleToGoal - previousTotalAngle;
                 currentAngularVelocity = deltaAngle / deltaTime;
-
-                // Log velocity calculation components
-                KLog.d("AngVel", String.format("ΔAngle: %.4f rad, ΔTime: %.1f ms, Velocity: %.3f rad/ms (%.3f rad/s)",
-                    deltaAngle, deltaTime, currentAngularVelocity, currentAngularVelocity * 1000.0));
-
                 previousTotalAngle = totalAngleToGoal;
                 velocityTimer.reset();
             }
         }
 
-        // Summary log
-        KLog.d("AngVel", String.format("Angular Velocity: %.3f rad/ms, Angle Error: %.3f rad (%.1f deg)",
-            currentAngularVelocity, totalAngleToGoal, Math.toDegrees(totalAngleToGoal)));
+        KLog.d("TurretStateMachine", String.format("AngVel: %.4f rad/ms, AngleToGoal: %.1f deg, Distance: %.0f mm",
+            currentAngularVelocity, Math.toDegrees(totalAngleToGoal), distanceToGoal));
     }
 }
