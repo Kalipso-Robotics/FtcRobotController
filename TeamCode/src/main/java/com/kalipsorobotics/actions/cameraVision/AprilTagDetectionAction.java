@@ -42,10 +42,6 @@ public class AprilTagDetectionAction extends Action {
 
     private final double ROBOT_CENTER_TO_TURRET_DISTANCE = 4.0; //todo measure final
 
-    final double CAM_HEIGHT_M = 12.5 * 25.4; //todo need to change for real bot
-    final double TAG_HEIGHT_M = 29.5 * 25.4;
-    final double deltaH = TAG_HEIGHT_M - CAM_HEIGHT_M;
-    private Position robotPositionRelLimelight = new Position(0, 0, 0);
     double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId) {
@@ -118,53 +114,21 @@ public class AprilTagDetectionAction extends Action {
                     LimelightPos currentPos = new LimelightPos(tagCamFlatDist, headingRad, xCam, yCam, zCam);
                     SharedData.setLimelightPosition(currentPos);
 
+
+
                     KLog.d("limelight_pos", String.format("Limelight Pos: %s", currentPos));
-
-
-                            // --------------------- odometry ----------------------------
-
                     KLog.d("limelight", String.format("Heading to tag (rad) %.3f", headingRad));
-
-                    double camHeadingField = angleWrapRad(APRIL_YAW_FIELD_RAD + Math.PI - headingRad); // heading of limelight in relation to field
-
-                    double currentTurretRad = turret.getCurrentAngleRad();
-
-                    //------------- current robot rad -----------------
-//                        double currentRobotRad = SharedData.getOdometryPosition().getTheta();
-
-                    double currentRobotRad  = angleWrapRad(camHeadingField - currentTurretRad);
-
-                    //------------- ================= -----------------
-
-                    double bearingField = angleWrapRad(camHeadingField + headingRad);
-
-                    double xDistCamToTag = Math.cos(bearingField) * tagCamFlatDist;
-                    double yDistCamToTag = Math.sin(bearingField) * tagCamFlatDist;
-
-                    double xDistTurretToLimelight = Math.cos(currentTurretRad + currentRobotRad) * TURRET_CENTER_TO_LIMELIGHT_DIST;
-                    double yDistTurretToLimeLight = Math.sin(currentTurretRad + currentRobotRad) * TURRET_CENTER_TO_LIMELIGHT_DIST;
-
-                    double xDistCenterToTurret = Math.cos(currentRobotRad) * ROBOT_CENTER_TO_TURRET_DISTANCE;
-                    double yDistCenterToTurret = Math.sin(currentRobotRad) * ROBOT_CENTER_TO_TURRET_DISTANCE;
-
-                    double totalX = xDistCamToTag + xDistTurretToLimelight + xDistCenterToTurret;
-                    double totalY = yDistCamToTag + yDistTurretToLimeLight + yDistCenterToTurret;
-
-//                    SharedData.setLimelightOdometryPosition(new Position(APRILTAG_X_FROM_INIT - totalX, APRILTAG_Y_FROM_INIT - totalY, currentRobotRad));
-
-                    // 2D distance ignoring height
-//                        double distance = Math.hypot(totalX, totalY);
-
-//                        SharedData.setDistanceToGoal(distance);
-//                        SharedData.setAngleRadToGoal(angleRad);
-
                     KLog.d("limelight_pos", String.format("LL GOAL TAG %d", tagId));
                     KLog.d("limelight_pos", String.format("Goal X (left-right mm) %.2f", xCam));
                     KLog.d("limelight_pos", String.format("Goal Z (front-back mm) %.2f", zCam));
 
+                    // Calculate and set global robot position from vision
+                    Position globalPos = calculateGlobalLimelightPosition();
+                    if (globalPos != null) {
+                        SharedData.setLimelightGlobalPosition(globalPos);
+                    }
                 }
 
-                // existing debug
                 KLog.d("limelight_fiducial", String.format("Fiducial - ID: %d, Family: %s, Xdeg: %.2f, Ydeg: %.2f",
                         fr.getFiducialId(), fr.getFamily(),
                         fr.getTargetXDegrees(), fr.getTargetYDegrees()));
@@ -176,14 +140,84 @@ public class AprilTagDetectionAction extends Action {
         }
     }
 
-    private Position translate() {
-
+    /**
+     * Transforms robot position from AprilTag-relative to field-origin-relative coordinates.
+     * Uses the configured AprilTag position and orientation on the field.
+     *
+     * @param robotRelTagX Robot's X offset from AprilTag in AprilTag's local frame (mm)
+     * @param robotRelTagY Robot's Y offset from AprilTag in AprilTag's local frame (mm)
+     * @param robotRelTagTheta Robot's heading relative to AprilTag (radians)
+     * @return Robot's position in global field coordinates
+     */
+    public Position transformToGlobalPosition(double robotRelTagX, double robotRelTagY, double robotRelTagTheta) {
+        Position localPos = new Position(robotRelTagX, robotRelTagY, robotRelTagTheta);
+        Position aprilTagFieldPos = new Position(APRILTAG_X_FROM_INIT, APRILTAG_Y_FROM_INIT, APRIL_YAW_FIELD_RAD);
+        return localPos.toGlobal(aprilTagFieldPos);
     }
 
-    private Position calculateGlobalLimelightPosition() {
+    /**
+     * Calculates the robot's global position based on current vision data.
+     * Uses the detected AprilTag position and known tag field location.
+     *
+     * Coordinate system:
+     * - Field: +X is forward from init position, +Y is left, angles are CCW from +X
+     * - Camera: +Z is forward (optical axis), +X is right, +Y is down
+     * - AprilTag's local frame: +X is the direction the tag faces, origin at tag center
+     *
+     * @return Robot's global field position, or null if no valid detection
+     */
+    public Position calculateGlobalLimelightPosition() {
+        LLResult result = limelight.getLatestResult();
+        if (result == null || !result.isValid()) {
+            return null;
+        }
 
+        List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
+        for (LLResultTypes.FiducialResult fr : fiducialResults) {
+            if (fr.getFiducialId() == targetAprilTagId) {
+                Pose3D tagCamPose = fr.getTargetPoseCameraSpace();
 
+                // Tag position in camera frame (mm)
+                double xCam = tagCamPose.getPosition().x * 1000;
+                double zCam = tagCamPose.getPosition().z * 1000;
 
+                // Distance from camera to tag (2D, ignoring height)
+                double distCamToTag = Math.hypot(xCam, zCam);
+
+                // Angle from camera forward to the tag (positive = tag is to the right)
+                double angleToTagInCamFrame = Math.atan2(xCam, zCam);
+
+                // Camera heading relative to AprilTag's facing direction:
+                // Camera faces opposite the tag (π) plus adjustment for where tag appears in view
+                double camHeadingRelTag = Math.PI + angleToTagInCamFrame;
+
+                // Camera position relative to AprilTag in tag's local frame:
+                // Camera is in front of the tag (positive X in tag's frame)
+                // Transform to field coordinates using transformToGlobalPosition
+                Position camFieldPos = transformToGlobalPosition(distCamToTag, 0, camHeadingRelTag);
+
+                // Robot heading = camera heading - turret angle
+                double currentTurretRad = turret.getCurrentAngleRad();
+                double robotHeadingField = angleWrapRad(camFieldPos.getTheta() - currentTurretRad);
+
+                // Turret heading in field frame
+                double turretHeadingField = angleWrapRad(robotHeadingField + currentTurretRad);
+
+                // Work backwards from camera to robot center:
+                // Camera is at offset from turret center (in turret's forward direction)
+                double turretX = camFieldPos.getX() - Math.cos(turretHeadingField) * TURRET_CENTER_TO_LIMELIGHT_DIST;
+                double turretY = camFieldPos.getY() - Math.sin(turretHeadingField) * TURRET_CENTER_TO_LIMELIGHT_DIST;
+
+                // Turret is at offset from robot center (in robot's forward direction)
+                double robotX = turretX - Math.cos(robotHeadingField) * ROBOT_CENTER_TO_TURRET_DISTANCE;
+                double robotY = turretY - Math.sin(robotHeadingField) * ROBOT_CENTER_TO_TURRET_DISTANCE;
+
+                Position globalPosition = new Position(robotX, robotY, robotHeadingField);
+                KLog.d("limelight_pos", String.format("Global Robot Pos: %s", globalPosition));
+                return globalPosition;
+            }
+        }
+        return null;
     }
 
 }

@@ -26,7 +26,7 @@ public class TurretReady extends Action {
         if (!hasStarted) {
             timeoutTimer.reset();
             hasStarted = true;
-            KLog.d(this.getName(), "current pos " + SharedData.getOdometryPosition());
+            KLog.d(this.getName(), "current pos " + SharedData.getOdometryIMUPosition());
         }
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {

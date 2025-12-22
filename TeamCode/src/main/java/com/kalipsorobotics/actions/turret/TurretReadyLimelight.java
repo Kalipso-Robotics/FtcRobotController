@@ -1,9 +1,6 @@
 package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
-import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
-import com.kalipsorobotics.test.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -29,7 +26,7 @@ public class TurretReadyLimelight extends Action {
         if (!hasStarted) {
             timeoutTimer.reset();
             hasStarted = true;
-            KLog.d(this.getName(), "current pos " + SharedData.getOdometryPosition());
+            KLog.d(this.getName(), "current pos " + SharedData.getOdometryIMUPosition());
         }
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {

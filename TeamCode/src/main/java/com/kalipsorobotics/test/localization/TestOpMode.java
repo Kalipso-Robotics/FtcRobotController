@@ -7,7 +7,6 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 //@TeleOp(name = "TestTeleOp", group = "Test")
 public class TestOpMode extends KOpMode {
@@ -41,7 +40,7 @@ public class TestOpMode extends KOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            KLog.d("debug_OpMode_Transfer", "TeleOp Position " + SharedData.getOdometryPosition());
+            KLog.d("debug_OpMode_Transfer", "TeleOp Position " + SharedData.getOdometryIMUPosition());
         }
 
         cleanupRobot();

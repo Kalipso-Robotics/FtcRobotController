@@ -2,18 +2,14 @@ package com.kalipsorobotics.test.localization;
 
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.localization.OdometryLogger;
-import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
-import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,8 +33,8 @@ public class OdometryDataCollector extends LinearOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-        Position pos1 = SharedData.getOdometryPosition();
-        Position pos2 = SharedData.getOdometryPosition();
+        Position pos1 = SharedData.getOdometryIMUPosition();
+        Position pos2 = SharedData.getOdometryIMUPosition();
 
         waitForStart();
         try {

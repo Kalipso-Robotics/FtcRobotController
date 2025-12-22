@@ -192,4 +192,35 @@ public class Position {
         this.y = newY;
     }
 
+    /**
+     * Transforms this position from a local coordinate frame to a global coordinate frame.
+     * The local frame is defined by an origin position with its own location and orientation.
+     *
+     * @param originX     X position of the local frame's origin in global coordinates
+     * @param originY     Y position of the local frame's origin in global coordinates
+     * @param originTheta Rotation of the local frame relative to global frame (radians, +CCW)
+     * @return A new Position in global coordinates
+     */
+    public Position toGlobal(double originX, double originY, double originTheta) {
+        double cos = Math.cos(originTheta);
+        double sin = Math.sin(originTheta);
+
+        double globalX = originX + (this.x * cos - this.y * sin);
+        double globalY = originY + (this.x * sin + this.y * cos);
+        double globalTheta = MathFunctions.angleWrapRad(this.theta + originTheta);
+
+        return new Position(globalX, globalY, globalTheta);
+    }
+
+    /**
+     * Transforms this position from a local coordinate frame to a global coordinate frame.
+     * The local frame is defined by the given origin position.
+     *
+     * @param origin The origin of the local frame expressed in global coordinates
+     * @return A new Position in global coordinates
+     */
+    public Position toGlobal(Position origin) {
+        return toGlobal(origin.getX(), origin.getY(), origin.getTheta());
+    }
+
 }

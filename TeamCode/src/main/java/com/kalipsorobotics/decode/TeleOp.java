@@ -212,7 +212,7 @@ public class TeleOp extends KOpMode {
             // ========== UPDATE ACTIONS ==========
             updateActions();
 
-            Log.d("Odometry", "Position: " + SharedData.getOdometryPosition());
+            Log.d("Odometry", "Position: " + SharedData.getOdometryIMUPosition());
         }
 
         cleanupRobot();

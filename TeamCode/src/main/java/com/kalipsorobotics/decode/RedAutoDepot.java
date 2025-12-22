@@ -165,14 +165,14 @@ public abstract class RedAutoDepot extends KOpMode {
         while (opModeIsActive()) {
             autoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryPosition());
+            KLog.d("Odometry", "Position: " + SharedData.getOdometryIMUPosition());
         }
         KLog.d("RedAutoDepot-Run", "Autonomous loop ended - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         KLog.d("Auto→TeleOp", "=== AUTO ENDING ===");
-        KLog.d("Auto→TeleOp", "Final position: " + SharedData.getOdometryPosition());
+        KLog.d("Auto→TeleOp", "Final position: " + SharedData.getOdometryIMUPosition());
         KLog.d("RedAutoDepot-Run", "Calling cleanupRobot()");
         cleanupRobot();
-        KLog.d("Auto→TeleOp", "After cleanup position: " + SharedData.getOdometryPosition());
+        KLog.d("Auto→TeleOp", "After cleanup position: " + SharedData.getOdometryIMUPosition());
         KLog.d("RedAutoDepot-Run", "After cleanupRobot() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
     }
 

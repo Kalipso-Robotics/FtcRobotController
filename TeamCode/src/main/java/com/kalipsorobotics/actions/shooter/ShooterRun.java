@@ -175,7 +175,7 @@ public class ShooterRun extends Action {
     }
 
     private double getOdometryDistanceMM() {
-        Position currentPosition = SharedData.getOdometryPosition();
+        Position currentPosition = SharedData.getOdometryIMUPosition();
         double odometryDistanceMM = currentPosition.toPoint().distanceTo(targetPoint);
         KLog.d("ShooterRun_Distance", "Odometry distance: " + odometryDistanceMM + " mm");
         return odometryDistanceMM;

@@ -42,7 +42,7 @@ public class AdaptivePurePursuitRobotData extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            Position currentPosition = SharedData.getOdometryPosition();
+            Position currentPosition = SharedData.getOdometryIMUPosition();
             Vector deltaPosition = Vector.between(prevPosition, currentPosition);
 
             double currentTime = elapsedTime.seconds();

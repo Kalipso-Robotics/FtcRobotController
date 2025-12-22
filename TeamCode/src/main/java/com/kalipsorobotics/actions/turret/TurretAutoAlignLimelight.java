@@ -201,7 +201,7 @@ public class TurretAutoAlignLimelight extends Action {
     }
 
     private void updateAngularVelocity() {
-        Position currentPosition = SharedData.getOdometryPosition();
+        Position currentPosition = SharedData.getOdometryIMUPosition();
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
         double currentRobotHeading = currentPosition.getTheta();

@@ -125,7 +125,7 @@ public class RoundTripAction extends KActionSet {
                 getName() != null ? getName() : "unnamed"));
 
             if (!hasUpdatedShooterReady) {
-                Point currentPos = new Position(SharedData.getOdometryPosition()).toPoint();
+                Point currentPos = new Position(SharedData.getOdometryIMUPosition()).toPoint();
                 KLog.d("RoundTrip", String.format("[%s] Updating shooter position - Current: (%.1f, %.1f), Target: (%.1f, %.1f)",
                     getName() != null ? getName() : "unnamed",
                     currentPos.getX(), currentPos.getY(),

@@ -10,65 +10,68 @@ import java.util.HashMap;
 
 public class SharedData {
 
-    private static final Position odometryPosition = new Position(0, 0, 0);
+    private static final Position odometryIMUPosition = new Position(0, 0, 0);
 
-    private static final LimelightPos limelightPosition = new LimelightPos(0,0,0,0,0);
+    public static Position getOdometryIMUPosition() {
+        return new Position(odometryIMUPosition);
+    }
+    public static void setOdometryIMUPosition(Position position) {
+        odometryIMUPosition.reset(position);
+    }
+    public static void resetOdometryIMUPosition() {
+        odometryIMUPosition.reset(new Position(0, 0, 0));
+    }
+
+
+    private static final Position odometryWheelPosition = new Position(0, 0, 0);
+
+    public static Position getOdometryWheelPosition() {
+        return new Position(odometryWheelPosition);
+    }
+    public static void setOdometryWheelPosition(Position position) {
+        odometryWheelPosition.reset(position);
+    }
+    public static void resetOdometryWheelPosition() {
+        odometryWheelPosition.reset(new Position(0, 0, 0));
+    }
+
+
+
     private static final HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionMap = new HashMap<>();
-
-    public static Position getOdometryPosition() {
-        return new Position(odometryPosition);
-    }
-
-    public static void setOdometryPosition(Position position) {
-        odometryPosition.reset(position);
-    }
-
-    public static void setLimelightPosition(LimelightPos position) {
-        limelightPosition.setPos(position);
-    }
-
-    public static LimelightPos getLimelightPosition() {
-        return limelightPosition;
-    }
-
-    public static void resetOdometryPosition() {
-        odometryPosition.reset(new Position(0, 0, 0));
-    }
-
     public static HashMap<OdometrySensorCombinations, PositionHistory> getOdometryPositionMap() {
         return new HashMap<>(odometryPositionMap);
     }
-
     public static void setOdometryPositionMap(HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionMap) {
         SharedData.odometryPositionMap.putAll(odometryPositionMap);
     }
 
-    private static long unhealthyCounter = 0;
 
+    private static final LimelightPos limelightPosition = new LimelightPos(0,0,0,0,0);
+    public static void setLimelightPosition(LimelightPos position) {
+        limelightPosition.setPos(position);
+    }
+    public static LimelightPos getLimelightPosition() {
+        return limelightPosition;
+    }
+
+    private static final Position limelightGlobalPosition = new Position(0, 0, 0);
+    public static Position getLimelightGlobalPosition() {
+        return new Position(limelightGlobalPosition);
+    }
+    public static void setLimelightGlobalPosition(Position position) {
+        limelightGlobalPosition.reset(position);
+    }
+
+
+    private static long unhealthyCounter = 0;
     public static long getUnhealthyCounter() {
         return unhealthyCounter;
     }
-
     public static void setUnhealthyCounter(long unhealthyCounter) {
         SharedData.unhealthyCounter = unhealthyCounter;
     }
 
 
-    public static boolean isIsOdometryUnhealthy() {
-        return isOdometryUnhealthy;
-    }
-
-
-
-    private static boolean isOdometryUnhealthy = false;
-
-    public static boolean getOdometryUnhealthy() {
-        return isOdometryUnhealthy;
-    }
-
-    public static void setIsOdometryUnhealthy(boolean isOdometryUnhealthy) {
-        SharedData.isOdometryUnhealthy = isOdometryUnhealthy;
-    }
 
     private static AllianceColor allianceColor = AllianceColor.RED;
 

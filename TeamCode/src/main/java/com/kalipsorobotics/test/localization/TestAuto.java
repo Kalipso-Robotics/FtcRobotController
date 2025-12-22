@@ -8,7 +8,6 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 //@Autonomous
 public class TestAuto extends KOpMode {
@@ -39,7 +38,7 @@ public class TestAuto extends KOpMode {
         waitForStart();
         while (opModeIsActive()) {
             purePursuitAction.updateCheckDone();
-            KLog.d("debug_OpMode_Transfer", "Auto Position " + SharedData.getOdometryPosition());
+            KLog.d("debug_OpMode_Transfer", "Auto Position " + SharedData.getOdometryIMUPosition());
         }
         KLog.d("debug_OpMode_Transfer", "Auto End right (supposed to be 0)" +
                 odometry.getRightEncoderMM() +

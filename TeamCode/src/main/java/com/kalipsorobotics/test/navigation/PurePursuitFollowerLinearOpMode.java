@@ -144,7 +144,7 @@ public class PurePursuitFollowerLinearOpMode extends LinearOpMode {
     // --- Pull pose (x_mm, y_mm, heading_rad) from the Kalipso SharedData map using WHEEL_IMU ---
     // This uses mild reflection so it will work even if your Position class method names vary.
     private PoseMMRad readPoseFromSharedData() {
-        Position position = SharedData.getOdometryPosition();
+        Position position = SharedData.getOdometryIMUPosition();
         return new PoseMMRad(position.getX(), position.getY(), position.getTheta());
 
     }

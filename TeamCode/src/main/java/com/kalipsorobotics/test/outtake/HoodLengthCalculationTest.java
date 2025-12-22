@@ -28,8 +28,8 @@ public class HoodLengthCalculationTest extends LinearOpMode {
         calculateHoodLength = new CalculateHoodLength(new Position(0, 0, 0)); //TODO find actual goal position
         ShooterLUTCornerGrid lut = new ShooterLUTCornerGrid();
 
-        double xIn = 1000*(SharedData.getOdometryPosition().getX()); //converts to meters
-        double yIn = 1000*(SharedData.getOdometryPosition().getY());
+        double xIn = 1000*(SharedData.getOdometryIMUPosition().getX()); //converts to meters
+        double yIn = 1000*(SharedData.getOdometryIMUPosition().getY());
 
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();

@@ -3,11 +3,9 @@ package com.kalipsorobotics.actions.turret;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
-import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
-import com.kalipsorobotics.math.Velocity;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
@@ -113,7 +111,7 @@ public class TurretAutoAlign extends Action {
 
     public static double calculateTargetTicks(Point targetPoint) {
 
-        Position currentPosition = SharedData.getOdometryPosition();
+        Position currentPosition = SharedData.getOdometryIMUPosition();
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
 
