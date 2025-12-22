@@ -3,6 +3,7 @@ package com.kalipsorobotics.actions.cameraVision;
 import static com.kalipsorobotics.math.MathFunctions.angleWrapRad;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.math.LimelightPos;
@@ -44,7 +45,7 @@ public class AprilTagDetectionAction extends Action {
     final double CAM_HEIGHT_M = 12.5 * 25.4; //todo need to change for real bot
     final double TAG_HEIGHT_M = 29.5 * 25.4;
     final double deltaH = TAG_HEIGHT_M - CAM_HEIGHT_M;
-
+    private Position robotPositionRelLimelight = new Position(0, 0, 0);
     double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId) {
@@ -173,6 +174,16 @@ public class AprilTagDetectionAction extends Action {
         if (!hasFound) {
             SharedData.getLimelightPosition().reset();
         }
+    }
+
+    private Position translate() {
+
+    }
+
+    private Position calculateGlobalLimelightPosition() {
+
+
+
     }
 
 }
