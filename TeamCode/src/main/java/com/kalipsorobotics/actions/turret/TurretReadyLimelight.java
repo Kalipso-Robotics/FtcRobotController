@@ -28,7 +28,6 @@ public class TurretReadyLimelight extends Action {
         if (!hasStarted) {
             timeoutTimer.reset();
             hasStarted = true;
-            turretAutoAlignLimelight.setIsDone(false);
             KLog.d(this.getName(), "current pos " + SharedData.getOdometryPosition());
         }
 
@@ -40,7 +39,6 @@ public class TurretReadyLimelight extends Action {
 
         if (turretAutoAlignLimelight.isWithinRange()) {
             isDone = true;
-            turretAutoAlignLimelight.setIsDone(true);
             KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlignLimelight.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlignLimelight.getTargetTicks());
         }

@@ -190,7 +190,10 @@ public class TurretAutoAlignLimelight extends Action {
         }
     }
 
-
+    public void stopAndSetDone() {
+        turretMotor.setPower(0);
+        isDone = true;
+    }
     public double getTargetTicks() {
         return targetTicks;
     }

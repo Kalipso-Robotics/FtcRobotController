@@ -6,10 +6,12 @@ import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.actions.turret.TurretReadyLimelight;
+import com.kalipsorobotics.actions.turret.TurretStop;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 
@@ -26,7 +28,11 @@ public class ShootAllAction extends KActionSet {
     private double targetRPS;
     private double targetHoodPos;
 
+    private boolean hasTurnedLimelightOn = false;
+
     private ShooterReady shooterReady;
+
+    private PushBall pushBall;
 
     private TurretReadyLimelight turretReadyLimelight;
 
@@ -83,16 +89,32 @@ public class ShootAllAction extends KActionSet {
         turretReadyLimelight.setName("turretReady");
         this.addAction(turretReadyLimelight);
 
-        PushBall pushAllBalls = new PushBall(stopper, intake, shooter);
-        pushAllBalls.setName("pushAllBalls");
-        pushAllBalls.setDependentActions(shooterReady, turretReadyLimelight);
-        this.addAction(pushAllBalls);
+        pushBall = new PushBall(stopper, intake, shooter);
+        pushBall.setName("pushAllBalls");
+        pushBall.setDependentActions(shooterReady, turretReadyLimelight);
+        this.addAction(pushBall);
+
+        TurretStop turretStop = new TurretStop(turretAutoAlignLimelight);
+        turretStop.setName("turretStop");
+        turretStop.setDependentActions(pushBall);
+        this.addAction(turretStop);
 
         ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
         releaseBraking.setName("ReleaseBraking");
-        releaseBraking.setDependentActions(pushAllBalls);
+        releaseBraking.setDependentActions(pushBall);
         this.addAction(releaseBraking);
 
+    }
+
+    @Override
+    public void beforeUpdate() {
+        if (isDone) {
+            return;
+        }
+        if (!hasTurnedLimelightOn) {
+            turretAutoAlignLimelight.setIsDone(false);
+            hasTurnedLimelightOn = true;
+        }
     }
 
     public void setTurretReady(boolean isDone) {

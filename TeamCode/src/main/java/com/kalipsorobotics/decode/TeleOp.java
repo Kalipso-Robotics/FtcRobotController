@@ -249,7 +249,7 @@ public class TeleOp extends KOpMode {
         } else if (kGamePad2.isDpadRightPressed()) {
             turret.turretMotor.setPower(0.25);
         } else {
-            if (isTurretEnabled) {
+            if (!isTurretEnabled) {
                 turret.getTurretMotor().setPower(0);
             }
             else {
