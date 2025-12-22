@@ -19,7 +19,11 @@ public class ActivateBraking extends Action {
 
     @Override
     protected void update() {
+        if (isDone) {
+            return;
+        }
         driveBrake.getBrakeLeft().setTargetPosition(BRAKE_LEFT_POS);
         driveBrake.getBrakeRight().setTargetPosition(BRAKE_RIGHT_POS);
+        isDone = true;
     }
 }

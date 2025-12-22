@@ -12,8 +12,8 @@ public class DriveBrake {
     private final KServo brakeLeft;
     //C2 brakeRight  C5 brakeLeft
     public DriveBrake(OpModeUtilities opModeUtilities) {
-        this.brakeRight = new KServo(opModeUtilities.getHardwareMap().servo.get("brakeRight"));
-        this.brakeLeft = new KServo(opModeUtilities.getHardwareMap().servo.get("brakeLeft"));
+        this.brakeRight = new KServo(opModeUtilities.getHardwareMap().servo.get("brakeRight")); // port 4
+        this.brakeLeft = new KServo(opModeUtilities.getHardwareMap().servo.get("brakeLeft")); // port 2
         init();
         KLog.d("Braking", "Braking system initialized");
     }
