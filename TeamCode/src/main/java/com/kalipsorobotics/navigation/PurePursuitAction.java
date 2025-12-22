@@ -216,12 +216,13 @@ public class  PurePursuitAction extends Action {
         double bRightPower = powerX + powerY - powerAngle;
 
 //        if (!nearEndPoint(currentPosition)) {
-//            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
-//            double scale = 1/max;
-//            fLeftPower = fLeftPower * scale;
-//            bLeftPower = bLeftPower * scale;
-//            fRightPower = fRightPower * scale;
-//            bRightPower = bRightPower * scale;
+            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
+            double scale = 1/max;
+            fLeftPower = fLeftPower * scale;
+            bLeftPower = bLeftPower * scale;
+            fRightPower = fRightPower * scale;
+
+            bRightPower = bRightPower * scale;
 //        }
 
         KLog.d("PurePursuit_Log",
