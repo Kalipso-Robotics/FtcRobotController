@@ -13,7 +13,6 @@ import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
-import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
@@ -57,7 +56,6 @@ public class TeleOp extends KOpMode {
     private Odometry odometry = null;
 
 
-    ShooterStop shooterStop = null;
     ShootAllAction shootAllAction = null;
 
     ActivateBraking activateBraking = null;
@@ -83,7 +81,8 @@ public class TeleOp extends KOpMode {
     private boolean intakeRunPressed = false;
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
-    private boolean warmupFarToggled = false;
+    private boolean warmupFarPressed = false;
+    private boolean warmupAutoPressed = false;
     private boolean releasePressed = false;
     private boolean markUndershotPressed = false;
     private boolean markOvershotPressed = false;
@@ -179,7 +178,8 @@ public class TeleOp extends KOpMode {
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
             shootAllPressed = kGamePad1.isLeftBumperFirstPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
-            warmupFarToggled = kGamePad2.isToggleDpadUp();
+            warmupFarPressed = kGamePad2.isDpadUpFirstPressed();
+            warmupAutoPressed = kGamePad2.isDpadDownFirstPressed();
 
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
@@ -375,7 +375,6 @@ public class TeleOp extends KOpMode {
             shooterRun.stop();
 
             shootAllAction = null;
-            setLastShooterAction(shooterStop);
 
             releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
             setLastBrakingAction(releaseBrakeAction);
@@ -393,7 +392,6 @@ public class TeleOp extends KOpMode {
         if (shootAllPressed) {
             if (!isPending(shootAllAction)) {
                 shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignLimelight);
-                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -434,14 +432,14 @@ public class TeleOp extends KOpMode {
             return;
         }
 
-        if (warmupFarToggled) {
+        if (warmupFarPressed) {
             if (!isPending(shootAllAction)) {
                 shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
                 shooterRun.setTargetRPS(ShooterInterpolationConfig.getMaxValue()[0]);
                 shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getMaxValue()[1]);
                 KLog.d("TeleOp_Shooting_Warmup", "Warmup For Far Shoot");
             }
-        } else {
+        } else if (warmupAutoPressed) {
             if (!isPending(shootAllAction)) {
                 shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
                 KLog.d("TeleOp_Shooting_Warmup", "Warmup For Auto Shoot");

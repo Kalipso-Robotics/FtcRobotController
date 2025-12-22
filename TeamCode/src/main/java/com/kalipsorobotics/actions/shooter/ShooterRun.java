@@ -99,18 +99,23 @@ public class ShooterRun extends Action {
         switch (shooterRunMode) {
             case STOP:
                 shooter.stop();
-                break;
+                return;
             case SHOOT_USING_TARGET_RPS_HOOD:
                 // Direct RPS mode
-                KLog.d("shooter_ready", "Using direct RPS mode");
+                KLog.d("ShooterRun_SHOOT_USING_TARGET_RPS_HOOD", "Using direct RPS mode");
                 break;
             case SHOOT_USING_DISTANCE:
+                KLog.e("ShooterRun_SHOOT_USING_DISTANCE", "Distance: " + distanceMM);
                 params = getPrediction(distanceMM);
                 this.targetRPS = params.rps;
                 this.targetHoodPosition = params.hoodPosition;
                 break;
             case SHOOT_USING_FIXED_POINT:
-                distanceMM = launchPoint.distanceTo(targetPoint);
+                if (launchPoint == null) {
+                    KLog.e("ShooterRun_SHOOT_USING_FIXED_POINT", "Launch Point Null");
+                }
+                KLog.d("ShooterRun_SHOOT_USING_FIXED_POINT", "Launch Point " + launchPoint);
+                distanceMM = targetPoint.distanceTo(launchPoint);
                 params = getPrediction(distanceMM);
                 this.targetRPS = params.rps;
                 this.targetHoodPosition = params.hoodPosition;
@@ -119,6 +124,7 @@ public class ShooterRun extends Action {
                 params = getPrediction(getCurrentDistanceMM());
                 this.targetRPS = params.rps;
                 this.targetHoodPosition = params.hoodPosition;
+                KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", "TargetRPS: " + targetRPS);
                 break;
         }
         KLog.d("ShooterRun", "Running mode " + shooterRunMode);
@@ -208,12 +214,9 @@ public class ShooterRun extends Action {
     }
 
     public void stop() {
-        if (isDone) {
-            return;
-        }
         setShooterRunMode(ShooterRunMode.STOP);
         shooter.stop();
-        isDone = true;
+        KLog.d("ShooterRun_Stop", "ShooterRun Stop");
     }
 
     public void setUseLimelight(boolean useLimelight){

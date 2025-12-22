@@ -55,7 +55,7 @@ public class ShootAllAction extends KActionSet {
         this.shooterRun = shooterRun;
         this.turretAutoAlignLimelight = turretAutoAlignLimelight;
 
-        shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_FIXED_POINT);
+        shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
 
         generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignLimelight);
     }
@@ -70,10 +70,10 @@ public class ShootAllAction extends KActionSet {
 
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignLimelight turretAutoAlignLimelight) {
-
-        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
-        activateBraking.setName("ActivateBraking");
-        this.addAction(activateBraking);
+//
+//        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
+//        activateBraking.setName("ActivateBraking");
+//        this.addAction(activateBraking);
 
         shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("ready");
@@ -88,12 +88,11 @@ public class ShootAllAction extends KActionSet {
         pushAllBalls.setDependentActions(shooterReady, turretReadyLimelight);
         this.addAction(pushAllBalls);
 
-        shooterRun.setShooterRunMode(ShooterRunMode.STOP);
-
-        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
-        releaseBraking.setName("ReleaseBraking");
-        releaseBraking.setDependentActions(pushAllBalls);
-        this.addAction(releaseBraking);
+//
+//        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
+//        releaseBraking.setName("ReleaseBraking");
+//        releaseBraking.setDependentActions(pushAllBalls);
+//        this.addAction(releaseBraking);
 
     }
 

@@ -120,7 +120,7 @@ public abstract class KOpMode extends LinearOpMode {
             lastBrakingAction.updateCheckDone();
         }
 
-        if (shooterRun !=null) {
+        if (shooterRun != null) {
             shooterRun.updateCheckDone();
         }
 
