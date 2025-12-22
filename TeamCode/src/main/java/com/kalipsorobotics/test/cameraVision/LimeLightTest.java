@@ -1,18 +1,11 @@
 package com.kalipsorobotics.test.cameraVision;
 
-import android.os.SystemClock;
-
-import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
-import com.kalipsorobotics.math.Position;
-import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;

@@ -2,7 +2,7 @@ package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import com.kalipsorobotics.actions.cameraVision.GoalDetectionAction;
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
@@ -20,7 +20,7 @@ public class TurretAutoAlignLimelight extends Action {
 
     Turret turret;
     KMotor turretMotor;
-    private GoalDetectionAction goalDetectionAction;
+    private AprilTagDetectionAction aprilTagDetectionAction;
 
     private double targetTicks;
     private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
@@ -41,10 +41,10 @@ public class TurretAutoAlignLimelight extends Action {
     private boolean isFirstVelocityUpdate;
 
 
-    public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, GoalDetectionAction goalDetectionAction, AllianceColor allianceColor) {
+    public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
-        this.goalDetectionAction = goalDetectionAction;
+        this.aprilTagDetectionAction = aprilTagDetectionAction;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
         this.targetTicks = 0;
@@ -103,7 +103,7 @@ public class TurretAutoAlignLimelight extends Action {
         }
 
 
-        goalDetectionAction.updateCheckDone();
+        aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
         aprilTagFound = !SharedData.getLimelightPosition().isEmpty();
         double targetAngleLimelight = 0;
