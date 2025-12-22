@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.cameraVision;
 
+import static com.kalipsorobotics.math.MathFunctions.angleWrapRad;
+
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
@@ -122,18 +124,18 @@ public class AprilTagDetectionAction extends Action {
 
                     KLog.d("limelight", String.format("Heading to tag (rad) %.3f", headingRad));
 
-                    double camHeadingField = normRad(APRIL_YAW_FIELD_RAD + Math.PI - headingRad); // heading of limelight in relation to field
+                    double camHeadingField = angleWrapRad(APRIL_YAW_FIELD_RAD + Math.PI - headingRad); // heading of limelight in relation to field
 
                     double currentTurretRad = turret.getCurrentAngleRad();
 
                     //------------- current robot rad -----------------
 //                        double currentRobotRad = SharedData.getOdometryPosition().getTheta();
 
-                    double currentRobotRad  = normRad(camHeadingField - currentTurretRad);
+                    double currentRobotRad  = angleWrapRad(camHeadingField - currentTurretRad);
 
                     //------------- ================= -----------------
 
-                    double bearingField = normRad(camHeadingField + headingRad);
+                    double bearingField = angleWrapRad(camHeadingField + headingRad);
 
                     double xDistCamToTag = Math.cos(bearingField) * tagCamFlatDist;
                     double yDistCamToTag = Math.sin(bearingField) * tagCamFlatDist;
@@ -171,12 +173,6 @@ public class AprilTagDetectionAction extends Action {
         if (!hasFound) {
             SharedData.getLimelightPosition().reset();
         }
-    }
-
-    private static double normRad(double a){
-        while (a <= -Math.PI) a += 2*Math.PI;
-        while (a >   Math.PI) a -= 2*Math.PI;
-        return a;
     }
 
 }
