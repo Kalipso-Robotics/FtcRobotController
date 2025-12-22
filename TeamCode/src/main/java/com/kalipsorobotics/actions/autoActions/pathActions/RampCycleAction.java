@@ -28,7 +28,7 @@ public class RampCycleAction extends KActionSet {
         trip2_1.setName("trip2.5");
         trip2_1.setFinalSearchRadius(40);
         trip2_1.addPoint(1161.85, 982.76 * allianceColor.getPolarity(), 47 * allianceColor.getPolarity());
-        trip2_1.addPoint(1405, 1201 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity());
+        trip2_1.addPoint(1305, 1101 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity());
         this.addAction(trip2_1);
         //x=1405.56 (55.34 in), y=-1201.27 (-47.29 in), theta=-0.8324 (-4
         CloseStopperAction closeStopperAction = new CloseStopperAction(stopper);
