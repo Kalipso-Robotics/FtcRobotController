@@ -6,8 +6,8 @@ import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "BlueAutoNearRampCycle")
-public class BlueAutoNearRampCycle extends RedAutoNearRampCycle {
+@Autonomous(name = "BlueAutoDepotRampCycle")
+public class BlueAutoDepotRampCycle extends RedAutoDepotRampCycle {
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;
