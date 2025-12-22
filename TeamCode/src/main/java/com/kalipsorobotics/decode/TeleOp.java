@@ -87,7 +87,7 @@ public class TeleOp extends KOpMode {
     private boolean markOvershotPressed = false;
     private boolean shooterReadyWasNotDone = false;
     private boolean limelightCorrectionPressed = false;
-    private boolean manualTurretControlToggled = false;
+    private boolean isTurretEnabled = false;
     private boolean useLimelight = true;
     private boolean forceShootNearPressed = false;
     private boolean odometryTurretOverrideToggle = false;
@@ -185,7 +185,7 @@ public class TeleOp extends KOpMode {
 
             releasePressed = kGamePad2.isYPressed();
 
-            manualTurretControlToggled = kGamePad2.isToggleX();
+            isTurretEnabled = kGamePad2.isToggleX();
             odometryTurretOverrideToggle = kGamePad2.isBackButtonToggle();
 
             markUndershotPressed = kGamePad2.isButtonXFirstPressed();
@@ -236,12 +236,12 @@ public class TeleOp extends KOpMode {
         goalDetectionAction.updateCheckDone();
 
         //Manual
-        if (manualTurretControlToggled) {
-            turretAutoAlignLimelight.setIsDone(true);
-        }
-        else {
+        if (isTurretEnabled) {
             turretAutoAlignLimelight.setIsDone(false);
             turretAutoAlignLimelight.updateCheckDone();
+        }
+        else {
+            turretAutoAlignLimelight.setIsDone(true);
         }
 
         if (kGamePad2.isDpadLeftPressed()) {
@@ -249,7 +249,7 @@ public class TeleOp extends KOpMode {
         } else if (kGamePad2.isDpadRightPressed()) {
             turret.turretMotor.setPower(0.25);
         } else {
-            if (manualTurretControlToggled) {
+            if (isTurretEnabled) {
                 turret.getTurretMotor().setPower(0);
             }
             else {
@@ -394,7 +394,7 @@ public class TeleOp extends KOpMode {
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                if (manualTurretControlToggled) {
+                if (isTurretEnabled) {
                     shootAllAction.setTurretReady(true);
                 }
                 KLog.d("TeleOp_Shooting", "Shoot action started - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
@@ -409,7 +409,7 @@ public class TeleOp extends KOpMode {
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                if (manualTurretControlToggled) {
+                if (isTurretEnabled) {
                     shootAllAction.setTurretReady(true);
                 }
                 KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
@@ -423,7 +423,7 @@ public class TeleOp extends KOpMode {
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                if (manualTurretControlToggled) {
+                if (isTurretEnabled) {
                     shootAllAction.setTurretReady(true);
                 }
                 KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
