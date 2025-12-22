@@ -23,12 +23,12 @@ public class Point {
         return (this.getX() * other.getX()) + (this.getY() * other.getY());
     }
 
-    public double distanceTo(Point other) {
-        return Math.hypot(other.getX() - this.getX(), other.getY() - this.getY());
+    public double distanceTo(Point point2) {
+        return Math.hypot(point2.getX() - this.getX(), point2.getY() - this.getY());
     }
 
-    public Point relativeTo(Point other) {
-        return new Point(this.getX() - other.getX(), this.getY() - other.getY());
+    public Point relativeTo(Point point2) {
+        return new Point(this.getX() - point2.getX(), this.getY() - point2.getY());
     }
 
     public static double distance(Point p1, Point p2) {
