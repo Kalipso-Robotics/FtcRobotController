@@ -81,6 +81,9 @@ public class Odometry {
         this.wheelPositionHistory.setCurrentPosition(startPosMMRad);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRad);
 
+        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
+        odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
+
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
         currentImuHeading = prevImuHeading;
@@ -294,7 +297,7 @@ public class Odometry {
         Velocity wheelRelDelta = calculateRelativeDeltaWheel(rightDistanceMM, leftDistanceMM,
                 backDistanceMM, timeElapsedSeconds * 1000);
         wheelRelDelta = linearToArcDelta(wheelRelDelta);
-        Position prevPosition = wheelPositionHistory.getCurrentPosition();
+        Position prevPosition = SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL).getCurrentPosition();
         Position globalPosition = calculateGlobal(wheelRelDelta, prevPosition);
 
         wheelPositionHistory.setRawIMU(currentImuHeading);
@@ -312,7 +315,7 @@ public class Odometry {
         Velocity wheelIMURelDelta = calculateRelativeDeltaWheelIMU(rightDistanceMM, leftDistanceMM, backDistanceMM,
                 timeElapsedSeconds * 1000);
         wheelIMURelDelta = linearToArcDelta(wheelIMURelDelta);
-        Position prevPosition = wheelIMUPositionHistory.getCurrentPosition();
+        Position prevPosition = SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU).getCurrentPosition();
         Position globalPosition = calculateGlobal(wheelIMURelDelta, prevPosition);
 
         wheelIMUPositionHistory.setRawIMU(currentImuHeading);

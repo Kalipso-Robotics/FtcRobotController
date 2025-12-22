@@ -149,7 +149,7 @@ public class AprilTagDetectionAction extends Action {
      * @param robotRelTagTheta Robot's heading relative to AprilTag (radians)
      * @return Robot's position in global field coordinates
      */
-    public Position transformToGlobalPosition(double robotRelTagX, double robotRelTagY, double robotRelTagTheta) {
+    private Position transformToGlobalPosition(double robotRelTagX, double robotRelTagY, double robotRelTagTheta) {
         Position localPos = new Position(robotRelTagX, robotRelTagY, robotRelTagTheta);
         Position aprilTagFieldPos = new Position(APRILTAG_X_FROM_INIT, APRILTAG_Y_FROM_INIT, APRIL_YAW_FIELD_RAD);
         return localPos.toGlobal(aprilTagFieldPos);

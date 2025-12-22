@@ -16,6 +16,7 @@ import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.localization.ResetOdometryToPosition;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -52,6 +53,7 @@ public class TeleOp extends KOpMode {
     private Turret turret = null;
     private Stopper stopper = null;
     private Odometry odometry = null;
+    private ResetOdometryToPosition resetOdometryToPosition = null;
 
 
     ShootAllAction shootAllAction = null;
@@ -389,6 +391,7 @@ public class TeleOp extends KOpMode {
         // Priority 2- Execute shoot sequence
         if (shootAllPressed) {
             if (!isPending(shootAllAction)) {
+                resetOdometryToPosition = new ResetOdometryToPosition(aprilTagDetectionAction.calculateGlobalLimelightPosition());
                 shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignLimelight);
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
