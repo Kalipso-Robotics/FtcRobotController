@@ -64,4 +64,8 @@ public class Turret {
         return turretMotor.getCurrentPosition() / TICKS_PER_RADIAN;
     }
 
+    public void stop() {
+        turretMotor.stop();
+    }
+
 }
