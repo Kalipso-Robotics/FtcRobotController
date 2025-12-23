@@ -24,7 +24,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name="RedAutoDepotRampCycle")
 public class RedAutoDepotRampCycle extends KOpMode {
-    KActionSet blueAutoDepot;
+    KActionSet redAutoDepot;
     public final static double SHOOT_FAR_X = 150;
     public final static double SHOOT_FAR_Y = 100;
 
@@ -58,7 +58,7 @@ public class RedAutoDepotRampCycle extends KOpMode {
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
 
-        blueAutoDepot = new KActionSet();
+        redAutoDepot = new KActionSet();
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
@@ -82,7 +82,7 @@ public class RedAutoDepotRampCycle extends KOpMode {
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false);
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
-        blueAutoDepot.addAction(trip0);
+        redAutoDepot.addAction(trip0);
 
         // ----------------- TRIP 1 ---------------------- ~5 sec
 
@@ -93,46 +93,46 @@ public class RedAutoDepotRampCycle extends KOpMode {
         trip1.getTrip().getMoveToBall().addPoint(727, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(727, 1150 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
-        blueAutoDepot.addAction(trip1);
+        redAutoDepot.addAction(trip1);
 
         // ----------------- TRIP 2 ---------------------- ~8 sec
 
         RampCycleAction trip2 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
         trip2.setName("trip2");
         trip2.setDependentActions(trip1);
-        blueAutoDepot.addAction(trip2);
+        redAutoDepot.addAction(trip2);
 
         // ----------------- TRIP 3 ---------------------- ~5 sec
 
         RampCycleAction trip3 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2);
-        blueAutoDepot.addAction(trip3);
+        redAutoDepot.addAction(trip3);
 
         // ----------------- TRIP 4 ---------------------- ~5 sec
 
         RampCycleAction trip4 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
         trip4.setName("trip4");
         trip4.setDependentActions(trip3);
-        blueAutoDepot.addAction(trip4);
+        redAutoDepot.addAction(trip4);
 
         IntakeStop stopIntake = new IntakeStop(intake);
         stopIntake.setName("stopIntake");
         stopIntake.setDependentActions(trip4);
-        blueAutoDepot.addAction(stopIntake);
+        redAutoDepot.addAction(stopIntake);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
         park.setDependentActions(trip4);
         park.addPoint(170, 540 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
-        blueAutoDepot.addAction(park);
+        redAutoDepot.addAction(park);
         KLog.d("auto", "--------------DEPOT AUTO STARTED-------------");
         KLog.d("BlueAutoDepot-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         waitForStart();
         KLog.d("BlueAutoDepot-Run", "After waitForStart() - starting autonomous loop");
         while (opModeIsActive()) {
-            blueAutoDepot.updateCheckDone();
+            redAutoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
