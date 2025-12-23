@@ -92,26 +92,26 @@ public class RedAutoDepotRampCycle extends KOpMode {
         trip1.getTrip().getMoveToBall().clearPoints();
         trip1.getTrip().getMoveToBall().addPoint(727, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getTrip().getMoveToBall().addPoint(727, 1150 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         redAutoDepot.addAction(trip1);
 
         // ----------------- TRIP 2 ---------------------- ~8 sec
 
-        RampCycleAction trip2 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
+        RampCycleAction trip2 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint, 90);
         trip2.setName("trip2");
         trip2.setDependentActions(trip1);
         redAutoDepot.addAction(trip2);
 
         // ----------------- TRIP 3 ---------------------- ~5 sec
 
-        RampCycleAction trip3 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
+        RampCycleAction trip3 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint, 90);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2);
         redAutoDepot.addAction(trip3);
 
         // ----------------- TRIP 4 ---------------------- ~5 sec
 
-        RampCycleAction trip4 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint);
+        RampCycleAction trip4 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint, 90);
         trip4.setName("trip4");
         trip4.setDependentActions(trip3);
         redAutoDepot.addAction(trip4);

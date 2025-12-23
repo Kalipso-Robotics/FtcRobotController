@@ -2,11 +2,16 @@ package com.kalipsorobotics.actions.autoActions.pathActions;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
+import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
+import com.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
+import com.kalipsorobotics.actions.shooter.ShooterReady;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.stopper.CloseStopperAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
@@ -20,19 +25,29 @@ public class RampCycleAction extends KActionSet {
     RoundTripAction trip3 = null;
 
     public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, AllianceColor allianceColor, Point shooterPoint) {
-        autoActionPath(driveTrain, allianceColor, stopper, intake, opModeUtilities, turretAutoAlign, shooter, shooterPoint);
+        autoActionPath(driveTrain, allianceColor, stopper, intake, opModeUtilities, turretAutoAlign, shooter, shooterPoint, 180);
     }
-    private void autoActionPath(DriveTrain driveTrain, AllianceColor allianceColor, Stopper stopper, Intake intake, OpModeUtilities opModeUtilities, TurretAutoAlign turretAutoAlign, Shooter shooter, Point shooterPoint) {
+
+    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, AllianceColor allianceColor, Point shooterPoint, double shooterHeading) {
+        autoActionPath(driveTrain, allianceColor, stopper, intake, opModeUtilities, turretAutoAlign, shooter, shooterPoint, shooterHeading);
+    }
+
+    private void autoActionPath(DriveTrain driveTrain, AllianceColor allianceColor, Stopper stopper, Intake intake, OpModeUtilities opModeUtilities, TurretAutoAlign turretAutoAlign, Shooter shooter, Point shooterPoint, double shooterHeading) {
         PurePursuitAction trip2_1 = new PurePursuitAction(driveTrain);
         trip2_1.setName("trip2.5");
-        trip2_1.setFinalSearchRadius(40);
+        trip2_1.setFinalSearchRadius(50);
         trip2_1.addPoint(1161.85, 982.76 * allianceColor.getPolarity(), 47 * allianceColor.getPolarity());
-        trip2_1.addPoint(1305, 1101 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity());
+        trip2_1.addPoint(1255, 1101 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity());
         this.addAction(trip2_1);
+
         //x=1405.56 (55.34 in), y=-1201.27 (-47.29 in), theta=-0.8324 (-4
         CloseStopperAction closeStopperAction = new CloseStopperAction(stopper);
         closeStopperAction.setName("closeStopper");
         this.addAction(closeStopperAction);
+
+        ShooterRun shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), shooterPoint);
+        shooterRun.setName("shooterRun");  // FIX: Correct name (was "shooterReady")
+        this.addAction(shooterRun);
 
         IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, 5000);
         intakeFullAction.setName("intake");
@@ -44,13 +59,12 @@ public class RampCycleAction extends KActionSet {
         waitAction.setDependentActions(trip2_1);
         this.addAction(waitAction);
 
-
-        trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(2860, 135 * allianceColor.getPolarity()), 500);
+        trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(shooterPoint.getX(), shooterPoint.getY() * allianceColor.getPolarity()), 500);
         trip3.setName("trip3");
         trip3.setDependentActions(waitAction);
         trip3.getMoveToBall().clearPoints();
-        trip3.getMoveToBall().addPoint(shooterPoint.getX(), shooterPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
-        trip3.getMoveToBall().setFinalSearchRadius(50);
+        trip3.getMoveToBall().setFinalSearchRadius(30);
+        trip3.getMoveToBall().addPoint(shooterPoint.getX(), shooterPoint.getY(), shooterHeading);
         this.addAction(trip3);
     }
 }
