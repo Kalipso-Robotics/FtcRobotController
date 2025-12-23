@@ -1,12 +1,15 @@
 package com.kalipsorobotics.test.localization;
 
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
+import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;
 import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -45,6 +48,12 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         double power = 0;
         boolean calibrationComplete = false;
         String action;
+
+        Turret.setInstanceNull();
+        Turret turret = Turret.getInstance(opModeUtilities);
+
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24);
+
         waitForStart();
         try {
             while (opModeIsActive()) {
@@ -56,6 +65,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 //            calibrationComplete = true;
 //            KLog.d("minimumPower", "minimum power " + power);
 //            driveTrain.setPower(power);
+                aprilTagDetectionAction.updateCheckDone();
 
                 if (gamepad1.a) {
                     action = "Slamming";
@@ -79,7 +89,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
                 KLog.d("encoders", "count back: " + odometry.getBackEncoderMM() +
                         "  count right: " + odometry.getRightEncoderMM() +
                         "  count left: " + odometry.getLeftEncoderMM());
-                KLog.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
+                //KLog.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
             }
         } finally {
             odometryFileWriter.close();

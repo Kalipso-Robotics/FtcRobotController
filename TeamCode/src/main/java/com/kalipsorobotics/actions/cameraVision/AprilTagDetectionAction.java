@@ -31,11 +31,17 @@ public class AprilTagDetectionAction extends Action {
     private boolean hasStarted = false;
     // Field-facing yaw of each goal tag (absolute field frame, +CCW from field X)
 
-    private final double APRIL_YAW_FIELD_RAD = Math.toRadians(-36 - 90);
+    //Perpendicular vector to AprilTag
+    private final double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(36 + 90); //Math.toRadians(-234);
 
-    private final double APRILTAG_X_FROM_INIT_MM = ((12 * 12) - 12.5) * 25.4 - 364;
+    private final double APRILTAG_X_REL_FIELD_MM = 3305;
 
-    private final double APRILTAG_Y_FROM_INIT_MM = (53.5 - 14.5) * 25.4;
+    private final double APRILTAG_Y_REL_FIELD_MM = 1016;
+
+    //Measure from CAD
+//    private final double FIELD_ORIGIN_X_REL_APRILTAG_MM = 2629;
+//
+//    private final double FIELD_ORIGIN_Y_REL_APRILTAG_MM = -1894;
 
     private final double TURRET_CENTER_TO_LIMELIGHT_DIST_MM = 168;
 
@@ -173,14 +179,14 @@ public class AprilTagDetectionAction extends Action {
         // Take April tag as origin, how camera is located in that space.
         double cameraRelAprilTagXMM = zCamMM;
         double cameraRelAprilTagYMM = -xCamMM;
-        double cameraRelAprilTagHeadingRad = -(Math.toRadians(90) + yawCamRad);
+        double cameraRelAprilTagHeadingRad = -(yawCamRad - Math.toRadians(90)); //+90 because of heading vector
 
         Position cameraRelAprilTagPos = new Position(cameraRelAprilTagXMM, cameraRelAprilTagYMM, cameraRelAprilTagHeadingRad);
         KLog.d("limelight_pos", String.format("Cam Relative to April tag (origin) Pos: %s", cameraRelAprilTagPos));
 
         //Look at field as origin, how April Tag is located in that space.
-        Position aprilTagRelFieldPos = new Position(APRILTAG_X_FROM_INIT_MM, APRILTAG_Y_FROM_INIT_MM, -APRIL_YAW_FIELD_RAD);
-        Position camRelFieldPos = cameraRelAprilTagPos.toGlobal(aprilTagRelFieldPos);
+        Position aprilTagRelFieldPos = new Position(APRILTAG_X_REL_FIELD_MM, APRILTAG_Y_REL_FIELD_MM, APRIL_TAG_HEADING_REL_FIELD_RAD);
+        Position camRelFieldPos = cameraRelAprilTagPos.toNewFrame(aprilTagRelFieldPos);
         KLog.d("limelight_pos", String.format("Cam Relative to Field Pos: %s", camRelFieldPos));
 
         // Robot heading = camera heading - turret angle
@@ -191,10 +197,10 @@ public class AprilTagDetectionAction extends Action {
         double camRelFieldRad = angleWrapRad(robotHeadingField + currentCamRelRobotRad);
 
 
-        Position turretRelToField = camRelFieldPos.toGlobal(TURRET_CENTER_TO_LIMELIGHT_DIST_MM, TURRET_CENTER_TO_LIMELIGHT_DIST_MM, camRelFieldRad);
+        Position turretRelToField = camRelFieldPos.toNewFrame(TURRET_CENTER_TO_LIMELIGHT_DIST_MM, TURRET_CENTER_TO_LIMELIGHT_DIST_MM, camRelFieldRad);
         KLog.d("limelight_pos", String.format("Turret Rel To Field: %s", turretRelToField));
 
-        Position robotCenterRelToField = turretRelToField.toGlobal(ROBOT_CENTER_TO_TURRET_DISTANCE_MM, ROBOT_CENTER_TO_TURRET_DISTANCE_MM, camRelFieldRad);
+        Position robotCenterRelToField = turretRelToField.toNewFrame(ROBOT_CENTER_TO_TURRET_DISTANCE_MM, ROBOT_CENTER_TO_TURRET_DISTANCE_MM, 0);
         KLog.d("limelight_pos", String.format("Robot Center Rel To Field: %s", robotCenterRelToField));
 
         return robotCenterRelToField;

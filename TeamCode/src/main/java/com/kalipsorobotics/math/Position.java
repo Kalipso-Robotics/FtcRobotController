@@ -2,10 +2,7 @@ package com.kalipsorobotics.math;
 
 
 import com.kalipsorobotics.PID.PidNav;
-import com.kalipsorobotics.modules.GoBildaOdoModule;
-import com.kalipsorobotics.modules.GoBildaPinpointDriver;
 import com.kalipsorobotics.navigation.PurePursuitAction;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -240,18 +237,20 @@ public class Position {
      * Transforms this position from a local coordinate frame to a global coordinate frame.
      * The local frame is defined by an origin position with its own location and orientation.
      *
-     * @param originX     X position of the local frame's origin in global coordinates
-     * @param originY     Y position of the local frame's origin in global coordinates
-     * @param originTheta Rotation of the local frame relative to global frame (radians, +CCW)
+     * @param oldOriginInNewFrameX     X position of the old frame's origin relative to the new coordinates
+     * @param oldOriginInNewFrameY     Y position of the old frame's origin relative to the new coordinates
+     * @param oldOriginInNewFrameTheta Rotation of the old frame relative to new frame (radians, counter lockwise is positive)
      * @return A new Position in global coordinates
      */
-    public Position toGlobal(double originX, double originY, double originTheta) {
-        double cos = Math.cos(originTheta);
-        double sin = Math.sin(originTheta);
+    public Position toNewFrame(double oldOriginInNewFrameX, double oldOriginInNewFrameY, double oldOriginInNewFrameTheta) {
+        double cos = Math.cos(oldOriginInNewFrameTheta);
+        double sin = Math.sin(oldOriginInNewFrameTheta);
 
-        double globalX = originX + (this.x * cos - this.y * sin);
-        double globalY = originY + (this.x * sin + this.y * cos);
-        double globalTheta = MathFunctions.angleWrapRad(this.theta + originTheta);
+        // Clockwise-positive rotation matrix
+        double globalX = oldOriginInNewFrameX + (this.x * cos + this.y * sin);
+        double globalY = oldOriginInNewFrameY + (-this.x * sin + this.y * cos);
+
+        double globalTheta = MathFunctions.angleWrapRad(this.theta + oldOriginInNewFrameTheta);
 
         return new Position(globalX, globalY, globalTheta);
     }
@@ -263,8 +262,8 @@ public class Position {
      * @param origin The origin of the local frame expressed in global coordinates
      * @return A new Position in global coordinates
      */
-    public Position toGlobal(Position origin) {
-        return toGlobal(origin.getX(), origin.getY(), origin.getTheta());
+    public Position toNewFrame(Position origin) {
+        return toNewFrame(origin.getX(), origin.getY(), origin.getTheta());
     }
 
 }
