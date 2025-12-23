@@ -272,7 +272,7 @@ public class TestNavigation extends LinearOpMode {
             loopTimer.reset();
             
             // Get current robot pose from odometry
-            Position currentPose = SharedData.getOdometryIMUPosition();
+            Position currentPose = SharedData.getOdometryWheelIMUPosition();
             
             // Update navigation system (main control logic)
             boolean pathActive = navigationSystem.update(currentPose);
@@ -393,7 +393,7 @@ public class TestNavigation extends LinearOpMode {
         telemetry.addLine();
         
         // Final accuracy analysis
-        Position currentPose = SharedData.getOdometryIMUPosition();
+        Position currentPose = SharedData.getOdometryWheelIMUPosition();
         Position goalPose = navigationSystem.getGoalPose();
         
         if (goalPose != null) {

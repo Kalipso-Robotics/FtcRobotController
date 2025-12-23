@@ -14,7 +14,7 @@ public class PushBall extends KActionSet {
 
     public PushBall(Stopper stopper, Intake intake, Shooter shooter) {
 
-        KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryIMUPosition());
+        KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryWheelIMUPosition());
 
         KServoAutoAction openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
         openStopper.setName("openStopper");

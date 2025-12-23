@@ -40,8 +40,8 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-        Position pos1 = SharedData.getOdometryIMUPosition();
-        Position pos2 = SharedData.getOdometryIMUPosition();
+        Position pos1 = SharedData.getOdometryWheelIMUPosition();
+        Position pos2 = SharedData.getOdometryWheelIMUPosition();
         double power = 0;
         boolean calibrationComplete = false;
         String action;
@@ -69,11 +69,11 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 
                 KLog.d("Left_Encoder", "left_encoder " + driveTrain.getLeftEncoder().getCurrentPosition());
                 if (driveTrain.getfLeftPower() == 0) {
-                    KLog.d("Odometry_Position_While_Stopped", SharedData.getOdometryIMUPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
-                    pos1 = SharedData.getOdometryIMUPosition();
+                    KLog.d("Odometry_Position_While_Stopped", SharedData.getOdometryWheelIMUPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
+                    pos1 = SharedData.getOdometryWheelIMUPosition();
                 } else {
-                    KLog.d("Odometry_Position_While_Moving", SharedData.getOdometryIMUPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
-                    pos2 = SharedData.getOdometryIMUPosition();
+                    KLog.d("Odometry_Position_While_Moving", SharedData.getOdometryWheelIMUPosition() + ", power: fleft " + driveTrain.getfLeftPower() + ", fright " + driveTrain.getfRightPower() + ", bleft " + driveTrain.getbLeftPower() + ", bright " + driveTrain.getbRightPower());
+                    pos2 = SharedData.getOdometryWheelIMUPosition();
                 }
                 KLog.d("Calibration_Data", "nurture distance " + pos1.distanceTo(pos2) + " nurture angle " + Math.abs(pos1.getTheta() - pos2.getTheta()));
                 KLog.d("encoders", "count back: " + odometry.getBackEncoderMM() +

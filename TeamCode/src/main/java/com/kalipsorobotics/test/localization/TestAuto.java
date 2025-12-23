@@ -38,7 +38,7 @@ public class TestAuto extends KOpMode {
         waitForStart();
         while (opModeIsActive()) {
             purePursuitAction.updateCheckDone();
-            KLog.d("debug_OpMode_Transfer", "Auto Position " + SharedData.getOdometryIMUPosition());
+            KLog.d("debug_OpMode_Transfer", "Auto Position " + SharedData.getOdometryWheelIMUPosition());
         }
         KLog.d("debug_OpMode_Transfer", "Auto End right (supposed to be 0)" +
                 odometry.getRightEncoderMM() +

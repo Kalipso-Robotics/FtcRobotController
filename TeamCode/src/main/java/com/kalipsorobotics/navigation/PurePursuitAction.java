@@ -66,7 +66,7 @@ public class  PurePursuitAction extends Action {
 
     private double startTimeMS = System.currentTimeMillis();
 
-    private Position currentPosition = new Position(SharedData.getOdometryIMUPosition());
+    private Position currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
     private Position lastPosition;
     private double lastMilli = 0;
     ElapsedTime timeoutTimer;
@@ -254,11 +254,11 @@ public class  PurePursuitAction extends Action {
             startTimeMS = System.currentTimeMillis();
             hasStarted = true;
             //lastPosition = wheelOdometry.getCurrentPosition();
-            lastPosition = new Position(SharedData.getOdometryIMUPosition());
+            lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             timeoutTimer.reset();
         }
 
-        currentPosition = new Position(SharedData.getOdometryIMUPosition());
+        currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
 
         double elapsedTime = System.currentTimeMillis() - startTimeMS;
 

@@ -19,7 +19,7 @@ public class CheckXY {
         int extra = timeInMs%1000;
         //path with increments each second
         Position intendedPos = happyPath.getPoint((timeInMs-extra)/1000);
-        Position currentPos = SharedData.getOdometryIMUPosition();
+        Position currentPos = SharedData.getOdometryWheelIMUPosition();
         if (abs(intendedPos.getX() - currentPos.getX()) < MIN_POSITION_THRESHOLD && abs(intendedPos.getY() - currentPos.getY()) < MIN_POSITION_THRESHOLD) {
             return true; // Robot IS on path
         }

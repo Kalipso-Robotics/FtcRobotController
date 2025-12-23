@@ -40,7 +40,7 @@ public class TestOpMode extends KOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            KLog.d("debug_OpMode_Transfer", "TeleOp Position " + SharedData.getOdometryIMUPosition());
+            KLog.d("debug_OpMode_Transfer", "TeleOp Position " + SharedData.getOdometryWheelIMUPosition());
         }
 
         cleanupRobot();

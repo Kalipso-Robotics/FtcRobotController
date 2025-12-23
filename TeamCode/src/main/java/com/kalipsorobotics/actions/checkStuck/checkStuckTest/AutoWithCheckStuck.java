@@ -113,7 +113,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
             }
 
             // Check for stuck condition - identical to original structure
-            Position currentPosition = SharedData.getOdometryIMUPosition();
+            Position currentPosition = SharedData.getOdometryWheelIMUPosition();
             if (currentPosition != null) {
                 boolean isStuck = checkStuckRobot.isStuck(currentPosition);
 
@@ -169,7 +169,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                 telemetry.update();
             }
 
-            KLog.d("homePos", SharedData.getOdometryIMUPosition().toString());
+            KLog.d("homePos", SharedData.getOdometryWheelIMUPosition().toString());
             KLog.d("homePosMap", SharedData.getOdometryPositionMap().toString());
         }
         

@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.localization.ResetOdometryToPosition;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.util.concurrent.ExecutorService;
@@ -25,6 +26,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastBrakingAction = null;
     protected Action lastStopperAction = null;
     protected ShooterRun shooterRun = null;
+    protected ResetOdometryToPosition resetOdometryToPosition = null;
 
 
 
@@ -122,6 +124,10 @@ public abstract class KOpMode extends LinearOpMode {
 
         if (shooterRun != null) {
             shooterRun.updateCheckDone();
+        }
+
+        if (resetOdometryToPosition != null) {
+            resetOdometryToPosition.updateCheckDone();
         }
 
     }

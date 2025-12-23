@@ -12,7 +12,7 @@ public class SharedData {
 
     private static final Position odometryIMUPosition = new Position(0, 0, 0);
 
-    public static Position getOdometryIMUPosition() {
+    public static Position getOdometryWheelIMUPosition() {
         return new Position(odometryIMUPosition);
     }
     public static void setOdometryIMUPosition(Position position) {

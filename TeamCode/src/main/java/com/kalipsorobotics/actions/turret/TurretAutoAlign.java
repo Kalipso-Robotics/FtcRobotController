@@ -111,7 +111,7 @@ public class TurretAutoAlign extends Action {
 
     public static double calculateTargetTicks(Point targetPoint) {
 
-        Position currentPosition = SharedData.getOdometryIMUPosition();
+        Position currentPosition = SharedData.getOdometryWheelIMUPosition();
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
 

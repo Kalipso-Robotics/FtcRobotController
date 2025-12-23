@@ -33,8 +33,8 @@ public class OdometryDataCollector extends LinearOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-        Position pos1 = SharedData.getOdometryIMUPosition();
-        Position pos2 = SharedData.getOdometryIMUPosition();
+        Position pos1 = SharedData.getOdometryWheelIMUPosition();
+        Position pos2 = SharedData.getOdometryWheelIMUPosition();
 
         waitForStart();
         try {

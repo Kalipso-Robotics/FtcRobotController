@@ -44,9 +44,9 @@ public class TestTeleOp extends KOpMode {
 
         // Reuse odometry instance from Auto (don't call setInstanceNull!)
         KLog.d("Auto→TeleOp", "=== TELEOP STARTING ===");
-        KLog.d("Auto→TeleOp", "Before getInstance: " + SharedData.getOdometryIMUPosition());
+        KLog.d("Auto→TeleOp", "Before getInstance: " + SharedData.getOdometryWheelIMUPosition());
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        KLog.d("Auto→TeleOp", "After getInstance: " + SharedData.getOdometryIMUPosition());
+        KLog.d("Auto→TeleOp", "After getInstance: " + SharedData.getOdometryWheelIMUPosition());
         KLog.d("Auto→TeleOp", "Odometry instance: " + System.identityHashCode(odometry));
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
@@ -59,11 +59,11 @@ public class TestTeleOp extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        KLog.d("Auto→TeleOp", "After initializeRobot: " + SharedData.getOdometryIMUPosition());
+        KLog.d("Auto→TeleOp", "After initializeRobot: " + SharedData.getOdometryWheelIMUPosition());
         waitForStart();
         sleep(50);
         //Wait for Executor Thread to start
-        KLog.d("Auto→TeleOp", "After waitForStart: " + SharedData.getOdometryIMUPosition());
+        KLog.d("Auto→TeleOp", "After waitForStart: " + SharedData.getOdometryWheelIMUPosition());
         while (opModeIsActive()) {
 
             drivingSticks = kGamePad1.getLeftStickY() != 0 ||

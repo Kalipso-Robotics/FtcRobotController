@@ -53,8 +53,6 @@ public class TeleOp extends KOpMode {
     private Turret turret = null;
     private Stopper stopper = null;
     private Odometry odometry = null;
-    private ResetOdometryToPosition resetOdometryToPosition = null;
-
 
     ShootAllAction shootAllAction = null;
 
@@ -214,7 +212,7 @@ public class TeleOp extends KOpMode {
             // ========== UPDATE ACTIONS ==========
             updateActions();
 
-            Log.d("Odometry", "Position: " + SharedData.getOdometryIMUPosition());
+            Log.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
 
         cleanupRobot();
@@ -391,7 +389,7 @@ public class TeleOp extends KOpMode {
         // Priority 2- Execute shoot sequence
         if (shootAllPressed) {
             if (!isPending(shootAllAction)) {
-                resetOdometryToPosition = new ResetOdometryToPosition(aprilTagDetectionAction.calculateGlobalLimelightPosition());
+                resetOdometryToPosition = new ResetOdometryToPosition(SharedData.getLimelightGlobalPosition());
                 shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignLimelight);
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);

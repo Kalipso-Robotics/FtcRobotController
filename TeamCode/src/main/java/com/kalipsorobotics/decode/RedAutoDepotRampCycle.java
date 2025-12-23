@@ -134,14 +134,14 @@ public class RedAutoDepotRampCycle extends KOpMode {
         while (opModeIsActive()) {
             blueAutoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryIMUPosition());
+            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         KLog.d("BlueAutoDepot-Run", "Autonomous loop ended - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         KLog.d("Auto→TeleOp", "=== AUTO ENDING ===");
-        KLog.d("Auto→TeleOp", "Final position: " + SharedData.getOdometryIMUPosition());
+        KLog.d("Auto→TeleOp", "Final position: " + SharedData.getOdometryWheelIMUPosition());
         KLog.d("BlueAutoDepot-Run", "Calling cleanupRobot()");
         cleanupRobot();
-        KLog.d("Auto→TeleOp", "After cleanup position: " + SharedData.getOdometryIMUPosition());
+        KLog.d("Auto→TeleOp", "After cleanup position: " + SharedData.getOdometryWheelIMUPosition());
         KLog.d("blueAutoDepot-Run", "After cleanupRobot() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
     }
 }

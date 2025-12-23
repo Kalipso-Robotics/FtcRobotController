@@ -32,7 +32,7 @@ public class AdaptivePurePursuitAction extends Action {
     private double currentLookAheadRadius;
     static final private double LAST_RADIUS_MM = 15;
 
-    private Position currentPosition = new Position(SharedData.getOdometryIMUPosition());
+    private Position currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
 
     Optional<Position> follow;
     Optional<Position> prevFollow;
@@ -298,7 +298,7 @@ public class AdaptivePurePursuitAction extends Action {
             reset();
             startTimeMS = System.currentTimeMillis();
             hasStarted = true;
-            lastPosition = new Position(SharedData.getOdometryIMUPosition());
+            lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             timeoutTimer.reset();
         }
 
@@ -327,7 +327,7 @@ public class AdaptivePurePursuitAction extends Action {
         }
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
-            currentPosition = new Position(SharedData.getOdometryIMUPosition());
+            currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             KLog.d("ppDebug", "currentPosition: " + currentPosition.toString());
 
             int lastIdx = path.numPoints() - 1;
@@ -432,7 +432,7 @@ public class AdaptivePurePursuitAction extends Action {
         int spacingMM = 100;
 
         if (segInject == 0 && pointInject == 0 && injectedPathPoints.isEmpty()) {
-            injectedPathPoints.add(SharedData.getOdometryIMUPosition());
+            injectedPathPoints.add(SharedData.getOdometryWheelIMUPosition());
             // Add the very first point from the original path only once
             injectedPathPoints.add(path.getPoint(0));
             pointInject = 1;

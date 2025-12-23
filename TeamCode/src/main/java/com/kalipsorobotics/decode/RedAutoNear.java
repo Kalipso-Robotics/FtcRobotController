@@ -170,7 +170,7 @@ public class RedAutoNear extends KOpMode {
 
             redAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryIMUPosition());
+            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         cleanupRobot();
     }

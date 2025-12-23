@@ -26,7 +26,7 @@ public class TurretReadyLimelight extends Action {
         if (!hasStarted) {
             timeoutTimer.reset();
             hasStarted = true;
-            KLog.d(this.getName(), "current pos " + SharedData.getOdometryIMUPosition());
+            KLog.d(this.getName(), "current pos " + SharedData.getOdometryWheelIMUPosition());
         }
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {

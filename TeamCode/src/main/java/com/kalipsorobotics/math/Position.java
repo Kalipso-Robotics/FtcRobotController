@@ -11,6 +11,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 /**
  *
  * EVERYTHING HERE IS RADIANS
@@ -19,6 +21,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 
 public class Position {
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
     private double x;
     private double y;
     private double theta;
@@ -104,31 +108,66 @@ public class Position {
     }
 
     public String getPoint() {
-        return x + ", " + y + ", " + theta;
+        lock.readLock().lock();
+        try {
+            return x + ", " + y + ", " + theta;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public double getX() {
-        return x;
+        lock.readLock().lock();
+        try {
+            return x;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public double getY() {
-        return y;
+        lock.readLock().lock();
+        try {
+            return y;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public double getTheta() {
-        return theta;
+        lock.readLock().lock();
+        try {
+            return theta;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public PidNav getPidX() {
-        return pidX;
+        lock.readLock().lock();
+        try {
+            return pidX;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public PidNav getPidY() {
-        return pidY;
+        lock.readLock().lock();
+        try {
+            return pidY;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public PidNav getPidAngle() {
-        return pidAngle;
+        lock.readLock().lock();
+        try {
+            return pidAngle;
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     public PidNav getPidAngleAdaptive() {
@@ -144,12 +183,17 @@ public class Position {
     }
 
     public void reset(Position position) {
-        this.x = position.getX();
-        this.y = position.getY();
-        this.theta = position.getTheta();
-        this.pidX = position.pidX;
-        this.pidY = position.pidY;
-        this.pidAngle = position.pidAngle;
+        lock.writeLock().lock();
+        try {
+            this.x = position.getX();
+            this.y = position.getY();
+            this.theta = position.getTheta();
+            this.pidX = position.pidX;
+            this.pidY = position.pidY;
+            this.pidAngle = position.pidAngle;
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public double getDistanceAlongPath() {
