@@ -13,7 +13,6 @@ import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
-import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
@@ -90,7 +89,7 @@ public class TeleOp extends KOpMode {
     private boolean useLimelight = true;
     private boolean forceShootNearPressed = false;
     private boolean enableOdometryAlignTurret = true;
-
+    private double lastPower = 0;
 
     @Override
     protected void initializeRobotConfig() {
@@ -238,11 +237,16 @@ public class TeleOp extends KOpMode {
             }
         } else {
             if (kGamePad2.isDpadLeftPressed()) {
-                turretAutoAlignLimelight.runWithTicksIncrement(Turret.TICKS_PER_DEGREE * 1);
+                turretAutoAlignLimelight.runWithPower(-0.25);
+                lastPower = 0.25;
             } else if (kGamePad2.isDpadRightPressed()) {
-                turretAutoAlignLimelight.runWithTicksIncrement(Turret.TICKS_PER_DEGREE * -1);
+                turretAutoAlignLimelight.runWithPower(0.25);
+                lastPower = -0.25;
+            } else if (lastPower != 0) {
+                turretAutoAlignLimelight.stop();
+                lastPower = 0;
             } else {
-                turretAutoAlignLimelight.runWithLimelight(); // kinda stops when it doesnt see anything but not hard coded
+                turretAutoAlignLimelight.runWithLimelight();
             }
         }
 

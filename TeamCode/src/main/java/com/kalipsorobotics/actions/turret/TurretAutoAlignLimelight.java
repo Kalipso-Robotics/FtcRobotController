@@ -23,7 +23,7 @@ public class TurretAutoAlignLimelight extends Action {
     private AprilTagDetectionAction aprilTagDetectionAction;
     private TurretRunMode turretRunMode;
     private double targetTicks;
-    private double targetTicksIncrement;
+    private double targetPower;
     private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
@@ -32,7 +32,6 @@ public class TurretAutoAlignLimelight extends Action {
     private boolean hasSearched = false;
     double totalAngleWrap;
     double lastLimit;
-    TurretRunningMode runningMode;
     Point targetPoint;
     private boolean useOdometrySearch;
     private double previousTotalAngle;
@@ -49,7 +48,7 @@ public class TurretAutoAlignLimelight extends Action {
         this.dependentActions.add(new DoneStateAction());
         this.turretRunMode = TurretRunMode.STOP; // inital mode
         this.targetTicks = 0;
-        this.targetTicksIncrement = 0;
+        this.targetPower = 0;
 
         targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
 
@@ -64,12 +63,6 @@ public class TurretAutoAlignLimelight extends Action {
 
     public boolean isWithinRange() {
         return isWithinRange;
-    }
-
-    public void debugState() {
-        KLog.d("TurretStateMachine", String.format(
-            "DEBUG: mode=%s, isDone=%b, hasStarted=%b, targetPower=%.2f, targetTicks=%.0f, motorPos=%d, isWithinRange=%b",
-            turretRunMode, isDone, hasStarted, targetTicksIncrement, targetTicks, turretMotor.getCurrentPosition(), isWithinRange));
     }
 
     public void initBlocking() {
@@ -118,9 +111,9 @@ public class TurretAutoAlignLimelight extends Action {
                 turret.stop();
                 isWithinRange = true;
                 break;
-            case RUN_WITH_MANUAL_CONTROL:
-                turretMotor.goToTargetTicks((int) (turretMotor.getCurrentPosition() + targetTicksIncrement));
-                KLog.d("TurretStateMachine", "RUN_WITH_POWER mode - setting power to: " + turretMotor.getPower());
+            case RUN_WITH_POWER:
+                turretMotor.setPower(targetPower);
+                KLog.d("TurretStateMachine", "RUN_WITH_MANUAL_CONTROL mode - manualTargetTicks: " + targetPower + ", power: " + turretMotor.getPower());
                 isWithinRange = true;
                 break;
             case RUN_USING_LIMELIGHT:
@@ -165,7 +158,9 @@ public class TurretAutoAlignLimelight extends Action {
             targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint);
             KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
         } else {
-            KLog.d("TurretStateMachine", "No april tag and odometry disabled - NOT moving");
+            KLog.d("TurretStateMachine", "No april tag and odometry disabled - holding position");
+            turretMotor.setPower(0);
+            isWithinRange = true;
             return;
         }
 
@@ -198,11 +193,11 @@ public class TurretAutoAlignLimelight extends Action {
         }
     }
 
-    public void runWithTicksIncrement(double ticks) {
-        KLog.d("TurretStateMachine", "runWithPower() called - ticks: " + ticks + ", previous mode: " + turretRunMode);
-        this.turretRunMode = TurretRunMode.RUN_WITH_MANUAL_CONTROL;
-        this.targetTicksIncrement = ticks;
-        KLog.d("TurretStateMachine", "runWithPower() - mode now: " + turretRunMode + ", targetPower: " + targetTicksIncrement);
+    public void runWithPower(double power) {
+        KLog.d("TurretStateMachine", "runWithTicksIncrement() called - power: " + power + ", previous mode: " + turretRunMode);
+        this.turretRunMode = TurretRunMode.RUN_WITH_POWER;
+        this.targetPower = power;
+        KLog.d("TurretStateMachine", "runWithTicksIncrement() - mode now: " + turretRunMode + ", manualTargetTicks: " + targetPower);
     }
 
     public void runWithOdometryAndLimelight() {
