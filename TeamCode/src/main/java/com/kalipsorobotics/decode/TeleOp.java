@@ -132,13 +132,12 @@ public class TeleOp extends KOpMode {
 
         shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
 
-        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId);
+        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId, allianceColor);
         turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, aprilTagDetectionAction, allianceColor);
 
         shotLogger = new ShotLogger(opModeUtilities);
 
         KLog.d("TeleOp-Init", "Finished initializeRobot()");
-
     }
 
     @Override
@@ -213,7 +212,6 @@ public class TeleOp extends KOpMode {
 
             Log.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
-
         cleanupRobot();
     }
     private void handleDriving() {
@@ -239,10 +237,10 @@ public class TeleOp extends KOpMode {
         } else {
             if (kGamePad2.isDpadLeftPressed()) {
                 turretAutoAlignLimelight.runWithPower(-0.25);
-                lastPower = 0.25;
+                lastPower = -0.25;
             } else if (kGamePad2.isDpadRightPressed()) {
                 turretAutoAlignLimelight.runWithPower(0.25);
-                lastPower = -0.25;
+                lastPower = 0.25;
             } else if (lastPower != 0) {
                 turretAutoAlignLimelight.stop();
                 lastPower = 0;
@@ -250,8 +248,6 @@ public class TeleOp extends KOpMode {
                 turretAutoAlignLimelight.runWithLimelight();
             }
         }
-
-
         KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
     }
 
@@ -355,8 +351,6 @@ public class TeleOp extends KOpMode {
             shotLogger.markLastShotAsOvershot(); // Y
         }
     }
-
-
 
     /**
      * Handle shooting sequence

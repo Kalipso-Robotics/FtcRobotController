@@ -182,15 +182,16 @@ public class ShooterRun extends Action {
     }
 
     private double getCurrentDistanceMM() {
-        if (useLimelight) {
-            double limeLightDistanceMM = getLimeLightDistanceMM();
-            KLog.d("ShooterRun_Distance", "Limelight Distance " + limeLightDistanceMM);
-            return limeLightDistanceMM;
-        } else {
-            double odometryDistanceMM = getOdometryDistanceMM();
-            KLog.d("ShooterRun_Distance", "Odometry Distance " + odometryDistanceMM);
-            return odometryDistanceMM;
+        double distanceMM = getOdometryDistanceMM();
+        KLog.d("ShooterRun_Distance", "Odometry Distance " + distanceMM);
+
+        if (useLimelight && !SharedData.getLimelightPosition().isEmpty()) {
+            distanceMM = getLimeLightDistanceMM();
+            KLog.d("ShooterRun_Distance", "Limelight override Distance " + distanceMM);
         }
+        KLog.d("ShooterRun_Distance", "Final Distance " + distanceMM);
+
+        return distanceMM;
     }
 
     public void setLaunchPoint(Point launchPoint) {

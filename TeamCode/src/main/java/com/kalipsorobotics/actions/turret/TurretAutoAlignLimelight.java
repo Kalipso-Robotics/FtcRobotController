@@ -33,7 +33,7 @@ public class TurretAutoAlignLimelight extends Action {
     double totalAngleWrap;
     double lastLimit;
     Point targetPoint;
-    private boolean useOdometrySearch;
+    private boolean useOdometryAlign;
     private double previousTotalAngle;
     private double currentAngularVelocity;
     private ElapsedTime velocityTimer;
@@ -118,12 +118,12 @@ public class TurretAutoAlignLimelight extends Action {
                 break;
             case RUN_USING_LIMELIGHT:
                 KLog.d("TurretStateMachine", "RUN_USING_LimeLight mode - useOdometrySearch=false");
-                useOdometrySearch = false;
+                useOdometryAlign = false;
                 updateAlignToTarget();
                 break;
             case RUN_USING_ODOMETRY_AND_LIMELIGHT:
                 KLog.d("TurretStateMachine", "RUN_USING_ODOMETRY_AND_LimeLight mode - useOdometrySearch=true");
-                useOdometrySearch = true;
+                useOdometryAlign = true;
                 updateAlignToTarget();
                 break;
         }
@@ -132,7 +132,7 @@ public class TurretAutoAlignLimelight extends Action {
     }
 
     private void updateAlignToTarget() {
-        KLog.d("TurretStateMachine", "updateAlignToTarget() - useOdometrySearch: " + useOdometrySearch);
+        KLog.d("TurretStateMachine", "updateAlignToTarget() - useOdometrySearch: " + useOdometryAlign);
 
         aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
@@ -154,7 +154,7 @@ public class TurretAutoAlignLimelight extends Action {
             totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
             KLog.d("TurretStateMachine", "Using LIMELIGHT - targetAngle: " + targetAngleLimelight + ", targetTicks: " + targetTicks);
-        } else if (useOdometrySearch) {
+        } else if (useOdometryAlign) {
             targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint);
             KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
         } else {
@@ -256,5 +256,9 @@ public class TurretAutoAlignLimelight extends Action {
 
         KLog.d("TurretStateMachine", String.format("AngVel: %.4f rad/ms, AngleToGoal: %.1f deg, Distance: %.0f mm",
             currentAngularVelocity, Math.toDegrees(totalAngleToGoal), distanceToGoal));
+    }
+
+    public boolean getAlignWithOdometry() {
+        return useOdometryAlign;
     }
 }

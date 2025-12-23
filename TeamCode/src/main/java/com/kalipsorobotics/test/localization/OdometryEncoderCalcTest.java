@@ -3,6 +3,7 @@ package com.kalipsorobotics.test.localization;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.OdometryFileWriter;
 import com.kalipsorobotics.localization.OdometrySensorCombinations;
@@ -52,7 +53,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         Turret.setInstanceNull();
         Turret turret = Turret.getInstance(opModeUtilities);
 
-        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24);
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
 
         waitForStart();
         try {
