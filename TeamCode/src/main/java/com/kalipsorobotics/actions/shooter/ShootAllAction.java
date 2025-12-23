@@ -111,11 +111,6 @@ public class ShootAllAction extends KActionSet {
         if (isDone) {
             return;
         }
-        if (!hasTurnedLimelightOn) {
-            turretAutoAlignLimelight.setIsDone(false);
-            hasTurnedLimelightOn = true;
-        }
-        turretAutoAlignLimelight.updateCheckDone();
     }
 
     public void setTurretReady(boolean isDone) {

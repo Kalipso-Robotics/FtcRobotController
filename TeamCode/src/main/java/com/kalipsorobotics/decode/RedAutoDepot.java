@@ -23,7 +23,7 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "RedAutoDepot")
-public abstract class RedAutoDepot extends KOpMode {
+public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
 
     public final static double SHOOT_FAR_X = 150;
