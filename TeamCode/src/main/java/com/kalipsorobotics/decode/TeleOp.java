@@ -298,8 +298,6 @@ public class TeleOp extends KOpMode {
             return;  // Exit early - shoot has control
         }
 
-
-
         // Open on button press
         if (releasePressed) {
             if (!isPending(openStopper)) {
