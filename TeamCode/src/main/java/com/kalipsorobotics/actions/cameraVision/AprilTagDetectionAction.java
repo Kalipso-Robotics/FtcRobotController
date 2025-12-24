@@ -13,7 +13,10 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.util.List;
 
@@ -34,12 +37,12 @@ public class AprilTagDetectionAction extends Action {
     // Field-facing yaw of each goal tag (absolute field frame, +CCW from field X)
 
     //Perpendicular vector to AprilTag
-    private final double APRIL_TAG_HEADING_REL_FIELD_RAD = Math.toRadians(180 + 54); //Math.toRadians(-234);
+    private final double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(126); //Math.toRadians(-234);
 
     private final double APRILTAG_X_REL_FIELD_MM = 3305;
 
     private final double APRILTAG_Y_REL_FIELD_MM = 1016;
-    private Position aprilTagRelFieldPos;
+    private final Position aprilTagRelFieldPos;
 
 
 
@@ -57,10 +60,9 @@ public class AprilTagDetectionAction extends Action {
     double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
     boolean hasFound;
-    private  double xCamMM;
+    private double xCamMM;
     private double yCam;
     private double zCamMM;
-    private double yawCamRad;
     private double tagCamFlatDist;
     private double cameraHeadingRelAprilTagRad;
 
@@ -119,6 +121,7 @@ public class AprilTagDetectionAction extends Action {
                     Pose3D aprilTagRelCamPose = fiducialResult.getTargetPoseCameraSpace();
                     KLog.d("AprilTagDetection_limelight_pos", "aprilTagRelCamPose: (x, y, z), angle: " + aprilTagRelCamPose);
 
+                    //Pitch Counter Clockwise is negative and clockwise is positive
                     Pose3D camRelAprilTagPose = fiducialResult.getCameraPoseTargetSpace();
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTagPose: (x, y, z), angle: " + camRelAprilTagPose.toString());
 
@@ -127,7 +130,6 @@ public class AprilTagDetectionAction extends Action {
                     xCamMM = aprilTagRelCamPose.getPosition().x * 1000; // left right offset from tag
                     yCam = aprilTagRelCamPose.getPosition().y * 1000;
                     zCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
-                    yawCamRad = Math.toRadians(aprilTagRelCamPose.getOrientation().getYaw());
                     cameraHeadingRelAprilTagRad = -(Math.atan2(xCamMM, zCamMM)); // angle of incidence from apriltag center to camera center
 
                     tagCamFlatDist = Math.hypot(xCamMM, zCamMM); //distance from apriltag center to camera center FLAT WITHOUT HEIGHT
@@ -139,8 +141,9 @@ public class AprilTagDetectionAction extends Action {
 
 //====================================== Odometry =====================================
 
-
-                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, Math.toRadians(180 - camRelAprilTagPose.getOrientation().getYaw()));
+                    //Limelight has wabi-sabi Limelight thinks yaw is pitch and x is z and y is x
+                    //As you rotate whichever responds most to rotation is correct value.
+                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, Math.toRadians(180 + camRelAprilTagPose.getOrientation().getPitch()));
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTag Position (after transform): " + camRelAprilTag);
 
 
@@ -152,8 +155,6 @@ public class AprilTagDetectionAction extends Action {
                         SharedData.setLimelightGlobalPosition(globalPos);
                     }
                 }
-
-
             }
         }
 
