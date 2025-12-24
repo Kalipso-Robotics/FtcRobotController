@@ -47,9 +47,8 @@ public class PurePursuitHigherPowerTest extends KOpMode {
 
         // Create odometry
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule); //3015.93, 765.86, -2.4030
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3060, 712 * allianceColor.getPolarity(), -2.4049 * allianceColor.getPolarity()); //3015.93, 765.86, -2.4030
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-
 
         testAuto = new KActionSet();
     }
@@ -59,12 +58,32 @@ public class PurePursuitHigherPowerTest extends KOpMode {
         initializeRobot();
 
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain);
-        purePursuitAction.addPoint(400, 0, 90);
-        purePursuitAction.addPoint(400, 400, 180);
-        //purePursuitAction.addPoint(727, 1150 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        //purePursuitAction.addPoint(2860, 135 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+//        purePursuitAction.addPoint(400, 0, 90);
+//        purePursuitAction.addPoint(400, 400, 180);
+//        purePursuitAction.addPoint(800, 800, 0);
+//        purePursuitAction.addPoint(400, 800, 90);
+        purePursuitAction.addPoint(2598, 441.38, -138.29);
+        purePursuitAction.addPoint(1970, 175, 90);
+        purePursuitAction.addPoint(1970, 840, 90);
+        // move to hit lever
+        purePursuitAction.addPoint(1755, 1200, 0);
+        // move to launch
+        purePursuitAction.addPoint(2130, 135, 180);
+
+        purePursuitAction.addPoint(1970, 175, 90);
+        purePursuitAction.addPoint(1970, 840, 90);
+        // move to hit lever
+        purePursuitAction.addPoint(1755, 1200, 0);
+        // move to launch
+        purePursuitAction.addPoint(2130, 135, 180);
+
+        purePursuitAction.addPoint(1300, 200, 90);
+        purePursuitAction.addPoint(1300, 1100, 90);
+        purePursuitAction.addPoint(1300, 870, 90);
+        purePursuitAction.addPoint(2130, 135, 180);
+
         purePursuitAction.setName("testPurePursuit");
-        testAuto.addAction(purePursuitAction);
+        //testAuto.addAction(purePursuitAction);
 
         waitForStart();
         while (opModeIsActive()) {

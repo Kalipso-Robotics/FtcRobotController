@@ -37,6 +37,7 @@ public class TurretReady extends Action {
 
         if (turretAutoAlign.isWithinRange()) {
             isDone = true;
+            KLog.d(this.getName(), "Turret took " + timeoutTimer.milliseconds() + " milliseconds");
             KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlign.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlign.getTargetTicks());
         }

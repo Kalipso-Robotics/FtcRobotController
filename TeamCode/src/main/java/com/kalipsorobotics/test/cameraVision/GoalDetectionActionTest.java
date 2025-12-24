@@ -1,6 +1,7 @@
 package com.kalipsorobotics.test.cameraVision;
 
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
+import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -17,7 +18,7 @@ public class GoalDetectionActionTest extends LinearOpMode {
         OpModeUtilities opModeUtilities = new OpModeUtilities(this.hardwareMap, this, this.telemetry);
         Turret turret = Turret.getInstance(opModeUtilities);
         // TEST ON RED or change tagId
-        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24);
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
 
         waitForStart();
 

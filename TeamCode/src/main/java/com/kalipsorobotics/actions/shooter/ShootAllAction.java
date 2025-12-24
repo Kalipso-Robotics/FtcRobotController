@@ -111,6 +111,12 @@ public class ShootAllAction extends KActionSet {
         if (isDone) {
             return;
         }
+
+        if (turretAutoAlignLimelight.getAlignWithOdometry()) {
+            turretAutoAlignLimelight.runWithOdometryAndLimelight();
+        } else {
+            turretAutoAlignLimelight.runWithLimelight();
+        }
     }
 
     public void setTurretReady(boolean isDone) {

@@ -72,7 +72,7 @@ public class SharedData {
     }
 
 
-
+    //For transfer between Auto and TeleOp
     private static AllianceColor allianceColor = AllianceColor.RED;
 
     public static AllianceColor getAllianceColor() {
