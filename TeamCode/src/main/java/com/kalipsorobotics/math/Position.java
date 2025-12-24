@@ -25,6 +25,7 @@ public class Position {
     private double theta;
 
     private double distanceAlongPath;
+    private double distanceFromPrev;
     private double curvature;
     private double velocity;
     private double acceleration;
@@ -264,6 +265,10 @@ public class Position {
      */
     public Position toNewFrame(Position origin) {
         return toNewFrame(origin.getX(), origin.getY(), origin.getTheta());
+    }
+
+    public boolean isSamePosition(Position position) {
+        return this.getX() == position.getX() && this.getY() == position.getY() && this.getTheta() == position.getTheta();
     }
 
 }

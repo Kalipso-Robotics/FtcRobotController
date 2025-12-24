@@ -92,8 +92,6 @@ public class RedAutoDepot extends KOpMode {
         trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
     }
 
-
-
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();

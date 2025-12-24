@@ -78,6 +78,10 @@ public class  PurePursuitAction extends Action {
     private double thetaVelocity;
 //    private final double threshold = 10;
 
+    private boolean hasOvershot = false;
+
+    ElapsedTime timer;
+
     /**
      * Should not do more than 24 inches or 600mm moves in X and Y (single move)
      * Should not turn more than 90 deg (single move)
@@ -134,10 +138,15 @@ public class  PurePursuitAction extends Action {
         pathPoints.clear();
     }
 
-    public boolean nearEndPoint(Position robotPosition) {
+//    public boolean nearEndPoint(Position robotPosition) {
+//        Position endPoint = pathPoints.get(pathPoints.size()-1);
+//        double distance = Math.sqrt(Math.pow(Math.abs(robotPosition.getX() - endPoint.getX()), 2) + Math.pow(Math.abs(robotPosition.getY() - endPoint.getX()), 2));
+//        return distance < 500;
+//    }
+
+    public boolean isTargetLast(Position target) {
         Position endPoint = pathPoints.get(pathPoints.size()-1);
-        double distance = Math.sqrt(Math.pow(Math.abs(robotPosition.getX() - endPoint.getX()), 2) + Math.pow(Math.abs(robotPosition.getY() - endPoint.getX()), 2));
-        return distance < 500;
+        return target.isSamePosition(endPoint);
     }
 
     private double calcAdaptivePAngle(double theta) {
@@ -148,6 +157,7 @@ public class  PurePursuitAction extends Action {
         }
         return 1.0 / headingDelta;
     }
+
     public double[] calcAdaptiveP(double x, double y, double theta) {
         final double SLOW = 1.0/600;
         final double FAST = 1.0/120;
@@ -196,8 +206,16 @@ public class  PurePursuitAction extends Action {
 
         double distanceToTarget = currentToTarget.getLength();
         double targetDirection = currentToTarget.getHeadingDirection();
-        double targetAngle = target.getTheta();
         double directionError = MathFunctions.angleWrapRad(targetDirection - currentPos.getTheta());
+
+        double targetAngle;
+        if (path.getIndex(target) != 0) {
+            KLog.d("PurePursuitTargeting", "Interpolating Angle");
+            targetAngle = interpolateAngleWithLock(target, currentPos);
+        } else{
+            KLog.d("PurePursuitTargeting", "Target 0, no interpolation");
+            targetAngle = target.getTheta();
+        }
 
         double angleError = MathFunctions.angleWrapRad(targetAngle - currentPos.getTheta());
         double xError = Math.cos(directionError) * distanceToTarget;
@@ -215,15 +233,14 @@ public class  PurePursuitAction extends Action {
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
 
-//        if (!nearEndPoint(currentPosition)) {
+        if (!isTargetLast(currentPosition)) {
             double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
-            double scale = 1/max;
+            double scale = 1/max * 0.93;
             fLeftPower = fLeftPower * scale;
             bLeftPower = bLeftPower * scale;
             fRightPower = fRightPower * scale;
-
             bRightPower = bRightPower * scale;
-//        }
+        }
 
         KLog.d("PurePursuit_Log",
                 "running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
@@ -250,12 +267,14 @@ public class  PurePursuitAction extends Action {
         }
 
         if (!hasStarted) {
+            pathPoints.add(0, new Position(SharedData.getOdometryWheelIMUPosition())); //add starting position
             path = new Path(pathPoints);
             startTimeMS = System.currentTimeMillis();
             hasStarted = true;
             //lastPosition = wheelOdometry.getCurrentPosition();
             lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             timeoutTimer.reset();
+            timer = new ElapsedTime();
         }
 
         currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
@@ -330,11 +349,32 @@ public class  PurePursuitAction extends Action {
             }
         }
 
-
-
         lastMilli = timeoutTimer.milliseconds();
         lastPosition = currentPosition;
 
+    }
+
+    public double interpolateAngleWithLock(Position target, Position currentPosition) {
+        Position prevWayPoint = path.getPoint(path.getIndex(target)- 1);
+        double segmentLength = path.getSegment(path.getIndex(prevWayPoint)).getVector().getLength();
+        if (segmentLength == 0) {
+            return target.getTheta();
+        } else {
+            double distanceFromPrev = Math.hypot(prevWayPoint.getX() - currentPosition.getX(), prevWayPoint.getY() - currentPosition.getY());
+
+            double targetAngle;
+            if (distanceFromPrev <= segmentLength && !hasOvershot) {
+                targetAngle = prevWayPoint.getTheta() + (target.getTheta() - prevWayPoint.getTheta()) * distanceFromPrev/segmentLength;
+            } else {
+                hasOvershot = true;
+                targetAngle = target.getTheta();
+            }
+
+            KLog.d("PurePursuitTargeting", String.format("Target index: %d | Target theta: %.2f | distanceFromPrev: %.2f | segmentLength: %.2f | targetAngle: %.2f",
+                            path.getIndex(target), target.getTheta(), distanceFromPrev, segmentLength, targetAngle));
+
+            return targetAngle;
+        }
     }
 
     public void setMaxCheckDoneCounter (int maxCheckDoneCounter) {
@@ -353,6 +393,7 @@ public class  PurePursuitAction extends Action {
             //Log.d("purepursaction_debug_checkDone",
                     //"Done" + checkDoneCounter + "name:" +  name + "Pos: " + currentPosition);
             isDone = true;
+            KLog.d("PurePursuitTime", "Finished at: " + timer.milliseconds());
         }
 
         if (sleepTimeMS != 0) {
