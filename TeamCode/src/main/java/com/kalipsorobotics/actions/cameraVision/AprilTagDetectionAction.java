@@ -108,25 +108,26 @@ public class AprilTagDetectionAction extends Action {
         if (result != null && result.isValid()) {
             // Access fiducial results
             List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-            for (LLResultTypes.FiducialResult fr : fiducialResults) {
+            for (LLResultTypes.FiducialResult fiducialResult : fiducialResults) {
 
-                int tagId = fr.getFiducialId();
+                int tagId = fiducialResult.getFiducialId();
 
                 KLog.d("AprilTagDetection_Tag", "tagId " + tagId);
                 if (tagId == targetAprilTagId) {
                     KLog.d("AprilTagDetection_limelight_pos", "tagId matches targetId " + targetAprilTagId);
                     hasFound = true;
-                    Pose3D aprilTagPoseRelCam = fr.getTargetPoseCameraSpace();
-                    KLog.d("AprilTagDetection_limelight_pos", "aprilTagPoseRelCam: (x, y, z), angle: " + aprilTagPoseRelCam);
+                    Pose3D aprilTagRelCamPose = fiducialResult.getTargetPoseCameraSpace();
+                    KLog.d("AprilTagDetection_limelight_pos", "aprilTagRelCamPose: (x, y, z), angle: " + aprilTagRelCamPose);
 
-                    Pose3D camRelAprilTagPose = fr.getCameraPoseTargetSpace();
+                    Pose3D camRelAprilTagPose = fiducialResult.getCameraPoseTargetSpace();
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTagPose: (x, y, z), angle: " + camRelAprilTagPose.toString());
 
+
 //========================= For Distance Stuff ======================
-                    xCamMM = aprilTagPoseRelCam.getPosition().x * 1000; // left right offset from tag
-                    yCam = aprilTagPoseRelCam.getPosition().y * 1000;
-                    zCamMM = aprilTagPoseRelCam.getPosition().z * 1000; // front back offset from tag
-                    yawCamRad = Math.toRadians(aprilTagPoseRelCam.getOrientation().getYaw());
+                    xCamMM = aprilTagRelCamPose.getPosition().x * 1000; // left right offset from tag
+                    yCam = aprilTagRelCamPose.getPosition().y * 1000;
+                    zCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
+                    yawCamRad = Math.toRadians(aprilTagRelCamPose.getOrientation().getYaw());
                     cameraHeadingRelAprilTagRad = -(Math.atan2(xCamMM, zCamMM)); // angle of incidence from apriltag center to camera center
 
                     tagCamFlatDist = Math.hypot(xCamMM, zCamMM); //distance from apriltag center to camera center FLAT WITHOUT HEIGHT
@@ -139,7 +140,7 @@ public class AprilTagDetectionAction extends Action {
 //====================================== Odometry =====================================
 
 
-                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, Math.toRadians(-180 + camRelAprilTagPose.getOrientation().getYaw()));
+                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, Math.toRadians(180 - camRelAprilTagPose.getOrientation().getYaw()));
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTag Position (after transform): " + camRelAprilTag);
 
 
