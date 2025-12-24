@@ -91,6 +91,9 @@ public class Odometry {
         this.wheelPositionHistory.setCurrentPosition(startPosMMRad);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRad);
 
+        this.wheelPositionHistory.setCurrentVelocity(new Velocity(0, 0, 0), 0);
+        this.wheelIMUPositionHistory.setCurrentVelocity(new Velocity(0, 0, 0), 0);
+
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
 
