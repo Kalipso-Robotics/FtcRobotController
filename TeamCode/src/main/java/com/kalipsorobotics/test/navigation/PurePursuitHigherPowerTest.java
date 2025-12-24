@@ -59,8 +59,8 @@ public class PurePursuitHigherPowerTest extends KOpMode {
         initializeRobot();
 
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain);
-        purePursuitAction.addPoint(200, 0, 90);
-        purePursuitAction.addPoint(200, 200, 180);
+        purePursuitAction.addPoint(400, 0, 90);
+        purePursuitAction.addPoint(400, 400, 180);
         //purePursuitAction.addPoint(727, 1150 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //purePursuitAction.addPoint(2860, 135 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         purePursuitAction.setName("testPurePursuit");

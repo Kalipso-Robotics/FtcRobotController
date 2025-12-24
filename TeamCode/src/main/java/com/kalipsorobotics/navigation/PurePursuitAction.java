@@ -1,7 +1,5 @@
 package com.kalipsorobotics.navigation;
 
-import android.annotation.SuppressLint;
-
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.PID.PidNav;
@@ -80,6 +78,8 @@ public class  PurePursuitAction extends Action {
     private double thetaVelocity;
 //    private final double threshold = 10;
 
+    private boolean hasOvershot = false;
+
     /**
      * Should not do more than 24 inches or 600mm moves in X and Y (single move)
      * Should not turn more than 90 deg (single move)
@@ -155,6 +155,7 @@ public class  PurePursuitAction extends Action {
         }
         return 1.0 / headingDelta;
     }
+
     public double[] calcAdaptiveP(double x, double y, double theta) {
         final double SLOW = 1.0/600;
         final double FAST = 1.0/120;
@@ -208,7 +209,7 @@ public class  PurePursuitAction extends Action {
         double targetAngle;
         if (path.getIndex(target) != 0) {
             KLog.d("PurePursuitTargeting", "Interpolating Angle");
-            targetAngle = interpolateAngle(target, currentPos);
+            targetAngle = interpolateAngleWithLock(target, currentPos);
         } else{
             KLog.d("PurePursuitTargeting", "Target 0, no interpolation");
             targetAngle = target.getTheta();
@@ -232,7 +233,7 @@ public class  PurePursuitAction extends Action {
 
         if (!isTargetLast(currentPosition)) {
             double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
-            double scale = 1/max;
+            double scale = 1/max * 0.95;
             fLeftPower = fLeftPower * scale;
             bLeftPower = bLeftPower * scale;
             fRightPower = fRightPower * scale;
@@ -350,7 +351,7 @@ public class  PurePursuitAction extends Action {
 
     }
 
-    public double interpolateAngle(Position target, Position currentPosition) {
+    public double interpolateAngleWithLock(Position target, Position currentPosition) {
         Position prevWayPoint = path.getPoint(path.getIndex(target)- 1);
         double segmentLength = path.getSegment(path.getIndex(prevWayPoint)).getVector().getLength();
         if (segmentLength == 0) {
@@ -359,14 +360,14 @@ public class  PurePursuitAction extends Action {
             double distanceFromPrev = Math.hypot(prevWayPoint.getX() - currentPosition.getX(), prevWayPoint.getY() - currentPosition.getY());
 
             double targetAngle;
-            if (distanceFromPrev <= segmentLength) {
+            if (distanceFromPrev <= segmentLength && !hasOvershot) {
                 targetAngle = prevWayPoint.getTheta() + (target.getTheta() - prevWayPoint.getTheta()) * distanceFromPrev/segmentLength;
             } else {
+                hasOvershot = true;
                 targetAngle = target.getTheta();
             }
 
-            KLog.d("PurePursuitTargeting",
-                    String.format("Target index: %d | Target theta: %.2f | distanceFromPrev: %.2f | segmentLength: %.2f | targetAngle: %.2f",
+            KLog.d("PurePursuitTargeting", String.format("Target index: %d | Target theta: %.2f | distanceFromPrev: %.2f | segmentLength: %.2f | targetAngle: %.2f",
                             path.getIndex(target), target.getTheta(), distanceFromPrev, segmentLength, targetAngle));
 
             return targetAngle;
