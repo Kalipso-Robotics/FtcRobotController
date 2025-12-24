@@ -13,10 +13,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.util.List;
 
@@ -64,7 +61,7 @@ public class AprilTagDetectionAction extends Action {
     private double yCam;
     private double zCamMM;
     private double tagCamFlatDist;
-    private double cameraHeadingRelAprilTagRad;
+    private double cameraHeadingRealToAprilTagWithGoalOffset;
 
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId, AllianceColor allianceColor) {
@@ -130,12 +127,12 @@ public class AprilTagDetectionAction extends Action {
                     xCamMM = aprilTagRelCamPose.getPosition().x * 1000; // left right offset from tag
                     yCam = aprilTagRelCamPose.getPosition().y * 1000;
                     zCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
-                    cameraHeadingRelAprilTagRad = -(Math.atan2(xCamMM, zCamMM)); // angle of incidence from apriltag center to camera center
+                    cameraHeadingRealToAprilTagWithGoalOffset = -(Math.atan2(xCamMM + 75, zCamMM - 457.2)); // angle of incidence from apriltag center to camera center
 
                     tagCamFlatDist = Math.hypot(xCamMM, zCamMM); //distance from apriltag center to camera center FLAT WITHOUT HEIGHT
                     KLog.d("AprilTagDetection_limelight_pos", "Distance to GOAL " + tagCamFlatDist);
 
-                    LimelightPos currentPos = new LimelightPos(tagCamFlatDist, cameraHeadingRelAprilTagRad, xCamMM, yCam, zCamMM);
+                    LimelightPos currentPos = new LimelightPos(tagCamFlatDist, cameraHeadingRealToAprilTagWithGoalOffset, xCamMM, yCam, zCamMM);
                     KLog.d("AprilTagDetection_limelight_pos", "Set to SharedData. currentPos: " + currentPos);
                     SharedData.setLimelightPosition(currentPos);
 

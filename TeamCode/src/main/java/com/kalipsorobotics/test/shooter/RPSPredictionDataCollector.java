@@ -1,6 +1,8 @@
 package com.kalipsorobotics.test.shooter;
 
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
@@ -14,6 +16,7 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -88,7 +91,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
     private Odometry odometry;
     private DriveTrain driveTrain;
     private IMUModule imuModule;
-    private TurretAutoAlign turretAutoAlign;
+    private TurretAutoAlignLimelight turretAutoAlignLimelight;
     private Turret turret;
     private KFileWriter fileWriter;
     private OpModeUtilities opModeUtilities;
@@ -112,7 +115,9 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         fileWriter = new KFileWriter("RPSPredictionData", opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, AllianceColor.RED);
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
+        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, aprilTagDetectionAction, AllianceColor.RED);
+        turretAutoAlignLimelight.runWithLimelight();
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
 
@@ -139,7 +144,8 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         while (opModeIsActive()) {
             // Update odometry
             odometry.updateAll();
-            turretAutoAlign.updateCheckDone();
+            turretAutoAlignLimelight.updateCheckDone();
+            aprilTagDetectionAction.updateCheckDone();
 
             // ========== Power Control ==========
             if (gamepad1.dpad_up) {
@@ -165,10 +171,10 @@ public class RPSPredictionDataCollector extends LinearOpMode {
 
             // ========== Hood Control ==========
             if (gamepad1.dpad_right) {
-                hoodPosition += 0.05;
+                hoodPosition += 0.01;
             }
             if (gamepad1.dpad_left) {
-                hoodPosition -= 0.05;
+                hoodPosition -= 0.01;
             }
 
             // Clamp hood position between 0 and 1
@@ -235,7 +241,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             telemetry.addData("Shooter Power", "%.2f", shooterPower);
             telemetry.addData("Hood Position", "%.2f", hoodPosition);
             telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
-            telemetry.addData("Distance to Target", "%.2f mm", calculateDistanceToTarget());
+            telemetry.addData("Limelight Distance to Target", "%.2f mm", calculateDistanceToTarget());
             telemetry.addLine();
 
             if (lastShoot != null) {
@@ -307,20 +313,22 @@ public class RPSPredictionDataCollector extends LinearOpMode {
      * and target position from TurretConfig
      */
     private double calculateDistanceToTarget() {
-        Position currentPosition = odometry.update();
+        return SharedData.getLimelightPosition().getDistanceToAprilTagMM();
 
-        double currentX = currentPosition.getX();
-        double currentY = currentPosition.getY();
-
-        double targetX = TurretConfig.X_INIT_SETUP_MM;
-        double targetY = TurretConfig.Y_INIT_SETUP_MM;
-
-        double dx = targetX - currentX;
-        double dy = targetY - currentY;
-
-        double distance = Math.sqrt((dx * dx) + (dy * dy));
-
-        return distance;
+//        Position currentPosition = odometry.update();
+//
+//        double currentX = currentPosition.getX();
+//        double currentY = currentPosition.getY();
+//
+//        double targetX = TurretConfig.X_INIT_SETUP_MM;
+//        double targetY = TurretConfig.Y_INIT_SETUP_MM;
+//
+//        double dx = targetX - currentX;
+//        double dy = targetY - currentY;
+//
+//        double distance = Math.sqrt((dx * dx) + (dy * dy));
+//
+//        return distance;
     }
 
     /**
