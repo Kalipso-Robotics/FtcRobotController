@@ -20,6 +20,6 @@ public class ResetOdometryToPosition extends Action {
             return;
         }
         SharedData.setOdometryWheelPosition(position);
-        SharedData.setOdometryIMUPosition(position);
+        SharedData.setOdometryWheelIMUPosition(position);
     }
 }
