@@ -80,6 +80,8 @@ public class  PurePursuitAction extends Action {
 
     private boolean hasOvershot = false;
 
+    ElapsedTime timer;
+
     /**
      * Should not do more than 24 inches or 600mm moves in X and Y (single move)
      * Should not turn more than 90 deg (single move)
@@ -272,6 +274,7 @@ public class  PurePursuitAction extends Action {
             //lastPosition = wheelOdometry.getCurrentPosition();
             lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             timeoutTimer.reset();
+            timer = new ElapsedTime();
         }
 
         currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
@@ -390,6 +393,7 @@ public class  PurePursuitAction extends Action {
             //Log.d("purepursaction_debug_checkDone",
                     //"Done" + checkDoneCounter + "name:" +  name + "Pos: " + currentPosition);
             isDone = true;
+            KLog.d("PurePursuitTime", "Finished at: " + timer.milliseconds());
         }
 
         if (sleepTimeMS != 0) {
