@@ -109,21 +109,14 @@ public class RedAutoDepotRampCycle extends KOpMode {
         trip3.setDependentActions(trip2);
         redAutoDepot.addAction(trip3);
 
-        // ----------------- TRIP 4 ---------------------- ~5 sec
-
-        RampCycleAction trip4 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, farLaunchPoint, 90);
-        trip4.setName("trip4");
-        trip4.setDependentActions(trip3);
-        redAutoDepot.addAction(trip4);
-
         IntakeStop stopIntake = new IntakeStop(intake);
         stopIntake.setName("stopIntake");
-        stopIntake.setDependentActions(trip4);
+        stopIntake.setDependentActions(trip3);
         redAutoDepot.addAction(stopIntake);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
-        park.setDependentActions(trip4);
+        park.setDependentActions(trip3);
         park.addPoint(170, 540 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         redAutoDepot.addAction(park);
