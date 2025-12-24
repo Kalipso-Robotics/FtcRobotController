@@ -227,7 +227,7 @@ public class TeleOp extends KOpMode {
     }
     private void handleTurret() {
 
-        //Manual
+        // Auto Align
         if (isTurretAutoAlignEnabled) {
             if (enableOdometryAlignTurret) {
                 turretAutoAlignLimelight.runWithOdometryAndLimelight();
@@ -235,6 +235,7 @@ public class TeleOp extends KOpMode {
                 turretAutoAlignLimelight.runWithLimelight();
             }
         } else {
+            //Manual
             if (kGamePad2.isDpadLeftPressed()) {
                 turretAutoAlignLimelight.runWithPower(-0.25);
                 lastPower = -0.25;
