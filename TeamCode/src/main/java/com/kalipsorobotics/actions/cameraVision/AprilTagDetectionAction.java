@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.cameraVision;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
@@ -33,12 +34,12 @@ public class AprilTagDetectionAction extends Action {
     // Field-facing yaw of each goal tag (absolute field frame, +CCW from field X)
 
     //Perpendicular vector to AprilTag
-    private final double APRIL_TAG_HEADING_REL_FIELD_RAD = Math.toRadians(180 + 54); //Math.toRadians(-234);
+    private final double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(126); //Math.toRadians(-234);
 
     private final double APRILTAG_X_REL_FIELD_MM = 3305;
 
     private final double APRILTAG_Y_REL_FIELD_MM = 1016;
-    private Position aprilTagRelFieldPos;
+    private final Position aprilTagRelFieldPos;
 
 
 
@@ -49,19 +50,18 @@ public class AprilTagDetectionAction extends Action {
 
     private final Position TURRET_REL_CAM_POS = new Position(-169.8848, -3.2466, 0);
 
-    private final Position ROBOT_REL_TURRET_POS = new Position(3.48052, 2.50233, 0);
+    private final Point ROBOT_REL_TURRET_POINT = new Point(3.48052, 2.50233);
 
 
     private Position camRelAprilTag;
     double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
     boolean hasFound;
-    private  double xCamMM;
+    private double xCamMM;
     private double yCam;
     private double zCamMM;
-    private double yawCamRad;
     private double tagCamFlatDist;
-    private double cameraHeadingRelAprilTagRad;
+    private double cameraHeadingRealToAprilTagWithGoalOffset;
 
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId, AllianceColor allianceColor) {
@@ -107,38 +107,40 @@ public class AprilTagDetectionAction extends Action {
         if (result != null && result.isValid()) {
             // Access fiducial results
             List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-            for (LLResultTypes.FiducialResult fr : fiducialResults) {
+            for (LLResultTypes.FiducialResult fiducialResult : fiducialResults) {
 
-                int tagId = fr.getFiducialId();
+                int tagId = fiducialResult.getFiducialId();
 
                 KLog.d("AprilTagDetection_Tag", "tagId " + tagId);
                 if (tagId == targetAprilTagId) {
                     KLog.d("AprilTagDetection_limelight_pos", "tagId matches targetId " + targetAprilTagId);
                     hasFound = true;
-                    Pose3D aprilTagPoseRelCam = fr.getTargetPoseCameraSpace();
-                    KLog.d("AprilTagDetection_limelight_pos", "aprilTagPoseRelCam: (x, y, z), angle: " + aprilTagPoseRelCam);
+                    Pose3D aprilTagRelCamPose = fiducialResult.getTargetPoseCameraSpace();
+                    KLog.d("AprilTagDetection_limelight_pos", "aprilTagRelCamPose: (x, y, z), angle: " + aprilTagRelCamPose);
 
-                    Pose3D camRelAprilTagPose = fr.getCameraPoseTargetSpace();
+                    //Pitch Counter Clockwise is negative and clockwise is positive
+                    Pose3D camRelAprilTagPose = fiducialResult.getCameraPoseTargetSpace();
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTagPose: (x, y, z), angle: " + camRelAprilTagPose.toString());
 
+
 //========================= For Distance Stuff ======================
-                    xCamMM = aprilTagPoseRelCam.getPosition().x * 1000; // left right offset from tag
-                    yCam = aprilTagPoseRelCam.getPosition().y * 1000;
-                    zCamMM = aprilTagPoseRelCam.getPosition().z * 1000; // front back offset from tag
-                    yawCamRad = Math.toRadians(aprilTagPoseRelCam.getOrientation().getYaw());
-                    cameraHeadingRelAprilTagRad = -(Math.atan2(xCamMM, zCamMM)); // angle of incidence from apriltag center to camera center
+                    xCamMM = aprilTagRelCamPose.getPosition().x * 1000; // left right offset from tag
+                    yCam = aprilTagRelCamPose.getPosition().y * 1000;
+                    zCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
+                    cameraHeadingRealToAprilTagWithGoalOffset = -(Math.atan2(xCamMM + 75, zCamMM - 457.2)); // angle of incidence from apriltag center to camera center
 
                     tagCamFlatDist = Math.hypot(xCamMM, zCamMM); //distance from apriltag center to camera center FLAT WITHOUT HEIGHT
                     KLog.d("AprilTagDetection_limelight_pos", "Distance to GOAL " + tagCamFlatDist);
 
-                    LimelightPos currentPos = new LimelightPos(tagCamFlatDist, cameraHeadingRelAprilTagRad, xCamMM, yCam, zCamMM);
+                    LimelightPos currentPos = new LimelightPos(tagCamFlatDist, cameraHeadingRealToAprilTagWithGoalOffset, xCamMM, yCam, zCamMM);
                     KLog.d("AprilTagDetection_limelight_pos", "Set to SharedData. currentPos: " + currentPos);
                     SharedData.setLimelightPosition(currentPos);
 
 //====================================== Odometry =====================================
 
-
-                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, (-180 + camRelAprilTagPose.getOrientation().getYaw()));
+                    //Limelight has wabi-sabi Limelight thinks yaw is pitch and x is z and y is x
+                    //As you rotate whichever responds most to rotation is correct value.
+                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, Math.toRadians(180 + camRelAprilTagPose.getOrientation().getPitch()));
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTag Position (after transform): " + camRelAprilTag);
 
 
@@ -150,8 +152,6 @@ public class AprilTagDetectionAction extends Action {
                         SharedData.setLimelightGlobalPosition(globalPos);
                     }
                 }
-
-
             }
         }
 
@@ -180,7 +180,9 @@ public class AprilTagDetectionAction extends Action {
 
         Position robotRelRobot = new Position(0 ,0 ,0);
 
-        Position robotRelTurret = robotRelRobot.toNewFrame(ROBOT_REL_TURRET_POS);
+        double turretAngle = turret.getCurrentAngleRad();  // get current turret heading in radians
+
+        Position robotRelTurret = robotRelRobot.toNewFrame(new Position(ROBOT_REL_TURRET_POINT.getX(), ROBOT_REL_TURRET_POINT.getY(), -turretAngle));
         KLog.d("AprilTagDetection_calculateGlobal", "robotRelTurret " + robotRelTurret);
 
         Position robotRelCam = robotRelTurret.toNewFrame(TURRET_REL_CAM_POS);

@@ -37,7 +37,7 @@ public class AutoBasketFunnelPath extends LinearOpMode {
 
         Odometry.setInstanceNull();
         Odometry wheelOdometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 0, 0, 0);
-        SharedData.resetOdometryIMUPosition();
+        SharedData.resetOdometryWheelIMUPosition();
 
         final int INTAKE_SAMPLE_X = -590-300;
 

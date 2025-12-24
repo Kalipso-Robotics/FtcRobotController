@@ -10,16 +10,16 @@ import java.util.HashMap;
 
 public class SharedData {
 
-    private static final Position odometryIMUPosition = new Position(0, 0, 0);
+    private static final Position odometryWheelIMUPosition = new Position(0, 0, 0);
 
     public static Position getOdometryWheelIMUPosition() {
-        return new Position(odometryIMUPosition);
+        return new Position(odometryWheelIMUPosition);
     }
-    public static void setOdometryIMUPosition(Position position) {
-        odometryIMUPosition.reset(position);
+    public static void setOdometryWheelIMUPosition(Position position) {
+        odometryWheelIMUPosition.reset(position);
     }
-    public static void resetOdometryIMUPosition() {
-        odometryIMUPosition.reset(new Position(0, 0, 0));
+    public static void resetOdometryWheelIMUPosition() {
+        odometryWheelIMUPosition.reset(new Position(0, 0, 0));
     }
 
 

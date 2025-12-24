@@ -91,8 +91,15 @@ public class Odometry {
         this.wheelPositionHistory.setCurrentPosition(startPosMMRad);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRad);
 
+        this.wheelPositionHistory.setCurrentVelocity(new Velocity(0, 0, 0), 0);
+        this.wheelIMUPositionHistory.setCurrentVelocity(new Velocity(0, 0, 0), 0);
+
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL, wheelPositionHistory);
         odometryPositionHistoryHashMap.put(OdometrySensorCombinations.WHEEL_IMU, wheelIMUPositionHistory);
+
+        SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);
+        SharedData.setOdometryWheelPosition(wheelPositionHistory.getCurrentPosition());
+        SharedData.setOdometryWheelIMUPosition(wheelIMUPositionHistory.getCurrentPosition());
 
         prevTime = SystemClock.elapsedRealtime();
         prevImuHeading = getIMUHeading();
@@ -365,7 +372,7 @@ public class Odometry {
         KLog.d("Odometry_IMU_Position", wheelIMUPosition.toString() + " UnhealthyCounter " + unhealthyCounter);
         KLog.d("Odometry_Wheel_Position", wheelPosition.toString() + " UnhealthyCounter " + unhealthyCounter);
         prevImuHeading = currentImuHeading;
-        SharedData.setOdometryIMUPosition(wheelIMUPosition);
+        SharedData.setOdometryWheelIMUPosition(wheelIMUPosition);
         SharedData.setOdometryWheelPosition(wheelPosition);
 
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);

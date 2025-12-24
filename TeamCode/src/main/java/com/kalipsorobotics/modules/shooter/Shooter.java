@@ -20,7 +20,7 @@ public class Shooter {
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
 
-    public static final Point TARGET_POINT = new Point(((144-6) * 25.4) - 200, ((72-6) * 25.4) - 190 - (196.85));//red
+    public static final Point TARGET_POINT = new Point(3305.2, 1200); //polarity outside x=3305.2 y=1,289.55
 
     public static final double HOOD_OFFSET = 0; // 0.25
 
