@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.cameraVision;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
@@ -49,7 +50,7 @@ public class AprilTagDetectionAction extends Action {
 
     private final Position TURRET_REL_CAM_POS = new Position(-169.8848, -3.2466, 0);
 
-    private final Position ROBOT_REL_TURRET_POS = new Position(3.48052, 2.50233, 0);
+    private final Point ROBOT_REL_TURRET_POINT = new Point(3.48052, 2.50233);
 
 
     private Position camRelAprilTag;
@@ -138,7 +139,7 @@ public class AprilTagDetectionAction extends Action {
 //====================================== Odometry =====================================
 
 
-                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, (-180 + camRelAprilTagPose.getOrientation().getYaw()));
+                    camRelAprilTag = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, Math.toRadians(-180 + camRelAprilTagPose.getOrientation().getYaw()));
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTag Position (after transform): " + camRelAprilTag);
 
 
@@ -180,7 +181,9 @@ public class AprilTagDetectionAction extends Action {
 
         Position robotRelRobot = new Position(0 ,0 ,0);
 
-        Position robotRelTurret = robotRelRobot.toNewFrame(ROBOT_REL_TURRET_POS);
+        double turretAngle = turret.getCurrentAngleRad();  // get current turret heading in radians
+
+        Position robotRelTurret = robotRelRobot.toNewFrame(new Position(ROBOT_REL_TURRET_POINT.getX(), ROBOT_REL_TURRET_POINT.getY(), -turretAngle));
         KLog.d("AprilTagDetection_calculateGlobal", "robotRelTurret " + robotRelTurret);
 
         Position robotRelCam = robotRelTurret.toNewFrame(TURRET_REL_CAM_POS);
