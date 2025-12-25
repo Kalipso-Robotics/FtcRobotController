@@ -82,7 +82,7 @@ public class RoundTripAction extends KActionSet {
 
         shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
-        shoot.setDependentActions(shooterReady, moveToBalls, turretReady);
+        shoot.setDependentActions(moveToBalls); //removed turretReday, shooterReady
         this.addAction(shoot);
 
         shooterStop = new ShooterStop(shooterRun);

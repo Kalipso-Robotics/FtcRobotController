@@ -2,22 +2,22 @@ package com.kalipsorobotics.math;
 
 public class LimelightPos {
 
-    private double distanceToAprilTagMM;
+    private double distanceToGoalMM;
     private double angleToGoalRad;
     private double xMM;
     private double yMM;
     private double zMM;
 
     public LimelightPos(double distanceToAprilTagMM, double angleToGoalRad, double xMM, double yMM, double zMM) {
-        this.distanceToAprilTagMM = distanceToAprilTagMM;
+        this.distanceToGoalMM = distanceToAprilTagMM;
         this.angleToGoalRad = angleToGoalRad;
         this.xMM = xMM;
         this.yMM = yMM;
         this.zMM = zMM;
     }
 
-    public void setDistanceToAprilTagMM(double distanceToAprilTagMM) {
-        this.distanceToAprilTagMM = distanceToAprilTagMM;
+    public void setDistanceToGoalMM(double distanceToGoalMM) {
+        this.distanceToGoalMM = distanceToGoalMM;
     }
 
     public void setAngleToGoalRad(double angleToGoalRad) {
@@ -36,8 +36,8 @@ public class LimelightPos {
         this.zMM = zMM;
     }
 
-    public double getDistanceToAprilTagMM() {
-        return distanceToAprilTagMM;
+    public double getDistanceToGoalMM() {
+        return distanceToGoalMM;
     }
 
     public double getAngleToGoalRad() {
@@ -68,12 +68,12 @@ public class LimelightPos {
         this.yMM = position.getyMM();
         this.zMM = position.getzMM();
         this.angleToGoalRad = position.getAngleToGoalRad();
-        this.distanceToAprilTagMM = position.getDistanceToAprilTagMM();
+        this.distanceToGoalMM = position.getDistanceToGoalMM();
     }
 
     public void reset() {
         this.angleToGoalRad = 0;
-        this.distanceToAprilTagMM = 0;
+        this.distanceToGoalMM = 0;
         this.zMM = 0;
         this.xMM = 0;
         this.yMM = 0;
@@ -82,7 +82,7 @@ public class LimelightPos {
     @Override
     public String toString() {
         return "LimelightPos{" +
-                "distanceToTargetMM=" + distanceToAprilTagMM +
+                "distanceToTargetMM=" + distanceToGoalMM +
                 ", angleToGoalRad=" + angleToGoalRad +
                 ", xMM=" + xMM +
                 ", yMM=" + yMM +

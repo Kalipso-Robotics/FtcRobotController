@@ -1,12 +1,9 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
-import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
@@ -17,7 +14,6 @@ import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -313,7 +309,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
      * and target position from TurretConfig
      */
     private double calculateDistanceToTarget() {
-        return SharedData.getLimelightPosition().getDistanceToAprilTagMM();
+        return SharedData.getLimelightPosition().getDistanceToGoalMM();
 
 //        Position currentPosition = odometry.update();
 //

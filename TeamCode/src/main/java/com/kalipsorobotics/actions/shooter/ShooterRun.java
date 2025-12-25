@@ -169,7 +169,7 @@ public class ShooterRun extends Action {
     }
 
     private double getLimeLightDistanceMM() {
-        double limeLightDistanceMM = SharedData.getLimelightPosition().getDistanceToAprilTagMM() + APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
+        double limeLightDistanceMM = SharedData.getLimelightPosition().getDistanceToGoalMM() + APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
         KLog.d("ShooterRun_Distance", "Limelight distance: " + limeLightDistanceMM + " mm");
         return limeLightDistanceMM;
     }
