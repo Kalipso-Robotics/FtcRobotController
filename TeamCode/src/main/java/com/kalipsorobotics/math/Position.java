@@ -255,6 +255,7 @@ public class Position {
 
         // Add the frame rotation to the heading
         double newTheta = this.theta + oldOriginInNewFrameTheta;
+        newTheta = MathFunctions.angleWrapRad(newTheta);
 
         return new Position(newX, newY, newTheta);
     }
