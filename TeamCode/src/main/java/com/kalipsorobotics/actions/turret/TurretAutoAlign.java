@@ -86,7 +86,7 @@ public class TurretAutoAlign extends Action {
         }
 
 
-        targetTicks = calculateTargetTicks(targetPoint);
+        targetTicks = calculateTargetTicks(targetPoint, SharedData.getOdometryWheelIMUPosition());
         KLog.d("turret", "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
 
 
@@ -109,9 +109,8 @@ public class TurretAutoAlign extends Action {
     }
 
 
-    public static double calculateTargetTicks(Point targetPoint) {
+    public static double calculateTargetTicks(Point targetPoint, Position currentPosition) {
 
-        Position currentPosition = SharedData.getOdometryWheelIMUPosition();
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
 

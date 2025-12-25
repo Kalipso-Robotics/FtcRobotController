@@ -309,7 +309,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
      * and target position from TurretConfig
      */
     private double calculateDistanceToTarget() {
-        return SharedData.getLimelightPosition().getDistanceToGoalMM();
+        return SharedData.getLimelightRawPosition().getDistanceToGoalMM();
 
 //        Position currentPosition = odometry.update();
 //

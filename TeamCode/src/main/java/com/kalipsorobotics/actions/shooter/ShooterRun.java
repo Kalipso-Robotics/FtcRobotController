@@ -169,7 +169,7 @@ public class ShooterRun extends Action {
     }
 
     private double getLimeLightDistanceMM() {
-        double limeLightDistanceMM = SharedData.getLimelightPosition().getDistanceToGoalMM() + APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
+        double limeLightDistanceMM = SharedData.getLimelightRawPosition().getDistanceToGoalMM() + APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
         KLog.d("ShooterRun_Distance", "Limelight distance: " + limeLightDistanceMM + " mm");
         return limeLightDistanceMM;
     }
@@ -185,7 +185,7 @@ public class ShooterRun extends Action {
         double distanceMM = getOdometryDistanceMM();
         KLog.d("ShooterRun_Distance", "Odometry Distance " + distanceMM);
 
-        if (useLimelight && !SharedData.getLimelightPosition().isEmpty()) {
+        if (useLimelight && !SharedData.getLimelightRawPosition().isEmpty()) {
             distanceMM = getLimeLightDistanceMM();
             KLog.d("ShooterRun_Distance", "Limelight override Distance " + distanceMM);
         }

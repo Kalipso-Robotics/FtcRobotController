@@ -6,20 +6,16 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 
 public class ResetOdometryToPosition extends Action {
-
-    private final Position position;
-
-    public ResetOdometryToPosition(Position position) {
-        this.position = position;
-    }
-
     @Override
     protected void update() {
-        if (position == null) {
-            KLog.e("ResetOdometryToPosition", "Position is null");
+        if (SharedData.getLimelightRawPosition().isEmpty()) {
+            KLog.d("ResetOdometryToPosition", "No Valid Detection Not Updating");
             return;
         }
-        SharedData.setOdometryWheelPosition(position);
-        SharedData.setOdometryWheelIMUPosition(position);
+        Position limelightGlobalPosition = SharedData.getLimelightGlobalPosition();
+        KLog.d("ResetOdometryToPosition", "Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() + "Odometry Wheel, " + SharedData.getOdometryWheelPosition() + " to position, " + limelightGlobalPosition);
+        SharedData.setOdometryWheelPosition(limelightGlobalPosition);
+        SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
+        isDone = true;
     }
 }

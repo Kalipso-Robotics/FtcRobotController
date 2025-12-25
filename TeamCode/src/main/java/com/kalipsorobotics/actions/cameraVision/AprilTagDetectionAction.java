@@ -125,7 +125,7 @@ public class AprilTagDetectionAction extends Action {
 
                     LimelightPos currentPos = new LimelightPos(distanceFromCamToGoal, headingToGoal, xCamMM, yCam, zCamMM);
                     KLog.d("AprilTagDetection_limelight_pos", "Set to SharedData. currentPos: " + currentPos);
-                    SharedData.setLimelightPosition(currentPos);
+                    SharedData.setLimelightRawPosition(currentPos);
 //====================================== Odometry =====================================
 
                     //Limelight has wabi-sabi Limelight thinks yaw is pitch and x is z and y is x
@@ -137,6 +137,7 @@ public class AprilTagDetectionAction extends Action {
                     // Calculate and set global robot position from vision
                     Position globalPos = calculateGlobalLimelightPosition();
                     if (globalPos != null) {
+
                         KLog.d("AprilTagDetection_limelight_pos_global", "Updating LimeLight share data robot position to: " + globalPos);
                         SharedData.setLimelightGlobalPosition(globalPos);
                     }
@@ -145,7 +146,7 @@ public class AprilTagDetectionAction extends Action {
         }
 
         if (!hasFound) {
-            SharedData.getLimelightPosition().reset();
+            SharedData.getLimelightRawPosition().reset();
         }
     }
 

@@ -24,7 +24,7 @@ public class GoalDetectionActionTest extends LinearOpMode {
 
         while (opModeIsActive()) {
             aprilTagDetectionAction.updateCheckDone();
-            telemetry.addData("current limelight position ", SharedData.getLimelightPosition().toString());
+            telemetry.addData("current limelight position ", SharedData.getLimelightRawPosition().toString());
         }
     }
 }

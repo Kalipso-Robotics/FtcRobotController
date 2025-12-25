@@ -138,7 +138,7 @@ public class TurretAutoAlignLimelight extends Action {
 
         aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
-        aprilTagFound = !SharedData.getLimelightPosition().isEmpty();
+        aprilTagFound = !SharedData.getLimelightRawPosition().isEmpty();
         double currentAngleRad = turret.getCurrentAngleRad();
 
         KLog.d("TurretStateMachine", "aprilTagFound: " + aprilTagFound + ", currentAngleRad: " + currentAngleRad);
@@ -151,17 +151,15 @@ public class TurretAutoAlignLimelight extends Action {
         // -------------------------------------------
 
         if (aprilTagFound) {
-            double targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
             hasSearched = false;
             odometryTransitionCount = 0;
-            totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
-            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
-            KLog.d("TurretStateMachine", "Using LIMELIGHT - targetAngle: " + targetAngleLimelight + ", targetTicks: " + targetTicks);
+            targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, SharedData.getLimelightGlobalPosition());
+            KLog.d("TurretStateMachine", "Using LIMELIGHT targetTicks: " + targetTicks);
         } else if (useOdometryAlign) {
             odometryTransitionCount++;
             KLog.d("TurretStateMachine", "Limelight not seen, odometryTransitionCount: " + odometryTransitionCount + "/" + odometryTransitionThresholdCount);
             if (odometryTransitionCount > odometryTransitionThresholdCount) {
-                targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint);
+                targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, SharedData.getOdometryWheelIMUPosition());
                 KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
             } else {
                 KLog.d("TurretStateMachine", "Waiting for transition threshold, holding position");

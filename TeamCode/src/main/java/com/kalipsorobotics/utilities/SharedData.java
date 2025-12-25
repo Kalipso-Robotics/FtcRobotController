@@ -46,13 +46,14 @@ public class SharedData {
     }
 
 
-    private static final LimelightPos limelightPosition = new LimelightPos(0,0,0,0,0);
-    public static void setLimelightPosition(LimelightPos position) {
-        limelightPosition.setPos(position);
+    private static final LimelightPos limelightRawPosition = new LimelightPos(0,0,0,0,0);
+    public static void setLimelightRawPosition(LimelightPos position) {
+        limelightRawPosition.setPos(position);
     }
-    public static LimelightPos getLimelightPosition() {
-        return limelightPosition;
+    public static LimelightPos getLimelightRawPosition() {
+        return limelightRawPosition;
     }
+
 
     private static final Position limelightGlobalPosition = new Position(0, 0, 0);
     public static Position getLimelightGlobalPosition() {
