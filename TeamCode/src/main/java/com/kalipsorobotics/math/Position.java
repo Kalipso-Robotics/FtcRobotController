@@ -240,10 +240,24 @@ public class Position {
      *
      * @param oldOriginInNewFrameX     X position of the old frame's origin relative to the new coordinates
      * @param oldOriginInNewFrameY     Y position of the old frame's origin relative to the new coordinates
-     * @param oldOriginInNewFrameTheta Rotation of the old frame relative to new frame (radians, counter lockwise is positive)
+     * @param oldOriginInNewFrameTheta Rotation of the old frame relative to new frame (radians, clockwise is positive)
      * @return A new Position in global coordinates
      */
+
     public Position toNewFrame(double oldOriginInNewFrameX, double oldOriginInNewFrameY, double oldOriginInNewFrameTheta) {
+        double cos = Math.cos(oldOriginInNewFrameTheta);
+        double sin = Math.sin(oldOriginInNewFrameTheta);
+
+        // Rotate and translate the position
+        double newX = this.x * cos - this.y * sin + oldOriginInNewFrameX;
+        double newY = this.x * sin + this.y * cos + oldOriginInNewFrameY;
+
+        // Add the frame rotation to the heading
+        double newTheta = this.theta + oldOriginInNewFrameTheta;
+
+        return new Position(newX, newY, newTheta);
+    }
+   /* public Position toNewFrame(double oldOriginInNewFrameX, double oldOriginInNewFrameY, double oldOriginInNewFrameTheta) {
         double cos = Math.cos(oldOriginInNewFrameTheta);
         double sin = Math.sin(oldOriginInNewFrameTheta);
 
@@ -254,7 +268,7 @@ public class Position {
         double globalTheta = MathFunctions.angleWrapRad(this.theta + oldOriginInNewFrameTheta);
 
         return new Position(globalX, globalY, globalTheta);
-    }
+    }*/
 
     /**
      * Transforms this position from a local coordinate frame to a global coordinate frame.
