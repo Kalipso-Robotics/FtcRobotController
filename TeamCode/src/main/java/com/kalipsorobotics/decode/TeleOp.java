@@ -378,7 +378,7 @@ public class TeleOp extends KOpMode {
         // Priority 2- Execute shoot sequence
         if (shootAllPressed) {
             if (!isPending(shootAllAction)) {
-                //resetOdometryToPosition = new ResetOdometryToPosition(SharedData.getLimelightGlobalPosition());
+                resetOdometryToPosition = new ResetOdometryToPosition(SharedData.getLimelightGlobalPosition());
                 shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignLimelight);
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);

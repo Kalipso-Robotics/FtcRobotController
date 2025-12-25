@@ -1,8 +1,9 @@
 package com.kalipsorobotics.actions.cameraVision;
 
+import static com.kalipsorobotics.actions.cameraVision.AprilTagConfig.*;
+
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.cameraVision.AllianceColor;
-import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
@@ -31,37 +32,9 @@ public class AprilTagDetectionAction extends Action {
     private final Turret turret;
     private final int targetAprilTagId;
     private boolean hasStarted = false;
-    // Field-facing yaw of each goal tag (absolute field frame, +CCW from field X)
-
-    //Perpendicular vector to AprilTag
-    private final double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(126); //Math.toRadians(-234);
-
-    private final double APRILTAG_X_REL_FIELD_MM = 3305;
-
-    private final double APRILTAG_Y_REL_FIELD_MM = 1016;
-
-    private final double APRIL_X_REL_TO_GOAL = 300.232;
-
-    private final double APRIL_Y_REL_TO_GOAL = 369.541;
-
-    private final double APRIL_TAG_ANGLE_REL_TO_GOAL_RAD = Math.toRadians(54);
-
     private final Position aprilTagRelFieldPos;
 
-
-
-    //Measure from CAD
-//    private final double FIELD_ORIGIN_X_REL_APRILTAG_MM = 2629;
-//
-//    private final double FIELD_ORIGIN_Y_REL_APRILTAG_MM = -1894;
-
-    private final Position TURRET_REL_CAM_POS = new Position(-169.8848, -3.2466, 0);
-
-    private final Point ROBOT_REL_TURRET_POINT = new Point(3.48052, 2.50233);
-
-
     private Position camRelAprilTag;
-    double kDistanceScale = (72.0 + 59 + 32 + 25) / (72 + 58.5 + 31.25 + 23.5); // real / calculated
 
     boolean hasFound;
     private double xCamMM;
@@ -182,7 +155,7 @@ public class AprilTagDetectionAction extends Action {
      * Uses the detected AprilTag position and known tag field location.
      *
      * Coordinate system:
-     * - Field: +X is forward from init position, +Y is left, angles are CCW from +X
+     * - Field: +X is forward from init position, +Y is right, angles are CCW from +X
      * - Camera: +Z is forward (optical axis), +X is right, +Y is down
      * - AprilTag's local frame: +X is the direction the tag faces, origin at tag center
      *

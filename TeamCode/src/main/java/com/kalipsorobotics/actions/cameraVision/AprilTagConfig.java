@@ -1,0 +1,31 @@
+package com.kalipsorobotics.actions.cameraVision;
+
+
+import com.acmerobotics.dashboard.config.Config;
+import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.math.Position;
+
+@Config
+public class AprilTagConfig {
+
+    public static double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(126); //Math.toRadians(-234);
+
+    //Tuned until zero field is different from CAD
+    public static double APRILTAG_X_REL_FIELD_MM = 3115;
+    public static double APRILTAG_Y_REL_FIELD_MM = 951.43; //Tuned until zero
+
+
+    public static double APRIL_X_REL_TO_GOAL = 300.232;
+
+    public static double APRIL_Y_REL_TO_GOAL = 369.541;
+
+    public static double APRIL_TAG_ANGLE_REL_TO_GOAL_RAD = Math.toRadians(54);
+
+
+    public static Position TURRET_REL_CAM_POS = new Position(-169.8848, -3.2466, 0);
+    public static Point ROBOT_REL_TURRET_POINT = new Point(3.48052, 2.50233);
+
+
+    public static double FIELD_ORIGIN_X_REL_APRILTAG_MM = 2629;
+    public static double FIELD_ORIGIN_Y_REL_APRILTAG_MM = -1894;
+}

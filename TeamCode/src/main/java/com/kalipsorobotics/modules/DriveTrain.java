@@ -10,6 +10,10 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class DriveTrain {
+    public static double ROBOT_LENGTH = 400.0;
+    public static double ROBOT_WIDTH = 388.70;
+
+
     private static DriveTrain single_instance = null;
 
     private OpModeUtilities opModeUtilities;
