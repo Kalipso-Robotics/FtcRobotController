@@ -28,7 +28,6 @@ public class Shooter {
 
     public static final double FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY = 2370.0 / 2.0;
 
-
     private final OpModeUtilities opModeUtilities;
 
     private final KMotor shooter1;
