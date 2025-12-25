@@ -22,6 +22,7 @@ import java.util.Optional;
 public class  PurePursuitAction extends Action {
     public static final double P_XY = 1.0/350.0;
     public static final double P_ANGLE = (1.0 / Math.toRadians(90));
+    public static final double D_XY = 1.0/200;
     public static final double P_XY_FAST = P_XY * 2;
     public static final double P_ANGLE_FAST = P_ANGLE * 2;
     public static final double P_XY_SLOW = P_XY / 2;
@@ -225,6 +226,11 @@ public class  PurePursuitAction extends Action {
         double powerX = target.getPidX().getPower(xError);
         double powerY = target.getPidY().getPower(yError);
 
+        if (!isTargetLast(currentPosition)) {
+            powerX *= 1.5;
+            powerY *= 1.5;
+        }
+
         KLog.d("directionalpowerlook", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
                 powerAngle));
 
@@ -233,14 +239,14 @@ public class  PurePursuitAction extends Action {
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
 
-        if (!isTargetLast(currentPosition)) {
-            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
-            double scale = 1/max * 0.93;
-            fLeftPower = fLeftPower * scale;
-            bLeftPower = bLeftPower * scale;
-            fRightPower = fRightPower * scale;
-            bRightPower = bRightPower * scale;
-        }
+//        if (!isTargetLast(currentPosition)) {
+//            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
+//            double scale = 1/max * 0.93;
+//            fLeftPower = fLeftPower * scale;
+//            bLeftPower = bLeftPower * scale;
+//            fRightPower = fRightPower * scale;
+//            bRightPower = bRightPower * scale;
+//        }
 
         KLog.d("PurePursuit_Log",
                 "running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
@@ -364,7 +370,8 @@ public class  PurePursuitAction extends Action {
 
             double targetAngle;
             if (distanceFromPrev <= segmentLength && !hasOvershot) {
-                targetAngle = prevWayPoint.getTheta() + (target.getTheta() - prevWayPoint.getTheta()) * distanceFromPrev/segmentLength;
+                double thetaAngle = MathFunctions.angleWrapRad(target.getTheta() - prevWayPoint.getTheta());
+                targetAngle = prevWayPoint.getTheta() + thetaAngle * distanceFromPrev/segmentLength;
             } else {
                 hasOvershot = true;
                 targetAngle = target.getTheta();

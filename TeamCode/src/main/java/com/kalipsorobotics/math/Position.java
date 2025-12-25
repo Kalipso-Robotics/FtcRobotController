@@ -4,6 +4,7 @@ package com.kalipsorobotics.math;
 import com.kalipsorobotics.PID.PidNav;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 
+import org.checkerframework.dataflow.qual.Pure;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
@@ -30,8 +31,8 @@ public class Position {
     private double velocity;
     private double acceleration;
 
-    private PidNav pidX = new PidNav(PurePursuitAction.P_XY, 0, 0);
-    private PidNav pidY = new PidNav(PurePursuitAction.P_XY, 0, 0);
+    private PidNav pidX = new PidNav(PurePursuitAction.P_XY, 0, PurePursuitAction.D_XY);
+    private PidNav pidY = new PidNav(PurePursuitAction.P_XY, 0, PurePursuitAction.D_XY);
     private PidNav pidAngle = new PidNav(PurePursuitAction.P_ANGLE, 0, 0);
     private PidNav pidAngleAdaptive = new PidNav(1.3 / Math.toRadians(90), 0.001, 0);
 
