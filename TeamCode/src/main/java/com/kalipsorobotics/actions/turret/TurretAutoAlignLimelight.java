@@ -30,6 +30,8 @@ public class TurretAutoAlignLimelight extends Action {
     private boolean aprilTagFound = false;
     private double searchAngleDeg = 180;
     private boolean hasSearched = false;
+    private double odometryTransitionThresholdCount = 20;
+    private double odometryTransitionCount = 0;
     double totalAngleWrap;
     double lastLimit;
     Point targetPoint;
@@ -151,12 +153,20 @@ public class TurretAutoAlignLimelight extends Action {
         if (aprilTagFound) {
             double targetAngleLimelight = SharedData.getLimelightPosition().getAngleToGoalRad();
             hasSearched = false;
+            odometryTransitionCount = 0;
             totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
             KLog.d("TurretStateMachine", "Using LIMELIGHT - targetAngle: " + targetAngleLimelight + ", targetTicks: " + targetTicks);
         } else if (useOdometryAlign) {
-            targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint);
-            KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
+            odometryTransitionCount++;
+            KLog.d("TurretStateMachine", "Limelight not seen, odometryTransitionCount: " + odometryTransitionCount + "/" + odometryTransitionThresholdCount);
+            if (odometryTransitionCount > odometryTransitionThresholdCount) {
+                targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint);
+                KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
+            } else {
+                KLog.d("TurretStateMachine", "Waiting for transition threshold, holding position");
+                return;
+            }
         } else {
             KLog.d("TurretStateMachine", "No april tag and odometry disabled - holding position");
             turretMotor.setPower(0);
