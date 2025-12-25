@@ -10,9 +10,10 @@ public class Path {
     private final List<Position> path;
     private int currentSearchWayPointIndex = 0;
 
-    private final double PATH_ANGLE_TOLERANCE = Math.toRadians(5);
-
+    public static final double PATH_ANGLE_TOLERANCE = Math.toRadians(5);
+    private double pathAngleTolerance = 0;
     public Path(List<Position> path) {
+        this.pathAngleTolerance = PATH_ANGLE_TOLERANCE;
         this.path = Collections.unmodifiableList(path);
     }
 
@@ -61,7 +62,7 @@ public class Path {
                 return Optional.of(currentFollowPosition);
             } else {
                 // within distance and try to lock angle
-                if (Math.abs(currentPosition.getTheta() - currentFollowPosition.getTheta()) > PATH_ANGLE_TOLERANCE) {
+                if (Math.abs(currentPosition.getTheta() - currentFollowPosition.getTheta()) > pathAngleTolerance) {
                     currentSearchWayPointIndex = i;
                     KLog.d("purepursaction_debug_follow", "Achieved Point, trying to lock angle | Current Position: " + currentPosition.getPoint()
                     + " Follow Point: " + currentFollowPosition.getPoint());
@@ -130,5 +131,14 @@ public class Path {
             currentSearchWayPointIndex--;
         }
         return currentSearchWayPointIndex;
+    }
+
+
+    public double getPathAngleTolerance() {
+        return pathAngleTolerance;
+    }
+
+    public void setPathAngleTolerance(double pathAngleTolerance) {
+        this.pathAngleTolerance = pathAngleTolerance;
     }
 }

@@ -21,7 +21,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 
 public class RoundTripAction extends KActionSet {
-
+    private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 30;
     private PurePursuitAction moveToBall;
 
     private IntakeFullAction intakeFullAction;
@@ -52,6 +52,7 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setName("moveToBall");  // FIX: Name the action!
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
+        moveToBalls.setFinalAngleLockingThresholdDegree(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE);
         moveToBalls.setLookAheadRadius(150);  // Increased from default 75 to reduce oscillation during heading changes
         moveToBalls.setFinalSearchRadius(100);
         moveToBalls.setMaxTimeOutMS(8000);
@@ -82,7 +83,7 @@ public class RoundTripAction extends KActionSet {
 
         shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
-        shoot.setDependentActions(moveToBalls); //removed turretReday, shooterReady
+        shoot.setDependentActions(moveToBalls, shooterReady); //removed turretReady
         this.addAction(shoot);
 
         shooterStop = new ShooterStop(shooterRun);

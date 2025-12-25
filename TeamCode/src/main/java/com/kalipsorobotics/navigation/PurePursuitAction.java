@@ -32,9 +32,9 @@ public class  PurePursuitAction extends Action {
     private double lastSearchRadius = LAST_RADIUS_MM;
     private double lookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
-    List<Position> pathPoints = new ArrayList<>();
+    private final List<Position> pathPoints = new ArrayList<>();
 
-    DriveTrain driveTrain;
+    private final DriveTrain driveTrain;
 
     private final PidNav pidX;
     private final PidNav pidY;
@@ -43,7 +43,7 @@ public class  PurePursuitAction extends Action {
     int maxCheckDoneCounter = 1;
     int checkDoneCounter = 0;
 
-    Path path;
+    private Path path;
     Segment lastLine;
     static final private double LOOK_AHEAD_RADIUS_MM = 75;
 
@@ -65,6 +65,8 @@ public class  PurePursuitAction extends Action {
 
     private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 1;
 
+    private double finalAngleLockingThresholdDegree = 0;
+
     private double startTimeMS = System.currentTimeMillis();
 
     private Position currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
@@ -82,6 +84,7 @@ public class  PurePursuitAction extends Action {
     private boolean hasOvershot = false;
 
     ElapsedTime timer;
+    private double pathAngleToleranceDeg;
 
     /**
      * Should not do more than 24 inches or 600mm moves in X and Y (single move)
@@ -95,8 +98,8 @@ public class  PurePursuitAction extends Action {
         this.pidY = new PidNav(P_XY, 0, 0, 0.1000);
         this.pidAngle = new PidNav(P_ANGLE, 0, 0, 0.0050);
 
-
-
+        finalAngleLockingThresholdDegree = FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE;
+        this.pathAngleToleranceDeg = Path.PATH_ANGLE_TOLERANCE;
         this.timeoutTimer = new ElapsedTime();
 
         this.prevFollow = Optional.empty();
@@ -153,7 +156,7 @@ public class  PurePursuitAction extends Action {
     private double calcAdaptivePAngle(double theta) {
         Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
         double headingDelta = Math.abs(pos.getTheta() - theta);
-        if (headingDelta < FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) {
+        if (headingDelta < finalAngleLockingThresholdDegree) {
             return P_ANGLE_SLOW;
         }
         return 1.0 / headingDelta;
@@ -188,7 +191,7 @@ public class  PurePursuitAction extends Action {
 
         //Log.d("purepursaction_adaptiveP", String.format("action distance %f, P increased from %f to %f", actionDistance, P_XY, adaptiveXY));
         //Log.d("purepursaction_adaptiveP", String.format("heading delta %f, P increased from %f to %f", headingDelta, P_ANGLE, adaptiveTheta));
-        return new double[]{adaptiveXY, adaptiveTheta};
+        return new double[] {adaptiveXY, adaptiveTheta};
     }
 
     public void setFinalSearchRadius(double searchRadiusMM){
@@ -275,6 +278,7 @@ public class  PurePursuitAction extends Action {
         if (!hasStarted) {
             pathPoints.add(0, new Position(SharedData.getOdometryWheelIMUPosition())); //add starting position
             path = new Path(pathPoints);
+            path.setPathAngleTolerance(pathAngleToleranceDeg);
             startTimeMS = System.currentTimeMillis();
             hasStarted = true;
             //lastPosition = wheelOdometry.getCurrentPosition();
@@ -343,7 +347,7 @@ public class  PurePursuitAction extends Action {
                     "Lookahead returns nothing. Last point " + lastPoint + "current pos:    " + currentPosition.toString());
             //11-22 13:04:54.212  3107  3301 D KLog_purepursaction_debug_follow: locking final angle:  x=2598.00 (102.28 in), y=441.38 (17.38 in), theta=-2.4136 (-138.3 deg)
             //11-22 13:04:54.213  3107  3301 D KLog_purepursaction_debug_follow: current pos:    x=2616.11 (103.00 in), y=432.30 (17.02 in), theta=-2.4347 (-139.5 deg)
-            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) < Math.toRadians(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE) ) {
+            if (Math.abs(lastPoint.getTheta() - currentPosition.getTheta()) < Math.toRadians(finalAngleLockingThresholdDegree) ) {
                 KLog.d("purepursaction_debug_follow",
                         "Final angle is within range. Finish moving. Last point  " + lastPoint + "current pos:    " + currentPosition.toString());
                 finishedMoving();
@@ -424,5 +428,15 @@ public class  PurePursuitAction extends Action {
         this.maxTimeOutMS = maxTimeOutMS;
     }
 
+    public double getFinalAngleLockingThresholdDegree() {
+        return finalAngleLockingThresholdDegree;
+    }
 
+    public void setFinalAngleLockingThresholdDegree(double finalAngleLockingThresholdDegree) {
+        this.finalAngleLockingThresholdDegree = finalAngleLockingThresholdDegree;
+    }
+
+    public void setPathAngleTolerance(double pathAngleTolerance) {
+        this.pathAngleToleranceDeg = pathAngleTolerance;
+    }
 }
