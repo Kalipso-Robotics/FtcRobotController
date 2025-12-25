@@ -2,14 +2,24 @@ package com.kalipsorobotics.localization;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 
 public class ResetOdometryToPosition extends Action {
+
+    Turret turret;
+
+    public ResetOdometryToPosition(Turret turret) {
+        this.turret = turret;
+    }
+
+
     @Override
     protected void update() {
-        if (SharedData.getLimelightRawPosition().isEmpty()) {
-            KLog.d("ResetOdometryToPosition", "No Valid Detection Not Updating");
+        double turretVelocity = turret.getCurrentVelocity();
+        if (SharedData.getLimelightRawPosition().isEmpty() && turretVelocity > 10) {
+            KLog.d("ResetOdometryToPosition", "No Valid Detection Not Updating. turretVelocity (deg / sec):  " + turretVelocity);
             return;
         }
         Position limelightGlobalPosition = SharedData.getLimelightGlobalPosition();

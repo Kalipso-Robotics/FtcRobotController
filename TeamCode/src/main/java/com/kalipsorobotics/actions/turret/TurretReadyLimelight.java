@@ -9,9 +9,9 @@ public class TurretReadyLimelight extends Action {
     private double maxTimeoutMS;
     private ElapsedTime timeoutTimer;
     private static final double DEFAULT_MAX_TIMOUT_MS = 4000;
-    private TurretAutoAlignLimelight turretAutoAlignLimelight;
-    public TurretReadyLimelight(TurretAutoAlignLimelight turretAutoAlignLimelight) {
-        this.turretAutoAlignLimelight = turretAutoAlignLimelight;
+    private TurretAutoAlignTeleop turretAutoAlignTeleop;
+    public TurretReadyLimelight(TurretAutoAlignTeleop turretAutoAlignTeleop) {
+        this.turretAutoAlignTeleop = turretAutoAlignTeleop;
         this.maxTimeoutMS = DEFAULT_MAX_TIMOUT_MS;
         timeoutTimer = new ElapsedTime();
     }
@@ -35,10 +35,10 @@ public class TurretReadyLimelight extends Action {
             return;
         }
 
-        if (turretAutoAlignLimelight.isWithinRange()) {
+        if (turretAutoAlignTeleop.isWithinRange()) {
             isDone = true;
-            KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlignLimelight.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
-                    "Target Ticks: " + turretAutoAlignLimelight.getTargetTicks());
+            KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
+                    "Target Ticks: " + turretAutoAlignTeleop.getTargetTicks());
         }
     }
 }

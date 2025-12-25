@@ -1,9 +1,11 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
-import com.kalipsorobotics.actions.turret.TurretAutoAlignLimelight;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
+import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleop;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
@@ -87,7 +89,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
     private Odometry odometry;
     private DriveTrain driveTrain;
     private IMUModule imuModule;
-    private TurretAutoAlignLimelight turretAutoAlignLimelight;
+    private TurretAutoAlignTeleop turretAutoAlignTeleop;
     private Turret turret;
     private KFileWriter fileWriter;
     private OpModeUtilities opModeUtilities;
@@ -112,8 +114,8 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
-        turretAutoAlignLimelight = new TurretAutoAlignLimelight(opModeUtilities, turret, aprilTagDetectionAction, AllianceColor.RED);
-        turretAutoAlignLimelight.runWithLimelight();
+        turretAutoAlignTeleop = new TurretAutoAlignTeleop(opModeUtilities, turret, aprilTagDetectionAction, AllianceColor.RED);
+        turretAutoAlignTeleop.runWithOdometry();
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
 
@@ -140,7 +142,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         while (opModeIsActive()) {
             // Update odometry
             odometry.updateAll();
-            turretAutoAlignLimelight.updateCheckDone();
+            turretAutoAlignTeleop.updateCheckDone();
             aprilTagDetectionAction.updateCheckDone();
 
             // ========== Power Control ==========
@@ -309,7 +311,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
      * and target position from TurretConfig
      */
     private double calculateDistanceToTarget() {
-        return SharedData.getLimelightRawPosition().getDistanceToGoalMM();
+        return ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT);
 
 //        Position currentPosition = odometry.update();
 //

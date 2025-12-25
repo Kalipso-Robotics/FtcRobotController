@@ -1,10 +1,7 @@
 package com.kalipsorobotics.actions.shooter;
 
-import static com.kalipsorobotics.modules.shooter.ShooterConfig.APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
-
 import android.annotation.SuppressLint;
 
-import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.shooter.ShooterConfig;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
@@ -18,7 +15,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterRun extends Action {
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
-
     private final Shooter shooter;
     private final Point targetPoint;
     private Point launchPoint;
@@ -168,15 +164,8 @@ public class ShooterRun extends Action {
         return shooter.getPrediction(currentDistanceMM);
     }
 
-    private double getLimeLightDistanceMM() {
-        double limeLightDistanceMM = SharedData.getLimelightRawPosition().getDistanceToGoalMM() + APRIL_TAG_DISTANCE_OFFSET_TO_TARGET_POINT_MM;
-        KLog.d("ShooterRun_Distance", "Limelight distance: " + limeLightDistanceMM + " mm");
-        return limeLightDistanceMM;
-    }
-
     private double getOdometryDistanceMM() {
-        Position currentPosition = SharedData.getOdometryWheelIMUPosition();
-        double odometryDistanceMM = currentPosition.toPoint().distanceTo(targetPoint);
+        double odometryDistanceMM = getDistanceToTargetFromCurrentPos(targetPoint);
         KLog.d("ShooterRun_Distance", "Odometry distance: " + odometryDistanceMM + " mm");
         return odometryDistanceMM;
     }
@@ -184,13 +173,6 @@ public class ShooterRun extends Action {
     private double getCurrentDistanceMM() {
         double distanceMM = getOdometryDistanceMM();
         KLog.d("ShooterRun_Distance", "Odometry Distance " + distanceMM);
-
-        if (useLimelight && !SharedData.getLimelightRawPosition().isEmpty()) {
-            distanceMM = getLimeLightDistanceMM();
-            KLog.d("ShooterRun_Distance", "Limelight override Distance " + distanceMM);
-        }
-        KLog.d("ShooterRun_Distance", "Final Distance " + distanceMM);
-
         return distanceMM;
     }
 
@@ -239,5 +221,9 @@ public class ShooterRun extends Action {
 
     public void setTargetRPS(double targetRPS) {
         this.targetRPS = targetRPS;
+    }
+
+    public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
+        return SharedData.getOdometryWheelIMUPosition().toPoint().distanceTo(targetPoint);
     }
 }

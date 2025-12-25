@@ -213,7 +213,7 @@ public class KMotor {
      * Get the underlying DcMotor object
      * @return the motor
      */
-    public DcMotor getMotor() {
+    public DcMotorEx getMotor() {
         return motor;
     }
 

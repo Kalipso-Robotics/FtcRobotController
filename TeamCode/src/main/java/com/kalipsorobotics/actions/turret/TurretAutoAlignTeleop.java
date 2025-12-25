@@ -16,7 +16,7 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-public class TurretAutoAlignLimelight extends Action {
+public class TurretAutoAlignTeleop extends Action {
     OpModeUtilities opModeUtilities;
     Turret turret;
     KMotor turretMotor;
@@ -27,7 +27,6 @@ public class TurretAutoAlignLimelight extends Action {
     private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
-    private boolean aprilTagFound = false;
     private double searchAngleDeg = 180;
     private boolean hasSearched = false;
     private double odometryTransitionThresholdCount = 20;
@@ -35,14 +34,13 @@ public class TurretAutoAlignLimelight extends Action {
     double totalAngleWrap;
     double lastLimit;
     Point targetPoint;
-    private boolean useOdometryAlign;
     private double previousTotalAngle;
     private double currentAngularVelocity;
     private ElapsedTime velocityTimer;
     private boolean isFirstVelocityUpdate;
 
 
-    public TurretAutoAlignLimelight(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
+    public TurretAutoAlignTeleop(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
         this.aprilTagDetectionAction = aprilTagDetectionAction;
@@ -118,14 +116,8 @@ public class TurretAutoAlignLimelight extends Action {
                 KLog.d("TurretStateMachine", "RUN_WITH_MANUAL_CONTROL mode - manualTargetTicks: " + targetPower + ", power: " + turretMotor.getPower());
                 isWithinRange = true;
                 break;
-            case RUN_USING_LIMELIGHT:
-                KLog.d("TurretStateMachine", "RUN_USING_LimeLight mode - useOdometrySearch=false");
-                useOdometryAlign = false;
-                updateAlignToTarget();
-                break;
-            case RUN_USING_ODOMETRY_AND_LIMELIGHT:
+            case RUN_USING_ODOMETRY:
                 KLog.d("TurretStateMachine", "RUN_USING_ODOMETRY_AND_LimeLight mode - useOdometrySearch=true");
-                useOdometryAlign = true;
                 updateAlignToTarget();
                 break;
         }
@@ -134,15 +126,8 @@ public class TurretAutoAlignLimelight extends Action {
     }
 
     private void updateAlignToTarget() {
-        KLog.d("TurretStateMachine", "updateAlignToTarget() - useOdometrySearch: " + useOdometryAlign);
-
         aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
-        aprilTagFound = !SharedData.getLimelightRawPosition().isEmpty();
-        double currentAngleRad = turret.getCurrentAngleRad();
-
-        KLog.d("TurretStateMachine", "aprilTagFound: " + aprilTagFound + ", currentAngleRad: " + currentAngleRad);
-
         // ONLY FOR DASHBOARD TUNING TO UPDATE WITHOUT RECONSTUCTING
         // -------------------------------------------
         turretMotor.getPIDFController().setKp(TurretConfig.kP);
@@ -150,29 +135,10 @@ public class TurretAutoAlignLimelight extends Action {
         turretMotor.getPIDFController().setKs(TurretConfig.kS);
         // -------------------------------------------
 
-        if (aprilTagFound) {
-            hasSearched = false;
-            odometryTransitionCount = 0;
-            targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, SharedData.getLimelightGlobalPosition());
-            KLog.d("TurretStateMachine", "Using LIMELIGHT targetTicks: " + targetTicks);
-        } else if (useOdometryAlign) {
-            odometryTransitionCount++;
-            KLog.d("TurretStateMachine", "Limelight not seen, odometryTransitionCount: " + odometryTransitionCount + "/" + odometryTransitionThresholdCount);
-            if (odometryTransitionCount > odometryTransitionThresholdCount) {
-                targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, SharedData.getOdometryWheelIMUPosition());
-                KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
-            } else {
-                KLog.d("TurretStateMachine", "Waiting for transition threshold, holding position");
-                return;
-            }
-        } else {
-            KLog.d("TurretStateMachine", "No april tag and odometry disabled - holding position");
-            turretMotor.setPower(0);
-            isWithinRange = true;
-            return;
-        }
+        KLog.d("TurretStateMachine", "Limelight not seen, odometryTransitionCount: " + odometryTransitionCount + "/" + odometryTransitionThresholdCount);
+        targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, SharedData.getOdometryWheelIMUPosition());
+        KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
 
-        KLog.d("TurretStateMachine", "Calling moveToTargetTicks() - targetTicks: " + targetTicks);
         moveToTargetTicks();
     }
 
@@ -208,16 +174,10 @@ public class TurretAutoAlignLimelight extends Action {
         KLog.d("TurretStateMachine", "runWithTicksIncrement() - mode now: " + turretRunMode + ", manualTargetTicks: " + targetPower);
     }
 
-    public void runWithOdometryAndLimelight() {
+    public void runWithOdometry() {
         KLog.d("TurretStateMachine", "runWithOdometryAndLimelight() called - previous mode: " + turretRunMode);
-        this.turretRunMode = TurretRunMode.RUN_USING_ODOMETRY_AND_LIMELIGHT;
+        this.turretRunMode = TurretRunMode.RUN_USING_ODOMETRY;
         KLog.d("TurretStateMachine", "runWithOdometryAndLimelight() - mode now: " + turretRunMode);
-    }
-
-    public void runWithLimelight() {
-        KLog.d("TurretStateMachine", "runWithLimelight() called - previous mode: " + turretRunMode);
-        this.turretRunMode = TurretRunMode.RUN_USING_LIMELIGHT;
-        KLog.d("TurretStateMachine", "runWithLimelight() - mode now: " + turretRunMode);
     }
 
     public void stop() {
@@ -264,9 +224,5 @@ public class TurretAutoAlignLimelight extends Action {
 
         KLog.d("TurretStateMachine", String.format("AngVel: %.4f rad/ms, AngleToGoal: %.1f deg, Distance: %.0f mm",
             currentAngularVelocity, Math.toDegrees(totalAngleToGoal), distanceToGoal));
-    }
-
-    public boolean getAlignWithOdometry() {
-        return useOdometryAlign;
     }
 }
