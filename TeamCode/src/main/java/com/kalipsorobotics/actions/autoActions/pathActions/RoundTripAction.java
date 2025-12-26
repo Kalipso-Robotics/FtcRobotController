@@ -34,11 +34,10 @@ public class RoundTripAction extends KActionSet {
     private TurretAutoAlign turretAutoAlign;
     private TurretReady turretReady;
     private boolean hasUpdatedShooterReady = false;
-
     Point targetPoint;
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake) {
+                           Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake, boolean shouldDependOnFlywheel) {
         this.targetPoint = targetPoint;
         this.shooter = shooter;
         this.turretAutoAlign = turretAutoAlign;
@@ -83,7 +82,11 @@ public class RoundTripAction extends KActionSet {
 
         shoot = new PushBall(stopper, intake, shooter);
         shoot.setName("shoot");
-        shoot.setDependentActions(moveToBalls, shooterReady); //removed turretReady
+        if (shouldDependOnFlywheel) {
+            shoot.setDependentActions(moveToBalls, shooterReady); //removed turretReady
+        } else {
+            shoot.setDependentActions(moveToBalls);
+        }
         this.addAction(shoot);
 
         shooterStop = new ShooterStop(shooterRun);
@@ -95,7 +98,12 @@ public class RoundTripAction extends KActionSet {
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
                            Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
-        this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, true);
+        this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, true, false);
+    }
+
+    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, boolean shouldDependOnFlywheel) {
+        this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, true, shouldDependOnFlywheel);
     }
 
     public PurePursuitAction getMoveToBall() {

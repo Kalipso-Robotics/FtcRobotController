@@ -355,7 +355,11 @@ public class TeleOp extends KOpMode {
         if (stopShooterPressed) {
             shooterRun.stop();
 
+            if (shootAllAction != null) {
+                shootAllAction.setIsDone(true);
+            }
             shootAllAction = null;
+            setLastShooterAction(shootAllAction);
 
             releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
             setLastBrakingAction(releaseBrakeAction);

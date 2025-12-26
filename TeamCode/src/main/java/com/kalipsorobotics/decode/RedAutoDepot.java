@@ -102,7 +102,7 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- FIRST SHOOT ----------------------
 
-        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false);
+        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
         autoDepot.addAction(trip0);
