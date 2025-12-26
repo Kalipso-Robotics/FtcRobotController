@@ -119,11 +119,13 @@ public class TurretAutoAlignTeleop extends Action {
             case RUN_USING_LIMELIGHT:
                 KLog.d("TurretStateMachine", "RUN_USING_LimeLight mode - useOdometrySearch=false");
                 useOdometryAlign = false;
+                isWithinRange = false;
                 updateAlignToTarget();
                 break;
             case RUN_USING_ODOMETRY_AND_LIMELIGHT:
                 KLog.d("TurretStateMachine", "RUN_USING_ODOMETRY_AND_LimeLight mode - useOdometrySearch=true");
                 useOdometryAlign = true;
+                isWithinRange = false;
                 updateAlignToTarget();
                 break;
         }
