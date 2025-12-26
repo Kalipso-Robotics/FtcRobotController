@@ -23,11 +23,7 @@ public class AprilTagDetectionAction extends Action {
 
     AllianceColor allianceColor;
 
-    private boolean useWebcam = false;
-
-//    private AprilTagProcessor aprilTagProcessor;
-//    private VisionPortal visionPortal;
-//    WebcamName camera;
+    private final OpModeUtilities opModeUtilities;
 
     private final Limelight3A limelight;
     private final Turret turret;
@@ -42,37 +38,35 @@ public class AprilTagDetectionAction extends Action {
     private double yCamMM;
     private double zCamMM;
     private double distanceFromCamToAprilTag;
-    private Position cameraPositionRelToGoal;
+
+    private double prevPitchDeg = Double.MIN_VALUE;
 
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId, AllianceColor allianceColor) {
         this.allianceColor = allianceColor;
+        this.opModeUtilities = opModeUtilities;
 
         aprilTagRelFieldPos =  new Position(APRILTAG_X_REL_FIELD_MM, APRILTAG_Y_REL_FIELD_MM * allianceColor.getPolarity(), APRIL_TAG_HEADING_REL_FIELD_RAD * allianceColor.getPolarity());
 
         limelight = opModeUtilities.getHardwareMap().get(Limelight3A.class, "limelight");
 
-        limelight.pipelineSwitch(0);
+        if (allianceColor == AllianceColor.RED) {
+            boolean pipelineSwitched = limelightSwitchPipeline(0);
+            KLog.d("AprilTagDetection_Pipeline", "Pipeline Switch Red " + pipelineSwitched);
+        } else {
+            boolean pipelineSwitched = limelightSwitchPipeline(1);
+            KLog.d("AprilTagDetection_Pipeline", "Pipeline Switch Blue " + pipelineSwitched);
+        }
+
         limelight.start();
+
 
         this.turret = turret;
         this.targetAprilTagId = targetAprilTagId;
     }
 
-    public void setUseWebcam(boolean useWebcam) {
-        this.useWebcam = useWebcam;
-    }
-
     public Limelight3A getLimelight() {
         return limelight;
-    }
-
-    /**
-     * Public method to trigger odometry update from vision
-     * For use in testing and manual triggering
-     */
-    public void updateOdometryFromVision() {
-        update();
     }
 
     @Override
@@ -83,13 +77,12 @@ public class AprilTagDetectionAction extends Action {
         }
 
         LLResult result = limelight.getLatestResult();
-//        KLog.d("limelight", String.format("limelight results %s", result));
+        KLog.d("AprilTagDetection_Result", "Result validity, " + result.isValid() + " result: " + result);
         hasFound = false;
         if (result != null && result.isValid()) {
             // Access fiducial results
             List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
             for (LLResultTypes.FiducialResult fiducialResult : fiducialResults) {
-
                 int tagId = fiducialResult.getFiducialId();
 
                 KLog.d("AprilTagDetection_Tag", "tagId " + tagId);
@@ -109,7 +102,16 @@ public class AprilTagDetectionAction extends Action {
 
                     //Limelight has wabi-sabi Limelight thinks yaw is pitch and x is z and y is x
                     //As you rotate whichever responds most to rotation is correct value.
-                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(180 + camRelAprilTagPose.getOrientation().getPitch()));
+                    double camRelAprilTagPitchDeg = camRelAprilTagPose.getOrientation().getPitch();
+                    boolean isSpike = isLimelightSpike(camRelAprilTagPitchDeg, prevPitchDeg);
+                    prevPitchDeg = camRelAprilTagPitchDeg;
+                    if (isSpike) {
+                        SharedData.getLimelightRawPosition().reset();
+                        hasFound = false;
+                        return;
+                    }
+
+                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(180 + camRelAprilTagPitchDeg));
                     camRelAprilTagPos = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, camRelAprilTagTheta);
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTag Position (after transform): " + camRelAprilTagPos);
 
@@ -179,11 +181,27 @@ public class AprilTagDetectionAction extends Action {
         return robotRelFieldPos;
     }
 
-    public Position calculateCamPositionInGoalSpace(double camXInAprilTagSpace, double camZInAprilTagSpace, double camHeadingInAprilTagSpaceRad) {
-        Position turretInAprilTagSpace = new Position(-camZInAprilTagSpace, -camXInAprilTagSpace, Math.toRadians(180) + camHeadingInAprilTagSpaceRad);
-        KLog.d("AprilTagDetection", "turret in april tag space " + turretInAprilTagSpace.toString());
-        Position turretInGoalSpace = turretInAprilTagSpace.toNewFrame(new Position(APRIL_X_REL_TO_GOAL, APRIL_Y_REL_TO_GOAL, APRIL_TAG_ANGLE_REL_TO_GOAL_RAD)); // from cad
-        KLog.d("AprilTagDetection", "turet in goal space " + turretInGoalSpace.toString());
-        return turretInGoalSpace;
+    private boolean limelightSwitchPipeline(int index) {
+        boolean limelightSwitched = limelight.pipelineSwitch(index);
+        if (!limelightSwitched) {
+            opModeUtilities.getOpMode().sleep(150);
+            limelightSwitched = limelight.pipelineSwitch(index);
+        }
+        return limelightSwitched;
     }
+
+    private boolean isLimelightSpike(double currentPitchDeg, double prevPitchDeg) {
+        if ((Math.abs(currentPitchDeg)) == 180 && (Math.abs(prevPitchDeg) == 180)) {
+            return false;
+        }
+        boolean isDifferentSign = (Math.signum(currentPitchDeg) != Math.signum(prevPitchDeg));
+        boolean isBigMagnitude = Math.min(Math.abs(currentPitchDeg), Math.abs(prevPitchDeg)) > (5);
+        boolean result = isBigMagnitude && isDifferentSign;
+        if (result) {
+            KLog.d("AprilTagDetection_limelight_pos", "Pitch spike. Skip update and reset. from: " + prevPitchDeg + " to:" + currentPitchDeg);
+        }
+        return result;
+    }
+
+
 }

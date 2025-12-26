@@ -45,10 +45,7 @@ public class LimelightPos {
     }
 
     public boolean isEmpty() {
-        if (getxMM() == 0 && getyMM() == 0 && getzMM() == 0 && getCamAngleToAprilTagRad() == 0) {
-            return true;
-        }
-        return false;
+        return getxMM() == 0 && getyMM() == 0 && getzMM() == 0 && getCamAngleToAprilTagRad() == 0;
     }
 
     public double getxMM() {
