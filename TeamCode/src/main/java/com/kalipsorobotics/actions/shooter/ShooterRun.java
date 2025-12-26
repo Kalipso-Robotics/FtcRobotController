@@ -170,8 +170,14 @@ public class ShooterRun extends Action {
         return odometryDistanceMM;
     }
 
+    private double getLimelightDistance() {
+        double limelightDistanceMM = SharedData.getLimelightRawPosition().getApriLTagDistanceToCamMM();
+        KLog.d("ShooterRun_Distance", "Limelight distance: " + limelightDistanceMM + " mm");
+        return limelightDistanceMM;
+    }
+
     private double getCurrentDistanceMM() {
-        double distanceMM = getOdometryDistanceMM();
+        double distanceMM = getLimelightDistance();
         KLog.d("ShooterRun_Distance", "Odometry Distance " + distanceMM);
         return distanceMM;
     }

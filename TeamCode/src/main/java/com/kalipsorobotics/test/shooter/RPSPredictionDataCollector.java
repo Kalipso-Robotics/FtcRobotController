@@ -115,7 +115,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         turret = Turret.getInstance(opModeUtilities);
         AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
         turretAutoAlignTeleop = new TurretAutoAlignTeleop(opModeUtilities, turret, aprilTagDetectionAction, AllianceColor.RED);
-        turretAutoAlignTeleop.runWithOdometry();
+        turretAutoAlignTeleop.runWithOdometryAndLimelight();
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
 
@@ -311,7 +311,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
      * and target position from TurretConfig
      */
     private double calculateDistanceToTarget() {
-        return ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT);
+        return SharedData.getLimelightRawPosition().getApriLTagDistanceToCamMM();
 
 //        Position currentPosition = odometry.update();
 //

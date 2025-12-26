@@ -34,9 +34,9 @@ public class AprilTagDetectionAction extends Action {
     private Position camRelAprilTagPos;
 
     boolean hasFound;
-    private double xCamMM;
-    private double yCamMM;
-    private double zCamMM;
+    private double xAprilTagRelToCamMM;
+    private double yAprilTagRelToCamMM;
+    private double zAprilTagRelToCamMM;
     private double distanceFromCamToAprilTag;
 
     private double prevPitchDeg = Double.MIN_VALUE;
@@ -125,14 +125,18 @@ public class AprilTagDetectionAction extends Action {
                     }
 
                     //========================= For Raw Data Stuff To April Tag ======================
-                    xCamMM = camRelAprilTagPose.getPosition().x * 1000; // left right offset from tag
-                    yCamMM = camRelAprilTagPose.getPosition().y * 1000;
-                    zCamMM = camRelAprilTagPose.getPosition().z * 1000; // front back offset from tag
+                    xAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().x * 1000;
+                    yAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().y * 1000;
+                    zAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
 
-                    double headingFromCamToAprilTag = Math.atan2(xCamMM, -zCamMM);
-                    distanceFromCamToAprilTag = Math.hypot(xCamMM, -zCamMM);
+                    // ANGLE -----------
+                    double headingFromCamToGoal = Math.atan2(xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM)) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, -zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2));
 
-                    LimelightPos currentRawPos = new LimelightPos(distanceFromCamToAprilTag, headingFromCamToAprilTag, xCamMM, yCamMM, zCamMM);
+                    // DISTANCE -----------
+                    distanceFromCamToAprilTag = Math.hypot(xAprilTagRelToCamMM, -zAprilTagRelToCamMM);
+
+                    // SEND TO SHARED DATA ----------
+                    LimelightPos currentRawPos = new LimelightPos(distanceFromCamToAprilTag, headingFromCamToGoal, xAprilTagRelToCamMM, yAprilTagRelToCamMM, zAprilTagRelToCamMM);
                     KLog.d("AprilTagDetection_limelight_pos", "Set to SharedData. currentRawPos: " + currentRawPos);
                     SharedData.setLimelightRawPosition(currentRawPos);
                 }

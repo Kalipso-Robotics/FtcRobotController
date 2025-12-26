@@ -20,20 +20,20 @@ public class TurretAutoAlignTeleop extends Action {
     OpModeUtilities opModeUtilities;
     Turret turret;
     KMotor turretMotor;
-    private final AprilTagDetectionAction aprilTagDetectionAction;
+    private AprilTagDetectionAction aprilTagDetectionAction;
     private TurretRunMode turretRunMode;
     private double targetTicks;
     private double targetPower;
     private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
+    private boolean aprilTagFound = false;
     private double searchAngleDeg = 180;
     private boolean hasSearched = false;
-    private double odometryTransitionThresholdCount = 20;
-    private double odometryTransitionCount = 0;
     double totalAngleWrap;
     double lastLimit;
     Point targetPoint;
+    private boolean useOdometryAlign;
     private double previousTotalAngle;
     private double currentAngularVelocity;
     private ElapsedTime velocityTimer;
@@ -116,8 +116,14 @@ public class TurretAutoAlignTeleop extends Action {
                 KLog.d("TurretStateMachine", "RUN_WITH_MANUAL_CONTROL mode - manualTargetTicks: " + targetPower + ", power: " + turretMotor.getPower());
                 isWithinRange = true;
                 break;
-            case RUN_USING_ODOMETRY:
+            case RUN_USING_LIMELIGHT:
+                KLog.d("TurretStateMachine", "RUN_USING_LimeLight mode - useOdometrySearch=false");
+                useOdometryAlign = false;
+                updateAlignToTarget();
+                break;
+            case RUN_USING_ODOMETRY_AND_LIMELIGHT:
                 KLog.d("TurretStateMachine", "RUN_USING_ODOMETRY_AND_LimeLight mode - useOdometrySearch=true");
+                useOdometryAlign = true;
                 updateAlignToTarget();
                 break;
         }
@@ -126,8 +132,15 @@ public class TurretAutoAlignTeleop extends Action {
     }
 
     private void updateAlignToTarget() {
+        KLog.d("TurretStateMachine", "updateAlignToTarget() - useOdometrySearch: " + useOdometryAlign);
+
         aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
+        aprilTagFound = !SharedData.getLimelightRawPosition().isEmpty();
+        double currentAngleRad = turret.getCurrentAngleRad();
+
+        KLog.d("TurretStateMachine", "aprilTagFound: " + aprilTagFound + ", currentAngleRad: " + currentAngleRad);
+
         // ONLY FOR DASHBOARD TUNING TO UPDATE WITHOUT RECONSTUCTING
         // -------------------------------------------
         turretMotor.getPIDFController().setKp(TurretConfig.kP);
@@ -135,10 +148,31 @@ public class TurretAutoAlignTeleop extends Action {
         turretMotor.getPIDFController().setKs(TurretConfig.kS);
         // -------------------------------------------
 
-        KLog.d("TurretStateMachine", "Limelight not seen, odometryTransitionCount: " + odometryTransitionCount + "/" + odometryTransitionThresholdCount);
-        targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, SharedData.getOdometryWheelIMUPosition());
-        KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
+        if (aprilTagFound) {
+            double targetAngleLimelight = SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
+            hasSearched = false;
+            totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
+            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
+            KLog.d("TurretStateMachine", "Using LIMELIGHT - targetAngle: " + targetAngleLimelight + ", targetTicks: " + targetTicks);
+        } else if (useOdometryAlign) {
+            // NOTE: We are trying to estimate a possible angle to goal based off the IMU angle in odometry and not trusting the x or y to hopefully put
+            // the turret so the limelight can see the tag
 
+            double currentRobotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
+            double currentTurretAngleRelRobotRad = turret.getCurrentAngleRad();
+            double biasAngle = Math.atan2(targetPoint.getX(), targetPoint.getY()); // angle based on initial setup
+
+            totalAngleWrap = MathFunctions.angleWrapRad(biasAngle - currentTurretAngleRelRobotRad - currentRobotAngleRad);
+            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
+            KLog.d("TurretStateMachine", "Using ODOMETRY - targetTicks: " + targetTicks);
+        } else {
+            KLog.d("TurretStateMachine", "No april tag and odometry disabled - holding position");
+            turretMotor.setPower(0);
+            isWithinRange = true;
+            return;
+        }
+
+        KLog.d("TurretStateMachine", "Calling moveToTargetTicks() - targetTicks: " + targetTicks);
         moveToTargetTicks();
     }
 
@@ -174,10 +208,16 @@ public class TurretAutoAlignTeleop extends Action {
         KLog.d("TurretStateMachine", "runWithTicksIncrement() - mode now: " + turretRunMode + ", manualTargetTicks: " + targetPower);
     }
 
-    public void runWithOdometry() {
+    public void runWithOdometryAndLimelight() {
         KLog.d("TurretStateMachine", "runWithOdometryAndLimelight() called - previous mode: " + turretRunMode);
-        this.turretRunMode = TurretRunMode.RUN_USING_ODOMETRY;
+        this.turretRunMode = TurretRunMode.RUN_USING_ODOMETRY_AND_LIMELIGHT;
         KLog.d("TurretStateMachine", "runWithOdometryAndLimelight() - mode now: " + turretRunMode);
+    }
+
+    public void runWithLimelight() {
+        KLog.d("TurretStateMachine", "runWithLimelight() called - previous mode: " + turretRunMode);
+        this.turretRunMode = TurretRunMode.RUN_USING_LIMELIGHT;
+        KLog.d("TurretStateMachine", "runWithLimelight() - mode now: " + turretRunMode);
     }
 
     public void stop() {
@@ -223,6 +263,10 @@ public class TurretAutoAlignTeleop extends Action {
         }
 
         KLog.d("TurretStateMachine", String.format("AngVel: %.4f rad/ms, AngleToGoal: %.1f deg, Distance: %.0f mm",
-            currentAngularVelocity, Math.toDegrees(totalAngleToGoal), distanceToGoal));
+                currentAngularVelocity, Math.toDegrees(totalAngleToGoal), distanceToGoal));
+    }
+
+    public boolean getAlignWithOdometry() {
+        return useOdometryAlign;
     }
 }

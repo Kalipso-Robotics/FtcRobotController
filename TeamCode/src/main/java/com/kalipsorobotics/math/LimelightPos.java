@@ -2,26 +2,26 @@ package com.kalipsorobotics.math;
 
 public class LimelightPos {
 
-    private double camDistanceToGoalMM;
-    private double camAngleToAprilTagRad;
+    private double apriLTagDistanceToCamMM;
+    private double goalAngleToCamRad;
     private double xMM;
     private double yMM;
     private double zMM;
 
-    public LimelightPos(double camDistanceToAprilTagMM, double camAngleToAprilTag, double xMM, double yMM, double zMM) {
-        this.camDistanceToGoalMM = camDistanceToAprilTagMM;
-        this.camAngleToAprilTagRad = camAngleToAprilTag;
+    public LimelightPos(double aprilTagDistanceToCamMM, double goalAngleToCamRad, double xMM, double yMM, double zMM) {
+        this.apriLTagDistanceToCamMM = aprilTagDistanceToCamMM;
+        this.goalAngleToCamRad = goalAngleToCamRad;
         this.xMM = xMM;
         this.yMM = yMM;
         this.zMM = zMM;
     }
 
-    public void setCamDistanceToGoalMM(double camDistanceToGoalMM) {
-        this.camDistanceToGoalMM = camDistanceToGoalMM;
+    public void setApriLTagDistanceToCamMM(double apriLTagDistanceToCamMM) {
+        this.apriLTagDistanceToCamMM = apriLTagDistanceToCamMM;
     }
 
-    public void setCamAngleToAprilTagRad(double camAngleToAprilTagRad) {
-        this.camAngleToAprilTagRad = camAngleToAprilTagRad;
+    public void setGoalAngleToCamRad(double goalAngleToCamRad) {
+        this.goalAngleToCamRad = goalAngleToCamRad;
     }
 
     public void setxMM(double xMM) {
@@ -36,16 +36,16 @@ public class LimelightPos {
         this.zMM = zMM;
     }
 
-    public double getCamDistanceToGoalMM() {
-        return camDistanceToGoalMM;
+    public double getApriLTagDistanceToCamMM() {
+        return apriLTagDistanceToCamMM;
     }
 
-    public double getCamAngleToAprilTagRad() {
-        return camAngleToAprilTagRad;
+    public double getGoalAngleToCamRad() {
+        return goalAngleToCamRad;
     }
 
     public boolean isEmpty() {
-        return getxMM() == 0 && getyMM() == 0 && getzMM() == 0 && getCamAngleToAprilTagRad() == 0;
+        return getxMM() == 0 && getyMM() == 0 && getzMM() == 0 && getGoalAngleToCamRad() == 0;
     }
 
     public double getxMM() {
@@ -64,13 +64,13 @@ public class LimelightPos {
         this.xMM = position.getxMM();
         this.yMM = position.getyMM();
         this.zMM = position.getzMM();
-        this.camAngleToAprilTagRad = position.getCamAngleToAprilTagRad();
-        this.camDistanceToGoalMM = position.getCamDistanceToGoalMM();
+        this.goalAngleToCamRad = position.getGoalAngleToCamRad();
+        this.apriLTagDistanceToCamMM = position.getApriLTagDistanceToCamMM();
     }
 
     public void reset() {
-        this.camAngleToAprilTagRad = 0;
-        this.camDistanceToGoalMM = 0;
+        this.goalAngleToCamRad = 0;
+        this.apriLTagDistanceToCamMM = 0;
         this.zMM = 0;
         this.xMM = 0;
         this.yMM = 0;
@@ -79,8 +79,8 @@ public class LimelightPos {
     @Override
     public String toString() {
         return "LimelightPos{" +
-                "distanceToTargetMM=" + camDistanceToGoalMM +
-                ", angleToGoalRad=" + camAngleToAprilTagRad +
+                "distanceToTargetMM=" + apriLTagDistanceToCamMM +
+                ", angleToGoalRad=" + goalAngleToCamRad +
                 ", xMM=" + xMM +
                 ", yMM=" + yMM +
                 ", zMM=" + zMM +
