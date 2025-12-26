@@ -11,8 +11,8 @@ public class AprilTagConfig {
     public static double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(126); //Math.toRadians(-234);
 
     //Tuned until zero field is different from CAD
-    public static double APRILTAG_X_REL_FIELD_MM = 3115;
-    public static double APRILTAG_Y_REL_FIELD_MM = 951.43; //Tuned until zero
+    public static double APRILTAG_X_REL_FIELD_MM = 3076.6; // 3115 FROM TUNE | 3,076.6 FROM MEASURE FIELD WITH TAPE MEASURE
+    public static double APRILTAG_Y_REL_FIELD_MM = 1013.5; //951.43 Tuned until zero | 1,013.5 mm IS FROM MEASURED FIELD WITH TAPE MEASURE
 
 
     public static double APRIL_X_REL_TO_GOAL = 300.232;
