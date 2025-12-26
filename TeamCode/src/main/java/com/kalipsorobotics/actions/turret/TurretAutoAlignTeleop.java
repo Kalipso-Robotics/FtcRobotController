@@ -151,9 +151,9 @@ public class TurretAutoAlignTeleop extends Action {
         // -------------------------------------------
 
         if (aprilTagFound) {
-            double targetAngleLimelight = SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
-            hasSearched = false;
-            totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad - targetAngleLimelight);
+            double targetAngleLimelight = -SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
+//            hasSearched = false;
+            totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad + targetAngleLimelight);
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
             KLog.d("TurretStateMachine", "Using LIMELIGHT - targetAngle: " + targetAngleLimelight + ", targetTicks: " + targetTicks);
         } else if (useOdometryAlign) {
