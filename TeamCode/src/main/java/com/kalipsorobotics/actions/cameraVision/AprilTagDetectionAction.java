@@ -125,7 +125,7 @@ public class AprilTagDetectionAction extends Action {
                     }
 
                     //========================= For Raw Data Stuff To April Tag ======================
-                    xAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().x * 1000 * allianceColor.getPolarity();
+                    xAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().x * 1000;
                     yAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().y * 1000;
                     zAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
 
