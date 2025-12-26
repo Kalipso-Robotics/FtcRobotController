@@ -110,8 +110,8 @@ public class AprilTagDetectionAction extends Action {
                         hasFound = false;
                         return;
                     }
-
-                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(180 + camRelAprilTagPitchDeg));
+                    // Counter Clockwise is negative and clockwise is positive
+                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(90 + camRelAprilTagPitchDeg));
                     camRelAprilTagPos = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, camRelAprilTagTheta);
                     KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTag Position (after transform): " + camRelAprilTagPos);
 
@@ -191,16 +191,12 @@ public class AprilTagDetectionAction extends Action {
     }
 
     private boolean isLimelightSpike(double currentPitchDeg, double prevPitchDeg) {
-        if ((Math.abs(currentPitchDeg)) == 180 && (Math.abs(prevPitchDeg) == 180)) {
-            return false;
-        }
-        boolean isDifferentSign = (Math.signum(currentPitchDeg) != Math.signum(prevPitchDeg));
-        boolean isBigMagnitude = Math.min(Math.abs(currentPitchDeg), Math.abs(prevPitchDeg)) > (5);
-        boolean result = isBigMagnitude && isDifferentSign;
-        if (result) {
+        double angleDiff = MathFunctions.angleWrapDeg(currentPitchDeg - prevPitchDeg);
+        boolean isSpike = (Math.abs(angleDiff) > (11));
+        if (isSpike) {
             KLog.d("AprilTagDetection_limelight_pos", "Pitch spike. Skip update and reset. from: " + prevPitchDeg + " to:" + currentPitchDeg);
         }
-        return result;
+        return isSpike;
     }
 
 
