@@ -20,7 +20,7 @@ public class TurretAutoAlignTeleop extends Action {
     OpModeUtilities opModeUtilities;
     Turret turret;
     KMotor turretMotor;
-    private AprilTagDetectionAction aprilTagDetectionAction;
+    private final AprilTagDetectionAction aprilTagDetectionAction;
     private TurretRunMode turretRunMode;
     private double targetTicks;
     private double targetPower;

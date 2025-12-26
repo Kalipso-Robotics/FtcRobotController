@@ -164,7 +164,7 @@ public class TeleOp extends KOpMode {
 
         while (opModeIsActive()) {
             if (!hasClosedStopperInnit) {
-                stopper.setPosition(Stopper.STOPPER_SERVO_CLOSED_POS);
+                stopper.setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
                 hasClosedStopperInnit = true;
             }
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
