@@ -130,13 +130,13 @@ public class AprilTagDetectionAction extends Action {
                     zAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
 
                     // ANGLE -----------
-                    double headingFromCamToGoal = Math.atan2(xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM)) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, -zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2));
+                    double estimateHeadingFromCamToGoal = Math.atan2(xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM)) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, -zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2));
 
                     // DISTANCE -----------
                     distanceFromCamToAprilTag = Math.hypot(xAprilTagRelToCamMM, -zAprilTagRelToCamMM);
 
                     // SEND TO SHARED DATA ----------
-                    LimelightPos currentRawPos = new LimelightPos(distanceFromCamToAprilTag, headingFromCamToGoal, xAprilTagRelToCamMM, yAprilTagRelToCamMM, zAprilTagRelToCamMM);
+                    LimelightPos currentRawPos = new LimelightPos(distanceFromCamToAprilTag, estimateHeadingFromCamToGoal, xAprilTagRelToCamMM, yAprilTagRelToCamMM, zAprilTagRelToCamMM);
                     KLog.d("AprilTagDetection_limelight_pos", "Set to SharedData. currentRawPos: " + currentRawPos);
                     SharedData.setLimelightRawPosition(currentRawPos);
                 }
