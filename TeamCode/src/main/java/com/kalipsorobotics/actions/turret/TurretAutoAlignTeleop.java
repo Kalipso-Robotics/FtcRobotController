@@ -123,7 +123,6 @@ public class TurretAutoAlignTeleop extends Action {
         updateAngularVelocity();
         aprilTagFound = !SharedData.getLimelightRawPosition().isEmpty();
 
-
         // just for ftc dashboard
         turretMotor.getPIDFController().setKp(TurretConfig.kP);
         turretMotor.getPIDFController().setKf(TurretConfig.kF);
@@ -132,7 +131,7 @@ public class TurretAutoAlignTeleop extends Action {
         double currentAngleRad = turret.getCurrentAngleRad();
 
         if (aprilTagFound) {
-            double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
+            double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
 
             totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
