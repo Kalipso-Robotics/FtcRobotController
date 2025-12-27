@@ -89,12 +89,6 @@ public class AprilTagDetectionAction extends Action {
                     double rawPitchDeg = camRelAprilTagPose.getOrientation().getPitch();
                     double rawCamPoseX = camRelAprilTagPose.getPosition().x;
                     double rawCamPoseZ = camRelAprilTagPose.getPosition().z;
-                    double rawTagPoseX = aprilTagRelCamPose.getPosition().x;
-                    double rawTagPoseY = aprilTagRelCamPose.getPosition().y;
-                    double rawTagPoseZ = aprilTagRelCamPose.getPosition().z;
-
-                    KLog.d("AprilTag_RAW", String.format("TagID=%d | CamPose(x=%.3f, z=%.3f) | TagPose(x=%.3f, y=%.3f, z=%.3f) | Pitch=%.2f°",
-                            tagId, rawCamPoseX, rawCamPoseZ, rawTagPoseX, rawTagPoseY, rawTagPoseZ, rawPitchDeg));
 
                     // ==================== SPIKE DETECTION ====================
                     boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
@@ -123,13 +117,14 @@ public class AprilTagDetectionAction extends Action {
                                 globalPos.getX(), globalPos.getY(), Math.toDegrees(globalPos.getTheta())));
                     }
                     //========================= For Raw Data Stuff To April Tag ======================
-                    xAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().x * 1000 * allianceColor.getPolarity();
+                    xAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().x * 1000;
                     yAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().y * 1000;
                     zAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
 
                     // ==================== CALCULATED: Angle & Distance to Goal ====================
-                    double adjustedX = xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM)) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X;
-                    double adjustedZ = zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2);
+                    // Goal offset is fixed relative to AprilTag - always add in positive X direction
+                    double adjustedX = xAprilTagRelToCamMM + GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X;
+                    double adjustedZ = zAprilTagRelToCamMM + GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z * allianceColor.getPolarity();
                     double estimateHeadingFromCamToGoal = Math.atan2(adjustedX, adjustedZ);
                     distanceFromCamToAprilTag = Math.hypot(xAprilTagRelToCamMM, zAprilTagRelToCamMM);
 

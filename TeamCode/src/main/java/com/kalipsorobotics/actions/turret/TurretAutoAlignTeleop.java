@@ -52,7 +52,6 @@ public class TurretAutoAlignTeleop extends Action {
 
         targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
 
-        // Initialize velocity tracking
         this.velocityTimer = new ElapsedTime();
         this.previousTotalAngle = 0;
         this.currentAngularVelocity = 0;
@@ -124,23 +123,17 @@ public class TurretAutoAlignTeleop extends Action {
         updateAngularVelocity();
         aprilTagFound = !SharedData.getLimelightRawPosition().isEmpty();
 
-        // Dashboard tuning support
+
+        // just for ftc dashboard
         turretMotor.getPIDFController().setKp(TurretConfig.kP);
         turretMotor.getPIDFController().setKf(TurretConfig.kF);
         turretMotor.getPIDFController().setKs(TurretConfig.kS);
 
-        // ==================== RAW: Turret Encoder ====================
         double currentAngleRad = turret.getCurrentAngleRad();
 
         if (aprilTagFound) {
-            double targetAngleLimelight = SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
-            double reversedTurretAngleRad = -currentAngleRad;
-//            hasSearched = false;
-            totalAngleWrap = MathFunctions.angleWrapRad(reversedTurretAngleRad + targetAngleLimelight);
-            // ==================== RAW: Limelight Angle ====================
             double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
 
-            // ==================== CALC: Target Position (Limelight) ====================
             totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
@@ -149,21 +142,16 @@ public class TurretAutoAlignTeleop extends Action {
                     Math.toDegrees(totalAngleWrap), (int) targetTicks));
 
         } else if (useOdometryAlign) {
-            // ==================== RAW: Odometry Data ====================
-            Position odomPos = SharedData.getOdometryWheelIMUPosition();
-            double robotAngleRad = odomPos.getTheta();
-            double turretAngleRad = turret.getCurrentAngleRad();
-
-            // ==================== CALC: Bias Angle ====================
+            double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
             double biasAngle = Math.atan2(targetPoint.getY(), targetPoint.getX());
+            double desiredTurretAngle = MathFunctions.angleWrapRad(biasAngle - robotAngleRad);
 
-            // ==================== CALC: Target Position (Odometry) ====================
-            totalAngleWrap = MathFunctions.angleWrapRad(biasAngle + turretAngleRad + robotAngleRad);
+            totalAngleWrap = desiredTurretAngle;
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
-            KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° TurretAngle=%.2f° | CALC: Bias=%.2f° Target=%.2f° (%d ticks)",
-                    Math.toDegrees(robotAngleRad), Math.toDegrees(turretAngleRad),
-                    Math.toDegrees(biasAngle), Math.toDegrees(totalAngleWrap), (int) targetTicks));
+            KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° | CALC: Bias=%.2f° DesiredTurret=%.2f° (%d ticks)",
+                    Math.toDegrees(robotAngleRad),
+                    Math.toDegrees(biasAngle), Math.toDegrees(desiredTurretAngle), (int) targetTicks));
 
         } else {
             turretMotor.setPower(0);

@@ -15,9 +15,9 @@ public class AprilTagConfig {
     public static double APRILTAG_Y_REL_FIELD_MM = 1013.5; //951.43 Tuned until zero | 1,013.5 mm IS FROM MEASURED FIELD WITH TAPE MEASURE
 
 
-    public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z = 300.232; // FROM CAD in camera system
+    public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z = 300.232 / 2; // FROM CAD in camera system
 
-    public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X = 369.541; // FROM CAD in camera system
+    public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X = 369.541 / 2; // FROM CAD in camera system
 
     public static double APRIL_TAG_ANGLE_REL_TO_GOAL_RAD = Math.toRadians(54);
 
