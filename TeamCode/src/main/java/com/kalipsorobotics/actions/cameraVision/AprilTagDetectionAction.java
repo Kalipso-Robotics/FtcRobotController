@@ -130,11 +130,7 @@ public class AprilTagDetectionAction extends Action {
                     zAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
 
                     // ANGLE -----------
-<<<<<<< HEAD
-                    double estimateHeadingFromCamToGoal = Math.atan2(xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X), -zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2));
-=======
                     double estimateHeadingFromCamToGoal = Math.atan2(xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM)) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2));
->>>>>>> bfa1df305a70382ae17c9d5f8a3fbeb8cb930e0c
 
                     // DISTANCE -----------
                     distanceFromCamToAprilTag = Math.hypot(xAprilTagRelToCamMM, zAprilTagRelToCamMM);

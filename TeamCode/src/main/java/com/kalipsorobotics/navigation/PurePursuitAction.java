@@ -142,11 +142,11 @@ public class  PurePursuitAction extends Action {
         pathPoints.clear();
     }
 
-//    public boolean nearEndPoint(Position robotPosition) {
-//        Position endPoint = pathPoints.get(pathPoints.size()-1);
-//        double distance = Math.sqrt(Math.pow(Math.abs(robotPosition.getX() - endPoint.getX()), 2) + Math.pow(Math.abs(robotPosition.getY() - endPoint.getX()), 2));
-//        return distance < 500;
-//    }
+    public boolean nearEndPoint(Position robotPosition) {
+        Position endPoint = pathPoints.get(pathPoints.size()-1);
+        double distance = Math.sqrt(Math.pow(Math.abs(robotPosition.getX() - endPoint.getX()), 2) + Math.pow(Math.abs(robotPosition.getY() - endPoint.getX()), 2));
+        return distance < 300;
+    }
 
     public boolean isTargetLast(Position target) {
         Position endPoint = pathPoints.get(pathPoints.size()-1);
@@ -229,9 +229,10 @@ public class  PurePursuitAction extends Action {
         double powerX = target.getPidX().getPower(xError);
         double powerY = target.getPidY().getPower(yError);
 
-        if (!isTargetLast(currentPosition)) {
+        if (!isTargetLast(currentPosition) || (isTargetLast(currentPosition) && !nearEndPoint(currentPosition))) {
             powerX *= 1.5;
             powerY *= 1.5;
+            KLog.d("PurePursuitScale", "Scaling UP x and y");
         }
 
         KLog.d("directionalpowerlook", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
@@ -242,7 +243,7 @@ public class  PurePursuitAction extends Action {
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
 
-//        if (!isTargetLast(currentPosition)) {
+//        if (isTargetLast(currentPosition) && !nearEndPoint(currentPosition)) {
 //            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
 //            double scale = 1/max * 0.93;
 //            fLeftPower = fLeftPower * scale;
