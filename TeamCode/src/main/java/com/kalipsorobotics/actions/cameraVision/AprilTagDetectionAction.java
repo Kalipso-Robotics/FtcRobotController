@@ -51,11 +51,9 @@ public class AprilTagDetectionAction extends Action {
         limelight = opModeUtilities.getHardwareMap().get(Limelight3A.class, "limelight");
 
         if (allianceColor == AllianceColor.RED) {
-            boolean pipelineSwitched = limelightSwitchPipeline(0);
-            KLog.d("AprilTagDetection_Pipeline", "Pipeline Switch Red " + pipelineSwitched);
+            limelightSwitchPipeline(0);
         } else {
-            boolean pipelineSwitched = limelightSwitchPipeline(1);
-            KLog.d("AprilTagDetection_Pipeline", "Pipeline Switch Blue " + pipelineSwitched);
+            limelightSwitchPipeline(1);
         }
 
         limelight.start();
@@ -72,72 +70,75 @@ public class AprilTagDetectionAction extends Action {
     @Override
     protected void update() {
         if (!hasStarted) {
-            KLog.d("AprilTagDetection_Start", "limelight started");
             hasStarted = true;
         }
 
         LLResult result = limelight.getLatestResult();
-        KLog.d("AprilTagDetection_Result", "Result validity, " + result.isValid() + " result: " + result);
         hasFound = false;
+
         if (result != null && result.isValid()) {
-            // Access fiducial results
             List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
             for (LLResultTypes.FiducialResult fiducialResult : fiducialResults) {
                 int tagId = fiducialResult.getFiducialId();
-
-                KLog.d("AprilTagDetection_Tag", "tagId " + tagId);
                 if (tagId == targetAprilTagId) {
-                    KLog.d("AprilTagDetection_limelight_pos", "tagId matches targetId " + targetAprilTagId);
                     hasFound = true;
                     Pose3D aprilTagRelCamPose = fiducialResult.getTargetPoseCameraSpace();
-//                    KLog.d("AprilTagDetection_limelight_pos", "aprilTagRelCamPose: (x, y, z), angle: " + aprilTagRelCamPose);
-
-                    //Pitch Counter Clockwise is negative and clockwise is positive
                     Pose3D camRelAprilTagPose = fiducialResult.getCameraPoseTargetSpace();
-                    KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTagPose: (x, y, z), angle: " + camRelAprilTagPose.toString());
 
+                    // ==================== RAW LIMELIGHT DATA ====================
+                    double rawPitchDeg = camRelAprilTagPose.getOrientation().getPitch();
+                    double rawCamPoseX = camRelAprilTagPose.getPosition().x;
+                    double rawCamPoseZ = camRelAprilTagPose.getPosition().z;
+                    double rawTagPoseX = aprilTagRelCamPose.getPosition().x;
+                    double rawTagPoseY = aprilTagRelCamPose.getPosition().y;
+                    double rawTagPoseZ = aprilTagRelCamPose.getPosition().z;
 
+                    KLog.d("AprilTag_RAW", String.format("TagID=%d | CamPose(x=%.3f, z=%.3f) | TagPose(x=%.3f, y=%.3f, z=%.3f) | Pitch=%.2f°",
+                            tagId, rawCamPoseX, rawCamPoseZ, rawTagPoseX, rawTagPoseY, rawTagPoseZ, rawPitchDeg));
 
-//====================================== Odometry =====================================
-
-                    //Limelight has wabi-sabi Limelight thinks yaw is pitch and x is z and y is x
-                    //As you rotate whichever responds most to rotation is correct value.
-                    double camRelAprilTagPitchDeg = camRelAprilTagPose.getOrientation().getPitch();
-                    boolean isSpike = isLimelightSpike(camRelAprilTagPitchDeg, prevPitchDeg);
-                    prevPitchDeg = camRelAprilTagPitchDeg;
+                    // ==================== SPIKE DETECTION ====================
+                    boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
                     if (isSpike) {
+                        KLog.d("AprilTag_SPIKE", String.format("REJECTED | prev=%.2f° curr=%.2f° delta=%.2f°",
+                                prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
                         SharedData.getLimelightRawPosition().reset();
                         hasFound = false;
+                        prevPitchDeg = rawPitchDeg;
                         return;
                     }
-                    // Counter Clockwise is negative and clockwise is positive
-                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(90 + camRelAprilTagPitchDeg));
-                    camRelAprilTagPos = new Position(-camRelAprilTagPose.getPosition().z * 1000, -camRelAprilTagPose.getPosition().x * 1000, camRelAprilTagTheta);
-                    KLog.d("AprilTagDetection_limelight_pos", "camRelAprilTag Position (after transform): " + camRelAprilTagPos);
+                    prevPitchDeg = rawPitchDeg;
 
+                    // ==================== CALCULATED: Odometry Transform ====================
+                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(90 + rawPitchDeg));
+                    camRelAprilTagPos = new Position(-rawCamPoseZ * 1000, -rawCamPoseX * 1000, camRelAprilTagTheta);
 
-                    // Calculate and set global robot position from vision
+                    KLog.d("AprilTag_ODOM", String.format("CamRelTag(x=%.1fmm, y=%.1fmm, θ=%.2f°)",
+                            camRelAprilTagPos.getX(), camRelAprilTagPos.getY(), Math.toDegrees(camRelAprilTagTheta)));
+
+                    // ==================== CALCULATED: Global Position ====================
                     Position globalPos = calculateGlobalLimelightPosition();
                     if (globalPos != null) {
-
-                        KLog.d("AprilTagDetection_limelight_pos_global", "Updating LimeLight share data robot position to: " + globalPos);
                         SharedData.setLimelightGlobalPosition(globalPos);
+                        KLog.d("AprilTag_GLOBAL", String.format("RobotPos(x=%.1fmm, y=%.1fmm, θ=%.2f°)",
+                                globalPos.getX(), globalPos.getY(), Math.toDegrees(globalPos.getTheta())));
                     }
-
                     //========================= For Raw Data Stuff To April Tag ======================
                     xAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().x * 1000 * allianceColor.getPolarity();
                     yAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().y * 1000;
                     zAprilTagRelToCamMM = aprilTagRelCamPose.getPosition().z * 1000; // front back offset from tag
 
-                    // ANGLE -----------
-                    double estimateHeadingFromCamToGoal = Math.atan2(xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM)) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2));
-
-                    // DISTANCE -----------
+                    // ==================== CALCULATED: Angle & Distance to Goal ====================
+                    double adjustedX = xAprilTagRelToCamMM + (Math.signum(xAprilTagRelToCamMM)) * GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X;
+                    double adjustedZ = zAprilTagRelToCamMM + (GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z / 2);
+                    double estimateHeadingFromCamToGoal = Math.atan2(adjustedX, adjustedZ);
                     distanceFromCamToAprilTag = Math.hypot(xAprilTagRelToCamMM, zAprilTagRelToCamMM);
 
-                    // SEND TO SHARED DATA ----------
+                    KLog.d("AprilTag_GOAL", String.format("TagPos(x=%.1f, z=%.1f) + Offset -> Adj(x=%.1f, z=%.1f) | AngleToGoal=%.2f° | Dist=%.1fmm",
+                            xAprilTagRelToCamMM, zAprilTagRelToCamMM, adjustedX, adjustedZ,
+                            Math.toDegrees(estimateHeadingFromCamToGoal), distanceFromCamToAprilTag));
+
+                    // ==================== OUTPUT: Send to SharedData ====================
                     LimelightPos currentRawPos = new LimelightPos(distanceFromCamToAprilTag, estimateHeadingFromCamToGoal, xAprilTagRelToCamMM, yAprilTagRelToCamMM, zAprilTagRelToCamMM);
-                    KLog.d("AprilTagDetection_limelight_pos", "Set to SharedData. currentRawPos: " + currentRawPos);
                     SharedData.setLimelightRawPosition(currentRawPos);
                 }
             }
@@ -162,25 +163,16 @@ public class AprilTagDetectionAction extends Action {
      */
     public Position calculateGlobalLimelightPosition() {
         if (!hasFound) {
-            KLog.d("limelight_pos", "No valid detection");
             return null;
         }
 
-        Position robotRelRobotPos = new Position(0 ,0 ,0);
-
-        double turretAngle = turret.getCurrentAngleRad();  // get current turret heading in radians
+        Position robotRelRobotPos = new Position(0, 0, 0);
+        double turretAngle = turret.getCurrentAngleRad();
 
         Position robotRelTurretPos = robotRelRobotPos.toNewFrame(new Position(ROBOT_REL_TURRET_POINT.getX(), ROBOT_REL_TURRET_POINT.getY(), -turretAngle));
-        KLog.d("AprilTagDetection_calculateGlobal", "robotRelTurretPos " + robotRelTurretPos);
-
         Position robotRelCamPos = robotRelTurretPos.toNewFrame(TURRET_REL_CAM_POS);
-        KLog.d("AprilTagDetection_calculateGlobal", "robotRelCamPos " + robotRelCamPos);
-
         Position robotRelAprilTagPos = robotRelCamPos.toNewFrame(camRelAprilTagPos);
-        KLog.d("AprilTagDetection_calculateGlobal", "robotRelAprilTagPos " + robotRelAprilTagPos);
-
         Position robotRelFieldPos = robotRelAprilTagPos.toNewFrame(aprilTagRelFieldPos);
-        KLog.d("AprilTagDetection_calculateGlobal", "robotRelFieldPos " + robotRelFieldPos);
 
         return robotRelFieldPos;
     }
@@ -196,11 +188,7 @@ public class AprilTagDetectionAction extends Action {
 
     private boolean isLimelightSpike(double currentPitchDeg, double prevPitchDeg) {
         double angleDiff = MathFunctions.angleWrapDeg(currentPitchDeg - prevPitchDeg);
-        boolean isSpike = (Math.abs(angleDiff) > (11));
-        if (isSpike) {
-            KLog.d("AprilTagDetection_limelight_pos", "Pitch spike. Skip update and reset. from: " + prevPitchDeg + " to:" + currentPitchDeg);
-        }
-        return isSpike;
+        return Math.abs(angleDiff) > 11;
     }
 
 
