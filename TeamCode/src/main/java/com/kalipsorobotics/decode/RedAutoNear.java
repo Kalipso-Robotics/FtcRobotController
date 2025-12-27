@@ -27,7 +27,7 @@ public class RedAutoNear extends KOpMode {
     final double FIRST_SHOOT_X = 2598;
     final double FIRST_SHOOT_Y = 441.38;
     final double SHOOT_NEAR_X = 2130; //2400
-    final double SHOOT_NEAR_Y = 135; //300
+    final double SHOOT_NEAR_Y = 125; //300
 
     final double THIRD_SHOOT_NEAR_X = 2700; //2400
     final double THIRD_SHOOT_NEAR_Y = 135; //300
@@ -39,6 +39,7 @@ public class RedAutoNear extends KOpMode {
     TurretAutoAlign turretAutoAlign = null;
     RoundTripAction trip3 = null;
     RoundTripAction trip2 = null;
+    RoundTripAction trip4 = null;
 
     @Override
     protected void initializeRobotConfig() {
@@ -78,19 +79,36 @@ public class RedAutoNear extends KOpMode {
     }
 
     public void handleTrip3() {
-        trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity()), 500);
+        trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 500);
         trip3.setName("trip3");
         // move to intake
         trip3.setDependentActions(trip2);
         redAutoNear.addAction(trip3);
 
         trip3.getMoveToBall().clearPoints();
-        trip3.getMoveToBall().addPoint(750, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(750, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(800, 150 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //     potential chunking point (x 13168, y 276, head 142)
-        trip3.getMoveToBall().addPoint(1250, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
-        trip3.getMoveToBall().setFinalSearchRadius(75);
+        trip3.getMoveToBall().addPoint(800, 150 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+//        trip3.getMoveToBall().addPoint(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip3.getMoveToBall().setFinalSearchRadius(150);
+    }
+
+    public void handleTrip4() {
+        trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity()), 500);
+        trip4.setName("trip4");
+        // move to intake
+        trip4.setDependentActions(trip3);
+        redAutoNear.addAction(trip4);
+
+        trip4.getMoveToBall().clearPoints();
+        trip4.getMoveToBall().addPoint(1200, 400 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(1200, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        //     potential chunking point (x 13168, y 276, head 142)
+        trip4.getMoveToBall().addPoint(1500, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip4.getMoveToBall().setFinalSearchRadius(75);
     }
 
     @Override
@@ -111,7 +129,7 @@ public class RedAutoNear extends KOpMode {
 
 
         // ----------------- FIRST SHOOT ----------------------
-        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint.multiplyY(allianceColor.getPolarity()), 0, false);
+        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint.multiplyY(allianceColor.getPolarity()), 0, true);
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(firstShootPoint.getX(), firstShootPoint.getY() * allianceColor.getPolarity(), -138.29 * allianceColor.getPolarity());
         trip0.setDependentActions(delayBeforeStart);
@@ -121,14 +139,17 @@ public class RedAutoNear extends KOpMode {
 
         RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip1.setName("trip1");
-        trip1.getMoveToBall().addPoint(1200, 200 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip1.getMoveToBall().addPoint(1300, 1000 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip1.getMoveToBall().addPoint(1300, 870 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        // move to lever
-        trip1.getMoveToBall().addPoint(1550, 950 * allianceColor.getPolarity(), 70 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1500, 500 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+
+        trip1.getMoveToBall().addPoint(2000, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(2000, 775 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        // move to hit lever
+        trip1.getMoveToBall().addPoint(2000, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , 0 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1725, 1050 * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
+
         // move to launch
-        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
+
         trip1.setDependentActions(trip0);
         trip1.getMoveToBall().setMaxTimeOutMS(9000);
         trip1.getMoveToBall().setFinalSearchRadius(150);
@@ -138,18 +159,24 @@ public class RedAutoNear extends KOpMode {
 
         trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip2.setName("trip2");
-        trip2.getMoveToBall().addPoint(2000, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(2000, 900 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(1970, 200 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(2000, 200 * allianceColor.getPolarity() , 180 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1400, 200 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1400, 960 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        // move to lever
+        trip2.getMoveToBall().addPoint(1500, 850 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1500, 850 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1500, 1050 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        // move to launch
         trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
+        trip2.getMoveToBall().setMaxTimeOutMS(9000);
         trip2.getMoveToBall().setFinalSearchRadius(150);
         redAutoNear.addAction(trip2);
 
         // ----------------- TRIP 3 ----------------------
 
        handleTrip3();
+
+       handleTrip4();
 
        // turretAutoAlign.initBlocking();
 
@@ -171,8 +198,8 @@ public class RedAutoNear extends KOpMode {
                 KLog.d("AutoProgress", String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
                     trip1.getIsDone() ? "✓" : "...",
                     trip2.getIsDone() ? "✓" : "...",
-                    trip3.getIsDone() ? "✓" : "..."));
-                    //park.getIsDone() ? "✓" : "..."));
+                    trip3.getIsDone() ? "✓" : "...",
+                    trip4.getIsDone() ? "✓" : "..."));
                 KLog.d("AutoProgress", "NOTE: Trip3 is commented out in code - Park depends on Trip3!");
             }
 
