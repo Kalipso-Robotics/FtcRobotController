@@ -143,7 +143,8 @@ public class TurretAutoAlignTeleop extends Action {
         } else if (useOdometryAlign) {
             double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
             double biasAngle = Math.atan2(targetPoint.getY(), targetPoint.getX());
-            double desiredTurretAngle = MathFunctions.angleWrapRad(biasAngle - robotAngleRad);
+            double offsetAngleRad = TurretConfig.TICKS_INIT_OFFSET / Turret.TICKS_PER_RADIAN;
+            double desiredTurretAngle = MathFunctions.angleWrapRad(biasAngle - robotAngleRad + offsetAngleRad);
 
             totalAngleWrap = desiredTurretAngle;
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
