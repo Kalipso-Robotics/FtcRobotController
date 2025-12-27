@@ -8,6 +8,7 @@ public class ShooterInterpolationConfig {
     public final static double MAX_HOOD = 0.8;
     public final static double NORMAL_HOOD = 0.75;
     public static final double NEAR_SHOOT_RPS = 32.86  + 0.5;
+    public static final double FAR_SHOOT_DISTANCE = 3441.86;
     /*
     public static double[] shooterData = {
 
@@ -41,36 +42,36 @@ public class ShooterInterpolationConfig {
 
    // Odometry distance base;
     public static double[] shooterData = {
-            602.23, 28.57 + 1, 0,
+            602.23, 28.57 + 1, 0.2,
             724, 32 + 1, 0,
-            918, 33.4 + 1, 0.1,
-            1126, 32 + 1.5, 0.2,
-            1143.96, 31.5 + 1.5, MAX_HOOD, // FIRST SHOOT NEAR,
-            1251.09, 32.14 + 1.5, MAX_HOOD,
-            1290.48, 31.43 + 1.5, MAX_HOOD,
+            918, 33.4 + 1, 0.3,
+            1126, 32 + 1.5, 0.4,
+            1143.96, 31.5 + 3.5, 0.5, // FIRST SHOOT NEAR,
+            1251.09, 32.14 + 2, MAX_HOOD,
+            1290.48, 31.43 + 2, MAX_HOOD,
             1321.83, 30.71 + 2, MAX_HOOD,
-            1341.74, 32.14 + 1.5, MAX_HOOD,
-            1411.42, 32.86 + 1.5, MAX_HOOD,
+            1341.74, 32.14 + 2, MAX_HOOD,
+            1411.42, 32.86 + 2, MAX_HOOD,
             1496.56, 30 + 2, MAX_HOOD,
-            1496.59, 32.86 + 1.5, MAX_HOOD,
-            1526.71, 34.29 + 1.5, MAX_HOOD,
-            1595.31 + 1.5, NEAR_SHOOT_RPS, MAX_HOOD, // SECOND SHOOT NEAR,
-            1700.15, 32.14 + 1.5, MAX_HOOD,
-            1813.77, 32.86 + 1.5, MAX_HOOD,
-            1931.24, 34.29 + 1, MAX_HOOD,
-            2070.17, 35 + 1, MAX_HOOD,
-            2186.13, 37.86 + 1, MAX_HOOD,
-            2186.2, 37.86 + 1, MAX_HOOD,
-            2328.5, 38.57 + 1, MAX_HOOD,
-            2328.51, 40.71 + 1, MAX_HOOD,
-            2446.11, 41 + 1, MAX_HOOD,
-            2590.71, 42.14 + 1, MAX_HOOD,
-            2729.31, 44.29 + 1, MAX_HOOD,
-            2865.43, 43.29 + 1 + 0.5, MAX_HOOD,
-            3001.9, 45 + 1 + 0.5, MAX_HOOD,
-            3138.04, 44.5 + 1 + 0.5, MAX_HOOD,
-            3283.8, 46 + 1 + 0.5, MAX_HOOD, // 2 + 3 SHOOT FAR,
-            3441.86, 46.6 + 1 + 0.5, MAX_HOOD, // FIRST SHOOT FAR,
+            1496.59, 32.86 + 2, MAX_HOOD,
+            1526.71, 34.29 + 2, MAX_HOOD,
+            1595.31 + 2, NEAR_SHOOT_RPS, MAX_HOOD, // SECOND SHOOT NEAR,
+            1700.15, 32.14 + 2, MAX_HOOD,
+            1813.77, 32.86 + 2, MAX_HOOD,
+            1931.24, 34.29 + 2, MAX_HOOD,
+            2070.17, 35 + 2, MAX_HOOD,
+            2186.13, 37.86 + 2, MAX_HOOD,
+            2186.2, 37.86 + 2, MAX_HOOD,
+            2328.5, 38.57 + 2, MAX_HOOD,
+            2328.51, 40.71 + 2, MAX_HOOD,
+            2446.11, 41 + 2, MAX_HOOD,
+            2590.71, 42.14 + 2, MAX_HOOD,
+            2729.31, 44.29 + 2, MAX_HOOD,
+            2865.43, 43.29 + 2.5, MAX_HOOD,
+            3001.9, 45 + 2.5, MAX_HOOD,
+            3138.04, 44.5 + 2.5, MAX_HOOD,
+            3283.8, 46 + 2.5, MAX_HOOD, // 2 + 3 SHOOT FAR,
+            3441.86, 46.6 + 2.5, MAX_HOOD, // FIRST SHOOT FAR,
     };
 
     public static double[] getMaxValue() {

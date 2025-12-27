@@ -216,11 +216,11 @@ public class TeleOp extends KOpMode {
     }
     private void handleDriving() {
         if (drivingSticksActive) {
-            driveAction.move(gamepad1);
             if (releaseBrakeAction == null || releaseBrakeAction.getIsDone()) {
                 releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
                 setLastBrakingAction(releaseBrakeAction);
             }
+            driveAction.move(gamepad1);
         } else {
             driveTrain.setPower(0);
         }
@@ -355,6 +355,9 @@ public class TeleOp extends KOpMode {
     private void handleShooting() {
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
+            releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
+            setLastBrakingAction(releaseBrakeAction);
+
             shooterRun.stop();
 
             if (shootAllAction != null) {
@@ -362,9 +365,6 @@ public class TeleOp extends KOpMode {
             }
             shootAllAction = null;
             setLastShooterAction(shootAllAction);
-
-            releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
-            setLastBrakingAction(releaseBrakeAction);
 
             KLog.d("TeleOp_Shooting", "Shooter stop");
             return;

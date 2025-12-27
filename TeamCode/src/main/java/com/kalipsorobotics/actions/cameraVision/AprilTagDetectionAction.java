@@ -76,6 +76,7 @@ public class AprilTagDetectionAction extends Action {
         LLResult result = limelight.getLatestResult();
         hasFound = false;
 
+        KLog.d("AprilTag", "AprilTagDetection is running. Result valid: " + result.isValid()+ " Full result:" + result);
         if (result != null && result.isValid()) {
             List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
             for (LLResultTypes.FiducialResult fiducialResult : fiducialResults) {

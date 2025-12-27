@@ -64,11 +64,20 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
 //            KLog.d("minimumPower", "minimum power " + power);
 //            driveTrain.setPower(power);
                 aprilTagDetectionAction.updateCheckDone();
-
+                KLog.d("OdoEncoderCalcTest", "Successfully switched color to blue " + aprilTagDetectionAction.toString());
                 if (gamepad1.a) {
                     action = "Slamming";
                 } else {
                     action = "normal";
+                }
+
+                if (gamepad1.x) {
+                    aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 20, AllianceColor.BLUE);
+                    KLog.d("OdoEncoderCalcTest", "Successfully switched color to blue " + aprilTagDetectionAction.toString());
+                }
+                if (gamepad1.b) {
+                    aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
+                    KLog.d("OdoEncoderCalcTest", "Successfully switched color to red " + aprilTagDetectionAction.toString());
                 }
 
                 odometryFileWriter.writeOdometryPositionHistory(SharedData.getOdometryPositionMap(), action);

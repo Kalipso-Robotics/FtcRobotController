@@ -3,6 +3,7 @@ package com.kalipsorobotics.actions.shooter;
 import android.annotation.SuppressLint;
 
 import com.kalipsorobotics.modules.shooter.ShooterConfig;
+import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -172,6 +173,10 @@ public class ShooterRun extends Action {
 
     private double getLimelightDistance() {
         double limelightDistanceMM = SharedData.getLimelightRawPosition().getApriLTagDistanceToCamMM();
+        if (SharedData.getLimelightRawPosition().isEmpty()) {
+            limelightDistanceMM = ShooterInterpolationConfig.FAR_SHOOT_DISTANCE;
+            KLog.d("ShooterRun_Distance", "NOT SEEING LIMELIGHT, FALLBACK TO FAR SHOOT: " + limelightDistanceMM + " mm");
+        }
         KLog.d("ShooterRun_Distance", "Limelight distance: " + limelightDistanceMM + " mm");
         return limelightDistanceMM;
     }
