@@ -40,6 +40,8 @@ public class AprilTagDetectionAction extends Action {
     private double distanceFromCamToAprilTag;
 
     private double prevPitchDeg = Double.MIN_VALUE;
+    private int consecutiveGoodReadings = 0;
+    private static final int STABILITY_THRESHOLD = 4;
 
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId, AllianceColor allianceColor) {
@@ -76,7 +78,7 @@ public class AprilTagDetectionAction extends Action {
         LLResult result = limelight.getLatestResult();
         hasFound = false;
 
-        KLog.d("AprilTag", "AprilTagDetection is running. Result valid: " + result.isValid()+ " Full result:" + result);
+        KLog.d("AprilTag", "AprilTagDetection is running. Is Result valid: " + result.isValid()+ " Full result:" + result);
         if (result != null && result.isValid()) {
             List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
             for (LLResultTypes.FiducialResult fiducialResult : fiducialResults) {
@@ -98,10 +100,13 @@ public class AprilTagDetectionAction extends Action {
                                 prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
                         SharedData.getLimelightRawPosition().reset();
                         hasFound = false;
+                        consecutiveGoodReadings = 0;
                         prevPitchDeg = rawPitchDeg;
                         return;
                     }
                     prevPitchDeg = rawPitchDeg;
+                    consecutiveGoodReadings++;
+                    consecutiveGoodReadings = Math.min(consecutiveGoodReadings, STABILITY_THRESHOLD + 1);
 
                     // ==================== CALCULATED: Odometry Transform ====================
                     double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(90 + rawPitchDeg));
@@ -134,13 +139,18 @@ public class AprilTagDetectionAction extends Action {
                             Math.toDegrees(estimateHeadingFromCamToGoal), distanceFromCamToAprilTag));
 
                     // ==================== OUTPUT: Send to SharedData ====================
-                    LimelightPos currentRawPos = new LimelightPos(distanceFromCamToAprilTag, estimateHeadingFromCamToGoal, xAprilTagRelToCamMM, yAprilTagRelToCamMM, zAprilTagRelToCamMM);
-                    SharedData.setLimelightRawPosition(currentRawPos);
+                    if (consecutiveGoodReadings > STABILITY_THRESHOLD) {
+                        LimelightPos currentRawPos = new LimelightPos(distanceFromCamToAprilTag, estimateHeadingFromCamToGoal, xAprilTagRelToCamMM, yAprilTagRelToCamMM, zAprilTagRelToCamMM);
+                        SharedData.setLimelightRawPosition(currentRawPos);
+                    } else {
+                        KLog.d("AprilTag_STABILITY", String.format("Waiting for stable readings: %d/%d", consecutiveGoodReadings, STABILITY_THRESHOLD));
+                    }
                 }
             }
         }
 
         if (!hasFound) {
+            consecutiveGoodReadings = 0;
             SharedData.getLimelightRawPosition().reset();
         }
     }

@@ -65,13 +65,13 @@ public class ShooterInterpolationConfig {
             2328.5, 38.57 + 2, MAX_HOOD,
             2328.51, 40.71 + 2, MAX_HOOD,
             2446.11, 41 + 2, MAX_HOOD,
-            2590.71, 42.14 + 2, MAX_HOOD,
-            2729.31, 44.29 + 2, MAX_HOOD,
-            2865.43, 43.29 + 2.5, MAX_HOOD,
-            3001.9, 45 + 2.5, MAX_HOOD,
-            3138.04, 44.5 + 2.5, MAX_HOOD,
-            3283.8, 46 + 2.5, MAX_HOOD, // 2 + 3 SHOOT FAR,
-            3441.86, 46.6 + 2.5, MAX_HOOD, // FIRST SHOOT FAR,
+            2590.71, 42.14 + 3, MAX_HOOD,
+            2729.31, 44.29 + 3, MAX_HOOD,
+            2865.43, 43.29 + 4, MAX_HOOD,
+            3001.9, 45 + 4.5, MAX_HOOD, // good
+            3138.04, 44.5 + 5.5, MAX_HOOD, // good
+            3283.8, 46 + 6.5, MAX_HOOD,
+            3441.86, 46.6 + 7.5, MAX_HOOD, 
     };
 
     public static double[] getMaxValue() {
