@@ -37,6 +37,7 @@ public class TurretReadyLimelight extends Action {
 
         if (turretAutoAlignTeleop.isWithinRange()) {
             isDone = true;
+            turretAutoAlignTeleop.stop();
             KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlignTeleop.getTargetTicks());
         }

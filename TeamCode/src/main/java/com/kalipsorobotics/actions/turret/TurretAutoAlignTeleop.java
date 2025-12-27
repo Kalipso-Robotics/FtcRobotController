@@ -116,6 +116,7 @@ public class TurretAutoAlignTeleop extends Action {
                 updateAlignToTarget();
                 break;
         }
+        KLog.d("Turret_MODE", "CURRENT RUNNING MODE " + turretRunMode);
     }
 
     private void updateAlignToTarget() {

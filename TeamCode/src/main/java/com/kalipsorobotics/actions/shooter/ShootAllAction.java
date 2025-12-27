@@ -109,8 +109,10 @@ public class ShootAllAction extends KActionSet {
         if (isDone) {
             return;
         }
-
-        turretAutoAlignTeleop.runWithOdometryAndLimelight();
+        if (!hasStarted) {
+            turretAutoAlignTeleop.runWithOdometryAndLimelight();
+            hasStarted = true;
+        }
     }
 
     public void setTurretReady(boolean isDone) {
