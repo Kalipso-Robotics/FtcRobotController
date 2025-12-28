@@ -29,8 +29,8 @@ public class RoundTripAction extends KActionSet {
     private ShooterRun shooterRun;
     private Shooter shooter;
     private ShooterReady shooterReady;
-    private PushBall shoot;
-    private ShooterStop shooterStop;
+    private PushBall pushBall;
+//    private ShooterStop shooterStop;
     private TurretAutoAlign turretAutoAlign;
     private TurretReady turretReady;
     private boolean hasUpdatedShooterReady = false;
@@ -80,19 +80,19 @@ public class RoundTripAction extends KActionSet {
         turretReady.setDependentActions(moveToBalls);
         this.addAction(turretReady);
 
-        shoot = new PushBall(stopper, intake, shooter);
-        shoot.setName("shoot");
+        pushBall = new PushBall(stopper, intake, shooter);
+        pushBall.setName("shoot");
         if (shouldDependOnFlywheel) {
-            shoot.setDependentActions(moveToBalls, shooterReady); //removed turretReady
+            pushBall.setDependentActions(moveToBalls, shooterReady); //removed turretReady
         } else {
-            shoot.setDependentActions(moveToBalls);
+            pushBall.setDependentActions(moveToBalls);
         }
-        this.addAction(shoot);
-
-        shooterStop = new ShooterStop(shooterRun);
-        shooterStop.setName("stop");
-        shooterStop.setDependentActions(shoot);
-        this.addAction(shooterStop);
+        this.addAction(pushBall);
+//
+//        shooterStop = new ShooterStop(shooterRun);
+//        shooterStop.setName("stop");
+//        shooterStop.setDependentActions(pushBall);
+//        this.addAction(shooterStop);
 
     }
 
@@ -114,17 +114,6 @@ public class RoundTripAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
-        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, ShooterStop: %s, TurretReady: %s, ShooterReadyUpdated: %b",
-            getName() != null ? getName() : "unnamed",
-            moveToBall.getIsDone() ? "DONE" : "NOT DONE",
-            intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
-            shooterReady.getIsDone() ? "DONE" : "NOT DONE",
-            shooterRun.getIsDone() ? "DONE" : "NOT DONE",
-            shoot.getIsDone() ? "DONE" : "NOT DONE",
-            shooterStop.getIsDone() ? "DONE" : "NOT DONE",
-            turretReady.getIsDone() ? "DONE" : "NOT DONE",
-            hasUpdatedShooterReady));
-
         if (moveToBall.getIsDone()){
             KLog.d("RoundTrip", String.format("[%s] MoveToBall COMPLETED - Stopping intake and updating shooter position",
                 getName() != null ? getName() : "unnamed"));
@@ -145,5 +134,22 @@ public class RoundTripAction extends KActionSet {
                     getName() != null ? getName() : "unnamed"));
             }
         }
+
+        if (pushBall.getIsDone()) {
+            shooterRun.setIsDone(true);
+            shooterReady.setIsDone(true);
+            turretReady.setIsDone(true);
+        }
+
+        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s, ShooterReadyUpdated: %b",
+                getName() != null ? getName() : "unnamed",
+                moveToBall.getIsDone() ? "DONE" : "NOT DONE",
+                intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
+                shooterReady.getIsDone() ? "DONE" : "NOT DONE",
+                shooterRun.getIsDone() ? "DONE" : "NOT DONE",
+                pushBall.getIsDone() ? "DONE" : "NOT DONE",
+                turretReady.getIsDone() ? "DONE" : "NOT DONE",
+                hasUpdatedShooterReady));
+
     }
 }

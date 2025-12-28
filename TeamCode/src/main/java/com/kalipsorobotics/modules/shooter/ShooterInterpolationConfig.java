@@ -8,7 +8,7 @@ public class ShooterInterpolationConfig {
     public final static double MAX_HOOD = 0.8;
     public static double MAX_RPS = 55;
     public final static double NORMAL_HOOD = 0.75;
-    public static final double NEAR_SHOOT_RPS = 32.86  + 0.5;
+    public static final double NEAR_SHOOT_RPS = 35.50;
     public static final double FAR_SHOOT_DISTANCE = 3441.86;
     /*
     public static double[] shooterData = {
@@ -47,7 +47,40 @@ public class ShooterInterpolationConfig {
             724, 32 + 1, 0,
             918, 33.4 + 1, 0.3,
             1126, 32 + 1.5, 0.4,
-            1143.96, 31.5 + 3.5, 0.5, // FIRST SHOOT NEAR,
+            1143.96, 31.5 + 2, 0.5, // FIRST SHOOT NEAR,
+            1251.09, 32.14 + 2, MAX_HOOD,
+            1290.48, 32.43 + 2, MAX_HOOD,
+            1321.83, 32.71 + 2, MAX_HOOD,
+            1341.74, 33.00 + 2, MAX_HOOD,
+            1411.42, 33.86 + 2, MAX_HOOD,
+            1496.56, 34 + 2, MAX_HOOD,
+            1496.59, 34.86 + 3.5, MAX_HOOD,
+            1526.71, 35.29 + 3.5, MAX_HOOD,
+            1595.31, NEAR_SHOOT_RPS + 4, MAX_HOOD, // SECOND SHOOT NEAR,
+            1700.15, 35.54 + 4.5, MAX_HOOD,
+            1813.77, 35.86 + 4.5, MAX_HOOD,
+            1931.24, 35.29 + 4.5, MAX_HOOD,
+            2070.17, 36.39 + 4.5, MAX_HOOD,
+            2186.13, 37.86 + 4, MAX_HOOD,
+            2186.2, 37.86 + 4, MAX_HOOD,
+            2328.5, 38.57 + 4, MAX_HOOD,
+            2328.51, 40.71 + 4, MAX_HOOD,
+            2446.11, 41 + 4, MAX_HOOD,
+            2590.71, 42.14 + 4, MAX_HOOD,
+            2729.31, 44.29 + 4, MAX_HOOD,
+            2865.43, 43.29 + 4, MAX_HOOD,
+            3001.9, 45 + 4.5, MAX_HOOD, // good
+            3138.04, 44.5 + 5.5, MAX_HOOD, // good
+            3283.8, 46 + 6.5, MAX_HOOD,
+            3441.86, 46.6 + 7.5, MAX_HOOD,
+    };
+    /* Before manually tuning near
+    public static double[] shooterData = {
+            602.23, 28.57 + 1, 0.2,
+            724, 32 + 1, 0,
+            918, 33.4 + 1, 0.3,
+            1126, 32 + 1.5, 0.4,
+            1143.96, 31.5 + 2, 0.5, // FIRST SHOOT NEAR,
             1251.09, 32.14 + 2, MAX_HOOD,
             1290.48, 31.43 + 2, MAX_HOOD,
             1321.83, 30.71 + 2, MAX_HOOD,
@@ -56,7 +89,7 @@ public class ShooterInterpolationConfig {
             1496.56, 30 + 2, MAX_HOOD,
             1496.59, 32.86 + 2, MAX_HOOD,
             1526.71, 34.29 + 2, MAX_HOOD,
-            1595.31 + 2, NEAR_SHOOT_RPS, MAX_HOOD, // SECOND SHOOT NEAR,
+            1595.31, NEAR_SHOOT_RPS + 2, MAX_HOOD, // SECOND SHOOT NEAR,
             1700.15, 32.14 + 2, MAX_HOOD,
             1813.77, 32.86 + 2, MAX_HOOD,
             1931.24, 34.29 + 2, MAX_HOOD,
@@ -74,6 +107,7 @@ public class ShooterInterpolationConfig {
             3283.8, 46 + 6.5, MAX_HOOD,
             3441.86, 46.6 + 7.5, MAX_HOOD,
     };
+     */
 
     public static double[] getMaxValue() {
         return new double[] {shooterData[shooterData.length - 2], shooterData[shooterData.length - 1]};
