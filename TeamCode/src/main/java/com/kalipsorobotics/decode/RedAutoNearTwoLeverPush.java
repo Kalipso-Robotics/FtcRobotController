@@ -3,18 +3,12 @@ package com.kalipsorobotics.decode;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
-import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.stopper.CloseStopperAction;
 import com.kalipsorobotics.math.Point;
-import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-
-import org.checkerframework.dataflow.qual.Pure;
-
-import java.nio.channels.ClosedByInterruptException;
 
 @Disabled
 @Autonomous(name="RedAutoNearTwoLeverPush")
@@ -45,11 +39,11 @@ public class RedAutoNearTwoLeverPush extends RedAutoNear{
         waitAction.setDependentActions(trip2_1);
         redAutoNear.addAction(waitAction);
 
-        trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity()), 500);
+        trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity()), 500);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2_1);
         trip3.getMoveToBall().clearPoints();
-        trip3.getMoveToBall().addPoint(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         redAutoNear.addAction(trip3);
     }
 }

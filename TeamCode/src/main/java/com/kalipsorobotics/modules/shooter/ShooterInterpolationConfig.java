@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 public class ShooterInterpolationConfig {
 
     public final static double MAX_HOOD = 0.8;
+    public static double MAX_RPS = 55;
     public final static double NORMAL_HOOD = 0.75;
     public static final double NEAR_SHOOT_RPS = 32.86  + 0.5;
     public static final double FAR_SHOOT_DISTANCE = 3441.86;
@@ -71,7 +72,7 @@ public class ShooterInterpolationConfig {
             3001.9, 45 + 4.5, MAX_HOOD, // good
             3138.04, 44.5 + 5.5, MAX_HOOD, // good
             3283.8, 46 + 6.5, MAX_HOOD,
-            3441.86, 46.6 + 7.5, MAX_HOOD, 
+            3441.86, 46.6 + 7.5, MAX_HOOD,
     };
 
     public static double[] getMaxValue() {

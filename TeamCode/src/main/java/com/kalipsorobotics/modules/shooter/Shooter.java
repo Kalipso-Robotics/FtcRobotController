@@ -113,7 +113,7 @@ public class Shooter {
     public boolean isAtTargetRPS() {
         double effectiveTolerance = TARGET_RPS_TOLERANCE;
         if (targetRPS != 0) {
-            effectiveTolerance = (targetRPS / ShooterConfig.MAX_RPS) * TARGET_RPS_TOLERANCE;
+            effectiveTolerance = (targetRPS / ShooterInterpolationConfig.MAX_RPS) * TARGET_RPS_TOLERANCE;
         }
         boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
         return isWithinTarget;

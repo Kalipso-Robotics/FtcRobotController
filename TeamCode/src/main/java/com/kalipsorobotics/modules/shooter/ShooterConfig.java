@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class ShooterConfig {
     public static double timeToStabilize = 500;
-    public static double MAX_RPS = 55;
 
     public static boolean shouldUseLimelight = false;
 

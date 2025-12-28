@@ -141,4 +141,8 @@ public class Path {
     public void setPathAngleTolerance(double pathAngleTolerance) {
         this.pathAngleTolerance = pathAngleTolerance;
     }
+
+    public boolean isFollowingLastPoint() {
+        return currentSearchWayPointIndex == path.size()-1;
+    }
 }

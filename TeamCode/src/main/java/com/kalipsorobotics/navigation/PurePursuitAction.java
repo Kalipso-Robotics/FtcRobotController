@@ -79,6 +79,8 @@ public class  PurePursuitAction extends Action {
     private double prevXVelocity;
     private double prevYVelocity;
     private double thetaVelocity;
+
+    private boolean enablePowerScalingForPath = false;
 //    private final double threshold = 10;
 
     private boolean hasOvershot = false;
@@ -215,7 +217,8 @@ public class  PurePursuitAction extends Action {
         double targetAngle;
         if (path.getIndex(target) != 0) {
             KLog.d("PurePursuitTargeting", "Interpolating Angle");
-            targetAngle = interpolateAngleWithLock(target, currentPos);
+//            targetAngle = interpolateAngleWithLock(target, currentPos);
+            targetAngle = target.getTheta();
         } else{
             KLog.d("PurePursuitTargeting", "Target 0, no interpolation");
             targetAngle = target.getTheta();
@@ -243,15 +246,14 @@ public class  PurePursuitAction extends Action {
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
 
-//        if (isTargetLast(currentPosition) && !nearEndPoint(currentPosition)) {
-//            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
-//            double scale = 1/max * 0.93;
-//            fLeftPower = fLeftPower * scale;
-//            bLeftPower = bLeftPower * scale;
-//            fRightPower = fRightPower * scale;
-//            bRightPower = bRightPower * scale;
-//        }
-
+        if (enablePowerScalingForPath && (distanceToTarget > (Math.max(currentLookAheadRadius, lastSearchRadius) * 2))) {
+                double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
+                double scale = 1/max * 0.93;
+                fLeftPower = fLeftPower * scale;
+                bLeftPower = bLeftPower * scale;
+                fRightPower = fRightPower * scale;
+                bRightPower = bRightPower * scale;
+        }
         KLog.d("PurePursuit_Log",
                 "running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
                 bRightPower);
@@ -415,6 +417,10 @@ public class  PurePursuitAction extends Action {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void setEnablePowerScalingForPath(boolean enablePowerScalingForPath) {
+        this.enablePowerScalingForPath = enablePowerScalingForPath;
     }
 
     public void setSleep(long sleepTimeMS) {
