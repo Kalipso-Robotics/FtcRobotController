@@ -139,13 +139,11 @@ public class PIDFController {
         double staticPower = ks * Math.signum(error);
 
         double output = proportional + integral + derivative;
-
         //clamp to make staticPower min
-        output = Math.max(Math.abs(staticPower), Math.abs(output)) * Math.signum(output);
+        output = Math.max(Math.abs(staticPower), Math.abs(output)) * Math.signum(error);
 
         lastTime = currentTime;
         lastError = error;
-
         // No feedforward when only error is provided
         return output;
     }

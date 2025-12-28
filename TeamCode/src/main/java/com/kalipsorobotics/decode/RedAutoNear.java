@@ -99,7 +99,7 @@ public class RedAutoNear extends KOpMode {
 //        trip3.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip3.getMoveToBall().setEnablePowerScalingForPath(true);
-        trip3.getMoveToBall().setWithinRadiusMM(300);
+        trip3.getMoveToBall().setWithinRangeRadiusMM(550);
         trip3.getMoveToBall().setFinalSearchRadius(200);
     }
 
@@ -117,10 +117,10 @@ public class RedAutoNear extends KOpMode {
 //        trip4.getMoveToBall().addPoint(1500, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
 //        trip4.getMoveToBall().addPoint(1250, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip4.getMoveToBall().addPoint(1250, 900 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(380, 1265, 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
+        trip4.getMoveToBall().addPoint(380, 1255, 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
         trip4.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
         trip4.getMoveToBall().setEnablePowerScalingForPath(true);
-        trip4.getMoveToBall().setWithinRadiusMM(300);
+        trip4.getMoveToBall().setWithinRangeRadiusMM(600);
         trip4.getMoveToBall().setLookAheadRadius(150);
         trip4.getMoveToBall().setFinalSearchRadius(300);
     }
@@ -148,6 +148,7 @@ public class RedAutoNear extends KOpMode {
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(firstShootPoint.getX(), firstShootPoint.getY() * allianceColor.getPolarity(), -138.29 * allianceColor.getPolarity());
         trip0.setDependentActions(delayBeforeStart);
+        trip0.getMoveToBall().setWithinRangeRadiusMM(250);
         redAutoNear.addAction(trip0);
 
         // ----------------- TRIP 1 ----------------------
@@ -159,14 +160,14 @@ public class RedAutoNear extends KOpMode {
         trip1.getMoveToBall().addPoint(2000, 650 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
 //        trip1.getMoveToBall().addPoint(2000, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , 0 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , 0 * allianceColor.getPolarity(), PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
         trip1.getMoveToBall().addPoint(1725, 1100 * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
 
         // move to launch
-        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity(), PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
 
         trip1.setDependentActions(trip0);
-        trip1.getMoveToBall().setWithinRadiusMM(125);
+        trip1.getMoveToBall().setWithinRangeRadiusMM(300);
         trip1.getMoveToBall().setMaxTimeOutMS(9000);
         trip1.getMoveToBall().setFinalSearchRadius(200);
         redAutoNear.addAction(trip1);
@@ -185,7 +186,7 @@ public class RedAutoNear extends KOpMode {
         // move to launch
         trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
-        trip2.getMoveToBall().setWithinRadiusMM(200);
+        trip2.getMoveToBall().setWithinRangeRadiusMM(400);
         trip2.getMoveToBall().setMaxTimeOutMS(9000);
         trip2.getMoveToBall().setFinalSearchRadius(200);
         redAutoNear.addAction(trip2);

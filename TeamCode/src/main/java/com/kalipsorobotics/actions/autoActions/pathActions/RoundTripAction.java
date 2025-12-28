@@ -55,7 +55,7 @@ public class RoundTripAction extends KActionSet {
         this.moveToBall = moveToBalls;
         moveToBalls.setFinalAngleLockingThresholdDegree(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE);
         moveToBalls.setLookAheadRadius(125);  // Increased from default 75 to reduce oscillation during heading changes
-        moveToBalls.setFinalSearchRadius(100);
+        moveToBalls.setFinalSearchRadius(150);
         moveToBalls.setMaxTimeOutMS(8000);
 
         this.purePursuitReady = new PurePursuitReady(moveToBalls);

@@ -26,10 +26,9 @@ public class TurretAutoAlign extends Action {
     private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
-    private double previousTotalAngle;
+    private double previousTotalAngle = 0;
     private double currentAngularVelocity;
     private ElapsedTime velocityTimer;
-    private boolean isFirstVelocityUpdate;
 
 
     private AllianceColor allianceColor;
@@ -160,20 +159,13 @@ public class TurretAutoAlign extends Action {
         double xToGoal = targetPoint.getX() - currentPosition.getX();
         double yToGoal = targetPoint.getY() - currentPosition.getY();
         double angleToGoal = Math.atan2(yToGoal, xToGoal);
-        double totalAngleToGoal = MathFunctions.angleWrapRad(angleToGoal - currentPosition.getTheta());
-
-        if (isFirstVelocityUpdate) {
+        double totalAngleToGoal = angleToGoal - currentPosition.getTheta();
+        double deltaTime = velocityTimer.milliseconds();
+        if (deltaTime > 0) {
+            currentAngularVelocity = (MathFunctions.angleWrapRad(totalAngleToGoal - previousTotalAngle)) / deltaTime;
+            KLog.d("Turret_PID", "Current Angular Velocity " + currentAngularVelocity + " prev " + previousTotalAngle + " delta time " + deltaTime);
             previousTotalAngle = totalAngleToGoal;
-            currentAngularVelocity = 0;
             velocityTimer.reset();
-            isFirstVelocityUpdate = false;
-        } else {
-            double deltaTime = velocityTimer.milliseconds();
-            if (deltaTime > 0) {
-                currentAngularVelocity = (totalAngleToGoal - previousTotalAngle) / deltaTime;
-                previousTotalAngle = totalAngleToGoal;
-                velocityTimer.reset();
-            }
         }
     }
 
