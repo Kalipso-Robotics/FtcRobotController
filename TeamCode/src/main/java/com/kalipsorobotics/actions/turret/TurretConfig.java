@@ -9,7 +9,7 @@ public class TurretConfig { //
     public static double Y_INIT_SETUP_MM = 1400; // 1413.55      1,413.55 = 1,219.2 mm + 194.35
 
     public static double TICKS_INIT_OFFSET = 0;
-    public static double kP = 0.005;   // faster response 0.004
+    public static double kP = 0.0055;   // faster response 0.004
     public static double kI = 0;       // keep at 0
     public static double kD = 0.0005;  // reduces overshoot (main time saver) 0.0003
     public static double kS = 0.10;    // faster final approach

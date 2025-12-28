@@ -99,6 +99,7 @@ public class RedAutoNear extends KOpMode {
 //        trip3.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip3.getMoveToBall().setEnablePowerScalingForPath(true);
+        trip3.getMoveToBall().setWithinRadiusMM(600);
         trip3.getMoveToBall().setFinalSearchRadius(200);
     }
 
@@ -119,6 +120,7 @@ public class RedAutoNear extends KOpMode {
         trip4.getMoveToBall().addPoint(380, 1240, 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
         trip4.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
         trip4.getMoveToBall().setEnablePowerScalingForPath(true);
+        trip4.getMoveToBall().setWithinRadiusMM(600);
         trip4.getMoveToBall().setLookAheadRadius(150);
         trip4.getMoveToBall().setFinalSearchRadius(300);
     }
@@ -164,6 +166,7 @@ public class RedAutoNear extends KOpMode {
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
 
         trip1.setDependentActions(trip0);
+        trip1.getMoveToBall().setWithinRadiusMM(400);
         trip1.getMoveToBall().setMaxTimeOutMS(9000);
         trip1.getMoveToBall().setFinalSearchRadius(200);
         redAutoNear.addAction(trip1);
@@ -182,6 +185,7 @@ public class RedAutoNear extends KOpMode {
         // move to launch
         trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
+        trip2.getMoveToBall().setWithinRadiusMM(400);
         trip2.getMoveToBall().setMaxTimeOutMS(9000);
         trip2.getMoveToBall().setFinalSearchRadius(200);
         redAutoNear.addAction(trip2);

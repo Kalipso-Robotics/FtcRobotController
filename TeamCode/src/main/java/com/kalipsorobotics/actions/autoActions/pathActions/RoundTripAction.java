@@ -3,6 +3,7 @@ package com.kalipsorobotics.actions.autoActions.pathActions;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
+import com.kalipsorobotics.actions.shooter.PurePursuitReady;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
@@ -30,6 +31,7 @@ public class RoundTripAction extends KActionSet {
     private Shooter shooter;
     private ShooterReady shooterReady;
     private PushBall pushBall;
+    private PurePursuitReady purePursuitReady;
 //    private ShooterStop shooterStop;
     private TurretAutoAlign turretAutoAlign;
     private TurretReady turretReady;
@@ -55,6 +57,10 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setLookAheadRadius(125);  // Increased from default 75 to reduce oscillation during heading changes
         moveToBalls.setFinalSearchRadius(100);
         moveToBalls.setMaxTimeOutMS(8000);
+
+        this.purePursuitReady = new PurePursuitReady(moveToBalls);
+        purePursuitReady.setName("purePursuitReady");
+        this.addAction(purePursuitReady);
 
         //warm - shorter
         shooterRun = new ShooterRun(shooter, targetPoint, launchPoint);
@@ -83,9 +89,9 @@ public class RoundTripAction extends KActionSet {
         pushBall = new PushBall(stopper, intake, shooter);
         pushBall.setName("shoot");
         if (shouldDependOnFlywheel) {
-            pushBall.setDependentActions(moveToBalls, shooterReady); //removed turretReady
+            pushBall.setDependentActions(purePursuitReady, shooterReady); //removed turretReady
         } else {
-            pushBall.setDependentActions(moveToBalls);
+            pushBall.setDependentActions(purePursuitReady);
         }
         this.addAction(pushBall);
 //
@@ -141,15 +147,18 @@ public class RoundTripAction extends KActionSet {
             turretReady.setIsDone(true);
         }
 
-        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s, ShooterReadyUpdated: %b",
+        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, PurePursuitReady: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s",
                 getName() != null ? getName() : "unnamed",
                 moveToBall.getIsDone() ? "DONE" : "NOT DONE",
+                purePursuitReady.getIsDone() ? "DONE" : "NOT DONE",
                 intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
                 shooterReady.getIsDone() ? "DONE" : "NOT DONE",
                 shooterRun.getIsDone() ? "DONE" : "NOT DONE",
                 pushBall.getIsDone() ? "DONE" : "NOT DONE",
-                turretReady.getIsDone() ? "DONE" : "NOT DONE",
-                hasUpdatedShooterReady));
+                turretReady.getIsDone() ? "DONE" : "NOT DONE"));
+        KLog.d("RoundTrip", String.format("[%s] PP isWithinRange=%b",
+                getName() != null ? getName() : "unnamed",
+                moveToBall.isWithinRange()));
 
     }
 }
