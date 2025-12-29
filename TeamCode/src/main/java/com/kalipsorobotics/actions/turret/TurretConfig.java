@@ -16,11 +16,11 @@ public class TurretConfig { //
     public static double kS = 0;    // faster final approach
     public static double kF = 225;     // 375 // for tracking moving targets
 
-    public static double kP_teleop = 0.008;   // faster response
+    public static double kP_teleop = 0.01;   // faster response
     public static double kI_teleop = 0;       // keep at 0
-    public static double kD_teleop = 0.0002;  // reduces overshoot (main time saver) 0.0003
+    public static double kD_teleop = 0.0003;  // reduces overshoot (main time saver) 0.0003
     public static double kS_teleop = 0.04;    // faster final approach
-    public static double kF_teleop = 150;     // 375 // for tracking moving targets
+    public static double kF_teleop = 225;     // 375 // for tracking moving targets
 
 
 }

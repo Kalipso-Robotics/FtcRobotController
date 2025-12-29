@@ -99,6 +99,7 @@ public class TurretAutoAlignTeleop extends Action {
         if (!hasStarted) {
             hasStarted = true;
             velocityTimer.reset();
+            KLog.d("Turret_PID", "PIDF constants " + turretMotor.getPIDFController());
         }
 
         switch (turretRunMode) {
@@ -128,12 +129,6 @@ public class TurretAutoAlignTeleop extends Action {
         aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
         aprilTagSeen = !SharedData.getLimelightRawPosition().isEmpty();
-
-        // just for ftc dashboard
-        turretMotor.getPIDFController().setKp(TurretConfig.kP);
-        turretMotor.getPIDFController().setKp(TurretConfig.kD);
-        turretMotor.getPIDFController().setKf(TurretConfig.kF);
-        turretMotor.getPIDFController().setKs(TurretConfig.kS);
 
         double currentAngleRad = turret.getCurrentAngleRad();
         double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
