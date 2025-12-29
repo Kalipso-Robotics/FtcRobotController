@@ -143,6 +143,7 @@ public class RoundTripAction extends KActionSet {
 
         if (pushBall.getIsDone()) {
             turretReady.setIsDone(true);
+            shooterReady.setIsDone(true);
         }
 
         KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, PurePursuitReady: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s",

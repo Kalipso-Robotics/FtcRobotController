@@ -14,6 +14,7 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleop;
+import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.localization.ResetOdometryToPosition;
@@ -94,6 +95,11 @@ public class TeleOp extends KOpMode {
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = SharedData.getAllianceColor();
+        TurretConfig.kP = TurretConfig.kP_teleop;
+        TurretConfig.kI = TurretConfig.kI_teleop;
+        TurretConfig.kD = TurretConfig.kD_teleop;
+        TurretConfig.kF = TurretConfig.kF_teleop;
+        TurretConfig.kS = TurretConfig.kS_teleop;
     }
 
     @Override
