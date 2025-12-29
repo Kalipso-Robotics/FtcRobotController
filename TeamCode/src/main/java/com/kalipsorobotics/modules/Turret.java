@@ -51,6 +51,7 @@ public class Turret {
         turretDcMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         turret.turretMotor = new KMotor(turretDcMotor, TurretConfig.kP, TurretConfig.kI, TurretConfig.kD, TurretConfig.kF, TurretConfig.kS);
+        turret.turretMotor.setTicksOffset(TurretConfig.TICKS_INIT_OFFSET);
     }
 
     public KMotor getTurretMotor(){

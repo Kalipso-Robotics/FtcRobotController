@@ -32,7 +32,7 @@ public class RoundTripAction extends KActionSet {
     private ShooterReady shooterReady;
     private PushBall pushBall;
     private PurePursuitReady purePursuitReady;
-//    private ShooterStop shooterStop;
+    private ShooterStop shooterStop;
     private TurretAutoAlign turretAutoAlign;
     private TurretReady turretReady;
     private boolean hasUpdatedShooterReady = false;
@@ -94,11 +94,11 @@ public class RoundTripAction extends KActionSet {
             pushBall.setDependentActions(purePursuitReady);
         }
         this.addAction(pushBall);
-//
-//        shooterStop = new ShooterStop(shooterRun);
-//        shooterStop.setName("stop");
-//        shooterStop.setDependentActions(pushBall);
-//        this.addAction(shooterStop);
+
+        shooterStop = new ShooterStop(shooterRun);
+        shooterStop.setName("stop");
+        shooterStop.setDependentActions(pushBall);
+        this.addAction(shooterStop);
 
     }
 
@@ -142,8 +142,6 @@ public class RoundTripAction extends KActionSet {
         }
 
         if (pushBall.getIsDone()) {
-            shooterRun.setIsDone(true);
-            shooterReady.setIsDone(true);
             turretReady.setIsDone(true);
         }
 

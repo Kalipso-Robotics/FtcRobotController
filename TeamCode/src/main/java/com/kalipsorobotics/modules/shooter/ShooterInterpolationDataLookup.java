@@ -1,7 +1,6 @@
 package com.kalipsorobotics.modules.shooter;
 
 import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.*;
-
 import com.kalipsorobotics.test.shooter.RampUpTimeInterpolation;
 
 import java.util.*;
@@ -12,9 +11,6 @@ import java.util.*;
  */
 public class ShooterInterpolationDataLookup implements IShooterPredictor {
     // No clamping - use the exact values from the manual tuning data
-    private static final double HOOD_OFFSET = 0.25;
-    private static final double MIN_HOOD_POS = 0.0;
-    private static final double MAX_HOOD_POS = 0.55;
 
     public static class DataPoint {
         final double distanceMM;
@@ -103,7 +99,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
      * Clamp hood position to valid range.
      */
     private double clampHood(double hood) {
-        return Math.max(MIN_HOOD_POS, Math.min(MAX_HOOD_POS, hood));
+        return Math.max(MIN_HOOD, Math.min(MAX_HOOD, hood));
     }
 
     /**

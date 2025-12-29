@@ -150,7 +150,7 @@ public class TurretAutoAlign extends Action {
     public static double computeTicksFromAngleRad(double angleWrapRad) {
         double turretRotation = (angleWrapRad) / (2 * Math.PI);
         double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
-        double currentTargetTicks = Turret.TICKS_PER_ROTATION * motorRotation + TurretConfig.TICKS_INIT_OFFSET;
+        double currentTargetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
         return currentTargetTicks;
     }
 

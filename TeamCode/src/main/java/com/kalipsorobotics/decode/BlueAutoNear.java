@@ -12,7 +12,7 @@ public class BlueAutoNear extends RedAutoNear {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(this.allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = -((Turret.TICKS_PER_ROTATION * Turret.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
+        TurretConfig.TICKS_INIT_OFFSET = (int) Math.round(-((Turret.TICKS_PER_ROTATION * Turret.BIG_TO_SMALL_PULLEY) / 2)); //offset by 180 deg
     }
 
 }

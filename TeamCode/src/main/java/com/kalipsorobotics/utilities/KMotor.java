@@ -28,6 +28,7 @@ public class KMotor {
     // Power limits
     private static final double MAX_POWER = 1.0;
     private static final double MIN_POWER = -1;
+    private int ticksOffset = 0;
 
     // Default PIDF constants - tune these values for optimal RPS control
     // These values are designed to prevent overshoot while reaching target quickly
@@ -238,6 +239,10 @@ public class KMotor {
      * @return encoder ticks
      */
     public int getCurrentPosition() {
-        return motor.getCurrentPosition();
+        return motor.getCurrentPosition() + ticksOffset;
+    }
+
+    public void setTicksOffset(int ticksOffset) {
+        this.ticksOffset = ticksOffset;
     }
 }

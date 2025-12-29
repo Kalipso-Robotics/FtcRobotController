@@ -38,6 +38,10 @@ public class TurretAutoAlignTeleop extends Action {
     private double currentAngularVelocity;
     private ElapsedTime velocityTimer;
     private boolean isFirstVelocityUpdate;
+    private double defaultBiasAngle;
+    private double currentBiasAngle;
+    private Position lastOdometryPos;
+
 
 
     public TurretAutoAlignTeleop(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
@@ -49,9 +53,11 @@ public class TurretAutoAlignTeleop extends Action {
         this.turretRunMode = TurretRunMode.STOP; // inital mode
         this.targetTicks = 0;
         this.targetPower = 0;
-
+        lastOdometryPos = new Position(0,0,0);
+        lastOdometryPos.reset(SharedData.getOdometryWheelIMUPosition());
         targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
-
+        defaultBiasAngle = Math.atan2(targetPoint.getY(), targetPoint.getX());
+        currentBiasAngle = defaultBiasAngle;
         this.velocityTimer = new ElapsedTime();
         this.previousTotalAngle = 0;
         this.currentAngularVelocity = 0;
@@ -132,27 +138,36 @@ public class TurretAutoAlignTeleop extends Action {
         double currentAngleRad = turret.getCurrentAngleRad();
 
         if (aprilTagSeen) {
+            lastOdometryPos.reset(SharedData.getOdometryWheelIMUPosition());
+
             double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
 
-            totalAngleWrap = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
-            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
+            // Calculate desired absolute angle (wrapped to [-π, π])
+            double desiredAngleRad = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
+            currentBiasAngle = desiredAngleRad;
+            // Compute shortest angular error to avoid ±180° boundary discontinuity
+            double errorRad = MathFunctions.angleWrapRad(desiredAngleRad - currentAngleRad);
 
-            KLog.d("Turret_LIMELIGHT", String.format("RAW: TurretPos=%.2f° LLAngle=%.2f° | CALC: Target=%.2f° (%d ticks)",
-                    Math.toDegrees(currentAngleRad), Math.toDegrees(limelightAngleRad),
-                    Math.toDegrees(totalAngleWrap), (int) targetTicks));
+            // Add error to current ticks for continuous target (no wrap-around jump)
+            double currentTicks = turretMotor.getCurrentPosition();
+            targetTicks = currentTicks + (errorRad * Turret.TICKS_PER_RADIAN);
+
+            totalAngleWrap = desiredAngleRad;
+
+            KLog.d("Turret_LIMELIGHT", String.format("RAW: TurretPos=%.2f° LLAngle=%.2f° CurrTicks=%d | CALC: Desired=%.2f° Err=%.2f° Target=%d ticks",
+                    Math.toDegrees(currentAngleRad), Math.toDegrees(limelightAngleRad), (int) currentTicks,
+                    Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
 
         } else if (useOdometryAlign) {
             double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
-            double biasAngle = Math.atan2(targetPoint.getY(), targetPoint.getX());
-            double offsetAngleRad = TurretConfig.TICKS_INIT_OFFSET / Turret.TICKS_PER_RADIAN;
-            double desiredTurretAngle = MathFunctions.angleWrapRad(biasAngle - robotAngleRad + offsetAngleRad);
+            double desiredTurretAngle = MathFunctions.angleWrapRad(currentBiasAngle - robotAngleRad);
 
             totalAngleWrap = desiredTurretAngle;
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
             KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° | CALC: Bias=%.2f° DesiredTurret=%.2f° (%d ticks)",
                     Math.toDegrees(robotAngleRad),
-                    Math.toDegrees(biasAngle), Math.toDegrees(desiredTurretAngle), (int) targetTicks));
+                    Math.toDegrees(currentBiasAngle), Math.toDegrees(desiredTurretAngle), (int) targetTicks));
 
         } else {
             turretMotor.setPower(0);
@@ -233,5 +248,9 @@ public class TurretAutoAlignTeleop extends Action {
 
     public boolean getAlignWithOdometry() {
         return useOdometryAlign;
+    }
+
+    public void setUseOdometryAlign(boolean useOdometryAlign) {
+        this.useOdometryAlign = useOdometryAlign;
     }
 }
