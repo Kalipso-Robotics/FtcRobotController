@@ -156,6 +156,7 @@ public class TurretAutoAlign extends Action {
 
     private void updateAngularVelocity() {
         Position currentPosition = SharedData.getOdometryWheelIMUPosition();
+
         double xToGoal = targetPoint.getX() - currentPosition.getX();
         double yToGoal = targetPoint.getY() - currentPosition.getY();
         double angleToGoal = Math.atan2(yToGoal, xToGoal);
