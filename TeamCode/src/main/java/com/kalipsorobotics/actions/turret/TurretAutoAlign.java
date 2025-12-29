@@ -23,8 +23,7 @@ public class TurretAutoAlign extends Action {
     private double targetTicks;
 
     private Point targetPoint;
-    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 1;
-    private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
+    private double toleranceTicks = TurretConfig.DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
     private double previousTotalAngle = 0;
     private double currentAngularVelocity;
@@ -87,6 +86,7 @@ public class TurretAutoAlign extends Action {
         if (!hasStarted) {
             hasStarted = true;
             velocityTimer.reset();
+            KLog.d("Turret_PID", "PIDF constants " + turretMotor.getPIDFController());
         }
 
         updateAngularVelocity();

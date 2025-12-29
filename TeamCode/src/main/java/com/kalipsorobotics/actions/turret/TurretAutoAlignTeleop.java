@@ -24,7 +24,7 @@ public class TurretAutoAlignTeleop extends Action {
     private TurretRunMode turretRunMode;
     private double targetTicks;
     private double targetPower;
-    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE)*1;
+    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 1;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
     private boolean aprilTagSeen = false;
@@ -131,6 +131,7 @@ public class TurretAutoAlignTeleop extends Action {
 
         // just for ftc dashboard
         turretMotor.getPIDFController().setKp(TurretConfig.kP);
+        turretMotor.getPIDFController().setKp(TurretConfig.kD);
         turretMotor.getPIDFController().setKf(TurretConfig.kF);
         turretMotor.getPIDFController().setKs(TurretConfig.kS);
 
