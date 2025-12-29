@@ -39,8 +39,8 @@ public class TurretAutoAlignTeleop extends Action {
     private ElapsedTime velocityTimer;
     private boolean isFirstVelocityUpdate;
     private double defaultBiasAngle;
-    private double currentBiasAngle;
     private Position lastOdometryPos;
+    private double biasAngleCorrection = 0;
 
 
 
@@ -57,7 +57,6 @@ public class TurretAutoAlignTeleop extends Action {
         lastOdometryPos.reset(SharedData.getOdometryWheelIMUPosition());
         targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
         defaultBiasAngle = Math.atan2(targetPoint.getY(), targetPoint.getX());
-        currentBiasAngle = defaultBiasAngle;
         this.velocityTimer = new ElapsedTime();
         this.previousTotalAngle = 0;
         this.currentAngularVelocity = 0;
@@ -136,6 +135,8 @@ public class TurretAutoAlignTeleop extends Action {
         turretMotor.getPIDFController().setKs(TurretConfig.kS);
 
         double currentAngleRad = turret.getCurrentAngleRad();
+        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
+        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle - robotAngleRad);
 
         if (aprilTagSeen) {
             lastOdometryPos.reset(SharedData.getOdometryWheelIMUPosition());
@@ -144,7 +145,7 @@ public class TurretAutoAlignTeleop extends Action {
 
             // Calculate desired absolute angle (wrapped to [-π, π])
             double desiredAngleRad = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
-            currentBiasAngle = desiredAngleRad;
+            biasAngleCorrection = desiredAngleRad - odoDesiredTurretAngle;
             // Compute shortest angular error to avoid ±180° boundary discontinuity
             double errorRad = MathFunctions.angleWrapRad(desiredAngleRad - currentAngleRad);
 
@@ -159,15 +160,15 @@ public class TurretAutoAlignTeleop extends Action {
                     Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
 
         } else if (useOdometryAlign) {
-            double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
-            double desiredTurretAngle = MathFunctions.angleWrapRad(currentBiasAngle - robotAngleRad);
-
-            totalAngleWrap = desiredTurretAngle;
+            if (SharedData.getOdometryWheelIMUPosition().distanceTo(lastOdometryPos) < 150) {
+                odoDesiredTurretAngle = MathFunctions.angleWrapRad(odoDesiredTurretAngle + biasAngleCorrection);
+            }
+            totalAngleWrap = odoDesiredTurretAngle;
             targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
 
-            KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° | CALC: Bias=%.2f° DesiredTurret=%.2f° (%d ticks)",
+            KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° | CALC: Bias Correction=%.2f° DesiredTurret=%.2f° (%d ticks)",
                     Math.toDegrees(robotAngleRad),
-                    Math.toDegrees(currentBiasAngle), Math.toDegrees(desiredTurretAngle), (int) targetTicks));
+                    Math.toDegrees(biasAngleCorrection), Math.toDegrees(odoDesiredTurretAngle), (int) targetTicks));
 
         } else {
             turretMotor.setPower(0);
