@@ -27,9 +27,10 @@ public class ShooterRun extends Action {
     private double targetRPS = 0;
     private double targetHoodPosition = 0;
     private double distanceMM = -1;
-
     ElapsedTime elapsedTime;
     private boolean useLimelight = false;
+
+    private boolean useOdometry = true;
 
 
     public ShooterRun(Shooter shooter, double targetRPS, double targetHoodPosition) {
@@ -118,10 +119,15 @@ public class ShooterRun extends Action {
                 this.targetHoodPosition = params.hoodPosition;
                 break;
             case SHOOT_USING_CURRENT_POINT:
-                params = getPrediction(getCurrentDistanceMM());
-                this.targetRPS = params.rps;
-                this.targetHoodPosition = params.hoodPosition;
-                KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", "TargetRPS: " + targetRPS);
+                double currentDist = getCurrentDistanceMM();
+                if (currentDist == -1) {
+                    KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", "NO DISTANCE FOUND, NOT CHANGING RPS OR HOOD");
+                } else {
+                    params = getPrediction(currentDist);
+                    this.targetRPS = params.rps;
+                    this.targetHoodPosition = params.hoodPosition;
+                    KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", "TargetRPS: " + targetRPS);
+                }
                 break;
         }
         KLog.d("ShooterRun", "Running mode " + shooterRunMode);
@@ -173,17 +179,23 @@ public class ShooterRun extends Action {
 
     private double getLimelightDistance() {
         double limelightDistanceMM = SharedData.getLimelightRawPosition().getApriLTagDistanceToCamMM();
-        if (SharedData.getLimelightRawPosition().isEmpty()) {
-            limelightDistanceMM = ShooterInterpolationConfig.FAR_SHOOT_DISTANCE;
-            KLog.d("ShooterRun_Distance", "NOT SEEING LIMELIGHT, FALLBACK TO FAR SHOOT: " + limelightDistanceMM + " mm");
-        }
         KLog.d("ShooterRun_Distance", "Limelight distance: " + limelightDistanceMM + " mm");
         return limelightDistanceMM;
     }
 
     private double getCurrentDistanceMM() {
-        double distanceMM = getLimelightDistance();
-        KLog.d("ShooterRun_Distance", "Odometry Distance " + distanceMM);
+        double distanceMM = -1;
+        if (!SharedData.getLimelightRawPosition().isEmpty()) {
+            distanceMM = getLimelightDistance();
+            KLog.d("ShooterRun_Distance", "LIMELIGHT IN VIEW  " + distanceMM + " mm");
+        } else if (useOdometry){
+            distanceMM = getOdometryDistanceMM();
+            KLog.d("ShooterRun_Distance", "NOT SEEING LIMELIGHT, FALLBACK TO ODOMETRY: " + distanceMM + " mm");
+        } else {
+            KLog.d("ShooterRun_Distance", "Limelight out of view & Odometry turned off, return -1 for distance");
+        }
+
+        KLog.d("ShooterRun_Distance", "Final Distance " + distanceMM);
         return distanceMM;
     }
 
@@ -237,4 +249,10 @@ public class ShooterRun extends Action {
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
         return SharedData.getOdometryWheelIMUPosition().toPoint().distanceTo(targetPoint);
     }
+
+    public void setUseOdometry(boolean useOdometry) {
+        this.useOdometry = useOdometry;
+        KLog.d("ShooterRun", "Odometry was set to: " + useOdometry);
+    }
+
 }
