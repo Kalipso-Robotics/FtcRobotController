@@ -80,18 +80,6 @@ public class RedAutoDepot extends KOpMode {
         KLog.d("RedAutoDepot-Init", "Finished initializeRobot()");
     }
 
-    public void addPointsToTrip1() {
-
-        trip1.getTrip().getMoveToBall().clearPoints();
-        trip1.getTrip().getMoveToBall().addPoint(110, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(110, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(110, 1110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(15, 1118 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-
-        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
-    }
-
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
@@ -173,6 +161,19 @@ public class RedAutoDepot extends KOpMode {
         KLog.d("Auto→TeleOp", "After cleanup position: " + SharedData.getOdometryWheelIMUPosition());
         KLog.d("RedAutoDepot-Run", "After cleanupRobot() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
     }
+
+    public void addPointsToTrip1() {
+
+        trip1.getTrip().getMoveToBall().clearPoints();
+        trip1.getTrip().getMoveToBall().addPoint(110, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(110, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(110, 1110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(15, 1118 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+    }
+
 
 
 }
