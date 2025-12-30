@@ -95,7 +95,7 @@ public class RedAutoDepot extends KOpMode {
         trip0.getMoveToBall().addPoint(0, 0, 0);
         autoDepot.addAction(trip0);
 
-        // ----------------- TRIP 1 ---------------------- ~5 sec
+        // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
 
         trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip1.setName("trip1");
@@ -103,14 +103,21 @@ public class RedAutoDepot extends KOpMode {
         addPointsToTrip1();
         autoDepot.addAction(trip1);
 
-        // ----------------- TRIP 2 ---------------------- ~8 sec
+        // ----------------- TRIP 2 (sweeping) ---------------------- ~8 sec
 
-        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip2.setName("trip2");
         trip2.setDependentActions(trip1);
+        trip2.getTrip().getMoveToBall().clearPoints();
+        trip2.getTrip().getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(223, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(223,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip2);
 
-        // ----------------- TRIP 3 ---------------------- ~5 sec
+        // ----------------- TRIP 3 (sweeping) ---------------------- ~5 sec
 
         DepotRoundTrip trip3 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip3.setName("trip3");
@@ -124,12 +131,13 @@ public class RedAutoDepot extends KOpMode {
         trip3.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip3);
 
-        //-------------------TRIP 4 ------------------- ~ 19qp01
-//
-//        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
-//        trip4.setName("trip4");
-//        trip4.setDependentActions(trip3);
-//        autoDepot.addAction(trip4);
+        //-------------------TRIP 4 (straight) -------------------
+
+        DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        trip4.setName("trip4");
+        trip4.setDependentActions(trip3);
+        autoDepot.addAction(trip4);
+
 
         // ----------------- PARK ----------------------
 
@@ -162,16 +170,27 @@ public class RedAutoDepot extends KOpMode {
         KLog.d("RedAutoDepot-Run", "After cleanupRobot() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
     }
 
+
+    // GO TO DEPOT FIRST ---------------
+//    public void addPointsToTrip1() {
+//
+//        trip1.getTrip().getMoveToBall().clearPoints();
+//        trip1.getTrip().getMoveToBall().addPoint(110, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip1.getTrip().getMoveToBall().addPoint(110, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip1.getTrip().getMoveToBall().addPoint(110, 1110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip1.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip1.getTrip().getMoveToBall().addPoint(15, 1118 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//
+//        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+//    }
+
+
+    // GO TO SPIKE MARK FIRST ---------------------
     public void addPointsToTrip1() {
-
         trip1.getTrip().getMoveToBall().clearPoints();
-        trip1.getTrip().getMoveToBall().addPoint(110, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(110, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(110, 1110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(15, 1118 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-
-        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(727, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(727, 1150 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
     }
 
 
