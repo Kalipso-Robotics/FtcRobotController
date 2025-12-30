@@ -7,6 +7,7 @@ import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
+import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.math.LimelightPos;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -129,10 +130,22 @@ public class AprilTagDetectionAction extends Action {
 
                     // ==================== CALCULATED: Angle & Distance to Goal ====================
                     // Goal offset is fixed relative to AprilTag - always add in positive X direction
-                    double adjustedX = xAprilTagRelToCamMM + GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X * allianceColor.getPolarity();
-                    double adjustedZ = zAprilTagRelToCamMM + GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z;
-                    double estimateHeadingFromCamToGoal = Math.atan2(adjustedX, adjustedZ);
                     distanceFromCamToAprilTag = Math.hypot(xAprilTagRelToCamMM, zAprilTagRelToCamMM);
+                    double adjustedX;
+                    double adjustedZ = zAprilTagRelToCamMM + GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z;
+                    double effectiveOffset;
+                    if (distanceFromCamToAprilTag < NEAR_DISTANCE_BEGIN_TO_SCALE_THRESHOLD) {
+                        effectiveOffset = GOAL_OFFSET_REL_APRIL_TAG_IN_CAM_SPACE_NEAR_X * allianceColor.getPolarity();
+                    } else {
+                        effectiveOffset = GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X * allianceColor.getPolarity();
+                    }
+                    adjustedX = xAprilTagRelToCamMM + effectiveOffset;
+                    double estimateHeadingFromCamToGoal = Math.atan2(adjustedX, adjustedZ);
+
+                    // FOR RPS TUNING ---------------------
+                    opModeUtilities.getTelemetry().addData("Distance to April Tag: ", "" + distanceFromCamToAprilTag);
+                    opModeUtilities.getTelemetry().update();
+                    // FOR RPS TUNING ---------------------
 
                     KLog.d("AprilTag_GOAL", String.format("TagPos(x=%.1f, z=%.1f) + Offset -> Adj(x=%.1f, z=%.1f) | AngleToGoal=%.2f° | Dist=%.1fmm",
                             xAprilTagRelToCamMM, zAprilTagRelToCamMM, adjustedX, adjustedZ,

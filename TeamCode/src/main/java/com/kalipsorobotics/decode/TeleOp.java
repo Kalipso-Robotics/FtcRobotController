@@ -236,6 +236,7 @@ public class TeleOp extends KOpMode {
         // Auto Align
         if (isTurretAutoAlignEnabled) {
             turretAutoAlignTeleop.setUseOdometryAlign(enableOdometryAlignTurret);
+            KLog.d("Teleop", "Back Button " + enableOdometryAlignTurret);
             turretAutoAlignTeleop.runWithOdometryAndLimelight();
         } else {
             //Manual

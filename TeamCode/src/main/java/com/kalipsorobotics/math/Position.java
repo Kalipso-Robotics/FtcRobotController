@@ -19,8 +19,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
 public class Position {
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
     private double x;
     private double y;
     private double theta;
@@ -107,66 +105,31 @@ public class Position {
     }
 
     public String getPoint() {
-        lock.readLock().lock();
-        try {
-            return x + ", " + y + ", " + theta;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return x + ", " + y + ", " + theta;
     }
 
     public double getX() {
-        lock.readLock().lock();
-        try {
             return x;
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 
     public double getY() {
-        lock.readLock().lock();
-        try {
-            return y;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return y;
     }
 
     public double getTheta() {
-        lock.readLock().lock();
-        try {
-            return theta;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return theta;
     }
 
     public PidNav getPidX() {
-        lock.readLock().lock();
-        try {
-            return pidX;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return pidX;
     }
 
     public PidNav getPidY() {
-        lock.readLock().lock();
-        try {
-            return pidY;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return pidY;
     }
 
     public PidNav getPidAngle() {
-        lock.readLock().lock();
-        try {
-            return pidAngle;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return pidAngle;
     }
 
     public PidNav getPidAngleAdaptive() {
@@ -182,17 +145,12 @@ public class Position {
     }
 
     public void reset(Position position) {
-        lock.writeLock().lock();
-        try {
-            this.x = position.getX();
-            this.y = position.getY();
-            this.theta = position.getTheta();
-            this.pidX = position.pidX;
-            this.pidY = position.pidY;
-            this.pidAngle = position.pidAngle;
-        } finally {
-            lock.writeLock().unlock();
-        }
+        this.x = position.getX();
+        this.y = position.getY();
+        this.theta = position.getTheta();
+        this.pidX = position.pidX;
+        this.pidY = position.pidY;
+        this.pidAngle = position.pidAngle;
     }
 
     public double getDistanceAlongPath() {

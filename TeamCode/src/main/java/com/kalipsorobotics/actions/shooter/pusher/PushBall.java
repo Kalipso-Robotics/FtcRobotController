@@ -11,7 +11,7 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 
 public class PushBall extends KActionSet {
-
+    private RunIntakeUntilFullSpeed runUntilFullSpeed;
     public PushBall(Stopper stopper, Intake intake, Shooter shooter) {
 
         KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryWheelIMUPosition());
@@ -22,16 +22,19 @@ public class PushBall extends KActionSet {
 
         KLog.d("PushAllBalls", "openStopper " + openStopper.getIsDone());
 
-        RunIntakeUntilFullSpeed untilShootingDone = new RunIntakeUntilFullSpeed(intake);
-        untilShootingDone.setName("untilShootingDone");
+        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
+        runUntilFullSpeed.setName("untilShootingDone");
 //        untilShootingDone.setDependentActions(pushLeft, pushRight);
-        this.addAction(untilShootingDone);
+        this.addAction(runUntilFullSpeed);
 
-        KLog.d("PushAllBalls", "run intake " + untilShootingDone.getIsDone());
+        KLog.d("PushAllBalls", "run intake " + runUntilFullSpeed.getIsDone());
 
 
         KLog.d("teleop", "pusher Stopped(based off intake)");
 
     }
 
+    public RunIntakeUntilFullSpeed getRunUntilFullSpeed() {
+        return runUntilFullSpeed;
+    }
 }
