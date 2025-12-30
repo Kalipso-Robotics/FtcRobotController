@@ -24,7 +24,7 @@ public class TurretAutoAlignTeleop extends Action {
     private TurretRunMode turretRunMode;
     private double targetTicks;
     private double targetPower;
-    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 1;
+    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 2;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
     private boolean aprilTagSeen = false;
@@ -131,17 +131,18 @@ public class TurretAutoAlignTeleop extends Action {
         aprilTagSeen = !SharedData.getLimelightRawPosition().isEmpty();
 
         double currentAngleRad = turret.getCurrentAngleRad();
-        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
-        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle - robotAngleRad);
+//        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
+//        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle - robotAngleRad);
+        Position currentPos = SharedData.getOdometryWheelIMUPosition();
 
         if (aprilTagSeen) {
-            lastOdometryPos.reset(SharedData.getOdometryWheelIMUPosition());
+            lastOdometryPos.reset(currentPos);
 
             double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
 
             // Calculate desired absolute angle (wrapped to [-π, π])
             double desiredAngleRad = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
-            biasAngleCorrection = desiredAngleRad - odoDesiredTurretAngle;
+//            biasAngleCorrection = desiredAngleRad - odoDesiredTurretAngle;
             // Compute shortest angular error to avoid ±180° boundary discontinuity
             double errorRad = MathFunctions.angleWrapRad(desiredAngleRad - currentAngleRad);
 
@@ -156,16 +157,17 @@ public class TurretAutoAlignTeleop extends Action {
                     Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
 
         } else if (useOdometryAlign) {
-            if (SharedData.getOdometryWheelIMUPosition().distanceTo(lastOdometryPos) < 150) {
-                odoDesiredTurretAngle = MathFunctions.angleWrapRad(odoDesiredTurretAngle + biasAngleCorrection);
-            }
-            totalAngleWrap = odoDesiredTurretAngle;
-            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
-
-            KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° | CALC: Bias Correction=%.2f° DesiredTurret=%.2f° (%d ticks)",
-                    Math.toDegrees(robotAngleRad),
-                    Math.toDegrees(biasAngleCorrection), Math.toDegrees(odoDesiredTurretAngle), (int) targetTicks));
-
+            targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos);
+            KLog.d("Turret_ODOMETRY", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
+//            if (SharedData.getOdometryWheelIMUPosition().distanceTo(lastOdometryPos) < 150) {
+//                odoDesiredTurretAngle = MathFunctions.angleWrapRad(odoDesiredTurretAngle + biasAngleCorrection);
+//            }
+//            totalAngleWrap = odoDesiredTurretAngle;
+//            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
+//
+//            KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° | CALC: Bias Correction=%.2f° DesiredTurret=%.2f° (%d ticks)",
+//                    Math.toDegrees(robotAngleRad),
+//                    Math.toDegrees(biasAngleCorrection), Math.toDegrees(odoDesiredTurretAngle), (int) targetTicks));
         } else {
             turretMotor.setPower(0);
             isWithinRange = true;
