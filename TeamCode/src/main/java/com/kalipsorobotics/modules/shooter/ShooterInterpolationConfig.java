@@ -6,14 +6,14 @@ import com.acmerobotics.dashboard.config.Config;
 public class ShooterInterpolationConfig {
 
     public static final double HOOD_OFFSET = 0;
-    public final static double MAX_HOOD = 0.57; //0.64 old hood
-    public final static double MIN_HOOD = 0;
+    public final static double MAX_HOOD = 1; //0.64 old hood
+    public final static double MIN_HOOD = -1;
     public static double MAX_RPS = 55;
     public static final double NEAR_SHOOT_RPS = 35.50;
     public static final double FAR_SHOOT_DISTANCE = 3441.86;
     public static double[] shooterData = {
-           400, 30.5, 0.1,
-            710, 32, 0.5,
+           400, 30.5, -0.9,
+            710, 32, -0.5,
             890, 32.7, MAX_HOOD,
             1115, 34.2, MAX_HOOD,
             1320, 35.3, MAX_HOOD, // NEAR SHOOT AUTO roughly

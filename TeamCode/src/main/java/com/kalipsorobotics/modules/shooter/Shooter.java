@@ -75,7 +75,7 @@ public class Shooter {
         if (hood == null) {
             opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
         }
-        this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
+        this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, -1, false);
 
         CRServo kicker = opModeUtilities.getHardwareMap().crservo.get("kicker");
         this.kicker = new KCRServo(kicker, false);
@@ -116,6 +116,7 @@ public class Shooter {
             effectiveTolerance = (targetRPS / ShooterInterpolationConfig.MAX_RPS) * TARGET_RPS_TOLERANCE;
         }
         boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
+        KLog.d("ShooterRun_isAtTargetRPS", "Target RPS tolerance (default) " + TARGET_RPS_TOLERANCE + " targetRps: " + targetRPS + " currentRps " + currentRPS + " isWithinTarget: " + isWithinTarget + " effectiveTolerance " + effectiveTolerance);
         return isWithinTarget;
     }
 

@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.shooter;
 
 import android.annotation.SuppressLint;
 
+import com.kalipsorobotics.actions.cameraVision.AprilTagConfig;
 import com.kalipsorobotics.modules.shooter.ShooterConfig;
 import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
@@ -172,7 +173,7 @@ public class ShooterRun extends Action {
     }
 
     private double getOdometryDistanceMM() {
-        double odometryDistanceMM = getDistanceToTargetFromCurrentPos(targetPoint);
+        double odometryDistanceMM = getDistanceToTargetFromCurrentPos(targetPoint) - AprilTagConfig.GOAL_TO_APRIL_TAG_OFFSET_DISTANCE;
         KLog.d("ShooterRun_Distance", "Odometry distance: " + odometryDistanceMM + " mm");
         return odometryDistanceMM;
     }
