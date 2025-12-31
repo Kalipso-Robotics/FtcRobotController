@@ -42,7 +42,7 @@ public class AprilTagDetectionAction extends Action {
 
     private double prevPitchDeg = Double.MIN_VALUE;
     private int consecutiveGoodReadings = 0;
-    private static final int STABILITY_THRESHOLD = 4;
+    private static final int STABILITY_THRESHOLD = 2;
 
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId, AllianceColor allianceColor) {

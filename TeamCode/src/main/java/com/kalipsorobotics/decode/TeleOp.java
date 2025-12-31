@@ -429,7 +429,7 @@ public class TeleOp extends KOpMode {
         if (warmupFarPressed) {
             if (!isPending(shootAllAction)) {
                 shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
-                shooterRun.setTargetRPS(ShooterInterpolationConfig.getMaxValue()[0]);
+                shooterRun.setTargetRPS(ShooterInterpolationConfig.COMMON_FAR_SHOOT_RPS);
                 shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getMaxValue()[1]);
                 KLog.d("TeleOp_Shooting_Warmup", "Warmup For Far Shoot");
             }

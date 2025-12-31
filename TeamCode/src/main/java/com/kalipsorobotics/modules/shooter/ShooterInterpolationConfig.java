@@ -10,25 +10,26 @@ public class ShooterInterpolationConfig {
     public final static double MIN_HOOD = -1;
     public static double MAX_RPS = 55;
     public static final double NEAR_SHOOT_RPS = 35.50;
+    public static final double COMMON_FAR_SHOOT_RPS = 45.5;
     public static final double FAR_SHOOT_DISTANCE = 3441.86;
     public static double[] shooterData = {
-           400, 30.5, -0.9,
-            710, 32, -0.5,
-            890, 32.7, MAX_HOOD,
-            1115, 34.2, MAX_HOOD,
-            1320, 35.3, MAX_HOOD, // NEAR SHOOT AUTO roughly
-            1630, 36.5, MAX_HOOD,
-            1785, 38.1, MAX_HOOD,
-            1920, 39.7, MAX_HOOD,
-            2050, 41.4, MAX_HOOD,
-            2200, 43, MAX_HOOD,
-            2400, 44.5, MAX_HOOD,
-            2570, 45.2, MAX_HOOD,
-            2760, 47, MAX_HOOD, // TIP AREA DON'T TOUCH
-            2965, 48.2 - 0.7, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH
-            3095, 48.3 - 0.8, MAX_HOOD, // FAR SHOOT ( 0 , 0 )
-            3300, 48.8 - 0.8, MAX_HOOD,
-            3500, 49.3 - 1.3, MAX_HOOD,
+        400, 30.5, -0.9,
+        710, 32, -0.5,
+        890, 32.7, MAX_HOOD,
+        1115, 34.2 - 0.5, MAX_HOOD,
+        1320, 35.3 - 0.5, MAX_HOOD, // NEAR SHOOT AUTO roughly
+        1630, 36.5 + 0.5, MAX_HOOD,
+        1785, 38.1 + 0.4, MAX_HOOD,
+        1920, 39.7, MAX_HOOD,
+        2050, 41.4, MAX_HOOD,
+        2200, 43, MAX_HOOD,
+        2400, 44.5, MAX_HOOD,
+        2570, 45.2 + 0.6, MAX_HOOD,
+        2760, 47 + 0.5, MAX_HOOD, // TIP AREA DON'T TOUCH
+        2965, 48.2 - 0.7, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH
+        3095, 48.3 - 0.8, MAX_HOOD, // FAR SHOOT ( 0 , 0 )
+        3300, 48.8 - 0.8, MAX_HOOD,
+        3500, 49.3 - 1.3, MAX_HOOD,
     };
 
     /*

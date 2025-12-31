@@ -116,6 +116,10 @@ public class RoundTripAction extends KActionSet {
         return moveToBall;
     }
 
+    public PushBall getPushBall() {
+        return pushBall;
+    }
+
     @Override
     protected void beforeUpdate() {
         super.beforeUpdate();

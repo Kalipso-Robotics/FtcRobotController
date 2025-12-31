@@ -17,7 +17,7 @@ public class AprilTagConfig {
 
     public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z = 300.232 / 2; // FROM CAD in camera system
 
-    public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X = 134.7705; // 369.541 FROM CAD in camera system
+    public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X = 134.7705 - 25; // 369.541 FROM CAD in camera system
     public static double NEAR_DISTANCE_BEGIN_TO_SCALE_THRESHOLD = 1320;
     public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAM_SPACE_NEAR_X = 84.7705;
     public static double APRIL_TAG_ANGLE_REL_TO_GOAL_RAD = Math.toRadians(54);
