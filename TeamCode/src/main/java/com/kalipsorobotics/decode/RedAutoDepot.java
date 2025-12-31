@@ -143,12 +143,12 @@ public class RedAutoDepot extends KOpMode {
 
         IntakeStop stopIntake = new IntakeStop(intake);
         stopIntake.setName("stopIntake");
-        stopIntake.setDependentActions(trip3);
+        stopIntake.setDependentActions(trip4);
         autoDepot.addAction(stopIntake);
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setName("park");
-        park.setDependentActions(trip3);
+        park.setDependentActions(trip4);
         park.addPoint(170, 540 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         park.setMaxCheckDoneCounter(20);
         autoDepot.addAction(park);

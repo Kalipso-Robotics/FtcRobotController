@@ -15,11 +15,11 @@ public class ShooterInterpolationConfig {
     public static double[] shooterData = {
         400, 30.5, -0.9,
         710, 32, -0.5,
-        890, 32.7, MAX_HOOD,
-        1115, 34.2 - 0.5, MAX_HOOD,
-        1320, 35.3 - 0.5, MAX_HOOD, // NEAR SHOOT AUTO roughly
-        1630, 36.5 + 0.5, MAX_HOOD,
-        1785, 38.1 + 0.4, MAX_HOOD,
+        890, 32.7 - 0.2, MAX_HOOD,
+        1115, 34.2 - 1, MAX_HOOD,
+        1320, 35.3 - 1, MAX_HOOD, // NEAR SHOOT AUTO roughly
+        1630, 36.5 - 0.2, MAX_HOOD,
+        1785, 38.1, MAX_HOOD,
         1920, 39.7, MAX_HOOD,
         2050, 41.4, MAX_HOOD,
         2200, 43, MAX_HOOD,
