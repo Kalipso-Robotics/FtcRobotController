@@ -114,6 +114,10 @@ public class ShootAllAction extends KActionSet {
             turretAutoAlignTeleop.runWithOdometryAndLimelight();
             hasStarted = true;
         }
+
+        if (pushBall.getIsDone()) {
+            shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
+        }
     }
 
     public void setTurretReady(boolean isDone) {
