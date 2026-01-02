@@ -103,10 +103,6 @@ public class RoundTripAction extends KActionSet {
 
         shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("stop");
-
-
-
-
     }
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
@@ -139,7 +135,7 @@ public class RoundTripAction extends KActionSet {
             KLog.d("RoundTrip", String.format("[%s] MoveToBall COMPLETED - Stopping intake and updating shooter position",
                 getName() != null ? getName() : "unnamed"));
 
-            intakeFullAction.stop();
+            intakeFullAction.setIsDone(true); //don't need to stop intake because push ball starts intake
             KLog.d("RoundTrip", String.format("[%s] IntakeFullAction stopped by pure pursuit completion",
                 getName() != null ? getName() : "unnamed"));
 

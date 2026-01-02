@@ -27,9 +27,9 @@ public class ShooterInterpolationConfig {
         2570, 45.2 + 0.6, MAX_HOOD,
         2760, 47 + 0.5, MAX_HOOD, // TIP AREA DON'T TOUCH
         2965, 48.2 - 0.7, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH
-        3095, 48.3 - 0.6, MAX_HOOD, // FAR SHOOT ( 0 , 0 )
-        3300, 48.8 - 1.1, MAX_HOOD,
-        3500, 49.3 - 1.5, MAX_HOOD,
+        3095, 48.3 - 0.3, MAX_HOOD, // FAR SHOOT ( 0 , 0 )
+        3300, 48.8 - 0.8, MAX_HOOD,
+        3500, 49.3 - 1.3, MAX_HOOD,
     };
 
     /*

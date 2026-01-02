@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 public class RedAutoDepotSpikeMark extends RedAutoDepot {
 
     @Override
-    public void addPointsToTrip1() {
+    public void addPointsToTrip1SpikeMark() {
         trip1.getTrip().getMoveToBall().clearPoints();
 
         trip1.getTrip().getMoveToBall().addPoint(727, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());

@@ -24,18 +24,18 @@ public class IntakeFullAction extends KActionSet {
         intakeAll.setDependentActions(intakeRunFullSpeed);
         this.addAction(intakeAll);
 
-        stopIntake = new IntakeStop(intake);
-        stopIntake.setName("stopIntake");
-        stopIntake.setDependentActions(intakeAll);
-        this.addAction(stopIntake);
+//        stopIntake = new IntakeStop(intake);
+//        stopIntake.setName("stopIntake");
+//        stopIntake.setDependentActions(intakeAll);
+//        this.addAction(stopIntake);
 
     }
 
-    public void stop() {
-        if (isDone) {
-            return;
-        }
-        stopIntake.update();
-        this.isDone = true;
-    }
+//    public void stop() {
+//        if (isDone) {
+//            return;
+//        }
+//        stopIntake.update();
+//        this.isDone = true;
+//    }
 }
