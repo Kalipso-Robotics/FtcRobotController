@@ -36,11 +36,11 @@ public class DepotRoundTrip extends KActionSet {
         trip.getMoveToBall().setFinalAngleLockingThresholdDegree(30);
         trip.getMoveToBall().setWithinRangeRadiusMM(100);
         trip.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(200);
-        trip.getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(223, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(223,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        //trip.getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        //trip.getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        //trip.getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(173, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(173,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 
         this.addAction(trip);
