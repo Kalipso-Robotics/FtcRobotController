@@ -99,6 +99,7 @@ public class RoundTripAction extends KActionSet {
         } else {
             pushBall.setDependentActions(purePursuitReady);
         }
+        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(150);
         this.addAction(pushBall);
 
         shooterStop = new ShooterStop(shooterRun);
