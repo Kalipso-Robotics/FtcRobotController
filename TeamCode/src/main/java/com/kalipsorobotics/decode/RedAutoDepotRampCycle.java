@@ -86,7 +86,7 @@ public class RedAutoDepotRampCycle extends KOpMode {
 
         // ----------------- TRIP 1 ---------------------- ~5 sec
 
-        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000.0, allianceColor);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
         trip1.getTrip().getMoveToBall().clearPoints();

@@ -28,19 +28,21 @@ public class DepotRoundTrip extends KActionSet {
 
     RoundTripAction trip;
     public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
-        trip = new RoundTripAction(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, target, launchPos, 2000);
+        trip = new RoundTripAction(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, target, launchPos, 2000, true, false);
         trip.setName("trip");
-        trip.getMoveToBall().setLookAheadRadius(75);
+        trip.getMoveToBall().setLookAheadRadius(150);
         trip.getMoveToBall().setMaxTimeOutMS(8000);
         trip.getMoveToBall().setFinalSearchRadius(150);
         trip.getMoveToBall().setFinalAngleLockingThresholdDegree(30);
         trip.getMoveToBall().setWithinRangeRadiusMM(100);
+        trip.getMoveToBall().setPathAngleTolerance(15);
         trip.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(200);
+        trip.setShouldShooterStop(false);
         //trip.getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip.getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip.getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(173, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip.getMoveToBall().addPoint(173,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(100, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip.getMoveToBall().addPoint(100, 1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 
         this.addAction(trip);

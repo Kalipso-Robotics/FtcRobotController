@@ -11,6 +11,7 @@ public class ShooterStop extends Action {
 
     ShooterRun shooterRun;
 
+
     public ShooterStop(ShooterRun shooterRun) {
         this.shooterRun = shooterRun;
         this.shooter = shooterRun.getShooter();

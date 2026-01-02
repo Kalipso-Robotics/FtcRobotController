@@ -36,6 +36,11 @@ public class RoundTripAction extends KActionSet {
     private TurretAutoAlign turretAutoAlign;
     private TurretReady turretReady;
     private boolean hasUpdatedShooterReady = false;
+
+
+    private boolean shouldShooterStop = true;
+
+
     Point targetPoint;
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
@@ -43,6 +48,7 @@ public class RoundTripAction extends KActionSet {
         this.targetPoint = targetPoint;
         this.shooter = shooter;
         this.turretAutoAlign = turretAutoAlign;
+        this.shouldShooterStop = shouldShooterStop;
 
         WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
         waitUntilShootRun.setName("waitUntilShootReady");
@@ -97,8 +103,9 @@ public class RoundTripAction extends KActionSet {
 
         shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("stop");
-        shooterStop.setDependentActions(pushBall);
-        this.addAction(shooterStop);
+
+
+
 
     }
 
@@ -124,6 +131,10 @@ public class RoundTripAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
+        if (shouldShooterStop && !hasStarted){
+            this.addAction(shooterStop);
+            shooterStop.setDependentActions(pushBall);
+        }
         if (moveToBall.getIsDone()){
             KLog.d("RoundTrip", String.format("[%s] MoveToBall COMPLETED - Stopping intake and updating shooter position",
                 getName() != null ? getName() : "unnamed"));
@@ -148,7 +159,9 @@ public class RoundTripAction extends KActionSet {
         if (pushBall.getIsDone()) {
             turretReady.setIsDone(true);
             shooterReady.setIsDone(true);
+            shooterRun.setIsDone(true);
         }
+
 
         KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, PurePursuitReady: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s",
                 getName() != null ? getName() : "unnamed",
@@ -163,5 +176,9 @@ public class RoundTripAction extends KActionSet {
                 getName() != null ? getName() : "unnamed",
                 moveToBall.isWithinRange()));
 
+    }
+
+    public void setShouldShooterStop(boolean shouldShooterStop) {
+        this.shouldShooterStop = shouldShooterStop;
     }
 }

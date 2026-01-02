@@ -94,10 +94,10 @@ public class RedAutoDepot extends KOpMode {
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
         trip0.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
+        trip0.setShouldShooterStop(false);
         autoDepot.addAction(trip0);
 
         // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
-
         trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
@@ -138,7 +138,8 @@ public class RedAutoDepot extends KOpMode {
         //-------------------TRIP 4 (straight) -------------------
 
         DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
-        trip4.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
+        trip4.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(1000);
+        trip4.getTrip().setShouldShooterStop(true);
         trip4.setName("trip4");
         trip4.setDependentActions(trip3);
         autoDepot.addAction(trip4);
