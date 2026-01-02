@@ -19,10 +19,10 @@ public class ShooterInterpolationConfig {
         1115, 34.2 - 2.4, 0.5, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
         1320, 35.3 - 2, MAX_HOOD,
         1630, 36.5 - 2, MAX_HOOD, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
-        1785, 38.1 - 2.5, MAX_HOOD, //Near auto, trip 3 shooting point, tuned, distance: 1736.5272931917884
-        1920, 39.7 - 2.5, MAX_HOOD,
-        2050, 41.4 - 2.5, MAX_HOOD,
-        2200, 43 - 2.5, MAX_HOOD,
+        1785, 38.1 - 2.7, MAX_HOOD, //Near auto, trip 3 shooting point, tuned, distance: 1736.5272931917884
+        1920, 39.7 - 2.7, MAX_HOOD,
+        2050, 41.4 - 2.7, MAX_HOOD,
+        2200, 43 - 2.7, MAX_HOOD,
         2400, 44.5 - 3, MAX_HOOD,
         2570, 45.2 + 0.6, MAX_HOOD,
         2760, 47 + 0.5, MAX_HOOD, // TIP AREA DON'T TOUCH, far shoot

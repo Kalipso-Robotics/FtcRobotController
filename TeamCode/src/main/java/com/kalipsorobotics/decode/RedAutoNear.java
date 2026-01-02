@@ -27,11 +27,11 @@ public class RedAutoNear extends KOpMode {
     KActionSet redAutoNear;
     final double FIRST_SHOOT_X = 2598;
     final double FIRST_SHOOT_Y = 441.38;
-    final double SHOOT_NEAR_X = 2100; //2400
+    final double SHOOT_NEAR_X = 1900; //2400
     final double SHOOT_NEAR_Y = 100; //300
-    final double FINAL_SHOOT_NEAR_X = 2500; //2400
+    final double FINAL_SHOOT_NEAR_X = 2450; //2400
     final double FINAL_SHOOT_NEAR_Y = 25; //300
-    final double THIRD_SHOOT_NEAR_X = 2050; //2400
+    final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300
 
     public DriveTrain driveTrain;
@@ -115,8 +115,8 @@ public class RedAutoNear extends KOpMode {
         RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, true);
         trip1.setName("trip1");
 
-        trip1.getMoveToBall().addPoint(2050, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(2050, 715 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
+        trip1.getMoveToBall().addPoint(1975, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1975, 715 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
 //        trip1.getMoveToBall().addPoint(2000, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(1825, 900 * allianceColor.getPolarity() , 0 * allianceColor.getPolarity(), PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
@@ -198,15 +198,15 @@ public class RedAutoNear extends KOpMode {
         redAutoNear.addAction(trip3);
 
         trip3.getMoveToBall().clearPoints();
-        trip3.getMoveToBall().addPoint(800, 320 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(800, 1125 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(750, 370 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(750, 1125 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //     potential chunking point (x 13168, y 276, head 142)
 //        trip3.getMoveToBall().addPoint(800, 150 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(750, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
 //        trip3.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip3.getMoveToBall().setEnablePowerScalingForPath(true);
-        trip3.getMoveToBall().setWithinRangeRadiusMM(200);
+        trip3.getMoveToBall().setWithinRangeRadiusMM(250);
         trip3.getMoveToBall().setFinalSearchRadius(200);
     }
 
