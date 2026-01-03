@@ -116,7 +116,7 @@ public class RedAutoNear extends KOpMode {
         trip1.setName("trip1");
 
         trip1.getMoveToBall().addPoint(1975, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1975, 765 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
+        trip1.getMoveToBall().addPoint(1975, 780 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
 //        trip1.getMoveToBall().addPoint(2000, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(1825, 900 * allianceColor.getPolarity() , 0 * allianceColor.getPolarity(), PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
@@ -218,17 +218,19 @@ public class RedAutoNear extends KOpMode {
         redAutoNear.addAction(trip4);
 
         trip4.getMoveToBall().clearPoints();
-//        trip4.getMoveToBall().addPoint(1250, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip4.getMoveToBall().addPoint(1250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        //     potential chunking point (x 13168, y 276, head 142)
-//        trip4.getMoveToBall().addPoint(1500, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
-//        trip4.getMoveToBall().addPoint(1250, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip4.getMoveToBall().addPoint(1250, 900 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(380, 1255 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
+        // OLD DEPOT PATH (risky)
+//        trip4.getMoveToBall().addPoint(380, 1255 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
+        //-----------------------
+
+        // alternate path to depot
+        trip4.getMoveToBall().addPoint(1375, 1100 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(650, 1225 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        // ----------------
         trip4.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);
         trip4.getMoveToBall().setEnablePowerScalingForPath(true);
         trip4.getMoveToBall().setWithinRangeRadiusMM(300);
         trip4.getMoveToBall().setLookAheadRadius(150);
+        trip4.getMoveToBall().setPathAngleTolerance(15);
         trip4.getMoveToBall().setFinalSearchRadius(300);
     }
 }
