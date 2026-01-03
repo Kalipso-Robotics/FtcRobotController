@@ -80,7 +80,7 @@ public class RedAutoNear extends KOpMode {
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
         turretAutoAlign.setToleranceDeg(5);
 
-        turretAutoAlign.setToleranceDeg(1.5);
+        turretAutoAlign.setToleranceDeg(3);
     }
 
 
