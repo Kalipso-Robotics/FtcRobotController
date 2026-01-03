@@ -15,7 +15,7 @@ public class RunIntakeUntilFullSpeed extends Action {
     private static final double TARGET_VELOCITY = MAX_VELOCITY_TICKS_PER_SEC;
     //01-01 21:31:51.020  1576  1748 D KLog_intake: velocity: 1920.0 / threshold: 1390.4545454545455 / atFullSpeed: true
     //01-01 21:31:30.735  1576  1748 D KLog_intake: velocity: 1460.0 / threshold: 1390.4545454545455 / atFullSpeed: true
-    private static final double FULL_SPEED_THRESHOLD = TARGET_VELOCITY * 0.68; // ~2642 ticks/sec / observed full speed velocity ~2000 ticks / sec, low velocity 500-900
+    private static final double FULL_SPEED_THRESHOLD = TARGET_VELOCITY * 0.75; // ~2642 ticks/sec / observed full speed velocity ~2000 ticks / sec, low velocity 500-900
     private double fullSpeedDurationMS = 150;
 
     private ElapsedTime fullSpeedTimer;

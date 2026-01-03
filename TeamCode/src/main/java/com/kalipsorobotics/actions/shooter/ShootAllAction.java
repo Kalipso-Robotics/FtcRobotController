@@ -87,6 +87,11 @@ public class ShootAllAction extends KActionSet {
         turretReadyLimelight.setName("turretReady");
         this.addAction(turretReadyLimelight);
 
+        TurretStop stop = new TurretStop(turretAutoAlignTeleop);
+        stop.setName("stop");
+        stop.setDependentActions(turretReadyLimelight);
+        this.addAction(stop);
+
         pushBall = new PushBall(stopper, intake, shooter);
         pushBall.setName("pushAllBalls");
         pushBall.setDependentActions(shooterReady, turretReadyLimelight);

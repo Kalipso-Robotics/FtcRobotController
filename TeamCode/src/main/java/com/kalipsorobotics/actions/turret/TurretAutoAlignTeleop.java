@@ -134,6 +134,7 @@ public class TurretAutoAlignTeleop extends Action {
 //        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
 //        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle - robotAngleRad);
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
+        double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos);
 
         if (aprilTagSeen) {
             lastOdometryPos.reset(currentPos);
@@ -149,7 +150,7 @@ public class TurretAutoAlignTeleop extends Action {
             // Add error to current ticks for continuous target (no wrap-around jump)
             double currentTicks = turretMotor.getCurrentPosition();
             targetTicks = currentTicks + (errorRad * Turret.TICKS_PER_RADIAN);
-
+            KLog.d("Turret_LIMELIGHT", "Delta Ticks Correction Odo - LL: " + (odoTargetTicks - targetTicks));
             totalAngleWrap = desiredAngleRad;
 
             KLog.d("Turret_LIMELIGHT", String.format("RAW: TurretPos=%.2f° LLAngle=%.2f° CurrTicks=%d | CALC: Desired=%.2f° Err=%.2f° Target=%d ticks",
@@ -157,7 +158,7 @@ public class TurretAutoAlignTeleop extends Action {
                     Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
 
         } else if (useOdometryAlign) {
-            targetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos);
+            targetTicks = odoTargetTicks;
             KLog.d("Turret_ODOMETRY", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
 //            if (SharedData.getOdometryWheelIMUPosition().distanceTo(lastOdometryPos) < 150) {
 //                odoDesiredTurretAngle = MathFunctions.angleWrapRad(odoDesiredTurretAngle + biasAngleCorrection);
