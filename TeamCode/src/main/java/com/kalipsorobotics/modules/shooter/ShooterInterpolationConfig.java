@@ -6,17 +6,17 @@ import com.acmerobotics.dashboard.config.Config;
 public class ShooterInterpolationConfig {
 
     public static final double HOOD_OFFSET = 0;
-    public final static double MAX_HOOD = 0.97; //0.64 old hood
-    public final static double MIN_HOOD = -0.97;
+    public final static double MAX_HOOD = 0.72; //0.64 old hood
+    public final static double MIN_HOOD = 0; // 37.38mm space by caliper from bottom
     public static double MAX_RPS = 55;
     public static final double NEAR_SHOOT_RPS = 35.50;
     public static final double COMMON_FAR_SHOOT_RPS = 45.5;
     public static final double FAR_SHOOT_DISTANCE = 3441.86;
     public static double[] shooterData = {
-        400, 30.5 - 0.7, -0.9,
-        710, 32 - 0.7, -0.5,
-        890, 32.7 - 1, 0.5,
-        1115, 34.2 - 2.4, 0.5, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
+        400, 30.5 - 0.7, MIN_HOOD,
+        710, 32 - 0.7, MIN_HOOD,
+        890, 32.7 - 1, MIN_HOOD,
+        1115, 34.2 - 2.4, MIN_HOOD, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
         1320, 35.3 - 1, MAX_HOOD,
         1630, 36.5 - 2, MAX_HOOD, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
         1785, 38.1 - 2.7, MAX_HOOD, //Near auto, trip 3 shooting point, tuned, distance: 1736.5272931917884
@@ -24,12 +24,12 @@ public class ShooterInterpolationConfig {
         2050, 41.4 - 1.3, MAX_HOOD,
         2200, 43 - 1.7, MAX_HOOD,
         2400, 44.5 - 2.2, MAX_HOOD,
-        2570, 45.2 + 0.8, MAX_HOOD,
-        2760, 47 + 0.3, MAX_HOOD, // TIP AREA DON'T TOUCH, far shoot
-        2965, 48.2 - 0.9, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH. far shoot
-        3095, 48.3 - 0.5, MAX_HOOD, // FAR SHOOT, first shoot ( 0 , 0 )
-        3300, 48.8 - 0.5, MAX_HOOD,
-        3500, 49.3 - 0.5, MAX_HOOD,
+        2570, 45.2 + 0.4, MAX_HOOD,
+        2760, 47 - 0.1, MAX_HOOD, // TIP AREA DON'T TOUCH, far shoot
+        2965, 48.2 - 1.4, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH. far shoot
+        3095, 48.3 - 1, MAX_HOOD, // FAR SHOOT, first shoot ( 0 , 0 )
+        3300, 48.8 - 0.9, MAX_HOOD,
+        3500, 49.3 - 0.9, MAX_HOOD,
     };
 
     /*

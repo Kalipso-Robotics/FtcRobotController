@@ -12,6 +12,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
+import com.kalipsorobotics.utilities.KLog;
 
 
 public class ShootAllAction extends KActionSet {
@@ -95,7 +96,7 @@ public class ShootAllAction extends KActionSet {
         pushBall = new PushBall(stopper, intake, shooter);
         pushBall.setName("pushAllBalls");
         pushBall.setDependentActions(shooterReady, turretReadyLimelight);
-        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(500);
+        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(1000);
         this.addAction(pushBall);
 
         TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
@@ -119,9 +120,15 @@ public class ShootAllAction extends KActionSet {
             turretAutoAlignTeleop.runWithOdometryAndLimelight();
             hasStarted = true;
         }
+    }
 
+    @Override
+    public void afterUpdate() {
         if (pushBall.getIsDone()) {
+            double maintainRPSValue = shooterRun.getTargetRPS() * 0.75;
+            shooterRun.setTargetRPS(maintainRPSValue);
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
+            KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
         }
     }
 

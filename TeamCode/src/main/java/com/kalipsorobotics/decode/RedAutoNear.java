@@ -40,6 +40,7 @@ public class RedAutoNear extends KOpMode {
     Stopper stopper = null;
     Turret turret = null;
     TurretAutoAlign turretAutoAlign = null;
+    RoundTripAction trip1 = null;
     RoundTripAction trip3 = null;
     RoundTripAction trip2 = null;
     RoundTripAction trip4 = null;
@@ -112,7 +113,7 @@ public class RedAutoNear extends KOpMode {
 
         // ----------------- TRIP 1 ----------------------
 
-        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
+        trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip1.setName("trip1");
 
         trip1.getMoveToBall().addPoint(1975, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
