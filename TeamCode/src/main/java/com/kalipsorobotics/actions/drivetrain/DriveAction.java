@@ -102,12 +102,6 @@ public class DriveAction {
         double bLeftPower = (forward - strafe + turn);
         double bRightPower = (forward + strafe - turn);
 
-//        double fLeftPower = powerX + powerY + powerAngle;
-//        double fRightPower = powerX - powerY - powerAngle;
-//        double bLeftPower = powerX - powerY + powerAngle;
-//        double bRightPower = powerX + powerY - powerAngle;
-
-
         double absMaxPower = MathFunctions.maxAbsValueDouble(fLeftPower, fRightPower, bLeftPower, bRightPower);
         if (absMaxPower > 1) {
             fLeftPower = fLeftPower / absMaxPower;
@@ -115,6 +109,48 @@ public class DriveAction {
             bLeftPower = bLeftPower / absMaxPower;
             bRightPower = bRightPower / absMaxPower;
         }
+        double[] driveTrainPowers = {fLeftPower, fRightPower, bLeftPower, bRightPower};
+        return driveTrainPowers;
+    }
+
+    public double[] calculatePowerSmarter(Gamepad gamepad) {
+        //negative because gamepad y is flip
+        double forward = 1 * -gamepad.left_stick_y; //cube so fast is fast and slow is slow       * -gamepad.left_stick_y * -gamepad.left_stick_y
+        double turn = 1 * gamepad.right_stick_x; //* gamepad.right_stick_x * gamepad.right_stick_x
+        double strafe = 1 * gamepad.left_stick_x; //* gamepad.left_stick_x * gamepad.left_stick_x
+
+        KLog.d("drive", "forward " + forward);
+        KLog.d("drive", "turn " + turn);
+        KLog.d("drive", "strafe " + strafe);
+
+        final double turnReserve = 0.4;
+        final double translationScale = 1.0 - turnReserve;
+
+        double translationMagnitude = Math.max(Math.abs(forward) + Math.abs(strafe), 1.0);
+
+        double scaledForward = (forward / translationMagnitude) * translationScale;
+        double scaledStrafe = (strafe  / translationMagnitude) * translationScale;
+
+        double scaledTurn = turn * turnReserve;
+
+        KLog.d("drive", "scaled forward " + scaledForward);
+        KLog.d("drive", "scaled strafe " + scaledStrafe);
+        KLog.d("drive", "scaled turn " + scaledTurn);
+
+        double fLeftPower = scaledForward + scaledStrafe + scaledTurn;
+        double fRightPower = scaledForward - scaledStrafe - scaledTurn;
+        double bLeftPower = scaledForward - scaledStrafe + scaledTurn;
+        double bRightPower = scaledForward + scaledStrafe - scaledTurn;
+
+        //safety
+        double absMaxPower = MathFunctions.maxAbsValueDouble(fLeftPower, fRightPower, bLeftPower, bRightPower);
+        if (absMaxPower > 1) {
+            fLeftPower = fLeftPower / absMaxPower;
+            fRightPower = fRightPower / absMaxPower;
+            bLeftPower = bLeftPower / absMaxPower;
+            bRightPower = bRightPower / absMaxPower;
+        }
+
         double[] driveTrainPowers = {fLeftPower, fRightPower, bLeftPower, bRightPower};
         return driveTrainPowers;
     }
@@ -174,7 +210,6 @@ public class DriveAction {
     }
 
     public void move(Gamepad gamepad) {
-
         double[] driveTrainPower = calculatePower(gamepad);
 
         fLeft.setPower(driveTrainPower[0]);
