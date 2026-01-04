@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.turret;
 
+import static com.kalipsorobotics.actions.turret.TurretConfig.*;
+
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;;
@@ -28,6 +30,7 @@ public class TurretAutoAlignTeleOp extends Action {
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
     private boolean aprilTagSeen = false;
+
     private double searchAngleDeg = 180;
     private boolean hasSearched = false;
     double totalAngleWrap;
@@ -158,6 +161,7 @@ public class TurretAutoAlignTeleOp extends Action {
                     Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
 
         } else if (useOdometryAlign) {
+
             targetTicks = odoTargetTicks;
             KLog.d("Turret_ODOMETRY", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
 //            if (SharedData.getOdometryWheelIMUPosition().distanceTo(lastOdometryPos) < 150) {

@@ -8,7 +8,6 @@ import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -26,7 +25,7 @@ public class Shooter {
 
     public final double TARGET_RPS_TOLERANCE = 1;
 
-    public static final double FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY = 2370.0 / 2.0;
+    public static final double FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY = 2370.0 / 2.0;
 
     private final OpModeUtilities opModeUtilities;
 
@@ -152,8 +151,8 @@ public class Shooter {
      */
     public IShooterPredictor.ShooterParams getPrediction(double distanceMM) {
         if (distanceMM > 4200) {
-            KLog.d("shooter_ready", "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY + " Distance: " + distanceMM);
-            return predictor.predict(FALLBACK_DISTANCE_IF_DISTANCEMM_IS_WACKY);
+            KLog.d("shooter_ready", "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY + " Distance: " + distanceMM);
+            return predictor.predict(FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY);
         }
         return predictor.predict(distanceMM);
     }

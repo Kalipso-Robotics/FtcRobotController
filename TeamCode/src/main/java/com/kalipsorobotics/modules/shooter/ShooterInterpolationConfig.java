@@ -5,6 +5,8 @@ import com.acmerobotics.dashboard.config.Config;
 @Config
 public class ShooterInterpolationConfig {
 
+    public static double rpsOffset = 0;
+
     public static final double HOOD_OFFSET = 0;
     public final static double MAX_HOOD = 0.72; //0.64 old hood
     public final static double MIN_HOOD = 0; // 37.38mm space by caliper from bottom

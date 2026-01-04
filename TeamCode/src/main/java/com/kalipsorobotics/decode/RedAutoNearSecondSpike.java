@@ -9,6 +9,7 @@ public class RedAutoNearSecondSpike extends RedAutoNear{
 
     @Override
     public void handleTrip3() {
+//============================ Trip 3 (Intake Second Spike) ============================
         trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip3.setName("trip2");
         trip3.getMoveToBall().addPoint(1375, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());

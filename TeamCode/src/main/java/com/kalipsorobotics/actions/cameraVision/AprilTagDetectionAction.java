@@ -7,7 +7,6 @@ import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.math.LimelightPos;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -42,7 +41,11 @@ public class AprilTagDetectionAction extends Action {
 
     private double prevPitchDeg = Double.MIN_VALUE;
     private int consecutiveGoodReadings = 0;
+    private int consecutiveBadReadings;
+
     private static final int STABILITY_THRESHOLD = 2;
+    public static int CONSECUTIVE_BAD_READING_TOLERANCE = 5;
+
 
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId, AllianceColor allianceColor) {
@@ -107,6 +110,7 @@ public class AprilTagDetectionAction extends Action {
                     }
                     prevPitchDeg = rawPitchDeg;
                     consecutiveGoodReadings++;
+                    consecutiveBadReadings = 0;
                     consecutiveGoodReadings = Math.min(consecutiveGoodReadings, STABILITY_THRESHOLD + 1);
 
                     // ==================== CALCULATED: Odometry Transform ====================
@@ -164,7 +168,11 @@ public class AprilTagDetectionAction extends Action {
 
         if (!hasFound) {
             consecutiveGoodReadings = 0;
-            SharedData.getLimelightRawPosition().reset();
+            consecutiveBadReadings++;
+            if (consecutiveBadReadings > CONSECUTIVE_BAD_READING_TOLERANCE) {
+                KLog.d("AprilTag", "No AprilTag detected consecutively. Resetting SharedData.");
+                SharedData.getLimelightRawPosition().reset();
+            }
         }
     }
 

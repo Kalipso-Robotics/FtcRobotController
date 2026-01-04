@@ -38,9 +38,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
             DATA_POINTS.add(new DataPoint(ShooterInterpolationConfig.shooterData[i],
                     ShooterInterpolationConfig.shooterData[i + 1],
                     ShooterInterpolationConfig.shooterData[i + 2]));
-
         }
-
     }
 
 
@@ -59,7 +57,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
             DataPoint dp = DATA_POINTS.get(0);
             double clampedHood = clampHood(dp.hoodPosition);
             clampedHood += HOOD_OFFSET;
-            return new IShooterPredictor.ShooterParams(dp.rps, clampedHood);
+            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood);
         }
 
         // If distance is above maximum, return last point
@@ -67,7 +65,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
             DataPoint dp = DATA_POINTS.get(DATA_POINTS.size() - 1);
             double clampedHood = clampHood(dp.hoodPosition);
             clampedHood += HOOD_OFFSET;
-            return new IShooterPredictor.ShooterParams(dp.rps, clampedHood);
+            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood);
         }
 
         // Find the two surrounding points
@@ -84,7 +82,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
 
                 double clampedHood = clampHood(interpolatedHood);
                 clampedHood += HOOD_OFFSET;
-                return new IShooterPredictor.ShooterParams(interpolatedRPS, clampedHood);
+                return new IShooterPredictor.ShooterParams(interpolatedRPS + rpsOffset, clampedHood);
             }
         }
 
@@ -92,7 +90,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
         DataPoint dp = DATA_POINTS.get(DATA_POINTS.size() - 1);
         double clampedHood = clampHood(dp.hoodPosition);
         clampedHood += HOOD_OFFSET;
-        return new IShooterPredictor.ShooterParams(dp.rps, clampedHood);
+        return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood);
     }
 
     /**

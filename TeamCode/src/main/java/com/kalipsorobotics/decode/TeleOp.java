@@ -2,6 +2,7 @@ package com.kalipsorobotics.decode;
 
 import android.util.Log;
 
+import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.*;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
@@ -89,6 +90,9 @@ public class TeleOp extends KOpMode {
     private boolean useLimelight = true;
     private boolean forceShootNearPressed = false;
     private boolean enableOdometryAlignTurret = true;
+    private boolean incrementRPSPressed;
+    private boolean decrementRPSPressed;
+
     private double lastPower = 0;
 
     @Override
@@ -135,7 +139,7 @@ public class TeleOp extends KOpMode {
             tagId = 20;
         }
 
-        shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+        shooterRun = new ShooterRun(opModeUtilities, shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
 
         aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId, allianceColor);
         turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret, aprilTagDetectionAction, allianceColor);
@@ -174,6 +178,10 @@ public class TeleOp extends KOpMode {
             }
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticksActive = kGamePad1.isAnyStickActive();
+
+            incrementRPSPressed = kGamePad1.isDpadUpPressed();
+            decrementRPSPressed = kGamePad1.isDpadDownPressed();
+
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
@@ -214,8 +222,8 @@ public class TeleOp extends KOpMode {
 
             // ========== UPDATE ACTIONS ==========
             updateActions();
-
-            Log.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
+            telemetry.addLine("Rps Offset" + ShooterInterpolationConfig.rpsOffset);
+            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         cleanupRobot();
     }
@@ -360,6 +368,15 @@ public class TeleOp extends KOpMode {
      * Handle shooting sequence
      */
     private void handleShooting() {
+
+        if (incrementRPSPressed) {
+            ShooterInterpolationConfig.rpsOffset += 0.1;
+            KLog.d("TeleOp_Shooting", "Increment Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
+        } else if (decrementRPSPressed) {
+            ShooterInterpolationConfig.rpsOffset -= 0.1;
+            KLog.d("TeleOp_Shooting", "Decrement Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
+        }
+
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
             releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
@@ -389,7 +406,7 @@ public class TeleOp extends KOpMode {
 //                resetOdometryToPosition = new ResetOdometryToPosition(turret);
                 shooterRun.setUseOdometry(enableOdometryAlignTurret);
                 shooterRun.setUseLimelight(useLimelight);
-                    setLastShooterAction(shootAllAction);
+                setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 if (isTurretAutoAlignEnabled) {
                     shootAllAction.setTurretReady(true);

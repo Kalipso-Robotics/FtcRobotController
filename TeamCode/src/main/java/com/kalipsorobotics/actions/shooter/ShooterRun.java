@@ -12,10 +12,13 @@ import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.shooter.IShooterPredictor;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterRun extends Action {
+
+    private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
     private final Shooter shooter;
     private final Point targetPoint;
@@ -35,7 +38,9 @@ public class ShooterRun extends Action {
     private boolean isWithinRange = false;
 
 
-    public ShooterRun(Shooter shooter, double targetRPS, double targetHoodPosition) {
+
+    public ShooterRun(OpModeUtilities opModeUtilities, Shooter shooter, double targetRPS, double targetHoodPosition) {
+        this.opModeUtilities = opModeUtilities;
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD;
         this.shooter = shooter;
         this.targetPoint = null;
@@ -46,7 +51,8 @@ public class ShooterRun extends Action {
         this.targetHoodPosition = targetHoodPosition;
     }
 
-    public ShooterRun(Shooter shooter, Point targetPoint, Point launchPoint) {
+    public ShooterRun(OpModeUtilities opModeUtilities, Shooter shooter, Point targetPoint, Point launchPoint) {
+        this.opModeUtilities = opModeUtilities;
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_FIXED_POINT;
         this.shooter = shooter;
         this.targetPoint = targetPoint;
@@ -58,7 +64,8 @@ public class ShooterRun extends Action {
         this.targetHoodPosition = 0;
     }
 
-    public ShooterRun(Shooter shooter, Point targetPoint) {
+    public ShooterRun(OpModeUtilities opModeUtilities, Shooter shooter, Point targetPoint) {
+        this.opModeUtilities = opModeUtilities;
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
         this.shooter = shooter;
         this.targetPoint = targetPoint;
@@ -171,7 +178,9 @@ public class ShooterRun extends Action {
         IShooterPredictor.ShooterParams params = shooter.getPrediction(currentDistanceMM);
         KLog.d("shooter_ready", "Distance: " + currentDistanceMM + " params: " + params);
         // Get shooter parameters from predictor using the distance
-        return shooter.getPrediction(currentDistanceMM);
+
+        opModeUtilities.getTelemetry().addData("ShooterRun_TargetRPS", params.rps);
+        return params;
     }
 
     private double getOdometryDistanceMM() {

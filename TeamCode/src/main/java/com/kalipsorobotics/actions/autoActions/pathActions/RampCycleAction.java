@@ -46,7 +46,7 @@ public class RampCycleAction extends KActionSet {
         closeStopperAction.setName("closeStopper");
         this.addAction(closeStopperAction);
 
-        ShooterRun shooterRun = new ShooterRun(shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), shooterPoint);
+        ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), shooterPoint);
         shooterRun.setName("shooterRun");  // FIX: Correct name (was "shooterReady")
         this.addAction(shooterRun);
 
