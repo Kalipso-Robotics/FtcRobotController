@@ -113,7 +113,7 @@ public class AprilTagDetectionAction extends Action {
                     double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(90 + rawPitchDeg));
                     camRelAprilTagPos = new Position(-rawCamPoseZ * 1000, -rawCamPoseX * 1000, camRelAprilTagTheta);
 
-                    KLog.d("AprilTag_ODOM", String.format("CamRelTag(x=%.1fmm, y=%.1fmm, θ=%.2f°)",
+                    KLog.d("AprilTag_CAM_REL_APRIL_TAG", String.format("CamRelTag(x=%.1fmm, y=%.1fmm, θ=%.2f°)",
                             camRelAprilTagPos.getX(), camRelAprilTagPos.getY(), Math.toDegrees(camRelAprilTagTheta)));
 
                     // ==================== CALCULATED: Global Position ====================
@@ -207,7 +207,7 @@ public class AprilTagDetectionAction extends Action {
 
     private boolean isLimelightSpike(double currentPitchDeg, double prevPitchDeg) {
         double angleDiff = MathFunctions.angleWrapDeg(currentPitchDeg - prevPitchDeg);
-        return Math.abs(angleDiff) > 11;
+        return Math.abs(angleDiff) > 90;
     }
 
 

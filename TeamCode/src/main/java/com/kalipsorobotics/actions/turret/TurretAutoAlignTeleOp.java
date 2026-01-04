@@ -16,7 +16,7 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-public class TurretAutoAlignTeleop extends Action {
+public class TurretAutoAlignTeleOp extends Action {
     OpModeUtilities opModeUtilities;
     Turret turret;
     KMotor turretMotor;
@@ -44,7 +44,7 @@ public class TurretAutoAlignTeleop extends Action {
 
 
 
-    public TurretAutoAlignTeleop(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
+    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
         this.aprilTagDetectionAction = aprilTagDetectionAction;

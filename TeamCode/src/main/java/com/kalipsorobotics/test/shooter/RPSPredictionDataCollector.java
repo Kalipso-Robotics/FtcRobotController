@@ -1,11 +1,9 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
-import com.kalipsorobotics.actions.shooter.ShooterRun;
-import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleop;
+import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Intake;
@@ -89,7 +87,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
     private Odometry odometry;
     private DriveTrain driveTrain;
     private IMUModule imuModule;
-    private TurretAutoAlignTeleop turretAutoAlignTeleop;
+    private TurretAutoAlignTeleOp turretAutoAlignTeleop;
     private Turret turret;
     private KFileWriter fileWriter;
     private OpModeUtilities opModeUtilities;
@@ -114,7 +112,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
-        turretAutoAlignTeleop = new TurretAutoAlignTeleop(opModeUtilities, turret, aprilTagDetectionAction, AllianceColor.RED);
+        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, aprilTagDetectionAction, AllianceColor.RED);
         turretAutoAlignTeleop.runWithOdometryAndLimelight();
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");

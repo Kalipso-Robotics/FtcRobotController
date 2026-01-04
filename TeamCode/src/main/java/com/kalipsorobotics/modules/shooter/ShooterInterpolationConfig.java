@@ -10,8 +10,6 @@ public class ShooterInterpolationConfig {
     public final static double MIN_HOOD = 0; // 37.38mm space by caliper from bottom
     public static double MAX_RPS = 55;
     public static final double NEAR_SHOOT_RPS = 35.50;
-    public static final double COMMON_FAR_SHOOT_RPS = 45.5;
-    public static final double FAR_SHOOT_DISTANCE = 3441.86;
     public static double[] shooterData = {
         400, 30.5 - 0.7, MIN_HOOD,
         710, 32 - 0.7, MIN_HOOD,
@@ -130,6 +128,9 @@ public class ShooterInterpolationConfig {
     };
      */
 
+    public static double[] getMinValue() {
+        return new double[] {shooterData[1], shooterData[2]};
+    }
     public static double[] getMaxValue() {
         return new double[] {shooterData[shooterData.length - 2], shooterData[shooterData.length - 1]};
     }
