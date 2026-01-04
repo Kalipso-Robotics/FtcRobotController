@@ -117,6 +117,8 @@ public class ShootAllAction extends KActionSet {
             return;
         }
         if (!hasStarted) {
+            //Refresh targetRPS
+            shooterRun.update();
             turretAutoAlignTeleop.runWithOdometryAndLimelight();
             hasStarted = true;
         }

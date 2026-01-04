@@ -32,6 +32,7 @@ public class ShooterRun extends Action {
     private boolean useLimelight = false;
 
     private boolean useOdometry = true;
+    private boolean isWithinRange = false;
 
 
     public ShooterRun(Shooter shooter, double targetRPS, double targetHoodPosition) {
@@ -67,10 +68,10 @@ public class ShooterRun extends Action {
     }
 
     public boolean isWithinRange() {
-        boolean atTarget = shooter.isAtTargetRPS();
+        //boolean atTarget = shooter.isAtTargetRPS();
         KLog.d("ShooterRun", "isWithinRange called - Current RPS: " + shooter.getRPS() +
-               ", At Target: " + atTarget + ", Target RPS: " + targetRPS);
-        return atTarget;
+                ", Target RPS: " + targetRPS + ", At Within Range: " + isWithinRange);
+        return isWithinRange;
     }
 
     @SuppressLint("DefaultLocale")
@@ -148,16 +149,17 @@ public class ShooterRun extends Action {
 
         if (shooter.isAtTargetRPS()) {
             if ((rpsInRangeTimer.milliseconds() > ShooterConfig.timeToStabilize)) {
-                KLog.d("shooterAdjust", "Shooter READY " + shooter.getRPS());
-                KLog.d("shooter_ready", "ramp up time ms: " + rampUpTimeTimer.milliseconds());
+                KLog.d("shooter_ready", "Shooter is within range and READY. TargetRPS: " + targetRPS + " Current RPS: " + shooter.getRPS() + ". Ramp up time ms:" + rampUpTimeTimer.milliseconds());
                 //isDone = true;
+                isWithinRange = true;
             } else {
-                KLog.d("shooter_ready", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + targetRPS);
-                KLog.d("shooterAdjust", "waiting for timer, RPS within tolerance: " + shooter.getRPS() + " TARGET: " + targetRPS);
+                KLog.d("shooter_ready", "Shooter within range, but waiting for time to stablize. TargetRPS: " + targetRPS + " Current RPS: " + shooter.getRPS() );
+                isWithinRange = false;
             }
         } else {
-            KLog.d("shooterAdjust", "Shooter ready timer reset " + shooter.getRPS() + " TARGET: " + targetRPS);
+            KLog.d("shooter_ready", "Shooter not within range." + shooter.getRPS() + " TARGET: " + targetRPS);
             rpsInRangeTimer.reset();
+            isWithinRange = false;
         }
 
     }
@@ -236,6 +238,9 @@ public class ShooterRun extends Action {
 
     public void setShooterRunMode(ShooterRunMode shooterRunMode) {
         this.shooterRunMode = shooterRunMode;
+        KLog.d("ShooterRun_Set_Mode", "Mode Change -> Force Update. New Mode: " + shooterRunMode);
+        this.update();
+
     }
 
     public ShooterRunMode getShooterRunMode() {

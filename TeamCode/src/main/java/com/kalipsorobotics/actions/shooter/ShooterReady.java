@@ -11,24 +11,6 @@ public class ShooterReady extends Action {
         this.shooterRun = shooterRun;
     }
 
-    @Override
-    public boolean updateCheckDone() {
-        if (isDone) {
-            return true;
-        }
-
-        // Check dependencies
-        for (Action action : dependentActions) {
-            if (action != null && !action.getIsDone()) {
-                KLog.d("ShooterReady", "Waiting for dependent action: " + action.getName() + " (isDone: " + action.getIsDone() + ")");
-                return false;
-            }
-        }
-
-        KLog.d("ShooterReady", "All dependencies done, calling update()");
-        update();
-        return isUpdateDone();
-    }
 
     @Override
     protected void update() {
