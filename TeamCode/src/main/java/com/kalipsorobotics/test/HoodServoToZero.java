@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class HoodServoToZero extends LinearOpMode {
 
-    private double hoodPos = -1;
+    private double hoodPos = 0;
     @Override
     public void runOpMode() throws InterruptedException {
 

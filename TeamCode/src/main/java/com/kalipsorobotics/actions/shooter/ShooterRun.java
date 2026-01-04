@@ -101,7 +101,7 @@ public class ShooterRun extends Action {
                 return;
             case SHOOT_USING_TARGET_RPS_HOOD:
                 // Direct RPS mode
-                KLog.d("ShooterRun_SHOOT_USING_TARGET_RPS_HOOD", "Using direct RPS mode");
+                KLog.d("ShooterRun_SHOOT_USING_TARGET_RPS_HOOD", "Using direct RPS mode, TargetRps " + targetRPS + " Target Hood " + targetHoodPosition);
                 break;
             case SHOOT_USING_DISTANCE:
                 KLog.e("ShooterRun_SHOOT_USING_DISTANCE", "Distance: " + distanceMM);

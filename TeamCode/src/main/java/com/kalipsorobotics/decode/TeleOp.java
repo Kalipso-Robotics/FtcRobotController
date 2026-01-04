@@ -390,7 +390,7 @@ public class TeleOp extends KOpMode {
 //                resetOdometryToPosition = new ResetOdometryToPosition(turret);
                 shooterRun.setUseOdometry(enableOdometryAlignTurret);
                 shooterRun.setUseLimelight(useLimelight);
-                setLastShooterAction(shootAllAction);
+                    setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 if (isTurretAutoAlignEnabled) {
                     shootAllAction.setTurretReady(true);

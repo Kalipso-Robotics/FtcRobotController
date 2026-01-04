@@ -138,6 +138,13 @@ public class RedAutoDepot extends KOpMode {
         //-------------------TRIP 4 (straight) -------------------
 
         DepotRoundTrip trip4 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        trip4.getTrip().getMoveToBall().clearPoints();
+        trip4.getTrip().getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getTrip().getMoveToBall().addPoint(15,  1140 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getTrip().getMoveToBall().addPoint(223, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getTrip().getMoveToBall().addPoint(223,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         trip4.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         trip4.getTrip().setShouldShooterStop(true);
         trip4.setName("trip4");

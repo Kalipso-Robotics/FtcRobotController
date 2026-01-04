@@ -136,10 +136,6 @@ public class RoundTripAction extends KActionSet {
             KLog.d("RoundTrip", String.format("[%s] MoveToBall COMPLETED - Stopping intake and updating shooter position",
                 getName() != null ? getName() : "unnamed"));
 
-            intakeFullAction.setIsDone(true); //don't need to stop intake because push ball starts intake
-            KLog.d("RoundTrip", String.format("[%s] IntakeFullAction stopped by pure pursuit completion",
-                getName() != null ? getName() : "unnamed"));
-
             if (!hasUpdatedShooterReady) {
                 Point currentPos = new Position(SharedData.getOdometryWheelIMUPosition()).toPoint();
                 KLog.d("RoundTrip", String.format("[%s] Updating shooter position - Current: (%.1f, %.1f), Target: (%.1f, %.1f)",
@@ -151,12 +147,6 @@ public class RoundTripAction extends KActionSet {
                 KLog.d("RoundTrip", String.format("[%s] Shooter position updated successfully",
                     getName() != null ? getName() : "unnamed"));
             }
-        }
-
-        if (pushBall.getIsDone()) {
-            turretReady.setIsDone(true);
-            shooterReady.setIsDone(true);
-            shooterRun.setIsDone(true);
         }
 
 
@@ -173,6 +163,21 @@ public class RoundTripAction extends KActionSet {
                 getName() != null ? getName() : "unnamed",
                 moveToBall.isWithinRange()));
 
+    }
+
+    @Override
+    public void afterUpdate() {
+        if (pushBall.getIsDone()) {
+            turretReady.setIsDone(true);
+            shooterReady.setIsDone(true);
+            shooterRun.setIsDone(true);
+        }
+
+        if (moveToBall.getIsDone()) {
+            intakeFullAction.setIsDone(true); //don't need to stop intake because push ball starts intake
+            KLog.d("RoundTrip", String.format("[%s] IntakeFullAction stopped by pure pursuit completion",
+                    getName() != null ? getName() : "unnamed"));
+        }
     }
 
     public void setShouldShooterStop(boolean shouldShooterStop) {

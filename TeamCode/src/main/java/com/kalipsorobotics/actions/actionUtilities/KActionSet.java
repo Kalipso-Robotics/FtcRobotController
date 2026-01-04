@@ -50,7 +50,7 @@ public class KActionSet extends Action {
                 }
             }
         }
-
+        afterUpdate();
         KLog.d("ActionSet", String.format("[%s] Status: %d total, %d completed, %d executed, %d blocked",
             getName() != null ? getName() : "unnamed",
             totalActions, completedActions, executedActions, blockedActions));
@@ -58,6 +58,10 @@ public class KActionSet extends Action {
 
     // this is a hook to open up update to other code
     protected void beforeUpdate() {
+
+    }
+
+    protected void afterUpdate() {
 
     }
 
