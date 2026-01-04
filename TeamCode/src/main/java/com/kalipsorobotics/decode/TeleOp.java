@@ -17,7 +17,6 @@ import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleop;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.localization.ResetOdometryToPosition;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -80,7 +79,7 @@ public class TeleOp extends KOpMode {
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
     private boolean warmupFarPressed = false;
-    private boolean warmupAutoPressed = false;
+    private boolean warmupNearPressed = false;
     private boolean releasePressed = false;
     private boolean markUndershotPressed = false;
     private boolean markOvershotPressed = false;
@@ -181,7 +180,7 @@ public class TeleOp extends KOpMode {
             shootAllPressed = kGamePad1.isLeftBumperFirstPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
             warmupFarPressed = kGamePad2.isDpadUpFirstPressed();
-            warmupAutoPressed = kGamePad2.isDpadDownFirstPressed();
+            warmupNearPressed = kGamePad2.isDpadDownFirstPressed();
 
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
@@ -429,13 +428,15 @@ public class TeleOp extends KOpMode {
         if (warmupFarPressed) {
             if (!isPending(shootAllAction)) {
                 shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
-                shooterRun.setTargetRPS(ShooterInterpolationConfig.COMMON_FAR_SHOOT_RPS);
+                shooterRun.setTargetRPS(ShooterInterpolationConfig.getMaxValue()[0] * 0.8);
                 shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getMaxValue()[1]);
                 KLog.d("TeleOp_Shooting_Warmup", "Warmup For Far Shoot");
             }
-        } else if (warmupAutoPressed) {
+        } else if (warmupNearPressed) {
             if (!isPending(shootAllAction)) {
-                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
+                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
+                shooterRun.setTargetRPS(ShooterInterpolationConfig.getMinValue()[0]);
+                shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getMinValue()[1]);
                 KLog.d("TeleOp_Shooting_Warmup", "Warmup For Auto Shoot");
             }
         }
