@@ -171,6 +171,10 @@ public class Odometry {
         return (int) (mm / MM_PER_TICK);
     }
 
+    public static double getTrackWidthMm() {
+        return TRACK_WIDTH_MM;
+    }
+
     public double getRightEncoderMM() {
         //corresponds to fRight
         //direction FORWARD
