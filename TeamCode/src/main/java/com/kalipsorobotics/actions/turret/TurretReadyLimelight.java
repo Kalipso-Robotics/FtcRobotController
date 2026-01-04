@@ -9,8 +9,8 @@ public class TurretReadyLimelight extends Action {
     private double maxTimeoutMS;
     private ElapsedTime timeoutTimer;
     private static final double DEFAULT_MAX_TIMOUT_MS = 4000;
-    private TurretAutoAlignTeleop turretAutoAlignTeleop;
-    public TurretReadyLimelight(TurretAutoAlignTeleop turretAutoAlignTeleop) {
+    private TurretAutoAlignTeleOp turretAutoAlignTeleop;
+    public TurretReadyLimelight(TurretAutoAlignTeleOp turretAutoAlignTeleop) {
         this.turretAutoAlignTeleop = turretAutoAlignTeleop;
         this.maxTimeoutMS = DEFAULT_MAX_TIMOUT_MS;
         timeoutTimer = new ElapsedTime();

@@ -3,8 +3,8 @@ package com.kalipsorobotics.actions.turret;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 
 public class TurretStop extends Action {
-    TurretAutoAlignTeleop turretAutoAlignTeleop;
-    public TurretStop(TurretAutoAlignTeleop turretAutoAlignTeleop) {
+    TurretAutoAlignTeleOp turretAutoAlignTeleop;
+    public TurretStop(TurretAutoAlignTeleOp turretAutoAlignTeleop) {
         this.turretAutoAlignTeleop = turretAutoAlignTeleop;
     }
 
