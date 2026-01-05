@@ -12,6 +12,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
+import com.kalipsorobotics.test.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
 
 
@@ -74,6 +75,7 @@ public class ShootAllAction extends KActionSet {
     }
 
 
+
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
 
         ActivateBraking activateBraking = new ActivateBraking(driveBrake);
@@ -87,11 +89,6 @@ public class ShootAllAction extends KActionSet {
         turretReadyLimelight = new TurretReadyLimelight(turretAutoAlignTeleop);
         turretReadyLimelight.setName("turretReady");
         this.addAction(turretReadyLimelight);
-
-        TurretStop stop = new TurretStop(turretAutoAlignTeleop);
-        stop.setName("stop");
-        stop.setDependentActions(turretReadyLimelight);
-        this.addAction(stop);
 
         pushBall = new PushBall(stopper, intake, shooter);
         pushBall.setName("pushAllBalls");
@@ -118,8 +115,8 @@ public class ShootAllAction extends KActionSet {
         }
         if (!hasStarted) {
             //Refresh targetRPS
+            turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_WHILE_SHOOTING);
             shooterRun.update();
-            turretAutoAlignTeleop.runWithOdometryAndLimelight();
             hasStarted = true;
         }
     }

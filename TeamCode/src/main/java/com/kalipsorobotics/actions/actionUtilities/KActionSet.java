@@ -12,9 +12,18 @@ public class KActionSet extends Action {
     public void addAction(Action... actions) {
         Collections.addAll(this.actions, actions);
     }
+    boolean hasInitialized = false;
+    public void initActions(){
+
+    }
 
     @Override
     public void update() {
+        if (!hasInitialized) {
+            initActions();
+            hasInitialized = true;
+        }
+
         beforeUpdate();
 
         int totalActions = 0;

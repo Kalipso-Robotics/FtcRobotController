@@ -240,9 +240,10 @@ public class TeleOp extends KOpMode {
         // Auto Align
         if (isTurretAutoAlignEnabled) {
             turretAutoAlignTeleOp.setUseOdometryAlign(enableOdometryAlignTurret);
-            KLog.d("Teleop", "Back Button " + enableOdometryAlignTurret);
+            KLog.d("TeleOp", "Back Button " + enableOdometryAlignTurret);
             turretAutoAlignTeleOp.runWithOdometryAndLimelight();
         } else {
+            KLog.d("TeleOp", "In Manual Mode");
             //Manual
             if (kGamePad2.isDpadLeftPressed()) {
                 turretAutoAlignTeleOp.runWithPower(-0.25);
@@ -390,9 +391,6 @@ public class TeleOp extends KOpMode {
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                if (isTurretAutoAlignEnabled) {
-                    shootAllAction.setTurretReady(true);
-                }
                 KLog.d("TeleOp_Shooting", "Shoot action started - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
             return;
@@ -407,9 +405,6 @@ public class TeleOp extends KOpMode {
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                if (isTurretAutoAlignEnabled) {
-                    shootAllAction.setTurretReady(true);
-                }
                 KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
             return;
