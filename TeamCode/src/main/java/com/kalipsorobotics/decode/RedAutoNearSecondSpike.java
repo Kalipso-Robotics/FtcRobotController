@@ -3,8 +3,10 @@ package com.kalipsorobotics.decode;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-public class RedAutoNearSecondSpike extends RedAutoNear{
+@Autonomous
+public class RedAutoNearSecondSpike extends RedAutoNear {
     Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y);
 
     @Override
@@ -15,7 +17,7 @@ public class RedAutoNearSecondSpike extends RedAutoNear{
         trip3.getMoveToBall().addPoint(1375, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(1375, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        trip3.getMoveToBall().addPoint(1500, 1110 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(1500, 1160 * allianceColor.getPolarity(), 185 * allianceColor.getPolarity());
 
 //        trip2.getMoveToBall().addPoint(1500, 900 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
 //        trip2.getMoveToBall().addPoint(1500, 1050 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
@@ -28,6 +30,7 @@ public class RedAutoNearSecondSpike extends RedAutoNear{
         redAutoNear.addAction(trip3);
     }
 
+    //============================ Trip 4 (Intake Second Spike) ============================
     @Override
     public void handleTrip4() {
         trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
@@ -35,7 +38,7 @@ public class RedAutoNearSecondSpike extends RedAutoNear{
         trip4.getMoveToBall().addPoint(1375, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(1375, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        trip4.getMoveToBall().addPoint(1500, 1110 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(1500, 1160 * allianceColor.getPolarity(), 185 * allianceColor.getPolarity());
 
 //        trip2.getMoveToBall().addPoint(1500, 900 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
 //        trip2.getMoveToBall().addPoint(1500, 1050 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());

@@ -149,6 +149,7 @@ public class TeleOp extends KOpMode {
 
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         KLog.d("TeleOp-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        stopper.setPosition(stopper.STOPPER_SERVO_OPEN_POS);
         waitForStart();
         sleep(50);
         //Wait for Executor Thread to start
@@ -167,7 +168,7 @@ public class TeleOp extends KOpMode {
 
         while (opModeIsActive()) {
             if (!hasClosedStopperInnit) {
-                stopper.setPosition(stopper.STOPPER_SERVO_OPEN_POS);
+                stopper.setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
                 hasClosedStopperInnit = true;
             }
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
@@ -340,10 +341,12 @@ public class TeleOp extends KOpMode {
         }
 
         if (incrementHoodPressed) {
-            ShooterInterpolationConfig.hoodOffset += 0.01;
+            ShooterInterpolationConfig.hoodOffset += 0.1;
+            shooter.getHood().setPosition(shooter.getHoodPosition() + 0.1);
             KLog.d("TeleOp_Shooting", "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         } else if (decrementHoodPressed) {
-            ShooterInterpolationConfig.hoodOffset -= 0.01;
+            ShooterInterpolationConfig.hoodOffset -= 0.1;
+            shooter.getHood().setPosition(shooter.getHoodPosition() - 0.1);
             KLog.d("TeleOp_Shooting", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         }
 
