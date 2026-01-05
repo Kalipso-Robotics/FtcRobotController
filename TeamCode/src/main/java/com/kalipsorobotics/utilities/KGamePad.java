@@ -189,6 +189,66 @@ public class KGamePad {
         this.toggleX = toggleX;
     }
 
+    public void setToggleY(boolean toggleY) {
+        this.toggleY = toggleY;
+    }
+
+    public void setToggleA(boolean toggleA) {
+        this.toggleA = toggleA;
+    }
+
+    public void setToggleB(boolean toggleB) {
+        this.toggleB = toggleB;
+    }
+
+    public void setToggleBack(boolean toggleBack) {
+        this.toggleBack = toggleBack;
+    }
+
+    public void setToggleStart(boolean toggleStart) {
+        this.toggleStart = toggleStart;
+    }
+
+    public void setToggleDpadUp(boolean toggleDpadUp) {
+        this.toggleDpadUp = toggleDpadUp;
+    }
+
+    public void setToggleDpadDown(boolean toggleDpadDown) {
+        this.toggleDpadDown = toggleDpadDown;
+    }
+
+    public void setToggleDpadLeft(boolean toggleDpadLeft) {
+        this.toggleDpadLeft = toggleDpadLeft;
+    }
+
+    public void setToggleDpadRight(boolean toggleDpadRight) {
+        this.toggleDpadRight = toggleDpadRight;
+    }
+
+    public void setToggleLeftBumper(boolean toggleLeftBumper) {
+        this.toggleLeftBumper = toggleLeftBumper;
+    }
+
+    public void setToggleRightBumper(boolean toggleRightBumper) {
+        this.toggleRightBumper = toggleRightBumper;
+    }
+
+    public void setToggleLeftTrigger(boolean toggleLeftTrigger) {
+        this.toggleLeftTrigger = toggleLeftTrigger;
+    }
+
+    public void setToggleRightTrigger(boolean toggleRightTrigger) {
+        this.toggleRightTrigger = toggleRightTrigger;
+    }
+
+    public void setToggleLeftStickButton(boolean toggleLeftStickButton) {
+        this.toggleLeftStickButton = toggleLeftStickButton;
+    }
+
+    public void setToggleRightStickButton(boolean toggleRightStickButton) {
+        this.toggleRightStickButton = toggleRightStickButton;
+    }
+
     public boolean isToggleY() {
         if (isButtonYFirstPressed()) {
             toggleY = !toggleY;
