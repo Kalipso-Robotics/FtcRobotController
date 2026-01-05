@@ -175,11 +175,11 @@ public class TeleOp extends KOpMode {
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticksActive = kGamePad1.isAnyStickActive();
 
-            incrementRPSPressed = kGamePad1.isDpadUpFirstPressed();
-            decrementRPSPressed = kGamePad1.isDpadDownFirstPressed();
+            incrementRPSPressed = kGamePad2.isDpadUpFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
+            decrementRPSPressed = kGamePad2.isDpadDownFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
 
-            incrementHoodPressed = kGamePad1.isDpadRightFirstPressed();
-            decrementHoodPressed = kGamePad1.isDpadLeftFirstPressed();
+            incrementHoodPressed = kGamePad2.isDpadRightFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
+            decrementHoodPressed = kGamePad2.isDpadLeftFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
 
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
