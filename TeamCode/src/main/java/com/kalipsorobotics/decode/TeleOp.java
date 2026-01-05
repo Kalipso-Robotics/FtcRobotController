@@ -176,19 +176,27 @@ public class TeleOp extends KOpMode {
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticksActive = kGamePad1.isAnyStickActive();
 
-            incrementRPSPressed = kGamePad2.isDpadUpFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
-            decrementRPSPressed = kGamePad2.isDpadDownFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
+            boolean kGamepad2IsDpadUpFirstPressed = kGamePad2.isDpadUpFirstPressed();
+            boolean kGamepad2IsDpadDownFirstPressed = kGamePad2.isDpadDownFirstPressed();
 
-            incrementHoodPressed = kGamePad2.isDpadRightFirstPressed() && kGamePad2.isLeftBumperPressed();
-            decrementHoodPressed = kGamePad2.isDpadLeftFirstPressed() && kGamePad2.isLeftBumperPressed();
+            boolean kGamepad2IsDpadLeftFirstPressed = kGamePad2.isDpadLeftFirstPressed();
+            boolean kGamepad2IsDpadRightFirstPressed = kGamePad2.isDpadRightFirstPressed();
+
+            incrementRPSPressed = kGamepad2IsDpadUpFirstPressed && kGamePad2.isLeftBumperPressed();
+            decrementRPSPressed = kGamepad2IsDpadDownFirstPressed && kGamePad2.isLeftBumperPressed();
+
+            incrementHoodPressed = kGamepad2IsDpadRightFirstPressed && kGamePad2.isLeftBumperPressed();
+            decrementHoodPressed = kGamepad2IsDpadLeftFirstPressed && kGamePad2.isLeftBumperPressed();
 
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
             shootAllActionPressed = kGamePad1.isLeftBumperFirstPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
-            warmupFarPressed = kGamePad2.isDpadUpFirstPressed();
-            warmupNearPressed = kGamePad2.isDpadDownFirstPressed();
+            warmupFarPressed = kGamepad2IsDpadUpFirstPressed;
+            warmupNearPressed = kGamepad2IsDpadDownFirstPressed;
+
+            KLog.d("TeleOp_Warmup_Button", "WarmupFarButton: " + warmupFarPressed + " warmupNearButton: " + warmupNearPressed);
 
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
@@ -358,6 +366,12 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp_Shooting", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         }
 
+
+
+
+
+
+
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
             releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
@@ -377,6 +391,7 @@ public class TeleOp extends KOpMode {
 
         //Shooting Running --> return;
         if (isPending(shootAllAction)) {
+            KLog.d("TeleOp_Shooting", "shootAllAction Pending -> Return");
             return;
         }
 
@@ -424,13 +439,15 @@ public class TeleOp extends KOpMode {
         }
 
         if (warmupFarPressed) {
+            KLog.d("TeleOp_Shooting_Warmup", "Try to warmup far");
             if (!isPending(shootAllAction)) {
                 shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
-                shooterRun.setTargetRPS(ShooterInterpolationConfig.getFarShoot()[0] * 0.8);
+                shooterRun.setTargetRPS(ShooterInterpolationConfig.getFarShoot()[0] * 0.9);
                 shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getFarShoot()[1]);
                 KLog.d("TeleOp_Shooting_Warmup", "Warmup For Far Shoot");
             }
         } else if (warmupNearPressed) {
+            KLog.d("TeleOp_Shooting_Warmup", "Try to warmup near");
             if (!isPending(shootAllAction)) {
                 shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
                 shooterRun.setTargetRPS(ShooterInterpolationConfig.getMinValue()[0]);
