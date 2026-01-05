@@ -49,11 +49,12 @@ public class KServo {
     public void setTargetPosition(double position) {
         lastPosition = servo.getPosition();
         targetPosition = position;
-        if(lastPosition != targetPosition) {
+        if (lastPosition != targetPosition) {
             estimatedFinishTime = estimateTimeMs(lastPosition, targetPosition) * 1.25;
             startTime = System.currentTimeMillis();
-            servo.setPosition(targetPosition);
         }
+        servo.setPosition(targetPosition);
+
 //        time.reset();
     }
 

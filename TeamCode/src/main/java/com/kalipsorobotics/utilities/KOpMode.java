@@ -117,6 +117,7 @@ public abstract class KOpMode extends LinearOpMode {
         }
 
         if (lastStopperAction != null && lastStopperAction != lastIntakeAction && lastStopperAction != lastMoveAction && lastStopperAction != lastShooterAction) {
+            KLog.d("KOpMode", "lastStopperAction updateCheckDone");
             lastStopperAction.updateCheckDone();
         }
 
