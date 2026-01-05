@@ -185,6 +185,10 @@ public class KGamePad {
         return toggleX;
     }
 
+    public void setToggleX(boolean toggleX) {
+        this.toggleX = toggleX;
+    }
+
     public boolean isToggleY() {
         if (isButtonYFirstPressed()) {
             toggleY = !toggleY;
