@@ -1,8 +1,5 @@
 package com.kalipsorobotics.decode;
 
-import android.util.Log;
-
-import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.*;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
@@ -93,6 +90,9 @@ public class TeleOp extends KOpMode {
     private boolean incrementRPSPressed;
     private boolean decrementRPSPressed;
 
+    private boolean incrementHoodPressed;
+    private boolean decrementHoodPressed;
+
     private double lastPower = 0;
 
     @Override
@@ -179,8 +179,11 @@ public class TeleOp extends KOpMode {
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticksActive = kGamePad1.isAnyStickActive();
 
-            incrementRPSPressed = kGamePad1.isDpadUpPressed();
-            decrementRPSPressed = kGamePad1.isDpadDownPressed();
+            incrementRPSPressed = kGamePad1.isDpadUpFirstPressed();
+            decrementRPSPressed = kGamePad1.isDpadDownFirstPressed();
+
+            incrementHoodPressed = kGamePad1.isDpadRightFirstPressed();
+            decrementHoodPressed = kGamePad1.isDpadLeftFirstPressed();
 
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
@@ -222,7 +225,7 @@ public class TeleOp extends KOpMode {
 
             // ========== UPDATE ACTIONS ==========
             updateActions();
-            telemetry.addLine("Rps Offset" + ShooterInterpolationConfig.rpsOffset);
+            telemetry.addLine("Rps Offset " + ShooterInterpolationConfig.rpsOffset + "Hood Offset " + ShooterInterpolationConfig.hoodOffset);
             KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         cleanupRobot();
@@ -377,6 +380,14 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp_Shooting", "Decrement Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
         }
 
+        if (incrementHoodPressed) {
+            ShooterInterpolationConfig.hoodOffset += 0.01;
+            KLog.d("TeleOp_Shooting", "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
+        } else if (decrementHoodPressed) {
+            ShooterInterpolationConfig.hoodOffset -= 0.01;
+            KLog.d("TeleOp_Shooting", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
+        }
+
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
             releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
@@ -419,7 +430,7 @@ public class TeleOp extends KOpMode {
         //
         if (forceShootFarPressed) {
             if (!isPending(shootAllAction)) {
-                shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getMaxValue()[0], ShooterInterpolationConfig.getMaxValue()[1]);
+                shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getFarShoot()[0], ShooterInterpolationConfig.getFarShoot()[1]);
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -445,8 +456,8 @@ public class TeleOp extends KOpMode {
         if (warmupFarPressed) {
             if (!isPending(shootAllAction)) {
                 shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
-                shooterRun.setTargetRPS(ShooterInterpolationConfig.getMaxValue()[0] * 0.8);
-                shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getMaxValue()[1]);
+                shooterRun.setTargetRPS(ShooterInterpolationConfig.getFarShoot()[0] * 0.8);
+                shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getFarShoot()[1]);
                 KLog.d("TeleOp_Shooting_Warmup", "Warmup For Far Shoot");
             }
         } else if (warmupNearPressed) {

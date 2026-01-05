@@ -1,7 +1,6 @@
 package com.kalipsorobotics.modules.shooter;
 
 import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.*;
-import com.kalipsorobotics.test.shooter.RampUpTimeInterpolation;
 
 import java.util.*;
 
@@ -56,16 +55,16 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
         if (distanceMM <= DATA_POINTS.get(0).distanceMM) {
             DataPoint dp = DATA_POINTS.get(0);
             double clampedHood = clampHood(dp.hoodPosition);
-            clampedHood += HOOD_OFFSET;
-            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood);
+            clampedHood += HOOD_INIT_OFFSET;
+            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood + hoodOffset);
         }
 
         // If distance is above maximum, return last point
         if (distanceMM >= DATA_POINTS.get(DATA_POINTS.size() - 1).distanceMM) {
             DataPoint dp = DATA_POINTS.get(DATA_POINTS.size() - 1);
             double clampedHood = clampHood(dp.hoodPosition);
-            clampedHood += HOOD_OFFSET;
-            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood);
+            clampedHood += HOOD_INIT_OFFSET;
+            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood + hoodOffset);
         }
 
         // Find the two surrounding points
@@ -81,16 +80,16 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
                 double interpolatedHood = lower.hoodPosition + t * (upper.hoodPosition - lower.hoodPosition);
 
                 double clampedHood = clampHood(interpolatedHood);
-                clampedHood += HOOD_OFFSET;
-                return new IShooterPredictor.ShooterParams(interpolatedRPS + rpsOffset, clampedHood);
+                clampedHood += HOOD_INIT_OFFSET;
+                return new IShooterPredictor.ShooterParams(interpolatedRPS + rpsOffset, clampedHood + hoodOffset);
             }
         }
 
         // Should never reach here, but return last point as fallback
         DataPoint dp = DATA_POINTS.get(DATA_POINTS.size() - 1);
         double clampedHood = clampHood(dp.hoodPosition);
-        clampedHood += HOOD_OFFSET;
-        return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood);
+        clampedHood += HOOD_INIT_OFFSET;
+        return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood + hoodOffset);
     }
 
     /**
