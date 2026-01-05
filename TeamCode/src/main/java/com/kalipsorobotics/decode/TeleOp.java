@@ -2,7 +2,6 @@ package com.kalipsorobotics.decode;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
-import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
 import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
@@ -54,7 +53,6 @@ public class TeleOp extends KOpMode {
 
     ShootAllAction shootAllAction = null;
 
-    ActivateBraking activateBraking = null;
     ReleaseBraking releaseBraking = null;
     ReleaseBrakeAction releaseBrakeAction = null;
 
@@ -78,11 +76,7 @@ public class TeleOp extends KOpMode {
     private boolean stopShooterPressed = false;
     private boolean warmupFarPressed = false;
     private boolean warmupNearPressed = false;
-    private boolean releasePressed = false;
-    private boolean markUndershotPressed = false;
-    private boolean markOvershotPressed = false;
-    private boolean shooterReadyWasNotDone = false;
-    private boolean limelightCorrectionPressed = false;
+    private boolean releaseStopperPressed = false;
     private boolean isTurretAutoAlignEnabled = false;
     private boolean useLimelight = true;
     private boolean forceShootNearPressed = false;
@@ -196,14 +190,11 @@ public class TeleOp extends KOpMode {
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
 
-            releasePressed = kGamePad2.isYPressed();
+            releaseStopperPressed = kGamePad2.isYPressed();
 
             isTurretAutoAlignEnabled = kGamePad2.isToggleX();
             enableOdometryAlignTurret = !kGamePad2.isBackButtonToggle();
 
-            markUndershotPressed = kGamePad2.isButtonXFirstPressed();
-            markOvershotPressed = kGamePad2.isButtonYFirstPressed();
-            limelightCorrectionPressed = kGamePad1.isBackButtonFirstPressed();  // Back button for vision correction
 
             // ========== HANDLE DRIVING ==========
             handleDriving();
@@ -314,7 +305,7 @@ public class TeleOp extends KOpMode {
         }
 
         // Open on button press
-        if (releasePressed) {
+        if (releaseStopperPressed) {
             if (!isPending(openStopper)) {
                 openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
                 closeStopper = null;
