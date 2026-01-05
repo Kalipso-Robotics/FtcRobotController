@@ -224,7 +224,7 @@ public class RedAutoNear extends KOpMode {
         //-----------------------
 
         // alternate path to depot
-        trip4.getMoveToBall().addPoint(1375, 1100 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(1375, 1225 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(650, 1225 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // ----------------
         trip4.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY_FAST, PurePursuitAction.P_ANGLE);

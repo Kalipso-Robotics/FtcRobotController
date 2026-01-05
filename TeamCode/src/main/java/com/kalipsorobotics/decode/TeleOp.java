@@ -242,6 +242,9 @@ public class TeleOp extends KOpMode {
         }
     }
     private void handleTurret() {
+        if (isPending(shootAllAction)) {
+            return;
+        }
 
         // Auto Align
         if (isTurretAutoAlignEnabled) {
