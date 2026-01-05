@@ -200,7 +200,7 @@ public class AprilTagDetectionAction extends Action {
         Position robotRelCamPos = robotRelTurretPos.toNewFrame(TURRET_REL_CAM_POS);
         Position robotRelAprilTagPos = robotRelCamPos.toNewFrame(camRelAprilTagPos);
         Position robotRelFieldPos = robotRelAprilTagPos.toNewFrame(aprilTagRelFieldPos);
-
+        KLog.d("AprilTag_GLOBAL", "robotRelFieldPos: " + robotRelFieldPos);
         return robotRelFieldPos;
     }
 

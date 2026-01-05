@@ -14,6 +14,7 @@ import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.localization.ResetOdometryToPosition;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -384,7 +385,7 @@ public class TeleOp extends KOpMode {
                 kGamePad2.setToggleX(false);
                 isTurretAutoAlignEnabled = false;
                 shootAllAction = new ShootAllAction(stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
-//                resetOdometryToPosition = new ResetOdometryToPosition(turret);
+                resetOdometryToPosition = new ResetOdometryToPosition(turret);
                 shooterRun.setUseOdometry(enableOdometryAlignTurret);
                 shooterRun.setUseLimelight(useLimelight);
                 setLastShooterAction(shootAllAction);

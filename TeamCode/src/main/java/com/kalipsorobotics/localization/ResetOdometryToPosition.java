@@ -23,9 +23,9 @@ public class ResetOdometryToPosition extends Action {
             return;
         }
         Position limelightGlobalPosition = SharedData.getLimelightGlobalPosition();
-        KLog.d("ResetOdometryToPosition", "Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() + "Odometry Wheel, " + SharedData.getOdometryWheelPosition() + " to position, " + limelightGlobalPosition);
-        SharedData.setOdometryWheelPosition(limelightGlobalPosition);
-        SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
+        KLog.d("ResetOdometryToPosition", "If I were resetting but I am not. Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() + "Odometry Wheel, " + SharedData.getOdometryWheelPosition() + " to position, " + limelightGlobalPosition);
+//        SharedData.setOdometryWheelPosition(limelightGlobalPosition);
+//        SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
         isDone = true;
     }
 }
