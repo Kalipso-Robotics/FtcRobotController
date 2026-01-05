@@ -25,6 +25,7 @@ import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
+import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.kalipsorobotics.modules.shooter.ShotLogger;
@@ -332,6 +333,7 @@ public class TeleOp extends KOpMode {
      */
     private void handleShooting() {
 
+
         if (incrementRPSPressed) {
             ShooterInterpolationConfig.rpsOffset += 0.1;
             KLog.d("TeleOp_Shooting", "Increment Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
@@ -340,13 +342,17 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp_Shooting", "Decrement Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
         }
 
+        double hoodPosition;
+
         if (incrementHoodPressed) {
             ShooterInterpolationConfig.hoodOffset += 0.1;
-            shooter.getHood().setPosition(shooter.getHoodPosition() + 0.1);
+            hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() + 0.1);
+            shooter.getHood().setPosition(hoodPosition);
             KLog.d("TeleOp_Shooting", "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         } else if (decrementHoodPressed) {
             ShooterInterpolationConfig.hoodOffset -= 0.1;
-            shooter.getHood().setPosition(shooter.getHoodPosition() - 0.1);
+            hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() - 0.1);
+            shooter.getHood().setPosition(hoodPosition);
             KLog.d("TeleOp_Shooting", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         }
 

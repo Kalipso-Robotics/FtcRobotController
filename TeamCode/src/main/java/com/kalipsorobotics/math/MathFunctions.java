@@ -1,7 +1,15 @@
 package com.kalipsorobotics.math;
 
 
+import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.MAX_HOOD;
+import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.MIN_HOOD;
+
 public class MathFunctions {
+
+    public static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
     public static double angleWrapRad(double angle) {
         angle = angle % (2 * Math.PI);
         if (angle > Math.PI) {

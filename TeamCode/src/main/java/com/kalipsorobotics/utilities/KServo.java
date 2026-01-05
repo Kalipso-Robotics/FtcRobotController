@@ -1,5 +1,6 @@
 package com.kalipsorobotics.utilities;
 
+import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.robotcore.hardware.Servo;
@@ -114,5 +115,9 @@ public class KServo {
 
     public Servo getServo() {
         return servo;
+    }
+
+    public static double clampServoPos(double position) {
+        return MathFunctions.clamp(position, 0, 1);
     }
 }
