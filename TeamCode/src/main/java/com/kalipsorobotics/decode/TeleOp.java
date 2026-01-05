@@ -179,8 +179,8 @@ public class TeleOp extends KOpMode {
             incrementRPSPressed = kGamePad2.isDpadUpFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
             decrementRPSPressed = kGamePad2.isDpadDownFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
 
-            incrementHoodPressed = kGamePad2.isDpadRightFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
-            decrementHoodPressed = kGamePad2.isDpadLeftFirstPressed() && kGamePad2.isLeftBumperFirstPressed();
+            incrementHoodPressed = kGamePad2.isDpadRightFirstPressed() && kGamePad2.isLeftBumperPressed();
+            decrementHoodPressed = kGamePad2.isDpadLeftFirstPressed() && kGamePad2.isLeftBumperPressed();
 
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
