@@ -167,7 +167,7 @@ public class TeleOp extends KOpMode {
 
         while (opModeIsActive()) {
             if (!hasClosedStopperInnit) {
-                stopper.setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
+                stopper.setPosition(stopper.STOPPER_SERVO_OPEN_POS);
                 hasClosedStopperInnit = true;
             }
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
@@ -314,15 +314,15 @@ public class TeleOp extends KOpMode {
             return;
         }
 
-
         // Close when intaking
         if (intakeRunPressed || isPending(intakeRun)) {
             KLog.d("TeleOp_Stopper", "Intake Pressed Close Stopper isPending: " + isPending(closeStopper));
-            closeStopper = null;
-            KLog.d("TeleOp_Stopper", "Close Stopper");
-            closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
-            openStopper = null;
-            setLastStopperAction(closeStopper);
+            if (!isPending(closeStopper)) {
+                KLog.d("TeleOp_Stopper", "Close Stopper");
+                closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                openStopper = null;
+                setLastStopperAction(closeStopper);
+            }
         }
     }
 
