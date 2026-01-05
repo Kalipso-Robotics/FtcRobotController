@@ -71,7 +71,7 @@ public class TeleOp extends KOpMode {
 
     // Button state variables
     private boolean drivingSticksActive = false;
-    private boolean shootAllPressed = false;
+    private boolean shootAllActionPressed = false;
     private boolean forceShootFarPressed = false;
     private boolean intakeRunPressed = false;
     private boolean intakeReversePressed = false;
@@ -188,7 +188,7 @@ public class TeleOp extends KOpMode {
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
-            shootAllPressed = kGamePad1.isLeftBumperFirstPressed();
+            shootAllActionPressed = kGamePad1.isLeftBumperFirstPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
             warmupFarPressed = kGamePad2.isDpadUpFirstPressed();
             warmupNearPressed = kGamePad2.isDpadDownFirstPressed();
@@ -219,9 +219,6 @@ public class TeleOp extends KOpMode {
 
             // ========== HANDLE SHOOTING ==========
             handleShooting();
-
-            // ========== HANDLE SHOT LOGGING ==========
-            handleShotLogging();
 
             // ========== UPDATE ACTIONS ==========
             updateActions();
@@ -278,7 +275,7 @@ public class TeleOp extends KOpMode {
      */
     private void handleIntake() {
         // PRIORITY 1: If shooting, don't interfere (shoot action controls intake)
-        if (isPending(shootAllAction) || shootAllPressed) {
+        if (isPending(shootAllAction) || shootAllActionPressed) {
             return;  // Exit early - shoot has control
         }
 
@@ -312,7 +309,7 @@ public class TeleOp extends KOpMode {
      */
     private void handleStopper() {
         // PRIORITY 1: If shooting, don't interfere (shoot action controls intake)
-        if (isPending(shootAllAction) || shootAllPressed) {
+        if (isPending(shootAllAction) || shootAllActionPressed) {
             return;  // Exit early - shoot has control
         }
 
@@ -333,40 +330,6 @@ public class TeleOp extends KOpMode {
                 openStopper = null;
                 setLastStopperAction(closeStopper);
             }
-        }
-    }
-
-    /**
-     * Handle shot logging and quality marking
-     */
-    private void handleShotLogging() {
-        // Track when ShooterReady transitions from not done to done
-        if (isPending(shootAllAction) && shootAllAction.getShooterReady() != null) {
-            boolean shooterReadyIsDone = shootAllAction.getShooterReady().getIsDone();
-
-            // Log when ShooterReady just became done (transition from false to true)
-            if (shooterReadyWasNotDone && shooterReadyIsDone) {
-                double targetRps = shootAllAction.getShooterRun().getTargetRPS();
-                double actualRps = shootAllAction.getShooterRun().getShooter().getRPS();
-                double hoodPos = shootAllAction.getShooterRun().getTargetHoodPosition();
-                double distMM = shootAllAction.getShooterRun().getDistanceMM();
-
-                shotLogger.logShot(targetRps, actualRps, hoodPos, distMM);
-                shooterReadyWasNotDone = false; // Reset for next shot
-            } else if (!shooterReadyIsDone) {
-                // Track that shooter ready is not done yet
-                shooterReadyWasNotDone = true;
-            }
-        } else {
-            // Reset when no shoot action is pending
-            shooterReadyWasNotDone = false;
-        }
-
-        // Handle X/Y keys for marking shot quality
-        if (markUndershotPressed) {
-            shotLogger.markLastShotAsUndershot(); // X
-        } else if (markOvershotPressed) {
-            shotLogger.markLastShotAsOvershot(); // Y
         }
     }
 
@@ -402,7 +365,7 @@ public class TeleOp extends KOpMode {
                 shootAllAction.setIsDone(true);
             }
             shootAllAction = null;
-            setLastShooterAction(shootAllAction);
+            setLastShooterAction(null);
 
             KLog.d("TeleOp_Shooting", "Shooter stop");
             return;
@@ -414,7 +377,7 @@ public class TeleOp extends KOpMode {
         }
 
         // Priority 2- Execute shoot sequence
-        if (shootAllPressed) {
+        if (shootAllActionPressed) {
             if (!isPending(shootAllAction)) {
                 kGamePad2.setToggleX(false);
                 isTurretAutoAlignEnabled = false;
