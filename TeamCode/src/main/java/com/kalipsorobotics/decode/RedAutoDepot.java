@@ -87,10 +87,11 @@ public class RedAutoDepot extends KOpMode {
         Point farLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y);
         Point thirdLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y + 100);
         Point firstShootPoint = new Point(0,0);
+        Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX() - 141.4213562373, Shooter.TARGET_POINT.getY() - 141.4213562373);
 
         // ----------------- FIRST SHOOT ----------------------
 
-        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
+        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
         trip0.setName("trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
         trip0.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(300);

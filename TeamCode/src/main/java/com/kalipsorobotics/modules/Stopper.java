@@ -11,6 +11,7 @@ public class Stopper {
     public final double STOPPER_SERVO_CLOSED_POS = 0.55;
     public final double STOPPER_SERVO_OPEN_POS = 0.7;
 
+
     private final OpModeUtilities opModeUtilities;
 
     private final KServo stopper;

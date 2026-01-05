@@ -235,6 +235,11 @@ public class TeleOp extends KOpMode {
                 releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
                 setLastBrakingAction(releaseBrakeAction);
             }
+            if (shootAllAction != null) {
+                shootAllAction.setIsDone(true);
+                closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                setLastStopperAction(closeStopper);
+            }
             driveAction.move(gamepad1);
         } else {
             driveTrain.setPower(0);
