@@ -134,10 +134,16 @@ public class TurretAutoAlignTeleOp extends Action {
                 updateAlignToTarget();
                 break;
             case RUN_WHILE_SHOOTING:
+                hasAlignedUsingOdometry = false;
+                hasAlignedUsingLimelight = false;
+                useOdometryAlign = true;
+                isWithinRange = false;
+                updateAlignToTarget();
+                break;/*
                 useOdometryAlign = true;
                 isWithinRange = false;
                 updateAlignToTargetWhileShooting();
-                break;
+                break;*/
         }
         KLog.d("Turret_MODE", "CURRENT RUNNING MODE " + turretRunMode);
     }
@@ -192,11 +198,11 @@ public class TurretAutoAlignTeleOp extends Action {
 
         double currentAngleRad = turret.getCurrentAngleRad();
 //        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
-//        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle - robotAngleRad);
+//        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle -   robotAngleRad);
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
         double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos);
 
-        if (aprilTagSeen) {
+        if (false) {
             lastOdometryPos.reset(currentPos);
 
             double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
