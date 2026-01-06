@@ -263,9 +263,11 @@ public class TeleOp extends KOpMode {
         //Manual
         if (kGamePad2.isDpadLeftPressed()) {
             turretAutoAlignTeleOp.incrementTicksOffset((int) Turret.TICKS_PER_DEGREE * 2);
+            telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
             lastOffset = 2;
         } else if (kGamePad2.isDpadRightPressed()) {
             turretAutoAlignTeleOp.incrementTicksOffset(- (int) Turret.TICKS_PER_DEGREE * 2);
+            telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
             lastOffset = -2;
         } else if (lastOffset != 0) {
             lastOffset = 0;
