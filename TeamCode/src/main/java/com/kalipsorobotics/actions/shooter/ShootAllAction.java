@@ -127,7 +127,7 @@ public class ShootAllAction extends KActionSet {
         }
         if (!hasStarted) {
             //Refresh targetRPS
-            turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_WHILE_SHOOTING);
+            turretAutoAlignTeleop.runWithOdometryAndLimelight();
             shooterRun.update();
             hasStarted = true;
         }

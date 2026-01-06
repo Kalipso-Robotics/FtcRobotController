@@ -17,7 +17,7 @@ public class RedAutoNearSecondSpike extends RedAutoNear {
         trip3.getMoveToBall().addPoint(1375, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(1375, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        trip3.getMoveToBall().addPoint(1500, 1160 * allianceColor.getPolarity(), 185 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(1600, 1160 * allianceColor.getPolarity(), 185 * allianceColor.getPolarity());
 
 //        trip2.getMoveToBall().addPoint(1500, 900 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
 //        trip2.getMoveToBall().addPoint(1500, 1050 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());

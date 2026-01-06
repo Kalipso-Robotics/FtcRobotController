@@ -1,6 +1,8 @@
 package com.kalipsorobotics.decode;
 
+import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 

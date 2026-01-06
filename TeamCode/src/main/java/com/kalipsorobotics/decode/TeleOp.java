@@ -88,7 +88,7 @@ public class TeleOp extends KOpMode {
     private boolean incrementHoodPressed;
     private boolean decrementHoodPressed;
 
-    private double lastPower = 0;
+    private double lastOffset = 0;
 
     @Override
     protected void initializeRobotConfig() {
@@ -251,25 +251,28 @@ public class TeleOp extends KOpMode {
 
         // Auto Align
         if (isTurretAutoAlignEnabled) {
+            KLog.d("TeleOp", "Running with only odometry");
             turretAutoAlignTeleOp.setUseOdometryAlign(enableOdometryAlignTurret);
             KLog.d("TeleOp", "Back Button " + enableOdometryAlignTurret);
             turretAutoAlignTeleOp.runWithOdometryAndLimelight();
         } else {
-            KLog.d("TeleOp", "In Manual Mode");
-            //Manual
-            if (kGamePad2.isDpadLeftPressed()) {
-                turretAutoAlignTeleOp.runWithPower(-0.25);
-                lastPower = -0.25;
-            } else if (kGamePad2.isDpadRightPressed()) {
-                turretAutoAlignTeleOp.runWithPower(0.25);
-                lastPower = 0.25;
-            } else if (lastPower != 0) {
-                turretAutoAlignTeleOp.stop();
-                lastPower = 0;
-            } else {
-                turretAutoAlignTeleOp.runWithLimelight();
-            }
+            KLog.d("TeleOp", "Running with only limelight");
+            turretAutoAlignTeleOp.runWithLimelight();
         }
+
+        //Manual
+        if (kGamePad2.isDpadLeftPressed()) {
+            turretAutoAlignTeleOp.incrementTicksOffset((int) Turret.TICKS_PER_DEGREE * 2);
+            lastOffset = 2;
+        } else if (kGamePad2.isDpadRightPressed()) {
+            turretAutoAlignTeleOp.incrementTicksOffset(- (int) Turret.TICKS_PER_DEGREE * 2);
+            lastOffset = -2;
+        } else if (lastOffset != 0) {
+            lastOffset = 0;
+        } else {
+            turretAutoAlignTeleOp.runWithLimelight();
+        }
+
         KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
     }
 
