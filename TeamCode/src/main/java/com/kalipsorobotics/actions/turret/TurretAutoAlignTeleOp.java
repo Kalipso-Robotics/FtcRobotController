@@ -111,12 +111,10 @@ public class TurretAutoAlignTeleOp extends Action {
                 isWithinRange = true;
                 break;
             case RUN_USING_LIMELIGHT:
-                useOdometryAlign = false;
                 isWithinRange = false;
                 updateAlignToTarget();
                 break;
             case RUN_USING_ODOMETRY:
-                useOdometryAlign = true;
                 isWithinRange = false;
                 updateAlignToTarget();
                 break;
@@ -134,10 +132,10 @@ public class TurretAutoAlignTeleOp extends Action {
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
         double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos, ticksOffset);
 
-        if (useOdometryAlign) {
+        if (turretRunMode == TurretRunMode.RUN_USING_ODOMETRY) {
             targetTicks = odoTargetTicks;
             KLog.d("Turret_", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
-        } else if (aprilTagSeen) {
+        } else if (turretRunMode == TurretRunMode.RUN_USING_LIMELIGHT && aprilTagSeen) {
             lastOdometryPos.reset(currentPos);
 
             double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag

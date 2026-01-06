@@ -79,7 +79,7 @@ public class TeleOp extends KOpMode {
     private boolean warmupNearPressed = false;
     private boolean releaseStopperPressed = false;
     private boolean enableOdometryTurretAlign = false;
-    private final boolean useLimelight = true;
+    private final boolean useLimelightForRPS = true;
     private boolean forceShootNearPressed = false;
     private boolean enableLimelightAlignTurret = true;
     private boolean incrementRPSPressed;
@@ -399,10 +399,13 @@ public class TeleOp extends KOpMode {
         // Priority 2- Execute shoot sequence
         if (shootAllActionPressed) {
             if (!isPending(shootAllAction)) {
+                if (!enableOdometryTurretAlign) {
+                    turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.RUN_USING_LIMELIGHT);
+                }
                 kGamePad2.setToggleX(false);
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
-                shooterRun.setUseOdometry(enableLimelightAlignTurret);
-                shooterRun.setUseLimelight(useLimelight);
+                shooterRun.setUseOdometry(enableOdometryTurretAlign);
+                shooterRun.setUseLimelight(useLimelightForRPS);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 KLog.d("TeleOp_Shooting", "Shoot action started - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
@@ -416,7 +419,7 @@ public class TeleOp extends KOpMode {
                 kGamePad2.setToggleX(false);
                 enableOdometryTurretAlign = false;
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getFarShoot()[0], ShooterInterpolationConfig.getFarShoot()[1]);
-                shooterRun.setUseLimelight(useLimelight);
+                shooterRun.setUseLimelight(useLimelightForRPS);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
@@ -429,7 +432,7 @@ public class TeleOp extends KOpMode {
                 kGamePad2.setToggleX(false);
                 enableOdometryTurretAlign = false;
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
-                shooterRun.setUseLimelight(useLimelight);
+                shooterRun.setUseLimelight(useLimelightForRPS);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
