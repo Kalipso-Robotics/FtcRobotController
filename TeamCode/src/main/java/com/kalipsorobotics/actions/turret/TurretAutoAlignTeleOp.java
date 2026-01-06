@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;;
+;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
@@ -41,8 +41,6 @@ public class TurretAutoAlignTeleOp extends Action {
     private ElapsedTime velocityTimer;
     private boolean isFirstVelocityUpdate;
     private Position lastOdometryPos;
-    private boolean hasAlignedUsingOdometry = false;
-    private boolean hasAlignedUsingLimelight = false;
     private int ticksOffset = 0;
 
 
@@ -105,27 +103,19 @@ public class TurretAutoAlignTeleOp extends Action {
 
         switch (turretRunMode) {
             case STOP:
-                hasAlignedUsingOdometry = false;
-                hasAlignedUsingLimelight = false;
                 turret.stop();
                 isWithinRange = true;
                 break;
             case RUN_WITH_POWER:
-                hasAlignedUsingOdometry = false;
-                hasAlignedUsingLimelight = false;
                 turretMotor.setPower(targetPower);
                 isWithinRange = true;
                 break;
             case RUN_USING_LIMELIGHT:
-                hasAlignedUsingOdometry = false;
-                hasAlignedUsingLimelight = false;
                 useOdometryAlign = false;
                 isWithinRange = false;
                 updateAlignToTarget();
                 break;
-            case RUN_USING_ODOMETRY_AND_LIMELIGHT:
-                hasAlignedUsingOdometry = false;
-                hasAlignedUsingLimelight = false;
+            case RUN_USING_ODOMETRY:
                 useOdometryAlign = true;
                 isWithinRange = false;
                 updateAlignToTarget();
@@ -144,7 +134,10 @@ public class TurretAutoAlignTeleOp extends Action {
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
         double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos, ticksOffset);
 
-        if (false) {
+        if (useOdometryAlign) {
+            targetTicks = odoTargetTicks;
+            KLog.d("Turret_", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
+        } else if (aprilTagSeen) {
             lastOdometryPos.reset(currentPos);
 
             double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
@@ -165,19 +158,6 @@ public class TurretAutoAlignTeleOp extends Action {
                     Math.toDegrees(currentAngleRad), Math.toDegrees(limelightAngleRad), (int) currentTicks,
                     Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
 
-        } else if (useOdometryAlign) {
-
-            targetTicks = odoTargetTicks;
-            KLog.d("Turret_", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
-//            if (SharedData.getOdometryWheelIMUPosition().distanceTo(lastOdometryPos) < 150) {
-//                odoDesiredTurretAngle = MathFunctions.angleWrapRad(odoDesiredTurretAngle + biasAngleCorrection);
-//            }
-//            totalAngleWrap = odoDesiredTurretAngle;
-//            targetTicks = totalAngleWrap * Turret.TICKS_PER_RADIAN;
-//
-//            KLog.d("Turret_ODOMETRY", String.format("RAW: RobotAngle=%.2f° | CALC: Bias Correction=%.2f° DesiredTurret=%.2f° (%d ticks)",
-//                    Math.toDegrees(robotAngleRad),
-//                    Math.toDegrees(biasAngleCorrection), Math.toDegrees(odoDesiredTurretAngle), (int) targetTicks));
         } else {
             KLog.d("TurretAutoAlign_AlignToTarget", "isWithingRange: " + isWithinRange + " aprilTagSeen: " + aprilTagSeen + " useOdometryAlign " + useOdometryAlign);
             turretMotor.setPower(0);
@@ -212,14 +192,6 @@ public class TurretAutoAlignTeleOp extends Action {
     public void runWithPower(double power) {
         this.targetPower = power;
         setTurretRunMode(TurretRunMode.RUN_WITH_POWER);
-    }
-
-    public void runWithOdometryAndLimelight() {
-        setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY_AND_LIMELIGHT);
-    }
-
-    public void runWithLimelight() {
-        setTurretRunMode(TurretRunMode.RUN_USING_LIMELIGHT);
     }
 
     public void stop() {
