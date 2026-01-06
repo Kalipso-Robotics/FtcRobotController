@@ -1,7 +1,5 @@
 package com.kalipsorobotics.actions.turret;
 
-import static com.kalipsorobotics.actions.turret.TurretConfig.*;
-
 import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
@@ -46,6 +44,7 @@ public class TurretAutoAlignTeleOp extends Action {
     private Position lastOdometryPos;
     private boolean hasAlignedUsingOdometry = false;
     private boolean hasAlignedUsingLimelight = false;
+    private int ticksOffset = 0;
 
 
 
@@ -133,62 +132,8 @@ public class TurretAutoAlignTeleOp extends Action {
                 isWithinRange = false;
                 updateAlignToTarget();
                 break;
-            case RUN_WHILE_SHOOTING:
-                hasAlignedUsingOdometry = false;
-                hasAlignedUsingLimelight = false;
-                useOdometryAlign = true;
-                isWithinRange = false;
-                updateAlignToTarget();
-                break;/*
-                useOdometryAlign = true;
-                isWithinRange = false;
-                updateAlignToTargetWhileShooting();
-                break;*/
         }
         KLog.d("Turret_MODE", "CURRENT RUNNING MODE " + turretRunMode);
-    }
-
-    private void updateAlignToTargetWhileShooting() {
-
-        aprilTagDetectionAction.updateCheckDone();
-        updateAngularVelocity();
-        aprilTagSeen = !SharedData.getLimelightRawPosition().isEmpty();
-
-        double currentAngleRad = turret.getCurrentAngleRad();
-        Position currentPos = SharedData.getOdometryWheelIMUPosition();
-        double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos);
-
-        if (useOdometryAlign && !hasAlignedUsingOdometry) {
-            hasAlignedUsingOdometry = true;
-            targetTicks = odoTargetTicks;
-            KLog.d("Turret_Odometry_Shooting", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
-        }
-
-        if (aprilTagSeen && !hasAlignedUsingLimelight) {
-            hasAlignedUsingLimelight = true;
-            lastOdometryPos.reset(currentPos);
-
-            double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
-
-            // Calculate desired absolute angle (wrapped to [-π, π])
-            double desiredAngleRad = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
-            // Compute shortest angular error to avoid ±180° boundary discontinuity
-            double errorRad = MathFunctions.angleWrapRad(desiredAngleRad - currentAngleRad);
-
-            // Add error to current ticks for continuous target (no wrap-around jump)
-            double currentTicks = turretMotor.getCurrentPosition();
-            targetTicks = currentTicks + (errorRad * Turret.TICKS_PER_RADIAN);
-            KLog.d("Turret_Limelight_Shooting", "Delta Ticks Correction Odo - LL: " + (odoTargetTicks - targetTicks));
-            totalAngleWrap = desiredAngleRad;
-
-            KLog.d("Turret_Limelight_Shooting", String.format("RAW: TurretPos=%.2f° LLAngle=%.2f° CurrTicks=%d | CALC: Desired=%.2f° Err=%.2f° Target=%d ticks",
-                    Math.toDegrees(currentAngleRad), Math.toDegrees(limelightAngleRad), (int) currentTicks,
-                    Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
-
-        }
-
-        moveToTargetTicks();
-
     }
 
     private void updateAlignToTarget() {
@@ -200,7 +145,7 @@ public class TurretAutoAlignTeleOp extends Action {
 //        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
 //        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle -   robotAngleRad);
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
-        double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos);
+        double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos, ticksOffset);
 
         if (false) {
             lastOdometryPos.reset(currentPos);
@@ -326,5 +271,10 @@ public class TurretAutoAlignTeleOp extends Action {
 
     public void setUseOdometryAlign(boolean useOdometryAlign) {
         this.useOdometryAlign = useOdometryAlign;
+    }
+
+    public void incrementTicksOffset(int ticksOffset) {
+        this.ticksOffset += ticksOffset;
+        this.update();
     }
 }

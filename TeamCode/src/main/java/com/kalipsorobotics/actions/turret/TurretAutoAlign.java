@@ -113,7 +113,7 @@ public class TurretAutoAlign extends Action {
     }
 
 
-    public static double calculateTargetTicks(Point targetPoint, Position currentPosition) {
+    public static double calculateTargetTicks(Point targetPoint, Position currentPosition, int offsetTicks) {
 
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
@@ -131,11 +131,18 @@ public class TurretAutoAlign extends Action {
 
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
 
+        double ticksOffsetRad = offsetTicks / Turret.TICKS_PER_RADIAN;
+        totalTurretAngle += ticksOffsetRad;
+
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
         KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
 
         return computeTicksFromAngleRad(totalTurretAngleWrap);
+    }
+
+    public static double calculateTargetTicks(Point targetPoint, Position currenPosition) {
+        return calculateTargetTicks(targetPoint, currenPosition, 0);
     }
 
 
