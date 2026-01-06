@@ -2,6 +2,7 @@ package com.kalipsorobotics.utilities;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.cameraVision.AllianceColor;
@@ -28,6 +29,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastStopperAction = null;
     protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
     protected ShooterRun shooterRun = null;
+    protected AprilTagDetectionAction aprilTagDetectionAction = null;
     protected ResetOdometryToPosition resetOdometryToPosition = null;
 
 
@@ -135,6 +137,10 @@ public abstract class KOpMode extends LinearOpMode {
         
         if (turretAutoAlignTeleOp != null) {
             turretAutoAlignTeleOp.updateCheckDone();
+        }
+
+        if (aprilTagDetectionAction != null) {
+            aprilTagDetectionAction.updateCheckDone();
         }
 
     }

@@ -112,7 +112,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
-        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, aprilTagDetectionAction, AllianceColor.RED);
+        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, AllianceColor.RED);
         turretAutoAlignTeleop.runWithOdometryAndLimelight();
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");

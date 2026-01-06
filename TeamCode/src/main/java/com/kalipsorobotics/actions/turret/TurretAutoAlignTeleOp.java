@@ -24,7 +24,6 @@ public class TurretAutoAlignTeleOp extends Action {
     OpModeUtilities opModeUtilities;
     Turret turret;
     KMotor turretMotor;
-    private AprilTagDetectionAction aprilTagDetectionAction;
     private TurretRunMode turretRunMode;
     private double targetTicks;
     private double targetPower;
@@ -49,10 +48,9 @@ public class TurretAutoAlignTeleOp extends Action {
 
 
 
-    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret, AprilTagDetectionAction aprilTagDetectionAction, AllianceColor allianceColor) {
+    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
-        this.aprilTagDetectionAction = aprilTagDetectionAction;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
         this.turretRunMode = TurretRunMode.STOP; // initial mode
@@ -143,8 +141,6 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     private void updateAlignToTargetWhileShooting() {
-
-        aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
         aprilTagSeen = !SharedData.getLimelightRawPosition().isEmpty();
 
@@ -186,7 +182,6 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     private void updateAlignToTarget() {
-        aprilTagDetectionAction.updateCheckDone();
         updateAngularVelocity();
         aprilTagSeen = !SharedData.getLimelightRawPosition().isEmpty();
 

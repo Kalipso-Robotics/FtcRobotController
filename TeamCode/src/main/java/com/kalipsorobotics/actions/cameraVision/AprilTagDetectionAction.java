@@ -114,7 +114,7 @@ public class AprilTagDetectionAction extends Action {
                     consecutiveGoodReadings = Math.min(consecutiveGoodReadings, STABILITY_THRESHOLD + 1);
 
                     // ==================== CALCULATED: Odometry Transform ====================
-                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(90 + rawPitchDeg));
+                    double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(180 + rawPitchDeg));
                     camRelAprilTagPos = new Position(-rawCamPoseZ * 1000, -rawCamPoseX * 1000, camRelAprilTagTheta);
 
                     KLog.d("AprilTag_CAM_REL_APRIL_TAG", String.format("CamRelTag(x=%.1fmm, y=%.1fmm, θ=%.2f°)",
