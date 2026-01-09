@@ -46,7 +46,7 @@ public class TurretAutoAlignTeleOp extends Action {
     private boolean isFirstVelocityUpdate;
     private Position lastOdometryPos;
     private int ticksOffset = 0;
-    private double prevLimelightAngleRad;
+    private double prevTargetTicks;
 
 
     public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, AprilTagDetectionAction aprilTagDetectionAction, Turret turret, AllianceColor allianceColor) {
@@ -144,26 +144,31 @@ public class TurretAutoAlignTeleOp extends Action {
             lastOdometryPos.reset(currentPos);
             double limelightAngleRad;
             if (aprilTagSeen) {
-                limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
-                prevLimelightAngleRad = limelightAngleRad;
+                limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
+
+                double totalTurretAngle = currentAngleRad + limelightAngleRad;
+
+                double ticksOffsetRad = ticksOffset / Turret.TICKS_PER_RADIAN;
+                totalTurretAngle += ticksOffsetRad;
+
+                totalAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
+                targetTicks = computeTicksFromAngleRad(totalAngleWrap);
+                prevTargetTicks = limelightAngleRad;
+
+                KLog.d("TurretAutoAlignTeleOp_Limelight_Align",
+                        "currentAngleRad: " + currentAngleRad +
+                                " totalTurretAngle " + totalTurretAngle +
+                                " totalAngleWrap " + totalAngleWrap +
+                                " targetTicks " + targetTicks +
+                                " limelightAngle " + limelightAngleRad);
+
+// already gives reverse sign from LL bc your on the left side of april tag
             } else {
-                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", "No April Tag Detected. Using Previous Angle: " + prevLimelightAngleRad);
-                limelightAngleRad = prevLimelightAngleRad;
+                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", "No April Tag Detected. Using Previous Ticks: " + prevTargetTicks);
+                targetTicks = prevTargetTicks;
             }
-            double totalTurretAngle = currentAngleRad + limelightAngleRad;
 
-            double ticksOffsetRad = ticksOffset / Turret.TICKS_PER_RADIAN;
-            totalTurretAngle += ticksOffsetRad;
 
-            totalAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
-            targetTicks = computeTicksFromAngleRad(totalAngleWrap);
-
-            KLog.d("TurretAutoAlignTeleOp_Limelight_Align",
-                    "currentAngleRad: " + currentAngleRad +
-                            "totalTurretAngle " + totalTurretAngle +
-                            " totalAngleWrap " + totalAngleWrap +
-                            " targetTicks " + targetTicks +
-                            " limelightAngle " + limelightAngleRad);
 
         } else {
             KLog.d("TurretAutoAlign_AlignToTarget", "isWithingRange: " + isWithinRange + " aprilTagSeen: " + aprilTagSeen + " useOdometryAlign " + useOdometryAlign);
