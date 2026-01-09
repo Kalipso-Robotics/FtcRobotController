@@ -106,6 +106,10 @@ public abstract class KOpMode extends LinearOpMode {
      * Automatically prevents duplicate updates if the same action is referenced in multiple slots
      */
     protected void updateActions() {
+        if (aprilTagDetectionAction != null) {
+            aprilTagDetectionAction.updateCheckDone();
+        }
+
         if (lastIntakeAction != null) {
             lastIntakeAction.updateCheckDone();
         }
@@ -139,9 +143,6 @@ public abstract class KOpMode extends LinearOpMode {
             turretAutoAlignTeleOp.updateCheckDone();
         }
 
-        if (aprilTagDetectionAction != null) {
-            aprilTagDetectionAction.updateCheckDone();
-        }
 
     }
 

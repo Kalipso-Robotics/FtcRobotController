@@ -1,10 +1,13 @@
 package com.kalipsorobotics.actions.turret;
 
+import static com.kalipsorobotics.actions.turret.TurretAutoAlign.computeTicksFromAngleRad;
+
 import android.util.Log;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 ;
+import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
@@ -20,6 +23,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class TurretAutoAlignTeleOp extends Action {
     OpModeUtilities opModeUtilities;
+    AprilTagDetectionAction aprilTagDetectionAction;
     Turret turret;
     KMotor turretMotor;
     private TurretRunMode turretRunMode;
@@ -42,11 +46,12 @@ public class TurretAutoAlignTeleOp extends Action {
     private boolean isFirstVelocityUpdate;
     private Position lastOdometryPos;
     private int ticksOffset = 0;
+    private double prevLimelightAngleRad;
 
 
-
-    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
+    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, AprilTagDetectionAction aprilTagDetectionAction, Turret turret, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
+        this.aprilTagDetectionAction = aprilTagDetectionAction;
         this.turret = turret;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
@@ -100,7 +105,7 @@ public class TurretAutoAlignTeleOp extends Action {
             velocityTimer.reset();
             KLog.d("Turret_PID", "PIDF constants " + turretMotor.getPIDFController());
         }
-
+        aprilTagDetectionAction.updateCheckDone();
         switch (turretRunMode) {
             case STOP:
                 turret.stop();
@@ -134,27 +139,31 @@ public class TurretAutoAlignTeleOp extends Action {
 
         if (turretRunMode == TurretRunMode.RUN_USING_ODOMETRY) {
             targetTicks = odoTargetTicks;
-            KLog.d("Turret_", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
-        } else if (turretRunMode == TurretRunMode.RUN_USING_LIMELIGHT && aprilTagSeen) {
+            KLog.d("TurretAutoAlignTeleOp_Odometry_Align", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
+        } else if (turretRunMode == TurretRunMode.RUN_USING_LIMELIGHT) {
             lastOdometryPos.reset(currentPos);
+            double limelightAngleRad;
+            if (aprilTagSeen) {
+                limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
+                prevLimelightAngleRad = limelightAngleRad;
+            } else {
+                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", "No April Tag Detected. Using Previous Angle: " + prevLimelightAngleRad);
+                limelightAngleRad = prevLimelightAngleRad;
+            }
+            double totalTurretAngle = currentAngleRad + limelightAngleRad;
 
-            double limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad(); // already gives reverse sign from LL bc your on the left side of april tag
+            double ticksOffsetRad = ticksOffset / Turret.TICKS_PER_RADIAN;
+            totalTurretAngle += ticksOffsetRad;
 
-            // Calculate desired absolute angle (wrapped to [-π, π])
-            double desiredAngleRad = MathFunctions.angleWrapRad(currentAngleRad + limelightAngleRad);
-//            biasAngleCorrection = desiredAngleRad - odoDesiredTurretAngle;
-            // Compute shortest angular error to avoid ±180° boundary discontinuity
-            double errorRad = MathFunctions.angleWrapRad(desiredAngleRad - currentAngleRad);
+            totalAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
+            targetTicks = computeTicksFromAngleRad(totalAngleWrap);
 
-            // Add error to current ticks for continuous target (no wrap-around jump)
-            double currentTicks = turretMotor.getCurrentPosition();
-            targetTicks = currentTicks + (errorRad * Turret.TICKS_PER_RADIAN);
-            KLog.d("Turret_Limelight", "Delta Ticks Correction Odo - LL: " + (odoTargetTicks - targetTicks));
-            totalAngleWrap = desiredAngleRad;
-
-            KLog.d("Turret_Limelight", String.format("RAW: TurretPos=%.2f° LLAngle=%.2f° CurrTicks=%d | CALC: Desired=%.2f° Err=%.2f° Target=%d ticks",
-                    Math.toDegrees(currentAngleRad), Math.toDegrees(limelightAngleRad), (int) currentTicks,
-                    Math.toDegrees(desiredAngleRad), Math.toDegrees(errorRad), (int) targetTicks));
+            KLog.d("TurretAutoAlignTeleOp_Limelight_Align",
+                    "currentAngleRad: " + currentAngleRad +
+                            "totalTurretAngle " + totalTurretAngle +
+                            " totalAngleWrap " + totalAngleWrap +
+                            " targetTicks " + targetTicks +
+                            " limelightAngle " + limelightAngleRad);
 
         } else {
             KLog.d("TurretAutoAlign_AlignToTarget", "isWithingRange: " + isWithinRange + " aprilTagSeen: " + aprilTagSeen + " useOdometryAlign " + useOdometryAlign);

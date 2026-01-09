@@ -44,7 +44,7 @@ public class AprilTagDetectionAction extends Action {
     private int consecutiveBadReadings;
 
     private static final int STABILITY_THRESHOLD = 2;
-    public static int CONSECUTIVE_BAD_READING_TOLERANCE = 5;
+    public static int CONSECUTIVE_BAD_READING_TOLERANCE = 0;
 
 
 
@@ -98,16 +98,16 @@ public class AprilTagDetectionAction extends Action {
                     double rawCamPoseZ = camRelAprilTagPose.getPosition().z;
 
                     // ==================== SPIKE DETECTION ====================
-                    boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
-                    if (isSpike) {
-                        KLog.d("AprilTag_SPIKE", String.format("REJECTED | prev=%.2f° curr=%.2f° delta=%.2f°",
-                                prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
-                        SharedData.getLimelightRawPosition().reset();
-                        hasFound = false;
-                        consecutiveGoodReadings = 0;
-                        prevPitchDeg = rawPitchDeg;
-                        return;
-                    }
+//                    boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
+//                    if (isSpike) {
+//                        KLog.d("AprilTag_SPIKE", String.format("REJECTED | prev=%.2f° curr=%.2f° delta=%.2f°",
+//                                prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
+//                        SharedData.getLimelightRawPosition().reset();
+//                        hasFound = false;
+//                        consecutiveGoodReadings = 0;
+//                        prevPitchDeg = rawPitchDeg;
+//                        return;
+//                    }
                     prevPitchDeg = rawPitchDeg;
                     consecutiveGoodReadings++;
                     consecutiveBadReadings = 0;
@@ -215,7 +215,7 @@ public class AprilTagDetectionAction extends Action {
 
     private boolean isLimelightSpike(double currentPitchDeg, double prevPitchDeg) {
         double angleDiff = MathFunctions.angleWrapDeg(currentPitchDeg - prevPitchDeg);
-        return Math.abs(angleDiff) > 90;
+        return Math.abs(angleDiff) > 180;
     }
 
 

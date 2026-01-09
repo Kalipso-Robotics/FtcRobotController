@@ -114,11 +114,7 @@ public class Shooter {
         return shooter1.getRPS();
     }
 
-    public boolean isAtTargetRPS() {
-        double effectiveTolerance = TARGET_RPS_TOLERANCE;
-        if (targetRPS != 0) {
-            effectiveTolerance = (targetRPS / ShooterInterpolationConfig.MAX_RPS) * TARGET_RPS_TOLERANCE;
-        }
+    public boolean isAtTargetRPS(double effectiveTolerance) {
         boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
         KLog.d("ShooterRun_isAtTargetRPS", "Target RPS tolerance (default) " + TARGET_RPS_TOLERANCE + " targetRps: " + targetRPS + " currentRps " + currentRPS + " isWithinTarget: " + isWithinTarget + " effectiveTolerance " + effectiveTolerance);
         return isWithinTarget;

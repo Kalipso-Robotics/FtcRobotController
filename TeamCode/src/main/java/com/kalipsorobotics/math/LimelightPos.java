@@ -2,22 +2,22 @@ package com.kalipsorobotics.math;
 
 public class LimelightPos {
 
-    private double apriLTagDistanceToCamMM;
+    private double aprilTagDistanceToCamMM;
     private double goalAngleToCamRad;
     private double xMM;
     private double yMM;
     private double zMM;
 
     public LimelightPos(double aprilTagDistanceToCamMM, double goalAngleToCamRad, double xMM, double yMM, double zMM) {
-        this.apriLTagDistanceToCamMM = aprilTagDistanceToCamMM;
+        this.aprilTagDistanceToCamMM = aprilTagDistanceToCamMM;
         this.goalAngleToCamRad = goalAngleToCamRad;
         this.xMM = xMM;
         this.yMM = yMM;
         this.zMM = zMM;
     }
 
-    public void setApriLTagDistanceToCamMM(double apriLTagDistanceToCamMM) {
-        this.apriLTagDistanceToCamMM = apriLTagDistanceToCamMM;
+    public void setAprilTagDistanceToCamMM(double aprilTagDistanceToCamMM) {
+        this.aprilTagDistanceToCamMM = aprilTagDistanceToCamMM;
     }
 
     public void setGoalAngleToCamRad(double goalAngleToCamRad) {
@@ -36,8 +36,8 @@ public class LimelightPos {
         this.zMM = zMM;
     }
 
-    public double getApriLTagDistanceToCamMM() {
-        return apriLTagDistanceToCamMM;
+    public double getAprilTagDistanceToCamMM() {
+        return aprilTagDistanceToCamMM;
     }
 
     public double getGoalAngleToCamRad() {
@@ -65,12 +65,12 @@ public class LimelightPos {
         this.yMM = position.getyMM();
         this.zMM = position.getzMM();
         this.goalAngleToCamRad = position.getGoalAngleToCamRad();
-        this.apriLTagDistanceToCamMM = position.getApriLTagDistanceToCamMM();
+        this.aprilTagDistanceToCamMM = position.getAprilTagDistanceToCamMM();
     }
 
     public void reset() {
         this.goalAngleToCamRad = 0;
-        this.apriLTagDistanceToCamMM = 0;
+        this.aprilTagDistanceToCamMM = 0;
         this.zMM = 0;
         this.xMM = 0;
         this.yMM = 0;
@@ -79,7 +79,7 @@ public class LimelightPos {
     @Override
     public String toString() {
         return "LimelightPos{" +
-                "distanceToTargetMM=" + apriLTagDistanceToCamMM +
+                "distanceToTargetMM=" + aprilTagDistanceToCamMM +
                 ", angleToGoalRad=" + goalAngleToCamRad +
                 ", xMM=" + xMM +
                 ", yMM=" + yMM +

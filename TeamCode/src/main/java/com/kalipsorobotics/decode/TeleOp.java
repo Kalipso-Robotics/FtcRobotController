@@ -135,7 +135,7 @@ public class TeleOp extends KOpMode {
         shooterRun = new ShooterRun(opModeUtilities, shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
 
         aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId, allianceColor);
-        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret, allianceColor);
+        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, aprilTagDetectionAction, turret, allianceColor);
 
         shotLogger = new ShotLogger(opModeUtilities);
 

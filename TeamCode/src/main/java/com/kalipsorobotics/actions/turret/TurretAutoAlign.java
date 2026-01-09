@@ -113,7 +113,7 @@ public class TurretAutoAlign extends Action {
     }
 
 
-    public static double calculateTargetTicks(Point targetPoint, Position currentPosition, int offsetTicks) {
+    public static double calculateTargetTicks(Point targetPoint, Position currentPosition, int ticksOffset) {
 
         double currentX = currentPosition.getX();
         double currentY = currentPosition.getY();
@@ -131,7 +131,7 @@ public class TurretAutoAlign extends Action {
 
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
 
-        double ticksOffsetRad = offsetTicks / Turret.TICKS_PER_RADIAN;
+        double ticksOffsetRad = ticksOffset / Turret.TICKS_PER_RADIAN;
         totalTurretAngle += ticksOffsetRad;
 
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);

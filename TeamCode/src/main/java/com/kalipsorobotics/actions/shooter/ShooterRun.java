@@ -1,10 +1,12 @@
 package com.kalipsorobotics.actions.shooter;
 
+import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.FAR_DISTANCE;
+import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.NEAR_DISTANCE;
+
 import android.annotation.SuppressLint;
 
 import com.kalipsorobotics.actions.cameraVision.AprilTagConfig;
 import com.kalipsorobotics.modules.shooter.ShooterConfig;
-import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -18,6 +20,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterRun extends Action {
 
+    public static final double FAR_TOLERANCE = 0.5;
+    public static final double MIDDLE_TOLERANCE = 0.75;
+    public static final double NEAR_TOLERANCE = 0.5;
     private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
     private final Shooter shooter;
@@ -154,7 +159,7 @@ public class ShooterRun extends Action {
         ));
 
 
-        if (shooter.isAtTargetRPS()) {
+        if (shooter.isAtTargetRPS(calculateRPSTolerance())) {
             if ((rpsInRangeTimer.milliseconds() > ShooterConfig.timeToStabilize)) {
                 KLog.d("shooter_ready", "Shooter is within range and READY. TargetRPS: " + targetRPS + " Current RPS: " + shooter.getRPS() + ". Ramp up time ms:" + rampUpTimeTimer.milliseconds());
                 //isDone = true;
@@ -190,7 +195,7 @@ public class ShooterRun extends Action {
     }
 
     private double getLimelightDistance() {
-        double limelightDistanceMM = SharedData.getLimelightRawPosition().getApriLTagDistanceToCamMM();
+        double limelightDistanceMM = SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM();
         KLog.d("ShooterRun_Distance", "Limelight distance: " + limelightDistanceMM + " mm");
         return limelightDistanceMM;
     }
@@ -270,4 +275,14 @@ public class ShooterRun extends Action {
         KLog.d("ShooterRun", "Odometry was set to: " + useOdometry);
     }
 
+
+    public double calculateRPSTolerance() {
+        if (distanceMM > FAR_DISTANCE) {
+            return FAR_TOLERANCE;
+        } else if (distanceMM > NEAR_DISTANCE) {
+            return MIDDLE_TOLERANCE;
+        } else {
+            return NEAR_TOLERANCE;
+        }
+    }
 }
