@@ -41,10 +41,10 @@ public class MotifCamera {
         }
     }
 
-    private AprilTagProcessor aprilTagProcessor;
-    private VisionPortal visionPortal;
+    private final AprilTagProcessor aprilTagProcessor;
+    private final VisionPortal visionPortal;
     private MotifPattern cachedMotifPattern;
-    private boolean motifPatternCached = false;
+    private final boolean motifPatternCached = false;
     WebcamName camera;
 
     public MotifCamera(OpModeUtilities opModeUtilities) {

@@ -5,6 +5,6 @@ public enum ShooterRunMode {
     SHOOT_USING_DISTANCE,
     SHOOT_USING_FIXED_POINT,
     SHOOT_USING_CURRENT_POINT,
-    STOP;
+    STOP
 
 }

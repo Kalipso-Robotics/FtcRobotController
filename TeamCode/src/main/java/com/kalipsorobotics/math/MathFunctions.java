@@ -1,9 +1,6 @@
 package com.kalipsorobotics.math;
 
 
-import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.MAX_HOOD;
-import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.MIN_HOOD;
-
 public class MathFunctions {
 
     public static double clamp(double value, double min, double max) {

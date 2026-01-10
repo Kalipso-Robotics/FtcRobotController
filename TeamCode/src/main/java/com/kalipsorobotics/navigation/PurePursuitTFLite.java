@@ -60,18 +60,18 @@ public class PurePursuitTFLite {
     // Parameters optimized for waypoint skipping but final precision
     private double maxSpeedMps = 1.0;
     private double maxOmega = 2.5;
-    private double lookaheadMinM = 0.3;   // larger minimum lookahead
-    private double lookaheadMaxM = 1.2;   // much larger maximum
-    private double kLookaheadVsSpeed = 0.6;
+    private final double lookaheadMinM = 0.3;   // larger minimum lookahead
+    private final double lookaheadMaxM = 1.2;   // much larger maximum
+    private final double kLookaheadVsSpeed = 0.6;
 
     // Very aggressive waypoint advancement - only care about final goal
-    private double waypointSkipRadiusM = 0.1; // 40 cm - skip waypoints aggressively
-    private double finalGoalRadiusM = 0.025; // 25 mm for final goal - high precision
-    private double finalGoalSlowdownRadiusM = 0.1; // start slowing when close to final
-    private double finalSpeedMps = 0.1;   // very slow for final approach
+    private final double waypointSkipRadiusM = 0.1; // 40 cm - skip waypoints aggressively
+    private final double finalGoalRadiusM = 0.025; // 25 mm for final goal - high precision
+    private final double finalGoalSlowdownRadiusM = 0.1; // start slowing when close to final
+    private final double finalSpeedMps = 0.1;   // very slow for final approach
 
-    private double kHeading = 3.0;
-    private double kXY = 1.8;
+    private final double kHeading = 3.0;
+    private final double kXY = 1.8;
 
     // Tight tolerances only for final goal
     private final double xyTolM = 0.025;       // 25 mm - high precision
@@ -290,7 +290,7 @@ public class PurePursuitTFLite {
         return Math.max(lo, Math.min(hi, v));
     }
     private static float clampF(float v, float lo, float hi) {
-        return (float) Math.max(lo, Math.min(hi, v));
+        return Math.max(lo, Math.min(hi, v));
     }
 
     // ---------- TFLite & Norm loaders ----------

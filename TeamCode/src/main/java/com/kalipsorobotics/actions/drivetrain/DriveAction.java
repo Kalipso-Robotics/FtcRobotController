@@ -25,7 +25,7 @@ public class DriveAction {
 
     // --------------- FOR MOVE VELOCITY --------------
     private Position prevPosition = null;
-    private double lastMilli = 0;
+    private final double lastMilli = 0;
     private final double MAX_WHEEL_VELOCITY_MM_S = 0.0; //todo measure straight max velocity
     private final double MAX_X_VELOCITY_MM_S = 0.8 * MAX_WHEEL_VELOCITY_MM_S; //scale down to not oversaturate power
     private final double MAX_Y_VELOCITY_MM_S = 0.9; //todo measure strafe max velocity

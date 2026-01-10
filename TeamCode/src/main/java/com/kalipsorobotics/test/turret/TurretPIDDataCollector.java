@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.turret;
 
-import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;

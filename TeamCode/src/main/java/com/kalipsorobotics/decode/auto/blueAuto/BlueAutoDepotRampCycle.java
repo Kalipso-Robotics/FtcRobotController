@@ -1,8 +1,7 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.decode.auto.blueAuto;
 
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
-import com.kalipsorobotics.modules.Turret;
+import com.kalipsorobotics.decode.auto.redAuto.RedAutoDepotRampCycle;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 

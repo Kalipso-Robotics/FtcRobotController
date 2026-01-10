@@ -3,6 +3,7 @@ package com.kalipsorobotics.actions.turret;
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
@@ -22,15 +23,15 @@ public class TurretAutoAlign extends Action {
 
     private double targetTicks;
 
-    private Point targetPoint;
+    private final Point targetPoint;
     private double toleranceTicks = TurretConfig.DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
     private double previousTotalAngle = 0;
     private double currentAngularVelocity;
-    private ElapsedTime velocityTimer;
+    private final ElapsedTime velocityTimer;
 
 
-    private AllianceColor allianceColor;
+    private final AllianceColor allianceColor;
 
     public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
@@ -131,7 +132,7 @@ public class TurretAutoAlign extends Action {
 
         double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
 
-        double ticksOffsetRad = ticksOffset / Turret.TICKS_PER_RADIAN;
+        double ticksOffsetRad = ticksOffset / TurretConfig.TICKS_PER_RADIAN;
         totalTurretAngle += ticksOffsetRad;
 
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
@@ -151,13 +152,13 @@ public class TurretAutoAlign extends Action {
     }
 
     public void setToleranceDeg(double newToleranceDeg) {
-        toleranceTicks = newToleranceDeg * Turret.TICKS_PER_DEGREE;
+        toleranceTicks = newToleranceDeg * TurretConfig.TICKS_PER_DEGREE;
     }
 
     public static double computeTicksFromAngleRad(double angleWrapRad) {
         double turretRotation = (angleWrapRad) / (2 * Math.PI);
-        double motorRotation = turretRotation * Turret.BIG_TO_SMALL_PULLEY;
-        double currentTargetTicks = Turret.TICKS_PER_ROTATION * motorRotation;
+        double motorRotation = turretRotation * TurretConfig.BIG_TO_SMALL_PULLEY;
+        double currentTargetTicks = TurretConfig.TICKS_PER_ROTATION * motorRotation;
         return currentTargetTicks;
     }
 

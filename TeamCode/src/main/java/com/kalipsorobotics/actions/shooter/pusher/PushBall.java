@@ -4,6 +4,7 @@ package com.kalipsorobotics.actions.shooter.pusher;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
+import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
@@ -11,12 +12,12 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 
 public class PushBall extends KActionSet {
-    private RunIntakeUntilFullSpeed runUntilFullSpeed;
+    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
     public PushBall(Stopper stopper, Intake intake, Shooter shooter) {
 
         KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryWheelIMUPosition());
 
-        KServoAutoAction openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
+        KServoAutoAction openStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_OPEN_POS);
         openStopper.setName("openStopper");
         this.addAction(openStopper);
 

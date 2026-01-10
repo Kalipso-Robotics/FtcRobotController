@@ -53,14 +53,14 @@ public class TestNavigation extends LinearOpMode {
     private ExecutorService executorService;
     
     // Timing and performance monitoring
-    private ElapsedTime runtime = new ElapsedTime();
-    private ElapsedTime loopTimer = new ElapsedTime();
+    private final ElapsedTime runtime = new ElapsedTime();
+    private final ElapsedTime loopTimer = new ElapsedTime();
     
     // =============================================================================
     // PATH CONFIGURATION - Modify these waypoints as needed
     // =============================================================================
     
-    private List<Position> autonomousPath = Arrays.asList(
+    private final List<Position> autonomousPath = Arrays.asList(
             new Position(0,    0,    Math.toRadians(0)),    // Start position
             new Position(600,  600,    Math.toRadians(90))  // Move forward 600mm, turn to face left
            // Move right 1800mm to final position

@@ -1,11 +1,11 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.decode.auto.redAuto;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
@@ -52,7 +52,7 @@ public class RedAutoNear extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = (int) -Math.round((Turret.TICKS_PER_ROTATION * Turret.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
+        TurretConfig.TICKS_INIT_OFFSET = (int) -Math.round((TurretConfig.TICKS_PER_ROTATION * TurretConfig.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
     }
 
     @Override
@@ -121,8 +121,8 @@ public class RedAutoNear extends KOpMode {
         trip1.getMoveToBall().addPoint(1975, 780 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
 //        trip1.getMoveToBall().addPoint(2000, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1825, 900 * allianceColor.getPolarity() , 0 * allianceColor.getPolarity(), PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
-        trip1.getMoveToBall().addPoint(1825, 1100 * allianceColor.getPolarity(), 0 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1825, 900 * allianceColor.getPolarity() , 0, PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
+        trip1.getMoveToBall().addPoint(1825, 1100 * allianceColor.getPolarity(), 0);
         trip1.getMoveToBall().addPoint(1825, 850 * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
 
         // move to launch

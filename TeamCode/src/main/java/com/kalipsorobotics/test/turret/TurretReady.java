@@ -7,13 +7,13 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class TurretReady extends Action {
-    private double maxTimeoutMS;
-    private ElapsedTime timeoutTimer;
-    private static final double DEFAULT_MAX_TIMOUT_MS = 4000;
-    private TurretAutoAlign turretAutoAlign;
+    private final double maxTimeoutMS;
+    private final ElapsedTime timeoutTimer;
+    private static final double DEFAULT_MAX_TIMEOUT_MS = 4000;
+    private final TurretAutoAlign turretAutoAlign;
     public TurretReady(TurretAutoAlign turretAutoAlign) {
         this.turretAutoAlign = turretAutoAlign;
-        this.maxTimeoutMS = DEFAULT_MAX_TIMOUT_MS;
+        this.maxTimeoutMS = DEFAULT_MAX_TIMEOUT_MS;
         timeoutTimer = new ElapsedTime();
     }
 

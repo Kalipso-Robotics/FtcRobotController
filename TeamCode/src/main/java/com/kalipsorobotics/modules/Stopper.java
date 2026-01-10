@@ -1,16 +1,12 @@
 package com.kalipsorobotics.modules;
 
-import com.kalipsorobotics.utilities.KCRServo;
+import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Stopper {
-
-    public final double STOPPER_SERVO_CLOSED_POS = 0.55;
-    public final double STOPPER_SERVO_OPEN_POS = 0.7;
-
 
     private final OpModeUtilities opModeUtilities;
 
@@ -27,7 +23,7 @@ public class Stopper {
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
             this.stopper = new KServo(stopper, KServo.AXON_MAX_SPEED, 255, 0, false);
-            this.stopper.setTargetPosition(STOPPER_SERVO_CLOSED_POS);
+            this.stopper.setTargetPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
             KLog.d("Stopper", "Constructor completed successfully");
         } catch (Exception e) {
             KLog.e("Stopper", "ERROR in constructor: " + e.getMessage());

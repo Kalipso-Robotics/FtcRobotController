@@ -2,8 +2,6 @@ package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
-import com.kalipsorobotics.utilities.OpModeUtilities;
 
 public class ShooterStop extends Action {
     Shooter shooter;

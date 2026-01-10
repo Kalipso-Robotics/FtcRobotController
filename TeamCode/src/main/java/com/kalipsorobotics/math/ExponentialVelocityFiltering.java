@@ -1,7 +1,7 @@
 package com.kalipsorobotics.math;
 
 public class ExponentialVelocityFiltering {
-    private double alpha;
+    private final double alpha;
     private double filteredVelocity;
     private double pastVelocity;
     private boolean initialized;

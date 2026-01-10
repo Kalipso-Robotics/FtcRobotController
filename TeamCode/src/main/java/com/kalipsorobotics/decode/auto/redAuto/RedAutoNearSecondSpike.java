@@ -1,4 +1,4 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.decode.auto.redAuto;
 
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.math.Point;

@@ -1,7 +1,6 @@
 package com.kalipsorobotics.modules;
 
-import android.provider.ContactsContract;
-
+import static com.kalipsorobotics.decode.configs.DrivetrainConfig.*;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -21,13 +20,13 @@ public class IMUModule {
         int i = 0;
         while (i < 3) {
             i++;
-            boolean isImuIntitalized = imu.initialize(new IMU.Parameters(
+            boolean isImusInitialized = imu.initialize(new IMU.Parameters(
                     new RevHubOrientationOnRobot(
-                            RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                            RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                            IMU_LOGO_FACING_DIRECTION,
+                            IMU_USB_FACING_DIRECTION
                     )
             ));
-            if (isImuIntitalized) {
+            if (isImusInitialized) {
                 break;
             } else {
                 opModeUtilities.getOpMode().sleep(500);

@@ -59,15 +59,15 @@ public class NavigationSystem {
     }
     
     // Core components
-    private InverseModelDriver inverseModel;
-    private PathSampler pathSampler;
-    private PursuitController pursuitController;
-    private TerminalPoseController terminalController;
-    private FrictionAdaptor frictionAdaptor;
-    private BiasAdaptor biasAdaptor;
-    private SpeedCaps speedCaps;
-    private DriveTrainIntegration driveTrainIntegration;
-    private DataCollector dataCollector;
+    private final InverseModelDriver inverseModel;
+    private final PathSampler pathSampler;
+    private final PursuitController pursuitController;
+    private final TerminalPoseController terminalController;
+    private final FrictionAdaptor frictionAdaptor;
+    private final BiasAdaptor biasAdaptor;
+    private final SpeedCaps speedCaps;
+    private final DriveTrainIntegration driveTrainIntegration;
+    private final DataCollector dataCollector;
     
     // State variables
     private ControlMode currentMode = ControlMode.PURSUIT;
@@ -78,7 +78,7 @@ public class NavigationSystem {
     
     // Control parameters
     private double maxCruiseSpeed = 1.2; // m/s
-    private double maxBrakingAccel = 2.5; // m/s²
+    private final double maxBrakingAccel = 2.5; // m/s²
     
     // Telemetry and status
     private double currentLookahead = 0.0;
@@ -263,7 +263,7 @@ public class NavigationSystem {
             // Update telemetry
             int nearestIndex = pathSampler.nearestIndexTo(currentPose.getX(), currentPose.getY());
             currentPathArcLength = pathSampler.getArcLengthAt(nearestIndex);
-            currentLookahead = Math.max(0.20, Math.min(0.80, 0.20 + 1.0 * currentSpeed));
+            currentLookahead = Math.max(0.20, Math.min(0.80, 0.20 + currentSpeed));
             
         } else if (currentMode == ControlMode.TERMINAL) {
             TerminalPoseController.VelocityCommand cmd = 
@@ -397,10 +397,10 @@ public class NavigationSystem {
         private static final String TAG = "InverseModelDriver";
         
         private Interpreter interpreter;
-        private float[] inputMeans = new float[3];
-        private float[] inputStds = new float[3];
-        private float[][] inputArray = new float[1][3];
-        private float[][] outputArray = new float[1][4];
+        private final float[] inputMeans = new float[3];
+        private final float[] inputStds = new float[3];
+        private final float[][] inputArray = new float[1][3];
+        private final float[][] outputArray = new float[1][4];
         
         public InverseModelDriver(Context context, String modelPath, String normPath) 
                 throws IOException, JSONException {
@@ -497,7 +497,7 @@ public class NavigationSystem {
     private static class PathSampler {
         private static final double SAMPLE_DISTANCE_MM = 10.0;
         
-        private List<PathPoint> sampledPoints = new ArrayList<>();
+        private final List<PathPoint> sampledPoints = new ArrayList<>();
         private double totalPathLength = 0.0;
         private int lastNearestIndex = 0;
         
@@ -943,7 +943,7 @@ public class NavigationSystem {
         private double maxSpeedScalar = 1.0;
         private double commandedDistanceSum = 0.0;
         private double measuredDistanceSum = 0.0;
-        private double emaAlpha = 0.1;
+        private final double emaAlpha = 0.1;
         private long lastUpdateTime = -1;
         
         public void update(double commandedVx, double commandedVy, 
@@ -1187,12 +1187,12 @@ public class NavigationSystem {
     private static class DriveTrainIntegration {
         private static final String TAG = "DriveTrainIntegration";
         
-        private DriveTrain driveTrain;
+        private final DriveTrain driveTrain;
         private boolean isConnected = false;
-        private double maxMotorPower = 1.0;
-        private double motorPowerDeadband = 0.02;
-        private boolean enableSlewRateLimit = true;
-        private double maxPowerChangePerUpdate = 0.1;
+        private final double maxMotorPower = 1.0;
+        private final double motorPowerDeadband = 0.02;
+        private final boolean enableSlewRateLimit = true;
+        private final double maxPowerChangePerUpdate = 0.1;
         private float[] lastMotorPowers = {0.0f, 0.0f, 0.0f, 0.0f};
         
         public DriveTrainIntegration(DriveTrain driveTrain) {
@@ -1303,7 +1303,7 @@ public class NavigationSystem {
     private static class DataCollector {
         private static final String TAG = "DataCollector";
         
-        private List<DataPoint> dataPoints;
+        private final List<DataPoint> dataPoints;
         private boolean isCollecting = false;
         private long startTime;
         private String sessionName;

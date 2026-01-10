@@ -162,7 +162,7 @@ public class ColorCalibration extends LinearOpMode {
 
             writer.close();
             KLog.d("ColorCalibration", "Calibration data saved successfully");
-            detectColorsAction.clearCalibratedMap();
+            DetectColorsAction.clearCalibratedMap();
         } catch (IOException e) {
             KLog.d("ColorCalibration", "Failed to save calibration data: " + e.getMessage());
         }

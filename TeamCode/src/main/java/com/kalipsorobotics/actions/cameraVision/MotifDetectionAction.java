@@ -21,7 +21,7 @@ public class MotifDetectionAction extends Action {
         return motifCamera;
     }
     private int getObiliskID() {
-        List<AprilTagDetection> detections = motifCamera.getAprilTagProcessor().getDetections();;
+        List<AprilTagDetection> detections = motifCamera.getAprilTagProcessor().getDetections();
 
         return detections.get(0).id;
     }

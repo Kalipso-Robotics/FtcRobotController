@@ -1,16 +1,21 @@
-package com.kalipsorobotics.actions.turret;
+package com.kalipsorobotics.decode.configs;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.kalipsorobotics.modules.Turret;
+
 
 @Config
-public class TurretConfig { //
+public class TurretConfig {
+    //==========TURRET=========
+    public static final double TICKS_PER_ROTATION = 384.5;
+    public static final double BIG_TO_SMALL_PULLEY = 125.0/32.0;
+    public static final double TICKS_PER_DEGREE = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / 360.0;
+    public static final double TICKS_PER_RADIAN = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / (2 * Math.PI); //
 
     //target MidPoint
     public static double X_INIT_SETUP_MM = 3419.5 - 152.4; //3400      3,619.5 mm - 200m = 3,419.5       142.5 - 8
     public static double Y_INIT_SETUP_MM = 1400 - 177.8; // 1413.55      1,413.55 = 1,219.2 mm + 194.35     47.5 + 15.25/2
     public static int TICKS_INIT_OFFSET = 0;
-    public static double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 1.5;
+    public static double DEFAULT_TOLERANCE_TICKS = (TICKS_PER_DEGREE) * 1.5;
     public static double kP = 0.008;   // faster response
     public static double kI = 0;       // keep at 0
     public static double kD = 0.0001;  // reduces overshoot (main time saver) 0.0002

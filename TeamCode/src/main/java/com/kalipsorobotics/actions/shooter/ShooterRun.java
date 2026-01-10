@@ -1,12 +1,11 @@
 package com.kalipsorobotics.actions.shooter;
 
-import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.FAR_DISTANCE;
-import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.NEAR_DISTANCE;
+import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import android.annotation.SuppressLint;
 
-import com.kalipsorobotics.actions.cameraVision.AprilTagConfig;
-import com.kalipsorobotics.modules.shooter.ShooterConfig;
+import com.kalipsorobotics.decode.configs.AprilTagConfig;
+import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 

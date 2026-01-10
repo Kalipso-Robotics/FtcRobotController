@@ -47,7 +47,7 @@ public class TurretKsTuner extends LinearOpMode {
     private static final int TRIALS_PER_POWER = 3;  // Number of times to test each power
 
     // Data storage
-    private ArrayList<TestResult> results = new ArrayList<>();
+    private final ArrayList<TestResult> results = new ArrayList<>();
     private File dataFile;
     private boolean isRunning = false;
 

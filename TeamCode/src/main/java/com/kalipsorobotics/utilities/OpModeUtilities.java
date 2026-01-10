@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class OpModeUtilities {
     private final HardwareMap hardwareMap;
-    private LinearOpMode opMode;
+    private final LinearOpMode opMode;
     private final Telemetry telemetry;
 
     public OpModeUtilities(HardwareMap hardwareMap, LinearOpMode opMode, Telemetry telemetry) {

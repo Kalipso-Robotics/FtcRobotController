@@ -5,7 +5,7 @@ import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
 
 public class PurePursuitReady extends Action {
-    private PurePursuitAction purePursuitAction;
+    private final PurePursuitAction purePursuitAction;
     public PurePursuitReady(PurePursuitAction purePursuitAction) {
         this.purePursuitAction = purePursuitAction;
     }

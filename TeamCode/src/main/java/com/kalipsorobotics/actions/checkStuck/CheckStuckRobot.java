@@ -29,7 +29,7 @@ public class CheckStuckRobot {
     final private double HEADING_DELTA_THRESHOLD = 1; // degrees - minimum change to detect spinning
 
     // Position history for reverse navigation
-    private List<Position> positionHistory = new ArrayList<>();
+    private final List<Position> positionHistory = new ArrayList<>();
     private static final int MAX_HISTORY_SIZE = 50; // Keep last 50 positions
     private static final long POSITION_UPDATE_INTERVAL_MS = 500; // Update position every 500ms
     private Position lastSafePosition = null;

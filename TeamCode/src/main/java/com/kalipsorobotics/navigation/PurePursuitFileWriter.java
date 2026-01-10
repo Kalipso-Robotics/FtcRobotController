@@ -27,46 +27,42 @@ public class PurePursuitFileWriter extends KFileWriter {
 
 
     private void writeOdometryHeader() {
-        StringBuilder stringBuilder = new StringBuilder();
 
         OdometrySensorCombinations key = OdometrySensorCombinations.WHEEL_IMU;
 
-        stringBuilder.append("Time");
-        stringBuilder.append(",");
-        stringBuilder.append(key);
-        stringBuilder.append(",");
-        stringBuilder.append(key + "_X,");
-        stringBuilder.append(key + "_Y,");
-        stringBuilder.append(key + "_Theta,");
-        stringBuilder.append(key + "_DeltaTheta,");
+        String stringBuilder = "Time" +
+                "," +
+                key +
+                "," +
+                key + "_X," +
+                key + "_Y," +
+                key + "_Theta," +
+                key + "_DeltaTheta," +
+                "Motor_fLeft," +
+                "Motor_fRight," +
+                "Motor_bLeft," +
+                "Motor_bRight";
 
-        stringBuilder.append("Motor_fLeft,");
-        stringBuilder.append("Motor_fRight,");
-        stringBuilder.append("Motor_bLeft,");
-        stringBuilder.append("Motor_bRight");
-
-        super.writeLine(stringBuilder.toString());
+        super.writeLine(stringBuilder);
     }
 
     public void writePurePursuitData(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryMap, DriveTrain driveTrain) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(System.currentTimeMillis());
-        stringBuilder.append(",");
 
-        stringBuilder.append(OdometrySensorCombinations.WHEEL_IMU);
-        stringBuilder.append(",");
-        stringBuilder.append(positionHistoryMap.get(OdometrySensorCombinations.WHEEL_IMU).toStringCSV());
-        stringBuilder.append(",");
-
-        stringBuilder.append(driveTrain.getfLeftPower());
-        stringBuilder.append(",");
-        stringBuilder.append(driveTrain.getfRightPower());
-        stringBuilder.append(",");
-        stringBuilder.append(driveTrain.getbLeftPower());
-        stringBuilder.append(",");
-        stringBuilder.append(driveTrain.getbRightPower());
+        String stringBuilder = System.currentTimeMillis() +
+                "," +
+                OdometrySensorCombinations.WHEEL_IMU +
+                "," +
+                positionHistoryMap.get(OdometrySensorCombinations.WHEEL_IMU).toStringCSV() +
+                "," +
+                driveTrain.getfLeftPower() +
+                "," +
+                driveTrain.getfRightPower() +
+                "," +
+                driveTrain.getbLeftPower() +
+                "," +
+                driveTrain.getbRightPower();
         KLog.d("purepursaction_power", "power " + driveTrain.getfLeftPower() + " " + driveTrain.getfRightPower() + " " + driveTrain.getbLeftPower() + " " + driveTrain.getbRightPower());
-        super.writeLine(stringBuilder.toString());
+        super.writeLine(stringBuilder);
     }
 
     public void close() {

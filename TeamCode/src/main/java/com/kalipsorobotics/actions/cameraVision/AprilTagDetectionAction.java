@@ -1,6 +1,6 @@
 package com.kalipsorobotics.actions.cameraVision;
 
-import static com.kalipsorobotics.actions.cameraVision.AprilTagConfig.*;
+import static com.kalipsorobotics.decode.configs.AprilTagConfig.*;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.cameraVision.AllianceColor;

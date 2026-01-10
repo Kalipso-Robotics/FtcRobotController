@@ -5,6 +5,7 @@ import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
@@ -36,8 +37,8 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
     private double hoodPosition = 0.55;
     private double distance = 0;
     private boolean isIncrementRps = true;
-    private double hoodIncrementation = 0.05;
-    private double rpsIncrementation = 0.5;
+    private final double hoodIncrementation = 0.05;
+    private final double rpsIncrementation = 0.5;
     @Override
     public void initializeRobot() {
         super.initializeRobot(); // Initialize base class components including kGamePad1
@@ -87,11 +88,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
 
 
             if (kGamePad1.isButtonXFirstPressed()) {
-                if (isIncrementRps) {
-                    isIncrementRps = false;
-                } else {
-                    isIncrementRps = true;
-                }
+                isIncrementRps = !isIncrementRps;
             }
             if (kGamePad1.isRightBumperPressed()) {
                 if (isIncrementRps) {
@@ -128,7 +125,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
                 // Create new intake action each time to ensure it runs
                 if (intakeRunFullSpeed != null || intakeRunFullSpeed.getIsDone()) {
                     intakeRunFullSpeed = new IntakeRunFullSpeed(intake);
-                    stop = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                    stop = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                     setLastStopperAction(stop);
                     setLastIntakeAction(intakeRunFullSpeed);
                 }

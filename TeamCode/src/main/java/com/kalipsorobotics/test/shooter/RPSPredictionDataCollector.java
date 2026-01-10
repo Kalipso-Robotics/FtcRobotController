@@ -3,6 +3,7 @@ package com.kalipsorobotics.test.shooter;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -189,10 +190,10 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             if (gamepad1.right_trigger > 0.1) {
                 // Right trigger: Run intake + Close stopper
                 intake.getIntakeMotor().setPower(1.0);
-                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
+                stopper.getStopper().setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
             } else if (gamepad1.left_trigger > 0.1) {
                 // Left trigger: Record shoot data
-                stopper.getStopper().setPosition(stopper.STOPPER_SERVO_OPEN_POS);
+                stopper.getStopper().setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
                 intake.getIntakeMotor().setPower(1.0);
 
                 // Record shoot data when trigger is first pressed (edge detection)
@@ -204,7 +205,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                     lastShoot = new ShootData(currentRPS, shooterPower, currentVoltage, hoodPosition, distanceToTargetMM);
 
                     // Log to KLog
-                    KLog.d("RPSPredictionData", "SHOOT RECORDED: " + lastShoot.toString());
+                    KLog.d("RPSPredictionData", "SHOOT RECORDED: " + lastShoot);
 
                     wasLeftTriggerPressed = true;
                 }

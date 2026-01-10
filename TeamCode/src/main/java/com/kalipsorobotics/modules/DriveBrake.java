@@ -1,7 +1,6 @@
 package com.kalipsorobotics.modules;
 
-import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
-import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
+import static com.kalipsorobotics.decode.configs.ModuleConfig.*;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -19,8 +18,8 @@ public class DriveBrake {
     }
 
     private void init() {
-        this.brakeLeft.setTargetPosition(ReleaseBraking.RELEASE_BRAKE_LEFT_POS);
-        this.brakeRight.setTargetPosition(ReleaseBraking.RELEASE_BRAKE_RIGHT_POS);
+        this.brakeLeft.setTargetPosition(RELEASE_BRAKE_LEFT_POS);
+        this.brakeRight.setTargetPosition(RELEASE_BRAKE_RIGHT_POS);
     }
 
     public KServo getBrakeRight() {

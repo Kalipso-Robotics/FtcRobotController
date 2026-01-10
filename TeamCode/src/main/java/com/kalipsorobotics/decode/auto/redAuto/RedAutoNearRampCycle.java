@@ -1,4 +1,4 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.decode.auto.redAuto;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
@@ -6,7 +6,7 @@ import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RampCycleAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
@@ -44,7 +44,7 @@ public class RedAutoNearRampCycle extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = (int) Math.round((Turret.TICKS_PER_ROTATION * Turret.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
+        TurretConfig.TICKS_INIT_OFFSET = (int) Math.round((TurretConfig.TICKS_PER_ROTATION * TurretConfig.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
     }
 
     @Override

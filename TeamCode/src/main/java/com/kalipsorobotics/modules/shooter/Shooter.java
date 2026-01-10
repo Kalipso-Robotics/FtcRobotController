@@ -1,10 +1,9 @@
 package com.kalipsorobotics.modules.shooter;
 
-import static com.kalipsorobotics.actions.cameraVision.AprilTagConfig.APRILTAG_X_REL_FIELD_MM;
-import static com.kalipsorobotics.actions.cameraVision.AprilTagConfig.APRILTAG_Y_REL_FIELD_MM;
+import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_X_REL_FIELD_MM;
+import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_Y_REL_FIELD_MM;
 
-import com.kalipsorobotics.actions.cameraVision.AprilTagConfig;
-import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.utilities.KCRServo;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -121,10 +120,7 @@ public class Shooter {
     }
 
     public boolean isRunning() {
-        if (Math.abs(shooter1.getPower()) > 0) {
-            return true;
-        }
-        return false;
+        return Math.abs(shooter1.getPower()) > 0;
     }
 
 
@@ -198,7 +194,7 @@ public class Shooter {
     public void goToRPS(double targetRPS) {
         this.targetRPS = targetRPS;
         // Get optimal kF for this target RPS
-        double optimalKf = ShooterConfig.getShooterKf(targetRPS);
+        double optimalKf = ShooterConfig.kf;
         // Update kF in both motors' PIDF controllers
         shooter1.getPIDFController().setKf(optimalKf);
         shooter2.getPIDFController().setKf(optimalKf);

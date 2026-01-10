@@ -1,6 +1,6 @@
 package com.kalipsorobotics.modules;
 
-import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -15,11 +15,6 @@ public class Turret {
 
     public KMotor turretMotor;
 
-    public static final double TICKS_PER_ROTATION = 384.5;
-    public static final double BIG_TO_SMALL_PULLEY = 125.0/32.0;
-
-    public static final double TICKS_PER_RADIAN = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / (2 * Math.PI);
-    public static final double TICKS_PER_DEGREE = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / 360.0;
 
     private Turret(OpModeUtilities opModeUtilities) {
         this.opModeUtilities = opModeUtilities;
@@ -63,11 +58,11 @@ public class Turret {
     }
 
     public double getCurrentAngleRad() {
-        return turretMotor.getCurrentPosition() / TICKS_PER_RADIAN;
+        return turretMotor.getCurrentPosition() / TurretConfig.TICKS_PER_RADIAN;
     }
 
     public double getCurrentVelocity() {
-        return turretMotor.getMotor().getVelocity() / TICKS_PER_DEGREE;
+        return turretMotor.getMotor().getVelocity() / TurretConfig.TICKS_PER_DEGREE;
     }
     public void stop() {
         KLog.d("TurretPower", "Current Power before Stopping: " + turretMotor.getPower());

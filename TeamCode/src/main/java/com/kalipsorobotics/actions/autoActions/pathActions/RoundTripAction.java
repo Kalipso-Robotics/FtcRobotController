@@ -23,18 +23,18 @@ import com.kalipsorobotics.utilities.SharedData;
 
 public class RoundTripAction extends KActionSet {
     private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 30;
-    private PurePursuitAction moveToBall;
+    private final PurePursuitAction moveToBall;
 
-    private IntakeFullAction intakeFullAction;
+    private final IntakeFullAction intakeFullAction;
 
-    private ShooterRun shooterRun;
-    private Shooter shooter;
-    private ShooterReady shooterReady;
-    private PushBall pushBall;
-    private PurePursuitReady purePursuitReady;
-    private ShooterStop shooterStop;
-    private TurretAutoAlign turretAutoAlign;
-    private TurretReady turretReady;
+    private final ShooterRun shooterRun;
+    private final Shooter shooter;
+    private final ShooterReady shooterReady;
+    private final PushBall pushBall;
+    private final PurePursuitReady purePursuitReady;
+    private final ShooterStop shooterStop;
+    private final TurretAutoAlign turretAutoAlign;
+    private final TurretReady turretReady;
     private boolean hasUpdatedShooterReady = false;
 
 

@@ -6,10 +6,10 @@ import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class TurretReadyLimelight extends Action {
-    private double maxTimeoutMS;
-    private ElapsedTime timeoutTimer;
+    private final double maxTimeoutMS;
+    private final ElapsedTime timeoutTimer;
     private static final double DEFAULT_MAX_TIMOUT_MS = 4000;
-    private TurretAutoAlignTeleOp turretAutoAlignTeleop;
+    private final TurretAutoAlignTeleOp turretAutoAlignTeleop;
     public TurretReadyLimelight(TurretAutoAlignTeleOp turretAutoAlignTeleop) {
         this.turretAutoAlignTeleop = turretAutoAlignTeleop;
         this.maxTimeoutMS = DEFAULT_MAX_TIMOUT_MS;

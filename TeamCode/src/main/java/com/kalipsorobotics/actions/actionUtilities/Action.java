@@ -84,7 +84,7 @@ public abstract class Action {
                 blockedStartTimeMs = System.currentTimeMillis();
                 wasBlockedLastUpdate = true;
                 KLog.d("ActionBlocking", String.format("[%s] BLOCKED - Waiting on: [%s]",
-                    getName() != null ? getName() : "unnamed", blockedBy.toString()));
+                    getName() != null ? getName() : "unnamed", blockedBy));
             } else {
                 // Log periodic updates while blocked
                 long blockedDurationMs = System.currentTimeMillis() - blockedStartTimeMs;
@@ -92,7 +92,7 @@ public abstract class Action {
                     KLog.d("ActionBlocking", String.format("[%s] STILL BLOCKED for %.1fs - Waiting on: [%s]",
                         getName() != null ? getName() : "unnamed",
                         blockedDurationMs / 1000.0,
-                        blockedBy.toString()));
+                            blockedBy));
                 }
             }
             return false;

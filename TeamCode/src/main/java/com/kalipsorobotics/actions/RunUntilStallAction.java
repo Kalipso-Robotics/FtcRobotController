@@ -9,12 +9,12 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class RunUntilStallAction extends Action {
-    private DcMotorEx motor;
-    private DcMotor regMotor;
-    private double power;
-    private double maxTimeoutMS;
+    private final DcMotorEx motor;
+    private final DcMotor regMotor;
+    private final double power;
+    private final double maxTimeoutMS;
     private int stallCount;
-    private ElapsedTime timeoutTimer;
+    private final ElapsedTime timeoutTimer;
 
     // goBILDA 5203 series motor specifications
     private static final double RPM = 1150.0; // RPM at 12V

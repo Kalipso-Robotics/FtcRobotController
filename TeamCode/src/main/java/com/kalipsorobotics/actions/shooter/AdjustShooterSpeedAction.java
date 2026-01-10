@@ -8,15 +8,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class AdjustShooterSpeedAction extends Action {
     private double targetRPS;
-    private double timeoutMS;
+    private final double timeoutMS;
     private ElapsedTime timeoutTimer;
     private final Shooter shooter;
     private static final double DEFAULT_DROP_BELOW_THRESHOLD_PERCENT = 0.99;
     private static final double DEFAULT_TIMEOUT_MS = 1000;
     private static final double MAX_RPS = 51;
-    private double dropBelowThreshold;
+    private final double dropBelowThreshold;
 //    private boolean boosting = false;
-    private double motorDirection;
+    private final double motorDirection;
 
     // Ideal constructor: just shooter
     public AdjustShooterSpeedAction(Shooter shooter) {

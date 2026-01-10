@@ -55,7 +55,7 @@ public class KActionSet extends Action {
                     KLog.d("ActionSet", String.format("[%s] Skipping action [%s] - blocked by: [%s]",
                         getName() != null ? getName() : "unnamed",
                         a.getName() != null ? a.getName() : "unnamed",
-                        blocking.toString()));
+                            blocking));
                 }
             }
         }

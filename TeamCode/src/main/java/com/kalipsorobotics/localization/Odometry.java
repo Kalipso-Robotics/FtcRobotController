@@ -1,5 +1,6 @@
 package com.kalipsorobotics.localization;
 
+import static com.kalipsorobotics.decode.configs.DrivetrainConfig.*;
 import android.os.SystemClock;
 
 import com.kalipsorobotics.math.MathFunctions;
@@ -22,21 +23,14 @@ import java.util.HashMap;
 
 public class Odometry {
 
-    private static final double DEAD_WHEEL_RADIUS_MM = 24;
-    private static final double TICKS_PER_REV = 2000;
-    //private static final double MM_PER_TICK = 2.0 * Math.PI * DEAD_WHEEL_RADIUS_MM / TICKS_PER_REV;
-    private static final double MM_PER_TICK = 0.0744953182; //Effective Constant  DistanceMM/Ticks
-
     private long unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
 
 //  Calibration Instruction
 //  (LeftTicks-RightTicks) * MM_PER_TICKS/Angle = TRACK_WIDTH_MM
-    final static private double TRACK_WIDTH_MM = 297.5; //301; //297;
 
 //  Calibration Instruction **Y change should be ~0**
 //  (BackTicks * MM_PER_TICK)/Angle = BACK_DISTANCE_TO_MID_ROBOT_MM
-    static private final double BACK_DISTANCE_TO_MID_ROBOT_MM = -90; //-70;
     private static Odometry single_instance = null;
     final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
@@ -48,9 +42,6 @@ public class Odometry {
     private OpModeUtilities opModeUtilities;
     HashMap<OdometrySensorCombinations, PositionHistory> odometryPositionHistoryHashMap = new HashMap<>();
     IMUModule imuModule;
-    //200-182 offset compare to line between parallel odo pods
-    //negative if robot center behind parallel wheels
-    //final private static double ROBOT_CENTER_OFFSET_MM = -18;
     private DcMotor rightEncoder;
     private DcMotor leftEncoder;
     private DcMotor backEncoder;
@@ -77,7 +68,6 @@ public class Odometry {
     long currentTime = SystemClock.elapsedRealtime();
     double timeElapsedSeconds = (currentTime - prevTime) / 1000.0;
 
-//    private final double MM_TO_INCH = 1/25.4;
 
     private Odometry(OpModeUtilities opModeUtilities, DriveTrain driveTrain, IMUModule imuModule,
                      Position startPosMMRad) {
@@ -134,7 +124,7 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startPosMMRad);
         } else {
-            KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance);
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
@@ -145,7 +135,7 @@ public class Odometry {
         if (single_instance == null) {
             single_instance = new Odometry(opModeUtilities, driveTrain, imuModule, startXMM, startYMM, startThetaRad);
         } else {
-            KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance.toString());
+            KLog.d("Odometry_debug_OpMode_Transfer", "Reuse Instance" + single_instance);
             resetHardware(opModeUtilities, driveTrain, imuModule, single_instance);
         }
         return single_instance;
@@ -426,10 +416,7 @@ public class Odometry {
     }
 
     private boolean isBadReading(double reading) {
-        if (Double.isNaN(reading) || Double.isInfinite(reading)) {
-            return true;
-        }
-        return false;
+        return Double.isNaN(reading) || Double.isInfinite(reading);
     }
 
     public boolean isShouldFallbackToWheelTheta() {

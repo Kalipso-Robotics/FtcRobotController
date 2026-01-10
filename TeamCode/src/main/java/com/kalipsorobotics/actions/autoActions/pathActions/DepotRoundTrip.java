@@ -1,11 +1,10 @@
 package com.kalipsorobotics.actions.autoActions.pathActions;
 
-import static com.kalipsorobotics.decode.RedAutoDepot.SHOOT_FAR_X;
-import static com.kalipsorobotics.decode.RedAutoDepot.SHOOT_FAR_Y;
+import static com.kalipsorobotics.decode.auto.redAuto.RedAutoDepot.SHOOT_FAR_X;
+import static com.kalipsorobotics.decode.auto.redAuto.RedAutoDepot.SHOOT_FAR_Y;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;

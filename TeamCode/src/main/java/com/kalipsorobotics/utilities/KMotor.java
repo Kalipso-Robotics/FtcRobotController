@@ -17,7 +17,7 @@ public class KMotor {
     private double prevTicks = 0;
     private double prevTimeMS;
 
-    private double prevRPS = 0;
+    private final double prevRPS = 0;
 
     // PIDF controller for RPS control
     private final PIDFController pidfController;

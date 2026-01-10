@@ -1,6 +1,7 @@
 package com.kalipsorobotics.test;
 
-import com.kalipsorobotics.actions.turret.TurretConfig;
+
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
@@ -36,7 +37,7 @@ public class TurretDataCollector extends LinearOpMode {
 
     // Test configuration
     private static final double TOLERANCE_DEGREES = 1.0;
-    private static final double TOLERANCE_TICKS = Turret.TICKS_PER_DEGREE * TOLERANCE_DEGREES;
+    private static final double TOLERANCE_TICKS = TurretConfig.TICKS_PER_DEGREE * TOLERANCE_DEGREES;
     private static final long MAX_MOVE_TIME_MS = 3000; // Max time to reach target
     private static final long SETTLE_TIME_MS = 1000; // Time to observe settling behavior
     private static final long SETTLE_LOG_INTERVAL_MS = 50; // How often to log during settling
@@ -44,8 +45,8 @@ public class TurretDataCollector extends LinearOpMode {
     // Turret limits (±180 degrees from starting position)
     private static final double MAX_ANGLE_DEG = 180.0;
     private static final double MIN_ANGLE_DEG = -180.0;
-    private static final double MAX_TICKS_FROM_ZERO = MAX_ANGLE_DEG * Turret.TICKS_PER_DEGREE;
-    private static final double MIN_TICKS_FROM_ZERO = MIN_ANGLE_DEG * Turret.TICKS_PER_DEGREE;
+    private static final double MAX_TICKS_FROM_ZERO = MAX_ANGLE_DEG * TurretConfig.TICKS_PER_DEGREE;
+    private static final double MIN_TICKS_FROM_ZERO = MIN_ANGLE_DEG * TurretConfig.TICKS_PER_DEGREE;
 
     // Test angles in degrees - relative to starting position, stays within ±180
     // ~55 trials, estimated 5-10 minutes
@@ -83,8 +84,8 @@ public class TurretDataCollector extends LinearOpMode {
     private double minOvershootDeg = Double.MAX_VALUE;
 
     // Lists for percentile calculations
-    private ArrayList<Long> settleTimesList = new ArrayList<>();
-    private ArrayList<Double> overshootList = new ArrayList<>();
+    private final ArrayList<Long> settleTimesList = new ArrayList<>();
+    private final ArrayList<Double> overshootList = new ArrayList<>();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -134,7 +135,7 @@ public class TurretDataCollector extends LinearOpMode {
      * Get current position relative to where we started (in degrees)
      */
     private double getRelativePositionDeg() {
-        return getRelativePositionTicks() / Turret.TICKS_PER_DEGREE;
+        return getRelativePositionTicks() / TurretConfig.TICKS_PER_DEGREE;
     }
 
     /**
@@ -143,7 +144,7 @@ public class TurretDataCollector extends LinearOpMode {
     private int targetDegreesToAbsoluteTicks(double targetDeg) {
         // Clamp target to ±180 degrees
         double clampedDeg = Math.max(MIN_ANGLE_DEG, Math.min(MAX_ANGLE_DEG, targetDeg));
-        return zeroOffsetTicks + (int)(clampedDeg * Turret.TICKS_PER_DEGREE);
+        return zeroOffsetTicks + (int)(clampedDeg * TurretConfig.TICKS_PER_DEGREE);
     }
 
     private void logConfiguration() {
@@ -151,7 +152,7 @@ public class TurretDataCollector extends LinearOpMode {
         KLog.d(TAG, String.format("PIDF Coefficients: kP=%.6f, kI=%.6f, kD=%.6f, kF=%.3f, kS=%.3f",
                 TurretConfig.kP, TurretConfig.kI, TurretConfig.kD, TurretConfig.kF, TurretConfig.kS));
         KLog.d(TAG, String.format("Turret Constants: TICKS_PER_DEGREE=%.4f, TICKS_PER_RADIAN=%.4f",
-                Turret.TICKS_PER_DEGREE, Turret.TICKS_PER_RADIAN));
+                TurretConfig.TICKS_PER_DEGREE, TurretConfig.TICKS_PER_RADIAN));
         KLog.d(TAG, String.format("Zero offset: %d ticks (starting position treated as 0 deg)", zeroOffsetTicks));
         KLog.d(TAG, String.format("Limits: %.1f to %.1f deg (%.1f to %.1f ticks from zero)",
                 MIN_ANGLE_DEG, MAX_ANGLE_DEG, MIN_TICKS_FROM_ZERO, MAX_TICKS_FROM_ZERO));
@@ -252,10 +253,10 @@ public class TurretDataCollector extends LinearOpMode {
 
             int currentAbsoluteTicks = turretMotor.getCurrentPosition();
             int currentRelativeTicks = currentAbsoluteTicks - zeroOffsetTicks;
-            double currentRelativeDeg = currentRelativeTicks / Turret.TICKS_PER_DEGREE;
+            double currentRelativeDeg = currentRelativeTicks / TurretConfig.TICKS_PER_DEGREE;
 
             int error = targetAbsoluteTicks - currentAbsoluteTicks;
-            double errorDeg = error / Turret.TICKS_PER_DEGREE;
+            double errorDeg = error / TurretConfig.TICKS_PER_DEGREE;
 
             // Safety check - only stop if we're outside limits AND trying to go further out
             boolean outsidePositiveLimit = currentRelativeTicks > MAX_TICKS_FROM_ZERO + TOLERANCE_TICKS;
@@ -357,9 +358,9 @@ public class TurretDataCollector extends LinearOpMode {
             updateAngularVelocity();
 
             int currentAbsoluteTicks = turretMotor.getCurrentPosition();
-            double currentRelativeDeg = (currentAbsoluteTicks - zeroOffsetTicks) / Turret.TICKS_PER_DEGREE;
+            double currentRelativeDeg = (currentAbsoluteTicks - zeroOffsetTicks) / TurretConfig.TICKS_PER_DEGREE;
             int error = targetAbsoluteTicks - currentAbsoluteTicks;
-            double errorDeg = error / Turret.TICKS_PER_DEGREE;
+            double errorDeg = error / TurretConfig.TICKS_PER_DEGREE;
 
             // Track min/max position
             if (currentRelativeDeg < minPositionDeg) minPositionDeg = currentRelativeDeg;
@@ -434,7 +435,7 @@ public class TurretDataCollector extends LinearOpMode {
             double deltaTime = velocityTimer.milliseconds();
             if (deltaTime > 0) {
                 double deltaTicks = currentTicks - previousAngleTicks;
-                double deltaRadians = deltaTicks / Turret.TICKS_PER_RADIAN;
+                double deltaRadians = deltaTicks / TurretConfig.TICKS_PER_RADIAN;
                 currentAngularVelocity = deltaRadians / deltaTime;
 
                 previousAngleTicks = currentTicks;

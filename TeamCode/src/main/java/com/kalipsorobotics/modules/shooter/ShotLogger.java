@@ -88,7 +88,7 @@ public class ShotLogger {
         lastShot = shot;
 
         // Log to KLog immediately
-        KLog.d("ShotLogger", String.format("Shot #%d: %s", shots.size(), shot.toString()));
+        KLog.d("ShotLogger", String.format("Shot #%d: %s", shots.size(), shot));
     }
 
     /**

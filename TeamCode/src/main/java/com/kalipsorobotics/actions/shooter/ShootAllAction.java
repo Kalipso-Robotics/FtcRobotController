@@ -21,17 +21,17 @@ import com.kalipsorobotics.utilities.KLog;
 public class ShootAllAction extends KActionSet {
 
     private final Turret turret;
-    private Stopper stopper;
-    private Intake intake;
-    private Shooter shooter;
-    private DriveBrake driveBrake;
+    private final Stopper stopper;
+    private final Intake intake;
+    private final Shooter shooter;
+    private final DriveBrake driveBrake;
 
-    private ShooterRun shooterRun;
-    private TurretAutoAlignTeleOp turretAutoAlignTeleop;
+    private final ShooterRun shooterRun;
+    private final TurretAutoAlignTeleOp turretAutoAlignTeleop;
     private double targetRPS;
     private double targetHoodPos;
 
-    private boolean hasTurnedLimelightOn = false;
+    private final boolean hasTurnedLimelightOn = false;
 
     private ShooterReady shooterReady;
 

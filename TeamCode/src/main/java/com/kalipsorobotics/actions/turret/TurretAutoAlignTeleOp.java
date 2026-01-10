@@ -9,6 +9,7 @@ import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 ;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
@@ -28,23 +29,23 @@ public class TurretAutoAlignTeleOp extends Action {
     KMotor turretMotor;
     private TurretRunMode turretRunMode;
     private double targetTicks;
-    private double targetPower;
-    private final double DEFAULT_TOLERANCE_TICKS = (Turret.TICKS_PER_DEGREE) * 2;
+    private final double targetPower;
+    private final double DEFAULT_TOLERANCE_TICKS = (TurretConfig.TICKS_PER_DEGREE) * 2;
     private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
     private boolean isWithinRange = false;
     private boolean aprilTagSeen = false;
 
-    private double searchAngleDeg = 180;
-    private boolean hasSearched = false;
+    private final double searchAngleDeg = 180;
+    private final boolean hasSearched = false;
     double totalAngleWrap;
     double lastLimit;
     Point targetPoint;
     private boolean useOdometryAlign;
     private double previousTotalAngle;
     private double currentAngularVelocity;
-    private ElapsedTime velocityTimer;
+    private final ElapsedTime velocityTimer;
     private boolean isFirstVelocityUpdate;
-    private Position lastOdometryPos;
+    private final Position lastOdometryPos;
     private int ticksOffset = 0;
     private double prevTargetTicks;
     private boolean shouldReadLimelight = false;
@@ -150,7 +151,7 @@ public class TurretAutoAlignTeleOp extends Action {
 
                 double totalTurretAngle = currentAngleRad + limelightAngleRad;
 
-                double ticksOffsetRad = ticksOffset / Turret.TICKS_PER_RADIAN;
+                double ticksOffsetRad = ticksOffset / TurretConfig.TICKS_PER_RADIAN;
                 totalTurretAngle += ticksOffsetRad;
 
 
@@ -227,7 +228,7 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     public void setToleranceDeg(double newToleranceDeg) {
-        toleranceTicks = newToleranceDeg * Turret.TICKS_PER_DEGREE;
+        toleranceTicks = newToleranceDeg * TurretConfig.TICKS_PER_DEGREE;
     }
 
     private void updateAngularVelocity() {

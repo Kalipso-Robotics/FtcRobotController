@@ -9,8 +9,8 @@ import com.kalipsorobotics.utilities.KServo;
 import java.util.Arrays;
 
 public class RevolverMoveToColorAction extends Action {
-    private Revolver revolver;
-    private KServo revolverServo;
+    private final Revolver revolver;
+    private final KServo revolverServo;
     MotifColor shootColor;
     DetectColorsAction detectColorsAction;
 

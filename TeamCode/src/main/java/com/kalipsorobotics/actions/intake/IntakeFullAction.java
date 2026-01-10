@@ -3,6 +3,7 @@ package com.kalipsorobotics.actions.intake;
 import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 
@@ -11,7 +12,7 @@ public class IntakeFullAction extends KActionSet {
 
     public IntakeFullAction(Stopper stopper, Intake intake, double maxTimeoutMS){
 
-        KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+        KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         closeStopper.setName("closeStopper");
         this.addAction(closeStopper);
 

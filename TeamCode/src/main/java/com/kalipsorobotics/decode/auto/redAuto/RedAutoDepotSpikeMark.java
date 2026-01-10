@@ -1,4 +1,4 @@
-package com.kalipsorobotics.decode;
+package com.kalipsorobotics.decode.auto.redAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;

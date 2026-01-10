@@ -42,8 +42,8 @@ public class DriveTrainKsTuner extends KOpMode {
     private static final int TRIALS_PER_POWER = 3;    // number of trials to average
 
     // Results storage
-    private List<Double> linearValidPowers = new ArrayList<>();
-    private List<Double> rotationalValidPowers = new ArrayList<>();
+    private final List<Double> linearValidPowers = new ArrayList<>();
+    private final List<Double> rotationalValidPowers = new ArrayList<>();
 
     private double minLinearPower = -1;
     private double minRotationalPower = -1;

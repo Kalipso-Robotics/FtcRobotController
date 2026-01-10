@@ -11,7 +11,8 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import com.kalipsorobotics.actions.turret.TurretConfig;
+import com.kalipsorobotics.decode.configs.ModuleConfig;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveBrake;
@@ -21,7 +22,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig;
+import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.test.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
@@ -29,17 +30,8 @@ import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-import com.kalipsorobotics.modules.shooter.ShotLogger;
 
-/**
- * Simplified redesign of RedFarTeleOp
- *
- * Key improvements:
- * 1. Priority-based structure (highest priority first, early returns)
- * 2. All inputs read at top of loop (clear what buttons do)
- * 3. Grouped by functionality (intake, shooting, etc.)
- * 4. Less fragile - priority is explicit, not dependent on if-else order
- */
+
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
 public class TeleOp extends KOpMode {
     private boolean hasClosedStopperInnit = false;
@@ -65,7 +57,6 @@ public class TeleOp extends KOpMode {
     IntakeReverse intakeReverse = null;
 
     DriveAction driveAction = null;
-    ShotLogger shotLogger = null;
 
     // Button state variables
     private boolean drivingSticksActive = false;
@@ -136,7 +127,6 @@ public class TeleOp extends KOpMode {
         aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId, allianceColor);
         turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, aprilTagDetectionAction, turret, allianceColor);
 
-        shotLogger = new ShotLogger(opModeUtilities);
 
         KLog.d("TeleOp-Init", "Finished initializeRobot()");
     }
@@ -147,7 +137,7 @@ public class TeleOp extends KOpMode {
 
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         KLog.d("TeleOp-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
-        stopper.setPosition(stopper.STOPPER_SERVO_OPEN_POS);
+        stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
         waitForStart();
         sleep(50);
         //Wait for Executor Thread to start
@@ -166,7 +156,7 @@ public class TeleOp extends KOpMode {
 
         while (opModeIsActive()) {
             if (!hasClosedStopperInnit) {
-                stopper.setPosition(stopper.STOPPER_SERVO_CLOSED_POS);
+                stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                 hasClosedStopperInnit = true;
             }
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
@@ -237,7 +227,7 @@ public class TeleOp extends KOpMode {
             }
             if (shootAllAction != null) {
                 shootAllAction.setIsDone(true);
-                closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                 setLastStopperAction(closeStopper);
             }
             driveAction.move(gamepad1);
@@ -261,9 +251,9 @@ public class TeleOp extends KOpMode {
 
         //Manual
         if (kGamePad2.isDpadLeftPressed()) {
-            turretAutoAlignTeleOp.incrementTicksOffset(-(int) Turret.TICKS_PER_DEGREE * 2);
+            turretAutoAlignTeleOp.incrementTicksOffset(-(int) TurretConfig.TICKS_PER_DEGREE * 2);
         } else if (kGamePad2.isDpadRightPressed()) {
-            turretAutoAlignTeleOp.incrementTicksOffset((int) Turret.TICKS_PER_DEGREE * 2);
+            turretAutoAlignTeleOp.incrementTicksOffset((int) TurretConfig.TICKS_PER_DEGREE * 2);
         }
         telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
 
@@ -328,7 +318,7 @@ public class TeleOp extends KOpMode {
         // Open on button press
         if (releaseStopperPressed) {
             if (!isPending(openStopper)) {
-                openStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_OPEN_POS);
+                openStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_OPEN_POS);
                 closeStopper = null;
                 setLastStopperAction(openStopper);
             }
@@ -340,7 +330,7 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp_Stopper", "Intake Pressed Close Stopper isPending: " + isPending(closeStopper));
             if (!isPending(closeStopper)) {
                 KLog.d("TeleOp_Stopper", "Close Stopper");
-                closeStopper = new KServoAutoAction(stopper.getStopper(), stopper.STOPPER_SERVO_CLOSED_POS);
+                closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                 openStopper = null;
                 setLastStopperAction(closeStopper);
             }
@@ -464,18 +454,6 @@ public class TeleOp extends KOpMode {
             }
         }
 
-    }
-
-    @Override
-    protected void cleanupRobot() {
-        // Write all accumulated shot data to file
-        if (shotLogger != null) {
-            shotLogger.writeToFile();
-            KLog.d("TeleOp", "Shot logger data written to file");
-        }
-
-        // Call parent cleanup
-        super.cleanupRobot();
     }
 
 }

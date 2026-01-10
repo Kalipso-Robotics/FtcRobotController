@@ -1,6 +1,6 @@
 package com.kalipsorobotics.test.shooter;
 
-import com.kalipsorobotics.modules.shooter.ShooterConfig;
+import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;

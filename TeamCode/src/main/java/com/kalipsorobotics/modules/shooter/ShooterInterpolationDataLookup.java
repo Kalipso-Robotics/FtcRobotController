@@ -1,6 +1,8 @@
 package com.kalipsorobotics.modules.shooter;
 
-import static com.kalipsorobotics.modules.shooter.ShooterInterpolationConfig.*;
+import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
+
+import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 
 import java.util.*;
 

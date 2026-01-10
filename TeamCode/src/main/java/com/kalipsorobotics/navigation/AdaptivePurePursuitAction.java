@@ -37,12 +37,12 @@ public class AdaptivePurePursuitAction extends Action {
     Optional<Position> follow;
     Optional<Position> prevFollow;
 
-    private double lastSearchRadius = LAST_RADIUS_MM;
+    private final double lastSearchRadius = LAST_RADIUS_MM;
 
-    private double finalAngleLockingThreshholdDeg = 1.5;
+    private final double finalAngleLockingThreshholdDeg = 1.5;
 
     private double startTimeMS = System.currentTimeMillis();
-    private double maxTimeOutMS = 1000000000;
+    private final double maxTimeOutMS = 1000000000;
 
     private Position lastPosition;
     private double lastMilli = 0;
@@ -74,7 +74,7 @@ public class AdaptivePurePursuitAction extends Action {
     private int calcVAIndex = -1;
     private boolean calcVelocityAccelDone = false;
     private double lastUpdateTime;
-    private double lastHeadingError = 0;
+    private final double lastHeadingError = 0;
 
 
     //TUNING NUMBERS: USE DATA ABOUT ROBOT
@@ -85,11 +85,11 @@ public class AdaptivePurePursuitAction extends Action {
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
     private final double MAX_ANGULAR_VELOCITY = 5.5; //rad/s, maximum turning velocity of the robot
 
-    private double WHEELBASE_LENGTH = 300; //front wheel to back wheel
-    private double TRACK_WIDTH = 400; //side to side
-    private double K_p = 0.00002; // 0.000015
-    private double K_a = 0.0; // 0.001
-    private double K_v = 0.0004; // 0.0004 0.00225
+    private final double WHEELBASE_LENGTH = 300; //front wheel to back wheel
+    private final double TRACK_WIDTH = 400; //side to side
+    private final double K_p = 0.00002; // 0.000015
+    private final double K_a = 0.0; // 0.001
+    private final double K_v = 0.0004; // 0.0004 0.00225
     private final double K = 1100; //based on how slow you want the robot to go around turns
 
     /*
@@ -328,7 +328,7 @@ public class AdaptivePurePursuitAction extends Action {
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
-            KLog.d("ppDebug", "currentPosition: " + currentPosition.toString());
+            KLog.d("ppDebug", "currentPosition: " + currentPosition);
 
             int lastIdx = path.numPoints() - 1;
             int closestIdx = findClosestPointIndex(path, currentPosition);

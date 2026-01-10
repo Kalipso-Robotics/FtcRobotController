@@ -27,26 +27,25 @@ public class OdometryLogger extends KFileWriter {
     }
 
     private void writeHeader() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("Time,");
-        stringBuilder.append("Encoder_Back_Ticks,");
-        stringBuilder.append("Encoder_Left_Ticks,");
-        stringBuilder.append("Encoder_Right_Ticks,");
-        stringBuilder.append("Encoder_Back_DistanceMM,");
-        stringBuilder.append("Encoder_Left_DistanceMM,");
-        stringBuilder.append("Encoder_Right_DistanceMM,");
-        stringBuilder.append("RawIMUReadingRad,");
-        stringBuilder.append("Wheel_X,");
-        stringBuilder.append("Wheel_Y,");
-        stringBuilder.append("Wheel_Theta,");
-        stringBuilder.append("Wheel_DeltaTheta,");
-        stringBuilder.append("Wheel_IMU_X,");
-        stringBuilder.append("Wheel_IMU_Y,");
-        stringBuilder.append("Wheel_IMU_Theta,");
-        stringBuilder.append("Wheel_IMU_DeltaTheta,");
-        stringBuilder.append("IMUUnhealthyCounter");
+        String stringBuilder = "Time," +
+                "Encoder_Back_Ticks," +
+                "Encoder_Left_Ticks," +
+                "Encoder_Right_Ticks," +
+                "Encoder_Back_DistanceMM," +
+                "Encoder_Left_DistanceMM," +
+                "Encoder_Right_DistanceMM," +
+                "RawIMUReadingRad," +
+                "Wheel_X," +
+                "Wheel_Y," +
+                "Wheel_Theta," +
+                "Wheel_DeltaTheta," +
+                "Wheel_IMU_X," +
+                "Wheel_IMU_Y," +
+                "Wheel_IMU_Theta," +
+                "Wheel_IMU_DeltaTheta," +
+                "IMUUnhealthyCounter";
 
-        super.writeLine(stringBuilder.toString());
+        super.writeLine(stringBuilder);
         try {
             super.flush();
         } catch (Exception e) {

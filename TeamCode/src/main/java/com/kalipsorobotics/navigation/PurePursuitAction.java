@@ -59,7 +59,7 @@ public class  PurePursuitAction extends Action {
     final private int maxUnstuckCounter = 2;
 
 
-    private int unstuckCounter = 0;
+    private final int unstuckCounter = 0;
 
     //private int farthestPointReached = 0;
 
@@ -250,11 +250,7 @@ public class  PurePursuitAction extends Action {
             KLog.d("PurePursuitScale", "Scaling UP x and y");
         }
 
-        if (path.isFollowingLastPoint() && distanceToTarget < withinRangeRadiusMM) {
-            isWithinRange = true;
-        } else {
-            isWithinRange = false;
-        }
+        isWithinRange = path.isFollowingLastPoint() && distanceToTarget < withinRangeRadiusMM;
         KLog.d("directionalpowerlook", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
                 powerAngle));
 
