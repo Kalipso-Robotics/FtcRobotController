@@ -135,15 +135,9 @@ public class AprilTagDetectionAction extends Action {
                     // ==================== CALCULATED: Angle & Distance to Goal ====================
                     // Goal offset is fixed relative to AprilTag - always add in positive X direction
                     distanceFromCamToAprilTag = Math.hypot(xAprilTagRelToCamMM, zAprilTagRelToCamMM);
-                    double adjustedX;
+                    double adjustedX = xAprilTagRelToCamMM;
                     double adjustedZ = zAprilTagRelToCamMM + GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z;
-                    double effectiveOffset;
-                    if (distanceFromCamToAprilTag < NEAR_DISTANCE_BEGIN_TO_SCALE_THRESHOLD) {
-                        effectiveOffset = GOAL_OFFSET_REL_APRIL_TAG_IN_CAM_SPACE_NEAR_X * allianceColor.getPolarity();
-                    } else {
-                        effectiveOffset = GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X * allianceColor.getPolarity();
-                    }
-                    adjustedX = xAprilTagRelToCamMM + effectiveOffset;
+
                     double estimateHeadingFromCamToGoal = Math.atan2(adjustedX, adjustedZ);
 
                     // FOR RPS TUNING ---------------------

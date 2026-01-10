@@ -47,6 +47,7 @@ public class TurretAutoAlignTeleOp extends Action {
     private Position lastOdometryPos;
     private int ticksOffset = 0;
     private double prevTargetTicks;
+    private boolean shouldReadLimelight = false;
 
 
     public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, AprilTagDetectionAction aprilTagDetectionAction, Turret turret, AllianceColor allianceColor) {
@@ -65,6 +66,7 @@ public class TurretAutoAlignTeleOp extends Action {
         this.previousTotalAngle = 0;
         this.currentAngularVelocity = 0;
         this.isFirstVelocityUpdate = true;
+        this.shouldReadLimelight = true;
     }
 
     public boolean isWithinRange() {
@@ -151,9 +153,17 @@ public class TurretAutoAlignTeleOp extends Action {
                 double ticksOffsetRad = ticksOffset / Turret.TICKS_PER_RADIAN;
                 totalTurretAngle += ticksOffsetRad;
 
-                totalAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
-                targetTicks = computeTicksFromAngleRad(totalAngleWrap);
-                prevTargetTicks = limelightAngleRad;
+
+                totalAngleWrap = MathFunctions.angleWrapRadHysteresis(totalTurretAngle);
+                double currentTargetTicks = computeTicksFromAngleRad(totalAngleWrap);
+
+                if (shouldReadLimelight) {
+                    targetTicks = currentTargetTicks;
+                    prevTargetTicks = targetTicks;
+                    shouldReadLimelight = false;
+                }
+
+
 
                 KLog.d("TurretAutoAlignTeleOp_Limelight_Align",
                         "currentAngleRad: " + currentAngleRad +
@@ -186,6 +196,7 @@ public class TurretAutoAlignTeleOp extends Action {
 
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
+            shouldReadLimelight = true;
             turretMotor.stop();
             KLog.d("Turret_PID", String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
@@ -199,11 +210,6 @@ public class TurretAutoAlignTeleOp extends Action {
 
             turretMotor.setPower(totalPower);
         }
-    }
-
-    public void runWithPower(double power) {
-        this.targetPower = power;
-        setTurretRunMode(TurretRunMode.RUN_WITH_POWER);
     }
 
     public void stop() {

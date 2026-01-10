@@ -200,8 +200,11 @@ public class TeleOp extends KOpMode {
             releaseStopperPressed = kGamePad2.isYPressed();
 
             toggleTurretAlign = kGamePad2.isToggleX();
+            KLog.d("TeleOp_Button", "toggleTurretAlign: " + toggleTurretAlign);
             enableLimelightAlignTurret = kGamePad2.isBackButtonToggle();
+            KLog.d("TeleOp_Button", "enableLimelightAlignTurret: " + enableLimelightAlignTurret);
             enableOdometryAlignTurret = !kGamePad2.isToggleB();
+            KLog.d("TeleOp_Button", "enableOdometryAlignTurret: " + enableOdometryAlignTurret);
 
 
             // ========== HANDLE DRIVING ==========

@@ -24,6 +24,29 @@ public class MathFunctions {
         return Math.toDegrees(angleWrapRad(Math.toRadians(angle)));
     }
 
+    /**
+     * Wraps angle only when it exceeds ±190 degrees (hysteresis band).
+     * This prevents oscillation near the ±180 boundary.
+     */
+    public static double angleWrapDegHysteresis(double angle) {
+        return Math.toDegrees(angleWrapRadHysteresis(Math.toRadians(angle)));
+    }
+
+    /**
+     * Wraps angle only when it exceeds ±(π + 10°) radians (hysteresis band).
+     * This prevents oscillation near the ±π boundary.
+     */
+    public static double angleWrapRadHysteresis(double angle) {
+        double threshold = Math.PI + Math.toRadians(15); // π + 10° in radians
+        angle = angle % (2 * Math.PI);
+        if (angle > threshold) {
+            angle -= 2 * Math.PI;
+        } else if (angle < -threshold) {
+            angle += 2 * Math.PI;
+        }
+        return angle;
+    }
+
     public static double angleWrapRadForce0ToPi(double angle) {
         angle = angle % (2 * Math.PI);
         if (angle < 0) {
