@@ -38,27 +38,11 @@ public class Shooter {
 
     private final KServo hood;
 
-    private final KCRServo kicker;
-
-
-
-//    private final KCRServo pusherRight;
-//    private final KCRServo pusherLeft;
-//
 
     private final IShooterPredictor predictor;
 
-//    public KCRServo getPusherRight() {
-//        return pusherRight;
-//    }
-//
-//    public KCRServo getPusherLeft() {
-//        return pusherLeft;
-//    }
     private double targetRPS;
-    private double prevRPS = 0;
     private double currentRPS;
-    private final double UNDERSHOOT_TOLERANCE = 5;
 
     public Shooter(OpModeUtilities opModeUtilities) {
 
@@ -80,29 +64,11 @@ public class Shooter {
         }
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, -1, false);
 
-        CRServo kicker = opModeUtilities.getHardwareMap().crservo.get("kicker");
-        this.kicker = new KCRServo(kicker, false);
 
         this.targetRPS = 0;
 
-//        CRServo kickerRight = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
-//        if (kickerRight == null) {
-//            opModeUtilities.getTelemetry().addData("Error", "Kicker1 servo not found in hardware map");
-//        }
-//        this.pusherRight = new KCRServo(kickerRight, false);
-//
-//        CRServo kickerLeft = opModeUtilities.getHardwareMap().crservo.get("pusherLeft");
-//        if (kickerLeft == null) {
-//            opModeUtilities.getTelemetry().addData("Error", "Kicker2 servo not found in hardware map");
-//        }
-//        this.pusherLeft = new KCRServo(kickerLeft, true);
 
-
-
-        // Use manual tuned data lookup (no file loading needed)
-        // To swap implementations, change this line:
         predictor = new ShooterInterpolationDataLookup();
-        // Alternative: predictor = new ShooterLutPredictorAdapter(opModeUtilities.getHardwareMap().appContext, "CappedShooterLUT.bin");
     }
 
     public double getHoodPosition() {
@@ -126,10 +92,6 @@ public class Shooter {
 
     public KServo getHood() {
         return hood;
-    }
-
-    public KCRServo getKicker() {
-        return kicker;
     }
 
     public KMotor getShooter1() {
@@ -205,20 +167,6 @@ public class Shooter {
         shooter1.goToRPS(targetRPS);
         shooter2.goToRPS(targetRPS);
 
-//        if ((prevRPS < targetRPS && currentRPS < (targetRPS - UNDERSHOOT_TOLERANCE)) && prevRPS > currentRPS) {
-//            if (targetRPS > 40) {
-//                //bang bang
-//                shooter1.setPower(0.7);
-//                shooter2.setPower(0.7);
-//                KLog.d("Shooter", "Using bang bang");
-//            }
-//        } else {
-//            // Set target RPS
-//            shooter1.goToRPS(targetRPS);
-//            shooter2.goToRPS(targetRPS);
-//        }
-
-        prevRPS = currentRPS;
     }
 
     /**
