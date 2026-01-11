@@ -93,9 +93,10 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
                     pos2 = SharedData.getOdometryWheelIMUPosition();
                 }
                 KLog.d("Calibration_Data", "nurture distance " + pos1.distanceTo(pos2) + " nurture angle " + Math.abs(pos1.getTheta() - pos2.getTheta()));
-                KLog.d("encoders", "count back: " + odometry.getBackEncoderMM() +
+                KLog.d("encodersMM", "count back: " + odometry.getBackEncoderMM() +
                         "  count right: " + odometry.getRightEncoderMM() +
                         "  count left: " + odometry.getLeftEncoderMM());
+                KLog.d("encoderTicks", "count back ticks: " + odometry.getCurrentBackTicks() + " count right ticks: " + odometry.getCurrentRightTicks() + " count left ticks: " + odometry.getCurrentLeftTicks());
                 //KLog.d("Velocity", Objects.requireNonNull(SharedData.getOdometryPositionMap().get(OdometrySensorCombinations.WHEEL_IMU)).getCurrentVelocity().toString());
             }
         } finally {

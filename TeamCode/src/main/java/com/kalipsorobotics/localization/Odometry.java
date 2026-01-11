@@ -26,11 +26,6 @@ public class Odometry {
     private long unhealthyCounter = 0;
     private boolean shouldFallbackToWheelTheta = true;
 
-//  Calibration Instruction
-//  (LeftTicks-RightTicks) * MM_PER_TICKS/Angle = TRACK_WIDTH_MM
-
-//  Calibration Instruction **Y change should be ~0**
-//  (BackTicks * MM_PER_TICK)/Angle = BACK_DISTANCE_TO_MID_ROBOT_MM
     private static Odometry single_instance = null;
     final private PositionHistory wheelPositionHistory = new PositionHistory();
     final private PositionHistory wheelIMUPositionHistory = new PositionHistory();
@@ -47,6 +42,7 @@ public class Odometry {
     private DcMotor backEncoder;
 
     private int currentLeftTicks = 0;
+
     private int currentRightTicks = 0;
     private int currentBackTicks = 0;
     private final double rightOffset;
@@ -169,7 +165,7 @@ public class Odometry {
         //corresponds to fRight
         //direction FORWARD
         //negative because encoder directions
-        currentRightTicks = rightEncoder.getCurrentPosition();
+        currentRightTicks = -rightEncoder.getCurrentPosition();
         KLog.d("Odometry_Encoder", "right encoder " + currentRightTicks);
         return ticksToMM(currentRightTicks) - rightOffset;
         //return ticksToMM(rightEncoder.getCurrentPosition());
@@ -466,6 +462,19 @@ public class Odometry {
             return true;
         }
         return false;
+    }
+
+
+    public int getCurrentRightTicks() {
+        return currentRightTicks;
+    }
+
+    public int getCurrentBackTicks() {
+        return currentBackTicks;
+    }
+
+    public int getCurrentLeftTicks() {
+        return currentLeftTicks;
     }
 
 

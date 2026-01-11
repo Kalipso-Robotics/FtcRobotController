@@ -7,13 +7,13 @@ public class ShooterInterpolationConfig {
 
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
-    public static final double HOOD_INIT_OFFSET = 0;
-    public final static double MAX_HOOD = 0.72; //0.64 old hood
-    public final static double MIN_HOOD = 0.3; // 37.38mm space by caliper from bottom
+    public static double HOOD_INIT_OFFSET = 0;
+    public static double MAX_HOOD = 0.72; //0.64 old hood
+    public static double MIN_HOOD = 0.3; // 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 46.6;
-    public static final double NEAR_SHOOT_RPS = 36.6;
-    public static final int FAR_DISTANCE = 2760;
-    public static final int NEAR_DISTANCE = 1785;
+    public static double NEAR_SHOOT_RPS = 36.6;
+    public static int FAR_DISTANCE = 2760;
+    public static int NEAR_DISTANCE = 1785;
     public static double[] shooterData = {
         710, 31.0, MIN_HOOD,
         890, 31.7, 0.55,
