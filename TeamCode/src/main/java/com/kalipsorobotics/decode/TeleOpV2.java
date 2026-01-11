@@ -18,7 +18,7 @@ public class TeleOpV2 extends TeleOp {
 
     @Override
     protected void initializeRobotConfig() {
-        super.initializeRobot();
+        super.initializeRobotConfig();
         DrivetrainConfig.BACK_DISTANCE_TO_MID_ROBOT_MM = DrivetrainConfigV2.BACK_DISTANCE_TO_MID_ROBOT_MM;
         DrivetrainConfig.TRACK_WIDTH_MM = DrivetrainConfigV2.TRACK_WIDTH_MM;
         DrivetrainConfig.MM_PER_TICK = DrivetrainConfigV2.MM_PER_TICK;
