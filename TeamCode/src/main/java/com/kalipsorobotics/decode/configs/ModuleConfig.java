@@ -10,6 +10,6 @@ public class ModuleConfig {
     public static double RELEASE_BRAKE_LEFT_POS = 0.8199;
 
     //========STOPPER========
-    public static double STOPPER_SERVO_CLOSED_POS = 0.55;
+    public static double STOPPER_SERVO_CLOSED_POS = 0.84; // 0.55 OLD STOPPER, current is Hood Stopper
     public static double STOPPER_SERVO_OPEN_POS = 0.7;
 }
