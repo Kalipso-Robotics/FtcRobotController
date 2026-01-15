@@ -40,7 +40,7 @@ public class DriveTrain {
 
         //sparkResetData(true, Math.toRadians(180));
 
-        resetWheelOdom();
+        resetDrivetrainOdometryEncoders();
 
        // testMotorDeleteLater = opModeUtilities.getHardwareMap().dcMotor.get("testMotor");
     }
@@ -75,10 +75,10 @@ public class DriveTrain {
         driveTrain.bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         driveTrain.bRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        driveTrain.fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        driveTrain.bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        driveTrain.fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        driveTrain.bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        driveTrain.fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        driveTrain.bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        driveTrain.fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        driveTrain.bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         //driveTrain.goBildaPinpointDriver = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 
@@ -178,7 +178,7 @@ public class DriveTrain {
         setPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
     }
 
-    public void resetWheelOdom() {
+    public void resetDrivetrainOdometryEncoders() {
         KLog.d("debug_OpMode_Transfer", "Reset Encoders" + Thread.currentThread().getId());
 
         // Print stack trace to see where this is being called from
