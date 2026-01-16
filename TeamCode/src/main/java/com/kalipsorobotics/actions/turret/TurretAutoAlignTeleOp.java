@@ -223,6 +223,10 @@ public class TurretAutoAlignTeleOp extends Action {
         update();
     }
 
+    public TurretRunMode getTurretRunMode() {
+        return this.turretRunMode;
+    }
+
     public double getTargetTicks() {
         return targetTicks;
     }

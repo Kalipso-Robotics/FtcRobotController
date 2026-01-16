@@ -174,7 +174,6 @@ public class TeleOp extends KOpMode {
             incrementHoodPressed = kGamepad2IsDpadRightFirstPressed && kGamePad2.isLeftBumperPressed();
             decrementHoodPressed = kGamepad2IsDpadLeftFirstPressed && kGamePad2.isLeftBumperPressed();
 
-
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
             shootAllActionPressed = kGamePad1.isLeftBumperFirstPressed();
@@ -214,8 +213,10 @@ public class TeleOp extends KOpMode {
 
             // ========== UPDATE ACTIONS ==========
             updateActions();
-            telemetry.addLine("Rps Offset " + ShooterInterpolationConfig.rpsOffset + "Hood Offset " + ShooterInterpolationConfig.hoodOffset);
+            telemetry.addLine(String.format("Rps Offset %.2f, Hood Offset %.2f", ShooterInterpolationConfig.rpsOffset, ShooterInterpolationConfig.hoodOffset));
             KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
+
+            telemetry.update();
         }
         cleanupRobot();
     }
@@ -248,6 +249,8 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp", "Stopping turret");
             turretAutoAlignTeleOp.stop();
         }
+
+        telemetry.addLine("Running using: " + (turretAutoAlignTeleOp.getTurretRunMode() == TurretRunMode.RUN_USING_LIMELIGHT ? "LIMELIGHT" : "ODOMETRY"));
 
         //Manual
         if (kGamePad2.isDpadLeftPressed()) {

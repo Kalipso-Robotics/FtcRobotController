@@ -24,6 +24,7 @@ public class PushBall extends KActionSet {
         KLog.d("PushAllBalls", "openStopper " + openStopper.getIsDone());
 
         runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
+        runUntilFullSpeed.setDependentActions(openStopper);
         runUntilFullSpeed.setName("untilShootingDone");
 //        untilShootingDone.setDependentActions(pushLeft, pushRight);
         this.addAction(runUntilFullSpeed);

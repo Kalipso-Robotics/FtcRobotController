@@ -18,17 +18,17 @@ public class ShooterInterpolationConfigV2 {
             1115, 34.0, 0.67, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
             1320, 35.4, MAX_HOOD,
             1630, 36.3, MAX_HOOD, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
-            NEAR_DISTANCE, 36.6, MAX_HOOD, //Near auto, trip 3 shooting point, tuned, distance: 1736.5272931917884
-            1920, 38.8, MAX_HOOD,
-            2050, 39.7, MAX_HOOD,
-            2200, 41.0, MAX_HOOD,
-            2400, 41.3, MAX_HOOD,
-            2570, 44.5, MAX_HOOD,
+            NEAR_DISTANCE, 37.6, MAX_HOOD, //Near auto, trip 3 shooting point, tuned, distance: 1736.5272931917884
+            1920, 39.5, MAX_HOOD,
+            2050, 40.7, MAX_HOOD,
+            2200, 41.7, MAX_HOOD, // 41.0
+            2400, 41.9, MAX_HOOD,
+            2570, 44.9, MAX_HOOD,
             FAR_DISTANCE, 45.5, MAX_HOOD, // TIP AREA DON'T TOUCH, far shoot
-            2965, 46.6, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH. far shoot
-            3095, 48.2, MAX_HOOD, // FAR SHOOT, first shoot ( 0 , 0 )
-            3300, 48.7, MAX_HOOD,
-            3500, 49.3, MAX_HOOD,
+            2965, 47.7, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH. far shoot
+            3095, 48.0, MAX_HOOD, // FAR SHOOT, first shoot ( 0 , 0 )
+            3300, 49.3, MAX_HOOD,
+            3500, 50.2, MAX_HOOD,
     };
 
 

@@ -141,8 +141,8 @@ public class AprilTagDetectionAction extends Action {
                     double estimateHeadingFromCamToGoal = Math.atan2(adjustedX, adjustedZ);
 
                     // FOR RPS TUNING ---------------------
-                    opModeUtilities.getTelemetry().addData("Distance to April Tag: ", "" + distanceFromCamToAprilTag);
-                    opModeUtilities.getTelemetry().update();
+                    opModeUtilities.getTelemetry().addLine(String.format("Distance to April Tag: %.2f", distanceFromCamToAprilTag));
+//                    opModeUtilities.getTelemetry().update();
                     // FOR RPS TUNING ---------------------
 
                     KLog.d("AprilTag_GOAL", String.format("TagPos(x=%.1f, z=%.1f) + Offset -> Adj(x=%.1f, z=%.1f) | AngleToGoal=%.2f° | Dist=%.1fmm",
