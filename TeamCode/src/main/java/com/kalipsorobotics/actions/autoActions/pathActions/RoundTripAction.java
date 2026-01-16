@@ -92,14 +92,14 @@ public class RoundTripAction extends KActionSet {
         turretReady.setDependentActions(moveToBalls);
         this.addAction(turretReady);
 
-        pushBall = new PushBall(stopper, intake, shooter);
+        pushBall = new PushBall(stopper, intake);
         pushBall.setName("shoot");
         if (shouldDependOnFlywheel) {
             pushBall.setDependentActions(purePursuitReady, shooterReady, turretReady); //removed turretReady
         } else {
             pushBall.setDependentActions(purePursuitReady, turretReady);
         }
-        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(150);
+//        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(150);
         this.addAction(pushBall);
 
         shooterStop = new ShooterStop(shooterRun);

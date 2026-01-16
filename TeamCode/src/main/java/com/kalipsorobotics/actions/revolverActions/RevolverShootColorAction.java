@@ -21,7 +21,7 @@ public class RevolverShootColorAction extends KActionSet {
         this.addAction(waitAction1);
         waitAction1.setDependentActions(revolverMoveToColorAction);
 
-        PushBall pushBall = new PushBall(stopper, intake, shooter);
+        PushBall pushBall = new PushBall(stopper, intake);
         pushBall.setName("kickBall");
         pushBall.setDependentActions(revolverMoveToColorAction, waitAction1);
         this.addAction(pushBall);

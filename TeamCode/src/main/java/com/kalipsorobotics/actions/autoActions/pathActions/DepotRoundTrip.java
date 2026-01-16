@@ -35,7 +35,7 @@ public class DepotRoundTrip extends KActionSet {
         trip.getMoveToBall().setFinalAngleLockingThresholdDegree(30);
         trip.getMoveToBall().setWithinRangeRadiusMM(100);
         trip.getMoveToBall().setPathAngleTolerance(10);
-        trip.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(200);
+//        trip.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(200);
         trip.setShouldShooterStop(false);
         //trip.getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip.getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());

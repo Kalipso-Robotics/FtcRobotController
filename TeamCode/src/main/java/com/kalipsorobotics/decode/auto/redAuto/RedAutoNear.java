@@ -3,6 +3,7 @@ package com.kalipsorobotics.decode.auto.redAuto;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
+import com.kalipsorobotics.actions.autoActions.pathActions.RampCycleAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.decode.configs.TurretConfig;
@@ -43,7 +44,7 @@ public class RedAutoNear extends KOpMode {
     TurretAutoAlign turretAutoAlign = null;
     RoundTripAction trip1 = null;
     RoundTripAction trip3 = null;
-    RoundTripAction trip2 = null;
+    RampCycleAction trip2 = null;
     RoundTripAction trip4 = null;
 
     long startTime;
@@ -137,7 +138,7 @@ public class RedAutoNear extends KOpMode {
 
         // ----------------- TRIP 2 ----------------------
 
-        trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
+        trip2 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip2.setName("trip2");
         trip2.getMoveToBall().addPoint(1375, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(1375, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());

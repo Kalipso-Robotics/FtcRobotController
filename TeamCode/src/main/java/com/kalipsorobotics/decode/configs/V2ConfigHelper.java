@@ -27,7 +27,6 @@ public class V2ConfigHelper {
         ShooterConfig.kd = ShooterConfigV2.kd;
         ShooterConfig.kf = ShooterConfigV2.kf;
 
-
         ShooterInterpolationConfig.rpsOffset = ShooterInterpolationConfigV2.rpsOffset;
         ShooterInterpolationConfig.hoodOffset = ShooterInterpolationConfigV2.hoodOffset;
         ShooterInterpolationConfig.HOOD_INIT_OFFSET = ShooterInterpolationConfigV2.HOOD_INIT_OFFSET;
@@ -38,5 +37,7 @@ public class V2ConfigHelper {
         ShooterInterpolationConfig.FAR_DISTANCE = ShooterInterpolationConfigV2.FAR_DISTANCE;
         ShooterInterpolationConfig.NEAR_DISTANCE = ShooterInterpolationConfigV2.NEAR_DISTANCE;
         ShooterInterpolationConfig.shooterData = ShooterInterpolationConfigV2.shooterData;
+
+        DrivetrainConfig.zeroPowerBehavior = DrivetrainConfigV2.zeroPowerBehavior;
     }
 }

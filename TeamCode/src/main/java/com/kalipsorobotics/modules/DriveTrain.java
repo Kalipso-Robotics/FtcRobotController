@@ -1,5 +1,6 @@
 package com.kalipsorobotics.modules;
 
+import com.kalipsorobotics.decode.configs.DrivetrainConfig;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.MathFunctions;
@@ -12,7 +13,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class DriveTrain {
     public static double ROBOT_LENGTH = 400.0;
     public static double ROBOT_WIDTH = 388.70;
-
 
     private static DriveTrain single_instance = null;
 
@@ -75,10 +75,10 @@ public class DriveTrain {
         driveTrain.bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         driveTrain.bRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        driveTrain.fLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        driveTrain.bLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        driveTrain.fRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        driveTrain.bRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        driveTrain.fLeft.setZeroPowerBehavior(DrivetrainConfig.zeroPowerBehavior);
+        driveTrain.bLeft.setZeroPowerBehavior(DrivetrainConfig.zeroPowerBehavior);
+        driveTrain.fRight.setZeroPowerBehavior(DrivetrainConfig.zeroPowerBehavior);
+        driveTrain.bRight.setZeroPowerBehavior(DrivetrainConfig.zeroPowerBehavior);
 
         //driveTrain.goBildaPinpointDriver = hardwareMap.get(GoBildaPinpointDriver.class,"goBildaOdometry");
 

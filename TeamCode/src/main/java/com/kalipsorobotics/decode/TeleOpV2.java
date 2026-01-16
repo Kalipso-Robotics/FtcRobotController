@@ -11,6 +11,7 @@ import com.kalipsorobotics.decode.configs.ShooterConfigV2;
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfigV2;
 import com.kalipsorobotics.decode.configs.V2ConfigHelper;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -20,6 +21,7 @@ public class TeleOpV2 extends TeleOp {
     protected void initializeRobotConfig() {
         super.initializeRobotConfig();
         V2ConfigHelper.configRobotV2();
+        DrivetrainConfig.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT;
     }
 
 

@@ -3,6 +3,7 @@ package com.kalipsorobotics.actions.shooter.pusher;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.modules.Intake;
@@ -12,8 +13,8 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 
 public class PushBall extends KActionSet {
-    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
-    public PushBall(Stopper stopper, Intake intake, Shooter shooter) {
+//    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
+    public PushBall(Stopper stopper, Intake intake) {
 
         KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryWheelIMUPosition());
 
@@ -23,20 +24,23 @@ public class PushBall extends KActionSet {
 
         KLog.d("PushAllBalls", "openStopper " + openStopper.getIsDone());
 
-        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
-        runUntilFullSpeed.setDependentActions(openStopper);
-        runUntilFullSpeed.setName("untilShootingDone");
-//        untilShootingDone.setDependentActions(pushLeft, pushRight);
-        this.addAction(runUntilFullSpeed);
-
-        KLog.d("PushAllBalls", "run intake " + runUntilFullSpeed.getIsDone());
+        WaitAction wait = new WaitAction(1000);
+        this.addAction(wait);
+//
+//        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
+//        runUntilFullSpeed.setDependentActions(openStopper);
+//        runUntilFullSpeed.setName("untilShootingDone");
+////        untilShootingDone.setDependentActions(pushLeft, pushRight);
+//        this.addAction(runUntilFullSpeed);
+//
+//        KLog.d("PushAllBalls", "run intake " + runUntilFullSpeed.getIsDone());
 
 
         KLog.d("teleop", "pusher Stopped(based off intake)");
 
     }
 
-    public RunIntakeUntilFullSpeed getRunUntilFullSpeed() {
-        return runUntilFullSpeed;
-    }
+//    public RunIntakeUntilFullSpeed getRunUntilFullSpeed() {
+//        return runUntilFullSpeed;
+//    }
 }
