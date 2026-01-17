@@ -8,6 +8,7 @@ import com.kalipsorobotics.math.Position;
 @Config
 public class AprilTagConfig {
 
+
     public static double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(126); //Math.toRadians(-234);
 
     //Tuned until zero field is different from CAD
@@ -19,7 +20,7 @@ public class AprilTagConfig {
 
     public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X = 134.7705 - 25; // 369.541 FROM CAD in camera system
 
-    public static double GOAL_TO_APRIL_TAG_OFFSET_DISTANCE = Math.hypot(AprilTagConfig.GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, AprilTagConfig.GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z);
+    public static final double GOAL_TO_APRIL_TAG_OFFSET_DISTANCE = Math.hypot(AprilTagConfig.GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, AprilTagConfig.GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z);
 
     public static Position TURRET_REL_CAM_POS = new Position(-169.8848, -3.2466, 0);
     public static Point ROBOT_REL_TURRET_POINT = new Point(3.48052, 2.50233);

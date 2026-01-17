@@ -8,7 +8,6 @@ import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.decode.configs.TurretConfig;
-import com.kalipsorobotics.decode.configs.V2ConfigHelper;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -56,7 +55,6 @@ public class RedAutoNearV2 extends KOpMode {
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = (int) -Math.round((TurretConfig.TICKS_PER_ROTATION * TurretConfig.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
 
-        V2ConfigHelper.configRobotV2();
     }
 
     @Override
