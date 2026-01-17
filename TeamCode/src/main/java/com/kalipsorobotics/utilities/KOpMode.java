@@ -28,7 +28,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastBrakingAction = null;
     protected Action lastStopperAction = null;
     protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
-    protected ShooterRun shooterRun = null;
+    protected ShooterRun shooterRunStopMode = null;
     protected AprilTagDetectionAction aprilTagDetectionAction = null;
     protected ResetOdometryToPosition resetOdometryToPosition = null;
 
@@ -131,8 +131,8 @@ public abstract class KOpMode extends LinearOpMode {
             lastBrakingAction.updateCheckDone();
         }
 
-        if (shooterRun != null) {
-            shooterRun.updateCheckDone();
+        if (shooterRunStopMode != null) {
+            shooterRunStopMode.updateCheckDone();
         }
 
         if (resetOdometryToPosition != null) {
