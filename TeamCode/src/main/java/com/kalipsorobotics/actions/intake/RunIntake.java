@@ -5,10 +5,10 @@ import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 
-public class IntakeRunFullSpeed extends Action {
+public class RunIntake extends Action {
     Intake intake;
 
-    public IntakeRunFullSpeed(Intake intake) {
+    public RunIntake(Intake intake) {
         this.intake = intake;
     }
 

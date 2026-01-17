@@ -2,29 +2,23 @@ package com.kalipsorobotics.actions.autoActions.pathActions;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
-import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
-import com.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
-import com.kalipsorobotics.actions.shooter.ShooterReady;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.stopper.CloseStopperAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.math.Point;
-import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
-import com.kalipsorobotics.navigation.SpeedAdaptivePurePursuitAction;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 
 
 public class RampCycleAction extends KActionSet {
-    RoundTripAction trip2 = null;
-    PurePursuitAction moveToBall;
+    RoundTripAction trip = null;
+    PurePursuitAction moveToShoot;
     OpModeUtilities opModeUtilities;
     DriveTrain driveTrain;
     TurretAutoAlign turretAutoAlign;
@@ -47,16 +41,16 @@ public class RampCycleAction extends KActionSet {
         this.launchPos = launchPos;
         this.waitForShooterReadyMS = waitForShooterReadyMS;
 
-        moveToBall = new PurePursuitAction(driveTrain);
-        moveToBall.setName("rampCycleTrip1");
-        this.addAction(moveToBall);
+        moveToShoot = new PurePursuitAction(driveTrain);
+        moveToShoot.setName("rampCycleTrip1");
+        this.addAction(moveToShoot);
 
-        trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,targetPoint, launchPos, 500);
-        trip2.setName("rampCycleTrip2");
-        trip2.getMoveToBall().clearPoints();
-        trip2.getMoveToBall().setFinalSearchRadius(200);
-        trip2.getMoveToBall().setMaxTimeOutMS(4000);
-        this.addAction(trip2);
+        trip = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,targetPoint, launchPos, 500);
+        trip.setName("rampCycleTrip2");
+        trip.getMoveToBall().clearPoints();
+        trip.getMoveToBall().setFinalSearchRadius(200);
+        trip.getMoveToBall().setMaxTimeOutMS(4000);
+        this.addAction(trip);
     }
 
     @Override
@@ -76,25 +70,30 @@ public class RampCycleAction extends KActionSet {
         shooterRun.setDependentActions();
         this.addAction(shooterRun);
 
-        IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, 5000);
+        IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, 5000, 1);
         intakeFullAction.setName("intake");
         this.addAction(intakeFullAction);
 
         WaitAction waitAction = new WaitAction(1000);
         waitAction.setName("waitForIntake");
-        waitAction.setDependentActions(moveToBall);
+        waitAction.setDependentActions(moveToShoot);
         this.addAction(waitAction);
+        // how does this wait do anything? -darren
 
-        trip2.setDependentActions(waitAction);
+        trip.setDependentActions(waitAction);
 
         ShooterStop shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
-        shooterStop.setDependentActions(trip2);
+        shooterStop.setDependentActions(trip);
         this.addAction(shooterStop);
     }
 
-    public PurePursuitAction getMoveToBall() {
-        return moveToBall;
+    public PurePursuitAction getMoveToShoot() {
+        return moveToShoot;
+    }
+
+    public RoundTripAction getTrip() {
+        return trip;
     }
 
 }

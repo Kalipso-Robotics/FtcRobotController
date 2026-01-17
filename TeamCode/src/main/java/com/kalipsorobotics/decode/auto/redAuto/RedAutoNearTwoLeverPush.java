@@ -2,6 +2,7 @@ package com.kalipsorobotics.decode.auto.redAuto;
 
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
+import com.kalipsorobotics.actions.intake.IntakeConfig;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.shooter.stopper.CloseStopperAction;
 import com.kalipsorobotics.math.Point;
@@ -29,7 +30,7 @@ public class RedAutoNearTwoLeverPush extends RedAutoNear{
         closeStopperAction.setDependentActions(trip2);
         redAutoNear.addAction(closeStopperAction);
 
-        IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, 5000);
+        IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
         intakeFullAction.setName("intake");
         redAutoNear.addAction(intakeFullAction);
         intakeFullAction.setDependentActions(trip2_1);

@@ -6,7 +6,7 @@ import com.kalipsorobotics.actions.drivetrain.DriveAction;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.intake.IntakeReverse;
-import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
+import com.kalipsorobotics.actions.intake.RunIntake;
 import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
@@ -52,7 +52,7 @@ public class TeleOp extends KOpMode {
     KServoAutoAction openStopper = null;
     KServoAutoAction closeStopper = null;
 
-    IntakeRunFullSpeed intakeRun = null;
+    RunIntake intakeRun = null;
     IntakeStop intakeStop = null;
     IntakeReverse intakeReverse = null;
 
@@ -287,7 +287,7 @@ public class TeleOp extends KOpMode {
         // PRIORITY 3: Manual forward
         if (intakeRunPressed) {
             if (!isPending(intakeRun)) {
-                intakeRun = new IntakeRunFullSpeed(intake);
+                intakeRun = new RunIntake(intake);
                 setLastIntakeAction(intakeRun);
             }
             return;  // Exit early

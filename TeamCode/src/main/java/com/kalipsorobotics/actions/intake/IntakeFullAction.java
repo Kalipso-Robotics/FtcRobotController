@@ -1,6 +1,5 @@
 package com.kalipsorobotics.actions.intake;
 
-import com.kalipsorobotics.actions.RunUntilStallAction;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
@@ -8,22 +7,17 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 
 public class IntakeFullAction extends KActionSet {
-    private IntakeStop stopIntake;
+    private RunIntakeTime runIntakeTime;
 
-    public IntakeFullAction(Stopper stopper, Intake intake, double maxTimeoutMS){
+    public IntakeFullAction(Stopper stopper, Intake intake, double timeMS, double power){
 
         KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         closeStopper.setName("closeStopper");
         this.addAction(closeStopper);
 
-        IntakeRunFullSpeed intakeRunFullSpeed = new IntakeRunFullSpeed(intake);
-        intakeRunFullSpeed.setName("intakeRun");
-        this.addAction(intakeRunFullSpeed);
-
-        RunUntilStallAction intakeAll = new RunUntilStallAction(intake.getIntakeMotor(), 1, maxTimeoutMS);
-        intakeAll.setName("intakeAll");
-        intakeAll.setDependentActions(intakeRunFullSpeed);
-        this.addAction(intakeAll);
+        runIntakeTime = new RunIntakeTime(intake, timeMS, power);
+        runIntakeTime.setName("intakeRun");
+        this.addAction(runIntakeTime);
 
 //        stopIntake = new IntakeStop(intake);
 //        stopIntake.setName("stopIntake");
@@ -32,7 +26,11 @@ public class IntakeFullAction extends KActionSet {
 
     }
 
-//    public void stop() {
+    public RunIntakeTime getRunIntakeTime() {
+        return runIntakeTime;
+    }
+
+    //    public void stop() {
 //        if (isDone) {
 //            return;
 //        }
@@ -40,3 +38,5 @@ public class IntakeFullAction extends KActionSet {
 //        this.isDone = true;
 //    }
 }
+
+

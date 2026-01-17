@@ -140,19 +140,19 @@ public class RedAutoNear extends KOpMode {
 
         trip2 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip2.setName("trip2");
-        trip2.getMoveToBall().addPoint(1330, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(1330, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToShoot().addPoint(1330, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToShoot().addPoint(1330, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        trip2.getMoveToBall().addPoint(1500, 1135 * allianceColor.getPolarity(), 195 * allianceColor.getPolarity());
+        trip2.getMoveToShoot().addPoint(1500, 1135 * allianceColor.getPolarity(), 195 * allianceColor.getPolarity());
 
 //        trip2.getMoveToBall().addPoint(1500, 900 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
 //        trip2.getMoveToBall().addPoint(1500, 1050 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to launch
-        trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        trip2.getMoveToShoot().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
-        trip2.getMoveToBall().setWithinRangeRadiusMM(150);
-        trip2.getMoveToBall().setMaxTimeOutMS(9000);
-        trip2.getMoveToBall().setFinalSearchRadius(200);
+        trip2.getMoveToShoot().setWithinRangeRadiusMM(150);
+        trip2.getMoveToShoot().setMaxTimeOutMS(9000);
+        trip2.getMoveToShoot().setFinalSearchRadius(200);
         redAutoNear.addAction(trip2);
 
         // ----------------- TRIP 3 ----------------------

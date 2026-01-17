@@ -1,9 +1,8 @@
 package com.kalipsorobotics.test.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-import com.kalipsorobotics.actions.intake.IntakeRunFullSpeed;
+import com.kalipsorobotics.actions.intake.RunIntake;
 import com.kalipsorobotics.actions.intake.IntakeStop;
-import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.modules.Intake;
@@ -24,9 +23,9 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
     KFileWriter kFileWriter = null;
     Shooter shooter = null;
     Intake intake = null;
-    IntakeRunFullSpeed intakeRunFullSpeed = null;
+    RunIntake intakeRunFullSpeed = null;
     IntakeStop intakeStop = null;
-    RunIntakeUntilFullSpeed runUntilFullSpeed = null;
+    RunIntake runUntilFullSpeed = null;
     TurretAutoAlign turretAutoAlign = null;
     Stopper stopper = null;
     KServoAutoAction stop = null;
@@ -47,9 +46,9 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
         intake = new Intake(opModeUtilities);
-        intakeRunFullSpeed = new IntakeRunFullSpeed(intake);
+        intakeRunFullSpeed = new RunIntake(intake);
         intakeStop = new IntakeStop(intake);
-        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
+        runUntilFullSpeed = new RunIntake(intake);
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 //        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
@@ -124,7 +123,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
             if (kGamePad1.isYPressed()) {
                 // Create new intake action each time to ensure it runs
                 if (intakeRunFullSpeed != null || intakeRunFullSpeed.getIsDone()) {
-                    intakeRunFullSpeed = new IntakeRunFullSpeed(intake);
+                    intakeRunFullSpeed = new RunIntake(intake);
                     stop = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                     setLastStopperAction(stop);
                     setLastIntakeAction(intakeRunFullSpeed);
@@ -141,7 +140,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
 
             if (kGamePad1.isDpadUpFirstPressed()) {
                 if (runUntilFullSpeed != null || runUntilFullSpeed.getIsDone()) {
-                    runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
+                    runUntilFullSpeed = new RunIntake(intake);
                     setLastIntakeAction(runUntilFullSpeed);
                 }
                 stopper.getStopper().setPosition(0.7);

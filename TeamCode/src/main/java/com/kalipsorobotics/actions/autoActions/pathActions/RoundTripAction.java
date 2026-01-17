@@ -2,6 +2,7 @@ package com.kalipsorobotics.actions.autoActions.pathActions;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
+import com.kalipsorobotics.actions.intake.IntakeConfig;
 import com.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.kalipsorobotics.actions.shooter.PurePursuitReady;
 import com.kalipsorobotics.actions.shooter.ShooterReady;
@@ -36,8 +37,6 @@ public class RoundTripAction extends KActionSet {
     private final TurretAutoAlign turretAutoAlign;
     private final TurretReady turretReady;
     private boolean hasUpdatedShooterReady = false;
-
-
     private boolean shouldShooterStop = true;
 
 
@@ -79,7 +78,7 @@ public class RoundTripAction extends KActionSet {
         shooterReady.setDependentActions(moveToBalls);
         this.addAction(shooterReady);
 
-        intakeFullAction = new IntakeFullAction(stopper, intake, 8000);
+        intakeFullAction = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
         intakeFullAction.setName("intakeFullAction");
         this.addAction(intakeFullAction);
 
@@ -171,6 +170,7 @@ public class RoundTripAction extends KActionSet {
             turretReady.setIsDone(true);
             shooterReady.setIsDone(true);
             shooterRun.setIsDone(true);
+            intakeFullAction.setIsDone(true);
         }
 
         if (moveToBall.getIsDone()) {
@@ -182,5 +182,9 @@ public class RoundTripAction extends KActionSet {
 
     public void setShouldShooterStop(boolean shouldShooterStop) {
         this.shouldShooterStop = shouldShooterStop;
+    }
+
+    public IntakeFullAction getIntakeFullAction() {
+        return intakeFullAction;
     }
 }

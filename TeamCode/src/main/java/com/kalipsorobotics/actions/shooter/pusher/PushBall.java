@@ -4,7 +4,9 @@ package com.kalipsorobotics.actions.shooter.pusher;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
-import com.kalipsorobotics.actions.intake.RunIntakeUntilFullSpeed;
+import com.kalipsorobotics.actions.intake.IntakeConfig;
+import com.kalipsorobotics.actions.intake.RunIntake;
+import com.kalipsorobotics.actions.intake.RunIntakeTime;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
@@ -24,8 +26,10 @@ public class PushBall extends KActionSet {
 
         KLog.d("PushAllBalls", "openStopper " + openStopper.getIsDone());
 
-        WaitAction wait = new WaitAction(1000);
-        this.addAction(wait);
+        RunIntakeTime runIntakeTime = new RunIntakeTime(intake, IntakeConfig.shootTimeMS, IntakeConfig.intakePower);
+        runIntakeTime.setName("runIntakeTime");
+        runIntakeTime.setDependentActions(openStopper);
+        this.addAction(runIntakeTime);
 //
 //        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
 //        runUntilFullSpeed.setDependentActions(openStopper);
