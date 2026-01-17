@@ -31,6 +31,7 @@ public class TurretReady extends Action {
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {
             KLog.d(this.getName(), "Turret TIMEOUT in " + maxTimeoutMS + " ms");
+            KLog.d("ActionTime", this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
             isDone = true;
             return;
         }

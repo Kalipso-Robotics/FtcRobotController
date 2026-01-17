@@ -73,6 +73,7 @@ public class  PurePursuitAction extends Action {
     private Position lastPosition;
     private double lastMilli = 0;
     ElapsedTime timeoutTimer;
+    ElapsedTime actionTime;
 
     private double xVelocity;
     private double yVelocity;
@@ -106,7 +107,7 @@ public class  PurePursuitAction extends Action {
         finalAngleLockingThresholdDegree = FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE;
         this.pathAngleToleranceDeg = Path.PATH_ANGLE_TOLERANCE;
         this.timeoutTimer = new ElapsedTime();
-
+        this.actionTime = new ElapsedTime();
         this.prevFollow = Optional.empty();
 
         //Log.d("purepursaction", "constructed");
@@ -122,6 +123,7 @@ public class  PurePursuitAction extends Action {
         this.pidAngle = new PidNav(pidAngle, 0, 0, 0.0050);
 
         this.timeoutTimer = new ElapsedTime();
+        this.actionTime = new ElapsedTime();
 
         this.prevFollow = Optional.empty();
 
@@ -301,6 +303,7 @@ public class  PurePursuitAction extends Action {
             lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             timeoutTimer.reset();
             timer = new ElapsedTime();
+            actionTime.reset();
         }
 
         currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
@@ -309,6 +312,7 @@ public class  PurePursuitAction extends Action {
 
         if (elapsedTime >= maxTimeOutMS) {
             setIsDone(true);
+            KLog.d("ActionTime", this.getName() + " done in " + actionTime.milliseconds() + " ms");
             //Log.d("purepursaction_debug_follow", "done timeout  " + getName());
             return;
         }
@@ -436,6 +440,7 @@ public class  PurePursuitAction extends Action {
             //Log.d("purepursaction_debug_checkDone",
                     //"Done" + checkDoneCounter + "name:" +  name + "Pos: " + currentPosition);
             isDone = true;
+            KLog.d("ActionTime", this.getName() + " done in " + actionTime.milliseconds() + " ms");
             KLog.d("PurePursuitTime", "Finished at: " + timer.milliseconds());
         }
 

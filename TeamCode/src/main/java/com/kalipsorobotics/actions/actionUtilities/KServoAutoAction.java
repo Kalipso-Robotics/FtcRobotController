@@ -3,15 +3,19 @@ package com.kalipsorobotics.actions.actionUtilities;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.utilities.KServo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class KServoAutoAction extends Action {
 
     protected KServo kServo;
     protected double targetPos;
 
+    ElapsedTime actionTime;
+
     public KServoAutoAction(KServo kServo, double targetPos) {
         this.kServo = kServo;
         this.targetPos = targetPos;
+        this.actionTime = new ElapsedTime();
     }
 
     @Override
@@ -22,6 +26,11 @@ public class KServoAutoAction extends Action {
             KLog.d("servo_action", "done for  " + targetPos + "currentTime  " + kServo.getTime() +
                     "port number  " + kServo.getPortNumber());
             return;
+        }
+
+        if (!hasStarted) {
+            actionTime.reset();
+            hasStarted = true;
         }
 
         KLog.d("servo_action", "not done setting target positions  " + targetPos + "currentTime  " + kServo.getTime() +
@@ -38,6 +47,7 @@ public class KServoAutoAction extends Action {
         if (isDone) {
             KLog.d("servo_action", "done" + targetPos + "current time  " + kServo.getTime() +
                     "port number  " + kServo.getPortNumber());
+            KLog.d("ActionTime", this.getName() + " done in " + actionTime + " ms");
         }
 
     }

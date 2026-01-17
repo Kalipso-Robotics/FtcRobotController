@@ -105,16 +105,17 @@ public class RedAutoDepot extends KOpMode {
         autoDepot.addAction(trip0);
 
         // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
-        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip1.setName("trip1");
         trip1.setDependentActions(trip0);
 //        trip1.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         addPointsToTrip1SpikeMark();
+        trip1.getTrip().setShouldShooterStop(false);
         autoDepot.addAction(trip1);
 
         // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
 
-        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip2.setName("trip2");
         trip2.setDependentActions(trip1);
         trip2.getTrip().getMoveToBall().clearPoints();
@@ -132,6 +133,7 @@ public class RedAutoDepot extends KOpMode {
         trip2.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 //        trip2.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         trip2.getTrip().getMoveToBall().setFinalSearchRadius(150);
+        trip2.getTrip().setShouldShooterStop(false);
         trip2.getTrip().getMoveToBall().setWithinRangeRadiusMM(150);
         trip2.getTrip().getMoveToBall().setPathAngleTolerance(45);
         trip2.getTrip().getMoveToBall().setFinalAngleLockingThresholdDegree(45);
@@ -219,16 +221,16 @@ public class RedAutoDepot extends KOpMode {
     }
 
     public DepotRoundTrip generateRetryTrip(DepotRoundTrip lastTrip) {
-        DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 2000, allianceColor);
+        DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         retryTrip.getTrip().getMoveToBall().clearPoints();
         // first try
         retryTrip.getTrip().getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         retryTrip.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        retryTrip.getTrip().getMoveToBall().addPoint(15,  1140 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        retryTrip.getTrip().getMoveToBall().addPoint(15,  1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         // retry
-        retryTrip.getTrip().getMoveToBall().addPoint(250, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        retryTrip.getTrip().getMoveToBall().addPoint(250,  1140 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        retryTrip.getTrip().getMoveToBall().addPoint(325, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        retryTrip.getTrip().getMoveToBall().addPoint(325,  1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         retryTrip.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         retryTrip.getTrip().getMoveToBall().setFinalSearchRadius(150);
@@ -240,7 +242,4 @@ public class RedAutoDepot extends KOpMode {
         retryTrip.setDependentActions(lastTrip);
         return retryTrip;
     }
-
-
-
 }
