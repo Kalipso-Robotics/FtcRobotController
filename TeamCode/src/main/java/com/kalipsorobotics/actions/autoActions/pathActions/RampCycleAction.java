@@ -72,7 +72,7 @@ public class RampCycleAction extends KActionSet {
         shooterRun.setDependentActions();
         this.addAction(shooterRun);
 
-        intakeFullAction = new IntakeFullAction(stopper, intake, 1750, 1);
+        intakeFullAction = new IntakeFullAction(stopper, intake, 2300, 1);
         intakeFullAction.setName("intake");
         intakeFullAction.setDependentActions(moveToRamp);
         this.addAction(intakeFullAction);
