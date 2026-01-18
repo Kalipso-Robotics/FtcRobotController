@@ -5,4 +5,5 @@ public class IntakeConfig {
     public static double shootTimeMS = 400;
     public static double intakeBallTimeMS = 7000;
     public static double intakePower = 1;
+    public static double intakeFromRampTime = 2300;
 }

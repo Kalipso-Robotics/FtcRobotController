@@ -6,7 +6,7 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous
-public class RedAutoNearSecondSpike extends RedAutoNear {
+public class RedAutoNearSecondSpike extends RedAutoNearRamp {
     Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y);
 
     @Override

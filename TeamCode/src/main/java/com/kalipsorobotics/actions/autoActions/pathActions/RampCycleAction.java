@@ -1,5 +1,7 @@
 package com.kalipsorobotics.actions.autoActions.pathActions;
 
+import static com.kalipsorobotics.actions.intake.IntakeConfig.intakeFromRampTime;
+
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.intake.IntakeConfig;
@@ -72,7 +74,7 @@ public class RampCycleAction extends KActionSet {
         shooterRun.setDependentActions();
         this.addAction(shooterRun);
 
-        intakeFullAction = new IntakeFullAction(stopper, intake, 2300, 1);
+        intakeFullAction = new IntakeFullAction(stopper, intake, intakeFromRampTime, 1);
         intakeFullAction.setName("intake");
         intakeFullAction.setDependentActions(moveToRamp);
         this.addAction(intakeFullAction);
