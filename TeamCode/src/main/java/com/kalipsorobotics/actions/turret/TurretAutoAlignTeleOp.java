@@ -46,6 +46,7 @@ public class TurretAutoAlignTeleOp extends Action {
     private final ElapsedTime velocityTimer;
     private boolean isFirstVelocityUpdate;
     private final Position lastOdometryPos;
+
     private int ticksOffset = 0;
     private double prevTargetTicks;
     private boolean shouldReadLimelight = false;
@@ -83,13 +84,7 @@ public class TurretAutoAlignTeleOp extends Action {
             if (timer.milliseconds() > 1000) {
                 this.updateCheckDone();
             }
-            opModeUtilities.getTelemetry().addData("count ", count);
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().update();
         }
-        opModeUtilities.getTelemetry().addData("isWithinRange ", isWithinRange);
-        opModeUtilities.getTelemetry().addLine("TURRET ALIGNED READY");
-        opModeUtilities.getTelemetry().update();
     }
 
     public Turret getTurret() {
@@ -272,5 +267,8 @@ public class TurretAutoAlignTeleOp extends Action {
 
     public int getTicksOffset() {
         return ticksOffset;
+    }
+    public void setTicksOffset(int ticksOffset) {
+        this.ticksOffset = ticksOffset;
     }
 }

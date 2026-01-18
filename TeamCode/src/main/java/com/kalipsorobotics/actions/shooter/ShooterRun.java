@@ -182,8 +182,6 @@ public class ShooterRun extends Action {
         IShooterPredictor.ShooterParams params = shooter.getPrediction(currentDistanceMM);
         KLog.d("shooter_ready", "Distance: " + currentDistanceMM + " params: " + params);
         // Get shooter parameters from predictor using the distance
-
-        opModeUtilities.getTelemetry().addLine("ShooterRun_TargetRPS " + params.rps + "ShooterRun_TargetHood " + params.hoodPosition);
         return params;
     }
 
