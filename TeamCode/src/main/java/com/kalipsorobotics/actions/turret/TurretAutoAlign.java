@@ -63,13 +63,8 @@ public class TurretAutoAlign extends Action {
             if (timer.milliseconds() > 1000) {
                 this.updateCheckDone();
             }
-            opModeUtilities.getTelemetry().addData("count ", count);
-            opModeUtilities.getTelemetry().addLine("TURRET IS ALIGNING WAIT");
-            opModeUtilities.getTelemetry().update();
+
         }
-        opModeUtilities.getTelemetry().addData("isWithinRange ", isWithinRange);
-        opModeUtilities.getTelemetry().addLine("TURRET ALIGNED READY");
-        opModeUtilities.getTelemetry().update();
     }
 
 

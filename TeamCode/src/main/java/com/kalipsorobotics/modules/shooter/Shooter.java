@@ -57,14 +57,9 @@ public class Shooter {
         shooter1 = new KMotor(motor1, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
         shooter2 = new KMotor(motor2, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
-        if (hood == null) {
-            opModeUtilities.getTelemetry().addData("Error", "Hood servo not found in hardware map");
-        }
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, -1, false);
 
-
         this.targetRPS = 0;
-
 
         predictor = new ShooterInterpolationDataLookup();
     }

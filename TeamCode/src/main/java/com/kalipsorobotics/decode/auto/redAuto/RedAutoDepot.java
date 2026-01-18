@@ -78,8 +78,8 @@ public class RedAutoDepot extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        shooterRunStopMode = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
-        shooterRunStopMode.setShooterRunMode(ShooterRunMode.STOP);
+        shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
+        shooterRun.setShooterRunMode(ShooterRunMode.STOP);
         KLog.d("RedAutoDepot-Init", "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
         Turret.setInstanceNull();
@@ -164,8 +164,8 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- PARK ----------------------
 
-        shooterRunStopMode.setDependentActions(lastTrip);
-        autoDepot.addAction(shooterRunStopMode);
+        shooterRun.setDependentActions(lastTrip);
+        autoDepot.addAction(shooterRun);
 
         IntakeStop stopIntake = new IntakeStop(intake);
         stopIntake.setName("stopIntake");
