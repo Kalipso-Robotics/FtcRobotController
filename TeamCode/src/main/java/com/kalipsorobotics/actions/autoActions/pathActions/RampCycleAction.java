@@ -12,6 +12,7 @@ import com.kalipsorobotics.actions.shooter.stopper.CloseStopperAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.modules.DriveTrain;
+import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
@@ -32,9 +33,11 @@ public class RampCycleAction extends KActionSet {
     Point targetPoint;
     Point launchPos;
     double waitForShooterReadyMS;
+    double waitTime;
+    ShooterRun shooterRun;
 
     public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTime) {
         this.opModeUtilities = opModeUtilities;
         this.driveTrain = driveTrain;
         this.turretAutoAlign = turretAutoAlign;
@@ -44,6 +47,7 @@ public class RampCycleAction extends KActionSet {
         this.targetPoint = targetPoint;
         this.launchPos = launchPos;
         this.waitForShooterReadyMS = waitForShooterReadyMS;
+        this.waitTime = waitTime;
 
         moveToRamp = new PurePursuitAction(driveTrain);
         moveToRamp.setName("rampCycleTrip1");
@@ -55,6 +59,12 @@ public class RampCycleAction extends KActionSet {
         tripToShoot.getMoveToBall().setFinalSearchRadius(200);
         tripToShoot.getMoveToBall().setMaxTimeOutMS(4000);
         this.addAction(tripToShoot);
+    }
+
+    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
+        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, 1000);
+
     }
 
     @Override
@@ -69,8 +79,8 @@ public class RampCycleAction extends KActionSet {
         closeStopperAction.setName("closeStopper");
         this.addAction(closeStopperAction);
 
-        ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, targetPoint, launchPos);
-        shooterRun.setName("shooterRun");  // FIX: Correct name (was "shooterReady")
+        shooterRun = new ShooterRun(opModeUtilities, shooter, targetPoint, launchPos);
+        shooterRun.setName("shooterRun");
         shooterRun.setDependentActions();
         this.addAction(shooterRun);
 
@@ -79,7 +89,7 @@ public class RampCycleAction extends KActionSet {
         intakeFullAction.setDependentActions(moveToRamp);
         this.addAction(intakeFullAction);
 
-        WaitAction waitAction = new WaitAction(1000);
+        WaitAction waitAction = new WaitAction(waitTime);
         waitAction.setName("waitForIntake");
         waitAction.setDependentActions(moveToRamp);
         this.addAction(waitAction);
@@ -101,6 +111,28 @@ public class RampCycleAction extends KActionSet {
         return tripToShoot;
     }
 
+    @Override
+    protected void beforeUpdate() {
+        super.beforeUpdate();
 
+        KLog.d("RampCycle", String.format("[%s] Status - MoveToRamp: %s, Intake: %s, ShooterRun: %s, TripToShoot: %s",
+                getName() != null ? getName() : "unnamed",
+                moveToRamp.getIsDone() ? "DONE" : "NOT DONE",
+                intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
+                shooterRun.getIsDone() ? "DONE" : "NOT DONE",
+                tripToShoot.getIsDone() ? "DONE" : "NOT DONE"));
+        KLog.d("RampCycle", String.format("[%s] MoveToRamp isWithinRange=%b",
+                getName() != null ? getName() : "unnamed",
+                moveToRamp.isWithinRange()));
+    }
+
+    @Override
+    public void afterUpdate() {
+        if (moveToRamp.getIsDone()) {
+            intakeFullAction.setIsDone(true);
+            KLog.d("RampCycle", String.format("[%s] IntakeFullAction stopped by MoveToRamp completion",
+                    getName() != null ? getName() : "unnamed"));
+        }
+    }
 
 }
