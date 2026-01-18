@@ -51,6 +51,10 @@ public class RampCycleAction extends KActionSet {
 
         moveToRamp = new PurePursuitAction(driveTrain);
         moveToRamp.setName("rampCycleTrip1");
+        moveToRamp.setPathAngleTolerance(10);
+        moveToRamp.setFinalSearchRadius(100);
+        moveToRamp.setFinalAngleLockingThresholdDegree(10);
+        moveToRamp.setMaxTimeOutMS(3000);
         this.addAction(moveToRamp);
 
         tripToShoot = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,targetPoint, launchPos, 500);
@@ -58,6 +62,8 @@ public class RampCycleAction extends KActionSet {
         tripToShoot.getMoveToBall().clearPoints();
         tripToShoot.getMoveToBall().setFinalSearchRadius(200);
         tripToShoot.getMoveToBall().setMaxTimeOutMS(4000);
+        tripToShoot.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
+        tripToShoot.getMoveToBall().setPathAngleTolerance(50);
         this.addAction(tripToShoot);
     }
 

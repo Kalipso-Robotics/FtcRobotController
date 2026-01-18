@@ -29,11 +29,17 @@ public class RedAutoNear extends KOpMode {
     final double FIRST_SHOOT_Y = 441.38;
     final double SHOOT_NEAR_X = 2000; //2400
     final double SHOOT_NEAR_Y = 100; //300
-    final double FINAL_SHOOT_NEAR_X = 2350; //2400
-    final double FINAL_SHOOT_NEAR_Y = 25; //300
+    final double FINAL_SHOOT_NEAR_X = 2325; //2400
+    final double FINAL_SHOOT_NEAR_Y = 75; //300
     final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300
     Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX() - 141.4213562373, Shooter.TARGET_POINT.getY() - 141.4213562373);
+
+    //No polarity here because multiplied externally
+    Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y);
+    Point firstShootPoint = new Point(FIRST_SHOOT_X, FIRST_SHOOT_Y);
+    Point lastTripLaunchPoint = new Point(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y);
+    Point thirdShootPoint = new Point(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y);
 
     public DriveTrain driveTrain;
     Shooter shooter = null;
@@ -91,10 +97,7 @@ public class RedAutoNear extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        //No polarity here because multiplied externally
-        Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y);
-        Point firstShootPoint = new Point(FIRST_SHOOT_X, FIRST_SHOOT_Y);
-        Point lastTripLaunchPoint = new Point(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y);
+
 
 
         SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
@@ -125,7 +128,7 @@ public class RedAutoNear extends KOpMode {
         trip1.getMoveToBall().addPoint(1950, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
         trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , 0);
-        trip1.getMoveToBall().addPoint(1725, 1075 * allianceColor.getPolarity(), 0);
+        trip1.getMoveToBall().addPoint(1725, 1125 * allianceColor.getPolarity(), 0);
         trip1.getMoveToBall().addPoint(1725, 850 * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
         // move to shoot
         trip1.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
@@ -142,12 +145,12 @@ public class RedAutoNear extends KOpMode {
         trip2.setName("trip2");
         trip2.getMoveToBall().clearPoints();
 
-        trip2.getMoveToBall().addPoint(1250, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(1250, 960 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1350, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1350, 960 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        trip2.getMoveToBall().addPoint(1600, 1040 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1700, 1040 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to launch
-        trip2.getMoveToBall().addPoint(1500, (nearLaunchPoint.getY()) * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        //trip2.getMoveToBall().addPoint(1500, (nearLaunchPoint.getY()) * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip2.setDependentActions(trip1);
         trip2.setShouldShooterStop(false);
@@ -158,9 +161,7 @@ public class RedAutoNear extends KOpMode {
 
         // ----------------- TRIP 3 (Tunnel) ----------------------
 
-        trip3 = generateTunnelTrip("trip4", nearLaunchPoint);
-        trip3.setDependentActions(trip2);
-        redAutoNear.addAction(trip3);
+        handleTrip3();
 
         // ----------------- TRIP 4  (3rd Spike) ----------------------
 
@@ -204,6 +205,12 @@ public class RedAutoNear extends KOpMode {
             KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         cleanupRobot();
+    }
+
+    public void handleTrip3() {
+        trip3 = generateTunnelTrip("trip4", nearLaunchPoint);
+        trip3.setDependentActions(trip2);
+        redAutoNear.addAction(trip3);
     }
 
     public void handleTrip4() {
