@@ -31,13 +31,14 @@ public class TurretReady extends Action {
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {
             KLog.d(this.getName(), "Turret TIMEOUT in " + maxTimeoutMS + " ms");
-            KLog.d("ActionTime", this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
+            KLog.d("ActionTime", this.getName() + " timeout in " + timeoutTimer.milliseconds() + " ms");
             isDone = true;
             return;
         }
 
         if (turretAutoAlign.isWithinRange()) {
             isDone = true;
+            KLog.d("ActionTime", this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
             KLog.d(this.getName(), "Turret took " + timeoutTimer.milliseconds() + " milliseconds");
             KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlign.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlign.getTargetTicks());
