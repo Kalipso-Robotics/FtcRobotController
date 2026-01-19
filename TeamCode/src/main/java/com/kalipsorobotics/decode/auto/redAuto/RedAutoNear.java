@@ -243,7 +243,7 @@ public class RedAutoNear extends KOpMode {
     }
 
     public RampCycleAction generateTunnelTrip(String name, Point shootPoint) {
-        RampCycleAction tunnelTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), shootPoint.multiplyY(allianceColor.getPolarity()), 0, 1000);
+        RampCycleAction tunnelTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), shootPoint.multiplyY(allianceColor.getPolarity()), 0, 800);
         tunnelTrip.setName(name);
         tunnelTrip.getTripToShoot().getMoveToBall().clearPoints();
         tunnelTrip.getMoveToRamp().clearPoints();
@@ -251,7 +251,8 @@ public class RedAutoNear extends KOpMode {
         tunnelTrip.getMoveToRamp().addPoint(1669, 1070 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to tunnel
 //        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(1450, 1169 * allianceColor.getPolarity(), 140 * allianceColor.getPolarity());
-        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(1400, 1085 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(1400, 1025 * allianceColor.getPolarity(), 120 * allianceColor.getPolarity());
+        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(1300, 1085 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         tunnelTrip.getTripToShoot().getMoveToBall().addPoint(975, 1225 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to shoot
         tunnelTrip.getTripToShoot().getMoveToBall().addPoint(shootPoint.getX(), shootPoint.multiplyY(allianceColor.getPolarity()).getY(), 150 * allianceColor.getPolarity());
