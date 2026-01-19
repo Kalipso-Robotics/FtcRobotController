@@ -346,7 +346,7 @@ public class  PurePursuitAction extends Action {
             if ((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
                 KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
-                if (timeoutTimer.milliseconds() > 1000) {
+                if (timeoutTimer.milliseconds() > 250) {
                     path.incrementCurrentSearchWayPointIndex();
                     KLog.d("purepursuit", "unstucking incrementing to next way point");
 

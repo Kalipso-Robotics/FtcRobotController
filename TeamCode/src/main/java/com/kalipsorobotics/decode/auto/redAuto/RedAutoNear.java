@@ -28,7 +28,7 @@ public class RedAutoNear extends KOpMode {
     KActionSet redAutoNear;
     final double FIRST_SHOOT_X = 2598;
     final double FIRST_SHOOT_Y = 441.38;
-    final double SHOOT_NEAR_X = 2000; //2400
+    final double SHOOT_NEAR_X = 2050; //2400
     final double SHOOT_NEAR_Y = 100; //300
     final double FINAL_SHOOT_NEAR_X = 2325; //2400
     final double FINAL_SHOOT_NEAR_Y = 75; //300
@@ -49,7 +49,7 @@ public class RedAutoNear extends KOpMode {
     Turret turret = null;
     TurretAutoAlign turretAutoAlign = null;
     RoundTripAction trip1 = null;
-    RoundTripAction trip4 = null;
+    RampCycleAction trip4 = null;
     RoundTripAction trip2 = null;
     RampCycleAction trip3 = null;
 
@@ -127,14 +127,14 @@ public class RedAutoNear extends KOpMode {
         trip1.getMoveToBall().addPoint(1950, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(1950, 650 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
-        trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , 0);
-        trip1.getMoveToBall().addPoint(1725, 1125 * allianceColor.getPolarity(), 0);
+        trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , -10);
+        trip1.getMoveToBall().addPoint(1725, 1060 * allianceColor.getPolarity(), -10);
         trip1.getMoveToBall().addPoint(1725, 850 * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
         // move to shoot
         trip1.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
         trip1.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         trip1.setShouldShooterStop(false);
-        trip1.getMoveToBall().setFinalSearchRadius(300);
+        trip1.getMoveToBall().setFinalSearchRadius(200);
         trip1.getMoveToBall().setWithinRangeRadiusMM(300);
         trip1.setDependentActions(trip0);
         redAutoNear.addAction(trip1);
@@ -148,7 +148,7 @@ public class RedAutoNear extends KOpMode {
         trip2.getMoveToBall().addPoint(1350, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(1350, 960 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        trip2.getMoveToBall().addPoint(1700, 1040 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(1700, 1060 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to launch
         //trip2.getMoveToBall().addPoint(1500, (nearLaunchPoint.getY()) * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
@@ -171,7 +171,7 @@ public class RedAutoNear extends KOpMode {
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
         park.setDependentActions(trip4);
-        park.addPoint(1800, 200 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        park.addPoint(1725, 250 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         redAutoNear.addAction(park);
 
 //        RampCycleAction trip5 = generateTunnelTrip("trip5", lastTripLaunchPoint);
@@ -217,45 +217,51 @@ public class RedAutoNear extends KOpMode {
     }
 
     public void handleTrip4() {
-        trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 0);
-        trip4.setName("trip4");
+        // --------------- 3RD SPIKE REGULAR TRIP
+//        trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 0);
+//        trip4.setName("trip4");
+//        trip4.setDependentActions(trip3);
+//        trip4.getMoveToBall().clearPoints();
+//        // move to intake
+//        trip4.getMoveToBall().addPoint(800, 275 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+//
+//        // move to launch
+////        secondSpike.getMoveToBall().addPoint(1500, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+//        // park
+//        trip4.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
+//        trip4.setShouldShooterStop(false);
+//        trip4.getMoveToBall().setFinalSearchRadius(300);
+//        trip4.getMoveToBall().setWithinRangeRadiusMM(300);
+//        redAutoNear.addAction(trip4);
+
+        trip4 = generateTunnelTrip("trip4", nearLaunchPoint);
         trip4.setDependentActions(trip3);
-        trip4.getMoveToBall().clearPoints();
-        // move to intake
-        trip4.getMoveToBall().addPoint(800, 275 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
-        // move to launch
-//        secondSpike.getMoveToBall().addPoint(1500, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
-        // park
-        trip4.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
-        trip4.setShouldShooterStop(false);
-        trip4.getMoveToBall().setFinalSearchRadius(300);
-        trip4.getMoveToBall().setWithinRangeRadiusMM(300);
         redAutoNear.addAction(trip4);
     }
 
     public RampCycleAction generateTunnelTrip(String name, Point shootPoint) {
-        RampCycleAction tunnelTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), shootPoint.multiplyY(allianceColor.getPolarity()), 0, 750);
+        RampCycleAction tunnelTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), shootPoint.multiplyY(allianceColor.getPolarity()), 0, 1000);
         tunnelTrip.setName(name);
         tunnelTrip.getTripToShoot().getMoveToBall().clearPoints();
         tunnelTrip.getMoveToRamp().clearPoints();
         // hit lever
-        tunnelTrip.getMoveToRamp().addPoint(1500, SHOOT_NEAR_Y * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
-        tunnelTrip.getMoveToRamp().addPoint(1669, 1040 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+        tunnelTrip.getMoveToRamp().addPoint(1669, 1070 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to tunnel
-        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(1401, 1169 * allianceColor.getPolarity(), 110 * allianceColor.getPolarity());
-        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(975, 1309 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
+//        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(1450, 1169 * allianceColor.getPolarity(), 140 * allianceColor.getPolarity());
+        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(1400, 1085 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        tunnelTrip.getTripToShoot().getMoveToBall().addPoint(975, 1225 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to shoot
         tunnelTrip.getTripToShoot().getMoveToBall().addPoint(shootPoint.getX(), shootPoint.multiplyY(allianceColor.getPolarity()).getY(), 150 * allianceColor.getPolarity());
 
         tunnelTrip.getMoveToRamp().setMaxTimeOutMS(2000);
-        tunnelTrip.getMoveToRamp().setPathAngleTolerance(15);
         tunnelTrip.getMoveToRamp().setFinalSearchRadius(150);
         tunnelTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(20);
 
         tunnelTrip.getTripToShoot().setShouldShooterStop(false);
+        tunnelTrip.getTripToShoot().getMoveToBall().setMaxTimeOutMS(6000);
         tunnelTrip.getTripToShoot().getMoveToBall().setWithinRangeRadiusMM(300);
         tunnelTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDegree(45);
 

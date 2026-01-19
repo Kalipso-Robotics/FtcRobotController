@@ -125,7 +125,7 @@ public class RedAutoDepot extends KOpMode {
         trip2.getTrip().getMoveToBall().addPoint(250,  1140 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         // retry
-        trip2.getTrip().getMoveToBall().addPoint(15,  1140 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(10,  1140 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 //        trip2.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         trip2.getTrip().getMoveToBall().setFinalSearchRadius(150);
@@ -225,16 +225,16 @@ public class RedAutoDepot extends KOpMode {
 //        retryTrip.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         if (sweepIn) {
-            retryTrip.getTrip().getMoveToBall().addPoint(325, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+            retryTrip.getTrip().getMoveToBall().addPoint(325, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
             // retry
             retryTrip.getTrip().getMoveToBall().addPoint(45, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-            retryTrip.getTrip().getMoveToBall().addPoint(45, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+            retryTrip.getTrip().getMoveToBall().addPoint(45, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         } else {
-            retryTrip.getTrip().getMoveToBall().addPoint(45, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+            retryTrip.getTrip().getMoveToBall().addPoint(45, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
             retryTrip.getTrip().getMoveToBall().addPoint(325, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
             // retry
-            retryTrip.getTrip().getMoveToBall().addPoint(325, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+            retryTrip.getTrip().getMoveToBall().addPoint(325, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         }
 
         retryTrip.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
