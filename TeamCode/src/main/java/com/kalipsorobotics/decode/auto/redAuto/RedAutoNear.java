@@ -23,7 +23,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "RedAutoNearSolo")
+@Autonomous
 public class RedAutoNear extends KOpMode {
     KActionSet redAutoNear;
     final double FIRST_SHOOT_X = 2598;
@@ -60,7 +60,6 @@ public class RedAutoNear extends KOpMode {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = (int) -Math.round((TurretConfig.TICKS_PER_ROTATION * TurretConfig.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
-
     }
 
     @Override

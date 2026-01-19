@@ -5,14 +5,14 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class TurretReadyLimelight extends Action {
+public class TurretReady extends Action {
     private final double maxTimeoutMS;
     private final ElapsedTime timeoutTimer;
-    private static final double DEFAULT_MAX_TIMOUT_MS = 4000;
+    private static final double DEFAULT_MAX_TIME_OUT_MS = 4000;
     private final TurretAutoAlignTeleOp turretAutoAlignTeleop;
-    public TurretReadyLimelight(TurretAutoAlignTeleOp turretAutoAlignTeleop) {
+    public TurretReady(TurretAutoAlignTeleOp turretAutoAlignTeleop) {
         this.turretAutoAlignTeleop = turretAutoAlignTeleop;
-        this.maxTimeoutMS = DEFAULT_MAX_TIMOUT_MS;
+        this.maxTimeoutMS = DEFAULT_MAX_TIME_OUT_MS;
         timeoutTimer = new ElapsedTime();
     }
 

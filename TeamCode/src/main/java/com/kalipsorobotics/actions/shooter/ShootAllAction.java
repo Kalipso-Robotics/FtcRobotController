@@ -5,7 +5,7 @@ import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import com.kalipsorobotics.actions.turret.TurretReadyLimelight;
+import com.kalipsorobotics.actions.turret.TurretReady;
 import com.kalipsorobotics.actions.turret.TurretStop;
 import com.kalipsorobotics.localization.ResetOdometryToPosition;
 import com.kalipsorobotics.modules.DriveBrake;
@@ -14,7 +14,6 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
-import com.kalipsorobotics.test.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
 
 
@@ -37,7 +36,7 @@ public class ShootAllAction extends KActionSet {
 
     private PushBall pushBall;
 
-    private TurretReadyLimelight turretReadyLimelight;
+    private TurretReady turretReady;
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos) {
         this.stopper = stopper;
@@ -54,7 +53,7 @@ public class ShootAllAction extends KActionSet {
         shooterRun.setTargetRPS(targetRPS);
         shooterRun.setTargetHoodPosition(targetHoodPos);
 
-        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignTeleop);
+        generateBasicAction(shooterRun, stopper, intake, turretAutoAlignTeleop);
     }
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
@@ -69,7 +68,7 @@ public class ShootAllAction extends KActionSet {
         shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
 
 
-        generateBasicAction(shooterRun, stopper, intake, shooter, turretAutoAlignTeleop);
+        generateBasicAction(shooterRun, stopper, intake, turretAutoAlignTeleop);
     }
 
     public ShooterRun getShooterRun() {
@@ -82,7 +81,7 @@ public class ShootAllAction extends KActionSet {
 
 
 
-    private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, Shooter shooter, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
+    private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
 
         ActivateBraking activateBraking = new ActivateBraking(driveBrake);
         activateBraking.setName("ActivateBraking");
@@ -92,13 +91,13 @@ public class ShootAllAction extends KActionSet {
         shooterReady.setName("ready");
         this.addAction(shooterReady);
 
-        turretReadyLimelight = new TurretReadyLimelight(turretAutoAlignTeleop);
-        turretReadyLimelight.setName("turretReady");
-        this.addAction(turretReadyLimelight);
+        turretReady = new TurretReady(turretAutoAlignTeleop);
+        turretReady.setName("turretReady");
+        this.addAction(turretReady);
 
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("pushAllBalls");
-        pushBall.setDependentActions(shooterReady, turretReadyLimelight);
+        pushBall.setDependentActions(shooterReady, turretReady);
 //        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(1000);
         this.addAction(pushBall);
 
@@ -135,7 +134,7 @@ public class ShootAllAction extends KActionSet {
     @Override
     public void afterUpdate() {
         if (pushBall.getIsDone()) {
-            double maintainRPSValue = shooterRun.getTargetRPS() * 0.9;
+            double maintainRPSValue = shooterRun.getTargetRPS() * 1;
             shooterRun.setTargetRPS(maintainRPSValue);
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
             KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
@@ -143,6 +142,6 @@ public class ShootAllAction extends KActionSet {
     }
 
     public void setTurretReady(boolean isDone) {
-        turretReadyLimelight.setIsDone(isDone);
+        turretReady.setIsDone(isDone);
     }
 }

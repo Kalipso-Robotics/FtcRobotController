@@ -46,7 +46,6 @@ public class TurretAutoAlignTeleOp extends Action {
     private final ElapsedTime velocityTimer;
     private boolean isFirstVelocityUpdate;
     private final Position lastOdometryPos;
-
     private int ticksOffset = 0;
     private double prevTargetTicks;
     private boolean shouldReadLimelight = false;

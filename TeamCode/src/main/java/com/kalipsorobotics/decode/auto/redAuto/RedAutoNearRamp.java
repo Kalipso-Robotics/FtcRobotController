@@ -23,7 +23,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "RedAutoNear")
+@Autonomous
 public class RedAutoNearRamp extends KOpMode {
     KActionSet redAutoNear;
     final double FIRST_SHOOT_X = 2598;
