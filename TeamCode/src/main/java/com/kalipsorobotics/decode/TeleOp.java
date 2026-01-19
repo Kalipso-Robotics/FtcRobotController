@@ -229,7 +229,7 @@ public class TeleOp extends KOpMode {
             updateActions();
 
             telemetry.addLine("Target Rps " + shooterRun.getTargetRPS() + " Target Hood " + shooterRun.getTargetHoodPosition());
-            telemetry.addData("Distance to Goal", shooterRun.getDistanceMM());
+            telemetry.addData("Distance to April Tag", SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM());
             telemetry.addData("Rps Offset", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset", "%.2f", ShooterInterpolationConfig.hoodOffset);
             KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());

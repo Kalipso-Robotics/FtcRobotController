@@ -99,7 +99,6 @@ public class RampCycleAction extends KActionSet {
         waitAction.setName("waitForIntake");
         waitAction.setDependentActions(moveToRamp);
         this.addAction(waitAction);
-        // how does this wait do anything? -darren
 
         tripToShoot.setDependentActions(waitAction);
 

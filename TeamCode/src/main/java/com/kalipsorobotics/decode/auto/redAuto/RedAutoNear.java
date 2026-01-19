@@ -125,7 +125,7 @@ public class RedAutoNear extends KOpMode {
         trip1.setName("trip1");
         trip1.getMoveToBall().clearPoints();
         trip1.getMoveToBall().addPoint(1950, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1950, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
+        trip1.getMoveToBall().addPoint(1950, 650 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
         trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , 0);
         trip1.getMoveToBall().addPoint(1725, 1125 * allianceColor.getPolarity(), 0);
@@ -218,11 +218,11 @@ public class RedAutoNear extends KOpMode {
 
     public void handleTrip4() {
         trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 0);
-        trip4.setName("trip3");
+        trip4.setName("trip4");
         trip4.setDependentActions(trip3);
         trip4.getMoveToBall().clearPoints();
         // move to intake
-        trip4.getMoveToBall().addPoint(800, 320 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(800, 275 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         // move to launch
@@ -250,7 +250,7 @@ public class RedAutoNear extends KOpMode {
         // move to shoot
         tunnelTrip.getTripToShoot().getMoveToBall().addPoint(shootPoint.getX(), shootPoint.multiplyY(allianceColor.getPolarity()).getY(), 150 * allianceColor.getPolarity());
 
-        tunnelTrip.getMoveToRamp().setMaxTimeOutMS(2500);
+        tunnelTrip.getMoveToRamp().setMaxTimeOutMS(2000);
         tunnelTrip.getMoveToRamp().setPathAngleTolerance(15);
         tunnelTrip.getMoveToRamp().setFinalSearchRadius(150);
         tunnelTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(20);
