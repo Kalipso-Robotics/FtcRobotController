@@ -24,6 +24,7 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
+import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.test.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
@@ -48,6 +49,7 @@ public class TeleOp extends KOpMode {
 
     ReleaseBraking releaseBraking = null;
     ReleaseBrakeAction releaseBrakeAction = null;
+    PurePursuitAction parkAction = null;
 
     KServoAutoAction openStopper = null;
     KServoAutoAction closeStopper = null;
@@ -80,6 +82,7 @@ public class TeleOp extends KOpMode {
     private boolean kGamepad2IsDpadLeftFirstPressed;
     private boolean kGamepad2IsDpadRightFirstPressed;
     private boolean setTurretOffset0Pressed;
+    private boolean parkButtonPressed;
 
     @Override
     protected void initializeRobotConfig() {
@@ -165,6 +168,11 @@ public class TeleOp extends KOpMode {
             // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
             drivingSticksActive = kGamePad1.isAnyStickActive();
 
+            parkButtonPressed = kGamePad1.isButtonXFirstPressed();
+
+
+
+            //============Driver 2============
             boolean kGamepad2IsDpadUpFirstPressed = kGamePad2.isDpadUpFirstPressed();
             boolean kGamepad2IsDpadDownFirstPressed = kGamePad2.isDpadDownFirstPressed();
 
@@ -220,7 +228,7 @@ public class TeleOp extends KOpMode {
             // ========== UPDATE ACTIONS ==========
             updateActions();
 
-            telemetry.addLine("Target Rps" + shooterRun.getTargetRPS() + " Target Hood" + shooterRun.getTargetHoodPosition());
+            telemetry.addLine("Target Rps " + shooterRun.getTargetRPS() + " Target Hood " + shooterRun.getTargetHoodPosition());
             telemetry.addData("Distance to Goal", shooterRun.getDistanceMM());
             telemetry.addData("Rps Offset", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset", "%.2f", ShooterInterpolationConfig.hoodOffset);
@@ -231,6 +239,15 @@ public class TeleOp extends KOpMode {
         cleanupRobot();
     }
     private void handleDriving() {
+
+        if (parkButtonPressed) {
+            if (parkAction == null || parkAction.getIsDone()) {
+                parkAction = new PurePursuitAction(driveTrain);
+                parkAction.addPoint(639.79, -1238.30 * allianceColor.getPolarity(), 0);
+                setLastMoveAction(parkAction);
+            }
+        }
+
         if (drivingSticksActive) {
             if (releaseBrakeAction == null || releaseBrakeAction.getIsDone()) {
                 releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
@@ -242,7 +259,8 @@ public class TeleOp extends KOpMode {
                 setLastStopperAction(closeStopper);
             }
             driveAction.move(gamepad1);
-        } else {
+            setLastMoveAction(null);
+        } else if (parkAction == null || parkAction.getIsDone()){
             driveTrain.setPower(0);
         }
     }

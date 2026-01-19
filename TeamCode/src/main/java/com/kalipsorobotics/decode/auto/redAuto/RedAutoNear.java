@@ -16,6 +16,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -167,9 +168,12 @@ public class RedAutoNear extends KOpMode {
 
         handleTrip4();
 
-        // ----------------- TRIP 5 (Lever + Tunnel) ----------------------
+        // ----------------- TRIP 5 (park) ----------------------
 
-
+        PurePursuitAction park = new PurePursuitAction(driveTrain);
+        park.setDependentActions(trip4);
+        park.addPoint(1800, 200 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        redAutoNear.addAction(park);
 
 //        RampCycleAction trip5 = generateTunnelTrip("trip5", lastTripLaunchPoint);
 //        trip5.setDependentActions(trip4);
@@ -224,7 +228,8 @@ public class RedAutoNear extends KOpMode {
         trip4.getMoveToBall().addPoint(800, 950 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         // move to launch
 //        secondSpike.getMoveToBall().addPoint(1500, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        // park
         trip4.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         trip4.setShouldShooterStop(false);
         trip4.getMoveToBall().setFinalSearchRadius(300);

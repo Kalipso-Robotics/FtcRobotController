@@ -167,7 +167,18 @@ public class RedAutoNearRamp extends KOpMode {
 
         handleTrip3();
 
+        // ----------------- TRIP 4 ----------------------
+
         handleTrip4();
+
+        // ----------------- TRIP 5 ----------------------
+
+        PurePursuitAction park = new PurePursuitAction(driveTrain);
+        park.setDependentActions(trip4);
+        park.addPoint(1800, 200 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+        redAutoNear.addAction(park);
+
+
 
         // turretAutoAlign.initBlocking();
 
