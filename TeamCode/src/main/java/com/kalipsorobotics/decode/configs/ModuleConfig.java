@@ -12,6 +12,6 @@ public class ModuleConfig {
     public static final double RELEASE_BRAKE_LEFT_POS = 0.8199;
 
     //========STOPPER========
-    public static final double STOPPER_SERVO_CLOSED_POS = 0.83;
-    public static final double STOPPER_SERVO_OPEN_POS = 0.7;
+    public static final double STOPPER_SERVO_CLOSED_POS = 0.61;
+    public static final double STOPPER_SERVO_OPEN_POS = 0.46;
 }

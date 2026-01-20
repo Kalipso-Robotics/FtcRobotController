@@ -88,7 +88,7 @@ public class ShootAllAction extends KActionSet {
         this.addAction(activateBraking);
 
         shooterReady = new ShooterReady(shooterRun);
-        shooterReady.setName("ready");
+        shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 
         turretReady = new TurretReady(turretAutoAlignTeleop);

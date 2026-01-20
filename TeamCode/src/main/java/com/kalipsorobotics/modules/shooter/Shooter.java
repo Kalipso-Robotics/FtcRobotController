@@ -54,8 +54,8 @@ public class Shooter {
         motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        shooter1 = new KMotor(motor1, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
-        shooter2 = new KMotor(motor2, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
+        shooter1 = new KMotor(motor1, ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+        shooter2 = new KMotor(motor2, ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
         this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, -1, false);
 
@@ -149,12 +149,34 @@ public class Shooter {
     public void goToRPS(double targetRPS) {
         this.targetRPS = targetRPS;
         // Get optimal kF for this target RPS
-        double optimalKf = ShooterConfig.kf;
+        double optimalKf = ShooterConfig.kf_accel;
         // Update kF in both motors' PIDF controllers
         shooter1.getPIDFController().setKf(optimalKf);
         shooter2.getPIDFController().setKf(optimalKf);
 
         currentRPS = getRPS();
+
+        double error = targetRPS - currentRPS;
+
+        if (error < 0) {
+            KLog.d("Shooter", "Switching PID controller for shooter to decel, currentRPS: " + currentRPS + ", targetRPS: " + targetRPS);
+            shooter1.getPIDFController().setKp(ShooterConfig.kp_decel);
+            shooter1.getPIDFController().setKi(ShooterConfig.ki_decel);
+            shooter1.getPIDFController().setKd(ShooterConfig.kd_decel);
+
+            shooter2.getPIDFController().setKp(ShooterConfig.kp_decel);
+            shooter2.getPIDFController().setKi(ShooterConfig.ki_decel);
+            shooter2.getPIDFController().setKd(ShooterConfig.kd_decel);
+        } else {
+            KLog.d("Shooter", "Switching PID controller for shooter to accel, currentRPS: " + currentRPS + ", targetRPS: " + targetRPS);
+            shooter1.getPIDFController().setKp(ShooterConfig.kp_accel);
+            shooter1.getPIDFController().setKi(ShooterConfig.ki_accel);
+            shooter1.getPIDFController().setKd(ShooterConfig.kd_accel);
+
+            shooter2.getPIDFController().setKp(ShooterConfig.kp_accel);
+            shooter2.getPIDFController().setKi(ShooterConfig.ki_accel);
+            shooter2.getPIDFController().setKd(ShooterConfig.kd_accel);
+        }
 
         // Set target RPS
         shooter1.goToRPS(targetRPS);

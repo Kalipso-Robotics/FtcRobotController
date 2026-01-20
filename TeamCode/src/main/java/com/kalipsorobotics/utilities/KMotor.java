@@ -1,6 +1,7 @@
 package com.kalipsorobotics.utilities;
 
 import com.kalipsorobotics.PID.PIDFController;
+import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.math.CalculateTickPer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -107,8 +108,6 @@ public class KMotor {
         // Get current RPS
         double currentRPS = getRPS();
 
-        // Calculate PIDF output with saturation limits
-        // Back-calculation anti-windup is applied internally
         double newPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
 
         // Set new power

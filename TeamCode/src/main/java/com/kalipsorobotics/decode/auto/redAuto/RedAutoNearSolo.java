@@ -4,7 +4,6 @@ package com.kalipsorobotics.decode.auto.redAuto;
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;
-import com.kalipsorobotics.actions.autoActions.pathActions.RampCycleAction;
 import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
 import com.kalipsorobotics.cameraVision.AllianceColor;
@@ -24,8 +23,8 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name="RedAutoSolo")
-public class RedAutoSolo extends KOpMode {
+@Autonomous
+public class RedAutoNearSolo extends KOpMode {
 
 
     KActionSet redAutoNear;
@@ -183,7 +182,7 @@ public class RedAutoSolo extends KOpMode {
         //----------------- TRIP 6 (park) ---------------------
 
         PurePursuitAction park = new PurePursuitAction(driveTrain);
-        park.setDependentActions(trip4);
+        park.setDependentActions(trip5);
         park.addPoint(1725, 250 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         redAutoNear.addAction(park);
 
