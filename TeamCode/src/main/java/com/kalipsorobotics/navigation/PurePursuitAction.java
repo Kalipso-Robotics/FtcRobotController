@@ -359,6 +359,7 @@ public class  PurePursuitAction extends Action {
 //                        path.incrementCurrentSearchWayPointIndex();
 //                        KLog.d("purepursuit", "unstucking incrementing to next way point");
 //                    }
+                    timeoutTimer.reset();
                 } else {
                     KLog.d("purepursuit", "Waiting for velocity timeout");
                 }
