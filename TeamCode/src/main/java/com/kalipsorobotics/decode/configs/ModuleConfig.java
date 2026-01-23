@@ -12,6 +12,6 @@ public class ModuleConfig {
     public static final double ACTIVATE_BRAKE_POS = 0.65;
 
     //========STOPPER========
-    public static final double STOPPER_SERVO_CLOSED_POS = 0.61;
-    public static final double STOPPER_SERVO_OPEN_POS = 0.46;
+    public static final double STOPPER_SERVO_CLOSED_POS = 0.88;
+    public static final double STOPPER_SERVO_OPEN_POS = 0.74;
 }
