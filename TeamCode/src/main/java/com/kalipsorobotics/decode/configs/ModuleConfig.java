@@ -8,8 +8,8 @@ public class ModuleConfig {
 
 
     //========BRAKE========
-    public static final double RELEASE_BRAKE_RIGHT_POS = 0.7095;
-    public static final double RELEASE_BRAKE_LEFT_POS = 0.8199;
+    public static final double RELEASE_BRAKE_POS = 0.40;
+    public static final double ACTIVATE_BRAKE_POS = 0.65;
 
     //========STOPPER========
     public static final double STOPPER_SERVO_CLOSED_POS = 0.61;

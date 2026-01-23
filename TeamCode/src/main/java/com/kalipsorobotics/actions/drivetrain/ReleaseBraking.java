@@ -18,8 +18,7 @@ public class ReleaseBraking extends Action {
         if (isDone) {
             return;
         }
-        driveBrake.getBrakeLeft().setTargetPosition(RELEASE_BRAKE_LEFT_POS);
-        driveBrake.getBrakeRight().setTargetPosition(RELEASE_BRAKE_RIGHT_POS);
+        driveBrake.getBrake().setTargetPosition(RELEASE_BRAKE_POS);
         isDone = true;
     }
 }
