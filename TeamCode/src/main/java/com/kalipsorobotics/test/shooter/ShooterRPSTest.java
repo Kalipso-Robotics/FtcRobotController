@@ -90,17 +90,17 @@ public class ShooterRPSTest extends LinearOpMode {
         telemetry.addData("Est. Time", "%d min", estimatedTimeMinutes);
         telemetry.addLine();
         telemetry.addLine("Current PID Values:");
-        telemetry.addData("Kp", "%.6f", ShooterConfig.kp_accel);
-        telemetry.addData("Ki", "%.6f", ShooterConfig.ki_accel);
-        telemetry.addData("Kd", "%.6f", ShooterConfig.kd_accel);
-        telemetry.addData("Kf", "%.6f", ShooterConfig.kf_accel);
+        telemetry.addData("Kp", "%.6f", ShooterConfig.kp);
+        telemetry.addData("Ki", "%.6f", ShooterConfig.ki);
+        telemetry.addData("Kd", "%.6f", ShooterConfig.kd);
+        telemetry.addData("Kf", "%.6f", ShooterConfig.kf);
         telemetry.addLine();
         telemetry.addLine("Press PLAY to start test");
         telemetry.update();
 
         KLog.d("ShooterRPSTest", "Starting shooter test");
         KLog.d("ShooterRPSTest", String.format("PID: kp=%.6f, ki=%.6f, kd=%.6f, kf=%.6f",
-            ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel));
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf));
 
         waitForStart();
 
@@ -153,7 +153,7 @@ public class ShooterRPSTest extends LinearOpMode {
             if (result != null) {
                 String line = String.format("%.1f,%.0f,%.2f,%.2f,%.2f,%.6f,%.6f,%.6f,%.6f",
                     targetRPS, result.rampUpTimeMs, result.minRPS, result.maxRPS, result.avgRPS,
-                    ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+                    ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
                 fileWriter.writeLine(line);
 
                 // Display results
@@ -392,7 +392,7 @@ public class ShooterRPSTest extends LinearOpMode {
         motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter1 = new KMotor(motor1,
-            ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         // Initialize shooter2
         DcMotor motor2 = hardwareMap.dcMotor.get("shooter2");
@@ -402,7 +402,7 @@ public class ShooterRPSTest extends LinearOpMode {
         motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter2 = new KMotor(motor2,
-            ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         KLog.d("ShooterRPSTest", "Motors initialized successfully");
     }

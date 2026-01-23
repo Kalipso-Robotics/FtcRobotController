@@ -137,10 +137,10 @@ public class PIDIterativeLearning extends LinearOpMode {
         fileWriter.writeLine("Iteration,targetRPS,kp,ki,kd,rampUpTime,maxRPS,minRPS,reachedTarget,stalled");
 
         // Initialize PID values from ShooterConfig
-        currentKp = ShooterConfig.kp_accel;
-        currentKi = ShooterConfig.ki_accel;
-        currentKd = ShooterConfig.kd_accel;
-        currentKf = ShooterConfig.kf_accel;
+        currentKp = ShooterConfig.kp;
+        currentKi = ShooterConfig.ki;
+        currentKd = ShooterConfig.kd;
+        currentKf = ShooterConfig.kf;
 
         // Initialize best values
         bestKp = currentKp;
@@ -695,7 +695,7 @@ public class PIDIterativeLearning extends LinearOpMode {
         motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter1 = new KMotor(motor1,
-            ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         // Initialize shooter2
         DcMotor motor2 = hardwareMap.dcMotor.get("shooter2");
@@ -705,7 +705,7 @@ public class PIDIterativeLearning extends LinearOpMode {
         motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter2 = new KMotor(motor2,
-            ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         KLog.d("PIDIterativeLearning", "Motors initialized successfully");
     }

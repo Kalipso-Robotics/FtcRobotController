@@ -404,7 +404,7 @@ public class KPTuning extends LinearOpMode {
         motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter1 = new KMotor(motor1,
-            ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         // Initialize shooter2
         DcMotor motor2 = hardwareMap.dcMotor.get("shooter2");
@@ -414,7 +414,7 @@ public class KPTuning extends LinearOpMode {
         motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         shooter2 = new KMotor(motor2,
-            ShooterConfig.kp_accel, ShooterConfig.ki_accel, ShooterConfig.kd_accel, ShooterConfig.kf_accel);
+            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
         KLog.d("KPTuning", "Motors initialized successfully");
     }
