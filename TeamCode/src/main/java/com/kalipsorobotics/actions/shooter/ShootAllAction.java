@@ -83,9 +83,9 @@ public class ShootAllAction extends KActionSet {
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
 
-        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
-        activateBraking.setName("ActivateBraking");
-        this.addAction(activateBraking);
+//        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
+//        activateBraking.setName("ActivateBraking");
+//        this.addAction(activateBraking);
 
         shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
@@ -112,10 +112,10 @@ public class ShootAllAction extends KActionSet {
         resetOdometryToPosition.setDependentActions(turretStop);
         this.addAction(resetOdometryToPosition);
 
-        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
-        releaseBraking.setName("ReleaseBraking");
-        releaseBraking.setDependentActions(pushBall);
-        this.addAction(releaseBraking);
+//        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
+//        releaseBraking.setName("ReleaseBraking");
+//        releaseBraking.setDependentActions(pushBall);
+//        this.addAction(releaseBraking);
 
     }
 
