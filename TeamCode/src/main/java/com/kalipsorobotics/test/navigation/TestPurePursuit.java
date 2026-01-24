@@ -7,11 +7,13 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Disabled
 @TeleOp
 public class TestPurePursuit extends KOpMode {
 

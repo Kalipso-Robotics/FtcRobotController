@@ -12,12 +12,14 @@ import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Disabled
 @TeleOp
 public class OdometryEncoderCalcTest extends LinearOpMode {
 

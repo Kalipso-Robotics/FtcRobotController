@@ -4,10 +4,12 @@ import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
+@Disabled
 @TeleOp
 public class BrakeServoTest extends LinearOpMode {
 

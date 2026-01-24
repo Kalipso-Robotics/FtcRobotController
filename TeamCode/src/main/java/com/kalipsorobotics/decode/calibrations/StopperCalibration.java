@@ -4,6 +4,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp

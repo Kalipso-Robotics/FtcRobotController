@@ -6,6 +6,7 @@ import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,6 +27,7 @@ import java.util.Collections;
  * IMPORTANT: The starting position when program runs is treated as 0 degrees.
  * The turret will only move ±180 degrees from that starting position.
  */
+@Disabled
 @TeleOp(name = "Turret Data Collector", group = "Test")
 public class TurretDataCollector extends LinearOpMode {
 

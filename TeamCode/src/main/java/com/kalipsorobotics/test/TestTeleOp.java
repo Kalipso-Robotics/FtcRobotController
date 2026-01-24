@@ -10,9 +10,11 @@ import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
+@Disabled
 @TeleOp
 public class TestTeleOp extends KOpMode {
 

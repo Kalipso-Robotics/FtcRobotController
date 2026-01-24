@@ -16,6 +16,7 @@ import com.kalipsorobotics.utilities.KFileWriter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -51,6 +52,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
  * - Hood Position
  * - Distance to target (MM)
  */
+@Disabled
 @TeleOp(name = "RPS Prediction Data Collector", group = "Test")
 public class RPSPredictionDataCollector extends LinearOpMode {
 

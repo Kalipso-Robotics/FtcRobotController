@@ -17,8 +17,10 @@ import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 
+@Disabled
 @Autonomous
 public class TestAutoDrive extends KOpMode {
 

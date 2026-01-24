@@ -7,12 +7,14 @@ import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Disabled
 @TeleOp
 public class OdometryDataCollector extends LinearOpMode {
 

@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class ShooterRun extends Action {
 
     public static final double FAR_TOLERANCE = 0.5;
-    public static final double MIDDLE_TOLERANCE = 0.75;
+    public static final double MIDDLE_TOLERANCE = 0.5;
     public static final double NEAR_TOLERANCE = 0.5;
     private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;

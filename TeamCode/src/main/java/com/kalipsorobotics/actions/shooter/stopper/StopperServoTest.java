@@ -6,11 +6,13 @@ import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
+@Disabled
 @TeleOp
 public class StopperServoTest extends LinearOpMode {
 

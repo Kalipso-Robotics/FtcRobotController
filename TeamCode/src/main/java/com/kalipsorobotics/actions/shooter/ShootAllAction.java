@@ -134,7 +134,7 @@ public class ShootAllAction extends KActionSet {
     @Override
     public void afterUpdate() {
         if (pushBall.getIsDone()) {
-            double maintainRPSValue = shooterRun.getTargetRPS() * 1;
+            double maintainRPSValue = shooterRun.getTargetRPS() * 0.925;
             shooterRun.setTargetRPS(maintainRPSValue);
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
             KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
