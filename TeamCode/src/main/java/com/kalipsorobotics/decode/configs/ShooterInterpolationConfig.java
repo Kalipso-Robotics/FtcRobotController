@@ -11,22 +11,22 @@ public class ShooterInterpolationConfig {
     public static final int FAR_DISTANCE = 2760;
     public static final int NEAR_DISTANCE = 1785;
     public static double[] shooterData = {
-            710, 31.0, MIN_HOOD,
-            890, 31.7, 0.55,
-            1115, 34.6, 0.67, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
-            1320, 35.8, MAX_HOOD,
-            1630, 37.3, MAX_HOOD, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
-            NEAR_DISTANCE, 38.9, MAX_HOOD, //Near Tip Point
+            710, 32.0, MIN_HOOD,
+            890, 33.9, 0.55,
+            1115, 35, 0.67, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
+            1320, 36.2, MAX_HOOD,
+            1630, 37.5, MAX_HOOD, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
+            NEAR_DISTANCE, 39.1, MAX_HOOD, //Near Tip Point
             1920, 39.8, MAX_HOOD,
             2050, 40.7, MAX_HOOD,
             2200, 41.7, MAX_HOOD, // 41.0
             2400, 41.9, MAX_HOOD,
             2570, 45.2, MAX_HOOD,
-            FAR_DISTANCE, 45.9, MAX_HOOD, // TIP AREA DON'T TOUCH, far shoot
-            2965, 47.6, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH. far shoot
-            3095, 48.2, MAX_HOOD, // FAR SHOOT, first shoot ( 0 , 0 )
-            3300, 48.8, MAX_HOOD,
-            3500, 49.5, MAX_HOOD,
+            FAR_DISTANCE, 45.7, MAX_HOOD, // TIP AREA DON'T TOUCH, far shoot
+            2965, 47.4, MAX_HOOD, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH. far shoot
+            3095, 48.0, MAX_HOOD, // FAR SHOOT, first shoot ( 0 , 0 )
+            3300, 48.6, MAX_HOOD,
+            3500, 49.3, MAX_HOOD,
     };
 
 
