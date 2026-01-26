@@ -11,11 +11,11 @@ public class ShooterInterpolationConfig {
     public static final int FAR_DISTANCE = 2760;
     public static final int NEAR_DISTANCE = 1785;
     public static double[] shooterData = {
-            710, 32.0, MIN_HOOD,
-            890, 33.9, 0.55,
-            1115, 35, 0.67, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
+            710, 33.2, MIN_HOOD,
+            890, 34.3, 0.5,
+            1115, 35, 0.6, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
             1320, 36.2, MAX_HOOD,
-            1630, 37.5, MAX_HOOD, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
+            1630, 37.8, MAX_HOOD, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
             NEAR_DISTANCE, 39.1, MAX_HOOD, //Near Tip Point
             1920, 39.8, MAX_HOOD,
             2050, 40.7, MAX_HOOD,
