@@ -199,16 +199,12 @@ public class ShooterRun extends Action {
 
     private double getCurrentDistanceMM() {
         double distanceMM = -1;
-        if (!SharedData.getLimelightRawPosition().isEmpty()) {
+        distanceMM = getOdometryDistanceMM();
+        KLog.d("ShooterRun_Distance", "ODOMETRY DISTANCE " + distanceMM + " mm");
+        if (useLimelight && !SharedData.getLimelightRawPosition().isEmpty()) {
             distanceMM = getLimelightDistance();
-            KLog.d("ShooterRun_Distance", "LIMELIGHT IN VIEW  " + distanceMM + " mm");
-        } else if (useOdometry){
-            distanceMM = getOdometryDistanceMM();
-            KLog.d("ShooterRun_Distance", "NOT SEEING LIMELIGHT, FALLBACK TO ODOMETRY: " + distanceMM + " mm");
-        } else {
-            KLog.d("ShooterRun_Distance", "Limelight out of view & Odometry turned off, return -1 for distance");
+            KLog.d("ShooterRun_Distance", "OVERRIDING ODOMETRY DISTANCE WITH LIMELIGHT " + distanceMM + " mm");
         }
-
         KLog.d("ShooterRun_Distance", "Final Distance " + distanceMM);
         return distanceMM;
     }
