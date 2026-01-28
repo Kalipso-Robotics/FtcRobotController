@@ -101,15 +101,15 @@ public class ShootAllAction extends KActionSet {
 //        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(1000);
         this.addAction(pushBall);
 
-        TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
-        turretStop.setName("turretStop");
-        turretStop.setDependentActions(pushBall);
-        this.addAction(turretStop);
+//        TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
+//        turretStop.setName("turretStop");
+//        turretStop.setDependentActions(pushBall);
+//        this.addAction(turretStop);
 
 
         ResetOdometryToPosition resetOdometryToPosition = new ResetOdometryToPosition(turret);
         resetOdometryToPosition.setName("resetOdometryToPosition");
-        resetOdometryToPosition.setDependentActions(turretStop);
+        resetOdometryToPosition.setDependentActions(pushBall);
         this.addAction(resetOdometryToPosition);
 
 //        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
