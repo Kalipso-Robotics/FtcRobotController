@@ -30,15 +30,15 @@ import java.util.ArrayList;
  *
  * Output file columns: Power, RPS_MAX, RPS_MIN, RPS_avg, Battery_Voltage
  */
+
 @TeleOp(name = "Motor Power RPS Data Collector", group = "Test")
-@Disabled
 public class MotorPowerRPSDataCollector extends LinearOpMode {
 
     // Test parameters
-    private static final double POWER_START = 0.15;
-    private static final double POWER_END = 0.65;
-    private static final double POWER_INCREMENT = 0.05;
-    private static final long STABILIZATION_TIME_MS = 4000; // 2 seconds
+    private static final double POWER_START = 0.3;
+    private static final double POWER_END = 1;
+    private static final double POWER_INCREMENT = 0.1;
+    private static final long STABILIZATION_TIME_MS = 6000; // 2 seconds
     private static final long DATA_COLLECTION_TIME_MS = 1000; // 1 second
     private static final long SAMPLE_INTERVAL_MS = 10; // Sample every 50ms/
     private KMotor shooter1;
@@ -184,7 +184,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         telemetry.addLine("Pull file using:");
         telemetry.addLine("adb pull /sdcard/Android/data/");
         telemetry.addLine("com.qualcomm.ftcrobotcontroller/");
-        telemetry.addLine("files/OdometryLog/ ~/");
+        telemetry.addLine("files/OdometryLog/ ~/Downloads");
         telemetry.update();
 
         KLog.d("MotorPowerRPSDataCollector", "Data collection complete. File closed.");
