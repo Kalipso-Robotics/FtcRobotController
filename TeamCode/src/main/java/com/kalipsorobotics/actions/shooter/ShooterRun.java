@@ -80,7 +80,7 @@ public class ShooterRun extends Action {
 
     public boolean isWithinRange() {
         //boolean atTarget = shooter.isAtTargetRPS();
-        KLog.d("ShooterRun", "isWithinRange called - Current RPS: " + shooter.getRPS() +
+        KLog.d("ShooterRun", "isWithinRange called. Power: " + shooter.getShooter1().getPower() + " Current RPS: " + shooter.getRPS() +
                 ", Target RPS: " + targetRPS + ", At Within Range: " + isWithinRange);
         return isWithinRange;
     }
