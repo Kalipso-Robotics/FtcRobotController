@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 
 import com.kalipsorobotics.decode.configs.AprilTagConfig;
 import com.kalipsorobotics.decode.configs.ShooterConfig;
+import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -145,8 +146,14 @@ public class ShooterRun extends Action {
         }
         KLog.d("ShooterRun", "Running mode " + shooterRunMode);
 
+        double hoodCompensation = ((targetRPS - shooter.getRPS())) * hoodCompensateCoefficient;
+        hoodCompensation = MathFunctions.clamp(hoodCompensation, minHoodCompensate, maxHoodCompensate);
+        double effectiveTargetHood = targetHoodPosition + hoodCompensation;
+        KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition);
+
+
         // Update hood position
-        shooter.getHood().setPosition(targetHoodPosition);
+        shooter.getHood().setPosition(effectiveTargetHood);
 
         // Use KMotor's goToRPS for automatic PID control
         shooter.goToRPS(targetRPS);

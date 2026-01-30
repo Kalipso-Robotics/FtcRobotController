@@ -1,6 +1,10 @@
 package com.kalipsorobotics.actions.shooter;
 
+import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.hoodHack;
+
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import com.kalipsorobotics.actions.actionUtilities.WaitAction;
 import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
 import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
@@ -98,7 +102,6 @@ public class ShootAllAction extends KActionSet {
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("pushAllBalls");
         pushBall.setDependentActions(shooterReady, turretReady);
-//        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(1000);
         this.addAction(pushBall);
 
 //        TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
