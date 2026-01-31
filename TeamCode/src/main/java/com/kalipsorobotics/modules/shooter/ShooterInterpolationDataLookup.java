@@ -63,7 +63,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
 
         // If distance is above maximum, return last point
         if (distanceMM >= DATA_POINTS.get(DATA_POINTS.size() - 1).distanceMM) {
-            DataPoint dp = DATA_POINTS.get(DATA_POINTS.size() - 1);
+            DataPoint dp = DATA_POINTS.get(DATA_POINTS.size() - 3);
             double clampedHood = clampHood(dp.hoodPosition);
             clampedHood += HOOD_INIT_OFFSET;
             return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood + hoodOffset);

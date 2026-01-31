@@ -1,7 +1,5 @@
 package com.kalipsorobotics.actions.shooter;
 
-import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.hoodHack;
-
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
 import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.kalipsorobotics.actions.actionUtilities.WaitAction;

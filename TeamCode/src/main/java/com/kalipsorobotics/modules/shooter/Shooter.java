@@ -155,6 +155,8 @@ public class Shooter {
         shooter2.getPIDFController().setKf(optimalKf);
         shooter1.getPIDFController().setKp(ShooterConfig.kp);
         shooter2.getPIDFController().setKp(ShooterConfig.kp);
+        shooter1.getPIDFController().setKa(ShooterConfig.kA);
+        shooter2.getPIDFController().setKa(ShooterConfig.kA);
 
         currentRPS = getRPS();
         //asymetric PID

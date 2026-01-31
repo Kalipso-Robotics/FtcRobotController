@@ -18,9 +18,11 @@ public class PIDFController {
     private double kd;
     private double kf;
     private double ks;
+    private double ka;
     private double integralError;
     private double lastError;
     private double lastTime;
+    private double lastTargetRPS = 0;
 
     private final String name;
 
@@ -38,6 +40,7 @@ public class PIDFController {
         kd = D;
         kf = F;
         ks = S;
+        ka = 0;
         integralError = 0;
         lastError = 0;
         lastTime = SystemClock.elapsedRealtimeNanos();
@@ -81,6 +84,7 @@ public class PIDFController {
         double proportional = kp * error;
         double integral = ki * integralError;
         double derivative = kd * (error - lastError) / timeDelta;
+        double accelerate = ka * (target - lastTargetRPS);
 
         // Feedforward component - base output for target velocity
         double feedforward = kf * target;
@@ -89,7 +93,7 @@ public class PIDFController {
         double maxIntegral = Math.abs(feedforward * 0.1);
         integral = Math.max(-maxIntegral, Math.min(maxIntegral, integral));
 
-        double totalRawOutput = proportional + integral + derivative + feedforward;
+        double totalRawOutput = proportional + integral + derivative + feedforward + accelerate;
 
         // Clamp output to valid range
         double clampedOutput = Math.max(minOutput, Math.min(maxOutput, totalRawOutput));
@@ -105,6 +109,7 @@ public class PIDFController {
 
         lastTime = currentTime;
         lastError = error;
+        lastTargetRPS = target;
 
         return clampedOutput;
     }
@@ -179,6 +184,9 @@ public class PIDFController {
 
     public double setKf(double val) {
         return kf = val;
+    }
+    public void setKa(double ka) {
+        this.ka = ka;
     }
 
     public void setKs(double ks) {

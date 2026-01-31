@@ -18,8 +18,6 @@ public class KMotor {
     private double prevTicks = 0;
     private double prevTimeMS;
 
-    private final double prevRPS = 0;
-
     // PIDF controller for RPS control
     private final PIDFController pidfController;
     private double targetRPS = 0;
@@ -102,7 +100,6 @@ public class KMotor {
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
-
         this.targetRPS = targetRPS;
 
         // Get current RPS

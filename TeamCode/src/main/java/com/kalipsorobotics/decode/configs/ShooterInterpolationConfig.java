@@ -1,5 +1,8 @@
 package com.kalipsorobotics.decode.configs;
 
+import static com.kalipsorobotics.decode.configs.ShooterConfig.hoodHack;
+import static com.kalipsorobotics.decode.configs.ShooterConfig.rpsHack;
+
 public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
@@ -10,11 +13,7 @@ public class ShooterInterpolationConfig {
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
     public static final int NEAR_DISTANCE = 1785;
-    public static final double hoodHack = 0.2;
-    public static final double hoodCompensateCoefficient = 0.2;
-    public static final double rpsHack = 1.5;
-    public static final double minHoodCompensate = -0.2;
-    public static final double maxHoodCompensate = 0.2;
+
     public static double[] shooterData = {
             710, 33.2 + rpsHack, MIN_HOOD,
             890, 34.3 + rpsHack, 0.5 - hoodHack,

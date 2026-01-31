@@ -1,5 +1,8 @@
 package com.kalipsorobotics.actions.shooter;
 
+import static com.kalipsorobotics.decode.configs.ShooterConfig.hoodCompensateCoefficient;
+import static com.kalipsorobotics.decode.configs.ShooterConfig.maxHoodCompensate;
+import static com.kalipsorobotics.decode.configs.ShooterConfig.minHoodCompensate;
 import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import android.annotation.SuppressLint;
@@ -145,11 +148,11 @@ public class ShooterRun extends Action {
                 break;
         }
         KLog.d("ShooterRun", "Running mode " + shooterRunMode);
-
-        double hoodCompensation = ((targetRPS - shooter.getRPS())) * hoodCompensateCoefficient;
+        double currRps = shooter.getRPS();
+        double hoodCompensation = ((targetRPS - currRps)) * hoodCompensateCoefficient;
         hoodCompensation = MathFunctions.clamp(hoodCompensation, minHoodCompensate, maxHoodCompensate);
         double effectiveTargetHood = targetHoodPosition + hoodCompensation;
-        KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition);
+        KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + (currRps - targetRPS));
 
 
         // Update hood position
