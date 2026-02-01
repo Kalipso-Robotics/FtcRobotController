@@ -18,12 +18,12 @@ public class TurretConfig {
     public static double DEFAULT_TOLERANCE_TICKS = (TICKS_PER_DEGREE) * 1.5;
     public static double kP = 0.008;   // faster response
     public static double kI = 0;       // keep at 0
-    public static double kD = 0.0001;  // reduces overshoot (main time saver) 0.0002
-    public static double kS = 0;    // faster final approach
-    public static double kF = 225;     // 375 // for tracking moving targets
+    public static double kD = 0;  // reduces overshoot (main time saver) 0.0001
+    public static double kS = 0.025;    // faster final approach
+    public static double kF = 245;     // 375 // for tracking moving targets
     public static double kP_teleop = 0.006;   //0.01 faster response
     public static double kI_teleop = 0;       // keep at 0
-    public static double kD_teleop = 0.0002;  // reduces overshoot (main time saver) 0.0006
-    public static double kS_teleop = 0;   //0.04 faster final approach
-    public static double kF_teleop = 225;     // 375 // for tracking moving targets
+    public static double kD_teleop = 0;  // reduces overshoot (main time saver) 0.0002
+    public static double kS_teleop = 0.025;   //0.04 faster final approach
+    public static double kF_teleop = 245;     // 375 // for tracking moving targets
 }
