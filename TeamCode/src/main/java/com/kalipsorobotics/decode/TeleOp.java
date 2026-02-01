@@ -11,11 +11,14 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
+import com.kalipsorobotics.localization.ResetOdometryToPosition;
+import com.kalipsorobotics.localization.ResetOdometryToPos;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;
@@ -23,7 +26,6 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
-import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 import com.kalipsorobotics.test.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
@@ -50,6 +52,7 @@ public class TeleOp extends KOpMode {
     ReleaseBraking releaseBraking = null;
     ReleaseBrakeAction releaseBrakeAction = null;
     PurePursuitAction parkAction = null;
+    PurePursuitAction leverAction = null;
 
     KServoAutoAction openStopper = null;
     KServoAutoAction closeStopper = null;
@@ -60,6 +63,9 @@ public class TeleOp extends KOpMode {
 
     DriveAction driveAction = null;
 
+    ResetOdometryToPosition resetOdometryToLimelight = null;
+    ResetOdometryToPos resetOdometryToCorner = null;
+
     // Button state variables
     private boolean drivingSticksActive = false;
     private boolean shootAllActionPressed = false;
@@ -67,8 +73,8 @@ public class TeleOp extends KOpMode {
     private boolean intakeRunPressed = false;
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
-    private boolean warmupFarPressed = false;
-    private boolean warmupNearPressed = false;
+    private boolean zeroLimelightPressed = false;
+    private boolean zeroCornerPressed = false;
     private boolean releaseStopperPressed = false;
     private boolean toggleTurretAlign = false;
     private boolean forceShootNearPressed = false;
@@ -82,6 +88,7 @@ public class TeleOp extends KOpMode {
     private boolean kGamepad2IsDpadRightFirstPressed;
     private boolean setTurretOffset0Pressed;
     private boolean parkButtonPressed;
+    private boolean leverButtonPressed;
 
     @Override
     protected void initializeRobotConfig() {
@@ -168,6 +175,7 @@ public class TeleOp extends KOpMode {
             drivingSticksActive = kGamePad1.isAnyStickActive();
 
             parkButtonPressed = kGamePad1.isButtonXFirstPressed();
+            leverButtonPressed = kGamePad1.isButtonYFirstPressed();
 
 
 
@@ -190,10 +198,8 @@ public class TeleOp extends KOpMode {
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
             shootAllActionPressed = kGamePad1.isLeftBumperFirstPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
-            warmupFarPressed = kGamepad2IsDpadUpFirstPressed;
-            warmupNearPressed = kGamepad2IsDpadDownFirstPressed;
-
-            KLog.d("TeleOp_Warmup_Button", "WarmupFarButton: " + warmupFarPressed + " warmupNearButton: " + warmupNearPressed);
+            zeroLimelightPressed = kGamepad2IsDpadUpFirstPressed;
+            zeroCornerPressed = kGamepad2IsDpadDownFirstPressed;
 
             intakeRunPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
@@ -212,8 +218,10 @@ public class TeleOp extends KOpMode {
             // ========== HANDLE DRIVING ==========
             handleDriving();
 
-            // ========== HANDLE LIMELIGHT ODOMETRY CORRECTION ==========
+            // ========== HANDLE ZEROING (LIMELIGHT & CORNER) ==========
+            handleZeroing();
 
+            // ========== HANDLE TURRET ==========
             handleTurret();
             // ========== HANDLE INTAKE (Priority Order: Shoot > Stall > Manual > Idle) ==========
             handleIntake();
@@ -246,6 +254,15 @@ public class TeleOp extends KOpMode {
                 setLastMoveAction(parkAction);
             }
         }
+
+        if (leverButtonPressed) {
+            if (leverAction == null || leverAction.getIsDone()) {
+                leverAction = new PurePursuitAction(driveTrain);
+                leverAction.addPoint(1325, 1200 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
+                setLastMoveAction(leverAction);
+            }
+        }
+
 
         if (drivingSticksActive) {
             if (releaseBrakeAction == null || releaseBrakeAction.getIsDone()) {
@@ -396,12 +413,6 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp_Shooting", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         }
 
-
-
-
-
-
-
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
             releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
@@ -467,24 +478,35 @@ public class TeleOp extends KOpMode {
             return;
         }
 
-        if (warmupFarPressed) {
-            KLog.d("TeleOp_Shooting_Warmup", "Try to warmup far");
-            if (!isPending(shootAllAction)) {
-                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
-                shooterRun.setTargetRPS(ShooterInterpolationConfig.getFarShoot()[0] * 0.9);
-                shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getFarShoot()[1]);
-                KLog.d("TeleOp_Shooting_Warmup", "Warmup For Far Shoot");
+    }
+
+    private void handleZeroing() {
+        if (zeroLimelightPressed) {
+            if (!isPending(resetOdometryToLimelight)) {
+                KLog.d("TeleOp_Zeroing", "Zero Limelight button pressed - resetting odometry to limelight position");
+                resetOdometryToLimelight = new ResetOdometryToPosition(turret);
+                setLastZeroAction(resetOdometryToLimelight);
+                KLog.d("TeleOp_Zeroing", "Limelight zero action started");
             }
-        } else if (warmupNearPressed) {
-            KLog.d("TeleOp_Shooting_Warmup", "Try to warmup near");
-            if (!isPending(shootAllAction)) {
-                shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
-                shooterRun.setTargetRPS(ShooterInterpolationConfig.getMinValue()[0]);
-                shooterRun.setTargetHoodPosition(ShooterInterpolationConfig.getMinValue()[1]);
-                KLog.d("TeleOp_Shooting_Warmup", "Warmup For Auto Shoot");
-            }
+            return;
         }
 
+        if (zeroCornerPressed) {
+            if (!isPending(resetOdometryToCorner)) {
+                KLog.d("TeleOp_Zeroing", "Zero Corner button pressed - resetting odometry to corner position");
+
+                // TODO: Update with actual corner coordinates
+                double cornerX = 600;
+                double cornerY = 0 * allianceColor.getPolarity();
+                double cornerTheta = 0;
+                Position cornerPosition = new Position(cornerX, cornerY, cornerTheta);
+
+                resetOdometryToCorner = new ResetOdometryToPos(cornerPosition);
+                setLastZeroAction(resetOdometryToCorner);
+                KLog.d("TeleOp_Zeroing", "Corner zero action started - Position: " + cornerPosition);
+            }
+            return;
+        }
     }
 
 }

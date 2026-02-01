@@ -27,6 +27,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastShooterAction = null;
     protected Action lastBrakingAction = null;
     protected Action lastStopperAction = null;
+    protected Action lastZeroAction = null;
     protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
     protected ShooterRun shooterRun = null;
     protected AprilTagDetectionAction aprilTagDetectionAction = null;
@@ -98,6 +99,10 @@ public abstract class KOpMode extends LinearOpMode {
     }
     protected void setLastStopperAction(Action action) {
         lastStopperAction = action;
+    }
+
+    protected void setLastZeroAction(Action action) {
+        lastZeroAction = action;
     }
 
     /**
