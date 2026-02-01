@@ -218,7 +218,7 @@ public class RedAutoNearRamp extends KOpMode {
         cleanupRobot();
     }
 
-    public void handleTrip3() {
+    public void handleTrip3() { //new ramp 2
         trip3 = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 0);
         trip3.setName("trip2");
         trip3.getMoveToRamp().clearPoints();
