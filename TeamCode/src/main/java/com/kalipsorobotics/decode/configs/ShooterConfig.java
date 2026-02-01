@@ -12,9 +12,13 @@ public class ShooterConfig {
     public static double kf = 0.01142857143; //0.01205432614;
     public static double kA = 0;
 
-    public static double hoodHack = 0.2;
-    public static double hoodCompensateCoefficient = 0.2;
-    public static double rpsHack = 1.5;
+    public static double hoodHack = 0.1;
+    public static double hoodCompensateCoefficient = 0.1; // 0.2
+    public static double rpsHack = 1;
     public static double minHoodCompensate = -0.2;
     public static double maxHoodCompensate = 0.2;
+
+    public static double accelBoostDeltaRPSThreshold = 2;
+    public static double decelBoostDeltaRPSThreshold = -2;
+
 }
