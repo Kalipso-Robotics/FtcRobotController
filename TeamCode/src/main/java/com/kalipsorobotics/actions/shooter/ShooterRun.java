@@ -19,13 +19,14 @@ import com.kalipsorobotics.modules.shooter.IShooterPredictor;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterRun extends Action {
 
-    public static final double FAR_TOLERANCE = 0.5;
-    public static final double MIDDLE_TOLERANCE = 0.5;
-    public static final double NEAR_TOLERANCE = 0.5;
+    public static final double FAR_TOLERANCE = 1;
+    public static final double MIDDLE_TOLERANCE = 1;
+    public static final double NEAR_TOLERANCE = 1;
     private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
     private final Shooter shooter;
@@ -147,19 +148,44 @@ public class ShooterRun extends Action {
                 }
                 break;
         }
+
         KLog.d("ShooterRun", "Running mode " + shooterRunMode);
         double currRps = shooter.getRPS();
-        double hoodCompensation = ((targetRPS - currRps)) * hoodCompensateCoefficient;
+        double deltaRPS = targetRPS - currRps;
+        double hoodCompensation = deltaRPS * hoodCompensateCoefficient;
         hoodCompensation = MathFunctions.clamp(hoodCompensation, minHoodCompensate, maxHoodCompensate);
-        double effectiveTargetHood = targetHoodPosition + hoodCompensation;
-        KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + (currRps - targetRPS));
+        double effectiveTargetHood = MathFunctions.clamp(targetHoodPosition + hoodCompensation, MIN_HOOD, MAX_HOOD);
 
+        if (Math.abs(deltaRPS) > 1) {
+            KLog.d("ShooterRun_Hood", "================ Big drop: Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);
+        } else {
+            KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);
+        }
 
+        // Bang control for rapid accel/decel when error is large
+        if (deltaRPS > ShooterConfig.accelBoostDeltaRPSThreshold) {
+            // Need to ACCELERATE - current RPS too low
+            shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            shooter.setPower(1.0);
+            KLog.d("ShooterRun_BangControl", "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
+        } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold) {
+            // Need to DECELERATE - current RPS too high
+            shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            shooter.setPower(0);
+            KLog.d("ShooterRun_BangControl", "BANG DECEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.decelBoostDeltaRPSThreshold + ")");
+        } else {
+            // Within threshold - use PID control for fine adjustment
+            shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            shooter.goToRPS(targetRPS);
+            KLog.d("ShooterRun_BangControl", "PID CONTROL: deltaRPS=" + deltaRPS);
+        }
         // Update hood position
         shooter.getHood().setPosition(effectiveTargetHood);
 
         // Use KMotor's goToRPS for automatic PID control
-        shooter.goToRPS(targetRPS);
 
         // Log status
         KLog.d("shooter_ready", String.format(
