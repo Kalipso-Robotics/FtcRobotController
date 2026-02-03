@@ -238,6 +238,7 @@ public class TeleOp extends KOpMode {
             updateActions();
 
             telemetry.addLine("Target Rps " + shooterRun.getTargetRPS() + " Target Hood " + shooterRun.getTargetHoodPosition());
+            telemetry.addLine("Current RPS " + shooter.getRPS());
             telemetry.addData("Distance to Goal", ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity())));
             telemetry.addData("Rps Offset", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("RPS hack", ShooterConfig.rpsHack);
