@@ -7,8 +7,8 @@ public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
     public static final double HOOD_INIT_OFFSET = 0;
-    public final static double MAX_HOOD = 0.72; //0.64 old hood
-    public final static double MIN_HOOD = 0.3; // 37.38mm space by caliper from bottom
+    public final static double MAX_HOOD = 0.1463; //0.72 old hood
+    public final static double MIN_HOOD = 0.3; // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 46.6;
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
@@ -16,8 +16,8 @@ public class ShooterInterpolationConfig {
 
     public static double[] shooterData = {
             710, 33.2 + rpsHack, MIN_HOOD,
-            890, 34.3 + rpsHack, 0.5 - hoodHack,
-            1115, 35.0 + rpsHack, 0.6 - hoodHack, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
+            890, 34.3 + rpsHack, MIN_HOOD - hoodHack,
+            1115, 35.0 + rpsHack, MAX_HOOD - hoodHack, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
             1320, 36.2 + rpsHack, MAX_HOOD - hoodHack,
             1630, 37.8 + rpsHack, MAX_HOOD - hoodHack, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
             NEAR_DISTANCE, 39.1 + rpsHack, MAX_HOOD - hoodHack, //Near Tip Point
@@ -31,6 +31,14 @@ public class ShooterInterpolationConfig {
             3095, 48.0 + rpsHack, MAX_HOOD - hoodHack, // FAR SHOOT, first shoot ( 0 , 0 )
             3300, 48.6 + rpsHack, MAX_HOOD - hoodHack,
             3500, 49.3 + rpsHack, MAX_HOOD - hoodHack,
+    };
+    static double maxHoodComp = 0.1463;
+    public static double[] shooterData2 = {
+        1963, 57.5, maxHoodComp,
+        3238, 66.2, maxHoodComp,
+        3748,
+
+
     };
 
 

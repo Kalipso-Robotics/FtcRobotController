@@ -7,7 +7,6 @@ import com.kalipsorobotics.utilities.KOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@Disabled
 @TeleOp
 public class StopperCalibration extends KOpMode {
 
@@ -29,7 +28,7 @@ public class StopperCalibration extends KOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double stopperPosition = 1;
+        double stopperPosition = 0.5;
 
 
         initializeRobot();

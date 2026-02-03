@@ -11,6 +11,7 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
+import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.localization.ResetOdometryToLimelight;
 import com.kalipsorobotics.localization.ResetOdometryToPos;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
@@ -18,6 +19,7 @@ import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
+import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -236,8 +238,9 @@ public class TeleOp extends KOpMode {
             updateActions();
 
             telemetry.addLine("Target Rps " + shooterRun.getTargetRPS() + " Target Hood " + shooterRun.getTargetHoodPosition());
-            telemetry.addData("Distance to April Tag", SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM());
+            telemetry.addData("Distance to Goal", ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity())));
             telemetry.addData("Rps Offset", "%.2f", ShooterInterpolationConfig.rpsOffset);
+            telemetry.addData("RPS hack", ShooterConfig.rpsHack);
             telemetry.addData("Hood Offset", "%.2f", ShooterInterpolationConfig.hoodOffset);
             KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
 
@@ -402,13 +405,13 @@ public class TeleOp extends KOpMode {
         double hoodPosition;
 
         if (incrementHoodPressed) {
-            ShooterInterpolationConfig.hoodOffset += 0.1;
-            hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() + 0.1);
+            ShooterInterpolationConfig.hoodOffset += 0.02;
+            hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() + 0.02);
             shooter.getHood().setPosition(hoodPosition);
             KLog.d("TeleOp_Shooting", "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         } else if (decrementHoodPressed) {
-            ShooterInterpolationConfig.hoodOffset -= 0.1;
-            hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() - 0.1);
+            ShooterInterpolationConfig.hoodOffset -= 0.02;
+            hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() - 0.02);
             shooter.getHood().setPosition(hoodPosition);
             KLog.d("TeleOp_Shooting", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         }
@@ -497,7 +500,7 @@ public class TeleOp extends KOpMode {
 
                 // TODO: Update with actual corner coordinates
                 double cornerX = 0;
-                double cornerY = 600 * allianceColor.getPolarity();
+                double cornerY = 1200 * allianceColor.getPolarity();
                 double cornerTheta = 0;
                 Position cornerPosition = new Position(cornerX, cornerY, cornerTheta);
 

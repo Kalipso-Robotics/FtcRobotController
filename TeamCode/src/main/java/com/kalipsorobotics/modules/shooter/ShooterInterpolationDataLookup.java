@@ -98,7 +98,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
      * Clamp hood position to valid range.
      */
     private double clampHood(double hood) {
-        return Math.max(MIN_HOOD, Math.min(MAX_HOOD, hood));
+        return Math.max(MAX_HOOD, Math.min(MIN_HOOD, hood)); // MIN MAX HOOD SWITCHED WHILE FLIP DIRECTION BROKEN IN KSERVO
     }
 
     /**

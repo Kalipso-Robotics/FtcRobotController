@@ -154,7 +154,7 @@ public class ShooterRun extends Action {
         double deltaRPS = targetRPS - currRps;
         double hoodCompensation = deltaRPS * hoodCompensateCoefficient;
         hoodCompensation = MathFunctions.clamp(hoodCompensation, minHoodCompensate, maxHoodCompensate);
-        double effectiveTargetHood = MathFunctions.clamp(targetHoodPosition + hoodCompensation, MIN_HOOD, MAX_HOOD);
+        double effectiveTargetHood = MathFunctions.clamp(targetHoodPosition + hoodCompensation, MAX_HOOD, MIN_HOOD); // CLAMPING INVERSED WHILE FLIP DIRECTION IS BROKEN FOR KSERVO BC HOOD GEAR
 
         if (Math.abs(deltaRPS) > 1) {
             KLog.d("ShooterRun_Hood", "================ Big drop: Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);
@@ -222,13 +222,13 @@ public class ShooterRun extends Action {
     }
 
     private double getOdometryDistanceMM() {
-        double odometryDistanceMM = getDistanceToTargetFromCurrentPos(targetPoint) - AprilTagConfig.GOAL_TO_APRIL_TAG_OFFSET_DISTANCE;
+        double odometryDistanceMM = getDistanceToTargetFromCurrentPos(targetPoint);
         KLog.d("ShooterRun_Distance", "Odometry distance: " + odometryDistanceMM + " mm");
         return odometryDistanceMM;
     }
 
     private double getLimelightDistance() {
-        double limelightDistanceMM = SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM();
+        double limelightDistanceMM = SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM() + AprilTagConfig.GOAL_TO_APRIL_TAG_OFFSET_DISTANCE;
         KLog.d("ShooterRun_Distance", "Limelight distance: " + limelightDistanceMM + " mm");
         return limelightDistanceMM;
     }

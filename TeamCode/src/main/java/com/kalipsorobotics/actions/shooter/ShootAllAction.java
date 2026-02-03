@@ -9,7 +9,7 @@ import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.actions.turret.TurretReady;
 import com.kalipsorobotics.actions.turret.TurretStop;
-import com.kalipsorobotics.localization.ResetOdometryToPosition;
+import com.kalipsorobotics.localization.ResetOdometryToLimelight;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
@@ -135,9 +135,8 @@ public class ShootAllAction extends KActionSet {
     @Override
     public void afterUpdate() {
         if (pushBall.getIsDone()) {
-            double maintainRPSValue = shooterRun.getTargetRPS() * 0.925;
-
-            shooterRun.setTargetRPS(maintainRPSValue);
+//            double maintainRPSValue = shooterRun.getTargetRPS() * 0.925;
+//            shooterRun.setTargetRPS(maintainRPSValue);
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
             //KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
         }

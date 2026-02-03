@@ -6,7 +6,7 @@ import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.cameraVision.AllianceColor;
-import com.kalipsorobotics.localization.ResetOdometryToPosition;
+import com.kalipsorobotics.localization.ResetOdometryToLimelight;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import java.util.concurrent.ExecutorService;
@@ -31,7 +31,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
     protected ShooterRun shooterRun = null;
     protected AprilTagDetectionAction aprilTagDetectionAction = null;
-    protected ResetOdometryToPosition resetOdometryToPosition = null;
+    protected ResetOdometryToLimelight resetOdometryToPosition = null;
 
 
 

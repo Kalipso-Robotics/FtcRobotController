@@ -2,8 +2,10 @@ package com.kalipsorobotics.modules.shooter;
 
 import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_X_REL_FIELD_MM;
 import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_Y_REL_FIELD_MM;
+import static com.kalipsorobotics.decode.configs.ShooterConfig.hoodFlipDirection;
 
 import com.kalipsorobotics.decode.configs.ShooterConfig;
+import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.Point;
@@ -57,7 +59,7 @@ public class Shooter {
         shooter1 = new KMotor(motor1, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
         shooter2 = new KMotor(motor2, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
-        this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, 0, false);
+        this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, ShooterInterpolationConfig.MAX_HOOD, hoodFlipDirection);
 
         this.targetRPS = 0;
 
