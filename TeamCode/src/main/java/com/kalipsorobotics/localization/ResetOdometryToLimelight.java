@@ -6,11 +6,11 @@ import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 
-public class ResetOdometryToPosition extends Action {
+public class ResetOdometryToLimelight extends Action {
 
     Turret turret;
 
-    public ResetOdometryToPosition(Turret turret) {
+    public ResetOdometryToLimelight(Turret turret) {
         this.turret = turret;
     }
 

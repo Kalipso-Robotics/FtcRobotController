@@ -11,7 +11,7 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import com.kalipsorobotics.localization.ResetOdometryToPosition;
+import com.kalipsorobotics.localization.ResetOdometryToLimelight;
 import com.kalipsorobotics.localization.ResetOdometryToPos;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
@@ -63,7 +63,7 @@ public class TeleOp extends KOpMode {
 
     DriveAction driveAction = null;
 
-    ResetOdometryToPosition resetOdometryToLimelight = null;
+    ResetOdometryToLimelight resetOdometryToLimelight = null;
     ResetOdometryToPos resetOdometryToCorner = null;
 
     // Button state variables
@@ -484,7 +484,7 @@ public class TeleOp extends KOpMode {
         if (zeroLimelightPressed) {
             if (!isPending(resetOdometryToLimelight)) {
                 KLog.d("TeleOp_Zeroing", "Zero Limelight button pressed - resetting odometry to limelight position");
-                resetOdometryToLimelight = new ResetOdometryToPosition(turret);
+                resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
                 setLastZeroAction(resetOdometryToLimelight);
                 KLog.d("TeleOp_Zeroing", "Limelight zero action started");
             }
@@ -496,8 +496,8 @@ public class TeleOp extends KOpMode {
                 KLog.d("TeleOp_Zeroing", "Zero Corner button pressed - resetting odometry to corner position");
 
                 // TODO: Update with actual corner coordinates
-                double cornerX = 600;
-                double cornerY = 0 * allianceColor.getPolarity();
+                double cornerX = 0;
+                double cornerY = 600 * allianceColor.getPolarity();
                 double cornerTheta = 0;
                 Position cornerPosition = new Position(cornerX, cornerY, cornerTheta);
 
