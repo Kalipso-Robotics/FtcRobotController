@@ -1,7 +1,7 @@
 package com.kalipsorobotics.decode.configs;
 
-import static com.kalipsorobotics.decode.configs.ShooterConfig.hoodHack;
-import static com.kalipsorobotics.decode.configs.ShooterConfig.rpsHack;
+
+
 
 public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
@@ -36,25 +36,23 @@ public class ShooterInterpolationConfig {
 
     static double maxHoodComp = 0.1663;
     public static double[] shooterData = {
-        707, 47.5, 0.3, // with min hood
-        912, 48, 0.2653,
-        1188, 51.4, 0.1863,
-        1310, 53.6, maxHoodComp,
-        1518, 54.6, maxHoodComp,
-        1705, 56, maxHoodComp,
-        1898, 57.3, maxHoodComp,
-        2075, 58.2, maxHoodComp,
-        2244, 59, maxHoodComp,
-        2417, 61, maxHoodComp,
-        2561, 62.3, maxHoodComp,
-        2769, 65, maxHoodComp,
-        2974, 66.55, maxHoodComp,
-        3154, 67.9, maxHoodComp,
-        3360, 68.9, maxHoodComp,
-        3495, 69.5, maxHoodComp,
-        3697, 71, maxHoodComp,
 
-
+            1310, 42.8, maxHoodComp + 0.12,
+            1518, 42.8, maxHoodComp + 0.1,
+            1705, 45.7, maxHoodComp + 0.08,
+            1898, 48.7, maxHoodComp + 0.04,
+            2075, 51.4, maxHoodComp,
+            2244, 51.7, maxHoodComp,
+            2417, 52.4, maxHoodComp,
+            2561, 56.7, maxHoodComp,
+            2769, 55.5, maxHoodComp,
+            2974, 60.95, maxHoodComp,
+            3154, 60, maxHoodComp,
+            3360, 62.3, maxHoodComp,
+            3495, 63.9, maxHoodComp,
+            3697, 65, maxHoodComp,
+            3847, 63, maxHoodComp,
+            4202, 69.1, maxHoodComp,
 
     };
 
