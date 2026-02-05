@@ -61,7 +61,7 @@ public class Shooter {
         shooter1 = new KMotor(motor1, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
         shooter2 = new KMotor(motor2, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
         Servo hood = opModeUtilities.getHardwareMap().servo.get("hood");
-        this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, ShooterInterpolationConfig.MAX_HOOD, hoodFlipDirection);
+        this.hood = new KServo(hood, KServo.AXON_MAX_SPEED, 255, ShooterInterpolationConfig.MIN_HOOD, hoodFlipDirection);
 
         this.targetRPS = 0;
 

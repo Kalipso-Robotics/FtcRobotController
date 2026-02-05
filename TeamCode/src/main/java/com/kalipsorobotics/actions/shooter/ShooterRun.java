@@ -1,6 +1,5 @@
 package com.kalipsorobotics.actions.shooter;
 
-import static com.kalipsorobotics.decode.configs.ShooterConfig.*;
 import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import android.annotation.SuppressLint;
@@ -152,7 +151,7 @@ public class ShooterRun extends Action {
         double deltaRPS = targetRPS - currRps;
         double hoodCompensation = deltaRPS * hoodCompensateCoefficient;
         hoodCompensation = MathFunctions.clamp(hoodCompensation, minHoodCompensate, maxHoodCompensate);
-        double effectiveTargetHood = MathFunctions.clamp(targetHoodPosition + hoodCompensation, MAX_HOOD, MIN_HOOD); // CLAMPING INVERSED WHILE FLIP DIRECTION IS BROKEN FOR KSERVO BC HOOD GEAR
+        double effectiveTargetHood = MathFunctions.clamp(targetHoodPosition + hoodCompensation, MIN_HOOD, MAX_HOOD); // CLAMPING INVERSED WHILE FLIP DIRECTION IS BROKEN FOR KSERVO BC HOOD GEAR
 
         if (Math.abs(deltaRPS) > 1) {
             KLog.d("ShooterRun_Hood", "================ Big drop: Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);

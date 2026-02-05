@@ -3,6 +3,7 @@ package com.kalipsorobotics.modules.shooter;
 import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
+import com.kalipsorobotics.math.MathFunctions;
 
 import java.util.*;
 
@@ -98,7 +99,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
      * Clamp hood position to valid range.
      */
     private double clampHood(double hood) {
-        return Math.max(MAX_HOOD, Math.min(MIN_HOOD, hood)); // MIN MAX HOOD SWITCHED WHILE FLIP DIRECTION BROKEN IN KSERVO
+        return MathFunctions.clamp(hood, MIN_HOOD, MAX_HOOD); // MIN MAX HOOD SWITCHED WHILE FLIP DIRECTION BROKEN IN KSERVO
     }
 
     /**

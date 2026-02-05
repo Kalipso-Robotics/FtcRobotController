@@ -7,12 +7,15 @@ public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
     public static final double HOOD_INIT_OFFSET = 0;
-    public final static double MIN_HOOD = 0.122600000000192; //0.72 old hood
-    public final static double MAX_HOOD = 0.3; // 0.3 old hood 37.38mm space by caliper from bottom
+    public final static double MIN_HOOD = 0.1226; //0.72 old hood
+    public final static double MAX_HOOD = 0.3392; // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5;
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
     public static final int NEAR_DISTANCE = 1785;
+    public static double minHoodCompensate = -0.02166;
+    public static double maxHoodCompensate = 0.02166;
+    public static double hoodCompensateCoefficient = maxHoodCompensate; // 0.2
     /*
     public static double[] shooterData0 = {
             710, 33.2 + rpsHack, MIN_HOOD,
@@ -34,26 +37,26 @@ public class ShooterInterpolationConfig {
     };
     */
 
-    static double maxHoodComp = 0.1663;
+    static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate;
     public static double[] shooterData = {
-            810, 46.2, maxHoodComp + 0.16,
-            1050, 46.2, maxHoodComp - 0.04,
-            1310, 47.8, maxHoodComp - 0.12,
-            1518, 47.8, maxHoodComp - 0.1,
-            1705, 50.7, maxHoodComp - 0.08,
-            1898, 53.7, maxHoodComp - 0.04,
-            2075, 56.4, maxHoodComp,
-            2244, 56.7, maxHoodComp,
-            2417, 57.4, maxHoodComp,
-            2561, 61.7, maxHoodComp,
-            2769, 60.5, maxHoodComp,
-            2974, 65.95, maxHoodComp,
-            3154, 65, maxHoodComp,
-            3240, 65.7, maxHoodComp,
-            3260, 65.7, maxHoodComp,
-            3460, 67.8, maxHoodComp,
-            3700, 70.0, maxHoodComp,
-            4202, 74.1, maxHoodComp,
+            810, 46.2, compensatedMaxHood - 0.16,
+            1050, 46.2, compensatedMaxHood - 0.04,
+            1310, 47.8, compensatedMaxHood - 0.12,
+            1518, 47.8, compensatedMaxHood - 0.1,
+            1705, 50.7, compensatedMaxHood - 0.08,
+            1898, 53.7, compensatedMaxHood - 0.04,
+            2075, 56.4, compensatedMaxHood,
+            2244, 56.7, compensatedMaxHood,
+            2417, 57.4, compensatedMaxHood,
+            2561, 61.7, compensatedMaxHood,
+            2769, 60.5, compensatedMaxHood,
+            2974, 65.95, compensatedMaxHood,
+            3154, 65, compensatedMaxHood,
+            3240, 65.7, compensatedMaxHood,
+            3260, 65.7, compensatedMaxHood,
+            3460, 67.8, compensatedMaxHood,
+            3700, 70.0, compensatedMaxHood,
+            4202, 74.1, compensatedMaxHood,
     };
 
 
