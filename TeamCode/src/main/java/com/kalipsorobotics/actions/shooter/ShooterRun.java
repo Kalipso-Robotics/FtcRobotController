@@ -1,8 +1,6 @@
 package com.kalipsorobotics.actions.shooter;
 
-import static com.kalipsorobotics.decode.configs.ShooterConfig.hoodCompensateCoefficient;
-import static com.kalipsorobotics.decode.configs.ShooterConfig.maxHoodCompensate;
-import static com.kalipsorobotics.decode.configs.ShooterConfig.minHoodCompensate;
+import static com.kalipsorobotics.decode.configs.ShooterConfig.*;
 import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import android.annotation.SuppressLint;

@@ -4,6 +4,7 @@ import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_X_REL_F
 import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_Y_REL_FIELD_MM;
 import static com.kalipsorobotics.decode.configs.ShooterConfig.hoodFlipDirection;
 
+import com.kalipsorobotics.decode.configs.AprilTagConfig;
 import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.decode.configs.TurretConfig;
@@ -24,7 +25,7 @@ public class Shooter {
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
 
-    public static final Point TARGET_POINT = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM); //polarity outside x=3305.2 y=1,289.55
+    public static final Point TARGET_POINT = new Point(APRILTAG_X_REL_FIELD_MM, APRILTAG_Y_REL_FIELD_MM); //polarity outside x=3305.2 y=1,289.55
 
     public static final double HOOD_OFFSET = 0; // 0.25
 

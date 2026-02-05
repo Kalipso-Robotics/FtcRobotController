@@ -22,7 +22,7 @@ public class AprilTagConfig {
 
     public static final double GOAL_TO_APRIL_TAG_OFFSET_DISTANCE = Math.hypot(AprilTagConfig.GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_X, AprilTagConfig.GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z);
 
-    public static Position TURRET_REL_CAM_POS = new Position(-169.8848, -3.2466, 0);
-    public static Point ROBOT_REL_TURRET_POINT = new Point(3.48052, 2.50233);
+    public static Position TURRET_REL_CAM_POS = new Position(-147.565, 0.977, 0);
+    public static Point ROBOT_REL_TURRET_POINT = new Point(-24.51971493, 2.50233587);
 
 }

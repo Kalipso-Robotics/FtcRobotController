@@ -7,8 +7,8 @@ public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
     public static final double HOOD_INIT_OFFSET = 0;
-    public final static double MAX_HOOD = 0.1463; //0.72 old hood
-    public final static double MIN_HOOD = 0.3; // 0.3 old hood 37.38mm space by caliper from bottom
+    public final static double MIN_HOOD = 0.122600000000192; //0.72 old hood
+    public final static double MAX_HOOD = 0.3; // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5;
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
@@ -36,24 +36,24 @@ public class ShooterInterpolationConfig {
 
     static double maxHoodComp = 0.1663;
     public static double[] shooterData = {
-
-            1310, 42.8, maxHoodComp + 0.12,
-            1518, 42.8, maxHoodComp + 0.1,
-            1705, 45.7, maxHoodComp + 0.08,
-            1898, 48.7, maxHoodComp + 0.04,
-            2075, 51.4, maxHoodComp,
-            2244, 51.7, maxHoodComp,
-            2417, 52.4, maxHoodComp,
-            2561, 56.7, maxHoodComp,
-            2769, 55.5, maxHoodComp,
-            2974, 60.95, maxHoodComp,
-            3154, 60, maxHoodComp,
-            3360, 62.3, maxHoodComp,
-            3495, 63.9, maxHoodComp,
-            3697, 65, maxHoodComp,
-            3847, 63, maxHoodComp,
-            4202, 69.1, maxHoodComp,
-
+            810, 46.2, maxHoodComp + 0.16,
+            1050, 46.2, maxHoodComp - 0.04,
+            1310, 47.8, maxHoodComp - 0.12,
+            1518, 47.8, maxHoodComp - 0.1,
+            1705, 50.7, maxHoodComp - 0.08,
+            1898, 53.7, maxHoodComp - 0.04,
+            2075, 56.4, maxHoodComp,
+            2244, 56.7, maxHoodComp,
+            2417, 57.4, maxHoodComp,
+            2561, 61.7, maxHoodComp,
+            2769, 60.5, maxHoodComp,
+            2974, 65.95, maxHoodComp,
+            3154, 65, maxHoodComp,
+            3240, 65.7, maxHoodComp,
+            3260, 65.7, maxHoodComp,
+            3460, 67.8, maxHoodComp,
+            3700, 70.0, maxHoodComp,
+            4202, 74.1, maxHoodComp,
     };
 
 

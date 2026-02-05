@@ -29,6 +29,7 @@ public class KServo {
         this.servoSpeed = servoSpeed;
         this.rangeDegrees = rangeDegrees;
         this.flipDirection = flipDirection;
+        this.servo.setDirection(flipDirection ? Servo.Direction.REVERSE : Servo.Direction.FORWARD);
         this.zeroPosition = zeroPosition;
         this.lastPosition = servo.getPosition();
     }

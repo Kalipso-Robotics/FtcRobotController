@@ -446,6 +446,7 @@ public class TeleOp extends KOpMode {
                     turnOnTurret();
                 }
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
+                resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
                 shooterRun.setUseOdometry(toggleTurretAlign);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -500,7 +501,7 @@ public class TeleOp extends KOpMode {
 
                 // TODO: Update with actual corner coordinates
                 double cornerX = 0;
-                double cornerY = 1200 * allianceColor.getPolarity();
+                double cornerY = 2006.6 * allianceColor.getPolarity();
                 double cornerTheta = 0;
                 Position cornerPosition = new Position(cornerX, cornerY, cornerTheta);
 
