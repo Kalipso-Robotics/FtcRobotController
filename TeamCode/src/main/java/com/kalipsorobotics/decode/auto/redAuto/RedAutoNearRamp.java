@@ -26,16 +26,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous
 public class RedAutoNearRamp extends KOpMode {
     KActionSet redAutoNear;
-    final double FIRST_SHOOT_X = 2598;
-    final double FIRST_SHOOT_Y = 441.38;
-    final double SHOOT_NEAR_X = 1715; //2400
-    final double SHOOT_NEAR_Y = 20; //300
+    final double FIRST_SHOOT_X = 2400;
+    final double FIRST_SHOOT_Y = 128;
+    final double SHOOT_NEAR_X = 1765; //2400
+    final double SHOOT_NEAR_Y = 0; //300
     final double FINAL_SHOOT_NEAR_X = 2350; //2400
     final double FINAL_SHOOT_NEAR_Y = 25; //300
     final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300
-    Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX() - 141.4213562373, Shooter.TARGET_POINT.getY() - 141.4213562373);
-
+    Point firstShotTargetPoint = Shooter.TARGET_POINT;
     Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y);
     Point firstShootPoint = new Point(FIRST_SHOOT_X, FIRST_SHOOT_Y);
     Point lastTripLaunchPoint = new Point(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y);
@@ -126,7 +125,7 @@ public class RedAutoNearRamp extends KOpMode {
         trip1.setName("trip1");
         trip1.getMoveToBall().clearPoints();
         trip1.getMoveToBall().addPoint(1375, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1375, 975 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1375, 1000 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to launch
         trip1.getMoveToBall().addPoint(1500, nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
@@ -235,7 +234,7 @@ public class RedAutoNearRamp extends KOpMode {
         trip4.setDependentActions(trip3);
         trip4.getMoveToBall().clearPoints();
         trip4.getMoveToBall().addPoint(1950, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(1950, 700 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
+        trip4.getMoveToBall().addPoint(1950, 720 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
 
         trip4.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         trip4.setShouldShooterStop(false);
@@ -256,6 +255,7 @@ public class RedAutoNearRamp extends KOpMode {
         trip5.getMoveToBall().clearPoints();
         trip5.getMoveToBall().addPoint(750, 370 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip5.getMoveToBall().addPoint(750, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip5.getMoveToBall().addPoint(750, 1025 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip5.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip5.getMoveToBall().setEnablePowerScalingForPath(true);
         trip5.setShouldShooterStop(false);
@@ -268,9 +268,9 @@ public class RedAutoNearRamp extends KOpMode {
     public RampCycleAction generateRampTrip() {
         RampCycleAction rampTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         rampTrip.getMoveToRamp().clearPoints();
-        rampTrip.getMoveToRamp().addPoint(1510, 9080 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        rampTrip.getMoveToRamp().addPoint(1550, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        rampTrip.getMoveToRamp().addPoint(1460, 1030 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
+        rampTrip.getMoveToRamp().addPoint(1400, 1010 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity()); // eating point
         rampTrip.getMoveToRamp().setPathAngleTolerance(5);
         rampTrip.getMoveToRamp().setLookAheadRadius(75);
         rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(10);

@@ -107,11 +107,12 @@ public class ShootAllAction extends KActionSet {
 //        turretStop.setDependentActions(pushBall);
 //        this.addAction(turretStop);
 
-
         ResetOdometryToLimelight resetOdometryToPosition = new ResetOdometryToLimelight(turret);
         resetOdometryToPosition.setName("resetOdometryToPosition");
         resetOdometryToPosition.setDependentActions(pushBall);
         this.addAction(resetOdometryToPosition);
+
+
 
 //        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
 //        releaseBraking.setName("ReleaseBraking");
