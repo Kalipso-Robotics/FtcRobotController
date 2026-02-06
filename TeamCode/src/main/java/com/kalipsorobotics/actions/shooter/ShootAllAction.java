@@ -40,6 +40,8 @@ public class ShootAllAction extends KActionSet {
 
     private TurretReady turretReady;
 
+    private ResetOdometryToLimelight resetOdometryToPosition;
+
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos) {
         this.stopper = stopper;
         this.intake = intake;
@@ -89,12 +91,17 @@ public class ShootAllAction extends KActionSet {
 //        activateBraking.setName("ActivateBraking");
 //        this.addAction(activateBraking);
 
+        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
+        resetOdometryToPosition.setName("resetOdometryToPosition");
+        this.addAction(resetOdometryToPosition);
+
         shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 
         turretReady = new TurretReady(turretAutoAlignTeleop);
         turretReady.setName("turretReady");
+        turretReady.setDependentActions(resetOdometryToPosition);
         this.addAction(turretReady);
 
         pushBall = new PushBall(stopper, intake);
@@ -107,10 +114,7 @@ public class ShootAllAction extends KActionSet {
 //        turretStop.setDependentActions(pushBall);
 //        this.addAction(turretStop);
 
-        ResetOdometryToLimelight resetOdometryToPosition = new ResetOdometryToLimelight(turret);
-        resetOdometryToPosition.setName("resetOdometryToPosition");
-        resetOdometryToPosition.setDependentActions(pushBall);
-        this.addAction(resetOdometryToPosition);
+
 
 
 

@@ -26,6 +26,7 @@ public class TurretReady extends Action {
         if (!hasStarted) {
             timeoutTimer.reset();
             hasStarted = true;
+            turretAutoAlignTeleop.updateCheckDone();
             KLog.d(this.getName(), "current pos " + SharedData.getOdometryWheelIMUPosition());
         }
 
