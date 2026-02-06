@@ -1,8 +1,9 @@
 package com.kalipsorobotics.decode.configs;
 
 
+import com.acmerobotics.dashboard.config.Config;
 
-
+@Config
 public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
@@ -37,7 +38,7 @@ public class ShooterInterpolationConfig {
     };
     */
 
-    static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate;
+    static double compensatedMaxHood = 0.31754;
     public static double[] shooterData = {
             810, 46.2, compensatedMaxHood - 0.16,
             1050, 46.2, compensatedMaxHood - 0.04,

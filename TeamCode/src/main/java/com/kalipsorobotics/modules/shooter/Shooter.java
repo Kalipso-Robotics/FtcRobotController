@@ -4,6 +4,8 @@ import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_X_REL_F
 import static com.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_Y_REL_FIELD_MM;
 import static com.kalipsorobotics.decode.configs.ShooterConfig.hoodFlipDirection;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import com.kalipsorobotics.decode.configs.AprilTagConfig;
 import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
@@ -78,7 +80,15 @@ public class Shooter {
 
     public boolean isAtTargetRPS(double effectiveTolerance) {
         boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
-        KLog.d("ShooterRun_isAtTargetRPS",  "Delta: " + (targetRPS - currentRPS) + " Power: " + getShooter1().getPower() + " targetRps: " + targetRPS + " currentRps " + currentRPS + " isWithinTarget: " + isWithinTarget + " effectiveTolerance " + effectiveTolerance);
+        KLog.d("ShooterRun_Metrics",
+                "Delta: " + (targetRPS - currentRPS) +
+                        " Power: " + getShooter1().getPower() +
+                        " Voltage: " + opModeUtilities.getHardwareMap().voltageSensor.iterator().next().getVoltage() +
+                        " targetRps: " + targetRPS +
+                        " currentRps: " + currentRPS +
+                        " Error%: " + String.format("%.2f", Math.abs((targetRPS - currentRPS) / targetRPS * 100)) +
+                        " isWithinTarget: " + isWithinTarget +
+                        " effectiveTolerance: " + effectiveTolerance);
         return isWithinTarget;
     }
 
