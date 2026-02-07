@@ -248,6 +248,6 @@ public class Position {
     }
 
     public String toCompactString() {
-        return  String.format("x=%.2f, y=%.2f, theta=%.1f", x/25.4, y/25.4, Math.toDegrees(theta));
+        return  String.format("x=%.2f y=%.2f theta=%.1f", x/25.4, y/25.4, Math.toDegrees(theta));
     }
 }

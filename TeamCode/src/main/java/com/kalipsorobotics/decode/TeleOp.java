@@ -237,11 +237,11 @@ public class TeleOp extends KOpMode {
             // ========== UPDATE ACTIONS ==========
             updateActions();
             telemetry.addData("Odometry: ", SharedData.getOdometryWheelIMUPosition().toCompactString());
-            telemetry.addLine("Target Rps " + shooterRun.getTargetRPS() + " Target Hood " + shooterRun.getTargetHoodPosition());
-            telemetry.addLine("Current RPS " + shooter.getRPS());
-            telemetry.addData("Distance to Goal", ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity())));
-            telemetry.addData("Rps Offset", "%.2f", ShooterInterpolationConfig.rpsOffset);
-            telemetry.addData("Hood Offset", "%.2f", ShooterInterpolationConfig.hoodOffset);
+            telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
+            telemetry.addData("Current RPS ", "%.2f", shooter.getRPS());
+            telemetry.addData("Distance ", "%.0f", ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity())));
+            telemetry.addData("Rps Offset ", "%.2f", ShooterInterpolationConfig.rpsOffset);
+            telemetry.addData("Hood Offset ", "%.2f", ShooterInterpolationConfig.hoodOffset);
             telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
             telemetry.addLine("Turret Mode: " + turretAutoAlignTeleOp.getTurretRunMode());
             telemetry.update();
