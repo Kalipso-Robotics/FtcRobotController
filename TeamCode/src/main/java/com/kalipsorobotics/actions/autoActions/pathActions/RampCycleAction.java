@@ -23,6 +23,7 @@ import com.kalipsorobotics.utilities.OpModeUtilities;
 public class RampCycleAction extends KActionSet {
     RoundTripAction tripToShoot = null;
     PurePursuitAction moveToRamp;
+    PurePursuitAction moveToEat;
     OpModeUtilities opModeUtilities;
     IntakeFullAction intakeFullAction;
     DriveTrain driveTrain;
@@ -33,11 +34,13 @@ public class RampCycleAction extends KActionSet {
     Point targetPoint;
     Point launchPos;
     double waitForShooterReadyMS;
-    double waitTime;
+    double waitTime; // wait for intake
+    double waitForGate;
+
     ShooterRun shooterRun;
 
     public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTime) {
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTime, double waitForGate) {
         this.opModeUtilities = opModeUtilities;
         this.driveTrain = driveTrain;
         this.turretAutoAlign = turretAutoAlign;
@@ -48,6 +51,7 @@ public class RampCycleAction extends KActionSet {
         this.launchPos = launchPos;
         this.waitForShooterReadyMS = waitForShooterReadyMS;
         this.waitTime = waitTime;
+        this.waitForGate = waitForGate;
 
         moveToRamp = new PurePursuitAction(driveTrain);
         moveToRamp.setName("rampCycleTrip1");
@@ -57,8 +61,16 @@ public class RampCycleAction extends KActionSet {
         moveToRamp.setMaxTimeOutMS(3000);
         this.addAction(moveToRamp);
 
+        moveToEat = new PurePursuitAction(driveTrain);
+        moveToEat.setName("rampCycleTrip2");
+        moveToEat.setPathAngleTolerance(10);
+        moveToEat.setFinalSearchRadius(100);
+        moveToEat.setFinalAngleLockingThresholdDegree(10);
+        moveToRamp.setMaxTimeOutMS(2000);
+        this.addAction(moveToEat);
+
         tripToShoot = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,targetPoint, launchPos, 500);
-        tripToShoot.setName("rampCycleTrip2");
+        tripToShoot.setName("rampCycleTrip3");
         tripToShoot.getMoveToBall().clearPoints();
         tripToShoot.getMoveToBall().setFinalSearchRadius(200);
         tripToShoot.getMoveToBall().setMaxTimeOutMS(4000);
@@ -69,8 +81,12 @@ public class RampCycleAction extends KActionSet {
 
     public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
                            Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
-        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, 1000);
+        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, 1000, 0);
+    }
 
+    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTime) {
+        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, waitTime, 0);
     }
 
     @Override
@@ -95,9 +111,16 @@ public class RampCycleAction extends KActionSet {
         intakeFullAction.setDependentActions(moveToRamp);
         this.addAction(intakeFullAction);
 
+        WaitAction waitGate = new WaitAction(waitForGate);
+        waitGate.setName("waitForGate");
+        waitGate.setDependentActions(moveToRamp);
+        this.addAction(waitGate);
+
+        moveToEat.setDependentActions(waitGate);
+
         WaitAction waitAction = new WaitAction(waitTime);
         waitAction.setName("waitForIntake");
-        waitAction.setDependentActions(moveToRamp);
+        waitAction.setDependentActions(moveToEat);
         this.addAction(waitAction);
 
         tripToShoot.setDependentActions(waitAction);
@@ -112,6 +135,10 @@ public class RampCycleAction extends KActionSet {
         return moveToRamp;
     }
 
+    public PurePursuitAction getMoveToEat() {
+        return moveToEat;
+    }
+
     public RoundTripAction getTripToShoot() {
         return tripToShoot;
     }
@@ -120,9 +147,10 @@ public class RampCycleAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
-        KLog.d("RampCycle", String.format("[%s] Status - MoveToRamp: %s, Intake: %s, ShooterRun: %s, TripToShoot: %s",
+        KLog.d("RampCycle", String.format("[%s] Status - MoveToRamp: %s, MoveToEat: %s, Intake: %s, ShooterRun: %s, TripToShoot: %s",
                 getName() != null ? getName() : "unnamed",
                 moveToRamp.getIsDone() ? "DONE" : "NOT DONE",
+                moveToEat.getIsDone() ? "DONE" : "NOT DONE",
                 intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
                 shooterRun.getIsDone() ? "DONE" : "NOT DONE",
                 tripToShoot.getIsDone() ? "DONE" : "NOT DONE"));

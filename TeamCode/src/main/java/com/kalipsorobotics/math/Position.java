@@ -250,4 +250,8 @@ public class Position {
     public String toCompactString() {
         return  String.format("x=%.2f y=%.2f theta=%.1f", x/25.4, y/25.4, Math.toDegrees(theta));
     }
+
+    public boolean isEmpty() {
+        return (x == 0 && y == 0 && theta == 0);
+    }
 }
