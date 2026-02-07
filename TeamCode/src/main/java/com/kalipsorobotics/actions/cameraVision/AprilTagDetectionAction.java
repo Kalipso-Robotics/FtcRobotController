@@ -237,11 +237,11 @@ public class AprilTagDetectionAction extends Action {
             return true;
         }
 
-        if (prevLimelightGlobalPos != null) {
+        if (prevLimelightGlobalPos != null && !prevLimelightGlobalPos.isEmpty()) {
             double dist = globalPos.distanceTo(prevLimelightGlobalPos);
 
             if (!prevLimelightGlobalPos.isEmpty() && dist > OUT_OF_RANGE_THRESHOLD_MM) {
-                KLog.d("AprilTagDetectionAction_Spike", "Delta pos too high, delta: " + dist + " mm");
+                KLog.d("AprilTagDetectionAction_Spike", "Distance to previous position too high, distance: " + dist + " mm" + " previous pos: " + prevLimelightGlobalPos + " curr: " + globalPos);
                 return true;
             }
         }

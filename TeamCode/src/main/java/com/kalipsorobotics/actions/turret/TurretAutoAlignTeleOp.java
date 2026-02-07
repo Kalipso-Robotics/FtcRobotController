@@ -195,7 +195,7 @@ public class TurretAutoAlignTeleOp extends Action {
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             shouldReadLimelight = true;
-//            turretMotor.stop();
+            turretMotor.stop();
             KLog.d("Turret_PID", String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
             isWithinRange = false;
