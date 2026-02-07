@@ -30,6 +30,9 @@ public class RoundTripAction extends KActionSet {
 
     private final ShooterRun shooterRun;
     private final Shooter shooter;
+
+
+
     private final ShooterReady shooterReady;
     private final PushBall pushBall;
     private final PurePursuitReady purePursuitReady;
@@ -184,6 +187,9 @@ public class RoundTripAction extends KActionSet {
         this.shouldShooterStop = shouldShooterStop;
     }
 
+    public ShooterReady getShooterReady() {
+        return shooterReady;
+    }
     public IntakeFullAction getIntakeFullAction() {
         return intakeFullAction;
     }

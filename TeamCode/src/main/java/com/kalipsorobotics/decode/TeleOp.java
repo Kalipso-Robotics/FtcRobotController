@@ -11,7 +11,6 @@ import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.ShootAllAction;
 import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.localization.ResetOdometryToLimelight;
 import com.kalipsorobotics.localization.ResetOdometryToPos;
 import com.kalipsorobotics.decode.configs.ModuleConfig;
@@ -19,7 +18,6 @@ import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.localization.Odometry;
-import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -35,6 +33,8 @@ import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
+
+import org.opencv.core.Mat;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
@@ -72,7 +72,7 @@ public class TeleOp extends KOpMode {
     private boolean drivingSticksActive = false;
     private boolean shootAllActionPressed = false;
     private boolean forceShootFarPressed = false;
-    private boolean intakeRunPressed = false;
+    private boolean intakeStopPressed = false;
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
     private boolean zeroLimelightPressed = false;
@@ -203,7 +203,7 @@ public class TeleOp extends KOpMode {
             zeroLimelightPressed = kGamepad2IsDpadUpFirstPressed;
             zeroCornerPressed = kGamepad2IsDpadDownFirstPressed;
 
-            intakeRunPressed = kGamePad2.isRightTriggerPressed();
+            intakeStopPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
 
             releaseStopperPressed = kGamePad2.isYPressed();
@@ -236,14 +236,14 @@ public class TeleOp extends KOpMode {
 
             // ========== UPDATE ACTIONS ==========
             updateActions();
-
+            telemetry.addData("Odometry: ", SharedData.getOdometryWheelIMUPosition().toCompactString());
             telemetry.addLine("Target Rps " + shooterRun.getTargetRPS() + " Target Hood " + shooterRun.getTargetHoodPosition());
             telemetry.addLine("Current RPS " + shooter.getRPS());
             telemetry.addData("Distance to Goal", ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity())));
             telemetry.addData("Rps Offset", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset", "%.2f", ShooterInterpolationConfig.hoodOffset);
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
-
+            telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
+            telemetry.addLine("Turret Mode: " + turretAutoAlignTeleOp.getTurretRunMode());
             telemetry.update();
         }
         cleanupRobot();
@@ -253,7 +253,7 @@ public class TeleOp extends KOpMode {
         if (parkButtonPressed) {
             if (parkAction == null || parkAction.getIsDone()) {
                 parkAction = new PurePursuitAction(driveTrain);
-                parkAction.addPoint(639.79, -1238.30 * allianceColor.getPolarity(), 0);
+                parkAction.addPoint(557.99, -1316.56 * allianceColor.getPolarity(), 0);
                 setLastMoveAction(parkAction);
             }
         }
@@ -261,7 +261,8 @@ public class TeleOp extends KOpMode {
         if (leverButtonPressed) {
             if (leverAction == null || leverAction.getIsDone()) {
                 leverAction = new PurePursuitAction(driveTrain);
-                leverAction.addPoint(1325, 1200 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
+                leverAction.addPoint(1575, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                leverAction.addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
                 setLastMoveAction(leverAction);
             }
         }
@@ -278,8 +279,10 @@ public class TeleOp extends KOpMode {
                 setLastStopperAction(closeStopper);
             }
             driveAction.move(gamepad1);
+            leverAction = null;
+            parkAction = null;
             setLastMoveAction(null);
-        } else if (parkAction == null || parkAction.getIsDone()){
+        } else if ((parkAction == null || parkAction.getIsDone()) && (leverAction == null || leverAction.getIsDone())) {
             driveTrain.setPower(0);
         }
     }
@@ -297,7 +300,6 @@ public class TeleOp extends KOpMode {
             turretAutoAlignTeleOp.stop();
         }
 
-        telemetry.addLine("Running using: " + turretAutoAlignTeleOp.getTurretRunMode());
 
         //Manual
         if (kGamepad2IsDpadLeftFirstPressed) {
@@ -310,7 +312,6 @@ public class TeleOp extends KOpMode {
             turretAutoAlignTeleOp.setTicksOffset(0);
         }
 
-        telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
 
         KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
     }
@@ -341,13 +342,14 @@ public class TeleOp extends KOpMode {
             return;  // Exit early
         }
 
-
-        // PRIORITY 5: Stop when nothing pending
-        if (!isPending(intakeStop)) {
-            intakeStop = new IntakeStop(intake);
-            setLastIntakeAction(intakeStop);
+        if (intakeStopPressed) {
+            // PRIORITY 5: Stop when nothing pending
+            if (!isPending(intakeStop)) {
+                intakeStop = new IntakeStop(intake);
+                setLastIntakeAction(intakeStop);
+            }
+            return;
         }
-
         // PRIORITY 3: Manual forward
         if (!isPending(intakeRun)) {
             intakeRun = new RunIntake(intake);
@@ -376,7 +378,7 @@ public class TeleOp extends KOpMode {
         }
 
         // Close when intaking
-        if (intakeRunPressed || isPending(intakeRun)) {
+        if (intakeStopPressed || isPending(intakeRun)) {
             KLog.d("TeleOp_Stopper", "Intake Pressed Close Stopper isPending: " + isPending(closeStopper));
             if (!isPending(closeStopper)) {
                 KLog.d("TeleOp_Stopper", "Close Stopper");

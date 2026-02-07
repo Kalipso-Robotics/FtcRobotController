@@ -115,6 +115,7 @@ public class ShooterRun extends Action {
                 return;
             case SHOOT_USING_TARGET_RPS_HOOD:
                 // Direct RPS mode
+                distanceMM = -1;
                 KLog.d("ShooterRun_SHOOT_USING_TARGET_RPS_HOOD", "Using direct RPS mode, TargetRps " + targetRPS + " Target Hood " + targetHoodPosition);
                 break;
             case SHOOT_USING_DISTANCE:
@@ -135,6 +136,7 @@ public class ShooterRun extends Action {
                 break;
             case SHOOT_USING_CURRENT_POINT:
                 double currentDist = getCurrentDistanceMM();
+                distanceMM = currentDist;
                 if (currentDist == -1) {
                     KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", "NO DISTANCE FOUND, NOT CHANGING RPS OR HOOD");
                 } else {
@@ -164,7 +166,7 @@ public class ShooterRun extends Action {
             // Need to ACCELERATE - current RPS too low
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            shooter.setPower(1.0);
+            shooter.setPower(1);
             KLog.d("ShooterRun_BangControl", "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
         } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold) {
             // Need to DECELERATE - current RPS too high

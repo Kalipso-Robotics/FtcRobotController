@@ -93,11 +93,7 @@ public class Position {
         return Math.hypot(other.getX() - this.getX(), other.getY() - this.getY());
     }
 
-    @Override
-    public String toString() {
-        return  String.format("x=%.2f (%.2f in), y=%.2f (%.2f in), theta=%.4f (%.1f deg)", x, x/25.4, y, y/25.4,
-                theta, Math.toDegrees(theta));
-    }
+
 
     public static Position pose2DtoPosition(Pose2D pose2D) {
         Position position = new Position(pose2D.getX(DistanceUnit.MM), pose2D.getY(DistanceUnit.MM), pose2D.getHeading(AngleUnit.RADIANS));
@@ -245,4 +241,13 @@ public class Position {
         return this.getX() == position.getX() && this.getY() == position.getY() && this.getTheta() == position.getTheta();
     }
 
+    @Override
+    public String toString() {
+        return  String.format("x=%.2f (%.2f in), y=%.2f (%.2f in), theta=%.4f (%.1f deg)", x, x/25.4, y, y/25.4,
+                theta, Math.toDegrees(theta));
+    }
+
+    public String toCompactString() {
+        return  String.format("x=%.2f, y=%.2f, theta=%.1f", x/25.4, y/25.4, Math.toDegrees(theta));
+    }
 }

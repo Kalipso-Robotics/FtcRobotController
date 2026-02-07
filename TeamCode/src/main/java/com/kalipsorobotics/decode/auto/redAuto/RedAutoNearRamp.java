@@ -7,12 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 public class RedAutoNearRamp extends RedAutoNearRampThirdSpike {
 
     @Override
-    protected void handleTrip5() {
-        trip5Spike = null;
-        trip5Ramp = generateRampTrip();
-        trip5Ramp.setName("trip5Ramp");
-        trip5Ramp.setDependentActions(trip4);
-        redAutoNear.addAction(trip5Ramp);
+    protected void handleTrip4() {
+        trip4Spike = null;
+        trip4Ramp = generateRampTrip();
+        trip4Ramp.setName("trip4Ramp");
+        trip4Ramp.setDependentActions(trip3);
+        redAutoNear.addAction(trip4Ramp);
 
     }
 

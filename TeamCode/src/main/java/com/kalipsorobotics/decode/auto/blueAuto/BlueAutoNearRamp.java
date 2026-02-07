@@ -4,7 +4,10 @@ import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.decode.auto.redAuto.RedAutoNearRamp;
 import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+@Autonomous
 public class BlueAutoNearRamp extends RedAutoNearRamp {
 
     @Override

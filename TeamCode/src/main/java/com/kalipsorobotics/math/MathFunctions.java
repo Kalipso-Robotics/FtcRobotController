@@ -34,7 +34,7 @@ public class MathFunctions {
      * This prevents oscillation near the ±π boundary.
      */
     public static double angleWrapRadHysteresis(double angle) {
-        double threshold = Math.PI + Math.toRadians(15); // π + 10° in radians
+        double threshold = Math.toRadians(180 + 25);
         angle = angle % (2 * Math.PI);
         if (angle > threshold) {
             angle -= 2 * Math.PI;

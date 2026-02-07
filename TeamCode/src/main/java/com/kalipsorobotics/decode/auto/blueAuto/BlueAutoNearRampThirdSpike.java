@@ -6,7 +6,7 @@ import com.kalipsorobotics.decode.auto.redAuto.RedAutoNearRampThirdSpike;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "BlueAutoNearRamp")
+@Autonomous(name = "BlueAutoNearRampThirdSpike")
 public class BlueAutoNearRampThirdSpike extends RedAutoNearRampThirdSpike {
     @Override
     protected void initializeRobotConfig() {

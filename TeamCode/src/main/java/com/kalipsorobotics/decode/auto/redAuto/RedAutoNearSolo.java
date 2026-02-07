@@ -28,8 +28,8 @@ public class RedAutoNearSolo extends KOpMode {
 
 
     KActionSet redAutoNear;
-    final double FIRST_SHOOT_X = 2498;
-    final double FIRST_SHOOT_Y = 341.38;
+    final double FIRST_SHOOT_X = 2050;
+    final double FIRST_SHOOT_Y = 100;
     final double SHOOT_NEAR_X = 2050; //2400
     final double SHOOT_NEAR_Y = 100; //300
     final double FINAL_SHOOT_NEAR_X = 2325; //2400
@@ -115,6 +115,7 @@ public class RedAutoNearSolo extends KOpMode {
         // ----------------- FIRST SHOOT ----------------------
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint.multiplyY(allianceColor.getPolarity()), 0, true);
         trip0.setName("trip0");
+        trip0.getShooterReady().setName("shooterReady_trip0");
         trip0.getMoveToBall().clearPoints();
         trip0.getMoveToBall().addPoint(firstShootPoint.getX(), firstShootPoint.getY() * allianceColor.getPolarity(), -138.29 * allianceColor.getPolarity());
         trip0.setDependentActions(delayBeforeStart);
@@ -127,6 +128,7 @@ public class RedAutoNearSolo extends KOpMode {
 
         trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip1.setName("trip1");
+        trip1.getShooterReady().setName("shooterReady_trip1");
         trip1.getMoveToBall().clearPoints();
         trip1.getMoveToBall().addPoint(1975, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(1975, 825 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
@@ -143,6 +145,7 @@ public class RedAutoNearSolo extends KOpMode {
 
         trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip2.setName("trip2");
+        trip2.getShooterReady().setName("shooterReady_trip2");
         trip2.getMoveToBall().clearPoints();
 
         trip2.getMoveToBall().addPoint(1350, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
@@ -162,6 +165,7 @@ public class RedAutoNearSolo extends KOpMode {
 
         trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip3.setName("trip3");
+        trip3.getShooterReady().setName("shooterReady_trip3");
         trip3.setDependentActions(trip2);
         trip3.getMoveToBall().clearPoints();
         // move to intake
@@ -228,12 +232,14 @@ public class RedAutoNearSolo extends KOpMode {
 
     public void handleTrip4() {
         trip4 = generateDepotTrip("trip4", nearLaunchPoint);
+        trip4.getShooterReady().setName("shooterReady_trip4");
         trip4.setDependentActions(trip3);
         redAutoNear.addAction(trip4);
     }
 
     public void handleTrip5() {
         trip5 = generateDepotTrip("trip5", lastTripLaunchPoint);
+        trip5.getShooterReady().setName("shooterReady_trip5");
         trip5.setDependentActions(trip4);
         redAutoNear.addAction(trip5);
     }

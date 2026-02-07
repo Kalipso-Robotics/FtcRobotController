@@ -99,6 +99,7 @@ public class RedAutoDepot extends KOpMode {
 
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
         trip0.setName("trip0");
+        trip0.getShooterReady().setName("ShooterReady_trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
 //        trip0.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(300);
         trip0.setShouldShooterStop(false);
@@ -107,6 +108,7 @@ public class RedAutoDepot extends KOpMode {
         // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
         trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip1.setName("trip1");
+        trip1.getTrip().getShooterReady().setName("ShooterReady_trip1");
         trip1.setDependentActions(trip0);
 //        trip1.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         addPointsToTrip1SpikeMark();
@@ -117,6 +119,7 @@ public class RedAutoDepot extends KOpMode {
 
         DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip2.setName("trip2");
+        trip2.getTrip().getShooterReady().setName("ShooterReady_trip2");
         trip2.setDependentActions(trip1);
         trip2.getTrip().getMoveToBall().clearPoints();
         // first try
@@ -219,6 +222,7 @@ public class RedAutoDepot extends KOpMode {
 
     public DepotRoundTrip generateRetryTrip(DepotRoundTrip lastTrip, boolean sweepIn) {
         DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        retryTrip.getTrip().getShooterReady().setName("ShooterReady_retryTrip");
         retryTrip.getTrip().getMoveToBall().clearPoints();
         // first try
 //        retryTrip.getTrip().getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
