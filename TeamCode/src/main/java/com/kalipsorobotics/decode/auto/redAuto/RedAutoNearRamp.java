@@ -30,7 +30,7 @@ public class RedAutoNearRamp extends KOpMode {
     final double FIRST_SHOOT_Y = 128;
     final double SHOOT_NEAR_X = 1765; //2400
     final double SHOOT_NEAR_Y = 0; //300
-    final double FINAL_SHOOT_NEAR_X = 2350; //2400
+    final double FINAL_SHOOT_NEAR_X = 2400;
     final double FINAL_SHOOT_NEAR_Y = 25; //300
     final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300
@@ -270,7 +270,7 @@ public class RedAutoNearRamp extends KOpMode {
         rampTrip.getMoveToRamp().clearPoints();
         rampTrip.getMoveToRamp().addPoint(1575, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to lever
-        rampTrip.getMoveToRamp().addPoint(1400, 1010 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity()); // eating point
+        rampTrip.getMoveToRamp().addPoint(1300, 1010 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity()); // eating point
         rampTrip.getMoveToRamp().setPathAngleTolerance(5);
         rampTrip.getMoveToRamp().setLookAheadRadius(75);
         rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(10);
