@@ -92,6 +92,8 @@ public class TeleOp extends KOpMode {
     private boolean parkButtonPressed;
     private boolean leverButtonPressed;
 
+    private int shootCount = 0;
+
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = SharedData.getAllianceColor();
@@ -451,7 +453,15 @@ public class TeleOp extends KOpMode {
                 shooterRun.setUseOdometry(toggleTurretAlign);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                KLog.d("TeleOp_Shooting", "Shoot action started - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
+                shootCount++;
+                shootAllAction.setName("Shot_" + shootCount);
+                KLog.d("Teleop_Shooting", "Shot_" + shootCount + " - " +
+                        "Delta RPS: " + (shooter.getRPS() - shootAllAction.getShooterRun().getTargetRPS())  +
+                        "Distance " + shooterRun.getDistanceMM() +
+                        "Odometry " + SharedData.getOdometryWheelIMUPosition() +
+                        "Limelight Pos " + SharedData.getLimelightGlobalPosition() +
+                        "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg()
+                );
             }
             return;
         }

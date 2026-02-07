@@ -49,6 +49,7 @@ public class TurretAutoAlignTeleOp extends Action {
     private int ticksOffset = 0;
     private double prevTargetTicks;
     private boolean shouldReadLimelight = false;
+    private double deltaAngleDeg;
 
 
     public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, AprilTagDetectionAction aprilTagDetectionAction, Turret turret, AllianceColor allianceColor) {
@@ -189,12 +190,12 @@ public class TurretAutoAlignTeleOp extends Action {
         int currentTicks = turretMotor.getCurrentPosition();
         int error = (int) targetTicks - currentTicks;
 
-        double deltaAngleDeg = error / TurretConfig.TICKS_PER_DEGREE;
+        deltaAngleDeg = error / TurretConfig.TICKS_PER_DEGREE;
 
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             shouldReadLimelight = true;
-            turretMotor.stop();
+//            turretMotor.stop();
             KLog.d("Turret_PID", String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
             isWithinRange = false;
@@ -272,5 +273,9 @@ public class TurretAutoAlignTeleOp extends Action {
     }
     public void setTicksOffset(int ticksOffset) {
         this.ticksOffset = ticksOffset;
+    }
+
+    public double getDeltaAngleDeg() {
+        return deltaAngleDeg;
     }
 }

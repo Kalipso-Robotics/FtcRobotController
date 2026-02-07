@@ -10,6 +10,7 @@ import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
+import com.kalipsorobotics.actions.turret.TurretStop;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -93,6 +94,11 @@ public class RoundTripAction extends KActionSet {
         turretReady.setName("turretReady");
         turretReady.setDependentActions(moveToBalls);
         this.addAction(turretReady);
+
+        TurretStop turretStop = new TurretStop(turretAutoAlign);
+        turretStop.setName("turretStop");
+        turretStop.setDependentActions(turretReady);
+        this.addAction(turretStop);
 
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("shoot");
