@@ -229,8 +229,10 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
             trip5.setDependentActions(trip4Ramp);
         }
         trip5.getMoveToBall().clearPoints();
+        // move to first spike
         trip5.getMoveToBall().addPoint(1950, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip5.getMoveToBall().addPoint(1950, 720 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
+        // eat balls
+        trip5.getMoveToBall().addPoint(1950, 745 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
 
         trip5.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         trip5.setShouldShooterStop(false);
@@ -246,7 +248,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         rampTrip.getTripToShoot().getShooterReady().setName("rampTrip");
         rampTrip.getMoveToRamp().clearPoints();
         //move to lever
-        rampTrip.getMoveToRamp().addPoint(1600, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        rampTrip.getMoveToRamp().addPoint(1660, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //eat at lever
         rampTrip.getMoveToRamp().addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity()); // eating point
         rampTrip.getMoveToRamp().setPathAngleTolerance(5);
