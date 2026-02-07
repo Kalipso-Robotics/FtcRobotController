@@ -244,11 +244,11 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     }
 
     public RampCycleAction generateRampTrip() {
-        RampCycleAction rampTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, 1000, 150);
+        RampCycleAction rampTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, 1000, 200);
         rampTrip.getTripToShoot().getShooterReady().setName("rampTrip");
-        rampTrip.getMoveToRamp().clearPoints();
+        rampTrip.getMoveToEat().clearPoints();
         //move to lever
-        rampTrip.getMoveToRamp().addPoint(1660, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        rampTrip.getMoveToEat().addPoint(1660, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //eat at lever
         rampTrip.getMoveToRamp().addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity()); // eating point
         rampTrip.getMoveToRamp().setPathAngleTolerance(5);
