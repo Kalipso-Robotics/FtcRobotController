@@ -11,6 +11,8 @@ public class ShooterInterpolationConfig {
     public final static double MIN_HOOD = 0.1226; //0.72 old hood
     public final static double MAX_HOOD = 0.3392; // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5;
+    public static final double MAX_RPS = 74.1;
+
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
     public static final int NEAR_DISTANCE = 1785;
@@ -56,7 +58,7 @@ public class ShooterInterpolationConfig {
             3240, 66.3, compensatedMaxHood,
             3460, 67.8, compensatedMaxHood,
             3700, 70.0, compensatedMaxHood,
-            4202, 74.1, compensatedMaxHood,
+            4202, MAX_RPS, compensatedMaxHood,
     };
 
 

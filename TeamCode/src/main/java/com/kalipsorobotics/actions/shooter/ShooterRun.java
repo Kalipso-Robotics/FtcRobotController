@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 
 import com.kalipsorobotics.decode.configs.AprilTagConfig;
 import com.kalipsorobotics.decode.configs.ShooterConfig;
+import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
@@ -166,7 +167,7 @@ public class ShooterRun extends Action {
             // Need to ACCELERATE - current RPS too low
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            shooter.setPower(1);
+            shooter.setPower(1 * targetRPS / MAX_RPS);
             KLog.d("ShooterRun_BangControl", "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
         } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold) {
             // Need to DECELERATE - current RPS too high
