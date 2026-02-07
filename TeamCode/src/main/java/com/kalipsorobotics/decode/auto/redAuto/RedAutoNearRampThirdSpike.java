@@ -246,16 +246,16 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     public RampCycleAction generateRampTrip() {
         RampCycleAction rampTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, 1000, 200);
         rampTrip.getTripToShoot().getShooterReady().setName("rampTrip");
-        rampTrip.getMoveToEat().clearPoints();
+        rampTrip.getMoveToRamp().clearPoints();
         //move to lever
-        rampTrip.getMoveToEat().addPoint(1660, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        rampTrip.getMoveToRamp().addPoint(1660, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //eat at lever
-        rampTrip.getMoveToRamp().addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity()); // eating point
-        rampTrip.getMoveToRamp().setPathAngleTolerance(5);
-        rampTrip.getMoveToRamp().setLookAheadRadius(75);
-        rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(10);
-        rampTrip.getMoveToRamp().setFinalSearchRadius(150);
-        rampTrip.getMoveToRamp().setMaxTimeOutMS(3000);
+        rampTrip.getMoveToEat().addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity()); // eating point
+        rampTrip.getMoveToEat().setPathAngleTolerance(5);
+        rampTrip.getMoveToEat().setLookAheadRadius(75);
+        rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(10);
+        rampTrip.getMoveToEat().setFinalSearchRadius(150);
+        rampTrip.getMoveToEat().setMaxTimeOutMS(3000);
         // move to launch
         rampTrip.getTripToShoot().getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         rampTrip.getTripToShoot().setShouldShooterStop(false);
