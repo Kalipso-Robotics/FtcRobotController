@@ -46,7 +46,9 @@ public class AprilTagDetectionAction extends Action {
     private static final int STABILITY_THRESHOLD = 2;
     public static int CONSECUTIVE_BAD_READING_TOLERANCE = 0;
 
-
+    private Position prevLimelightGlobalPos;
+    private Position globalPos;
+    private final double OUT_OF_RANGE_THRESHOLD_MM = 1200;
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int targetAprilTagId, AllianceColor allianceColor) {
         this.allianceColor = allianceColor;
@@ -97,22 +99,6 @@ public class AprilTagDetectionAction extends Action {
                     double rawCamPoseX = camRelAprilTagPose.getPosition().x;
                     double rawCamPoseZ = camRelAprilTagPose.getPosition().z;
 
-                    // ==================== SPIKE DETECTION ====================
-                    boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
-                    if (isSpike) {
-                        KLog.d("AprilTag_SPIKE", String.format("REJECTED | prev=%.2f° curr=%.2f° delta=%.2f°",
-                                prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
-                        SharedData.getLimelightRawPosition().reset();
-                        hasFound = false;
-                        consecutiveGoodReadings = 0;
-                        prevPitchDeg = rawPitchDeg;
-                        return;
-                    }
-                    prevPitchDeg = rawPitchDeg;
-                    consecutiveGoodReadings++;
-                    consecutiveBadReadings = 0;
-                    consecutiveGoodReadings = Math.min(consecutiveGoodReadings, STABILITY_THRESHOLD + 1);
-
                     // ==================== CALCULATED: Odometry Transform ====================
                     double camRelAprilTagTheta = MathFunctions.angleWrapRad(Math.toRadians(180 + rawPitchDeg));
                     camRelAprilTagPos = new Position(-rawCamPoseZ * 1000, -rawCamPoseX * 1000, camRelAprilTagTheta);
@@ -120,8 +106,30 @@ public class AprilTagDetectionAction extends Action {
                     KLog.d("AprilTag_CAM_REL_APRIL_TAG", String.format("CamRelTag(x=%.1fmm, y=%.1fmm, θ=%.2f°)",
                             camRelAprilTagPos.getX(), camRelAprilTagPos.getY(), Math.toDegrees(camRelAprilTagTheta)));
 
+                    // ==================== CALCULATE GLOBAL POS ====================
+
+                    globalPos = calculateGlobalLimelightPosition();
+
+                    // ==================== SPIKE DETECTION ====================
+                    boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
+                    if (isSpike && globalPos == null) {
+                        KLog.d("AprilTag_SPIKE", String.format("REJECTED | prev=%.2f° curr=%.2f° delta=%.2f°",
+                                prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
+                        SharedData.getLimelightRawPosition().reset();
+                        hasFound = false;
+                        consecutiveGoodReadings = 0;
+                        prevLimelightGlobalPos = new Position(0,0,0);
+                        prevPitchDeg = rawPitchDeg;
+                        return;
+                    }
+                    prevPitchDeg = rawPitchDeg;
+                    prevLimelightGlobalPos = globalPos;
+                    consecutiveGoodReadings++;
+                    consecutiveBadReadings = 0;
+                    consecutiveGoodReadings = Math.min(consecutiveGoodReadings, STABILITY_THRESHOLD + 1);
+
                     // ==================== CALCULATED: Global Position ====================
-                    Position globalPos = calculateGlobalLimelightPosition();
+
                     if (globalPos != null) {
                         SharedData.setLimelightGlobalPosition(globalPos);
                         KLog.d("AprilTag_GLOBAL", String.format("RobotPos(x=%.1fmm, y=%.1fmm, θ=%.2f°)",
@@ -203,9 +211,40 @@ public class AprilTagDetectionAction extends Action {
     }
 
     private boolean isLimelightSpike(double currentPitchDeg, double prevPitchDeg) {
+        if (globalPos == null) {
+            return false;
+        }
+
         double angleDiff = MathFunctions.angleWrapDeg(currentPitchDeg - prevPitchDeg);
-        return Math.abs(angleDiff) > 90;
+        Position odoPos = SharedData.getOdometryWheelIMUPosition();
+
+        KLog.d("AprilTagDetectionAction_CheckingSpike", "Current LL pos " + globalPos +
+                " prev LL pos " + prevLimelightGlobalPos +
+                " Current pitch Deg " + currentPitchDeg +
+                " prev pitch Deg " + prevPitchDeg
+        );
+
+        if (Math.abs(angleDiff) > 90) {
+            KLog.d("AprilTagDetectionAction_Spike", "Delta angle too high, delta: " + angleDiff + " deg");
+            return true;
+        }
+        if (Math.abs(globalPos.getX()) > 3600 || Math.abs(globalPos.getY()) > 3000) {
+            KLog.d("AprilTagDetectionAction_Spike", "Pos out of the field, pos: " + globalPos);
+            return true;
+        }
+        if (globalPos.distanceTo(odoPos) > 600) {
+            KLog.d("AprilTagDetectionAction_Spike", "Delta rel to Odometry too high, LL pos: " + globalPos + " Odometry " + odoPos);
+            return true;
+        }
+
+        if (prevLimelightGlobalPos != null) {
+            double dist = globalPos.distanceTo(prevLimelightGlobalPos);
+
+            if (!prevLimelightGlobalPos.isEmpty() && dist > OUT_OF_RANGE_THRESHOLD_MM) {
+                KLog.d("AprilTagDetectionAction_Spike", "Delta pos too high, delta: " + dist + " mm");
+                return true;
+            }
+        }
+        return false;
     }
-
-
 }
