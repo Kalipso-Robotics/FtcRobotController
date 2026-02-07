@@ -1,12 +1,13 @@
 package com.kalipsorobotics.decode.auto.blueAuto;
 
-import com.kalipsorobotics.cameraVision.AllianceColor;
-import com.kalipsorobotics.decode.auto.redAuto.RedAutoNearRamp;
 import com.kalipsorobotics.decode.configs.TurretConfig;
+import com.kalipsorobotics.cameraVision.AllianceColor;
+import com.kalipsorobotics.decode.auto.redAuto.RedAutoNearRampThirdSpike;
 import com.kalipsorobotics.utilities.SharedData;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-public class BlueAutoNearRamp extends RedAutoNearRamp {
-
+@Autonomous(name = "BlueAutoNearRamp")
+public class BlueAutoNearRampThirdSpike extends RedAutoNearRampThirdSpike {
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;

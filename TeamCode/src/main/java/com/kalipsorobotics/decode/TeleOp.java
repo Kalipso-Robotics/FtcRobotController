@@ -332,15 +332,6 @@ public class TeleOp extends KOpMode {
             return;  // Exit early - shoot has control
         }
 
-        // PRIORITY 3: Manual forward
-        if (intakeRunPressed) {
-            if (!isPending(intakeRun)) {
-                intakeRun = new RunIntake(intake);
-                setLastIntakeAction(intakeRun);
-            }
-            return;  // Exit early
-        }
-
         // PRIORITY 4: Manual reverse
         if (intakeReversePressed) {
             if (!isPending(intakeReverse)) {
@@ -350,11 +341,19 @@ public class TeleOp extends KOpMode {
             return;  // Exit early
         }
 
+
         // PRIORITY 5: Stop when nothing pending
         if (!isPending(intakeStop)) {
             intakeStop = new IntakeStop(intake);
             setLastIntakeAction(intakeStop);
         }
+
+        // PRIORITY 3: Manual forward
+        if (!isPending(intakeRun)) {
+            intakeRun = new RunIntake(intake);
+            setLastIntakeAction(intakeRun);
+        }
+
     }
 
     /**
