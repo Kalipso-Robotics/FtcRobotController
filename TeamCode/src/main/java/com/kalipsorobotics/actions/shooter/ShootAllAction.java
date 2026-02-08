@@ -1,6 +1,7 @@
 package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
+import com.kalipsorobotics.actions.intake.IntakeStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.actions.turret.TurretReadyTeleOp;
@@ -36,6 +37,7 @@ public class ShootAllAction extends KActionSet {
     private TurretReadyTeleOp turretReadyTeleOp;
 
     private ResetOdometryToLimelight resetOdometryToPosition;
+    private IntakeStop intakeStop;
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos) {
         this.stopper = stopper;
@@ -85,6 +87,9 @@ public class ShootAllAction extends KActionSet {
 //        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
 //        activateBraking.setName("ActivateBraking");
 //        this.addAction(activateBraking);
+
+        intake.getIntakeMotor().setPower(0.2);
+
 
         resetOdometryToPosition = new ResetOdometryToLimelight(turret);
         resetOdometryToPosition.setName("resetOdometryToPosition");

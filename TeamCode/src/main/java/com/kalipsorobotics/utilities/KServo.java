@@ -42,7 +42,7 @@ public class KServo {
     public double estimateTimeMs(double currentPosition, double targetPosition) {
         double deltaPosition = Math.abs(targetPosition - currentPosition);
         double time = deltaPosition * rangeDegrees * (1000 / servoSpeedDegPerSec);
-        //0.2 * 255deg * (0.105sec / 60deg) = 0.0892sec
+        // 0.2 * 255 * (1000/400) = 127.5ms
         return time;
         //0.5 * 300deg * 0.25sec/60deg
     }
@@ -50,7 +50,7 @@ public class KServo {
     public void setTargetPosition(double position) {
         lastPosition = servo.getPosition();
         targetPosition = position;
-        if (lastPosition != targetPosition) {
+        if (Math.abs(lastPosition - targetPosition) > 0.000001) {
             estimatedFinishTime = estimateTimeMs(lastPosition, targetPosition) * 1.25;
             startTime = System.currentTimeMillis();
             servo.setPosition(targetPosition);
@@ -81,7 +81,7 @@ public class KServo {
         double deltaTime = (getTime() - startTime);
         KLog.d("KServo_isDone", "time " + deltaTime + " estimated " + estimatedFinishTime);
         if (deltaTime > estimatedFinishTime) {
-            KLog.d("isDone", "done time " + deltaTime + ", port# " + getPortNumber());
+            KLog.d("KServo_isDone", String.format("doneTimeMs: %.2f", deltaTime) + " TargetPosition: " + targetPosition + " Port: " + getPortNumber());
             lastPosition = servo.getPosition();
             return true;
         }

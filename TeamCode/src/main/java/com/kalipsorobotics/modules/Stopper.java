@@ -22,7 +22,7 @@ public class Stopper {
             KLog.d("Stopper", "Hardware servo retrieved: " + (stopper != null ? "SUCCESS" : "NULL"));
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
-            this.stopper = new KServo(stopper, KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false);
+            this.stopper = new KServo(stopper);
             this.stopper.setTargetPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
             KLog.d("Stopper", "Constructor completed successfully");
         } catch (Exception e) {
