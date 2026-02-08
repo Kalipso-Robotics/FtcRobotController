@@ -89,6 +89,7 @@ public class TeleOp extends KOpMode {
     private boolean setTurretOffset0Pressed;
     private boolean parkButtonPressed;
     private boolean leverButtonPressed;
+    private boolean enableLimelightZeroing = true;
 
     private int shootCount = 0;
 
@@ -440,8 +441,12 @@ public class TeleOp extends KOpMode {
                 if (toggleTurretAlign) {
                     turnOnTurret();
                 }
+                if (enableLimelightZeroing) {
+                    resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
+                    resetOdometryToLimelight.updateCheckDone();
+                }
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
-                resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
+
                 shooterRun.setUseOdometry(toggleTurretAlign);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -492,6 +497,7 @@ public class TeleOp extends KOpMode {
             if (!isPending(resetOdometryToLimelight)) {
                 KLog.d("TeleOp_Zeroing", "Zero Limelight button pressed - resetting odometry to limelight position");
                 resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
+                enableLimelightZeroing = true;
                 setLastZeroAction(resetOdometryToLimelight);
                 KLog.d("TeleOp_Zeroing", "Limelight zero action started");
             }
@@ -504,13 +510,14 @@ public class TeleOp extends KOpMode {
 
                 // TODO: Update with actual corner coordinates
                 double cornerX = 0;
-                double cornerY = 2006.6 * allianceColor.getPolarity();
+                double cornerY = -2006.6 * allianceColor.getPolarity();
                 double cornerTheta = 0;
                 Position cornerPosition = new Position(cornerX, cornerY, cornerTheta);
 
                 resetOdometryToCorner = new ResetOdometryToPos(cornerPosition);
+                enableLimelightZeroing = false;
                 setLastZeroAction(resetOdometryToCorner);
-                KLog.d("TeleOp_Zeroing", "Corner zero action started - Position: " + cornerPosition);
+                KLog.d("TeleOp_Zeroing", "Corner zero action started - Position: " + SharedData.getOdometryWheelIMUPosition());
             }
             return;
         }

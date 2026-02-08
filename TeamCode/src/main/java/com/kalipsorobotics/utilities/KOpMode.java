@@ -140,6 +140,10 @@ public abstract class KOpMode extends LinearOpMode {
             shooterRun.updateCheckDone();
         }
 
+        if (lastZeroAction != null) {
+            lastZeroAction.updateCheckDone();
+        }
+
         if (resetOdometryToPosition != null) {
             resetOdometryToPosition.updateCheckDone();
         }

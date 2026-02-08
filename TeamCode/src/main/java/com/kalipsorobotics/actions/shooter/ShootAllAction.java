@@ -89,11 +89,11 @@ public class ShootAllAction extends KActionSet {
 //        this.addAction(activateBraking);
 
         intake.getIntakeMotor().setPower(0.2);
-
-
-        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
-        resetOdometryToPosition.setName("resetOdometryToPosition");
-        this.addAction(resetOdometryToPosition);
+//
+//
+//        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
+//        resetOdometryToPosition.setName("resetOdometryToPosition");
+//        this.addAction(resetOdometryToPosition);
 
         shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
