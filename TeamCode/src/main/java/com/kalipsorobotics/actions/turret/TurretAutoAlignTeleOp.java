@@ -2,8 +2,6 @@ package com.kalipsorobotics.actions.turret;
 
 import static com.kalipsorobotics.actions.turret.TurretAutoAlign.computeTicksFromAngleRad;
 
-import android.util.Log;
-
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 ;
@@ -14,7 +12,6 @@ import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.Turret;
-import com.kalipsorobotics.test.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;

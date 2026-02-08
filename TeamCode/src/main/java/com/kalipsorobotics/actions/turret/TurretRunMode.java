@@ -1,4 +1,4 @@
-package com.kalipsorobotics.test.turret;
+package com.kalipsorobotics.actions.turret;
 
 public enum TurretRunMode {
     RUN_WITH_POWER, // withinRange = true;

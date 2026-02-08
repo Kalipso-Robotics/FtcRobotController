@@ -10,7 +10,6 @@ import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.actions.shooter.ShooterStop;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-import com.kalipsorobotics.actions.turret.TurretStop;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.modules.DriveTrain;
@@ -18,7 +17,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
-import com.kalipsorobotics.test.turret.TurretReady;
+import com.kalipsorobotics.actions.turret.TurretReadyAuto;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
@@ -39,7 +38,7 @@ public class RoundTripAction extends KActionSet {
     private final PurePursuitReady purePursuitReady;
     private final ShooterStop shooterStop;
     private final TurretAutoAlign turretAutoAlign;
-    private final TurretReady turretReady;
+    private final TurretReadyAuto turretReadyAuto;
     private boolean hasUpdatedShooterReady = false;
     private boolean shouldShooterStop = true;
 
@@ -90,10 +89,10 @@ public class RoundTripAction extends KActionSet {
             intakeFullAction.setIsDone(true);
         }
 
-        turretReady = new TurretReady(turretAutoAlign);
-        turretReady.setName("turretReady");
-        turretReady.setDependentActions(moveToBalls);
-        this.addAction(turretReady);
+        turretReadyAuto = new TurretReadyAuto(turretAutoAlign);
+        turretReadyAuto.setName("turretReady");
+        turretReadyAuto.setDependentActions(moveToBalls);
+        this.addAction(turretReadyAuto);
 
 //        TurretStop turretStop = new TurretStop(turretAutoAlign);
 //        turretStop.setName("turretStop");
@@ -103,9 +102,9 @@ public class RoundTripAction extends KActionSet {
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("shoot");
         if (shouldDependOnFlywheel) {
-            pushBall.setDependentActions(purePursuitReady, shooterReady, turretReady); //removed turretReady
+            pushBall.setDependentActions(purePursuitReady, shooterReady, turretReadyAuto); //removed turretReady
         } else {
-            pushBall.setDependentActions(purePursuitReady, turretReady);
+            pushBall.setDependentActions(purePursuitReady, turretReadyAuto);
         }
 //        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(150);
         this.addAction(pushBall);
@@ -166,7 +165,7 @@ public class RoundTripAction extends KActionSet {
                 shooterReady.getIsDone() ? "DONE" : "NOT DONE",
                 shooterRun.getIsDone() ? "DONE" : "NOT DONE",
                 pushBall.getIsDone() ? "DONE" : "NOT DONE",
-                turretReady.getIsDone() ? "DONE" : "NOT DONE"));
+                turretReadyAuto.getIsDone() ? "DONE" : "NOT DONE"));
         KLog.d("RoundTrip", String.format("[%s] PP isWithinRange=%b",
                 getName() != null ? getName() : "unnamed",
                 moveToBall.isWithinRange()));
@@ -176,7 +175,7 @@ public class RoundTripAction extends KActionSet {
     @Override
     public void afterUpdate() {
         if (pushBall.getIsDone()) {
-            turretReady.setIsDone(true);
+            turretReadyAuto.setIsDone(true);
             shooterReady.setIsDone(true);
             shooterRun.setIsDone(true);
             intakeFullAction.setIsDone(true);

@@ -47,7 +47,7 @@ public class ShooterInterpolationConfig {
             1310, 47.0, compensatedMaxHood - 0.18, //roughly first shot for near auto
             1518, 47.5, compensatedMaxHood - 0.1,
             1705, 50.4, compensatedMaxHood - 0.08,
-            1898, 53.7, compensatedMaxHood - 0.04,
+            1898, 53.0, compensatedMaxHood - 0.04,
             2075, 54.2, compensatedMaxHood,
             2244, 56.7, compensatedMaxHood,
             2417, 57.4, compensatedMaxHood,

@@ -1,14 +1,9 @@
 package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.KActionSet;
-import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-import com.kalipsorobotics.actions.actionUtilities.WaitAction;
-import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
-import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import com.kalipsorobotics.actions.shooter.pusher.PushBall;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import com.kalipsorobotics.actions.turret.TurretReady;
-import com.kalipsorobotics.actions.turret.TurretStop;
+import com.kalipsorobotics.actions.turret.TurretReadyTeleOp;
 import com.kalipsorobotics.localization.ResetOdometryToLimelight;
 import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.Intake;
@@ -38,7 +33,7 @@ public class ShootAllAction extends KActionSet {
 
     private PushBall pushBall;
 
-    private TurretReady turretReady;
+    private TurretReadyTeleOp turretReadyTeleOp;
 
     private ResetOdometryToLimelight resetOdometryToPosition;
 
@@ -99,10 +94,10 @@ public class ShootAllAction extends KActionSet {
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 
-        turretReady = new TurretReady(turretAutoAlignTeleop);
-        turretReady.setName("turretReady");
-        turretReady.setDependentActions(resetOdometryToPosition);
-        this.addAction(turretReady);
+        turretReadyTeleOp = new TurretReadyTeleOp(turretAutoAlignTeleop);
+        turretReadyTeleOp.setName("turretReady");
+        turretReadyTeleOp.setDependentActions(resetOdometryToPosition);
+        this.addAction(turretReadyTeleOp);
 
 //        TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
 //        turretStop.setName("turretStop");
@@ -111,7 +106,7 @@ public class ShootAllAction extends KActionSet {
 
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("pushAllBalls");
-        pushBall.setDependentActions(shooterReady, turretReady);
+        pushBall.setDependentActions(shooterReady, turretReadyTeleOp);
         this.addAction(pushBall);
 
 //        TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
@@ -141,7 +136,7 @@ public class ShootAllAction extends KActionSet {
             hasStarted = true;
         }
 
-        KLog.d("ShootAllAction_Status", "ShooterReady: " + shooterReady.getIsDone() + " TurretReady: " + turretReady.getIsDone() + " PushBall: " + pushBall.getIsDone());
+        KLog.d("ShootAllAction_Status", "ShooterReady: " + shooterReady.getIsDone() + " TurretReady: " + turretReadyTeleOp.getIsDone() + " PushBall: " + pushBall.getIsDone());
     }
 
     @Override
@@ -155,7 +150,7 @@ public class ShootAllAction extends KActionSet {
     }
 
     public void setTurretReady(boolean isDone) {
-        turretReady.setIsDone(isDone);
+        turretReadyTeleOp.setIsDone(isDone);
     }
 
 }

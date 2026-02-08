@@ -53,8 +53,9 @@ public class KServo {
         if (lastPosition != targetPosition) {
             estimatedFinishTime = estimateTimeMs(lastPosition, targetPosition) * 1.25;
             startTime = System.currentTimeMillis();
+            servo.setPosition(targetPosition);
         }
-        servo.setPosition(targetPosition);
+
 
 //        time.reset();
     }

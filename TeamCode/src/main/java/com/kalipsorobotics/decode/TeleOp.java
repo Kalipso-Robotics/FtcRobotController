@@ -27,14 +27,12 @@ import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.navigation.PurePursuitAction;
-import com.kalipsorobotics.test.turret.TurretRunMode;
+import com.kalipsorobotics.actions.turret.TurretRunMode;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.kalipsorobotics.utilities.SharedData;
-
-import org.opencv.core.Mat;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
@@ -272,15 +270,6 @@ public class TeleOp extends KOpMode {
 
 
         if (drivingSticksActive) {
-            if (releaseBrakeAction == null || releaseBrakeAction.getIsDone()) {
-                releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
-                setLastBrakingAction(releaseBrakeAction);
-            }
-            if (shootAllAction != null) {
-                shootAllAction.setIsDone(true);
-                closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-                setLastStopperAction(closeStopper);
-            }
             driveAction.move(gamepad1);
             leverAction = null;
             parkAction = null;
@@ -374,6 +363,7 @@ public class TeleOp extends KOpMode {
         if (releaseStopperPressed) {
             if (!isPending(openStopper)) {
                 openStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_OPEN_POS);
+                openStopper.setName("openStopper");
                 closeStopper = null;
                 setLastStopperAction(openStopper);
             }
@@ -386,6 +376,7 @@ public class TeleOp extends KOpMode {
             if (!isPending(closeStopper)) {
                 KLog.d("TeleOp_Stopper", "Close Stopper");
                 closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
+                closeStopper.setName("closeStopper");
                 openStopper = null;
                 setLastStopperAction(closeStopper);
             }
