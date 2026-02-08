@@ -20,6 +20,7 @@ public class ResetOdometryToLimelight extends Action {
         double turretVelocity = turret.getCurrentVelocity();
         if (SharedData.getLimelightRawPosition().isEmpty() || turretVelocity > 10) {
             KLog.d("ResetOdometryToPosition", "No Valid Detection Not Updating. turretVelocity (deg / sec):  " + turretVelocity);
+            isDone = true;
             return;
         }
         Position limelightGlobalPosition = SharedData.getLimelightGlobalPosition();

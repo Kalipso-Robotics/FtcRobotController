@@ -42,12 +42,12 @@ public class ShooterInterpolationConfig {
 
     static double compensatedMaxHood = 0.31754;
     public static double[] shooterData = {
-            810, 46.2, compensatedMaxHood - 0.16,
-            1050, 46.5, compensatedMaxHood - 0.18,
-            1310, 47.0, compensatedMaxHood - 0.18, //roughly first shot for near auto
-            1518, 47.5, compensatedMaxHood - 0.1,
-            1705, 50.4, compensatedMaxHood - 0.08,
-            1898, 53.0, compensatedMaxHood - 0.04,
+            810, 46.2, compensatedMaxHood - 0.12,
+            1050, 46.5, compensatedMaxHood - 0.08,
+            1310, 46.8, compensatedMaxHood - 0.08, //roughly first shot for near auto
+            1518, 47.5, compensatedMaxHood,
+            1705, 50.4, compensatedMaxHood,
+            1898, 53.0, compensatedMaxHood,
             2075, 54.2, compensatedMaxHood,
             2244, 56.7, compensatedMaxHood,
             2417, 57.4, compensatedMaxHood,
