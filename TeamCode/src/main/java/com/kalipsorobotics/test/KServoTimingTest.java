@@ -74,7 +74,7 @@ public class KServoTimingTest extends LinearOpMode {
 
                         // Calculate expected time manually
                         double deltaPosition = Math.abs(testPositions[currentTest] - servo.getPosition());
-                        estimatedTime = deltaPosition * 242 * (1000.0 / KServo.AXON_MAX_SPEED) * 1.25;
+                        estimatedTime = deltaPosition * 242 * (1000.0 / KServo.AXON_MAX_SPEED_DEG_PER_SEC) * 1.25;
 
                         sleep(100); // debounce
                     }

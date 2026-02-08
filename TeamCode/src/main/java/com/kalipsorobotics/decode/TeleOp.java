@@ -239,6 +239,7 @@ public class TeleOp extends KOpMode {
             // ========== UPDATE ACTIONS ==========
             updateActions();
             telemetry.addData("Odometry: ", SharedData.getOdometryWheelIMUPosition().toCompactString());
+            telemetry.addData("Shot: ", shootCount);
             telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Current RPS ", "%.2f", shooter.getRPS());
             telemetry.addData("Distance ", "%.0f", ShooterRun.getDistanceToTargetFromCurrentPos(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity())));
@@ -399,10 +400,10 @@ public class TeleOp extends KOpMode {
 
         if (incrementRPSPressed) {
             ShooterInterpolationConfig.rpsOffset += 0.1;
-            KLog.d("TeleOp_Shooting", "Increment Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
+            KLog.d("TeleOp_Shooting_RPS_offset", "Increment Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
         } else if (decrementRPSPressed) {
             ShooterInterpolationConfig.rpsOffset -= 0.1;
-            KLog.d("TeleOp_Shooting", "Decrement Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
+            KLog.d("TeleOp_Shooting_RPS_offset", "Decrement Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
         }
 
         double hoodPosition;
@@ -411,12 +412,12 @@ public class TeleOp extends KOpMode {
             ShooterInterpolationConfig.hoodOffset += 0.02;
             hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() + 0.02);
             shooter.getHood().setPosition(hoodPosition);
-            KLog.d("TeleOp_Shooting", "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
+            KLog.d("TeleOp_Shooting_Hood_Offset", "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         } else if (decrementHoodPressed) {
             ShooterInterpolationConfig.hoodOffset -= 0.02;
             hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() - 0.02);
             shooter.getHood().setPosition(hoodPosition);
-            KLog.d("TeleOp_Shooting", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
+            KLog.d("TeleOp_Shooting_Hood_offset", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         }
 
         // Priority 1- Stop shooter
@@ -438,7 +439,7 @@ public class TeleOp extends KOpMode {
 
         //Shooting Running --> return;
         if (isPending(shootAllAction)) {
-            KLog.d("TeleOp_Shooting", "shootAllAction Pending -> Return");
+            //KLog.d("TeleOp_Shooting", "shootAllAction Pending -> Return");
             return;
         }
 
@@ -475,7 +476,7 @@ public class TeleOp extends KOpMode {
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getFarShoot()[0], ShooterInterpolationConfig.getFarShoot()[1]);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
+                KLog.d("TeleOp_Shooting_Forced", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
             return;
         }
@@ -488,7 +489,7 @@ public class TeleOp extends KOpMode {
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                KLog.d("TeleOp_Shooting", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
+                KLog.d("TeleOp_Shooting_Forced", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
             return;
         }

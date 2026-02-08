@@ -140,6 +140,8 @@ public class ShootAllAction extends KActionSet {
             shooterRun.update();
             hasStarted = true;
         }
+
+        KLog.d("ShootAllAction_Status", "ShooterReady: " + shooterReady.getIsDone() + " TurretReady: " + turretReady.getIsDone() + " PushBall: " + pushBall.getIsDone());
     }
 
     @Override

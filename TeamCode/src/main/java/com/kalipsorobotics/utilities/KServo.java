@@ -1,14 +1,13 @@
 package com.kalipsorobotics.utilities;
 
 import com.kalipsorobotics.math.MathFunctions;
-import com.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class KServo {
-    public final static double AXON_MAX_SPEED = 60.0/0.3;
-    private final double servoSpeed; // degrees per sec Axon Max 4.8V: 428.57 deg/sec
+    public final static double AXON_MAX_SPEED_DEG_PER_SEC = 400;
+    private final double servoSpeedDegPerSec; // degrees per sec Axon Max 4.8V: 428.57 deg/sec
     private final Servo servo;
     private final double rangeDegrees;
     private final double zeroPosition;
@@ -24,9 +23,9 @@ public class KServo {
     private double startTime;
     private double estimatedFinishTime;
 
-    public KServo(Servo servo, double servoSpeed, double rangeDegrees, double zeroPosition, boolean flipDirection) {
+    public KServo(Servo servo, double servoSpeedDegPerSec, double rangeDegrees, double zeroPosition, boolean flipDirection) {
         this.servo = servo;
-        this.servoSpeed = servoSpeed;
+        this.servoSpeedDegPerSec = servoSpeedDegPerSec;
         this.rangeDegrees = rangeDegrees;
         this.flipDirection = flipDirection;
         this.servo.setDirection(flipDirection ? Servo.Direction.REVERSE : Servo.Direction.FORWARD);
@@ -35,14 +34,14 @@ public class KServo {
     }
 
     public KServo(Servo servo) {
-        this(servo, KServo.AXON_MAX_SPEED, 255, 0, false);
+        this(servo, KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false);
     }
 
     private final int counter = 0;
 
     public double estimateTimeMs(double currentPosition, double targetPosition) {
         double deltaPosition = Math.abs(targetPosition - currentPosition);
-        double time = deltaPosition * rangeDegrees * (1000 / servoSpeed);
+        double time = deltaPosition * rangeDegrees * (1000 / servoSpeedDegPerSec);
         //0.2 * 255deg * (0.105sec / 60deg) = 0.0892sec
         return time;
         //0.5 * 300deg * 0.25sec/60deg
