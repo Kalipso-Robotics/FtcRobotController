@@ -198,7 +198,7 @@ public class TeleOp extends KOpMode {
 
             forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
             forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
-            shootAllActionPressed = kGamePad1.isLeftBumperFirstPressed();
+            shootAllActionPressed = kGamePad1.isLeftBumperPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
             zeroLimelightPressed = kGamepad2IsDpadUpFirstPressed;
             zeroCornerPressed = kGamepad2IsDpadDownFirstPressed;

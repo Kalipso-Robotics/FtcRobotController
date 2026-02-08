@@ -49,6 +49,7 @@ public class KGamePad {
     }
 
     public boolean isLeftBumperPressed(){
+        KLog.d("KGamePad", "Left Bumper: " + gamepad.left_bumper);
         return gamepad.left_bumper;
     }
 
