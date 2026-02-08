@@ -30,7 +30,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     final double FIRST_SHOOT_Y = 128;
     final double SHOOT_NEAR_X = 1765; //2400
     final double SHOOT_NEAR_Y = 0; //300
-    final double FINAL_SHOOT_NEAR_X = 2450;
+    final double FINAL_SHOOT_NEAR_X = 2475;
     final double FINAL_SHOOT_NEAR_Y = 0; //300
     final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300

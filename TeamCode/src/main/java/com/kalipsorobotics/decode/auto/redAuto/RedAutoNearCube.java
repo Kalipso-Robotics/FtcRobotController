@@ -26,12 +26,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous
 public class RedAutoNearCube extends KOpMode {
     KActionSet redAutoNear;
-    final double FIRST_SHOOT_X = 2598;
-    final double FIRST_SHOOT_Y = 441.38;
+    final double FIRST_SHOOT_X = 2400;
+    final double FIRST_SHOOT_Y = 128;
     final double SHOOT_NEAR_X = 2050; //2400
     final double SHOOT_NEAR_Y = 100; //300
-    final double FINAL_SHOOT_NEAR_X = 2325; //2400
-    final double FINAL_SHOOT_NEAR_Y = 75; //300
+    final double FINAL_SHOOT_NEAR_X = 2475; //2400
+    final double FINAL_SHOOT_NEAR_Y = 0; //300
     final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300
     Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX() - 141.4213562373, Shooter.TARGET_POINT.getY() - 141.4213562373);
@@ -129,7 +129,7 @@ public class RedAutoNearCube extends KOpMode {
         trip1.getMoveToBall().addPoint(1950, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(1950, 650 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
         // move to hit lever
-        trip1.getMoveToBall().addPoint(1725, 900 * allianceColor.getPolarity() , -10);
+        trip1.getMoveToBall().addPoint(1725, 925 * allianceColor.getPolarity() , -10);
         trip1.getMoveToBall().addPoint(1725, 1060 * allianceColor.getPolarity(), -10);
         trip1.getMoveToBall().addPoint(1725, 850 * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
         // move to shoot
@@ -171,10 +171,10 @@ public class RedAutoNearCube extends KOpMode {
 
         // ----------------- TRIP 5 (park) ----------------------
 
-        PurePursuitAction park = new PurePursuitAction(driveTrain);
-        park.setDependentActions(trip4);
-        park.addPoint(1725, 250 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
-        redAutoNear.addAction(park);
+//        PurePursuitAction park = new PurePursuitAction(driveTrain);
+//        park.setDependentActions(trip4);
+//        park.addPoint(1725, 250 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
+//        redAutoNear.addAction(park);
 
 //        RampCycleAction trip5 = generateTunnelTrip("trip5", lastTripLaunchPoint);
 //        trip5.setDependentActions(trip4);
@@ -240,7 +240,7 @@ public class RedAutoNearCube extends KOpMode {
 //        trip4.getMoveToBall().setWithinRangeRadiusMM(300);
 //        redAutoNear.addAction(trip4);
 
-        trip4 = generateTunnelTrip("trip4", nearLaunchPoint);
+        trip4 = generateTunnelTrip("trip4", lastTripLaunchPoint);
         trip4.getTripToShoot().getShooterReady().setName("shooterReady_trip4");
         trip4.setDependentActions(trip3);
         redAutoNear.addAction(trip4);

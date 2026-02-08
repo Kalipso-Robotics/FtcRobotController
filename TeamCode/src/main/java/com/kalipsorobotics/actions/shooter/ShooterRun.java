@@ -22,7 +22,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterRun extends Action {
 
-    public static final double FAR_TOLERANCE = 1;
+    public static final double FAR_TOLERANCE = 0.75;
     public static final double MIDDLE_TOLERANCE = 1;
     public static final double NEAR_TOLERANCE = 1;
     private final OpModeUtilities opModeUtilities;
@@ -167,7 +167,7 @@ public class ShooterRun extends Action {
             // Need to ACCELERATE - current RPS too low
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            shooter.setPower(1 * targetRPS / MAX_RPS);
+            shooter.setPower(calculateEffectiveCompensationPower());
             KLog.d("ShooterRun_BangControl", "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
         } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold) {
             // Need to DECELERATE - current RPS too high
@@ -312,6 +312,14 @@ public class ShooterRun extends Action {
             return MIDDLE_TOLERANCE;
         } else {
             return NEAR_TOLERANCE;
+        }
+    }
+
+    public double calculateEffectiveCompensationPower() {
+        if (distanceMM > NEAR_DISTANCE) {
+            return 1;
+        } else {
+            return 0.9;
         }
     }
 }
