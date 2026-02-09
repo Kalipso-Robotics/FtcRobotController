@@ -53,6 +53,7 @@ public class TurretAutoAlign extends Action {
 
     public void stop() {
         turretMotor.stop();
+        KLog.d("Turret_STOP", "Auto turret stop called");
     }
     public void initBlocking() {
         ElapsedTime timer = new ElapsedTime();

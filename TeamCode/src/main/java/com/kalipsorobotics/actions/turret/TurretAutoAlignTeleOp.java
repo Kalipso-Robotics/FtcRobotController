@@ -209,7 +209,7 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     public void stop() {
-        //KLog.d("Turret_STOP", Log.getStackTraceString(new Throwable("stop() called")));
+        KLog.d("Turret_STOP", "Teleop turret stop called");
         setTurretRunMode(TurretRunMode.STOP);
     }
 

@@ -444,6 +444,7 @@ public class TeleOp extends KOpMode {
                 if (enableLimelightZeroing) {
                     resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
                     resetOdometryToLimelight.updateCheckDone();
+                    forceUpdateShootingActions();
                 }
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
 
@@ -523,4 +524,8 @@ public class TeleOp extends KOpMode {
         }
     }
 
+    public void forceUpdateShootingActions() {
+        turretAutoAlignTeleOp.updateCheckDone();
+        shooterRun.updateCheckDone();
+    }
 }
