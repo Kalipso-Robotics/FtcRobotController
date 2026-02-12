@@ -254,4 +254,12 @@ public class Position {
     public boolean isEmpty() {
         return (x == 0 && y == 0 && theta == 0);
     }
+
+    public Position predictPos(Velocity v, double deltaTimeMS) {
+        return new Position(this.getX() + v.getX() * deltaTimeMS, this.getY() + v.getY() * deltaTimeMS, MathFunctions.angleWrapRad(this.getTheta() + v.getTheta() * deltaTimeMS));
+    }
+
+    public Position calculateDelta(Position pose) {
+        return new Position(this.getX() - pose.getX(), this.getY() - pose.getY(), this.getTheta() - pose.theta);
+    }
 }

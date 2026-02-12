@@ -1,17 +1,22 @@
 package com.kalipsorobotics.actions.turret;
 
 import static com.kalipsorobotics.actions.turret.TurretAutoAlign.computeTicksFromAngleRad;
+import static com.kalipsorobotics.decode.configs.TurretConfig.LOOK_AHEAD_TIME_MS;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
 import com.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 ;
 import com.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
+import com.kalipsorobotics.actions.shooter.ShooterRun;
 import com.kalipsorobotics.cameraVision.AllianceColor;
 import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.math.Velocity;
 import com.kalipsorobotics.modules.Turret;
+import com.kalipsorobotics.modules.shooter.FlightTimeInterpolationLUT;
+import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KMotor;
 import com.kalipsorobotics.utilities.OpModeUtilities;
@@ -130,6 +135,10 @@ public class TurretAutoAlignTeleOp extends Action {
 //        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
 //        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle -   robotAngleRad);
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
+        if (TurretConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+            currentPos = getPredictedPos(targetPoint, currentPos, LOOK_AHEAD_TIME_MS);
+        }
+
         double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos, ticksOffset);
 
         if (turretRunMode == TurretRunMode.RUN_USING_ODOMETRY) {
@@ -274,5 +283,21 @@ public class TurretAutoAlignTeleOp extends Action {
 
     public double getDeltaAngleDeg() {
         return deltaAngleDeg;
+    }
+
+    public static Position getPredictedPos(Point targetPoint, Position currentPos, double lookAheadTimeMS) {
+        double distanceToGoal = currentPos.toPoint().distanceTo(targetPoint);
+        if (TurretConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+            Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
+            Position predictedPos = currentPos.predictPos(currentVelocity, lookAheadTimeMS);
+
+            KLog.d("SOTM", "Look Ahead Time MS: " + lookAheadTimeMS +
+                    " CurrentVelocity: " + currentVelocity +
+                    " Delta Pos: " + predictedPos.calculateDelta(currentPos) +
+                    " Delta Dist. to goal: " + (predictedPos.toPoint().distanceTo(targetPoint) - distanceToGoal)
+            );
+            currentPos = predictedPos;
+        }
+        return currentPos;
     }
 }

@@ -19,6 +19,8 @@ public class ShooterInterpolationConfig {
     public static double minHoodCompensate = -0.02166;
     public static double maxHoodCompensate = 0.02166;
     public static double hoodCompensateCoefficient = maxHoodCompensate; // 0.2
+
+    public static  double DEFAULT_VOLTAGE = 13.367;
     /*
     public static double[] shooterData0 = {
             710, 33.2 + rpsHack, MIN_HOOD,

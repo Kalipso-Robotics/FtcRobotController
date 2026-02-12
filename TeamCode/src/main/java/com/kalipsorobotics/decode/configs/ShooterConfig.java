@@ -16,4 +16,5 @@ public class ShooterConfig {
     public static double decelBoostDeltaRPSThreshold = -2;
 
     public static boolean hoodFlipDirection = true;
+    public static boolean SHOULD_SHOOT_ON_THE_MOVE = true;
 }

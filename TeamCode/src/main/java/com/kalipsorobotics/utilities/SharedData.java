@@ -5,6 +5,7 @@ import com.kalipsorobotics.localization.OdometrySensorCombinations;
 import com.kalipsorobotics.math.LimelightPos;
 import com.kalipsorobotics.math.Position;
 import com.kalipsorobotics.math.PositionHistory;
+import com.kalipsorobotics.math.Velocity;
 
 import java.util.HashMap;
 
@@ -83,5 +84,30 @@ public class SharedData {
     public static void setAllianceColor(AllianceColor allianceColor) {
         SharedData.allianceColor = allianceColor;
     }
+
+    private static final Velocity odometryWheelVelocity = new Velocity(0, 0, 0);
+
+    public static Velocity getOdometryWheelVelocity() {
+        return new Velocity(odometryWheelVelocity);
+    }
+    public static void setOdometryWheelVelocity(Velocity velocity) {
+        odometryWheelVelocity.reset(velocity);
+    }
+    public static void resetOdometryWheelVelocity() {
+        odometryWheelVelocity.reset(new Velocity(0, 0, 0));
+    }
+
+    private static final Velocity odometryWheelIMUVelocity = new Velocity(0, 0, 0);
+
+    public static Velocity getOdometryWheelIMUVelocity() {
+        return new Velocity(odometryWheelIMUVelocity);
+    }
+    public static void setOdometryWheelIMUVelocity(Velocity velocity) {
+        odometryWheelIMUVelocity.reset(velocity);
+    }
+    public static void resetOdometryWheelIMUVelocity() {
+        odometryWheelIMUVelocity.reset(new Velocity(0, 0, 0));
+    }
+
 
 }

@@ -2,8 +2,8 @@ package com.kalipsorobotics.math;
 
 public class ExponentialVelocityFiltering {
     private final double alpha;
-    private double filteredVelocity;
-    private double pastVelocity;
+    private Velocity filteredVelocity;
+    private Velocity pastVelocity;
     private boolean initialized;
 
     public ExponentialVelocityFiltering(double alpha) {
@@ -11,18 +11,13 @@ public class ExponentialVelocityFiltering {
             throw new IllegalArgumentException("Alpha must be between 0.0 and 1.0");
         }
         this.alpha = alpha;
-        this.pastVelocity = 0.0;
-        this.filteredVelocity = 0.0;
+        this.pastVelocity = new Velocity(0,0,0);
+        this.filteredVelocity = new Velocity(0,0,0);
         this.initialized = false;
     }
 
-    public double calculateFilteredVelocity(double newVelocity) {
-        // Handle invalid inputs
-        if (Double.isNaN(newVelocity) || Double.isInfinite(newVelocity)) {
-            return filteredVelocity;
-        }
+    public Velocity calculateFilteredVelocity(Velocity newVelocity) {
 
-        // On first call, initialize with the first measurement
         if (!initialized) {
             filteredVelocity = newVelocity;
             pastVelocity = newVelocity;
@@ -30,18 +25,23 @@ public class ExponentialVelocityFiltering {
             return filteredVelocity;
         }
 
-        filteredVelocity = newVelocity * alpha + (1 - alpha) * pastVelocity;
+        double filteredX = newVelocity.getX() * alpha + (1 - alpha) * pastVelocity.getX();
+        double filteredY = newVelocity.getY() * alpha + (1 - alpha) * pastVelocity.getY();
+        double filteredTheta = newVelocity.getTheta() * alpha + (1 - alpha) * pastVelocity.getTheta();
+
+        filteredVelocity = new Velocity(filteredX, filteredY, filteredTheta);
+
         pastVelocity = filteredVelocity;
         return filteredVelocity;
     }
 
     public void reset() {
-        filteredVelocity = 0.0;
-        pastVelocity = 0.0;
+        filteredVelocity = new Velocity(0,0,0);
+        pastVelocity = new Velocity(0,0,0);
         initialized = false;
     }
 
-    public double getFilteredVelocity() {
+    public Velocity getFilteredVelocity() {
         return filteredVelocity;
     }
 

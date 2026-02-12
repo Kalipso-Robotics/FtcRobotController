@@ -4,10 +4,13 @@ import static com.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import android.annotation.SuppressLint;
 
+import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.decode.configs.AprilTagConfig;
 import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import com.kalipsorobotics.math.MathFunctions;
+import com.kalipsorobotics.math.Position;
+import com.kalipsorobotics.modules.shooter.FlightTimeInterpolationLUT;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -43,7 +46,6 @@ public class ShooterRun extends Action {
 
     private boolean useOdometry = true;
     private boolean isWithinRange = false;
-
 
 
     public ShooterRun(OpModeUtilities opModeUtilities, Shooter shooter, double targetRPS, double targetHoodPosition) {
@@ -296,7 +298,14 @@ public class ShooterRun extends Action {
     }
 
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
-        return SharedData.getOdometryWheelIMUPosition().toPoint().distanceTo(targetPoint);
+        Position currentPos = SharedData.getOdometryWheelIMUPosition();
+
+        if (ShooterConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+            Position predictedPos = TurretAutoAlignTeleOp.getPredictedPos(targetPoint, currentPos, FlightTimeInterpolationLUT.calculate(currentPos.toPoint().distanceTo(targetPoint)));
+            return predictedPos.toPoint().distanceTo(targetPoint);
+        }
+
+        return currentPos.toPoint().distanceTo(targetPoint);
     }
 
     public void setUseOdometry(boolean useOdometry) {

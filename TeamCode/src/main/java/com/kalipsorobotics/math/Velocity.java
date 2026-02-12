@@ -5,14 +5,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 public class Velocity {
-    final private double x;
-    final private double y;
-    final private double theta;
+    private double x;
+    private double y;
+    private double theta;
 
     public Velocity(double x, double y, double theta) {
         this.x = x;
         this.y = y;
         this.theta = theta;
+    }
+
+    public Velocity(Velocity v) {
+        this(v.getX(), v.getY(), v.getTheta());
     }
 
 //add vector to vector
@@ -37,11 +41,7 @@ public class Velocity {
     }
     @Override
     public String toString() {
-        return "{" +
-                "x=" + x +
-                ", y=" + y +
-                ", theta=" + theta +
-                '}';
+        return String.format("(x=%.2f, y=%.2f, theta=%.6f)", x, y, theta);
     }
 
     public double getX() {
@@ -55,4 +55,11 @@ public class Velocity {
     public double getTheta() {
         return theta;
     }
+
+    public void reset(Velocity velocity) {
+        this.x = velocity.getX();
+        this.y = velocity.getY();
+        this.theta = velocity.getTheta();
+    }
 }
+
