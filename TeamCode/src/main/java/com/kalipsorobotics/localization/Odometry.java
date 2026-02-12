@@ -267,7 +267,6 @@ public class Odometry {
 
         Velocity rawVelocity = new Velocity(deltaX / deltaTimeMS, deltaY / deltaTimeMS, imuDeltaTheta / deltaTimeMS);
 
-        robotWheelIMUVelocity = ema.calculateFilteredVelocity(rawVelocity);
 
         KLog.d("Odometry_WheelIMUVelocity", "Raw Velocity: " + rawVelocity +
                 " Filtered Velocity: " + robotWheelVelocity);
@@ -330,6 +329,10 @@ public class Odometry {
         wheelRelDelta = linearToArcDelta(wheelRelDelta);
         Position globalPosition = calculateGlobal(wheelRelDelta, prevPositionWheel);
 
+        Position deltaPos = globalPosition.calculateDelta(prevPositionWheel);
+        Velocity rawVelocity = new Velocity(deltaPos.getX() / timeElapsedMS, deltaPos.getY() / timeElapsedMS, deltaPos.getTheta() / timeElapsedMS);
+        robotWheelVelocity = ema.calculateFilteredVelocity(rawVelocity);
+
         wheelPositionHistory.setRawIMU(currentImuHeading);
         wheelPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);
         wheelPositionHistory.setCurrentPosition(globalPosition);
@@ -345,6 +348,10 @@ public class Odometry {
                 timeElapsedMS);
         wheelIMURelDelta = linearToArcDelta(wheelIMURelDelta);
         Position globalPosition = calculateGlobal(wheelIMURelDelta, prevPositionWheelIMU);
+
+        Position deltaPos = globalPosition.calculateDelta(prevPositionWheelIMU);
+        Velocity rawVelocity = new Velocity(deltaPos.getX() / timeElapsedMS, deltaPos.getY() / timeElapsedMS, deltaPos.getTheta() / timeElapsedMS);
+        robotWheelIMUVelocity = ema.calculateFilteredVelocity(rawVelocity);
 
         wheelIMUPositionHistory.setRawIMU(currentImuHeading);
         wheelIMUPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);

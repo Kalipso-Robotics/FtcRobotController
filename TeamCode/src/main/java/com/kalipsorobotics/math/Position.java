@@ -260,6 +260,6 @@ public class Position {
     }
 
     public Position calculateDelta(Position pose) {
-        return new Position(this.getX() - pose.getX(), this.getY() - pose.getY(), this.getTheta() - pose.theta);
+        return new Position(this.getX() - pose.getX(), this.getY() - pose.getY(), MathFunctions.angleWrapRad(this.getTheta() - pose.theta));
     }
 }
