@@ -15,8 +15,8 @@ cd /Users/ethan/Kalipso-Robotics
 cd /Users/ethan/Kalipso-Robotics/TeamCode
 
 # Compile and run
-javac src/test/java/com/kalipsorobotics/modules/shooter/StandaloneShooterLutPredictorTest.java
-java -cp src/test/java com.kalipsorobotics.modules.shooter.StandaloneShooterLutPredictorTest
+javac src/test/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/StandaloneShooterLutPredictorTest.java
+java -cp src/test/java org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.StandaloneShooterLutPredictorTest
 ```
 
 ## What the Test Does
@@ -32,12 +32,12 @@ The test verifies the ShooterLutPredictor using real data from `Shooter LUT.json
 ## Files Created
 
 1. **ShooterLutPredictorTest.java** - JUnit test
-   - Location: `src/test/java/com/kalipsorobotics/modules/shooter/`
+   - Location: `src/test/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/`
    - Run with: `./gradlew :TeamCode:testDebugUnitTest`
    - Uses data directly from: `src/main/assets/ShooterLUT.json`
 
 2. **StandaloneShooterLutPredictorTest.java** - Standalone test (no dependencies)
-   - Location: `src/test/java/com/kalipsorobotics/modules/shooter/`
+   - Location: `src/test/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/`
    - Can run with just `java` and `javac` commands
    - Uses data from: `src/test/resources/ShooterLUT.json`
 

@@ -1,0 +1,265 @@
+package org.firstinspires.ftc.teamcode.kalipsorobotics.math;
+
+
+import org.firstinspires.ftc.teamcode.kalipsorobotics.PID.PidNav;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
+
+import org.checkerframework.dataflow.qual.Pure;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+/**
+ *
+ * EVERYTHING HERE IS RADIANS
+ *
+ */
+
+
+public class Position {
+    private double x;
+    private double y;
+    private double theta;
+
+    private double distanceAlongPath;
+    private double distanceFromPrev;
+    private double curvature;
+    private double velocity;
+    private double acceleration;
+
+    private PidNav pidX = new PidNav(PurePursuitAction.P_XY, 0, PurePursuitAction.D_XY);
+    private PidNav pidY = new PidNav(PurePursuitAction.P_XY, 0, PurePursuitAction.D_XY);
+    private PidNav pidAngle = new PidNav(PurePursuitAction.P_ANGLE, 0, 0);
+    private final PidNav pidAngleAdaptive = new PidNav(1.3 / Math.toRadians(90), 0.001, 0);
+
+    public Position (double x, double y, double theta) {
+        this.x = x;
+        this.y = y;
+        this.theta = theta;
+    }
+
+    public Position (Position position) {
+        this(position.x, position.y, position.theta);
+    }
+
+    public Position (double x, double y, double theta, double pXY, double pAngle) {
+        this.x = x;
+        this.y = y;
+        this.theta = theta;
+        this.pidX.setP(pXY);
+        this.pidY.setP(pXY);
+        this.pidAngle.setP(pAngle);
+    }
+
+    //add point to vector
+    public Position add(Velocity velocity) {
+        double theta = this.theta + velocity.getTheta();
+        return new Position (
+            this.x + velocity.getX(),
+            this.y + velocity.getY(),
+            MathFunctions.angleWrapRad(theta)
+        );
+    }
+
+    public Position addPosition(Vector vector) {
+        return new Position(this.getX() + vector.getX(), this.getY() + vector.getY(), Math.atan2(vector.getY(),vector.getX()));
+    }
+
+    public Point toPoint() {
+        return new Point(getX(), getY());
+    }
+
+//    public static List<Point> toPointList(List<Position> positions) {
+//        List<Point> points = new ArrayList<Point>();
+//
+//        for(int i=0; i < positions.size(); i++) {
+//            points.add(positions.get(i).toPoint());
+//        }
+//
+//        return points;
+//    }
+
+    public Position relativeTo(Position other) {
+        return new Position(this.getX() - other.getX(), this.getY() - other.getY(), this.getTheta() - other.getTheta());
+    }
+
+    public Vector projectOnto(Vector vector) {
+        return vector.scale( vector.dot(this)/vector.dot(vector));
+    }
+
+    public double distanceTo(Position other) {
+        return Math.hypot(other.getX() - this.getX(), other.getY() - this.getY());
+    }
+
+
+
+    public static Position pose2DtoPosition(Pose2D pose2D) {
+        Position position = new Position(pose2D.getX(DistanceUnit.MM), pose2D.getY(DistanceUnit.MM), pose2D.getHeading(AngleUnit.RADIANS));
+        return position;
+    }
+
+    public String getPoint() {
+        return x + ", " + y + ", " + theta;
+    }
+
+    public double getX() {
+            return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getTheta() {
+        return theta;
+    }
+
+    public PidNav getPidX() {
+        return pidX;
+    }
+
+    public PidNav getPidY() {
+        return pidY;
+    }
+
+    public PidNav getPidAngle() {
+        return pidAngle;
+    }
+
+    public PidNav getPidAngleAdaptive() {
+        return pidAngleAdaptive;
+    }
+
+    public void addX(double add) {
+        x += add;
+    }
+
+    public void addY(double add) {
+        y += add;
+    }
+
+    public void reset(Position position) {
+        this.x = position.getX();
+        this.y = position.getY();
+        this.theta = position.getTheta();
+        this.pidX = position.pidX;
+        this.pidY = position.pidY;
+        this.pidAngle = position.pidAngle;
+    }
+
+    public double getDistanceAlongPath() {
+        return this.distanceAlongPath;
+    }
+
+    public void setDistanceAlongPath(double distanceAlongPath) {
+        this.distanceAlongPath = distanceAlongPath;
+    }
+
+    public double getCurvature() {
+        return this.curvature;
+    }
+
+    public void setCurvature(double curvature) {
+        this.curvature = curvature;
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(double velocity) {
+        this.velocity = velocity;
+    }
+
+    public double getAcceleration() {
+        return acceleration;
+    }
+
+    public void setAcceleration(double acceleration) {
+        this.acceleration = acceleration;
+    }
+
+    public void setX(double newX) {
+        this.x = newX;
+    }
+
+    public void setY(double newY) {
+        this.y = newY;
+    }
+
+    /**
+     * Transforms this position from a local coordinate frame to a global coordinate frame.
+     * The local frame is defined by an origin position with its own location and orientation.
+     *
+     * @param oldOriginInNewFrameX     X position of the old frame's origin relative to the new coordinates
+     * @param oldOriginInNewFrameY     Y position of the old frame's origin relative to the new coordinates
+     * @param oldOriginInNewFrameTheta Rotation of the old frame relative to new frame (radians, clockwise is positive)
+     * @return A new Position in global coordinates
+     */
+
+    public Position toNewFrame(double oldOriginInNewFrameX, double oldOriginInNewFrameY, double oldOriginInNewFrameTheta) {
+        double cos = Math.cos(oldOriginInNewFrameTheta);
+        double sin = Math.sin(oldOriginInNewFrameTheta);
+
+        // Rotate and translate the position
+        double newX = this.x * cos - this.y * sin + oldOriginInNewFrameX;
+        double newY = this.x * sin + this.y * cos + oldOriginInNewFrameY;
+
+        // Add the frame rotation to the heading
+        double newTheta = this.theta + oldOriginInNewFrameTheta;
+        newTheta = MathFunctions.angleWrapRad(newTheta);
+
+        return new Position(newX, newY, newTheta);
+    }
+   /* public Position toNewFrame(double oldOriginInNewFrameX, double oldOriginInNewFrameY, double oldOriginInNewFrameTheta) {
+        double cos = Math.cos(oldOriginInNewFrameTheta);
+        double sin = Math.sin(oldOriginInNewFrameTheta);
+
+        // Clockwise-positive rotation matrix
+        double globalX = oldOriginInNewFrameX + (this.x * cos + this.y * sin);
+        double globalY = oldOriginInNewFrameY + (-this.x * sin + this.y * cos);
+
+        double globalTheta = MathFunctions.angleWrapRad(this.theta + oldOriginInNewFrameTheta);
+
+        return new Position(globalX, globalY, globalTheta);
+    }*/
+
+    /**
+     * Transforms this position from a local coordinate frame to a global coordinate frame.
+     * The local frame is defined by the given origin position.
+     *
+     * @param origin The origin of the local frame expressed in global coordinates
+     * @return A new Position in global coordinates
+     */
+    public Position toNewFrame(Position origin) {
+        return toNewFrame(origin.getX(), origin.getY(), origin.getTheta());
+    }
+
+    public boolean isSamePosition(Position position) {
+        return this.getX() == position.getX() && this.getY() == position.getY() && this.getTheta() == position.getTheta();
+    }
+
+    @Override
+    public String toString() {
+        return  String.format("x=%.2f (%.2f in), y=%.2f (%.2f in), theta=%.4f (%.1f deg)", x, x/25.4, y, y/25.4,
+                theta, Math.toDegrees(theta));
+    }
+
+    public String toCompactString() {
+        return  String.format("x=%.2f y=%.2f theta=%.1f", x/25.4, y/25.4, Math.toDegrees(theta));
+    }
+
+    public boolean isEmpty() {
+        return (x == 0 && y == 0 && theta == 0);
+    }
+
+    public Position predictPos(Velocity v, double deltaTimeMS) {
+        return new Position(this.getX() + v.getX() * deltaTimeMS, this.getY() + v.getY() * deltaTimeMS, MathFunctions.angleWrapRad(this.getTheta() + v.getTheta() * deltaTimeMS));
+    }
+
+    public Position calculateDelta(Position pose) {
+        return new Position(this.getX() - pose.getX(), this.getY() - pose.getY(), MathFunctions.angleWrapRad(this.getTheta() - pose.theta));
+    }
+}

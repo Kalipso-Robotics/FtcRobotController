@@ -5,7 +5,7 @@
 I've created a complete Java implementation to use machine learning models (from `.pkl` files) in your FTC robot code.
 
 ### 1. Java Implementation
-**File:** `TeamCode/src/main/java/com/kalipsorobotics/modules/shooter/ShooterMLPredictor.java`
+**File:** `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/ShooterMLPredictor.java`
 
 **Features:**
 - Loads ML model parameters from binary files

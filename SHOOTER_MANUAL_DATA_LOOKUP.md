@@ -5,7 +5,7 @@ A simple linear interpolation lookup table based on your manually tuned shooter 
 ## Files Created
 
 ### 1. `ShooterManualDataLookup.java`
-**Location:** `TeamCode/src/main/java/com/kalipsorobotics/modules/shooter/ShooterManualDataLookup.java`
+**Location:** `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/ShooterManualDataLookup.java`
 
 **Features:**
 - ✅ Loads data from CSV file
@@ -14,7 +14,7 @@ A simple linear interpolation lookup table based on your manually tuned shooter 
 - ✅ Simple, efficient lookup
 
 ### 2. `ShooterManualDataLookupTest.java`
-**Location:** `TeamCode/src/test/java/com/kalipsorobotics/modules/shooter/ShooterManualDataLookupTest.java`
+**Location:** `TeamCode/src/test/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/ShooterManualDataLookupTest.java`
 
 **Tests:**
 - ✅ Data loading verification
