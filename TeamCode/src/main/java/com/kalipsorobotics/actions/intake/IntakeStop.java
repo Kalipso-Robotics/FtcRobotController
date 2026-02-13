@@ -1,0 +1,23 @@
+package com.kalipsorobotics.actions.intake;
+
+import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.modules.Intake;
+
+public class IntakeStop extends Action {
+
+    Intake intake;
+
+    public IntakeStop(Intake intake) {
+        this.intake = intake;
+    }
+
+
+    @Override
+    public void update() {
+        if (isDone) {
+            return;
+        }
+        intake.getIntakeMotor().setPower(0);
+        isDone = true;
+    }
+}

@@ -5,7 +5,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.modules.shooter.ShooterLutPredictorInternal;
 
 /**
  * Unit test for ShooterLutPredictor
