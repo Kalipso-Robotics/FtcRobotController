@@ -52,6 +52,6 @@ public class FlightTimeInterpolationLUT {
         }
 
         KLog.d("FlightTimeMS", "INVALID DISTANCE RETURNING FALLBACK TO avg flight time");
-        return distanceMMToFlightTimeMS.get((int)(distanceMMToFlightTimeMS.size() / 2))[1];
+        return distanceMMToFlightTimeMS.get(distanceMMToFlightTimeMS.size() / 2)[1];
     }
 }

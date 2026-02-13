@@ -245,7 +245,7 @@ public class RedAutoNearSolo extends KOpMode {
     }
 
     public RoundTripAction generateDepotTrip(String name, Point shootPoint) {
-        RoundTripAction depotTrip = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);;
+        RoundTripAction depotTrip = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         depotTrip.setName(name);
         depotTrip.getMoveToBall().clearPoints();
         //move to depot

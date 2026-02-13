@@ -488,7 +488,6 @@ public class TeleOp extends KOpMode {
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 KLog.d("TeleOp_Shooting_Forced", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
             }
-            return;
         }
 
     }
@@ -520,7 +519,6 @@ public class TeleOp extends KOpMode {
                 setLastZeroAction(resetOdometryToCorner);
                 KLog.d("TeleOp_Zeroing", "Corner zero action started - Position: " + SharedData.getOdometryWheelIMUPosition());
             }
-            return;
         }
     }
 

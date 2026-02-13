@@ -7,7 +7,7 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 
 public class IntakeFullAction extends KActionSet {
-    private RunIntakeTime runIntakeTime;
+    private final RunIntakeTime runIntakeTime;
 
     public IntakeFullAction(Stopper stopper, Intake intake, double timeMS, double power){
 

@@ -6,10 +6,10 @@ import com.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class RunIntakeTime extends Action {
-    private Intake intake;
+    private final Intake intake;
     private double timeMS;
-    private double power;
-    private ElapsedTime timer;
+    private final double power;
+    private final ElapsedTime timer;
 
     public RunIntakeTime(Intake intake, double timeMS, double power) {
         this.intake = intake;
