@@ -52,7 +52,6 @@ public class StopperCalibration extends KOpMode {
 
             KLog.d("stopperPosition", "stopperPosition" + stopperPosition);
             telemetry.addData("stopperPosition", stopperPosition + " Cheese3"); //0.11 0.51 0.91
-            telemetry.addLine("SLOTH LOAD 2131");
             telemetry.update();
         }
 
