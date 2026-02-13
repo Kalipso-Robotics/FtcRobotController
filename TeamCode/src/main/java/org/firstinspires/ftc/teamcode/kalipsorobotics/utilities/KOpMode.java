@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
@@ -45,7 +46,6 @@ public abstract class KOpMode extends LinearOpMode {
         executorService = Executors.newSingleThreadExecutor();
         kGamePad1 = new KGamePad(gamepad1);
         kGamePad2 = new KGamePad(gamepad2);
-        FtcDashboard dashboard = FtcDashboard.getInstance();
     }
 
     protected void initializeRobotConfig() {

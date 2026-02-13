@@ -248,6 +248,8 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Hood Offset ", "%.2f", ShooterInterpolationConfig.hoodOffset);
             telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
             telemetry.addLine("Turret Mode: " + turretAutoAlignTeleOp.getTurretRunMode());
+            telemetry.addData("Delta Heading (Turret)", turretAutoAlignTeleOp.getDeltaAngleDeg());
+            telemetry.addData("Delta RPS (Shooter)", shooterRun.getTargetRPS() - shooter.getRPS());
             telemetry.update();
         }
         cleanupRobot();

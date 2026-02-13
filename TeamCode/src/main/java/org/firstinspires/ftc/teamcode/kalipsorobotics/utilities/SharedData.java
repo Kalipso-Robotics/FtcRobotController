@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
@@ -109,7 +110,7 @@ public class SharedData {
         odometryWheelIMUVelocity.reset(new Velocity(0, 0, 0));
     }
 
-    private static double voltage = 0.0;
+    private static double voltage = ShooterInterpolationConfig.DEFAULT_VOLTAGE;
     public static double getVoltage() {
         return voltage;
     }

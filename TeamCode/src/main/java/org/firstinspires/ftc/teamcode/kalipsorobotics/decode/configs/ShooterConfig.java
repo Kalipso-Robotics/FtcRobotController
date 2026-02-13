@@ -12,8 +12,8 @@ public class ShooterConfig {
     public static double kf = 0.01147578609; //0.01205432614;
     public static double kA = 0;
 
-    public static double accelBoostDeltaRPSThreshold = 2;
-    public static double decelBoostDeltaRPSThreshold = -2;
+    public static double accelBoostDeltaRPSThreshold = 3;
+    public static double decelBoostDeltaRPSThreshold = -3;
 
     public static boolean hoodFlipDirection = true;
     public static boolean SHOULD_SHOOT_ON_THE_MOVE = true;
