@@ -55,7 +55,7 @@ public class SOTMCompensation {
         KLog.d("SOTM", "Desired Velocity: " + desiredVelocity +
                 " Launch Velocity: " + launchVelocity +
                 " Results: " + results +
-                " Delta Distance: " + (distance - compensatedDistance)
+                " Delta Distance: " + (compensatedDistance - distance)
         );
 
         return results;
