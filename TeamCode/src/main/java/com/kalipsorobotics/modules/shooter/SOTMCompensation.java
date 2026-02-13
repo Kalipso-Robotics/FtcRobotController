@@ -47,7 +47,7 @@ public class SOTMCompensation {
 
         Velocity launchVelocity = desiredVelocity.minus(robotVelocity);
 
-        double compensatedDistance = Math.hypot(launchVelocity.getX(), launchVelocity.getY());
+        double compensatedDistance = Math.hypot(launchVelocity.getX() * flightTimeMS, launchVelocity.getY() * flightTimeMS);
         double compensatedAngleRad = Math.atan2(launchVelocity.getY(), launchVelocity.getX());
 
         SOTMResult results = new SOTMResult(compensatedDistance, compensatedAngleRad);
