@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.util.ElapsedTime;
 

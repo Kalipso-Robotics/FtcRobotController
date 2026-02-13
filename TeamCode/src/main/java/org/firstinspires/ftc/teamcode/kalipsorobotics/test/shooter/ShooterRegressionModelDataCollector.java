@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;

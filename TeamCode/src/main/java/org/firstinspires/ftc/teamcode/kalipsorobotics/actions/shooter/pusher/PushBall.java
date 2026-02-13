@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KS
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;

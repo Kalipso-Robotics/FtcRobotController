@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.revolverActions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.MotifColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Revolver;

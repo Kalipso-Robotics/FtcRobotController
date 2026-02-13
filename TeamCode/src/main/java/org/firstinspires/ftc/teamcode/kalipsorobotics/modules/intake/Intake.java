@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.modules;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;

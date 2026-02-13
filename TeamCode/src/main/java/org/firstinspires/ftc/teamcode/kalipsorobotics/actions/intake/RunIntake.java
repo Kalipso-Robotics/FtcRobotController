@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -11,11 +12,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class RunIntake extends Action {
     private final DcMotorEx motor;
-    private final DcMotor regMotor;
     private final double power;
     private final double maxTimeoutMS;
     private int stallCount;
     private final ElapsedTime timeoutTimer;
+    private IntakeMode intakeMode = IntakeMode.RUN_STALL;
 
     // goBILDA 5203 series motor specifications
     private static final double RPM = 1150.0; // RPM at 12V
@@ -31,7 +32,6 @@ public class RunIntake extends Action {
 
     public RunIntake(DcMotor motor, double power, double maxTimeoutMS) {
         this.motor = (DcMotorEx) motor;
-        this.regMotor = motor;
         this.power = power;
         this.maxTimeoutMS = maxTimeoutMS;
         this.stallCount = 0;
@@ -49,7 +49,6 @@ public class RunIntake extends Action {
 //                    getName() != null ? getName() : "unnamed"));
 //            return;
 //        }
-        isDone = true;
         if (!hasStarted) {
             KLog.d("RunUntilStall", String.format("[%s] STARTING - Setting motor power to %.2f, timeout: %.1fs",
                     getName() != null ? getName() : "unnamed", power, maxTimeoutMS / 1000.0));
@@ -57,6 +56,7 @@ public class RunIntake extends Action {
             hasStarted = true;
             timeoutTimer.reset();
         }
+
 
         motor.setPower(power);
 
@@ -67,9 +67,7 @@ public class RunIntake extends Action {
         if (elapsedTimeMs > maxTimeoutMS) {
             KLog.d("RunUntilStall", String.format("[%s] TIMEOUT after %.1fs - Stopping motor",
                     getName() != null ? getName() : "unnamed", elapsedTimeSec));
-            regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0.2);
-            isDone = true;
             return;
         }
 
@@ -80,7 +78,7 @@ public class RunIntake extends Action {
         double currentPercentMaxVelocity = curVelocity / expectedVelocity;
 
         // Log motor state every 500ms
-        if (((int)elapsedTimeMs) % 500 < 20) {
+        if (((int) elapsedTimeMs) % 500 < 20) {
             KLog.d("RunUntilStall", String.format("[%s] Motor State - Time: %.1fs, Velocity: %.1f/%.1f (threshold: %.1f), Current: %.0fmA, StallCount: %d, MaxVelocityPercent: %.2f",
                     getName() != null ? getName() : "unnamed",
                     elapsedTimeSec,
@@ -126,9 +124,7 @@ public class RunIntake extends Action {
         if (stallCount > 10) {
             KLog.d("RunUntilStall", String.format("[%s] STALL CONFIRMED (count: %d > 100) - Stopping motor after %.1fs",
                     getName() != null ? getName() : "unnamed", stallCount, elapsedTimeSec));
-            regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0.2);
-            isDone = true;
         }
     }
 }

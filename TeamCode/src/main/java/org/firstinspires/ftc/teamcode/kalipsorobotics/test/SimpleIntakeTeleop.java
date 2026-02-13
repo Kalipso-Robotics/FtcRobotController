@@ -1,6 +1,6 @@
 //package org.firstinspires.ftc.teamcode.kalipsorobotics.test;
 //
-//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 //import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 //import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 //import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KGamePad;
