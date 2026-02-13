@@ -3,8 +3,6 @@ package com.kalipsorobotics.modules;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.CalculateTickPer;
-import com.kalipsorobotics.utilities.KServo;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 

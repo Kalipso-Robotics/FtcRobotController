@@ -21,8 +21,6 @@ package com.kalipsorobotics.navigation;
 import android.content.Context;
 import android.content.res.AssetManager;
 
-import com.kalipsorobotics.math.Position;
-
 import org.tensorflow.lite.Interpreter;
 
 import java.io.*;

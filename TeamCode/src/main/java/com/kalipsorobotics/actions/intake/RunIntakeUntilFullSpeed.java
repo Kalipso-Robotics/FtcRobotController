@@ -1,8 +1,8 @@
-//package com.kalipsorobotics.actions.intake;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 //
-//import com.kalipsorobotics.actions.actionUtilities.Action;
-//import com.kalipsorobotics.modules.Intake;
-//import com.kalipsorobotics.utilities.KLog;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 //import com.qualcomm.robotcore.hardware.DcMotorEx;
 //import com.qualcomm.robotcore.util.ElapsedTime;
 //

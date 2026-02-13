@@ -1,7 +1,7 @@
 package com.kalipsorobotics.modules;
 
 import static com.kalipsorobotics.decode.configs.ModuleConfig.*;
-import com.kalipsorobotics.utilities.KLog;
+
 import com.kalipsorobotics.utilities.KServo;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 

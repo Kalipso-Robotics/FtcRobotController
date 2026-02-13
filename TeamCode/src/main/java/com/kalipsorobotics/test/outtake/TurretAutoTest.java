@@ -9,7 +9,6 @@ import com.kalipsorobotics.modules.IMUModule;
 import com.kalipsorobotics.modules.Turret;
 import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 //@Autonomous
 public class TurretAutoTest extends KOpMode {

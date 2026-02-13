@@ -17,12 +17,12 @@
 //        implementation "org.tensorflow:tensorflow-lite:2.13.0"
 //   3) See PurePursuitFollowerOpMode.java for usage example.
 
-package com.kalipsorobotics.navigation;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 
-import com.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 import org.tensorflow.lite.Interpreter;
 

@@ -1,18 +1,18 @@
 /*
-package com.kalipsorobotics.localization;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.localization;
 
 
 import android.os.SystemClock;
-import com.kalipsorobotics.utilities.KLog;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 
-import com.kalipsorobotics.math.MathFunctions;
-import com.kalipsorobotics.math.Position;
-import com.kalipsorobotics.math.Velocity;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 
-import com.kalipsorobotics.utilities.OpModeUtilities;
-import com.kalipsorobotics.modules.DriveTrain;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 
 public class SparkfunOdometry {
     OpModeUtilities opModeUtilities;

@@ -1,6 +1,5 @@
 package com.kalipsorobotics.test.navigation;
 
-import com.kalipsorobotics.decode.configs.DrivetrainConfig;
 import com.kalipsorobotics.localization.Odometry;
 import com.kalipsorobotics.modules.DriveTrain;
 import com.kalipsorobotics.modules.IMUModule;

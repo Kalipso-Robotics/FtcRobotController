@@ -96,7 +96,7 @@ These use the `ShooterLutPredictor` class which is already working. You can cont
 ## Files Created
 
 1. **Java Implementation:**
-   - `TeamCode/src/main/java/com/kalipsorobotics/modules/shooter/ShooterMLPredictor.java`
+   - `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/ShooterMLPredictor.java`
      - Loads ML model parameters from binary file
      - Supports KNN and Linear Regression
      - Includes StandardScaler support for feature normalization

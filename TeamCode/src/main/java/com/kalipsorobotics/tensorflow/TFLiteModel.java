@@ -1,7 +1,7 @@
 //
-//package com.kalipsorobotics.tensorflow.;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.tensorflow.;
 //
-//import com.kalipsorobotics.fresh.Vision;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.fresh.Vision;
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

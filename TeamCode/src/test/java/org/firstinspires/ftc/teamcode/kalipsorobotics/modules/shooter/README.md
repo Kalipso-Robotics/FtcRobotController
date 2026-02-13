@@ -16,7 +16,7 @@ cd /Users/ethan/Kalipso-Robotics
 ### Option 2: Using IntelliJ IDEA or Android Studio
 
 1. Open the project in your IDE
-2. Navigate to `TeamCode/src/test/java/com/kalipsorobotics/modules/shooter/ShooterLutPredictorTest.java`
+2. Navigate to `TeamCode/src/test/java/org/firstinspires/ftc/teamcode/kalipsorobotics/modules/shooter/ShooterLutPredictorTest.java`
 3. Right-click on the test class
 4. Select "Run 'ShooterLutPredictorTest'"
 

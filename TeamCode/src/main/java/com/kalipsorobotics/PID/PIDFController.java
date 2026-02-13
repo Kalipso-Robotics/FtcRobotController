@@ -5,8 +5,6 @@ import androidx.annotation.NonNull;
 
 import com.kalipsorobotics.utilities.KLog;
 
-import org.opencv.core.Mat;
-
 /**
  * PIDF Controller for velocity control (e.g., motor RPS)
  * Adds feedforward term to standard PID for better setpoint tracking

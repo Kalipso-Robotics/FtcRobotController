@@ -1,7 +1,6 @@
 package com.kalipsorobotics.utilities;
 
 import com.kalipsorobotics.PID.PIDFController;
-import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.math.CalculateTickPer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;

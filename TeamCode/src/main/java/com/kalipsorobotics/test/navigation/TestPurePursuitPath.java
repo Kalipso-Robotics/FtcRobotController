@@ -1,11 +1,11 @@
-//package com.kalipsorobotics.test.navigation;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.test.navigation;
 //
-//import com.kalipsorobotics.localization.Odometry;
-//import com.kalipsorobotics.modules.DriveTrain;
-//import com.kalipsorobotics.modules.GoBildaOdoModule;
-//import com.kalipsorobotics.modules.IMUModule;
-//import com.kalipsorobotics.navigation.PurePursuitAction;
-//import com.kalipsorobotics.utilities.OpModeUtilities;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.GoBildaOdoModule;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 //import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //

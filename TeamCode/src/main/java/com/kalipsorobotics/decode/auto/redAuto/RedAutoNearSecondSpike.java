@@ -1,9 +1,9 @@
-//package com.kalipsorobotics.decode.auto.redAuto;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 //
-//import com.kalipsorobotics.actions.autoActions.pathActions.RampCycleAction;
-//import com.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
-//import com.kalipsorobotics.math.Point;
-//import com.kalipsorobotics.modules.shooter.Shooter;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.RampCycleAction;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 //import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 //
 //@Autonomous

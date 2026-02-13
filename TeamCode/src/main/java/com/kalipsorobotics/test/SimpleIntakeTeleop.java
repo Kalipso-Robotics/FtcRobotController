@@ -1,10 +1,10 @@
-//package com.kalipsorobotics.test;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.test;
 //
-//import com.kalipsorobotics.modules.Intake;
-//import com.kalipsorobotics.modules.Stopper;
-//import com.kalipsorobotics.modules.shooter.Shooter;
-//import com.kalipsorobotics.utilities.KGamePad;
-//import com.kalipsorobotics.utilities.OpModeUtilities;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KGamePad;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

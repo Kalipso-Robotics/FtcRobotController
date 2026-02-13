@@ -6,8 +6,6 @@ import com.kalipsorobotics.modules.shooter.Shooter;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 
 @Disabled
 public class RevolverTest extends LinearOpMode {

@@ -1,7 +1,6 @@
 package com.kalipsorobotics.actions.actionUtilities;
 
 import com.kalipsorobotics.utilities.KCRServo;
-import com.qualcomm.robotcore.hardware.CRServo;
 
 public class KCRServoAutoAction extends Action {
 

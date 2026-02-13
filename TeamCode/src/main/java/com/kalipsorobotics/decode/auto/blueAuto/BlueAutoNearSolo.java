@@ -1,7 +1,6 @@
 package com.kalipsorobotics.decode.auto.blueAuto;
 
 import com.kalipsorobotics.cameraVision.AllianceColor;
-import com.kalipsorobotics.decode.auto.redAuto.RedAutoNear;
 import com.kalipsorobotics.decode.auto.redAuto.RedAutoNearSolo;
 import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.utilities.SharedData;

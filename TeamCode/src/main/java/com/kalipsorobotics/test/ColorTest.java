@@ -1,9 +1,9 @@
-//package com.kalipsorobotics.test;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.test;
 //
-//import com.kalipsorobotics.modules.MotifColor;
-//import com.kalipsorobotics.utilities.KColor;
-//import com.kalipsorobotics.utilities.KLog;
-//import com.kalipsorobotics.utilities.OpModeUtilities;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.MotifColor;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KColor;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 //import com.qualcomm.hardware.rev.RevColorSensorV3;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

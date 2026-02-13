@@ -1,7 +1,7 @@
-//package com.kalipsorobotics.actions;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.actions;
 //
-//import com.kalipsorobotics.actions.actionUtilities.Action;
-//import com.kalipsorobotics.utilities.KLog;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 //import com.qualcomm.robotcore.hardware.DcMotor;
 //import com.qualcomm.robotcore.hardware.DcMotorEx;
 //import com.qualcomm.robotcore.util.ElapsedTime;

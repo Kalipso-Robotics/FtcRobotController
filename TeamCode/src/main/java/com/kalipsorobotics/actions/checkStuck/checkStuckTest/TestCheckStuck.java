@@ -1,7 +1,5 @@
 package com.kalipsorobotics.actions.checkStuck.checkStuckTest;
 
-import com.kalipsorobotics.utilities.KLog;
-
 import com.kalipsorobotics.actions.checkStuck.CheckStuckRobot;
 import com.kalipsorobotics.modules.GoBildaOdoModule;
 import com.kalipsorobotics.navigation.PurePursuitAction;

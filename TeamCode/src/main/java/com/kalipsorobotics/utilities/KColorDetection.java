@@ -1,8 +1,8 @@
-//package com.kalipsorobotics.utilities;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 //
-//import static com.kalipsorobotics.modules.MotifColors.NONE;
+//import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.MotifColors.NONE;
 //
-//import com.kalipsorobotics.modules.MotifColors;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.MotifColors;
 //import com.qualcomm.hardware.rev.RevColorSensorV3;
 //
 //import java.util.HashMap;

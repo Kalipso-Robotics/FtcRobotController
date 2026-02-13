@@ -1,4 +1,4 @@
-package com.kalipsorobotics.modules.shooter;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

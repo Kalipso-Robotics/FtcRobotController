@@ -1,15 +1,10 @@
 package com.kalipsorobotics.actions.shooter.stopper;
 
-import com.kalipsorobotics.actions.drivetrain.ActivateBraking;
-import com.kalipsorobotics.actions.drivetrain.ReleaseBraking;
-import com.kalipsorobotics.modules.DriveBrake;
 import com.kalipsorobotics.modules.Stopper;
-import com.kalipsorobotics.utilities.KOpMode;
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 
 @Disabled

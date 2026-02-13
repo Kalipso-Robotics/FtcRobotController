@@ -2,8 +2,7 @@ package com.kalipsorobotics.tensorflow;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;

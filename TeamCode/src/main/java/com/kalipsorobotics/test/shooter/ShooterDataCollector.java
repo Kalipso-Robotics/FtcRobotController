@@ -1,19 +1,19 @@
-//package com.kalipsorobotics.test.shooter;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 //
-//import com.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
-//import com.kalipsorobotics.actions.shooter.ShootAllAction;
-//import com.kalipsorobotics.actions.shooter.pusher.PushBall;
-//import com.kalipsorobotics.actions.turret.TurretAutoAlign;
-//import com.kalipsorobotics.localization.Odometry;
-//import com.kalipsorobotics.modules.DriveTrain;
-//import com.kalipsorobotics.modules.IMUModule;
-//import com.kalipsorobotics.modules.Intake;
-//import com.kalipsorobotics.modules.Stopper;
-//import com.kalipsorobotics.modules.Turret;
-//import com.kalipsorobotics.modules.shooter.Shooter;
-//import com.kalipsorobotics.utilities.KOpMode;
-//import com.kalipsorobotics.utilities.OpModeUtilities;
-//import com.kalipsorobotics.utilities.SharedData;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootAllAction;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 //
 //@TeleOp

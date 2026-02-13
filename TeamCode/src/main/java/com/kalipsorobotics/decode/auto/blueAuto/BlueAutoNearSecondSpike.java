@@ -1,9 +1,9 @@
-//package com.kalipsorobotics.decode.auto.blueAuto;
+//package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.blueAuto;
 //
-//import com.kalipsorobotics.decode.configs.TurretConfig;
-//import com.kalipsorobotics.cameraVision.AllianceColor;
-//import com.kalipsorobotics.decode.auto.redAuto.RedAutoNearSecondSpike;
-//import com.kalipsorobotics.utilities.SharedData;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAutoNearSecondSpike;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 //import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 //
 //@Autonomous

@@ -2,14 +2,9 @@ package com.kalipsorobotics.localization;
 
 
 
-import android.graphics.PointF;
-
 import com.kalipsorobotics.math.Position;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.opencv.core.Point;
 
 

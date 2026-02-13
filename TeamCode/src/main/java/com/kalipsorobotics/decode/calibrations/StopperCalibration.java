@@ -4,7 +4,6 @@ import com.kalipsorobotics.modules.Intake;
 import com.kalipsorobotics.modules.Stopper;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.KOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
@@ -51,7 +50,7 @@ public class StopperCalibration extends KOpMode {
 
 
             KLog.d("stopperPosition", "stopperPosition" + stopperPosition);
-            telemetry.addData("stopperPosition", stopperPosition); //0.11 0.51 0.91
+            telemetry.addData("stopperPosition", stopperPosition + " Cheese3"); //0.11 0.51 0.91
             telemetry.update();
         }
 

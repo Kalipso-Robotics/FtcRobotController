@@ -2,7 +2,6 @@ package com.kalipsorobotics.modules;
 
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 public class GoBildaOdoModule {
 

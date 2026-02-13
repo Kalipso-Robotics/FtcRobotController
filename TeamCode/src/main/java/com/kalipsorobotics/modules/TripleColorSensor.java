@@ -6,7 +6,6 @@ import static com.kalipsorobotics.modules.ColorSensorPosition.FRONT;
 
 import com.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import java.util.HashMap;
 

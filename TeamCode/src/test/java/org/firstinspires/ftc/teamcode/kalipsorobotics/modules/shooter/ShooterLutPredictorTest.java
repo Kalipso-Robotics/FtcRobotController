@@ -1,4 +1,4 @@
-package com.kalipsorobotics.modules.shooter;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -6,6 +6,8 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import com.kalipsorobotics.math.Point;
+import com.kalipsorobotics.modules.shooter.Shooter;
+import com.kalipsorobotics.modules.shooter.ShooterLutPredictorInternal;
 
 /**
  * Unit test for ShooterLutPredictor

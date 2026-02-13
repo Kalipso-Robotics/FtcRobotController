@@ -1,9 +1,5 @@
 package com.kalipsorobotics.utilities;
 
-import com.kalipsorobotics.utilities.KLog;
-
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;

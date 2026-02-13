@@ -1,9 +1,12 @@
-package com.kalipsorobotics.modules.shooter;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+
+import com.kalipsorobotics.modules.shooter.IShooterPredictor;
+import com.kalipsorobotics.modules.shooter.ShooterInterpolationDataLookup;
 
 /**
  * Test for ShooterManualDataLookup with linear interpolation.
