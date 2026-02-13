@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.DEFAULT_VOLTAGE;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.PID.PIDFController;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.CalculateTickPer;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -104,8 +106,13 @@ public class KMotor {
         // Get current RPS
         double currentRPS = getRPS();
 
-        double newPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
-
+        double rawPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
+        double voltage = SharedData.getVoltage();
+        double newPower = clampPower(rawPower * (DEFAULT_VOLTAGE / voltage));
+        KLog.d("VoltageCompensation", "Raw Power: " + rawPower +
+                " Compensated Power: " + newPower +
+                " Current Voltage: " + voltage
+                );
         // Set new power
         motor.setPower(newPower);
 

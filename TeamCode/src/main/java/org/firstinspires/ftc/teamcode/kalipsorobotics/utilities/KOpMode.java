@@ -111,6 +111,8 @@ public abstract class KOpMode extends LinearOpMode {
      * Automatically prevents duplicate updates if the same action is referenced in multiple slots
      */
     protected void updateActions() {
+        SharedData.setVoltage(opModeUtilities.getHardwareMap().voltageSensor.iterator().next().getVoltage());
+
         if (aprilTagDetectionAction != null) {
             aprilTagDetectionAction.updateCheckDone();
         }

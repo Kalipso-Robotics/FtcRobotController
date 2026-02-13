@@ -109,5 +109,13 @@ public class SharedData {
         odometryWheelIMUVelocity.reset(new Velocity(0, 0, 0));
     }
 
+    private static double voltage = 0.0;
+    public static double getVoltage() {
+        return voltage;
+    }
+    public static void setVoltage(double newVoltage) {
+        voltage = newVoltage;
+    }
+
 
 }

@@ -21,8 +21,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@Autonomous
+@Disabled
 public class RedAutoNearCube extends KOpMode {
     KActionSet redAutoNear;
     final double FIRST_SHOOT_X = 2400;

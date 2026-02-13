@@ -20,10 +20,10 @@ public class FlightTimeInterpolationLUT {
         distanceMMToFlightTimeMS.add(new double[]{1827.0, 580.0});
         distanceMMToFlightTimeMS.add(new double[]{2193.0, 680.0});
         distanceMMToFlightTimeMS.add(new double[]{2367.0, 750.0});
-        distanceMMToFlightTimeMS.add(new double[]{2704.0, 940.0});
-        distanceMMToFlightTimeMS.add(new double[]{2680.0, 900.0});
         distanceMMToFlightTimeMS.add(new double[]{2591.0, 730.0});
-        distanceMMToFlightTimeMS.add(new double[]{2976.0, 740.0});
+        distanceMMToFlightTimeMS.add(new double[]{2680.0, 900.0});
+        distanceMMToFlightTimeMS.add(new double[]{2704.0, 940.0});
+        distanceMMToFlightTimeMS.add(new double[]{2976.0, 960.0});
         distanceMMToFlightTimeMS.add(new double[]{3289.0, 1000.0});
 
     }
