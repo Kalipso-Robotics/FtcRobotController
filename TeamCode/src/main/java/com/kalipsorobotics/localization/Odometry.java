@@ -7,7 +7,6 @@ import android.os.SystemClock;
 
 import com.kalipsorobotics.math.ExponentialVelocityFiltering;
 import com.kalipsorobotics.math.MathFunctions;
-import com.kalipsorobotics.math.Point;
 import com.kalipsorobotics.utilities.KLog;
 
 import com.kalipsorobotics.math.PositionHistory;
@@ -329,7 +328,7 @@ public class Odometry {
         wheelRelDelta = linearToArcDelta(wheelRelDelta);
         Position globalPosition = calculateGlobal(wheelRelDelta, prevPositionWheel);
 
-        Position deltaPos = globalPosition.calculateDelta(prevPositionWheel);
+        Position deltaPos = globalPosition.minus(prevPositionWheel);
         Velocity rawVelocity = new Velocity(deltaPos.getX() / timeElapsedMS, deltaPos.getY() / timeElapsedMS, deltaPos.getTheta() / timeElapsedMS);
         robotWheelVelocity = ema.calculateFilteredVelocity(rawVelocity);
 
@@ -349,7 +348,7 @@ public class Odometry {
         wheelIMURelDelta = linearToArcDelta(wheelIMURelDelta);
         Position globalPosition = calculateGlobal(wheelIMURelDelta, prevPositionWheelIMU);
 
-        Position deltaPos = globalPosition.calculateDelta(prevPositionWheelIMU);
+        Position deltaPos = globalPosition.minus(prevPositionWheelIMU);
         Velocity rawVelocity = new Velocity(deltaPos.getX() / timeElapsedMS, deltaPos.getY() / timeElapsedMS, deltaPos.getTheta() / timeElapsedMS);
         robotWheelIMUVelocity = ema.calculateFilteredVelocity(rawVelocity);
 

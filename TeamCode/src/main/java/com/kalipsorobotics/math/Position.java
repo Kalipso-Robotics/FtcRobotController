@@ -4,12 +4,9 @@ package com.kalipsorobotics.math;
 import com.kalipsorobotics.PID.PidNav;
 import com.kalipsorobotics.navigation.PurePursuitAction;
 
-import org.checkerframework.dataflow.qual.Pure;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  *
@@ -259,7 +256,7 @@ public class Position {
         return new Position(this.getX() + v.getX() * deltaTimeMS, this.getY() + v.getY() * deltaTimeMS, MathFunctions.angleWrapRad(this.getTheta() + v.getTheta() * deltaTimeMS));
     }
 
-    public Position calculateDelta(Position pose) {
+    public Position minus(Position pose) {
         return new Position(this.getX() - pose.getX(), this.getY() - pose.getY(), MathFunctions.angleWrapRad(this.getTheta() - pose.theta));
     }
 }

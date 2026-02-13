@@ -61,5 +61,9 @@ public class Velocity {
         this.y = velocity.getY();
         this.theta = velocity.getTheta();
     }
+
+    public Velocity minus(Velocity vel) {
+        return new Velocity(this.getX() - vel.getX(), this.getY() - vel.getY(), MathFunctions.angleWrapRad(this.getTheta() - vel.theta));
+    }
 }
 

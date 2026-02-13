@@ -7,10 +7,11 @@ import android.annotation.SuppressLint;
 import com.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import com.kalipsorobotics.decode.configs.AprilTagConfig;
 import com.kalipsorobotics.decode.configs.ShooterConfig;
-import com.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.math.MathFunctions;
 import com.kalipsorobotics.math.Position;
-import com.kalipsorobotics.modules.shooter.FlightTimeInterpolationLUT;
+import com.kalipsorobotics.math.Velocity;
+import com.kalipsorobotics.modules.shooter.SOTMCompensation;
 import com.kalipsorobotics.modules.shooter.ShooterRunMode;
 import com.kalipsorobotics.utilities.KLog;
 
@@ -299,10 +300,11 @@ public class ShooterRun extends Action {
 
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
-
+        Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
         if (ShooterConfig.SHOULD_SHOOT_ON_THE_MOVE) {
-            Position predictedPos = TurretAutoAlignTeleOp.getPredictedPos(targetPoint, currentPos, FlightTimeInterpolationLUT.calculate(currentPos.toPoint().distanceTo(targetPoint)));
-            return predictedPos.toPoint().distanceTo(targetPoint);
+            Position predictedPos = currentPos.predictPos(currentVelocity, TurretConfig.LOOK_AHEAD_TIME_MS);
+            SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
+            return result.getDistance();
         }
 
         return currentPos.toPoint().distanceTo(targetPoint);
