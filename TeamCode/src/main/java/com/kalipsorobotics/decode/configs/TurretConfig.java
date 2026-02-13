@@ -16,7 +16,7 @@ public class TurretConfig {
     public static double Y_INIT_SETUP_MM = 1400 - 177.8; // 1413.55      1,413.55 = 1,219.2 mm + 194.35     47.5 + 15.25/2
     public static int TICKS_INIT_OFFSET = 0;
     public static boolean SHOULD_SHOOT_ON_THE_MOVE = true;
-    public static double LOOK_AHEAD_TIME_MS = 100;
+    public static double LOOK_AHEAD_TIME_MS = 300;
     public static double DEFAULT_TOLERANCE_TICKS = (TICKS_PER_DEGREE) * 1.5;
     public static double kP = 0.0055;   // faster response
     public static double kI = 0;       // keep at 0

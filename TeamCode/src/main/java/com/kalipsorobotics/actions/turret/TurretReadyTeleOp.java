@@ -1,6 +1,7 @@
 package com.kalipsorobotics.actions.turret;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.decode.configs.TurretConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -43,6 +44,8 @@ public class TurretReadyTeleOp extends Action {
             KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlignTeleop.getTargetTicks());
             KLog.d("ActionTime", this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
+        } else if (TurretConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+            isDone = true;
         }
     }
 }

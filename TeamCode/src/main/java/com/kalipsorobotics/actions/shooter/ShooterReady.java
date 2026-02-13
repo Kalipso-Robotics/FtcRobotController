@@ -1,6 +1,7 @@
 package com.kalipsorobotics.actions.shooter;
 
 import com.kalipsorobotics.actions.actionUtilities.Action;
+import com.kalipsorobotics.decode.configs.ShooterConfig;
 import com.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -26,6 +27,7 @@ public class ShooterReady extends Action {
             actionTime.reset();
             hasStarted = true;
         }
+
         boolean isWithinRange = shooterRun.isWithinRange();
         KLog.d("ShooterReady", "Checking if shooter within range: " + isWithinRange);
         KLog.d("ShooterReady", "ShooterRun isDone: " + shooterRun.getIsDone());
@@ -39,6 +41,9 @@ public class ShooterReady extends Action {
             KLog.d("ActionTime", this.getName() + " done in " + actionTime.milliseconds() + " ms");
             KLog.d("ShooterReady", "*** SHOOTER READY MARKED AS DONE ***");
         } else {
+            if (ShooterConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+                isDone = true;
+            }
             KLog.d("ShooterReady", "** Still waiting for shooter to reach target RPS **");
         }
 
