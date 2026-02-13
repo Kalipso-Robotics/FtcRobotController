@@ -138,7 +138,7 @@ public class TurretAutoAlignTeleOp extends Action {
 
         if (turretRunMode == TurretRunMode.RUN_USING_ODOMETRY) {
             targetTicks = odoTargetTicks;
-            if (TurretConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+            if (TurretConfig.shouldShootOnTheMove) {
                 double compensatedTargetHeading = computeCompensatedTargetHeading(targetPoint, currentPos, LOOK_AHEAD_TIME_MS);
                 targetTicks = calculateTargetTicks(compensatedTargetHeading, currentPos.getTheta());
             }
@@ -304,7 +304,7 @@ public class TurretAutoAlignTeleOp extends Action {
         double distanceToGoal = currentPos.toPoint().distanceTo(targetPoint);
         double targetHeadingRad = Math.atan2(targetPoint.getY() - currentPos.getY(), targetPoint.getX() - currentPos.getX());
         double rawTargetHeadingRad = targetHeadingRad;
-        if (TurretConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+        if (TurretConfig.shouldShootOnTheMove) {
             Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
             Position predictedPos = currentPos.predictPos(currentVelocity, lookAheadTimeMS);
             SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);

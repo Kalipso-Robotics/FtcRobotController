@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig.shouldShootOnTheMove;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
@@ -88,6 +90,7 @@ public class TeleOp extends KOpMode {
     private boolean parkButtonPressed;
     private boolean leverButtonPressed;
     private boolean enableLimelightZeroing = true;
+    private boolean toggleSOTM = true;
 
     private int shootCount = 0;
 
@@ -196,7 +199,7 @@ public class TeleOp extends KOpMode {
             decrementHoodPressed = kGamepad2IsDpadLeftFirstPressed && kGamePad2.isLeftBumperPressed();
 
             shootAllActionPressed = kGamePad1.isLeftBumperPressed();
-            stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
+            stopShooterPressed = kGamePad1.isLeftTriggerFirstPressed();
             zeroLimelightPressed = kGamepad2IsDpadUpFirstPressed;
             zeroCornerPressed = kGamepad2IsDpadDownFirstPressed;
 
@@ -212,6 +215,9 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp_Button", "enableLimelightAlignTurret: " + enableLimelightAlignTurret);
             enableOdometryAlignTurret = !kGamePad2.isToggleB();
             KLog.d("TeleOp_Button", "enableOdometryAlignTurret: " + enableOdometryAlignTurret);
+            toggleSOTM = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperFirstPressed();
+            KLog.d("TeleOp_Button", "toggleSOTM: " + toggleSOTM);
+
 
 
             // ========== HANDLE DRIVING ==========
@@ -406,6 +412,10 @@ public class TeleOp extends KOpMode {
             hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() - 0.02);
             shooter.getHood().setPosition(hoodPosition);
             KLog.d("TeleOp_Shooting_Hood_offset", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
+        }
+
+        if (toggleSOTM) {
+            shouldShootOnTheMove = !shouldShootOnTheMove;
         }
 
         // Priority 1- Stop shooter

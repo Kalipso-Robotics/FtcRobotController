@@ -44,7 +44,7 @@ public class TurretReadyTeleOp extends Action {
             KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlignTeleop.getTargetTicks());
             KLog.d("ActionTime", this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
-        } else if (TurretConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+        } else if (TurretConfig.shouldShootOnTheMove) {
             isDone = true;
         }
     }
