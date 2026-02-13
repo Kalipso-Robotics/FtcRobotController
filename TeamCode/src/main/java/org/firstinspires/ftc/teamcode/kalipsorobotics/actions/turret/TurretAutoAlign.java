@@ -52,7 +52,7 @@ public class TurretAutoAlign extends Action {
     }
 
     public void stop() {
-        turretMotor.stop();
+        turret.stop();
         KLog.d("Turret_STOP", "Auto turret stop called");
     }
     public void initBlocking() {
@@ -77,7 +77,7 @@ public class TurretAutoAlign extends Action {
     protected void update() {
         if (!opModeUtilities.getOpMode().opModeIsActive() && !opModeUtilities.getOpMode().opModeInInit()) {
             KLog.d("Turret_Singleton", "OpModeNotActive Return");
-            turretMotor.stop();
+            turret.stop();
             return;
         }
         if (!hasStarted) {
@@ -98,7 +98,7 @@ public class TurretAutoAlign extends Action {
 
         if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
-            turretMotor.stop();
+            turret.stop();
             KLog.d("turret_position", "Within RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
         } else {
             isWithinRange = false;
@@ -180,7 +180,7 @@ public class TurretAutoAlign extends Action {
 
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
-            turretMotor.stop();
+            turret.stop();
             KLog.d("Turret_PID", String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
             isWithinRange = false;

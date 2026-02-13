@@ -167,8 +167,8 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         }
 
         // Stop motors
-        shooter1.stop();
-        shooter2.stop();
+        shooter1.stopAndResetPID();
+        shooter2.stopAndResetPID();
 
         // Close file
         fileWriter.close();

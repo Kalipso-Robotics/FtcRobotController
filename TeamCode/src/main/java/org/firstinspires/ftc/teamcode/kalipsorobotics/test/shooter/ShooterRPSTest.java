@@ -176,8 +176,8 @@ public class ShooterRPSTest extends LinearOpMode {
         }
 
         // Stop motors
-        shooter1.stop();
-        shooter2.stop();
+        shooter1.stopAndResetPID();
+        shooter2.stopAndResetPID();
 
         // Close file
         fileWriter.close();
@@ -362,8 +362,8 @@ public class ShooterRPSTest extends LinearOpMode {
         // Stop motors with brake mode for faster deceleration
         shooter1.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter2.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        shooter1.stop();
-        shooter2.stop();
+        shooter1.stopAndResetPID();
+        shooter2.stopAndResetPID();
 
         telemetry.addLine("Waiting for motors to stop...");
         telemetry.update();

@@ -183,8 +183,8 @@ public class KPTuning extends LinearOpMode {
                     saveProgress(currentKp, targetRPS - RPS_INCREMENT, overallTestNumber - 1);
                     fileWriter.close();
 
-                    shooter1.stop();
-                    shooter2.stop();
+                    shooter1.stopAndResetPID();
+                    shooter2.stopAndResetPID();
 
                     telemetry.addLine("=== LOW BATTERY - STOPPED ===");
                     telemetry.addData("Battery Voltage", "%.2fV", batteryVoltage);
@@ -241,8 +241,8 @@ public class KPTuning extends LinearOpMode {
         }
 
         // Stop motors
-        shooter1.stop();
-        shooter2.stop();
+        shooter1.stopAndResetPID();
+        shooter2.stopAndResetPID();
 
         // Close file
         fileWriter.close();
@@ -358,8 +358,8 @@ public class KPTuning extends LinearOpMode {
         // Stop motor with BRAKE mode for faster stopping
         shooter1.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter2.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        shooter1.stop();
-        shooter2.stop();
+        shooter1.stopAndResetPID();
+        shooter2.stopAndResetPID();
 
         // Wait for RPS to reach zero
         while (opModeIsActive()) {

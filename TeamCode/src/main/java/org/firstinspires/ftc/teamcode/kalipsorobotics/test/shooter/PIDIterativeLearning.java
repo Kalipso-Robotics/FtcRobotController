@@ -301,8 +301,8 @@ public class PIDIterativeLearning extends LinearOpMode {
         }
 
         // Stop motors
-        shooter1.stop();
-        shooter2.stop();
+        shooter1.stopAndResetPID();
+        shooter2.stopAndResetPID();
 
         // Close file
         fileWriter.close();
@@ -458,8 +458,8 @@ public class PIDIterativeLearning extends LinearOpMode {
         // Stop motors with brake mode for faster deceleration
         shooter1.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         shooter2.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        shooter1.stop();
-        shooter2.stop();
+        shooter1.stopAndResetPID();
+        shooter2.stopAndResetPID();
 
         // Wait for motors to stop (RPS < 0.5)
         while (opModeIsActive() && shooter1.getRPS() > 0.5) {

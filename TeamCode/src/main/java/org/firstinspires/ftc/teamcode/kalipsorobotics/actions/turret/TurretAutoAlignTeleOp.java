@@ -94,7 +94,7 @@ public class TurretAutoAlignTeleOp extends Action {
     @Override
     protected void update() {
         if (!opModeUtilities.getOpMode().opModeIsActive() && !opModeUtilities.getOpMode().opModeInInit()) {
-            turretMotor.stop();
+            turret.stop();
             return;
         }
 
@@ -216,7 +216,7 @@ public class TurretAutoAlignTeleOp extends Action {
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             shouldReadLimelight = true;
-            turretMotor.stop();
+            turret.stop();
             KLog.d("Turret_PID", String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
             isWithinRange = false;

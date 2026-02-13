@@ -184,7 +184,7 @@ public class KMotor {
     /**
      * Stop the motor
      */
-    public void stop() {
+    public void stopAndResetPID() {
         motor.setPower(0);
         resetPID();
     }

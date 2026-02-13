@@ -16,16 +16,16 @@ public class TurretConfig {
     public static double Y_INIT_SETUP_MM = 1400 - 177.8; // 1413.55      1,413.55 = 1,219.2 mm + 194.35     47.5 + 15.25/2
     public static int TICKS_INIT_OFFSET = 0;
     public static boolean SHOULD_SHOOT_ON_THE_MOVE = true;
-    public static double LOOK_AHEAD_TIME_MS = 300;
+    public static double LOOK_AHEAD_TIME_MS = 75;
     public static double DEFAULT_TOLERANCE_TICKS = (TICKS_PER_DEGREE) * 1.5;
     public static double kP = 0.0055;   // faster response
     public static double kI = 0;       // keep at 0
-    public static double kD = 0;  // reduces overshoot (main time saver) 0.0001
+    public static double kD = 0.00035;  // reduces overshoot (main time saver) 0.0001
     public static double kS = 0.01;    // 0.025 faster final approach
-    public static double kF = 125;     // 375 // for tracking moving targets
+    public static double kF = 0;     // 375 // for tracking moving targets
     public static double kP_teleop = 0.0055;   //0.01 faster response
     public static double kI_teleop = 0;       // keep at 0
-    public static double kD_teleop = 0;  // reduces overshoot (main time saver) 0.0002
+    public static double kD_teleop = 0.00035;  // reduces overshoot (main time saver) 0.0002
     public static double kS_teleop = 0.01;   //0.025 faster final approach
-    public static double kF_teleop = 125;     // 375 // for tracking moving targets
+    public static double kF_teleop = 0;     // 375 // for tracking moving targets
 }

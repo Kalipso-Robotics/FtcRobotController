@@ -230,7 +230,7 @@ public class TurretDataCollector extends LinearOpMode {
         }
 
         // Stop turret at end
-        turretMotor.stop();
+        turretMotor.stopAndResetPID();
         KLog.d(TAG, "=== DATA COLLECTION COMPLETE ===");
     }
 
@@ -268,7 +268,7 @@ public class TurretDataCollector extends LinearOpMode {
 
             if ((outsidePositiveLimit || outsideNegativeLimit) && targetIsAwayFromCenter) {
                 KLog.d(TAG_TRIAL, String.format("SAFETY STOP - Position %.2f deg exceeds limits and target is further out!", currentRelativeDeg));
-                turretMotor.stop();
+                turretMotor.stopAndResetPID();
                 result.reachedTarget = false;
                 break;
             }
@@ -287,7 +287,7 @@ public class TurretDataCollector extends LinearOpMode {
                     KLog.d(TAG_TRIAL, String.format("  Error: %.3f deg", errorDeg));
                 }
                 // Stop motor when within range
-                turretMotor.stop();
+                turretMotor.stopAndResetPID();
                 // Exit the loop - we're done with movement phase
                 break;
             } else {
@@ -331,7 +331,7 @@ public class TurretDataCollector extends LinearOpMode {
         result.finalErrorDeg = targetAngleDeg - result.finalPositionDeg;
 
         if (!result.reachedTarget) {
-            turretMotor.stop();
+            turretMotor.stopAndResetPID();
             KLog.d(TAG_TRIAL, String.format("TIMEOUT after %d ms - Target not reached", MAX_MOVE_TIME_MS));
             KLog.d(TAG_TRIAL, String.format("  Final position: %.2f deg (%d ticks relative)",
                     result.finalPositionDeg, (int) result.finalPositionTicks));
@@ -388,7 +388,7 @@ public class TurretDataCollector extends LinearOpMode {
                     result.maxOvershootDeg = overshoot;
                 }
             } else {
-                turretMotor.stop();
+                turretMotor.stopAndResetPID();
             }
 
             // Log at intervals

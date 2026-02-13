@@ -112,7 +112,7 @@ public class TurretKsTuner extends LinearOpMode {
             }
         } finally {
             // Ensure motor is stopped and data is saved
-            turretMotor.stop();
+            turretMotor.stopAndResetPID();
             saveResults();
             telemetry.addLine("Cleanup complete");
             telemetry.update();
@@ -227,7 +227,7 @@ public class TurretKsTuner extends LinearOpMode {
         }
 
         // Stop motor
-        turretMotor.stop();
+        turretMotor.stopAndResetPID();
 
         // Calculate average velocity
         double avgVelocity = samples > 0 ? velocitySum / samples : 0.0;

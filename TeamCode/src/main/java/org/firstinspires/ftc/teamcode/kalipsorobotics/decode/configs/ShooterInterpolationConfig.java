@@ -46,21 +46,21 @@ public class ShooterInterpolationConfig {
     public static double[] shooterData = {
             810, 45.7, compensatedMaxHood - 0.12,
             1050, 45.9, compensatedMaxHood - 0.08,
-            1310, 46.7 - 1, compensatedMaxHood - 0.08, //roughly first shot for near auto
-            1518, 47.5 - 1, compensatedMaxHood,
-            1705, 50.4 - 1, compensatedMaxHood,
-            1898, 52.7 - 1, compensatedMaxHood,
-            2075, 54.2 - 1, compensatedMaxHood,
-            2244, 56.7 - 1, compensatedMaxHood,
-            2417, 57.4 - 1, compensatedMaxHood,
-            2561, 60 - 1, compensatedMaxHood,
-            2769, 60.5 - 1, compensatedMaxHood,
-            2974, 63.5 - 3, compensatedMaxHood,
-            3154, 64.75 - 3, compensatedMaxHood,
-            3240, 66.3 - 3, compensatedMaxHood,
-            3460, 67.8 - 3, compensatedMaxHood,
-            3700, 70.0 - 3, compensatedMaxHood,
-            4202, MAX_RPS - 3, compensatedMaxHood,
+            1310, 46.7, compensatedMaxHood - 0.08, //roughly first shot for near auto
+            1518, 47.5, compensatedMaxHood,
+            1705, 50.4, compensatedMaxHood,
+            1898, 52.7, compensatedMaxHood,
+            2075, 54.2, compensatedMaxHood,
+            2244, 56.7, compensatedMaxHood,
+            2417, 57.4, compensatedMaxHood,
+            2561, 60, compensatedMaxHood,
+            2769, 60.5, compensatedMaxHood,
+            2974, 63.5, compensatedMaxHood,
+            3154, 64.75, compensatedMaxHood,
+            3240, 66.3, compensatedMaxHood,
+            3460, 67.8, compensatedMaxHood,
+            3700, 70.0, compensatedMaxHood,
+            4202, MAX_RPS, compensatedMaxHood,
     };
 
 

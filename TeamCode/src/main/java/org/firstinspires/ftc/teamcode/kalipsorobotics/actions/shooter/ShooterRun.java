@@ -161,7 +161,13 @@ public class ShooterRun extends Action {
         if (Math.abs(deltaRPS) > 1) {
             KLog.d("ShooterRun_Hood", "================ Big drop: Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);
         } else {
-            KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);
+            KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation +
+                    " effectiveTargetHood: " + effectiveTargetHood +
+                    " targetHoodPosition: " + targetHoodPosition +
+                    " Delta RPS: " + deltaRPS +
+                    " Current RPS: " + currRps +
+                    " Target RPS: " + targetRPS
+            );
         }
 
         // Bang control for rapid accel/decel when error is large
