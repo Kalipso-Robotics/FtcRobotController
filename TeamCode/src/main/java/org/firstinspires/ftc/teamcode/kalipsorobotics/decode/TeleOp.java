@@ -69,7 +69,6 @@ public class TeleOp extends KOpMode {
     // Button state variables
     private boolean drivingSticksActive = false;
     private boolean shootAllActionPressed = false;
-    private boolean forceShootFarPressed = false;
     private boolean intakeStopPressed = false;
     private boolean intakeReversePressed = false;
     private boolean stopShooterPressed = false;
@@ -77,7 +76,6 @@ public class TeleOp extends KOpMode {
     private boolean zeroCornerPressed = false;
     private boolean releaseStopperPressed = false;
     private boolean toggleTurretAlign = false;
-    private boolean forceShootNearPressed = false;
     private boolean enableLimelightAlignTurret = false;
     private boolean enableOdometryAlignTurret = false;
     private boolean incrementRPSPressed;
@@ -197,8 +195,6 @@ public class TeleOp extends KOpMode {
             incrementHoodPressed = kGamepad2IsDpadRightFirstPressed && kGamePad2.isLeftBumperPressed();
             decrementHoodPressed = kGamepad2IsDpadLeftFirstPressed && kGamePad2.isLeftBumperPressed();
 
-            forceShootFarPressed = kGamePad1.isRightBumperFirstPressed();
-            forceShootNearPressed = kGamePad1.isRightTriggerFirstPressed();
             shootAllActionPressed = kGamePad1.isLeftBumperPressed();
             stopShooterPressed = (kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperPressed()) || kGamePad1.isLeftTriggerFirstPressed();
             zeroLimelightPressed = kGamepad2IsDpadUpFirstPressed;
@@ -461,34 +457,8 @@ public class TeleOp extends KOpMode {
                         "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg()
                 );
             }
-            return;
         }
 
-        //
-        if (forceShootFarPressed) {
-            if (!isPending(shootAllAction)) {
-                if (toggleTurretAlign) {
-                    turnOnTurret();
-                }
-                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getFarShoot()[0], ShooterInterpolationConfig.getFarShoot()[1]);
-                setLastShooterAction(shootAllAction);
-                setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                KLog.d("TeleOp_Shooting_Forced", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
-            }
-            return;
-        }
-
-        if (forceShootNearPressed) {
-            if (!isPending(shootAllAction)) {
-                if (toggleTurretAlign) {
-                    turnOnTurret();
-                }
-                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp, ShooterInterpolationConfig.getNearValue()[0], ShooterInterpolationConfig.getNearValue()[1]);
-                setLastShooterAction(shootAllAction);
-                setLastStopperAction(null);  // Clear stopper - shoot action controls it
-                KLog.d("TeleOp_Shooting_Forced", "Shoot action started force shoot from far - Target RPS: " + shootAllAction.getShooterRun().getTargetRPS());
-            }
-        }
 
     }
 
