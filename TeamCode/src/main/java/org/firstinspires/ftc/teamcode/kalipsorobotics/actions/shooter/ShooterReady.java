@@ -48,4 +48,8 @@ public class ShooterReady extends Action {
         }
 
     }
+
+    public ShooterRun getShooterRun() {
+        return shooterRun;
+    }
 }
