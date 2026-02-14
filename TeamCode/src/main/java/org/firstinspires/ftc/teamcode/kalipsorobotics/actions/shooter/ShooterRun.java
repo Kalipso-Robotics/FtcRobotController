@@ -306,7 +306,7 @@ public class ShooterRun extends Action {
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
         Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
-        if (ShooterConfig.SHOULD_SHOOT_ON_THE_MOVE) {
+        if (ShooterConfig.shouldShootOnTheMove) {
             Position predictedPos = currentPos.predictPos(currentVelocity, TurretConfig.LOOK_AHEAD_TIME_MS);
             SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
             return result.getDistance();

@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Do
 ;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
@@ -138,7 +139,7 @@ public class TurretAutoAlignTeleOp extends Action {
 
         if (turretRunMode == TurretRunMode.RUN_USING_ODOMETRY) {
             targetTicks = odoTargetTicks;
-            if (TurretConfig.shouldShootOnTheMove) {
+            if (ShooterConfig.shouldShootOnTheMove) {
                 double compensatedTargetHeading = computeCompensatedTargetHeading(targetPoint, currentPos, LOOK_AHEAD_TIME_MS);
                 targetTicks = calculateTargetTicks(compensatedTargetHeading, currentPos.getTheta());
             }
@@ -304,7 +305,7 @@ public class TurretAutoAlignTeleOp extends Action {
         double distanceToGoal = currentPos.toPoint().distanceTo(targetPoint);
         double targetHeadingRad = Math.atan2(targetPoint.getY() - currentPos.getY(), targetPoint.getX() - currentPos.getX());
         double rawTargetHeadingRad = targetHeadingRad;
-        if (TurretConfig.shouldShootOnTheMove) {
+        if (ShooterConfig.shouldShootOnTheMove) {
             Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
             Position predictedPos = currentPos.predictPos(currentVelocity, lookAheadTimeMS);
             SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
