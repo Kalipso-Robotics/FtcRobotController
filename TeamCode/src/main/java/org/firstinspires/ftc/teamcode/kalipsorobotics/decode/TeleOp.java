@@ -160,7 +160,7 @@ public class TeleOp extends KOpMode {
 
         KLog.d("TeleOp-Run", "After waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
 
-        turretAutoAlignTeleOp.setToleranceDeg(2.5);
+        turretAutoAlignTeleOp.setToleranceDeg(2);
 
         if (stopper == null) {
             KLog.e("TeleOp-Run", "ERROR: Stopper is NULL when trying to create closeStopper action!");

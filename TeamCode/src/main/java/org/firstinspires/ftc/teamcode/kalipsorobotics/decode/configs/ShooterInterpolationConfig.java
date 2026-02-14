@@ -11,7 +11,7 @@ public class ShooterInterpolationConfig {
     public final static double MIN_HOOD = 0.1226; //0.72 old hood
     public final static double MAX_HOOD = 0.3392; // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5;
-    public static final double MAX_RPS = 74.1;
+    public static final double MAX_RPS = 73;
 
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
@@ -20,7 +20,7 @@ public class ShooterInterpolationConfig {
     public static double maxHoodCompensate = 0.02166;
     public static double hoodCompensateCoefficient = maxHoodCompensate; // 0.2
 
-    public static  double DEFAULT_VOLTAGE = 13.367;
+    public static  double DEFAULT_VOLTAGE = 13;
     /*
     public static double[] shooterData0 = {
             710, 33.2 + rpsHack, MIN_HOOD,
@@ -48,18 +48,18 @@ public class ShooterInterpolationConfig {
             810, 45.7 + rpsTune, compensatedMaxHood - 0.12,
             1050, 45.9 + rpsTune, compensatedMaxHood - 0.08,
             1310, 46.7 + rpsTune, compensatedMaxHood - 0.08, //roughly first shot for near auto
-            1518, 47.5 + rpsTune, compensatedMaxHood,
-            1705, 50.4 + rpsTune, compensatedMaxHood,
+            1518, 48.5 + rpsTune, compensatedMaxHood,
+            1705, 50.6 + rpsTune, compensatedMaxHood,
             1898, 52.7 + rpsTune, compensatedMaxHood,
-            2075, 54.2 + rpsTune, compensatedMaxHood,
-            2244, 56.7 + rpsTune, compensatedMaxHood,
-            2417, 57.4 + rpsTune, compensatedMaxHood,
+            2075, 54.4 + rpsTune, compensatedMaxHood,
+            2244, 56.6 + rpsTune, compensatedMaxHood,
+            2417, 57.6 + rpsTune, compensatedMaxHood,
             2561, 60 + rpsTune, compensatedMaxHood,
             2769, 60.5 + rpsTune, compensatedMaxHood,
-            2974, 63.5 + rpsTune, compensatedMaxHood,
+            2974, 63 + rpsTune, compensatedMaxHood,
             3154, 64.75 + rpsTune, compensatedMaxHood,
             3240, 66.3 + rpsTune, compensatedMaxHood,
-            3460, 67.8 + rpsTune, compensatedMaxHood,
+            3460, 68 + rpsTune, compensatedMaxHood,
             3700, 70.0 + rpsTune, compensatedMaxHood,
             4202, MAX_RPS + rpsTune, compensatedMaxHood,
     };

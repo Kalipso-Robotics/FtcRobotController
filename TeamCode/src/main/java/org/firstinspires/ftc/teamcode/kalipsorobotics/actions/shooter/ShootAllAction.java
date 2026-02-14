@@ -152,7 +152,9 @@ public class ShootAllAction extends KActionSet {
         }
         if (pushBall.getOpenStopper().getIsDone()) {
             KLog.d("ShootAllAction", "Turret Delta Angle: " + (turretAutoAlignTeleop.getDeltaAngleDeg()) +
-                    " Within Range: " + (turretAutoAlignTeleop.isWithinRange()));
+                    " Within Range: " + (turretAutoAlignTeleop.isWithinRange()) +
+                    " Delta RPS: " + (shooterRun.getTargetRPS() - shooter.getRPS())
+            );
             turretAutoAlignTeleop.stop();
         }
     }

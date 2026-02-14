@@ -20,6 +20,7 @@ public class RedAutoNearCubeRamp extends RedAutoNearRamp {
         // move to lever
         trip1.getMoveToBall().addPoint(1600, 1060 * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         // move to launch
+        trip1.getMoveToBall().addPoint(1500, nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip1.setDependentActions(trip0);
         trip1.setShouldShooterStop(false);

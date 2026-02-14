@@ -112,7 +112,7 @@ public class AprilTagDetectionAction extends Action {
 
                     // ==================== SPIKE DETECTION ====================
                     boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
-                    if (isSpike && globalPos == null) {
+                    if (isSpike || globalPos == null) {
                         KLog.d("AprilTag_SPIKE", String.format("REJECTED | prev=%.2f° curr=%.2f° delta=%.2f°",
                                 prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
                         SharedData.getLimelightRawPosition().reset();
