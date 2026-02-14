@@ -197,7 +197,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
                         "Distance " + shooterRun.getDistanceMM() +
                         "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
                         "Odometry " + SharedData.getOdometryWheelIMUPosition() +
-                        "Limelight Pos " + SharedData.getLimelightGlobalPosition();
+                        "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         redAutoNear.addAction(trip1);
     }
 
@@ -233,7 +233,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
                 "Distance " + shooterRun.getDistanceMM() +
                 "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
                 "Odometry " + SharedData.getOdometryWheelIMUPosition() +
-                "Limelight Pos " + SharedData.getLimelightGlobalPosition();
+                "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         redAutoNear.addAction(trip4Spike);
     }
 
@@ -265,7 +265,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
                 "Distance " + shooterRun.getDistanceMM() +
                 "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
                 "Odometry " + SharedData.getOdometryWheelIMUPosition() +
-                "Limelight Pos " + SharedData.getLimelightGlobalPosition();
+                "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         redAutoNear.addAction(trip5);
     }
 
@@ -295,7 +295,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
                 "Distance " + shooterRun.getDistanceMM() +
                 "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
                 "Odometry " + SharedData.getOdometryWheelIMUPosition() +
-                "Limelight Pos " + SharedData.getLimelightGlobalPosition();
+                "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         return rampTrip;
     }//
 }
