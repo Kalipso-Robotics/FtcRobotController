@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -12,119 +11,99 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 public class RunIntake extends Action {
     private final DcMotorEx motor;
-    private final double power;
-    private final double maxTimeoutMS;
-    private int stallCount;
-    private final ElapsedTime timeoutTimer;
-    private IntakeMode intakeMode = IntakeMode.RUN_STALL;
+    private final double fullPower;
 
     // goBILDA 5203 series motor specifications
-    private static final double RPM = 1150.0; // RPM at 12V
-    private static final double TICKS_PER_REV = ((1.0 + (46.0/11.0)) * 28.0); // ((1+(46/11)) * 28) = 145.09 ticks per revolution
-
-    // Calculate max velocity: RPM * ticks/rev / 60 sec/min
+    private static final double RPM = 1150.0;
+    private static final double TICKS_PER_REV = ((1.0 + (46.0 / 11.0)) * 28.0);
     private static final double MAX_VELOCITY_TICKS_PER_SEC = RPM * TICKS_PER_REV / 60.0;
 
     // Stall detection thresholds
-    private static final double STALL_CURRENT_THRESHOLD_MILLIAMPS = 5000.0;
-    private static final double MIN_POWER_THRESHOLD = 0.5; // only checks for motors that run with a power over 0.5
-    private static final double STALL_VELOCITY_PERCENTAGE = 0.5; // Consider stalled if velocity < 15% of expected
+    private static final double STALL_CURRENT_THRESHOLD_MA = 3400;
+    private static final double STALL_VELOCITY_PERCENTAGE = 0.5;
+    private static final int STALL_CONFIRM_COUNT = 8;
+    private static final double STALL_POWER = 0.55;
+    private static final double RECOVERY_VELOCITY_PERCENTAGE = 0.3;
 
-    public RunIntake(DcMotor motor, double power, double maxTimeoutMS) {
+    // State
+    private boolean isStalled = false;
+    private int stallCount = 0;
+    private int clearCount = 0;
+    private final ElapsedTime runTimer = new ElapsedTime();
+
+    public RunIntake(DcMotor motor, double power) {
         this.motor = (DcMotorEx) motor;
-        this.power = power;
-        this.maxTimeoutMS = maxTimeoutMS;
-        this.stallCount = 0;
-        this.timeoutTimer = new ElapsedTime();
+        this.fullPower = power;
     }
 
     public RunIntake(Intake intake) {
-        this(intake.getIntakeMotorEx(), 1, 100000);
+        this(intake.getIntakeMotorEx(), 1);
     }
 
     @Override
     public void update() {
-//        if (isDone) {
-//            KLog.d("RunUntilStall", String.format("[%s] Already done, skipping update",
-//                    getName() != null ? getName() : "unnamed"));
-//            return;
-//        }
         if (!hasStarted) {
-            KLog.d("RunUntilStall", String.format("[%s] STARTING - Setting motor power to %.2f, timeout: %.1fs",
-                    getName() != null ? getName() : "unnamed", power, maxTimeoutMS / 1000.0));
-            motor.setPower(power);
+            motor.setPower(fullPower);
             hasStarted = true;
-            timeoutTimer.reset();
-        }
-
-
-        motor.setPower(power);
-
-        double elapsedTimeMs = timeoutTimer.milliseconds();
-        double elapsedTimeSec = elapsedTimeMs / 1000.0;
-
-        // Check timeout
-        if (elapsedTimeMs > maxTimeoutMS) {
-            KLog.d("RunUntilStall", String.format("[%s] TIMEOUT after %.1fs - Stopping motor",
-                    getName() != null ? getName() : "unnamed", elapsedTimeSec));
-            motor.setPower(0.2);
+            runTimer.reset();
+            KLog.d("RunIntake", String.format("[%s] STARTED at power %.2f",
+                    getName() != null ? getName() : "unnamed", fullPower));
             return;
         }
 
-        double curVelocity = Math.abs(motor.getVelocity());
-        double currentDraw = motor.getCurrent(CurrentUnit.MILLIAMPS);
-        double expectedVelocity = Math.abs(power) * MAX_VELOCITY_TICKS_PER_SEC;
-        double stallVelocityThreshold = expectedVelocity * STALL_VELOCITY_PERCENTAGE;
-        double currentPercentMaxVelocity = curVelocity / expectedVelocity;
-
-        // Log motor state every 500ms
-        if (((int) elapsedTimeMs) % 500 < 20) {
-            KLog.d("RunUntilStall", String.format("[%s] Motor State - Time: %.1fs, Velocity: %.1f/%.1f (threshold: %.1f), Current: %.0fmA, StallCount: %d, MaxVelocityPercent: %.2f",
-                    getName() != null ? getName() : "unnamed",
-                    elapsedTimeSec,
-                    curVelocity,
-                    expectedVelocity,
-                    stallVelocityThreshold,
-                    currentDraw,
-                    stallCount,
-                    currentPercentMaxVelocity
-            ));
+        double velocity = Math.abs(motor.getVelocity());
+        double currentMA = motor.getCurrent(CurrentUnit.MILLIAMPS);
+        double expectedVelocity = Math.abs(fullPower) * MAX_VELOCITY_TICKS_PER_SEC;
+        KLog.d("RunIntake", String.format("Velocity %% %.2f", ((velocity / expectedVelocity) * 100)) + " current: " + currentMA + "mA");
+        // Skip stall detection during first second (motor spin-up)
+        if (runTimer.milliseconds() < 1000) {
+            motor.setPower(fullPower);
+            return;
         }
 
-        // Check stall conditions
-        boolean pastInitialDelay = elapsedTimeMs > 1000;
-        boolean powerAboveThreshold = Math.abs(motor.getPower()) > MIN_POWER_THRESHOLD;
-        boolean currentAboveThreshold = currentDraw > STALL_CURRENT_THRESHOLD_MILLIAMPS;
-        boolean velocityBelowThreshold = curVelocity < stallVelocityThreshold;
+        if (!isStalled) {
+            // RUNNING at full power — check for stall
+            boolean highCurrent = currentMA > STALL_CURRENT_THRESHOLD_MA;
+            boolean lowVelocity = velocity < expectedVelocity * STALL_VELOCITY_PERCENTAGE;
 
-        if (pastInitialDelay && powerAboveThreshold && currentAboveThreshold && velocityBelowThreshold) {
-            stallCount++;
-            if (stallCount == 1 || stallCount % 20 == 0) {
-                KLog.d("RunUntilStall", String.format("[%s] STALL DETECTED (count: %d) - Current: %.0fmA > %.0fmA, Velocity: %.1f < %.1f",
-                        getName() != null ? getName() : "unnamed",
-                        stallCount,
-                        currentDraw,
-                        STALL_CURRENT_THRESHOLD_MILLIAMPS,
-                        curVelocity,
-                        stallVelocityThreshold));
+            if (highCurrent && lowVelocity) {
+                stallCount++;
+            } else {
+                stallCount = 0;
+            }
+
+            if (stallCount >= STALL_CONFIRM_COUNT) {
+                isStalled = true;
+                stallCount = 0;
+                clearCount = 0;
+                motor.setPower(STALL_POWER);
+                KLog.d("RunIntake", String.format("[%s] STALL — dropping to %.2f power (current: %.0fmA, velocity: %.1f)",
+                        getName() != null ? getName() : "unnamed", STALL_POWER, currentMA, velocity));
+            } else {
+                motor.setPower(fullPower);
             }
         } else {
-            if (stallCount > 0) {
-                KLog.d("RunUntilStall", String.format("[%s] Stall conditions cleared - Resetting count from %d (pastDelay:%b, power:%.2f>%.2f=%b, current:%.0f>%.0f=%b, vel:%.1f<%.1f=%b)",
-                        getName() != null ? getName() : "unnamed",
-                        stallCount,
-                        pastInitialDelay,
-                        Math.abs(motor.getPower()), MIN_POWER_THRESHOLD, powerAboveThreshold,
-                        currentDraw, STALL_CURRENT_THRESHOLD_MILLIAMPS, currentAboveThreshold,
-                        curVelocity, stallVelocityThreshold, velocityBelowThreshold));
-            }
-            stallCount = 0;
-        }
+            // STALLED at low power — check if obstruction cleared
+            // At low power, expected velocity is lower
+            double lowPowerExpectedVelocity = STALL_POWER * MAX_VELOCITY_TICKS_PER_SEC;
+            boolean velocityRecovering = velocity > lowPowerExpectedVelocity * RECOVERY_VELOCITY_PERCENTAGE;
+            boolean currentNormal = currentMA < STALL_CURRENT_THRESHOLD_MA;
 
-        if (stallCount > 10) {
-            KLog.d("RunUntilStall", String.format("[%s] STALL CONFIRMED (count: %d > 100) - Stopping motor after %.1fs",
-                    getName() != null ? getName() : "unnamed", stallCount, elapsedTimeSec));
-            motor.setPower(0.2);
+            if (velocityRecovering && currentNormal) {
+                clearCount++;
+            } else {
+                clearCount = 0;
+            }
+
+            if (clearCount >= STALL_CONFIRM_COUNT) {
+                isStalled = false;
+                clearCount = 0;
+                motor.setPower(fullPower);
+                KLog.d("RunIntake", String.format("[%s] RECOVERED — back to full power %.2f (velocity: %.1f)",
+                        getName() != null ? getName() : "unnamed", fullPower, velocity));
+            } else {
+                motor.setPower(STALL_POWER);
+            }
         }
     }
 }
