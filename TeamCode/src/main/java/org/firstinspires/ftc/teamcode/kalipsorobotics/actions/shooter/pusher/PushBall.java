@@ -5,19 +5,23 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KA
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 public class PushBall extends KActionSet {
 //    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
+    private KServoAutoAction openStopper;
     public PushBall(Stopper stopper, Intake intake) {
 
         KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryWheelIMUPosition());
 
-        KServoAutoAction openStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_OPEN_POS);
+        openStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_OPEN_POS);
         openStopper.setName("openStopper");
         this.addAction(openStopper);
 
@@ -45,4 +49,7 @@ public class PushBall extends KActionSet {
 //        return runUntilFullSpeed;
 //    }
 
+    public KServoAutoAction getOpenStopper() {
+        return openStopper;
+    }
 }

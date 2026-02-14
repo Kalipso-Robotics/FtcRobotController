@@ -464,9 +464,9 @@ public class TeleOp extends KOpMode {
                 KLog.d("Teleop_Shooting", "Shot_" + shootCount + " - " +
                         "Delta RPS: " + (shooter.getRPS() - shootAllAction.getShooterRun().getTargetRPS())  +
                         "Distance " + shooterRun.getDistanceMM() +
+                        "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
                         "Odometry " + SharedData.getOdometryWheelIMUPosition() +
-                        "Limelight Pos " + SharedData.getLimelightGlobalPosition() +
-                        "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg()
+                        "Limelight Pos " + SharedData.getLimelightGlobalPosition()
                 );
             }
         }

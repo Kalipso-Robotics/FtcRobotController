@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyTeleOp;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Intake;
@@ -110,10 +111,11 @@ public class ShootAllAction extends KActionSet {
         pushBall.setDependentActions(shooterReady, turretReadyTeleOp);
         this.addAction(pushBall);
 
-//        TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
-//        turretStop.setName("turretStop");
-//        turretStop.setDependentActions(pushBall);
-//        this.addAction(turretStop);
+
+//        this.addAction(pushBall.getOpenStopper());
+//
+//        TurretStop turretStop = new TurretStop();
+//        turretStop.setDependentActions(pushBall.getOpenStopper());
 
 
 
@@ -147,6 +149,11 @@ public class ShootAllAction extends KActionSet {
 //            shooterRun.setTargetRPS(maintainRPSValue);
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
             //KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
+        }
+        if (pushBall.getOpenStopper().getIsDone()) {
+            KLog.d("ShootAllAction", "Turret Delta Angle: " + (turretAutoAlignTeleop.getDeltaAngleDeg()) +
+                    " Within Range: " + (turretAutoAlignTeleop.isWithinRange()));
+            turretAutoAlignTeleop.stop();
         }
     }
 
