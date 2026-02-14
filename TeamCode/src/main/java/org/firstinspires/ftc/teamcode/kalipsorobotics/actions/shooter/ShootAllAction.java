@@ -150,11 +150,12 @@ public class ShootAllAction extends KActionSet {
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
             //KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
         }
+        KLog.d("ShootAllAction", String.format("StopperStatus: %s, Turret Delta Angle: %.2f, Within Range: %s, Delta RPS: %.2f",
+                (pushBall.getOpenStopper().getIsDone()),
+                (turretAutoAlignTeleop.getDeltaAngleDeg()),
+                (turretAutoAlignTeleop.isWithinRange()),
+                (shooterRun.getTargetRPS() - shooter.getRPS())));
         if (pushBall.getOpenStopper().getIsDone()) {
-            KLog.d("ShootAllAction", "Turret Delta Angle: " + (turretAutoAlignTeleop.getDeltaAngleDeg()) +
-                    " Within Range: " + (turretAutoAlignTeleop.isWithinRange()) +
-                    " Delta RPS: " + (shooterRun.getTargetRPS() - shooter.getRPS())
-            );
             turretAutoAlignTeleop.stop();
         }
     }

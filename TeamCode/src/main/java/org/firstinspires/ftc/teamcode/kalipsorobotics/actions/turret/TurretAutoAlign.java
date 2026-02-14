@@ -29,6 +29,8 @@ public class TurretAutoAlign extends Action {
     private double previousTotalAngle = 0;
     private double currentAngularVelocity;
     private final ElapsedTime velocityTimer;
+    private double deltaAngleDeg;
+
 
 
     private final AllianceColor allianceColor;
@@ -178,6 +180,8 @@ public class TurretAutoAlign extends Action {
         int currentTicks = turretMotor.getCurrentPosition();
         int error = (int) targetTicks - currentTicks;
 
+        deltaAngleDeg = error / TurretConfig.TICKS_PER_DEGREE;
+
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turret.stop();
@@ -193,5 +197,9 @@ public class TurretAutoAlign extends Action {
 
             turretMotor.setPower(totalPower);
         }
+    }
+
+    public double getDeltaAngleDeg() {
+        return deltaAngleDeg;
     }
 }

@@ -230,7 +230,7 @@ public class TurretAutoAlignTeleOp extends Action {
 
             turretMotor.setPower(totalPower);
         }
-        KLog.d("Turret_PID", "Turret Delta Angle " + deltaAngleDeg);
+        KLog.d("Turret_PID", "Turret Delta Angle: " + deltaAngleDeg);
     }
 
     public void stop() {

@@ -449,7 +449,7 @@ public class TeleOp extends KOpMode {
                 if (toggleTurretAlign) {
                     turnOnTurret();
                 }
-                if (enableLimelightZeroing) {
+                if (enableLimelightZeroing && (shootCount % 2 == 0)) {
                     resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
                     resetOdometryToLimelight.updateCheckDone();
                     forceUpdateShootingActions();
@@ -461,12 +461,12 @@ public class TeleOp extends KOpMode {
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 shootCount++;
                 shootAllAction.setName("Shot_" + shootCount);
-                KLog.d("Teleop_Shooting", "Shot_" + shootCount + " - " +
-                        "Delta RPS: " + (shooter.getRPS() - shootAllAction.getShooterRun().getTargetRPS())  +
-                        "Distance " + shooterRun.getDistanceMM() +
-                        "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
-                        "Odometry " + SharedData.getOdometryWheelIMUPosition() +
-                        "Limelight Pos " + SharedData.getLimelightGlobalPosition()
+                KLog.d("Teleop_Shooting", "Shot_" + shootCount + " -" +
+                        " Delta RPS: " + (shooter.getRPS() - shootAllAction.getShooterRun().getTargetRPS())  +
+                        " Distance: " + shooterRun.getDistanceMM() +
+                        " Turret Delta Angle: " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
+                        " Odometry: " + SharedData.getOdometryWheelIMUPosition() +
+                        " Limelight Pos: " + SharedData.getLimelightGlobalPosition()
                 );
             }
         }

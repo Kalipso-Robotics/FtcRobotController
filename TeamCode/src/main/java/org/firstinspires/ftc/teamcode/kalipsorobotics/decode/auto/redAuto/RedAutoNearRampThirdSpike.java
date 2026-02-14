@@ -192,10 +192,10 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip1.getMoveToBall().setPathAngleTolerance(50);
         trip1.getMoveToBall().setFinalSearchRadius(200);
 
-        KLog.d("Teleop_Shooting", "Shot_1" + " - " +
+        KLog.d("Auto_Shooting", "Shot_1" + " - " +
                         "Delta RPS: " + (shooter.getRPS() - trip1.getShooterReady().getShooterRun().getTargetRPS())  +
-                        "Distance " + shooterRun.getDistanceMM() +
-                        "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
+                        "Distance " + trip1.getShooterReady().getShooterRun().getDistanceMM() +
+                        "Turret Delta Angle " + turretAutoAlign.getDeltaAngleDeg() +
                         "Odometry " + SharedData.getOdometryWheelIMUPosition() +
                         "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         redAutoNear.addAction(trip1);
@@ -228,10 +228,10 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip4Spike.getMoveToBall().setWithinRangeRadiusMM(300);
         trip4Spike.getMoveToBall().setFinalSearchRadius(200);
         trip4Spike.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
-        KLog.d("Teleop_Shooting", "Shot_4" + " - " +
-                "Delta RPS: " + (shooter.getRPS() - trip1.getShooterReady().getShooterRun().getTargetRPS())  +
-                "Distance " + shooterRun.getDistanceMM() +
-                "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
+        KLog.d("Auto_Shooting", "Shot_4" + " - " +
+                "Delta RPS: " + (shooter.getRPS() - trip4Spike.getShooterReady().getShooterRun().getTargetRPS())  +
+                "Distance " + trip4Spike.getShooterReady().getShooterRun().getDistanceMM() +
+                "Turret Delta Angle " + turretAutoAlign.getDeltaAngleDeg() +
                 "Odometry " + SharedData.getOdometryWheelIMUPosition() +
                 "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         redAutoNear.addAction(trip4Spike);
@@ -260,10 +260,10 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         // move to launch
         trip5.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
 
-        KLog.d("Teleop_Shooting", "Shot_5" + " - " +
-                "Delta RPS: " + (shooter.getRPS() - trip1.getShooterReady().getShooterRun().getTargetRPS())  +
-                "Distance " + shooterRun.getDistanceMM() +
-                "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
+        KLog.d("Auto_Shooting", "Shot_5" + " - " +
+                "Delta RPS: " + (shooter.getRPS() - trip5.getShooterReady().getShooterRun().getTargetRPS())  +
+                "Distance " + trip5.getShooterReady().getShooterRun().getDistanceMM() +
+                "Turret Delta Angle " + turretAutoAlign.getDeltaAngleDeg() +
                 "Odometry " + SharedData.getOdometryWheelIMUPosition() +
                 "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         redAutoNear.addAction(trip5);
@@ -276,7 +276,8 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         //move to lever
 //        rampTrip.getMoveToRamp().addPoint(1399.79, 925.11 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //eat at lever
-        rampTrip.getMoveToEat().addPoint(1445, 925.11 * allianceColor.getPolarity(), 57.3 * allianceColor.getPolarity()); // eating point
+        rampTrip.getMoveToEat().addPoint(1400, 925 * allianceColor.getPolarity(), 57.3 * allianceColor.getPolarity()); // eating point
+
         rampTrip.getMoveToEat().setPathAngleTolerance(5);
         rampTrip.getMoveToEat().setLookAheadRadius(75);
         rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(10);
@@ -290,10 +291,10 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         rampTrip.getTripToShoot().getMoveToBall().setWithinRangeRadiusMM(200);
         rampTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDegree(30);
 
-        KLog.d("Teleop_Shooting", "Shot_RampTrip" + " - " +
-                "Delta RPS: " + (shooter.getRPS() - trip1.getShooterReady().getShooterRun().getTargetRPS())  +
-                "Distance " + shooterRun.getDistanceMM() +
-                "Turret Delta Angle " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
+        KLog.d("Auto_Shooting", "Shot_Ramp" + " - " +
+                "Delta RPS: " + (shooter.getRPS() - rampTrip.getTripToShoot().getShooterReady().getShooterRun().getTargetRPS())  +
+                "Distance " + rampTrip.getTripToShoot().getShooterReady().getShooterRun().getDistanceMM() +
+                "Turret Delta Angle " + turretAutoAlign.getDeltaAngleDeg() +
                 "Odometry " + SharedData.getOdometryWheelIMUPosition() +
                 "Limelight Pos " + SharedData.getLimelightGlobalPosition());
         return rampTrip;
