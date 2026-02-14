@@ -9,11 +9,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 public class AprilTagConfig {
 
 
-    public static double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(126); //Math.toRadians(-234);
+    public static double APRIL_TAG_HEADING_REL_FIELD_RAD = -Math.toRadians(125.54); //Math.toRadians(-234);
 
     //Tuned until zero field is different from CAD
     public static double APRILTAG_X_REL_FIELD_MM = 3076.6; // 3115 FROM TUNE | 3,076.6 FROM MEASURE FIELD WITH TAPE MEASURE
-    public static double APRILTAG_Y_REL_FIELD_MM = 1013.5; //951.43 Tuned until zero | 1,013.5 mm IS FROM MEASURED FIELD WITH TAPE MEASURE
+    public static double APRILTAG_Y_REL_FIELD_MM = 1013.5 - 76.2; //951.43 Tuned until zero | 1,013.5 mm IS FROM MEASURED FIELD WITH TAPE MEASURE
 
 
     public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z = 300.232 / 2; // FROM CAD in camera system
