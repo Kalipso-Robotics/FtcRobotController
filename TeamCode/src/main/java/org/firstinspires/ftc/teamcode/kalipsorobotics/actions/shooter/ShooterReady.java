@@ -33,10 +33,13 @@ public class ShooterReady extends Action {
         KLog.d("ShooterReady", "ShooterRun isDone: " + shooterRun.getIsDone());
         if (isWithinRange) {
             isDone = true;
+            double currentRPS = shooterRun.getShooter().getRPS();
+            double targetRPS = shooterRun.getTargetRPS();
             KLog.d("ShooterReady_ShootInfo", "Name: " + this.getName() +
                     " Shooter is within range. Distance:" + shooterRun.getDistanceMM() +
-                    " Current RPS: " + shooterRun.getShooter().getRPS() +
-                    " Target RPS: " + shooterRun.getTargetRPS());
+                    " Delta RPS: " + (targetRPS - currentRPS) +
+                    " Current RPS: " + currentRPS +
+                    " Target RPS: " + targetRPS);
             KLog.d("ShooterReady", "*** SHOOTER READY MARKED AS DONE ***");
             KLog.d("ShooterReady_ActionTime", "ActionTime: " + actionTime.milliseconds() + " ms");
             KLog.d("ShooterReady", "*** SHOOTER READY MARKED AS DONE ***");

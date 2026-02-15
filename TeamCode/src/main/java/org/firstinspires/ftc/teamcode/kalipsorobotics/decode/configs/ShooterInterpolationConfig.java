@@ -16,8 +16,9 @@ public class ShooterInterpolationConfig {
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
     public static final int NEAR_DISTANCE = 1785;
-    public static double minHoodCompensate = -0.02166;
-    public static double maxHoodCompensate = 0.02166;
+    public static double maxHoodCompensate = 0.01; //0.02166;
+    public static double minHoodCompensate = -maxHoodCompensate;//-0.02166;
+
     public static double hoodCompensateCoefficient = maxHoodCompensate; // 0.2
 
     public static  double DEFAULT_VOLTAGE = 12.5;
@@ -42,7 +43,7 @@ public class ShooterInterpolationConfig {
     };
     */
 
-    static double compensatedMaxHood = 0.31754;
+    static double compensatedMaxHood = 0.4; //0.31754;
     private static final double rpsTune = -1;
     public static double[] shooterData = {
             810, 45.7 + rpsTune, compensatedMaxHood - 0.12,

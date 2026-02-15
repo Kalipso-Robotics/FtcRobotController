@@ -162,8 +162,6 @@ public class KMotor {
             KLog.d("ShooterReady", "RPS within tolerance - Ready!");
         }
 
-
-
         return isAtTarget;
     }
 

@@ -150,7 +150,7 @@ public class ShooterRun extends Action {
                 }
                 break;
         }
-
+        shooter.setTargetRPS(targetRPS);
         KLog.d("ShooterRun", "Running mode " + shooterRunMode);
         double currRps = shooter.getRPS();
         double deltaRPS = targetRPS - currRps;
@@ -169,7 +169,6 @@ public class ShooterRun extends Action {
                     " Target RPS: " + targetRPS
             );
         }
-
         // Bang control for rapid accel/decel when error is large
         if (deltaRPS > ShooterConfig.accelBoostDeltaRPSThreshold) {
             // Need to ACCELERATE - current RPS too low
@@ -208,7 +207,7 @@ public class ShooterRun extends Action {
                 //isDone = true;
                 isWithinRange = true;
             } else {
-                KLog.d("shooter_ready", "Shooter within range, but waiting for time to stablize. TargetRPS: " + targetRPS + " Current RPS: " + shooter.getRPS() );
+                KLog.d("shooter_ready", "Shooter within range, but waiting for time to stabilize. TargetRPS: " + targetRPS + " Current RPS: " + shooter.getRPS() );
                 isWithinRange = false;
             }
         } else {

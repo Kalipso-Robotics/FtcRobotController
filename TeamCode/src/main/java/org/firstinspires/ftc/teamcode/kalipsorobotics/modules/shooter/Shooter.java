@@ -41,6 +41,7 @@ public class Shooter {
 
     private final IShooterPredictor predictor;
 
+
     private double targetRPS;
     private double currentRPS;
 
@@ -228,6 +229,8 @@ public class Shooter {
         return pixel / MM_TO_PIXEL_RATIO;
     }
 
-
+    public void setTargetRPS(double targetRPS) {
+        this.targetRPS = targetRPS;
+    }
 
 }
