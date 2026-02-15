@@ -10,10 +10,11 @@ public class ResetOdometryToLimelight extends Action {
 
     Turret turret;
 
+    private boolean overrideOdometry = false;
+
     public ResetOdometryToLimelight(Turret turret) {
         this.turret = turret;
     }
-
 
     @Override
     protected void update() {
@@ -28,5 +29,9 @@ public class ResetOdometryToLimelight extends Action {
         SharedData.setOdometryWheelPosition(limelightGlobalPosition);
         SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
         isDone = true;
+    }
+
+    public void setOverrideOdometry(boolean overrideOdometry) {
+        this.overrideOdometry = overrideOdometry;
     }
 }

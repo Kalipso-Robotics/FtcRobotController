@@ -277,8 +277,9 @@ public class TeleOp extends KOpMode {
         if (leverButtonPressed) {
             if (leverAction == null || leverAction.getIsDone()) {
                 leverAction = new PurePursuitAction(driveTrain);
-                leverAction.addPoint(1575, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                leverAction.addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
+//                leverAction.addPoint(1575, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//                leverAction.addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
+                leverAction.addPoint(1375, 950 * allianceColor.getPolarity(), 57.3 * allianceColor.getPolarity()); // eating point
                 setLastMoveAction(leverAction);
             }
         }
@@ -500,6 +501,7 @@ public class TeleOp extends KOpMode {
             if (!isPending(resetOdometryToLimelight)) {
                 KLog.d("TeleOp_Zeroing", "Zero Limelight button pressed - resetting odometry to limelight position");
                 resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
+                resetOdometryToLimelight.setOverrideOdometry(true);
                 enableLimelightZeroing = true;
                 setLastZeroAction(resetOdometryToLimelight);
                 KLog.d("TeleOp_Zeroing", "Limelight zero action started");
