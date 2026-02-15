@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Shoo
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReverse;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
@@ -69,7 +68,7 @@ public class TeleOp extends KOpMode {
     DriveAction driveAction = null;
 
     ResetOdometryToLimelight resetOdometryToLimelight = null;
-    ResetOdometryToPos resetOdometryToCorner = null;
+    ResetOdometryToPos resetOdometryToPos = null;
 
     // Button state variables
     private boolean drivingSticksActive = false;
@@ -471,7 +470,7 @@ public class TeleOp extends KOpMode {
                 if (toggleTurretAlign) {
                     turnOnTurret();
                 }
-                if (enableLimelightZeroing && (shootCount % 2 == 0)) {
+                if (enableLimelightZeroing) {
                     resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
                     resetOdometryToLimelight.updateCheckDone();
                     forceUpdateShootingActions();
@@ -498,19 +497,22 @@ public class TeleOp extends KOpMode {
 
     private void handleZeroing() {
         if (zeroLimelightPressed) {
-            if (!isPending(resetOdometryToLimelight)) {
-                KLog.d("TeleOp_Zeroing", "Zero Limelight button pressed - resetting odometry to limelight position");
-                resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
-                resetOdometryToLimelight.setOverrideOdometry(true);
-                enableLimelightZeroing = true;
-                setLastZeroAction(resetOdometryToLimelight);
-                KLog.d("TeleOp_Zeroing", "Limelight zero action started");
+            if (!isPending(resetOdometryToPos)) {
+                Position unfilteredLimelightPos = SharedData.getUnfilteredLimelightGlobalPos();
+                resetOdometryToPos = new ResetOdometryToPos(unfilteredLimelightPos);
+                resetOdometryToPos.updateCheckDone();
+                setLastZeroAction(resetOdometryToPos);
+                forceUpdateShootingActions();
+                KLog.d("TeleOp_Zeroing", "Force Limelight zero action started - Odometry Position: " + SharedData.getOdometryWheelIMUPosition() +
+                        " Unfiltered Limelight pos: " + unfilteredLimelightPos +
+                        " Filtered Limelight Pos: " + SharedData.getLimelightGlobalPosition()
+                );
             }
             return;
         }
 
         if (zeroCornerPressed) {
-            if (!isPending(resetOdometryToCorner)) {
+            if (!isPending(resetOdometryToPos)) {
                 KLog.d("TeleOp_Zeroing", "Zero Corner button pressed - resetting odometry to corner position");
 
                 // TODO: Update with actual corner coordinates
@@ -519,9 +521,9 @@ public class TeleOp extends KOpMode {
                 double cornerTheta = 0;
                 Position cornerPosition = new Position(cornerX, cornerY, cornerTheta);
 
-                resetOdometryToCorner = new ResetOdometryToPos(cornerPosition);
+                resetOdometryToPos = new ResetOdometryToPos(cornerPosition);
                 enableLimelightZeroing = false;
-                setLastZeroAction(resetOdometryToCorner);
+                setLastZeroAction(resetOdometryToPos);
                 KLog.d("TeleOp_Zeroing", "Corner zero action started - Position: " + SharedData.getOdometryWheelIMUPosition());
             }
         }

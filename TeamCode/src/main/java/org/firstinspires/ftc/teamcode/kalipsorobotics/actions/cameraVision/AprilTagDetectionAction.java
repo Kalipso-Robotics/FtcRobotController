@@ -109,6 +109,7 @@ public class AprilTagDetectionAction extends Action {
                     // ==================== CALCULATE GLOBAL POS ====================
 
                     globalPos = calculateGlobalLimelightPosition();
+                    SharedData.setUnfilteredLimelightGlobalPos(globalPos);
 
                     // ==================== SPIKE DETECTION ====================
                     boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);

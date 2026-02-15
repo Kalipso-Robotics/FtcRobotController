@@ -118,5 +118,18 @@ public class SharedData {
         voltage = newVoltage;
     }
 
+    private static Position unfilteredLimelightGlobalPos = new Position(0,0,0);
+    public static Position getUnfilteredLimelightGlobalPos() {
+        return new Position(unfilteredLimelightGlobalPos);
+    }
+
+    public static void setUnfilteredLimelightGlobalPos(Position position) {
+        if (position != null) {
+            unfilteredLimelightGlobalPos.reset(position);
+        } else {
+            unfilteredLimelightGlobalPos.reset(new Position(0,0,0));
+        }
+    }
+
 
 }

@@ -234,7 +234,7 @@ public class RedAutoDepot extends KOpMode {
             retryTrip.getTrip().getMoveToBall().addPoint(45, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
             retryTrip.getTrip().getMoveToBall().addPoint(45, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         } else {
-            retryTrip.getTrip().getMoveToBall().addPoint(45, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+            retryTrip.getTrip().getMoveToBall().addPoint(25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
             retryTrip.getTrip().getMoveToBall().addPoint(325, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
             // retry
