@@ -182,13 +182,13 @@ public class ShooterRun extends Action {
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             shooter.setPower(0);
-            KLog.d("ShooterRun_BangControl", "BANG DECEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.decelBoostDeltaRPSThreshold + ")");
+            KLog.d("ShooterRun_BangControl", String.format("BANG DECEL: deltaRPS = %.2f, threshold = %.2f", deltaRPS, ShooterConfig.decelBoostDeltaRPSThreshold));
         } else {
             // Within threshold - use PID control for fine adjustment
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.goToRPS(targetRPS);
-            KLog.d("ShooterRun_BangControl", "PID CONTROL: deltaRPS=" + deltaRPS);
+            KLog.d("ShooterRun_BangControl", String.format("PID CONTROL: deltaRPS = %.2f", deltaRPS));
         }
         // Update hood position
         shooter.getHood().setPosition(effectiveTargetHood);
