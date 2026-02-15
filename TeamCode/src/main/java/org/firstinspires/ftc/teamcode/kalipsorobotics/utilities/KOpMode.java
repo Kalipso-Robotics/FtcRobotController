@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
@@ -26,7 +24,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastIntakeAction = null;
     protected Action lastMoveAction = null;
     protected Action lastShooterAction = null;
-    protected Action lastBrakingAction = null;
+    protected Action lastTiltAction = null;
     protected Action lastStopperAction = null;
     protected Action lastZeroAction = null;
     protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
@@ -94,13 +92,12 @@ public abstract class KOpMode extends LinearOpMode {
     protected void setLastShooterAction(Action action) {
         lastShooterAction = action;
     }
-    protected void setLastBrakingAction(Action action) {
-        lastBrakingAction = action;
+    protected void setLastTiltAction(Action action) {
+        lastTiltAction = action;
     }
     protected void setLastStopperAction(Action action) {
         lastStopperAction = action;
     }
-
     protected void setLastZeroAction(Action action) {
         lastZeroAction = action;
     }
@@ -134,8 +131,8 @@ public abstract class KOpMode extends LinearOpMode {
             lastStopperAction.updateCheckDone();
         }
 
-        if (lastBrakingAction != null) {
-            lastBrakingAction.updateCheckDone();
+        if (lastTiltAction != null) {
+            lastTiltAction.updateCheckDone();
         }
 
         if (shooterRun != null) {

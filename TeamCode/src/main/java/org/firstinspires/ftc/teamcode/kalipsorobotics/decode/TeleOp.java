@@ -6,7 +6,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KS
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.ReleaseBrakeAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.ReleaseBraking;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReverse;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
@@ -24,6 +23,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -47,14 +47,17 @@ public class TeleOp extends KOpMode {
     private Intake intake = null;
     private Turret turret = null;
     private Stopper stopper = null;
+    private Tilter tilter = null;
     private Odometry odometry = null;
 
     ShootAllAction shootAllAction = null;
 
-    ReleaseBraking releaseBraking = null;
-    ReleaseBrakeAction releaseBrakeAction = null;
+
     PurePursuitAction parkAction = null;
     PurePursuitAction leverAction = null;
+    KServoAutoAction tiltDown = null;
+    KServoAutoAction tiltUp = null;
+
 
     KServoAutoAction openStopper = null;
     KServoAutoAction closeStopper = null;
@@ -89,6 +92,8 @@ public class TeleOp extends KOpMode {
     private boolean setTurretOffset0Pressed;
     private boolean parkButtonPressed;
     private boolean leverButtonPressed;
+    private boolean tiltDownPressed;
+    private boolean tiltUpPressed;
     private boolean enableLimelightZeroing = true;
     private boolean toggleSOTM = true;
 
@@ -126,6 +131,7 @@ public class TeleOp extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
+        tilter = new Tilter(opModeUtilities);
         KLog.d("TeleOp-Init", "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
         turret = Turret.getInstance(opModeUtilities);
@@ -154,6 +160,7 @@ public class TeleOp extends KOpMode {
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         KLog.d("TeleOp-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
+        tilter.setPosition(ModuleConfig.TILTER_SERVO_UP_POS);
         waitForStart();
         sleep(50);
         //Wait for Executor Thread to start
@@ -180,6 +187,9 @@ public class TeleOp extends KOpMode {
 
             parkButtonPressed = kGamePad1.isButtonXFirstPressed();
             leverButtonPressed = kGamePad1.isButtonYFirstPressed();
+
+            tiltUpPressed = kGamePad1.isDpadUpFirstPressed();
+            tiltDownPressed = kGamePad1.isDpadDownPressed();
 
 
 
@@ -281,6 +291,20 @@ public class TeleOp extends KOpMode {
             setLastMoveAction(null);
         } else if ((parkAction == null || parkAction.getIsDone()) && (leverAction == null || leverAction.getIsDone())) {
             driveTrain.setPower(0);
+        }
+
+        if (tiltUpPressed) {
+            if (!isPending(tiltUp)) {
+                tiltDown = null;
+                tiltUp = new KServoAutoAction(tilter.getTilter(), ModuleConfig.TILTER_SERVO_UP_POS);
+                setLastTiltAction(tiltUp);
+            }
+        } else if (tiltDownPressed) {
+            if (!isPending(tiltDown)) {
+                tiltUp = null;
+                tiltDown = new KServoAutoAction(tilter.getTilter(), ModuleConfig.TILTER_SERVO_DOWN_POS);
+                setLastTiltAction(tiltDown);
+            }
         }
     }
     private void handleTurret() {
@@ -422,9 +446,6 @@ public class TeleOp extends KOpMode {
 
         // Priority 1- Stop shooter
         if (stopShooterPressed) {
-            releaseBrakeAction = new ReleaseBrakeAction(driveBrake, releaseBraking);
-            setLastBrakingAction(releaseBrakeAction);
-
             shooterRun.stop();
 
             if (shootAllAction != null) {
