@@ -9,7 +9,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 public class IntakeFullAction extends KActionSet {
     private final RunIntakeTime runIntakeTime;
 
+    private Intake intake;
+
     public IntakeFullAction(Stopper stopper, Intake intake, double timeMS, double power){
+
+        this.intake = intake;
 
         KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         closeStopper.setName("closeStopper");
@@ -30,11 +34,6 @@ public class IntakeFullAction extends KActionSet {
         return runIntakeTime;
     }
 
-    //    public void stop() {
-//        if (isDone) {
-//            return;
-//        }
-//        stopIntake.update();
 //        this.isDone = true;
 //    }
 }

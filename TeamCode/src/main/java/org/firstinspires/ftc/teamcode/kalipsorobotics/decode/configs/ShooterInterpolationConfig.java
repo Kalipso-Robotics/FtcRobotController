@@ -46,16 +46,16 @@ public class ShooterInterpolationConfig {
     static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate; //0.31754;
     private static final double rpsTune = 0.1;
     public static double[] shooterData = {
-            810, 45.7 + rpsTune, compensatedMaxHood - 0.17,
-            1050, 45.9 + rpsTune, compensatedMaxHood - 0.013,
-            1310, 46.7 + rpsTune, compensatedMaxHood - 0.013, //roughly first shot for near auto
-            1518, 48.5 + rpsTune, compensatedMaxHood - 0.01,
-            1705, 50.6 + rpsTune, compensatedMaxHood - 0.01,
-            1898, 52.7 + rpsTune, compensatedMaxHood - 0.05,
+            810, 45.7 + rpsTune, compensatedMaxHood - 0.18,
+            1050, 45.9 + rpsTune, compensatedMaxHood - 0.07,
+            1310, 47.2 + rpsTune, compensatedMaxHood - 0.07, //roughly first shot for near auto
+            1518, 48.9 + rpsTune, compensatedMaxHood - 0.05,
+            1705, 51.6 + rpsTune, compensatedMaxHood - 0.05,
+            1898, 53 + rpsTune, compensatedMaxHood - 0.05,
             2075, 54.4 + rpsTune, compensatedMaxHood - 0.05,
             2244, 56.6 + rpsTune, compensatedMaxHood - 0.05,
-            2417, 57.6 + rpsTune, compensatedMaxHood - 0.05,
-            2561, 60 + rpsTune, compensatedMaxHood - 0.05,
+            2417, 57.6 + rpsTune, compensatedMaxHood,
+            2561, 60 + rpsTune, compensatedMaxHood,
             2769, 61.5 + rpsTune, compensatedMaxHood,
             2974, 63 + rpsTune, compensatedMaxHood,
             3154, 64.75 + rpsTune, compensatedMaxHood,

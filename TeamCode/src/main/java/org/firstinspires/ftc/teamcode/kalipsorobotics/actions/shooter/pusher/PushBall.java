@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
@@ -18,8 +19,12 @@ public class PushBall extends KActionSet {
 
         KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryWheelIMUPosition());
 
+        IntakeStop intakeStop = new IntakeStop(intake);
+        this.addAction(intakeStop);
+
         openStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_OPEN_POS);
         openStopper.setName("openStopper");
+        openStopper.setDependentActions(intakeStop);
         this.addAction(openStopper);
 
         KLog.d("PushAllBalls", "openStopper " + openStopper.getIsDone());

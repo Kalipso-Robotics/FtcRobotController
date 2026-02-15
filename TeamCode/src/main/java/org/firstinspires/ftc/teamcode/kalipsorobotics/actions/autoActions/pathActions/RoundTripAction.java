@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KA
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.PurePursuitReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
@@ -57,9 +58,8 @@ public class RoundTripAction extends KActionSet {
         waitUntilShootRun.setName("waitUntilShootReady");
         this.addAction(waitUntilShootRun);
 
-        // check if this is the correct way to get drivetrain
         PurePursuitAction moveToBalls = new PurePursuitAction(drivetrain);
-        moveToBalls.setName("moveToBall");  // FIX: Name the action!
+        moveToBalls.setName("moveToBall");
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
         moveToBalls.setFinalAngleLockingThresholdDegree(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE);
@@ -184,6 +184,7 @@ public class RoundTripAction extends KActionSet {
 
         if (moveToBall.getIsDone()) {
             intakeFullAction.setIsDone(true); //don't need to stop intake because push ball starts intake
+
             KLog.d("RoundTrip", String.format("[%s] IntakeFullAction stopped by pure pursuit completion",
                     getName() != null ? getName() : "unnamed"));
         }
