@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldShootOnTheMoveRPS;
 
+import android.util.Log;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
@@ -178,6 +180,7 @@ public class TeleOp extends KOpMode {
         KLog.d("TeleOp-Run", "closeStopper created successfully");
 
         while (opModeIsActive()) {
+            Log.d("Loop_Speed", "Starting Loop");
             if (!hasClosedStopperInnit) {
                 stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                 hasClosedStopperInnit = true;

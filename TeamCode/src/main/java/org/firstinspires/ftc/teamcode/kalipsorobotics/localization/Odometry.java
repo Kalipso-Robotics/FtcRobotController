@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.localization;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.DrivetrainConfig.*;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryConfig.alpha;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryConfig.alphaTheta;
 
 import android.os.SystemClock;
 
@@ -61,7 +62,8 @@ public class Odometry {
     private Position prevPositionWheelIMU;
     private Velocity robotWheelIMUVelocity;
     private Velocity robotWheelVelocity;
-    private final ExponentialVelocityFiltering ema;
+    private ExponentialVelocityFiltering emaWheelIMU;
+    private ExponentialVelocityFiltering emaWheel;
     double rightDistanceMM;
     double leftDistanceMM;
     double backDistanceMM;
@@ -78,7 +80,8 @@ public class Odometry {
         this.rightOffset = this.getRightEncoderMM();
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = this.getBackEncoderMM();
-        this.ema = new ExponentialVelocityFiltering(alpha);
+        this.emaWheelIMU = new ExponentialVelocityFiltering(alpha, alphaTheta);
+        this.emaWheel = new ExponentialVelocityFiltering(alpha, alphaTheta);
 
         this.wheelPositionHistory.setCurrentPosition(startPosMMRad);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRad);
@@ -217,8 +220,6 @@ public class Odometry {
 
         Velocity rawVelocity = new Velocity(deltaX / deltaTimeMS, deltaY / deltaTimeMS, deltaTheta / deltaTimeMS);
 
-        robotWheelVelocity = ema.calculateFilteredVelocity(rawVelocity);
-
         KLog.d("Odometry_WheelVelocity", "Raw Velocity: " + rawVelocity +
                 " Filtered Velocity: " + robotWheelVelocity);
 
@@ -330,7 +331,7 @@ public class Odometry {
 
         Position deltaPos = globalPosition.minus(prevPositionWheel);
         Velocity rawVelocity = new Velocity(deltaPos.getX() / timeElapsedMS, deltaPos.getY() / timeElapsedMS, deltaPos.getTheta() / timeElapsedMS);
-        robotWheelVelocity = ema.calculateFilteredVelocity(rawVelocity);
+        robotWheelVelocity = emaWheel.calculateFilteredVelocity(rawVelocity);
 
         wheelPositionHistory.setRawIMU(currentImuHeading);
         wheelPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);
@@ -350,7 +351,7 @@ public class Odometry {
 
         Position deltaPos = globalPosition.minus(prevPositionWheelIMU);
         Velocity rawVelocity = new Velocity(deltaPos.getX() / timeElapsedMS, deltaPos.getY() / timeElapsedMS, deltaPos.getTheta() / timeElapsedMS);
-        robotWheelIMUVelocity = ema.calculateFilteredVelocity(rawVelocity);
+        robotWheelIMUVelocity = emaWheelIMU.calculateFilteredVelocity(rawVelocity);
 
         wheelIMUPositionHistory.setRawIMU(currentImuHeading);
         wheelIMUPositionHistory.setDistanceMM(leftDistanceMM, rightDistanceMM, backDistanceMM);

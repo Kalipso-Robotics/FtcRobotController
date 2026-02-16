@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.Pus
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
@@ -167,7 +168,9 @@ public class ShootAllAction extends KActionSet {
                 (turretAutoAlignTeleop.isWithinRange()),
                 (shooterRun.getTargetRPS() - shooter.getRPS())));
         if (pushBall.getOpenStopper().getIsDone()) {
-            turretAutoAlignTeleop.stop();
+            if (!TurretConfig.shouldShootOnTheMoveTurret) {
+                turretAutoAlignTeleop.stop();
+            }
         }
     }
 
