@@ -72,6 +72,7 @@ public class TeleOp extends KOpMode {
 
     // Button state variables
     private boolean drivingSticksActive = false;
+    private boolean slowDrivePressed = false;
     private boolean shootAllActionPressed = false;
     private boolean intakeStopPressed = false;
     private boolean intakeReversePressed = false;
@@ -187,10 +188,13 @@ public class TeleOp extends KOpMode {
             parkButtonPressed = kGamePad1.isButtonXFirstPressed();
             leverButtonPressed = kGamePad1.isButtonYFirstPressed();
 
+            slowDrivePressed = kGamePad1.isAPressed();
+
             tiltUpPressed = kGamePad1.isDpadUpFirstPressed();
             tiltDownPressed = kGamePad1.isDpadDownPressed();
 
-
+            shootAllActionPressed = kGamePad1.isLeftBumperPressed();
+            stopShooterPressed = kGamePad1.isLeftTriggerFirstPressed();
 
             //============Driver 2============
             boolean kGamepad2IsDpadUpFirstPressed = kGamePad2.isDpadUpFirstPressed();
@@ -207,8 +211,7 @@ public class TeleOp extends KOpMode {
             incrementHoodPressed = kGamepad2IsDpadRightFirstPressed && kGamePad2.isLeftBumperPressed();
             decrementHoodPressed = kGamepad2IsDpadLeftFirstPressed && kGamePad2.isLeftBumperPressed();
 
-            shootAllActionPressed = kGamePad1.isLeftBumperPressed();
-            stopShooterPressed = kGamePad1.isLeftTriggerFirstPressed();
+
             zeroLimelightPressed = kGamepad2IsDpadUpFirstPressed;
             zeroCornerPressed = kGamepad2IsDpadDownFirstPressed;
 
@@ -283,6 +286,11 @@ public class TeleOp extends KOpMode {
             }
         }
 
+        if (slowDrivePressed) {
+            driveAction.setPowerCoefficient(0.5);
+        } else {
+            driveAction.setPowerCoefficient(1);
+        }
 
         if (drivingSticksActive) {
             driveAction.move(gamepad1);

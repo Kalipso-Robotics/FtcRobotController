@@ -35,6 +35,10 @@ public class DriveAction {
     private double filteredVYCurrent = 0;
     private double filteredVThetaCurrent = 0;
 
+
+
+    private double powerCoefficient = 1;
+
     private final double WHEELBASE_LENGTH = 300; //front wheel to back wheel
     private double startTimeMS = System.currentTimeMillis();
     private boolean hasStarted = false;
@@ -86,9 +90,9 @@ public class DriveAction {
 
     public double[] calculatePower(Gamepad gamepad) {
         //negative because gamepad y is flip
-        double forward = Math.cbrt(-gamepad.left_stick_y); //cube so fast is fast and slow is slow       * -gamepad.left_stick_y * -gamepad.left_stick_y
-        double turn = Math.cbrt(gamepad.right_stick_x); //* gamepad.right_stick_x * gamepad.right_stick_x
-        double strafe = Math.cbrt(gamepad.left_stick_x); //* gamepad.left_stick_x * gamepad.left_stick_x
+        double forward = Math.cbrt(-gamepad.left_stick_y) * powerCoefficient;
+        double turn = Math.cbrt(gamepad.right_stick_x) * powerCoefficient;
+        double strafe = Math.cbrt(gamepad.left_stick_x) * powerCoefficient;
 
         KLog.d("drive", "forward " + forward);
         KLog.d("drive", "turn " + turn);
@@ -250,5 +254,13 @@ public class DriveAction {
 
     public OpModeUtilities getOpModeUtilities() {
         return opModeUtilities;
+    }
+
+    public double getPowerCoefficient() {
+        return powerCoefficient;
+    }
+
+    public void setPowerCoefficient(double powerCoefficient) {
+        this.powerCoefficient = powerCoefficient;
     }
 }
