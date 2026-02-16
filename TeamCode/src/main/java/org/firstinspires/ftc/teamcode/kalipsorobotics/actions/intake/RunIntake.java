@@ -22,7 +22,7 @@ public class RunIntake extends Action {
     private static final double STALL_CURRENT_THRESHOLD_MA = 3400;
     private static final double STALL_VELOCITY_PERCENTAGE = 0.5;
     private static final int STALL_CONFIRM_COUNT = 8;
-    private static final double STALL_POWER = 0.55;
+    private static final double STALL_POWER = 1; //0.55
     private static final double RECOVERY_VELOCITY_PERCENTAGE = 0.3;
 
     // State

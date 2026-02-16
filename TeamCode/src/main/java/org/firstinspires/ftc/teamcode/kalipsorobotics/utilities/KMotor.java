@@ -109,9 +109,9 @@ public class KMotor {
         double rawPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
         double newPower = rawPower;
         double voltage = SharedData.getVoltage();
-        if (!(Math.abs(voltage) < 0.000000001)) {
-            newPower = clampPower(rawPower * (DEFAULT_VOLTAGE / voltage));
-        }
+//        if (!(Math.abs(voltage) < 0.000000001)) {
+//            newPower = clampPower(rawPower * (DEFAULT_VOLTAGE / voltage));
+//        }
 
         KLog.d("VoltageCompensation", "Raw Power: " + rawPower +
                 " Compensated Power: " + newPower +

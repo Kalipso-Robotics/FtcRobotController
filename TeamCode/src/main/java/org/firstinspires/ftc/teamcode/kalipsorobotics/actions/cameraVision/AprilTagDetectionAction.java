@@ -109,7 +109,6 @@ public class AprilTagDetectionAction extends Action {
                     // ==================== CALCULATE GLOBAL POS ====================
 
                     globalPos = calculateGlobalLimelightPosition();
-                    SharedData.setUnfilteredLimelightGlobalPos(globalPos);
 
                     // ==================== SPIKE DETECTION ====================
                     boolean isSpike = isLimelightSpike(rawPitchDeg, prevPitchDeg);
@@ -123,6 +122,20 @@ public class AprilTagDetectionAction extends Action {
                         prevPitchDeg = rawPitchDeg;
                         return;
                     }
+
+                    SharedData.setUnfilteredLimelightGlobalPos(globalPos);
+
+                    if (isLimelightOdometrySpike()) {
+                        KLog.d("AprilTag_ODOMETRY_SPIKE", String.format("REJECTED | prev=%.2f° curr=%.2f° delta=%.2f°",
+                                prevPitchDeg, rawPitchDeg, rawPitchDeg - prevPitchDeg));
+                        SharedData.getLimelightRawPosition().reset();
+                        hasFound = false;
+                        consecutiveGoodReadings = 0;
+                        prevLimelightGlobalPos = new Position(0,0,0);
+                        prevPitchDeg = rawPitchDeg;
+                        return;
+                    }
+
                     prevPitchDeg = rawPitchDeg;
                     prevLimelightGlobalPos = globalPos;
                     consecutiveGoodReadings++;
@@ -217,7 +230,6 @@ public class AprilTagDetectionAction extends Action {
         }
 
         double angleDiff = MathFunctions.angleWrapDeg(currentPitchDeg - prevPitchDeg);
-        Position odoPos = SharedData.getOdometryWheelIMUPosition();
 
         KLog.d("AprilTagDetectionAction_CheckingSpike", "Current LL pos " + globalPos +
                 " prev LL pos " + prevLimelightGlobalPos +
@@ -233,10 +245,6 @@ public class AprilTagDetectionAction extends Action {
             KLog.d("AprilTagDetectionAction_Spike", "Pos out of the field, pos: " + globalPos);
             return true;
         }
-        if (globalPos.distanceTo(odoPos) > 600) {
-            KLog.d("AprilTagDetectionAction_Spike", "Delta rel to Odometry too high, LL pos: " + globalPos + " Odometry " + odoPos);
-            return true;
-        }
 
         if (prevLimelightGlobalPos != null && !prevLimelightGlobalPos.isEmpty()) {
             double dist = globalPos.distanceTo(prevLimelightGlobalPos);
@@ -247,5 +255,18 @@ public class AprilTagDetectionAction extends Action {
             }
         }
         return false;
+    }
+
+    private boolean isLimelightOdometrySpike() {
+
+        Position odoPos = SharedData.getOdometryWheelIMUPosition();
+
+        if (globalPos.distanceTo(odoPos) > 600) {
+            KLog.d("AprilTagDetectionAction_Spike", "Delta rel to Odometry too high, LL pos: " + globalPos + " Odometry " + odoPos);
+            return true;
+        }
+
+        return false;
+
     }
 }

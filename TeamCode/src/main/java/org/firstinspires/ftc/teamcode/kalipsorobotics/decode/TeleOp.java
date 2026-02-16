@@ -470,13 +470,9 @@ public class TeleOp extends KOpMode {
                 if (toggleTurretAlign) {
                     turnOnTurret();
                 }
-                if (enableLimelightZeroing) {
-                    resetOdometryToLimelight = new ResetOdometryToLimelight(turret);
-                    resetOdometryToLimelight.updateCheckDone();
-                    forceUpdateShootingActions();
-                }
-                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
 
+                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
+                shootAllAction.setEnableLimelightZeroing(enableLimelightZeroing);
                 shooterRun.setUseOdometry(toggleTurretAlign);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -502,6 +498,7 @@ public class TeleOp extends KOpMode {
                 resetOdometryToPos = new ResetOdometryToPos(unfilteredLimelightPos);
                 resetOdometryToPos.updateCheckDone();
                 setLastZeroAction(resetOdometryToPos);
+                enableLimelightZeroing = true;
                 forceUpdateShootingActions();
                 KLog.d("TeleOp_Zeroing", "Force Limelight zero action started - Odometry Position: " + SharedData.getOdometryWheelIMUPosition() +
                         " Unfiltered Limelight pos: " + unfilteredLimelightPos +

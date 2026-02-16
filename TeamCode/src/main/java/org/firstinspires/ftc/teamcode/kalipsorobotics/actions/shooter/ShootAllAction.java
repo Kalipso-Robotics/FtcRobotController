@@ -40,6 +40,12 @@ public class ShootAllAction extends KActionSet {
     private ResetOdometryToLimelight resetOdometryToPosition;
     private IntakeStop intakeStop;
 
+    public void setEnableLimelightZeroing(boolean enableLimelightZeroing) {
+        this.enableLimelightZeroing = enableLimelightZeroing;
+    }
+
+    private boolean enableLimelightZeroing = true;
+
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos) {
         this.stopper = stopper;
         this.intake = intake;
@@ -117,8 +123,10 @@ public class ShootAllAction extends KActionSet {
 //        TurretStop turretStop = new TurretStop();
 //        turretStop.setDependentActions(pushBall.getOpenStopper());
 
-
-
+        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
+        resetOdometryToPosition.setName("resetOdometryToPosition");
+        resetOdometryToPosition.setDependentActions(pushBall);
+        this.addAction(resetOdometryToPosition);
 
 
 //        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
@@ -137,6 +145,9 @@ public class ShootAllAction extends KActionSet {
             //Refresh targetRPS
             shooterRun.update();
             hasStarted = true;
+            if (!enableLimelightZeroing) {
+                resetOdometryToPosition.setIsDone(true);
+            }
         }
 
         KLog.d("ShootAllAction_Status", "ShooterReady: " + shooterReady.getIsDone() + " TurretReady: " + turretReadyTeleOp.getIsDone() + " PushBall: " + pushBall.getIsDone());
@@ -163,5 +174,7 @@ public class ShootAllAction extends KActionSet {
     public void setTurretReady(boolean isDone) {
         turretReadyTeleOp.setIsDone(isDone);
     }
+
+
 
 }
