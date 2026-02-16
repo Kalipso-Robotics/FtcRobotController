@@ -44,7 +44,7 @@ public class ShooterReady extends Action {
             KLog.d("ShooterReady_ActionTime", "ActionTime: " + actionTime.milliseconds() + " ms");
             KLog.d("ShooterReady", "*** SHOOTER READY MARKED AS DONE ***");
         } else {
-            if (ShooterConfig.shouldShootOnTheMove) {
+            if (ShooterConfig.shouldShootOnTheMoveRPS) {
                 isDone = true;
             }
             KLog.d("ShooterReady", "** Still waiting for shooter to reach target RPS **");

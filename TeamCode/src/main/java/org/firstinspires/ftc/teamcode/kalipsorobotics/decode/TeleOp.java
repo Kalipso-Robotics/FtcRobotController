@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldShootOnTheMove;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldShootOnTheMoveRPS;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
@@ -441,7 +441,7 @@ public class TeleOp extends KOpMode {
         }
 
         if (toggleSOTM) {
-            shouldShootOnTheMove = !shouldShootOnTheMove;
+            shouldShootOnTheMoveRPS = !shouldShootOnTheMoveRPS;
         }
 
         // Priority 1- Stop shooter
