@@ -52,7 +52,7 @@ public class SOTMCompensation {
 
         SOTMResult results = new SOTMResult(compensatedDistance, compensatedAngleRad);
 
-        KLog.d("SOTM", "Desired Velocity: " + desiredVelocity +
+        KLog.d("SOTM", () -> "Desired Velocity: " + desiredVelocity +
                 " Launch Velocity: " + launchVelocity +
                 " Results: " + results +
                 " Delta Distance: " + (compensatedDistance - distance)

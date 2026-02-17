@@ -50,6 +50,8 @@ public class ShooterRun extends Action {
 
     private double currentRPS = 0;
 
+    private DcMotor.ZeroPowerBehavior prevMode;
+
     public ShooterRun(OpModeUtilities opModeUtilities, Shooter shooter, double targetRPS, double targetHoodPosition) {
         this.opModeUtilities = opModeUtilities;
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD;
@@ -172,20 +174,29 @@ public class ShooterRun extends Action {
         // Bang control for rapid accel/decel when error is large
         if (deltaRPS > ShooterConfig.accelBoostDeltaRPSThreshold) {
             // Need to ACCELERATE - current RPS too low
-            shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            if (prevMode != DcMotor.ZeroPowerBehavior.FLOAT) {
+                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                prevMode = DcMotor.ZeroPowerBehavior.FLOAT;
+            }
             shooter.setPower(calculateEffectiveCompensationPower());
             KLog.d("ShooterRun_BangControl", () -> "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
         } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold) {
             // Need to DECELERATE - current RPS too high
-            shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            if (prevMode != DcMotor.ZeroPowerBehavior.BRAKE) {
+                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                prevMode = DcMotor.ZeroPowerBehavior.BRAKE;
+            }
             shooter.setPower(0);
             KLog.d("ShooterRun_BangControl", () -> String.format("BANG DECEL: deltaRPS = %.2f, threshold = %.2f", deltaRPS, ShooterConfig.decelBoostDeltaRPSThreshold));
         } else {
             // Within threshold - use PID control for fine adjustment
-            shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            if (prevMode != DcMotor.ZeroPowerBehavior.FLOAT) {
+                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                prevMode = DcMotor.ZeroPowerBehavior.FLOAT;
+            }
             shooter.goToRPS(targetRPS);
             KLog.d("ShooterRun_BangControl", () -> String.format("PID CONTROL: deltaRPS = %.2f", deltaRPS));
         }

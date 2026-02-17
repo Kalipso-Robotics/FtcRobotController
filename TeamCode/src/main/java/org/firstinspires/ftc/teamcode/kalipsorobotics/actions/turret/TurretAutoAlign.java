@@ -119,7 +119,7 @@ public class TurretAutoAlign extends Action {
 
         double yTargetGoal = targetPoint.getY() - currentY;
         double xTargetGoal = targetPoint.getX() - currentX;
-        KLog.d("turret_angle_target", "target point " + targetPoint);
+        KLog.d("turret_angle_target", () -> "target point " + targetPoint);
 
         double angleTargetRadian;
 
@@ -135,7 +135,8 @@ public class TurretAutoAlign extends Action {
 
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
-        KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
+        double finalTotalTurretAngle = totalTurretAngle;
+        KLog.d("turret_angle", () -> "total turret angle " + finalTotalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
 
         return computeTicksFromAngleRad(totalTurretAngleWrap);
     }
@@ -170,7 +171,7 @@ public class TurretAutoAlign extends Action {
         double deltaTime = velocityTimer.milliseconds();
         if (deltaTime > 0) {
             currentAngularVelocity = (MathFunctions.angleWrapRad(totalAngleToGoal - previousTotalAngle)) / deltaTime;
-            KLog.d("Turret_PID", "Current Angular Velocity " + currentAngularVelocity + " prev " + previousTotalAngle + " delta time " + deltaTime);
+            KLog.d("Turret_PID", () -> "Current Angular Velocity " + currentAngularVelocity + " prev " + previousTotalAngle + " delta time " + deltaTime);
             previousTotalAngle = totalAngleToGoal;
             velocityTimer.reset();
         }
@@ -185,14 +186,14 @@ public class TurretAutoAlign extends Action {
         if (Math.abs(error) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turret.stop();
-            KLog.d("Turret_PID", String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
+            KLog.d("Turret_PID", () -> String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
             isWithinRange = false;
             double pidOutput = turretMotor.getPIDFController().calculate(error);
             double feedforward = TurretConfig.kF * currentAngularVelocity;
             double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
 
-            KLog.d("Turret_PID", String.format("MOVING | Curr=%d Target=%d Err=%d | PID=%.3f FF=%.3f Power=%.3f",
+            KLog.d("Turret_PID", () -> String.format("MOVING | Curr=%d Target=%d Err=%d | PID=%.3f FF=%.3f Power=%.3f",
                     currentTicks, (int) targetTicks, error, pidOutput, feedforward, totalPower));
 
             turretMotor.setPower(totalPower);

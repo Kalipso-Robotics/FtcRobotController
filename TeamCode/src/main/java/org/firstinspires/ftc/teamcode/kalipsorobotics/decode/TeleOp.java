@@ -198,7 +198,7 @@ public class TeleOp extends KOpMode {
             parkButtonPressed = kGamePad1.isButtonXFirstPressed();
             leverButtonPressed = kGamePad1.isButtonYFirstPressed();
 
-            slowDrivePressed = kGamePad1.isAPressed();
+            slowDrivePressed = kGamePad1.isRightBumperPressed();
 
             tiltUpPressed = kGamePad1.isDpadUpFirstPressed();
             tiltDownPressed = kGamePad1.isDpadDownPressed();
@@ -292,9 +292,10 @@ public class TeleOp extends KOpMode {
 //                leverAction.addPoint(1575, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //                leverAction.addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
                 //move to lever
-                leverAction.addPoint(1600, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                leverAction.addPoint(1600, 850 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 //eat at lever
-                leverAction.addPoint(1350, 1075 * allianceColor.getPolarity(), 60 * allianceColor.getPolarity()); // eating point //theta 57.3                setLastMoveAction(leverAction);
+                leverAction.addPoint(1325, 1075 * allianceColor.getPolarity(), 60 * allianceColor.getPolarity()); // eating point //theta 57.3
+                setLastMoveAction(leverAction);
             }
         }
 

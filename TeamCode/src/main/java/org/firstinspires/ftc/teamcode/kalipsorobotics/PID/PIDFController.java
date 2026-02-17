@@ -97,11 +97,12 @@ public class PIDFController {
         double clampedOutput = Math.max(minOutput, Math.min(maxOutput, totalRawOutput));
 
         // Log calculated values
-        KLog.d("PIDF_" + name, String.format(
+        double finalIntegral = integral;
+        KLog.d("PIDF", () -> String.format(
             "Current: %.2f | Target: %.2f | Error: %.2f | P: %.4f | I: %.4f | D: %.4f | F: %.4f | RawOutput: %.4f | Output: %.4f",
-            current, target, error, proportional, integral, derivative, feedforward, totalRawOutput, clampedOutput));
+            current, target, error, proportional, finalIntegral, derivative, feedforward, totalRawOutput, clampedOutput));
 
-        KLog.d("PIDF_" + name, String.format(
+        KLog.d("PIDF", () -> String.format(
                 "Current: %.2f | Target: %.2f | Error: %.2f | kP: %.4f | kI: %.4f | kD: %.4f | kF: %.4f | DeltaT: %.4f",
                 current, target, error, kp, ki, kd, kf, timeDelta));
 

@@ -6,5 +6,5 @@ import com.acmerobotics.dashboard.config.Config;
 public class OdometryConfig {
 
     public static double alpha = 0.4; //0.3
-    public static double alphaTheta = 0.72; //0.7
+    public static double alphaTheta = 0.6; //0.7
 }

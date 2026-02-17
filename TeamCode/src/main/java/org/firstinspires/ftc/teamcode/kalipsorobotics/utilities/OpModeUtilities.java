@@ -55,25 +55,25 @@ public class OpModeUtilities {
      * @param odometry
      */
     public static void runOdometryExecutorService(ExecutorService executorService, Odometry odometry) {
-        KLog.d("ExecutorService_Run", "runOdometryExecutorService called");
-        KLog.d("ExecutorService_Run", "odometry instance: " + odometry);
-        KLog.d("ExecutorService_Run", "odometry.getOpModeUtilities(): " + odometry.getOpModeUtilities());
+        KLog.d("ExecutorService_Run", () -> "runOdometryExecutorService called");
+        KLog.d("ExecutorService_Run", () -> "odometry instance: " + odometry);
+        KLog.d("ExecutorService_Run", () -> "odometry.getOpModeUtilities(): " + odometry.getOpModeUtilities());
 
         OdometryLogger odometryLogger = new OdometryLogger("OdometryDataCollector", odometry.getOpModeUtilities());
-        KLog.d("ExecutorService_Run", "OdometryLogger created successfully");
+        KLog.d("ExecutorService_Run", () -> "OdometryLogger created successfully");
 
         executorService.submit(() -> {
             try {
-                KLog.d("ExecutorService_Run", "Executor task started");
+                KLog.d("ExecutorService_Run", () -> "Executor task started");
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-                KLog.d("ExecutorService_Run", "About to check while condition - opModeUtilities=" + odometry.getOpModeUtilities());
-                KLog.d("ExecutorService_Run", "opModeUtilities.getOpMode()=" + odometry.getOpModeUtilities().getOpMode().opModeIsActive());
-                KLog.d("ExecutorService_Run", "opModeUtilities.getOpMode()=" + odometry.getOpModeUtilities().getOpMode().getClass().getSimpleName());
+                KLog.d("ExecutorService_Run", () -> "About to check while condition - opModeUtilities=" + odometry.getOpModeUtilities());
+                KLog.d("ExecutorService_Run", () -> "opModeUtilities.getOpMode()=" + odometry.getOpModeUtilities().getOpMode().opModeIsActive());
+                KLog.d("ExecutorService_Run", () -> "opModeUtilities.getOpMode()=" + odometry.getOpModeUtilities().getOpMode().getClass().getSimpleName());
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        KLog.d("ExecutorService_Run", "Thread is running. OpMode.isActive: " + odometry.getOpModeUtilities().getOpMode().opModeIsActive());
+                        KLog.d("ExecutorService_Run", () -> "Thread is running. OpMode.isActive: " + odometry.getOpModeUtilities().getOpMode().opModeIsActive());
                         if (odometry.getOpModeUtilities().getOpMode().opModeIsActive()) {
-                            KLog.d("ExecutorService_Run", "OpModeIsActive. Running");
+                            KLog.d("ExecutorService_Run", () -> "OpModeIsActive. Running");
                             odometry.updateAll();
                             odometryLogger.log(SharedData.getOdometryPositionMap());
                         }
@@ -82,14 +82,14 @@ public class OpModeUtilities {
                         // Continue running despite errors in individual updates
                     }
                 }
-                KLog.d("ExecutorService_Run", "Odometry thread exiting - interrupted=" +
+                KLog.d("ExecutorService_Run", () -> "Odometry thread exiting - interrupted=" +
                     Thread.currentThread().isInterrupted() + ", opModeActive=" +
                     odometry.getOpModeUtilities().getOpMode().opModeIsActive());
             } finally {
                 // CRITICAL: This always executes, even if thread is interrupted or exception occurs
-                KLog.d("ExecutorService_Run", "Finally. Closing odometry logger");
+                KLog.d("ExecutorService_Run", () -> "Finally. Closing odometry logger");
                 odometryLogger.close();
-                KLog.d("ExecutorService_Run", "Odometry logger closed successfully");
+                KLog.d("ExecutorService_Run", () -> "Odometry logger closed successfully");
             }
         });
     }
