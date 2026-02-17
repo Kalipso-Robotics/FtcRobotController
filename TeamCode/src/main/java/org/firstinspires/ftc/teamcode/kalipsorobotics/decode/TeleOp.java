@@ -4,6 +4,8 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Shoo
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
@@ -100,6 +102,8 @@ public class TeleOp extends KOpMode {
     private boolean toggleSOTM = true;
 
     private int shootCount = 0;
+    private double lastLoopTime = 0;
+    private final ElapsedTime loopTimer = new ElapsedTime();
 
     @Override
     protected void initializeRobotConfig() {
@@ -129,12 +133,12 @@ public class TeleOp extends KOpMode {
         driveAction = new DriveAction(driveTrain);
 
         KLog.d("TeleOp-Init", "Creating intake, shooter, stopper, turret modules");
-        KLog.d("TeleOp-Init", "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
+        KLog.d("TeleOp-Init", () -> "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
         tilter = new Tilter(opModeUtilities);
-        KLog.d("TeleOp-Init", "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
+        KLog.d("TeleOp-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
         turret = Turret.getInstance(opModeUtilities);
 
@@ -160,14 +164,15 @@ public class TeleOp extends KOpMode {
         initializeRobot();
 
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
-        KLog.d("TeleOp-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        KLog.d("TeleOp-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
         tilter.setPosition(ModuleConfig.TILTER_SERVO_UP_POS);
         waitForStart();
+        telemetry.setMsTransmissionInterval(200);
         sleep(50);
         //Wait for Executor Thread to start
 
-        KLog.d("TeleOp-Run", "After waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        KLog.d("TeleOp-Run", () -> "After waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
 
         turretAutoAlignTeleOp.setToleranceDeg(2);
 
@@ -180,7 +185,9 @@ public class TeleOp extends KOpMode {
         KLog.d("TeleOp-Run", "closeStopper created successfully");
 
         while (opModeIsActive()) {
-            Log.d("Loop_Speed", "Starting Loop");
+            lastLoopTime = loopTimer.milliseconds();
+            loopTimer.reset();
+            Log.d("Loop_Speed", (int) lastLoopTime + "ms");
             if (!hasClosedStopperInnit) {
                 stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                 hasClosedStopperInnit = true;
@@ -224,14 +231,14 @@ public class TeleOp extends KOpMode {
             releaseStopperPressed = kGamePad2.isYPressed();
 
             toggleTurretAlign = !kGamePad2.isToggleX();
-            KLog.d("TeleOp_Button", "toggleTurretAlign: " + toggleTurretAlign);
+            KLog.d("TeleOp_Button", () -> "toggleTurretAlign: " + toggleTurretAlign);
 //            enableLimelightAlignTurret = kGamePad2.isBackButtonToggle(); TURNED OFF LIMELIGHT
             enableLimelightAlignTurret = false;
-            KLog.d("TeleOp_Button", "enableLimelightAlignTurret: " + enableLimelightAlignTurret);
+            KLog.d("TeleOp_Button", () -> "enableLimelightAlignTurret: " + enableLimelightAlignTurret);
             enableOdometryAlignTurret = !kGamePad2.isToggleB();
-            KLog.d("TeleOp_Button", "enableOdometryAlignTurret: " + enableOdometryAlignTurret);
+            KLog.d("TeleOp_Button", () -> "enableOdometryAlignTurret: " + enableOdometryAlignTurret);
             toggleSOTM = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperFirstPressed();
-            KLog.d("TeleOp_Button", "toggleSOTM: " + toggleSOTM);
+            KLog.d("TeleOp_Button", () -> "toggleSOTM: " + toggleSOTM);
 
 
 
@@ -284,8 +291,10 @@ public class TeleOp extends KOpMode {
                 leverAction = new PurePursuitAction(driveTrain);
 //                leverAction.addPoint(1575, 908 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //                leverAction.addPoint(1325, 1025 * allianceColor.getPolarity(), 52 * allianceColor.getPolarity());
-                leverAction.addPoint(1375, 950 * allianceColor.getPolarity(), 57.3 * allianceColor.getPolarity()); // eating point
-                setLastMoveAction(leverAction);
+                //move to lever
+                leverAction.addPoint(1600, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                //eat at lever
+                leverAction.addPoint(1350, 1075 * allianceColor.getPolarity(), 60 * allianceColor.getPolarity()); // eating point //theta 57.3                setLastMoveAction(leverAction);
             }
         }
 
@@ -345,7 +354,7 @@ public class TeleOp extends KOpMode {
         }
 
 
-        KLog.d("TeleOp_Turret", "Turret Power" + turret.turretMotor.getPower());
+        KLog.d("TeleOp_Turret", () -> "Turret Power" + turret.turretMotor.getPower());
     }
 
     private void turnOnTurret() {
@@ -412,7 +421,7 @@ public class TeleOp extends KOpMode {
 
         // Close when intaking
         if (intakeStopPressed || isPending(intakeRun)) {
-            KLog.d("TeleOp_Stopper", "Intake Pressed Close Stopper isPending: " + isPending(closeStopper));
+            KLog.d("TeleOp_Stopper", () -> "Intake Pressed Close Stopper isPending: " + isPending(closeStopper));
             if (!isPending(closeStopper)) {
                 KLog.d("TeleOp_Stopper", "Close Stopper");
                 closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
@@ -431,10 +440,10 @@ public class TeleOp extends KOpMode {
 
         if (incrementRPSPressed) {
             ShooterInterpolationConfig.rpsOffset += 0.1;
-            KLog.d("TeleOp_Shooting_RPS_offset", "Increment Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
+            KLog.d("TeleOp_Shooting_RPS_offset", () -> "Increment Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
         } else if (decrementRPSPressed) {
             ShooterInterpolationConfig.rpsOffset -= 0.1;
-            KLog.d("TeleOp_Shooting_RPS_offset", "Decrement Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
+            KLog.d("TeleOp_Shooting_RPS_offset", () -> "Decrement Shooter rps offset: " + ShooterInterpolationConfig.rpsOffset);
         }
 
         double hoodPosition;
@@ -443,12 +452,12 @@ public class TeleOp extends KOpMode {
             ShooterInterpolationConfig.hoodOffset += 0.02;
             hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() + 0.02);
             shooter.getHood().setPosition(hoodPosition);
-            KLog.d("TeleOp_Shooting_Hood_Offset", "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
+            KLog.d("TeleOp_Shooting_Hood_Offset", () -> "Increment Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         } else if (decrementHoodPressed) {
             ShooterInterpolationConfig.hoodOffset -= 0.02;
             hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() - 0.02);
             shooter.getHood().setPosition(hoodPosition);
-            KLog.d("TeleOp_Shooting_Hood_offset", "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
+            KLog.d("TeleOp_Shooting_Hood_offset", () -> "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
         }
 
         if (toggleSOTM) {
@@ -489,7 +498,7 @@ public class TeleOp extends KOpMode {
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 shootCount++;
                 shootAllAction.setName("Shot_" + shootCount);
-                KLog.d("Teleop_Shooting", "Shot_" + shootCount + " -" +
+                KLog.d("Teleop_Shooting", () -> "Shot_" + shootCount + " -" +
                         " Delta RPS: " + (shooter.getRPS() - shootAllAction.getShooterRun().getTargetRPS())  +
                         " Distance: " + shooterRun.getDistanceMM() +
                         " Turret Delta Angle: " + turretAutoAlignTeleOp.getDeltaAngleDeg() +
@@ -511,7 +520,7 @@ public class TeleOp extends KOpMode {
                 setLastZeroAction(resetOdometryToPos);
                 enableLimelightZeroing = true;
                 forceUpdateShootingActions();
-                KLog.d("TeleOp_Zeroing", "Force Limelight zero action started - Odometry Position: " + SharedData.getOdometryWheelIMUPosition() +
+                KLog.d("TeleOp_Zeroing", () -> "Force Limelight zero action started - Odometry Position: " + SharedData.getOdometryWheelIMUPosition() +
                         " Unfiltered Limelight pos: " + unfilteredLimelightPos +
                         " Filtered Limelight Pos: " + SharedData.getLimelightGlobalPosition()
                 );
@@ -532,7 +541,7 @@ public class TeleOp extends KOpMode {
                 resetOdometryToPos = new ResetOdometryToPos(cornerPosition);
                 enableLimelightZeroing = false;
                 setLastZeroAction(resetOdometryToPos);
-                KLog.d("TeleOp_Zeroing", "Corner zero action started - Position: " + SharedData.getOdometryWheelIMUPosition());
+                KLog.d("TeleOp_Zeroing", () -> "Corner zero action started - Position: " + SharedData.getOdometryWheelIMUPosition());
             }
         }
     }

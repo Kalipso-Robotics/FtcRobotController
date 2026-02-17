@@ -37,7 +37,7 @@ public class KActionSet extends Action {
                 if (a.getIsDone()) {
                     completedActions++;
                 } else if (a.dependentActionsDone()) {
-                    KLog.d("ActionSet", String.format("[%s] Executing action: [%s]",
+                    KLog.d("ActionSet", () -> String.format("[%s] Executing action: [%s]",
                         getName() != null ? getName() : "unnamed",
                         a.getName() != null ? a.getName() : "unnamed"));
                     a.updateCheckDone();
@@ -52,17 +52,21 @@ public class KActionSet extends Action {
                             blocking.append(dep.getName() != null ? dep.getName() : "unnamed");
                         }
                     }
-                    KLog.d("ActionSet", String.format("[%s] Skipping action [%s] - blocked by: [%s]",
+                    KLog.d("ActionSet", () -> String.format("[%s] Skipping action [%s] - blocked by: [%s]",
                         getName() != null ? getName() : "unnamed",
                         a.getName() != null ? a.getName() : "unnamed",
-                            blocking));
+                            blocking.toString()));
                 }
             }
         }
         afterUpdate();
-        KLog.d("ActionSet", String.format("[%s] Status: %d total, %d completed, %d executed, %d blocked",
+        final int finalTotal = totalActions;
+        final int finalCompleted = completedActions;
+        final int finalExecuted = executedActions;
+        final int finalBlocked = blockedActions;
+        KLog.d("ActionSet", () -> String.format("[%s] Status: %d total, %d completed, %d executed, %d blocked",
             getName() != null ? getName() : "unnamed",
-            totalActions, completedActions, executedActions, blockedActions));
+            finalTotal, finalCompleted, finalExecuted, finalBlocked));
     }
 
     // this is a hook to open up update to other code
@@ -77,7 +81,7 @@ public class KActionSet extends Action {
     @Override
     public boolean updateCheckDone() {
         if (isDone) {
-            KLog.d("action set log", "done for " + name);
+            KLog.d("action set log", () -> "done for " + name);
             return true;
         }
 

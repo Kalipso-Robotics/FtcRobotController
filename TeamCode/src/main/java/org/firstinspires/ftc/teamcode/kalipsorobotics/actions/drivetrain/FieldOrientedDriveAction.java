@@ -45,12 +45,13 @@ public class FieldOrientedDriveAction {
 
         rotX = rotX * 1.1;
 
-        KLog.d("field_drive", "forward " + forward);
-        KLog.d("field_drive", "turn " + turn);
-        KLog.d("field_drive", "strafe " + strafe);
-        KLog.d("field_drive", "botHeading " + Math.toDegrees(botHeading));
-        KLog.d("field_drive", "rotX " + rotX);
-        KLog.d("field_drive", "rotY " + rotY);
+        KLog.d("field_drive", () -> "forward " + forward);
+        KLog.d("field_drive", () -> "turn " + turn);
+        KLog.d("field_drive", () -> "strafe " + strafe);
+        KLog.d("field_drive", () -> "botHeading " + Math.toDegrees(botHeading));
+        double finalRotX = rotX;
+        KLog.d("field_drive", () -> "rotX " + finalRotX);
+        KLog.d("field_drive", () -> "rotY " + rotY);
 
         double fLeftPower = (rotY + rotX + turn);
         double fRightPower = (rotY - rotX - turn);
@@ -64,7 +65,7 @@ public class FieldOrientedDriveAction {
             bLeftPower = bLeftPower / absMaxPower;
             bRightPower = bRightPower / absMaxPower;
         }
-        
+
         double[] driveTrainPowers = {fLeftPower, fRightPower, bLeftPower, bRightPower};
         return driveTrainPowers;
     }
@@ -81,12 +82,13 @@ public class FieldOrientedDriveAction {
 
         rotX = rotX * 1.1;
 
-        KLog.d("field_drive", "forward " + forward);
-        KLog.d("field_drive", "turn " + turn);
-        KLog.d("field_drive", "strafe " + strafe);
-        KLog.d("field_drive", "botHeading " + Math.toDegrees(botHeading));
-        KLog.d("field_drive", "rotX " + rotX);
-        KLog.d("field_drive", "rotY " + rotY);
+        KLog.d("field_drive", () -> "forward " + forward);
+        KLog.d("field_drive", () -> "turn " + turn);
+        KLog.d("field_drive", () -> "strafe " + strafe);
+        KLog.d("field_drive", () -> "botHeading " + Math.toDegrees(botHeading));
+        double finalRotX = rotX;
+        KLog.d("field_drive", () -> "rotX " + finalRotX);
+        KLog.d("field_drive", () -> "rotY " + rotY);
 
         double fLeftPower = (rotY + rotX + turn);
         double fRightPower = (rotY - rotX - turn);
@@ -100,7 +102,7 @@ public class FieldOrientedDriveAction {
             bLeftPower = bLeftPower / absMaxPower;
             bRightPower = bRightPower / absMaxPower;
         }
-        
+
         double[] driveTrainPowers = {fLeftPower, fRightPower, bLeftPower, bRightPower};
         return driveTrainPowers;
     }
@@ -113,10 +115,10 @@ public class FieldOrientedDriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        KLog.d("field_drive", "fLeft power " + driveTrainPower[0]);
-        KLog.d("field_drive", "fRight power " + driveTrainPower[1]);
-        KLog.d("field_drive", "bLeft power " + driveTrainPower[2]);
-        KLog.d("field_drive", "bRight power " + driveTrainPower[3]);
+        KLog.d("field_drive", () -> "fLeft power " + driveTrainPower[0]);
+        KLog.d("field_drive", () -> "fRight power " + driveTrainPower[1]);
+        KLog.d("field_drive", () -> "bLeft power " + driveTrainPower[2]);
+        KLog.d("field_drive", () -> "bRight power " + driveTrainPower[3]);
     }
 
     public void moveFieldOrientedWithXYValues(double x, double y, Gamepad gamepad) {
@@ -127,10 +129,10 @@ public class FieldOrientedDriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        KLog.d("field_drive", "fLeft power " + driveTrainPower[0]);
-        KLog.d("field_drive", "fRight power " + driveTrainPower[1]);
-        KLog.d("field_drive", "bLeft power " + driveTrainPower[2]);
-        KLog.d("field_drive", "bRight power " + driveTrainPower[3]);
+        KLog.d("field_drive", () -> "fLeft power " + driveTrainPower[0]);
+        KLog.d("field_drive", () -> "fRight power " + driveTrainPower[1]);
+        KLog.d("field_drive", () -> "bLeft power " + driveTrainPower[2]);
+        KLog.d("field_drive", () -> "bRight power " + driveTrainPower[3]);
     }
 
     public OpModeUtilities getOpModeUtilities() {

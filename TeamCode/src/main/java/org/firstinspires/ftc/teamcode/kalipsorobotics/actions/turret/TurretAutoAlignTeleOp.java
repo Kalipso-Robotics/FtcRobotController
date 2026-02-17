@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Turr
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
@@ -102,9 +101,9 @@ public class TurretAutoAlignTeleOp extends Action {
         if (!hasStarted) {
             hasStarted = true;
             velocityTimer.reset();
-            KLog.d("Turret_PID", "PIDF constants " + turretMotor.getPIDFController());
+            KLog.d("Turret_PID", () -> "PIDF constants " + turretMotor.getPIDFController());
         }
-        aprilTagDetectionAction.updateCheckDone();
+
         switch (turretRunMode) {
             case STOP:
                 turret.stop();
@@ -123,7 +122,7 @@ public class TurretAutoAlignTeleOp extends Action {
                 updateAlignToTarget();
                 break;
         }
-        KLog.d("Turret_MODE", "CURRENT RUNNING MODE " + turretRunMode);
+        KLog.d("Turret_MODE", () -> "CURRENT RUNNING MODE " + turretRunMode);
     }
 
     private void updateAlignToTarget() {
@@ -133,7 +132,7 @@ public class TurretAutoAlignTeleOp extends Action {
         double currentAngleRad = turret.getCurrentAngleRad();
 //        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
 //        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle -   robotAngleRad);
-        Position currentPos = SharedData.getOdometryWheelIMUPosition();
+        Position currentPos = SharedData.peekOdometryWheelIMUPosition();
 
         double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos, ticksOffset);
 
@@ -143,7 +142,7 @@ public class TurretAutoAlignTeleOp extends Action {
                 double compensatedTargetHeading = computeCompensatedTargetHeading(targetPoint, currentPos, LOOK_AHEAD_TIME_MS);
                 targetTicks = calculateTargetTicks(compensatedTargetHeading, currentPos.getTheta());
             }
-            KLog.d("TurretAutoAlignTeleOp_Odometry_Align", "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
+            KLog.d("TurretAutoAlignTeleOp_Odometry_Align", () -> "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
         } else if (turretRunMode == TurretRunMode.RUN_USING_LIMELIGHT) {
             lastOdometryPos.reset(currentPos);
             double limelightAngleRad;
@@ -166,24 +165,24 @@ public class TurretAutoAlignTeleOp extends Action {
                 }
 
 
-
-                KLog.d("TurretAutoAlignTeleOp_Limelight_Align",
+                double finalTotalTurretAngle = totalTurretAngle;
+                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", () ->
                         "currentAngleRad: " + currentAngleRad +
-                                " totalTurretAngle " + totalTurretAngle +
+                                " totalTurretAngle " + finalTotalTurretAngle +
                                 " totalAngleWrap " + totalAngleWrap +
                                 " targetTicks " + targetTicks +
                                 " limelightAngle " + limelightAngleRad);
 
 // already gives reverse sign from LL bc your on the left side of april tag
             } else {
-                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", "No April Tag Detected. Using Previous Ticks: " + prevTargetTicks);
+                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", () -> "No April Tag Detected. Using Previous Ticks: " + prevTargetTicks);
                 targetTicks = prevTargetTicks;
             }
 
 
 
         } else {
-            KLog.d("TurretAutoAlign_AlignToTarget", "isWithingRange: " + isWithinRange + " aprilTagSeen: " + aprilTagSeen + " useOdometryAlign " + useOdometryAlign);
+            KLog.d("TurretAutoAlign_AlignToTarget", () -> "isWithingRange: " + isWithinRange + " aprilTagSeen: " + aprilTagSeen + " useOdometryAlign " + useOdometryAlign);
             turretMotor.setPower(0);
             isWithinRange = true;
             return;
@@ -194,16 +193,11 @@ public class TurretAutoAlignTeleOp extends Action {
 
     public double calculateTargetTicks(double targetAngleRad, double robotHeadingRad) {
 
-        double reverseTurretAngleRadian = -robotHeadingRad;
-
-        double totalTurretAngle = targetAngleRad + reverseTurretAngleRadian;
-
-        double ticksOffsetRad = ticksOffset / TurretConfig.TICKS_PER_RADIAN;
-        totalTurretAngle += ticksOffsetRad;
+        double totalTurretAngle = targetAngleRad - robotHeadingRad + (ticksOffset / TurretConfig.TICKS_PER_RADIAN);
 
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
 
-        KLog.d("turret_angle", "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
+        KLog.d("turret_angle", () -> "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
 
         return computeTicksFromAngleRad(totalTurretAngleWrap);
     }
@@ -218,19 +212,19 @@ public class TurretAutoAlignTeleOp extends Action {
             isWithinRange = true;
             shouldReadLimelight = true;
             turret.stop();
-            KLog.d("Turret_PID", String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
+            KLog.d("Turret_PID", () -> String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
             isWithinRange = false;
             double pidOutput = turretMotor.getPIDFController().calculate(error);
             double feedforward = TurretConfig.kF * currentAngularVelocity;
             double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
 
-            KLog.d("Turret_PID", String.format("MOVING | Curr=%d Target=%d Err=%d | PID=%.3f FF=%.3f Power=%.3f",
+            KLog.d("Turret_PID", () -> String.format("MOVING | Curr=%d Target=%d Err=%d | PID=%.3f FF=%.3f Power=%.3f",
                     currentTicks, (int) targetTicks, error, pidOutput, feedforward, totalPower));
 
             turretMotor.setPower(totalPower);
         }
-        KLog.d("Turret_PID", "Turret Delta Angle: " + deltaAngleDeg);
+        KLog.d("Turret_PID", () -> "Turret Delta Angle: " + deltaAngleDeg);
     }
 
     public void stop() {
@@ -256,7 +250,7 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     private void updateAngularVelocity() {
-        Position currentPosition = SharedData.getOdometryWheelIMUPosition();
+        Position currentPosition = SharedData.peekOdometryWheelIMUPosition();
         double xToGoal = targetPoint.getX() - currentPosition.getX();
         double yToGoal = targetPoint.getY() - currentPosition.getY();
         double angleToGoal = Math.atan2(yToGoal, xToGoal);
@@ -306,11 +300,11 @@ public class TurretAutoAlignTeleOp extends Action {
         double targetHeadingRad = Math.atan2(targetPoint.getY() - currentPos.getY(), targetPoint.getX() - currentPos.getX());
         double rawTargetHeadingRad = targetHeadingRad;
         if (TurretConfig.shouldShootOnTheMoveTurret) {
-            Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
+            Velocity currentVelocity = SharedData.peekOdometryWheelIMUVelocity();
             Position predictedPos = currentPos.predictPos(currentVelocity, lookAheadTimeMS);
             SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
             targetHeadingRad = result.getTargetAngleRad();
-            KLog.d("SOTM_Turret", "Look Ahead Time MS: " + lookAheadTimeMS +
+            KLog.d("SOTM_Turret", () -> "Look Ahead Time MS: " + lookAheadTimeMS +
                     " CurrentVelocity: " + currentVelocity +
                     " Delta Pos: " + predictedPos.minus(currentPos) +
                     " Delta Dist. to goal: " + (predictedPos.toPoint().distanceTo(targetPoint) - distanceToGoal) +

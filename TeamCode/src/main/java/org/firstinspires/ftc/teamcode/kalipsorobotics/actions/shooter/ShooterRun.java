@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.SHOOTER_LOOKUP_TIME;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import android.annotation.SuppressLint;
@@ -47,6 +48,7 @@ public class ShooterRun extends Action {
     private boolean useOdometry = true;
     private boolean isWithinRange = false;
 
+    private double currentRPS = 0;
 
     public ShooterRun(OpModeUtilities opModeUtilities, Shooter shooter, double targetRPS, double targetHoodPosition) {
         this.opModeUtilities = opModeUtilities;
@@ -84,8 +86,7 @@ public class ShooterRun extends Action {
     }
 
     public boolean isWithinRange() {
-        //boolean atTarget = shooter.isAtTargetRPS();
-        KLog.d("ShooterRun", "isWithinRange called. Power: " + shooter.getShooter1().getPower() + " Current RPS: " + shooter.getRPS() +
+        KLog.d("ShooterRun", () -> "isWithinRange called. Power: " + shooter.getShooter1().getPower() + " Current RPS: " + currentRPS +
                 ", Target RPS: " + targetRPS + ", At Within Range: " + isWithinRange);
         return isWithinRange;
     }
@@ -93,8 +94,8 @@ public class ShooterRun extends Action {
     @SuppressLint("DefaultLocale")
     @Override
     public void update() {
-        KLog.d("ShooterRun", "update() called - hasStarted: " + hasStarted + ", Current RPS: " + shooter.getRPS());
-
+        KLog.d("ShooterRun", () -> "update() called - hasStarted: " + hasStarted + ", Current RPS: " + currentRPS);
+        currentRPS = shooter.getRPS();
         if (!hasStarted) {
             shooter.getShooter1().resetPID();
             shooter.getShooter2().resetPID();
@@ -103,12 +104,12 @@ public class ShooterRun extends Action {
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
             KLog.d("ShooterRun", "*** SHOOTER RUN STARTED ***");
-            KLog.d("ShooterRun", "Target RPS: " + targetRPS + ", Target Hood: " + targetHoodPosition + ", Distance: " + distanceMM);
-            KLog.d(this.getClass().getName(), "PIDF: " + shooter.getShooter1().getPIDFController());
+            KLog.d("ShooterRun", () -> "Target RPS: " + targetRPS + ", Target Hood: " + targetHoodPosition + ", Distance: " + distanceMM);
+            KLog.d("ShooterRun", () -> "PIDF: " + shooter.getShooter1().getPIDFController());
             elapsedTime.reset();
         }
 
-        KLog.d("ShooterRun", "update() called - hasStarted: " + hasStarted + ", isDone: " + isDone);
+        KLog.d("ShooterRun", () -> "update() called - hasStarted: " + hasStarted + ", isDone: " + isDone);
 
         IShooterPredictor.ShooterParams params;
 
@@ -119,7 +120,7 @@ public class ShooterRun extends Action {
             case SHOOT_USING_TARGET_RPS_HOOD:
                 // Direct RPS mode
                 distanceMM = -1;
-                KLog.d("ShooterRun_SHOOT_USING_TARGET_RPS_HOOD", "Using direct RPS mode, TargetRps " + targetRPS + " Target Hood " + targetHoodPosition);
+                KLog.d("ShooterRun_SHOOT_USING_TARGET_RPS_HOOD", () -> "Using direct RPS mode, TargetRps " + targetRPS + " Target Hood " + targetHoodPosition);
                 break;
             case SHOOT_USING_DISTANCE:
                 KLog.e("ShooterRun_SHOOT_USING_DISTANCE", "Distance: " + distanceMM);
@@ -131,7 +132,7 @@ public class ShooterRun extends Action {
                 if (launchPoint == null) {
                     KLog.e("ShooterRun_SHOOT_USING_FIXED_POINT", "Launch Point Null");
                 }
-                KLog.d("ShooterRun_SHOOT_USING_FIXED_POINT", "Launch Point " + launchPoint);
+                KLog.d("ShooterRun_SHOOT_USING_FIXED_POINT", () -> "Launch Point " + launchPoint);
                 distanceMM = targetPoint.distanceTo(launchPoint);
                 params = getPrediction(distanceMM);
                 this.targetRPS = params.rps;
@@ -146,26 +147,25 @@ public class ShooterRun extends Action {
                     params = getPrediction(currentDist);
                     this.targetRPS = params.rps;
                     this.targetHoodPosition = params.hoodPosition;
-                    KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", "TargetRPS: " + targetRPS);
+                    KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", () -> "TargetRPS: " + targetRPS);
                 }
                 break;
         }
         shooter.setTargetRPS(targetRPS);
-        KLog.d("ShooterRun", "Running mode " + shooterRunMode);
-        double currRps = shooter.getRPS();
-        double deltaRPS = targetRPS - currRps;
-        double hoodCompensation = deltaRPS * hoodCompensateCoefficient;
-        hoodCompensation = MathFunctions.clamp(hoodCompensation, minHoodCompensate, maxHoodCompensate);
-        double effectiveTargetHood = MathFunctions.clamp(targetHoodPosition + hoodCompensation, MIN_HOOD, MAX_HOOD); // CLAMPING INVERSED WHILE FLIP DIRECTION IS BROKEN FOR KSERVO BC HOOD GEAR
+        KLog.d("ShooterRun", () -> "Running mode " + shooterRunMode);
+
+        double deltaRPS = targetRPS - currentRPS;
+        double hoodCompensation = MathFunctions.clamp(deltaRPS * hoodCompensateCoefficient, minHoodCompensate, maxHoodCompensate);
+        double effectiveTargetHood = MathFunctions.clamp(targetHoodPosition + hoodCompensation, MIN_HOOD, MAX_HOOD);
 
         if (Math.abs(deltaRPS) > 1) {
-            KLog.d("ShooterRun_Hood", "================ Big drop: Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);
+            KLog.d("ShooterRun_Hood", () -> "================ Big drop: Hood Compensation: " + hoodCompensation + " effectiveTargetHood: " + effectiveTargetHood + " targetHoodPosition: " + targetHoodPosition + " Delta RPS: " + deltaRPS);
         } else {
-            KLog.d("ShooterRun_Hood", "Hood Compensation: " + hoodCompensation +
+            KLog.d("ShooterRun_Hood", () -> "Hood Compensation: " + hoodCompensation +
                     " effectiveTargetHood: " + effectiveTargetHood +
                     " targetHoodPosition: " + targetHoodPosition +
                     " Delta RPS: " + deltaRPS +
-                    " Current RPS: " + currRps +
+                    " Current RPS: " + currentRPS +
                     " Target RPS: " + targetRPS
             );
         }
@@ -175,27 +175,24 @@ public class ShooterRun extends Action {
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.setPower(calculateEffectiveCompensationPower());
-            KLog.d("ShooterRun_BangControl", "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
+            KLog.d("ShooterRun_BangControl", () -> "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
         } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold) {
             // Need to DECELERATE - current RPS too high
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             shooter.setPower(0);
-            KLog.d("ShooterRun_BangControl", String.format("BANG DECEL: deltaRPS = %.2f, threshold = %.2f", deltaRPS, ShooterConfig.decelBoostDeltaRPSThreshold));
+            KLog.d("ShooterRun_BangControl", () -> String.format("BANG DECEL: deltaRPS = %.2f, threshold = %.2f", deltaRPS, ShooterConfig.decelBoostDeltaRPSThreshold));
         } else {
             // Within threshold - use PID control for fine adjustment
             shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             shooter.goToRPS(targetRPS);
-            KLog.d("ShooterRun_BangControl", String.format("PID CONTROL: deltaRPS = %.2f", deltaRPS));
+            KLog.d("ShooterRun_BangControl", () -> String.format("PID CONTROL: deltaRPS = %.2f", deltaRPS));
         }
         // Update hood position
         shooter.getHood().setPosition(effectiveTargetHood);
 
-        // Use KMotor's goToRPS for automatic PID control
-
-        // Log status
-        KLog.d("shooter_ready", String.format(
+        KLog.d("shooter_ready", () -> String.format(
             "Target: %.2f RPS, Hood: %.3f",
             targetRPS, targetHoodPosition
         ));
@@ -203,15 +200,14 @@ public class ShooterRun extends Action {
 
         if (shooter.isAtTargetRPS(calculateRPSTolerance())) {
             if ((rpsInRangeTimer.milliseconds() > ShooterConfig.timeToStabilize)) {
-                KLog.d("shooter_ready", "Shooter is within range and READY. TargetRPS: " + targetRPS + " Current RPS: " + shooter.getRPS() + ". Ramp up time ms:" + rampUpTimeTimer.milliseconds());
-                //isDone = true;
+                KLog.d("shooter_ready", () -> "Shooter is within range and READY. TargetRPS: " + targetRPS + " Current RPS: " + currentRPS + ". Ramp up time ms:" + rampUpTimeTimer.milliseconds());
                 isWithinRange = true;
             } else {
-                KLog.d("shooter_ready", "Shooter within range, but waiting for time to stabilize. TargetRPS: " + targetRPS + " Current RPS: " + shooter.getRPS() );
+                KLog.d("shooter_ready", () -> "Shooter within range, but waiting for time to stabilize. TargetRPS: " + targetRPS + " Current RPS: " + currentRPS);
                 isWithinRange = false;
             }
         } else {
-            KLog.d("shooter_ready", "Shooter not within range." + shooter.getRPS() + " TARGET: " + targetRPS);
+            KLog.d("shooter_ready", () -> "Shooter not within range." + currentRPS + " TARGET: " + targetRPS);
             rpsInRangeTimer.reset();
             isWithinRange = false;
         }
@@ -219,37 +215,35 @@ public class ShooterRun extends Action {
     }
 
     private IShooterPredictor.ShooterParams getPrediction(double currentDistanceMM) {
-        KLog.d("shooter_ready", "We using odo pos to target position: " + targetPoint);
-        // Calculate distance from odometry position to target
-
+        KLog.d("shooter_ready", () -> "We using odo pos to target position: " + targetPoint);
         IShooterPredictor.ShooterParams params = shooter.getPrediction(currentDistanceMM);
-        KLog.d("shooter_ready", "Distance: " + currentDistanceMM + " params: " + params);
-        // Get shooter parameters from predictor using the distance
+        KLog.d("shooter_ready", () -> "Distance: " + currentDistanceMM + " params: " + params);
         return params;
     }
 
     private double getOdometryDistanceMM() {
         double odometryDistanceMM = getDistanceToTargetFromCurrentPos(targetPoint);
-        KLog.d("ShooterRun_Distance", "Odometry distance: " + odometryDistanceMM + " mm");
+        KLog.d("ShooterRun_Distance", () -> "Odometry distance: " + odometryDistanceMM + " mm");
         return odometryDistanceMM;
     }
 
     private double getLimelightDistance() {
         double limelightDistanceMM = SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM() + AprilTagConfig.GOAL_TO_APRIL_TAG_OFFSET_DISTANCE;
-        KLog.d("ShooterRun_Distance", "Limelight distance: " + limelightDistanceMM + " mm");
+        KLog.d("ShooterRun_Distance", () -> "Limelight distance: " + limelightDistanceMM + " mm");
         return limelightDistanceMM;
     }
 
     private double getCurrentDistanceMM() {
-        double distanceMM = -1;
-        distanceMM = getOdometryDistanceMM();
-        KLog.d("ShooterRun_Distance", "ODOMETRY DISTANCE " + distanceMM + " mm");
+        double odometryDistanceMM = getOdometryDistanceMM();
+        KLog.d("ShooterRun_Distance", () -> "ODOMETRY DISTANCE " + odometryDistanceMM + " mm");
         if (useLimelight && !SharedData.getLimelightRawPosition().isEmpty()) {
-            distanceMM = getLimelightDistance();
-            KLog.d("ShooterRun_Distance", "OVERRIDING ODOMETRY DISTANCE WITH LIMELIGHT " + distanceMM + " mm");
+            double limelightDistanceMM = getLimelightDistance();
+            KLog.d("ShooterRun_Distance", () -> "OVERRIDING ODOMETRY DISTANCE WITH LIMELIGHT " + limelightDistanceMM + " mm");
+            KLog.d("ShooterRun_Distance", () -> "Final Distance " + limelightDistanceMM);
+            return limelightDistanceMM;
         }
-        KLog.d("ShooterRun_Distance", "Final Distance " + distanceMM);
-        return distanceMM;
+        KLog.d("ShooterRun_Distance", () -> "Final Distance " + odometryDistanceMM);
+        return odometryDistanceMM;
     }
 
     public void setLaunchPoint(Point launchPoint) {
@@ -288,7 +282,7 @@ public class ShooterRun extends Action {
 
     public void setShooterRunMode(ShooterRunMode shooterRunMode) {
         this.shooterRunMode = shooterRunMode;
-        KLog.d("ShooterRun_Set_Mode", "Mode Change -> Force Update. New Mode: " + shooterRunMode);
+        KLog.d("ShooterRun_Set_Mode", () -> "Mode Change -> Force Update. New Mode: " + shooterRunMode);
         this.update();
 
     }
@@ -302,15 +296,13 @@ public class ShooterRun extends Action {
     }
 
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
-        Position currentPos = SharedData.getOdometryWheelIMUPosition();
-        Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
+        Position currentPos = SharedData.peekOdometryWheelIMUPosition();
+        Velocity currentVelocity = SharedData.peekOdometryWheelIMUVelocity();
         double distance = currentPos.toPoint().distanceTo(targetPoint);
         if (ShooterConfig.shouldShootOnTheMoveRPS) {
-            Position predictedPos = currentPos.predictPos(currentVelocity, TurretConfig.LOOK_AHEAD_TIME_MS);
-//            SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
-//            return result.getDistance();
+            Position predictedPos = currentPos.predictPos(currentVelocity, ShooterConfig.SHOOTER_LOOKUP_TIME);
             double compensatedDistance = MathFunctions.distance(predictedPos.toPoint(), targetPoint);
-            KLog.d("ShooterRun_SOTMDistance", "Current Velocity: " + currentVelocity +
+            KLog.d("ShooterRun_SOTMDistance", () -> "Current Velocity: " + currentVelocity +
                     " Delta Distance: " + (compensatedDistance - distance) +
                     " Compensated Distance: " + compensatedDistance
             );
@@ -322,7 +314,7 @@ public class ShooterRun extends Action {
 
     public void setUseOdometry(boolean useOdometry) {
         this.useOdometry = useOdometry;
-        KLog.d("ShooterRun", "Odometry was set to: " + useOdometry);
+        KLog.d("ShooterRun", () -> "Odometry was set to: " + useOdometry);
     }
 
 

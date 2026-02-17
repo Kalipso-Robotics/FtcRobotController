@@ -14,8 +14,14 @@ public class SharedData {
 
     private static final Position odometryWheelIMUPosition = new Position(0, 0, 0);
 
+    /** Returns a defensive copy. Safe for storing or mutating. */
     public static Position getOdometryWheelIMUPosition() {
         return new Position(odometryWheelIMUPosition);
+    }
+
+    /** Returns a direct reference - zero allocation. Use only for read-only access within a single loop iteration. */
+    public static Position peekOdometryWheelIMUPosition() {
+        return odometryWheelIMUPosition;
     }
     public static void setOdometryWheelIMUPosition(Position position) {
         odometryWheelIMUPosition.reset(position);
@@ -100,8 +106,14 @@ public class SharedData {
 
     private static final Velocity odometryWheelIMUVelocity = new Velocity(0, 0, 0);
 
+    /** Returns a defensive copy. Safe for storing or mutating. */
     public static Velocity getOdometryWheelIMUVelocity() {
         return new Velocity(odometryWheelIMUVelocity);
+    }
+
+    /** Returns a direct reference - zero allocation. Use only for read-only access within a single loop iteration. */
+    public static Velocity peekOdometryWheelIMUVelocity() {
+        return odometryWheelIMUVelocity;
     }
     public static void setOdometryWheelIMUVelocity(Velocity velocity) {
         odometryWheelIMUVelocity.reset(velocity);

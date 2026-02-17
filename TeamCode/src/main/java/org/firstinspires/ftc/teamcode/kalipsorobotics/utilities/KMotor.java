@@ -89,7 +89,7 @@ public class KMotor {
         prevRPS = rps;
         return rps;*/
         double rps = CalculateTickPer.ticksToRotation6000RPM(motor.getVelocity());
-        KLog.d("KMotor", "getRPS: " + rps);
+        KLog.d("KMotor", () -> "getRPS: " + rps);
         return rps;
     }
 
@@ -113,7 +113,7 @@ public class KMotor {
 //            newPower = clampPower(rawPower * (DEFAULT_VOLTAGE / voltage));
 //        }
 
-        KLog.d("VoltageCompensation", "Raw Power: " + rawPower +
+        KLog.d("VoltageCompensation", () -> "Raw Power: " + rawPower +
                 " Compensated Power: " + newPower +
                 " Current Voltage: " + voltage
                 );
@@ -121,7 +121,7 @@ public class KMotor {
         motor.setPower(newPower);
 
         // Log for debugging
-        KLog.d("KMotor", String.format(
+        KLog.d("KMotor", () -> String.format(
             "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
             targetRPS, currentRPS, (targetRPS - currentRPS), newPower, 0.0, MAX_POWER
         ));
@@ -139,10 +139,9 @@ public class KMotor {
         int currentTicks = motor.getCurrentPosition();
         // Error = where we want to be - where we are
         int error = targetTicks - currentTicks;
-        double newPower = pidfController.calculate(error);
-        newPower = clampPower(newPower);
+        double newPower = clampPower(pidfController.calculate(error));
         motor.setPower(newPower);
-        KLog.d("KMotor", String.format(
+        KLog.d("KMotor", () -> String.format(
                 "Target: %d Ticks, Current: %d Ticks, Error: %d, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
                 targetTicks, currentTicks, error, newPower, -1.0, 1.0
         ));
@@ -156,7 +155,7 @@ public class KMotor {
      */
     public boolean isAtTargetRPS(double tolerance) {
         double currentRPS = getRPS();
-        KLog.d("KMotor", "Current RPS: " + currentRPS + " Target RPS: " + targetRPS);
+        KLog.d("KMotor", () -> "Current RPS: " + currentRPS + " Target RPS: " + targetRPS);
         boolean isAtTarget = (Math.abs(currentRPS - targetRPS) < tolerance); // changed <= to < (11/21)
         if (isAtTarget) {
             KLog.d("ShooterReady", "RPS within tolerance - Ready!");

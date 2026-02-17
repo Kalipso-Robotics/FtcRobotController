@@ -83,16 +83,16 @@ public abstract class Action {
             if (!wasBlockedLastUpdate) {
                 blockedStartTimeMs = System.currentTimeMillis();
                 wasBlockedLastUpdate = true;
-                KLog.d("ActionBlocking", String.format("[%s] BLOCKED - Waiting on: [%s]",
+                KLog.d("ActionBlocking", () -> String.format("[%s] BLOCKED - Waiting on: [%s]",
                     getName() != null ? getName() : "unnamed", blockedBy));
             } else {
                 // Log periodic updates while blocked
                 long blockedDurationMs = System.currentTimeMillis() - blockedStartTimeMs;
                 if (blockedDurationMs > 0 && blockedDurationMs % 1000 < 50) { // Log every ~1 second
-                    KLog.d("ActionBlocking", String.format("[%s] STILL BLOCKED for %.1fs - Waiting on: [%s]",
+                    KLog.d("ActionBlocking", () -> String.format("[%s] STILL BLOCKED for %.1fs - Waiting on: [%s]",
                         getName() != null ? getName() : "unnamed",
                         blockedDurationMs / 1000.0,
-                            blockedBy));
+                            blockedBy.toString()));
                 }
             }
             return false;
@@ -101,7 +101,7 @@ public abstract class Action {
         // No longer blocked
         if (wasBlockedLastUpdate) {
             long totalBlockedMs = System.currentTimeMillis() - blockedStartTimeMs;
-            KLog.d("ActionBlocking", String.format("[%s] UNBLOCKED after %.1fs - Dependencies completed",
+            KLog.d("ActionBlocking", () -> String.format("[%s] UNBLOCKED after %.1fs - Dependencies completed",
                 getName() != null ? getName() : "unnamed", totalBlockedMs / 1000.0));
             wasBlockedLastUpdate = false;
         }
@@ -109,18 +109,19 @@ public abstract class Action {
         // Track action start
         if (!hasStarted) {
             startTimeMs = System.currentTimeMillis();
-            KLog.d("ActionLifecycle", String.format("[%s] STARTED", getName() != null ? getName() : "unnamed"));
+            KLog.d("ActionLifecycle", () -> String.format("[%s] STARTED", getName() != null ? getName() : "unnamed"));
         }
 
+        boolean wasDoneBeforeUpdate = isDone;
         update();
         updateCount++;
         lastUpdateTimeMs = System.currentTimeMillis();
 
         // Check if completed
-        boolean justCompleted = !isDone && isUpdateDone();
+        boolean justCompleted = !wasDoneBeforeUpdate && isUpdateDone();
         if (justCompleted) {
             long totalDurationMs = System.currentTimeMillis() - startTimeMs;
-            KLog.d("ActionLifecycle", String.format("[%s] COMPLETED after %.1fs (%d updates)",
+            KLog.d("ActionLifecycle", () -> String.format("[%s] COMPLETED after %.1fs (%d updates)",
                 getName() != null ? getName() : "unnamed",
                 totalDurationMs / 1000.0,
                 updateCount));
@@ -178,6 +179,6 @@ public abstract class Action {
                 stringBuilder.append(a);
             }
         }
-        KLog.d("action dependencies",  stringBuilder.toString());
+        KLog.d("action dependencies", () -> stringBuilder.toString());
     }
 }

@@ -63,9 +63,9 @@ public class DriveAction {
         double turn = gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x;
         double strafe = gamepadx * gamepadx * gamepadx;
 
-        KLog.d("drive", "forward " + forward);
-        KLog.d("drive", "turn " + turn);
-        KLog.d("drive", "strafe " + strafe);
+        KLog.d("drive", () -> "forward " + forward);
+        KLog.d("drive", () -> "turn " + turn);
+        KLog.d("drive", () -> "strafe " + strafe);
 
         double fLeftPower = (forward + strafe + turn);
         double fRightPower = (forward - strafe - turn);
@@ -94,9 +94,9 @@ public class DriveAction {
         double turn = Math.cbrt(gamepad.right_stick_x) * powerCoefficient;
         double strafe = Math.cbrt(gamepad.left_stick_x) * powerCoefficient;
 
-        KLog.d("drive", "forward " + forward);
-        KLog.d("drive", "turn " + turn);
-        KLog.d("drive", "strafe " + strafe);
+        KLog.d("drive", () -> "forward " + forward);
+        KLog.d("drive", () -> "turn " + turn);
+        KLog.d("drive", () -> "strafe " + strafe);
 
         double fLeftPower = (forward + strafe + turn);
         double fRightPower = (forward - strafe - turn);
@@ -120,9 +120,9 @@ public class DriveAction {
         double turn = 1 * gamepad.right_stick_x; //* gamepad.right_stick_x * gamepad.right_stick_x
         double strafe = 1 * gamepad.left_stick_x; //* gamepad.left_stick_x * gamepad.left_stick_x
 
-        KLog.d("drive", "forward " + forward);
-        KLog.d("drive", "turn " + turn);
-        KLog.d("drive", "strafe " + strafe);
+        KLog.d("drive", () -> "forward " + forward);
+        KLog.d("drive", () -> "turn " + turn);
+        KLog.d("drive", () -> "strafe " + strafe);
 
         final double turnReserve = 0.4;
         final double translationScale = 1.0 - turnReserve;
@@ -134,9 +134,9 @@ public class DriveAction {
 
         double scaledTurn = turn * turnReserve;
 
-        KLog.d("drive", "scaled forward " + scaledForward);
-        KLog.d("drive", "scaled strafe " + scaledStrafe);
-        KLog.d("drive", "scaled turn " + scaledTurn);
+        KLog.d("drive", () -> "scaled forward " + scaledForward);
+        KLog.d("drive", () -> "scaled strafe " + scaledStrafe);
+        KLog.d("drive", () -> "scaled turn " + scaledTurn);
 
         double fLeftPower = scaledForward + scaledStrafe + scaledTurn;
         double fRightPower = scaledForward - scaledStrafe - scaledTurn;
@@ -218,7 +218,7 @@ public class DriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        KLog.d("drive", "fLeft power " + driveTrainPower[0] + "fRight power " + driveTrainPower[1] + "bLeft power " + driveTrainPower[2] + "bRight power " + driveTrainPower[3]);
+        KLog.d("drive", () -> "fLeft power " + driveTrainPower[0] + "fRight power " + driveTrainPower[1] + "bLeft power " + driveTrainPower[2] + "bRight power " + driveTrainPower[3]);
     }
 
     public void moveVelocity(Gamepad gamepad, Position currentPosition) {
@@ -235,7 +235,7 @@ public class DriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        KLog.d("drive", "fLeft power " + driveTrainPower[0] + "fRight power " + driveTrainPower[1] + "bLeft power " + driveTrainPower[2] + "bRight power " + driveTrainPower[3]);
+        KLog.d("drive", () -> "fLeft power " + driveTrainPower[0] + "fRight power " + driveTrainPower[1] + "bLeft power " + driveTrainPower[2] + "bRight power " + driveTrainPower[3]);
     }
 
     public void moveWithXYValues(double x, double y, Gamepad gamepad) {
@@ -246,10 +246,10 @@ public class DriveAction {
         bLeft.setPower(driveTrainPower[2]);
         bRight.setPower(driveTrainPower[3]);
 
-        KLog.d("drive", "fLeft power " + driveTrainPower[0]);
-        KLog.d("drive", "fRight power " + driveTrainPower[1]);
-        KLog.d("drive", "bLeft power " + driveTrainPower[2]);
-        KLog.d("drive", "bRight power " + driveTrainPower[3]);
+        KLog.d("drive", () -> "fLeft power " + driveTrainPower[0]);
+        KLog.d("drive", () -> "fRight power " + driveTrainPower[1]);
+        KLog.d("drive", () -> "bLeft power " + driveTrainPower[2]);
+        KLog.d("drive", () -> "bRight power " + driveTrainPower[3]);
     }
 
     public OpModeUtilities getOpModeUtilities() {

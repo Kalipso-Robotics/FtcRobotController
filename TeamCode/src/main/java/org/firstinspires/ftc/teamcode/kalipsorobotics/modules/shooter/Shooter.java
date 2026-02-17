@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -80,7 +82,7 @@ public class Shooter {
         KLog.d("ShooterRun_Metrics",
                 "Delta: " + (targetRPS - currentRPS) +
                         " Power: " + getShooter1().getPower() +
-                        " Voltage: " + opModeUtilities.getHardwareMap().voltageSensor.iterator().next().getVoltage() +
+                        " Voltage: " + SharedData.getVoltage() +
                         " targetRps: " + targetRPS +
                         " currentRps: " + currentRPS +
                         " Error%: " + String.format("%.2f", Math.abs((targetRPS - currentRPS) / targetRPS * 100)) +

@@ -65,10 +65,8 @@ public class Turret {
         return turretMotor.getMotor().getVelocity() / TurretConfig.TICKS_PER_DEGREE;
     }
     public void stop() {
-        KLog.d("TurretPower", "Current Power before Stopping: " + turretMotor.getPower());
+        double power = turretMotor.getPower();
         turretMotor.setPower(0);
-        KLog.d("TurretPower", "Power after STOP: " + turretMotor.getPower());
-
     }
 
 }

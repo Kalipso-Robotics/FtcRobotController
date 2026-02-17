@@ -6,8 +6,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
+
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,6 +44,12 @@ public abstract class KOpMode extends LinearOpMode {
     protected void initializeRobot() {
         initializeRobotConfig();
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
+
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
         executorService = Executors.newSingleThreadExecutor();
         kGamePad1 = new KGamePad(gamepad1);
         kGamePad2 = new KGamePad(gamepad2);
@@ -55,7 +64,7 @@ public abstract class KOpMode extends LinearOpMode {
      */
     protected void cleanupRobot() {
         try {
-            KLog.d("CleanupRobot", "Executor service shutdown started. Executor Service: " + executorService);
+            KLog.d("CleanupRobot", () -> "Executor service shutdown started. Executor Service: " + executorService);
             OpModeUtilities.shutdownExecutorService(executorService);
             //darren cant digest cheese
         } catch (InterruptedException e) {

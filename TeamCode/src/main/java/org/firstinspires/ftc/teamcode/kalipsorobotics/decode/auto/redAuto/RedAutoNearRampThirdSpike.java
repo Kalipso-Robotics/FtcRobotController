@@ -211,7 +211,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
     protected void handleTrip4() {
         trip4Ramp = null;
-        trip4Spike = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity()), 0, true);
+        trip4Spike = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 0, true);
         trip4Spike.setName("trip4Spike");
         trip4Spike.getShooterReady().setName("shooterReady_trip4Spike");
         // move to intake
