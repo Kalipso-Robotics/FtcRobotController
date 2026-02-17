@@ -278,7 +278,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         //eat at lever
         rampTrip.getMoveToEat().addPoint(1350, 1075 * allianceColor.getPolarity(), 60 * allianceColor.getPolarity()); // eating point //theta 57.3
 
-        rampTrip.getMoveToEat().setPathAngleTolerance(5);
+        rampTrip.getMoveToEat().setPathAngleTolerance(3);
         rampTrip.getMoveToEat().setLookAheadRadius(75);
         rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(10);
         rampTrip.getMoveToEat().setFinalSearchRadius(75);

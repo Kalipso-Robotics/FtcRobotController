@@ -233,8 +233,13 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     public void setTurretRunMode(TurretRunMode turretRunMode) {
+        TurretRunMode prevMode = this.turretRunMode;
         this.turretRunMode = turretRunMode;
-        update();
+
+        if (prevMode != turretRunMode) {
+            update();
+        }
+
     }
 
     public TurretRunMode getTurretRunMode() {

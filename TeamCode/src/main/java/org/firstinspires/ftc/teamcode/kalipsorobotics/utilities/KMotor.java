@@ -100,7 +100,7 @@ public class KMotor {
      *
      * @param targetRPS desired rotations per second
      */
-    public void goToRPS(double targetRPS) {
+    public double goToRPS(double targetRPS) {
         this.targetRPS = targetRPS;
 
         // Get current RPS
@@ -125,6 +125,7 @@ public class KMotor {
             "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
             targetRPS, currentRPS, (targetRPS - currentRPS), newPower, 0.0, MAX_POWER
         ));
+        return currentRPS;
     }
 
     public double clampPower(double power, double max_power, double min_power) {

@@ -161,25 +161,25 @@ public class Shooter {
      */
     public void goToRPS(double targetRPS) {
         this.targetRPS = targetRPS;
-        // Get optimal kF for this target RPS
-        double optimalKf = ShooterConfig.kf;
-        // Update kF in both motors' PIDF controllers
-        shooter1.getPIDFController().setKf(optimalKf);
-        shooter2.getPIDFController().setKf(optimalKf);
-        shooter1.getPIDFController().setKp(ShooterConfig.kp);
-        shooter2.getPIDFController().setKp(ShooterConfig.kp);
-        shooter1.getPIDFController().setKa(ShooterConfig.kA);
-        shooter2.getPIDFController().setKa(ShooterConfig.kA);
+//        // Get optimal kF for this target RPS
+//        double optimalKf = ShooterConfig.kf;
+//        // Update kF in both motors' PIDF controllers
+//        shooter1.getPIDFController().setKf(optimalKf);
+//        shooter2.getPIDFController().setKf(optimalKf);
+//        shooter1.getPIDFController().setKp(ShooterConfig.kp);
+//        shooter2.getPIDFController().setKp(ShooterConfig.kp);
+//        shooter1.getPIDFController().setKa(ShooterConfig.kA);
+//        shooter2.getPIDFController().setKa(ShooterConfig.kA);
 
-        currentRPS = getRPS();
-        //asymetric PID
-        if (targetRPS - currentRPS < 0) {
-            shooter1.getPIDFController().setKp(ShooterConfig.kp_rampDown);
-            shooter2.getPIDFController().setKp(ShooterConfig.kp_rampDown);
-        }
-        // Set target RPS
-        shooter1.goToRPS(targetRPS);
+        currentRPS = shooter1.goToRPS(targetRPS);
         shooter2.goToRPS(targetRPS);
+        //asymetric PID
+//        if (targetRPS - currentRPS < 0) {
+//            shooter1.getPIDFController().setKp(ShooterConfig.kp_rampDown);
+//            shooter2.getPIDFController().setKp(ShooterConfig.kp_rampDown);
+//        }
+        // Set target RPS
+
     }
 
     /**
