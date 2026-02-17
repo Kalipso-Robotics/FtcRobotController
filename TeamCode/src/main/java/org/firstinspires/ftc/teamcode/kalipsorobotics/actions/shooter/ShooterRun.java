@@ -292,7 +292,6 @@ public class ShooterRun extends Action {
         this.update();
 
     }
-
     public ShooterRunMode getShooterRunMode() {
         return shooterRunMode;
     }
@@ -305,13 +304,20 @@ public class ShooterRun extends Action {
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
         Position currentPos = SharedData.getOdometryWheelIMUPosition();
         Velocity currentVelocity = SharedData.getOdometryWheelIMUVelocity();
+        double distance = currentPos.toPoint().distanceTo(targetPoint);
         if (ShooterConfig.shouldShootOnTheMoveRPS) {
             Position predictedPos = currentPos.predictPos(currentVelocity, TurretConfig.LOOK_AHEAD_TIME_MS);
-            SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
-            return result.getDistance();
+//            SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
+//            return result.getDistance();
+            double compensatedDistance = MathFunctions.distance(predictedPos.toPoint(), targetPoint);
+            KLog.d("ShooterRun_SOTMDistance", "Current Velocity: " + currentVelocity +
+                    " Delta Distance: " + (compensatedDistance - distance) +
+                    " Compensated Distance: " + compensatedDistance
+            );
+            return compensatedDistance;
         }
 
-        return currentPos.toPoint().distanceTo(targetPoint);
+        return distance;
     }
 
     public void setUseOdometry(boolean useOdometry) {

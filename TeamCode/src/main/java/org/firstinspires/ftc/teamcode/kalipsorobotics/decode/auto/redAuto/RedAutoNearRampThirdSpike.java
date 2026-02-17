@@ -220,7 +220,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip4Spike.getMoveToBall().clearPoints();
         trip4Spike.getMoveToBall().clearPoints();
         trip4Spike.getMoveToBall().addPoint(775, 370 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4Spike.getMoveToBall().addPoint(775, 1000 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4Spike.getMoveToBall().addPoint(775, 850 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip4Spike.getMoveToBall().addPoint(775, 850 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4Spike.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4Spike.getMoveToBall().setEnablePowerScalingForPath(true);
@@ -276,7 +276,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         //move to lever
         rampTrip.getMoveToRamp().addPoint(1600, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //eat at lever
-        rampTrip.getMoveToEat().addPoint(1340, 1075 * allianceColor.getPolarity(), 60 * allianceColor.getPolarity()); // eating point //theta 57.3
+        rampTrip.getMoveToEat().addPoint(1350, 1075 * allianceColor.getPolarity(), 60 * allianceColor.getPolarity()); // eating point //theta 57.3
 
         rampTrip.getMoveToEat().setPathAngleTolerance(5);
         rampTrip.getMoveToEat().setLookAheadRadius(75);

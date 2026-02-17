@@ -33,6 +33,11 @@ public class PushBall extends KActionSet {
         runIntakeTime.setName("runIntakeTime");
         runIntakeTime.setDependentActions(openStopper);
         this.addAction(runIntakeTime);
+
+        KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
+        closeStopper.setName("closeStopper");
+        closeStopper.setDependentActions(runIntakeTime);
+        this.addAction(closeStopper);
 //
 //        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
 //        runUntilFullSpeed.setDependentActions(openStopper);

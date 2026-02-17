@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class KLog {
 
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = true;
 
     public static void d(String tag, String message) {
         if (DEBUG) {
