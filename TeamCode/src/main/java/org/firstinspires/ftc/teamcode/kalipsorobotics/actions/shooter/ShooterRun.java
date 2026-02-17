@@ -335,4 +335,8 @@ public class ShooterRun extends Action {
             return 0.9;
         }
     }
+
+    public double getCurrentRPS() {
+        return currentRPS;
+    }
 }

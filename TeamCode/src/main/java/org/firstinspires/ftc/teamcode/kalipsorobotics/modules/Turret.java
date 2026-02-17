@@ -65,7 +65,6 @@ public class Turret {
         return turretMotor.getMotor().getVelocity() / TurretConfig.TICKS_PER_DEGREE;
     }
     public void stop() {
-        double power = turretMotor.getPower();
         turretMotor.setPower(0);
     }
 

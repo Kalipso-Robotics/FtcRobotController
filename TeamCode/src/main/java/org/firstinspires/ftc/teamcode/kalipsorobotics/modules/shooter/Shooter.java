@@ -79,7 +79,7 @@ public class Shooter {
 
     public boolean isAtTargetRPS(double effectiveTolerance) {
         boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
-        KLog.d("ShooterRun_Metrics",
+        KLog.d("ShooterRun_Metrics", () ->
                 "Delta: " + (targetRPS - currentRPS) +
                         " Power: " + getShooter1().getPower() +
                         " Voltage: " + SharedData.getVoltage() +
