@@ -164,7 +164,7 @@ public class RedAutoDepot extends KOpMode {
 
         //-------------------TRIP 6 (retry) -------------------
 
-        DepotRoundTrip trip6 = generateRetryTrip(trip5, DepotTrips.INTAKE_OUT);
+        DepotRoundTrip trip6 = handleTrip6(trip5);
         lastTrip = trip6;
         autoDepot.addAction(trip6);
 
@@ -217,6 +217,9 @@ public class RedAutoDepot extends KOpMode {
 //        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 //    }
 
+    protected DepotRoundTrip handleTrip6(DepotRoundTrip trip5) {
+        return generateRetryTrip(trip5, DepotTrips.INTAKE_OUT);
+    }
 
     // GO TO SPIKE MARK FIRST ---------------------
     public void addPointsToTrip1SpikeMark() {
