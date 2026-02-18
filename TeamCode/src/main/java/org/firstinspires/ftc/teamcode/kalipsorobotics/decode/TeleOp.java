@@ -219,15 +219,15 @@ public class TeleOp extends KOpMode {
 
             setTurretOffset0Pressed = kGamePad2.isAPressed();
 
-            incrementRPSPressed = kGamepad2IsDpadUpFirstPressed && kGamePad2.isLeftBumperPressed();
-            decrementRPSPressed = kGamepad2IsDpadDownFirstPressed && kGamePad2.isLeftBumperPressed();
+            incrementRPSPressed = kGamepad2IsDpadUpFirstPressed;
+            decrementRPSPressed = kGamepad2IsDpadDownFirstPressed;
 
             incrementHoodPressed = kGamepad2IsDpadRightFirstPressed && kGamePad2.isLeftBumperPressed();
             decrementHoodPressed = kGamepad2IsDpadLeftFirstPressed && kGamePad2.isLeftBumperPressed();
 
 
-            zeroLimelightPressed = kGamepad2IsDpadUpFirstPressed;
-            zeroCornerPressed = kGamepad2IsDpadDownFirstPressed;
+            zeroLimelightPressed = kGamePad2.isLeftStickButtonFirstPressed();
+            zeroCornerPressed = kGamePad2.isRightStickButtonFirstPressed();
 
             intakeStopPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();

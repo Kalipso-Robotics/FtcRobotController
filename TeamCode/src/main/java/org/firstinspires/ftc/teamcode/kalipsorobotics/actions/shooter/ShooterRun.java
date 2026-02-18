@@ -310,7 +310,8 @@ public class ShooterRun extends Action {
         Position currentPos = SharedData.peekOdometryWheelIMUPosition();
         Velocity currentVelocity = SharedData.peekOdometryWheelIMUVelocity();
         double distance = currentPos.toPoint().distanceTo(targetPoint);
-        if (ShooterConfig.shouldShootOnTheMoveRPS) {
+        //Near shooting better without position prediction because of higher velocity travel
+        if (ShooterConfig.shouldShootOnTheMoveRPS && distance > BETWEEN_FAR_NEAR_TIP) {
             Position predictedPos = currentPos.predictPos(currentVelocity, ShooterConfig.SHOOTER_LOOKUP_TIME);
             double compensatedDistance = MathFunctions.distance(predictedPos.toPoint(), targetPoint);
             KLog.d("ShooterRun_SOTMDistance", () -> "Current Velocity: " + currentVelocity +
