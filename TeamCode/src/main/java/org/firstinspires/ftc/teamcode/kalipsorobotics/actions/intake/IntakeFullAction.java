@@ -7,9 +7,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 
 public class IntakeFullAction extends KActionSet {
+
     private final RunIntakeTime runIntakeTime;
 
-    private Intake intake;
+    private final Intake intake;
+
 
     public IntakeFullAction(Stopper stopper, Intake intake, double timeMS, double power){
 
@@ -33,7 +35,6 @@ public class IntakeFullAction extends KActionSet {
     public RunIntakeTime getRunIntakeTime() {
         return runIntakeTime;
     }
-
 //        this.isDone = true;
 //    }
 }

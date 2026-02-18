@@ -25,7 +25,7 @@ public class TestAuto extends KOpMode {
 
         Odometry.setInstanceNull();
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
     }
 
     @Override

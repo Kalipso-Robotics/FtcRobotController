@@ -28,7 +28,7 @@ public class TurretTest extends KOpMode {
         imuModule = IMUModule.getInstance(opModeUtilities);
 
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);

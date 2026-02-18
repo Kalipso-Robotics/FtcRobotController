@@ -39,7 +39,7 @@ public class PurePursuitHigherPowerTest extends KOpMode {
         // Create odometry
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3060, 712 * allianceColor.getPolarity(), -2.4049 * allianceColor.getPolarity()); //3015.93, 765.86, -2.4030
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         testAuto = new KActionSet();
     }

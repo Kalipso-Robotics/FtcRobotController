@@ -27,6 +27,5 @@ public class TurretConfig {
     public static double kD_teleop = 0.0004;  // reduces overshoot (main time saver) 0.0002
     public static double kS_teleop = 0.01;   //0.025 faster final approach
     public static double kF_teleop = 0;     // 375 // for tracking moving targets
-
-    public static boolean shouldShootOnTheMoveTurret = true;
+    public static boolean shouldShootOnTheMoveTurret = false;
 }

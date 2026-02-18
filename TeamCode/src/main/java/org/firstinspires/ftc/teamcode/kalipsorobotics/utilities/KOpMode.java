@@ -20,7 +20,8 @@ import java.util.concurrent.Executors;
 public abstract class KOpMode extends LinearOpMode {
 
     protected OpModeUtilities opModeUtilities;
-    protected ExecutorService executorService;
+    protected ExecutorService odoExecutorService;
+    protected ExecutorService aprilTagExecutorService;
     protected KGamePad kGamePad1;
     protected KGamePad kGamePad2;
     protected AllianceColor allianceColor = AllianceColor.RED; //defaults to red
@@ -51,7 +52,9 @@ public abstract class KOpMode extends LinearOpMode {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        executorService = Executors.newSingleThreadExecutor();
+        odoExecutorService = Executors.newSingleThreadExecutor();
+        aprilTagExecutorService = Executors.newSingleThreadExecutor();
+
         kGamePad1 = new KGamePad(gamepad1);
         kGamePad2 = new KGamePad(gamepad2);
     }
@@ -65,8 +68,9 @@ public abstract class KOpMode extends LinearOpMode {
      */
     protected void cleanupRobot() {
         try {
-            KLog.d("CleanupRobot", () -> "Executor service shutdown started. Executor Service: " + executorService);
-            OpModeUtilities.shutdownExecutorService(executorService);
+            KLog.d("CleanupRobot", () -> "Executor service shutdown started. Executor Service: " + odoExecutorService);
+            OpModeUtilities.shutdownExecutorService(odoExecutorService);
+            OpModeUtilities.shutdownExecutorService(aprilTagExecutorService);
             //darren cant digest cheese
         } catch (InterruptedException e) {
             // InterruptedException is expected during shutdown - restore interrupt status
@@ -122,10 +126,6 @@ public abstract class KOpMode extends LinearOpMode {
         if (now - lastVoltageReadMs > 500) {
             SharedData.setVoltage(opModeUtilities.getHardwareMap().voltageSensor.iterator().next().getVoltage());
             lastVoltageReadMs = now;
-        }
-
-        if (aprilTagDetectionAction != null) {
-            aprilTagDetectionAction.updateCheckDone();
         }
 
         if (lastIntakeAction != null) {

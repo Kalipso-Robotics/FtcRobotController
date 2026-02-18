@@ -22,7 +22,7 @@ public class TestOpMode extends KOpMode {
         imuModule = IMUModule.getInstance(opModeUtilities);
 
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
     }
 
     @Override

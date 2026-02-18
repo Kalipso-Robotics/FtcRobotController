@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig.*;
 
+import android.util.Log;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
@@ -269,4 +271,9 @@ public class AprilTagDetectionAction extends Action {
         return false;
 
     }
+
+    public OpModeUtilities getOpModeUtilities() {
+        return opModeUtilities;
+    }
 }
+

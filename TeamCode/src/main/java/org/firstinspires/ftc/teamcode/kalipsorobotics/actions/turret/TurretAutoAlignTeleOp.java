@@ -24,7 +24,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class TurretAutoAlignTeleOp extends Action {
     OpModeUtilities opModeUtilities;
-    AprilTagDetectionAction aprilTagDetectionAction;
     Turret turret;
     KMotor turretMotor;
     private TurretRunMode turretRunMode;
@@ -52,9 +51,8 @@ public class TurretAutoAlignTeleOp extends Action {
     private double deltaAngleDeg;
 
 
-    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, AprilTagDetectionAction aprilTagDetectionAction, Turret turret, AllianceColor allianceColor) {
+    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
-        this.aprilTagDetectionAction = aprilTagDetectionAction;
         this.turret = turret;
         this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());

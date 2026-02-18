@@ -44,7 +44,7 @@ public class TestAutoDrive extends KOpMode {
         // Create odometry
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         testAutoDrive = new KActionSet();
 

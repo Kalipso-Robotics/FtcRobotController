@@ -113,48 +113,52 @@ public class TeleOp extends KOpMode {
         TurretConfig.kD = TurretConfig.kD_teleop;
         TurretConfig.kF = TurretConfig.kF_teleop;
         TurretConfig.kS = TurretConfig.kS_teleop;
+        shouldShootOnTheMoveRPS = true;
+        TurretConfig.shouldShootOnTheMoveTurret = true;
     }
 
     @Override
     protected void initializeRobot() {
         super.initializeRobot();
         KLog.d("TeleOp-Init", "Starting initializeRobot()");
-
+        int tagId;
+        if (allianceColor == AllianceColor.RED) {
+            tagId = 24;
+        } else {
+            tagId = 20;
+        }
+        // ============== MODULES =================
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         driveBrake = new DriveBrake(opModeUtilities);
-
-        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
-
-        sleep(1000);
-
-        odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-//        odometry.setShouldFallbackToWheelTheta(true);
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
-        driveAction = new DriveAction(driveTrain);
-
-        KLog.d("TeleOp-Init", "Creating intake, shooter, stopper, turret modules");
-        KLog.d("TeleOp-Init", () -> "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
+        turret = Turret.getInstance(opModeUtilities);
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
         tilter = new Tilter(opModeUtilities);
-        KLog.d("TeleOp-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
-        turret = Turret.getInstance(opModeUtilities);
+        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+        sleep(1000);
+        // =========================================
 
-        int tagId;
-        if (allianceColor == AllianceColor.RED) {
-            tagId = 24;
-        }
-        else {
-            tagId = 20;
-        }
 
-        shooterRun = new ShooterRun(opModeUtilities, shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+        // ============== LONG RUNNING ACTIONS =================
 
+        odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+//        odometry.setShouldFallbackToWheelTheta(true);
         aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId, allianceColor);
-        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, aprilTagDetectionAction, turret, allianceColor);
 
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
+        driveAction = new DriveAction(driveTrain);
+        shooterRun = new ShooterRun(opModeUtilities, shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
+        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret, allianceColor);
+
+        // =========================================
+
+        KLog.d("TeleOp-Init", "Creating intake, shooter, stopper, turret modules");
+        KLog.d("TeleOp-Init", () -> "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
+
+        KLog.d("TeleOp-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
         KLog.d("TeleOp-Init", "Finished initializeRobot()");
     }

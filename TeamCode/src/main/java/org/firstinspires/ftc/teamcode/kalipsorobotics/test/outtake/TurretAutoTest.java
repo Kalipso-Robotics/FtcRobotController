@@ -30,7 +30,7 @@ public class TurretAutoTest extends KOpMode {
 
         Odometry.setInstanceNull();
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);

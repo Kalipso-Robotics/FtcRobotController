@@ -77,7 +77,7 @@ public class RedAutoDepot extends KOpMode {
         // Create odometry
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         autoDepot = new KActionSet();
         KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");
