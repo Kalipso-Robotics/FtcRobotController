@@ -72,9 +72,9 @@ public class OpModeUtilities {
                 KLog.d("ExecutorService_Run", () -> "opModeUtilities.getOpMode()=" + odometry.getOpModeUtilities().getOpMode().getClass().getSimpleName());
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        KLog.d("ExecutorService_Run", () -> "Thread is running. OpMode.isActive: " + odometry.getOpModeUtilities().getOpMode().opModeIsActive());
+                        KLog.d("ExecutorService_Run", () -> "Odometry Thread is running. OpMode.isActive: " + odometry.getOpModeUtilities().getOpMode().opModeIsActive());
                         if (odometry.getOpModeUtilities().getOpMode().opModeIsActive()) {
-                            KLog.d("ExecutorService_Run", () -> "OpModeIsActive. Running");
+                            KLog.d("ExecutorService_Run", () -> "Odometry OpModeIsActive. Running");
                             odometry.updateAll();
                             odometryLogger.log(SharedData.getOdometryPositionMap());
                         }
@@ -96,21 +96,23 @@ public class OpModeUtilities {
     }
 
     public static void runAprilTagExecutorService(ExecutorService executorService, AprilTagDetectionAction aprilTagDetectionAction) {
-        if (aprilTagDetectionAction == null) {
-            KLog.e("ExecutorService_Run", "aprilTagDetectionAction is null, not starting executor");
-            return;
-        }
         executorService.submit(() -> {
             try {
                 KLog.d("ExecutorService", "Executor is running");
-                KLog.d("ExecutorService_Run", () -> "Executor task started");
+                if (aprilTagDetectionAction == null) {
+                    KLog.e("ExecutorService_Run", "aprilTagDetectionAction is null, not starting executor");
+                    return;
+                }
+
+
+                KLog.d("ExecutorService_Run", () -> "April tag executor task started / running");
                 Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
 
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        KLog.d("ExecutorService_Run", () -> "Thread is running. OpMode.isActive: " + aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive());
+                        KLog.d("ExecutorService_Run", () -> "April Tag Thread is running. OpMode.isActive: " + aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive());
                         if (aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive()) {
-                            KLog.d("ExecutorService_Run", () -> "OpModeIsActive. Running");
+                            KLog.d("ExecutorService_Run", () -> "April Tag OpModeIsActive. Running");
                             aprilTagDetectionAction.updateCheckDone();
                         }
                     } catch (Exception e) {
@@ -123,7 +125,7 @@ public class OpModeUtilities {
                         aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive());
             } finally {
                 // CRITICAL: This always executes, even if thread is interrupted or exception occurs
-                KLog.d("ExecutorService_Run", () -> "Closing Executor Service");
+                KLog.d("ExecutorService_Run", () -> "Closing April Tag Executor Service");
             }
         });
     }
