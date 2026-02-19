@@ -5,8 +5,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAut
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@Autonomous
+@Disabled
 public class BlueAutoNearSolo extends RedAutoNearSolo {
     @Override
     protected void initializeRobotConfig() {

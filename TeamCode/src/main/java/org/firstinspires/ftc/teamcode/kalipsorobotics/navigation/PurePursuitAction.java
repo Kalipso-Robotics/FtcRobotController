@@ -81,7 +81,6 @@ public class  PurePursuitAction extends Action {
     private double prevYVelocity;
     private double thetaVelocity;
 
-    private boolean isWithinRange;
     private double withinRangeRadiusMM;
 
     private boolean enablePowerScalingForPath = false;
@@ -252,7 +251,6 @@ public class  PurePursuitAction extends Action {
             KLog.d("PurePursuitScale", "Scaling UP x and y");
         }
 
-        isWithinRange = path.isFollowingLastPoint() && distanceToTarget < withinRangeRadiusMM;
         KLog.d("directionalpowerlook", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
                 powerAngle));
 
@@ -328,14 +326,11 @@ public class  PurePursuitAction extends Action {
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
         //prevFollow.ifPresent(position -> farthestPointReached = path.getIndex(position));
-        isWithinRange = false;
         if (follow.isPresent()) {
             Position followPos = follow.get();
             double distToLast = currentPosition.distanceTo(path.getLastPoint());
             KLog.d("purepursaction_debug_follow",
                     "Follow lookahead point:  " + followPos + "current pos:    " + currentPosition.toString());
-            KLog.d("PurePursuitWithinRange", String.format("[%s] follow present | distToLast=%.1f | withinRadiusMM=%.1f | isTargetLast=%b | isWithinRange=%b",
-                    name, distToLast, withinRangeRadiusMM, isTargetLast(followPos), isWithinRange));
             targetPosition(follow.get(), currentPosition);
 
             xVelocity = (Math.abs(lastPosition.getX() - currentPosition.getX())) / (Math.abs(lastMilli - timeoutTimer.milliseconds()));
@@ -375,12 +370,6 @@ public class  PurePursuitAction extends Action {
             KLog.d("PurePursuitWithinRange", String.format("[%s] follow EMPTY | distToLast=%.1f | withinRadiusMM=%.1f | angleError=%.1fdeg | threshold=%.1fdeg",
                     name, distToLast, withinRangeRadiusMM, Math.toDegrees(angleError), finalAngleLockingThresholdDegree));
 
-            // Set isWithinRange based on distance to last point (even when follow is empty)
-            if (distToLast < withinRangeRadiusMM) {
-                isWithinRange = true;
-                KLog.d("PurePursuitWithinRange", String.format("[%s] Setting isWithinRange=TRUE (distToLast=%.1f < withinRadiusMM=%.1f)",
-                        name, distToLast, withinRangeRadiusMM));
-            }
 
             //11-22 13:04:54.212  3107  3301 D KLog_purepursaction_debug_follow: locking final angle:  x=2598.00 (102.28 in), y=441.38 (17.38 in), theta=-2.4136 (-138.3 deg)
             //11-22 13:04:54.213  3107  3301 D KLog_purepursaction_debug_follow: current pos:    x=2616.11 (103.00 in), y=432.30 (17.02 in), theta=-2.4347 (-139.5 deg)
@@ -482,11 +471,25 @@ public class  PurePursuitAction extends Action {
         this.pathAngleToleranceDeg = pathAngleTolerance;
     }
 
-    public void setWithinRangeRadiusMM(double withinRangeRadiusMM) {
-        this.withinRangeRadiusMM = withinRangeRadiusMM;
+
+    public int getLastPointIndex() {
+        return path.getPath().size() - 1;
+    }
+    public boolean isWithinDistancePoint(int index, double distanceThreshold) {
+        if (path.getCurrentSearchWayPointIndex() == index) {
+            double distanceToPoint = pathPoints.get(index).distanceTo(currentPosition);
+            if ((distanceToPoint < distanceThreshold)) {
+                KLog.d("PurePursuitAction_WithinDistancePoint", () ->
+                        "distanceToPoint: " + distanceToPoint +
+                        " targetPosition " + path.getPoint(index));
+                return true;
+            }
+        }
+        return false;
     }
 
-    public boolean isWithinRange() {
-        return isWithinRange;
+
+    public double getLastSearchRadius() {
+        return lastSearchRadius;
     }
 }

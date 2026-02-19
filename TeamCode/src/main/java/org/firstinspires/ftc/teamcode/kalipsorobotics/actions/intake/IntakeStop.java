@@ -7,8 +7,14 @@ public class IntakeStop extends Action {
 
     Intake intake;
 
+    IntakeFullAction intakeFullAction;
+
     public IntakeStop(Intake intake) {
         this.intake = intake;
+    }
+
+    public IntakeStop(IntakeFullAction intakeFullAction) {
+        this.intakeFullAction = intakeFullAction;
     }
 
 
@@ -17,7 +23,15 @@ public class IntakeStop extends Action {
         if (isDone) {
             return;
         }
-        intake.getIntakeMotor().setPower(0);
+        if (intake != null) {
+            intake.getIntakeMotor().setPower(0);
+        }
+        if (intakeFullAction != null) {
+            intakeFullAction.stopAndSetDone();
+        }
+
         isDone = true;
+
+
     }
 }

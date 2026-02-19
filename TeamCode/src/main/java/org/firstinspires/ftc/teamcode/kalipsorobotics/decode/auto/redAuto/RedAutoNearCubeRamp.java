@@ -25,7 +25,7 @@ public class RedAutoNearCubeRamp extends RedAutoNearRamp {
         trip1.setDependentActions(trip0);
         trip1.setShouldShooterStop(false);
         trip1.getMoveToBall().setLookAheadRadius(200);
-        trip1.getMoveToBall().setWithinRangeRadiusMM(350);
+        trip1.getPurePursuitReadyShooting().setDistanceThresholdMM(350);
         trip1.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
         redAutoNear.addAction(trip1);
     }

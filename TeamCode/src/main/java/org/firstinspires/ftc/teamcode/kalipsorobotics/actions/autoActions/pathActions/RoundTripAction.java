@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KA
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
@@ -36,7 +37,9 @@ public class RoundTripAction extends KActionSet {
 
     private final ShooterReady shooterReady;
     private final PushBall pushBall;
-    private final PurePursuitReady purePursuitReady;
+    private final PurePursuitReady purePursuitReadyShooting;
+
+    private final PurePursuitReady purePursuitReadyIntakeStop;
     private final ShooterStop shooterStop;
     private final TurretAutoAlign turretAutoAlign;
     private final TurretReadyAuto turretReadyAuto;
@@ -66,9 +69,27 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setFinalSearchRadius(150);
         moveToBalls.setMaxTimeOutMS(8000);
 
-        this.purePursuitReady = new PurePursuitReady(moveToBalls);
-        purePursuitReady.setName("purePursuitReady");
-        this.addAction(purePursuitReady);
+        purePursuitReadyIntakeStop = new PurePursuitReady(moveToBalls, 600);
+        purePursuitReadyIntakeStop.setName("purePursuitReadyIntakeStop");
+        this.addAction(purePursuitReadyIntakeStop);
+
+
+        intakeFullAction = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
+        intakeFullAction.setName("intakeFullAction");
+        this.addAction(intakeFullAction);
+
+        if (!shouldRunIntake) {
+            intakeFullAction.setIsDone(true);
+        }
+
+        IntakeStop intakeStop = new IntakeStop(intakeFullAction);
+        intakeStop.setName("intakeStop");
+        intakeStop.setDependentActions(purePursuitReadyIntakeStop);
+        this.addAction(intakeStop);
+
+        this.purePursuitReadyShooting = new PurePursuitReady(moveToBalls, moveToBall.getLastSearchRadius());
+        purePursuitReadyShooting.setName("purePursuitReadyShooting");
+        this.addAction(purePursuitReadyShooting);
 
         //warm - shorter
         shooterRun = new ShooterRun(opModeUtilities, shooter, targetPoint, launchPoint);
@@ -80,14 +101,6 @@ public class RoundTripAction extends KActionSet {
         shooterReady.setName("shooterReady");
         shooterReady.setDependentActions(moveToBalls);
         this.addAction(shooterReady);
-
-        intakeFullAction = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
-        intakeFullAction.setName("intakeFullAction");
-        this.addAction(intakeFullAction);
-
-        if (!shouldRunIntake) {
-            intakeFullAction.setIsDone(true);
-        }
 
         turretReadyAuto = new TurretReadyAuto(turretAutoAlign);
         turretReadyAuto.setName("turretReady");
@@ -102,9 +115,9 @@ public class RoundTripAction extends KActionSet {
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("shoot");
         if (shouldDependOnFlywheel) {
-            pushBall.setDependentActions(purePursuitReady, shooterReady, turretReadyAuto); //removed turretReady
+            pushBall.setDependentActions(purePursuitReadyShooting, shooterReady, turretReadyAuto); //removed turretReady
         } else {
-            pushBall.setDependentActions(purePursuitReady, turretReadyAuto);
+            pushBall.setDependentActions(purePursuitReadyShooting, turretReadyAuto);
         }
 //        pushBall.getRunUntilFullSpeed().setFullSpeedDurationMs(150);
         this.addAction(pushBall);
@@ -160,16 +173,12 @@ public class RoundTripAction extends KActionSet {
         KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, PurePursuitReady: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s",
                 getName() != null ? getName() : "unnamed",
                 moveToBall.getIsDone() ? "DONE" : "NOT DONE",
-                purePursuitReady.getIsDone() ? "DONE" : "NOT DONE",
+                purePursuitReadyShooting.getIsDone() ? "DONE" : "NOT DONE",
                 intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
                 shooterReady.getIsDone() ? "DONE" : "NOT DONE",
                 shooterRun.getIsDone() ? "DONE" : "NOT DONE",
                 pushBall.getIsDone() ? "DONE" : "NOT DONE",
                 turretReadyAuto.getIsDone() ? "DONE" : "NOT DONE"));
-        KLog.d("RoundTrip", String.format("[%s] PP isWithinRange=%b",
-                getName() != null ? getName() : "unnamed",
-                moveToBall.isWithinRange()));
-
     }
 
     @Override
@@ -198,5 +207,14 @@ public class RoundTripAction extends KActionSet {
     }
     public IntakeFullAction getIntakeFullAction() {
         return intakeFullAction;
+    }
+
+
+    public PurePursuitReady getPurePursuitReadyShooting() {
+        return purePursuitReadyShooting;
+    }
+
+    public PurePursuitReady getPurePursuitReadyIntakeStop() {
+        return purePursuitReadyIntakeStop;
     }
 }

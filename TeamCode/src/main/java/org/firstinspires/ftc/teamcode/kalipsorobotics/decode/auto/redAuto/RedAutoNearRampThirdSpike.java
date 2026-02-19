@@ -118,7 +118,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip0.getMoveToBall().addPoint(firstShootPoint.getX(), firstShootPoint.getY() * allianceColor.getPolarity(), -138.29 * allianceColor.getPolarity());
         trip0.setDependentActions(delayBeforeStart);
         trip0.setShouldShooterStop(false);
-        trip0.getMoveToBall().setWithinRangeRadiusMM(400);
+        trip0.getPurePursuitReadyShooting().setDistanceThresholdMM(400);
         trip0.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
         trip0.getMoveToBall().setFinalSearchRadius(150);
         redAutoNear.addAction(trip0);
@@ -142,11 +142,11 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         redAutoNear.addAction(trip3);
 
         // ----------------- TRIP 4 ----------------------
-
+        //Third Spike
         handleTrip4();
 
         // ----------------- TRIP 5 ----------------------
-
+        //First Spike
         handleTrip5();
 
         // ----------------- TRIP 6 ----------------------
@@ -186,7 +186,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 180 * allianceColor.getPolarity());
         trip1.setDependentActions(trip0);
         trip1.setShouldShooterStop(false);
-        trip1.getMoveToBall().setWithinRangeRadiusMM(300);
+        trip1.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         trip1.getMoveToBall().setMaxTimeOutMS(9000);
         trip1.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
         trip1.getMoveToBall().setPathAngleTolerance(50);
@@ -225,7 +225,8 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip4Spike.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4Spike.getMoveToBall().setEnablePowerScalingForPath(true);
         trip4Spike.setShouldShooterStop(false);
-        trip4Spike.getMoveToBall().setWithinRangeRadiusMM(300);
+        trip4Spike.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
+        trip4Spike.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(1200);
         trip4Spike.getMoveToBall().setFinalSearchRadius(200);
         trip4Spike.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         KLog.d("Auto_Shooting", "Shot_4" + " - " +
@@ -240,7 +241,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
     public void handleTrip5() {
         trip5 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(THIRD_SHOOT_NEAR_X, THIRD_SHOOT_NEAR_Y * allianceColor.getPolarity()), 0);
-        trip5.setName("trip4");
+        trip5.setName("trip5");
         // move to intake
         if (trip4Spike != null) {
             trip5.setDependentActions(trip4Spike);
@@ -256,7 +257,8 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip5.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         trip5.setShouldShooterStop(false);
         trip5.getMoveToBall().setFinalSearchRadius(300);
-        trip5.getMoveToBall().setWithinRangeRadiusMM(300);
+        trip5.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
+        trip5.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(400);
         // move to launch
         trip5.getMoveToBall().addPoint(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity(), PurePursuitAction.P_XY, PurePursuitAction.P_ANGLE * 2);
 
@@ -288,7 +290,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         rampTrip.getTripToShoot().setShouldShooterStop(false);
         rampTrip.getTripToShoot().getMoveToBall().setMaxTimeOutMS(4000);
         rampTrip.getTripToShoot().getMoveToBall().setFinalSearchRadius(200);
-        rampTrip.getTripToShoot().getMoveToBall().setWithinRangeRadiusMM(200);
+        rampTrip.getTripToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(200);
         rampTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDegree(30);
 
         KLog.d("Auto_Shooting", "Shot_Ramp" + " - " +

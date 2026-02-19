@@ -13,7 +13,7 @@ public class IntakeFullAction extends KActionSet {
     private final Intake intake;
 
 
-    public IntakeFullAction(Stopper stopper, Intake intake, double timeMS, double power){
+    public IntakeFullAction(Stopper stopper, Intake intake, double timeMS, double power) {
 
         this.intake = intake;
 
@@ -25,18 +25,19 @@ public class IntakeFullAction extends KActionSet {
         runIntakeTime.setName("intakeRun");
         this.addAction(runIntakeTime);
 
-//        stopIntake = new IntakeStop(intake);
-//        stopIntake.setName("stopIntake");
-//        stopIntake.setDependentActions(intakeAll);
-//        this.addAction(stopIntake);
-
     }
 
     public RunIntakeTime getRunIntakeTime() {
         return runIntakeTime;
     }
-//        this.isDone = true;
-//    }
+
+    public void stopAndSetDone() {
+        if (isDone) {
+            return;
+        }
+        this.setIsDone(true);
+        intake.getIntakeMotor().setPower(0);
+    }
 }
 
 

@@ -5,8 +5,18 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 public class PurePursuitReady extends Action {
     private final PurePursuitAction purePursuitAction;
-    public PurePursuitReady(PurePursuitAction purePursuitAction) {
+    private int pointIndex;
+    private double distanceThresholdMM;
+
+    public PurePursuitReady(PurePursuitAction purePursuitAction, int pointIndex, double distanceThresholdMM) {
         this.purePursuitAction = purePursuitAction;
+        this.pointIndex = pointIndex;
+        this.distanceThresholdMM = distanceThresholdMM;
+    }
+
+    public PurePursuitReady(PurePursuitAction purePursuitAction, double distanceThresholdMM) {
+        //Cannot do pointIndex = lastIndex in construction time because points get added later.
+        this(purePursuitAction, -1, distanceThresholdMM);
     }
 
     @Override
@@ -15,7 +25,11 @@ public class PurePursuitReady extends Action {
             return;
         }
 
-        boolean withinRange = purePursuitAction.isWithinRange();
+        if (pointIndex < 0) {
+            pointIndex = purePursuitAction.getLastPointIndex();
+        }
+        boolean withinRange = purePursuitAction.isWithinDistancePoint(pointIndex, distanceThresholdMM);
+
         boolean ppDone = purePursuitAction.getIsDone();
 
         KLog.d("PurePursuitReady", String.format("[%s] checking: isWithinRange=%b, ppDone=%b, ppName=%s",
@@ -32,5 +46,9 @@ public class PurePursuitReady extends Action {
             KLog.d("PurePursuitReady", String.format("[%s] WARNING: PP is done but isWithinRange=false! Marking ready anyway.", getName()));
             isDone = true;
         }
+    }
+
+    public void setDistanceThresholdMM(double distanceThresholdMM) {
+        this.distanceThresholdMM = distanceThresholdMM;
     }
 }

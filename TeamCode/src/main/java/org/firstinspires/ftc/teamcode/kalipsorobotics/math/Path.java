@@ -145,4 +145,8 @@ public class Path {
     public boolean isFollowingLastPoint() {
         return currentSearchWayPointIndex == path.size()-1;
     }
+
+    public int getCurrentSearchWayPointIndex() {
+        return currentSearchWayPointIndex;
+    }
 }

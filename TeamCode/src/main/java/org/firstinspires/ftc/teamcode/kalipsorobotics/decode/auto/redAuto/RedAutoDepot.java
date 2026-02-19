@@ -140,7 +140,7 @@ public class RedAutoDepot extends KOpMode {
 //        trip2.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         trip2.getTrip().getMoveToBall().setFinalSearchRadius(150);
         trip2.getTrip().setShouldShooterStop(false);
-        trip2.getTrip().getMoveToBall().setWithinRangeRadiusMM(150);
+        trip2.getTrip().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
         trip2.getTrip().getMoveToBall().setPathAngleTolerance(45);
         trip2.getTrip().getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         autoDepot.addAction(trip2);
@@ -261,7 +261,7 @@ public class RedAutoDepot extends KOpMode {
 
         retryTrip.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         retryTrip.getTrip().getMoveToBall().setFinalSearchRadius(150);
-        retryTrip.getTrip().getMoveToBall().setWithinRangeRadiusMM(150);
+        retryTrip.getTrip().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
         retryTrip.getTrip().getMoveToBall().setPathAngleTolerance(45);
         retryTrip.getTrip().getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         retryTrip.getTrip().setShouldShooterStop(false);

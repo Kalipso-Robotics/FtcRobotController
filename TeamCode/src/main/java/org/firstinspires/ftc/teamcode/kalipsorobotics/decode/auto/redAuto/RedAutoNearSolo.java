@@ -21,8 +21,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@Autonomous
+@Disabled
 public class RedAutoNearSolo extends KOpMode {
 
 
@@ -119,7 +120,7 @@ public class RedAutoNearSolo extends KOpMode {
         trip0.getMoveToBall().addPoint(firstShootPoint.getX(), firstShootPoint.getY() * allianceColor.getPolarity(), -138.29 * allianceColor.getPolarity());
         trip0.setDependentActions(delayBeforeStart);
         trip0.setShouldShooterStop(false);
-        trip0.getMoveToBall().setWithinRangeRadiusMM(150);
+        trip0.getPurePursuitReadyShooting().setDistanceThresholdMM(150);
         trip0.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
         redAutoNear.addAction(trip0);
 
@@ -136,7 +137,7 @@ public class RedAutoNearSolo extends KOpMode {
         trip1.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         trip1.setShouldShooterStop(false);
         trip1.getMoveToBall().setFinalSearchRadius(200);
-        trip1.getMoveToBall().setWithinRangeRadiusMM(200);
+        trip1.getPurePursuitReadyShooting().setDistanceThresholdMM(200);
         trip1.setDependentActions(trip0);
         redAutoNear.addAction(trip1);
 
@@ -156,7 +157,7 @@ public class RedAutoNearSolo extends KOpMode {
         trip2.setDependentActions(trip1);
         trip2.setShouldShooterStop(false);
         trip2.getMoveToBall().setLookAheadRadius(200);
-        trip2.getMoveToBall().setWithinRangeRadiusMM(300);
+        trip2.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         trip2.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
         redAutoNear.addAction(trip2);
 
@@ -175,7 +176,7 @@ public class RedAutoNearSolo extends KOpMode {
         trip3.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip3.setShouldShooterStop(false);
         trip3.getMoveToBall().setLookAheadRadius(200);
-        trip3.getMoveToBall().setWithinRangeRadiusMM(300);
+        trip3.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         trip3.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
         redAutoNear.addAction(trip3);
         //----------------- TRIP 4  (Depot) ----------------------
@@ -260,7 +261,7 @@ public class RedAutoNearSolo extends KOpMode {
 
         depotTrip.setShouldShooterStop(false);
         depotTrip.getMoveToBall().setMaxTimeOutMS(6000);
-        depotTrip.getMoveToBall().setWithinRangeRadiusMM(350);
+        depotTrip.getPurePursuitReadyShooting().setDistanceThresholdMM(350);
         depotTrip.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
 
         return depotTrip;

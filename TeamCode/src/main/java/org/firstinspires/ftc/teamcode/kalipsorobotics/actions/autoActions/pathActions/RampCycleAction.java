@@ -153,9 +153,6 @@ public class RampCycleAction extends KActionSet {
                 intakeFullAction.getIsDone() ? "DONE" : "NOT DONE",
                 shooterRun.getIsDone() ? "DONE" : "NOT DONE",
                 tripToShoot.getIsDone() ? "DONE" : "NOT DONE"));
-        KLog.d("RampCycle", String.format("[%s] MoveToRamp isWithinRange=%b",
-                getName() != null ? getName() : "unnamed",
-                moveToRamp.isWithinRange()));
     }
 
     @Override
