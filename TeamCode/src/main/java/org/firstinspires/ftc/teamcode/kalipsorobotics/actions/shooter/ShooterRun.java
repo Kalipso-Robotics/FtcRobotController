@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.SHOOTER_LOOKUP_TIME;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldBangBangCompensate;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import android.annotation.SuppressLint;
@@ -27,8 +28,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class ShooterRun extends Action {
 
     public static final double FAR_TOLERANCE = 0.75;
-    public static final double MIDDLE_TOLERANCE = 1;
-    public static final double NEAR_TOLERANCE = 1;
+    public static final double MIDDLE_TOLERANCE = 0.75;
+    public static final double NEAR_TOLERANCE = 0.50;
     private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
     private final Shooter shooter;
@@ -154,7 +155,7 @@ public class ShooterRun extends Action {
                 break;
         }
         shooter.setTargetRPS(targetRPS);
-        KLog.d("ShooterRun", () -> "Running mode " + shooterRunMode + " targetRPS: " + targetRPS + " distance: " + distanceMM);
+        KLog.d("ShooterRun_RunModeData", () -> "Running mode " + shooterRunMode + " targetRPS: " + targetRPS + " distance: " + distanceMM);
 
         double deltaRPS = targetRPS - currentRPS;
         double hoodCompensation = MathFunctions.clamp(deltaRPS * hoodCompensateCoefficient, minHoodCompensate, maxHoodCompensate);
@@ -171,8 +172,9 @@ public class ShooterRun extends Action {
                     " Target RPS: " + targetRPS
             );
         }
+
         // Bang control for rapid accel/decel when error is large
-        if (deltaRPS > ShooterConfig.accelBoostDeltaRPSThreshold) {
+        if (deltaRPS > ShooterConfig.accelBoostDeltaRPSThreshold && shouldBangBangCompensate) {
             // Need to ACCELERATE - current RPS too low
             if (prevMode != DcMotor.ZeroPowerBehavior.FLOAT) {
                 shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -181,7 +183,7 @@ public class ShooterRun extends Action {
             }
             shooter.setPower(calculateEffectiveCompensationPower());
             KLog.d("ShooterRun_BangControl", () -> "BANG ACCEL: deltaRPS=" + deltaRPS + " (threshold=" + ShooterConfig.accelBoostDeltaRPSThreshold + ")");
-        } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold) {
+        } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold && shouldBangBangCompensate) {
             // Need to DECELERATE - current RPS too high
             if (prevMode != DcMotor.ZeroPowerBehavior.BRAKE) {
                 shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -200,6 +202,7 @@ public class ShooterRun extends Action {
             shooter.goToRPS(targetRPS);
             KLog.d("ShooterRun_BangControl", () -> String.format("PID CONTROL: deltaRPS = %.2f", deltaRPS));
         }
+
         // Update hood position
         shooter.getHood().setPosition(effectiveTargetHood);
 
@@ -344,7 +347,7 @@ public class ShooterRun extends Action {
         if (distanceMM > NEAR_DISTANCE) {
             return 1;
         } else {
-            return 0.9;
+            return 0.7;
         }
     }
 

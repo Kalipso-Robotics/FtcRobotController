@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.blueAuto;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldBangBangCompensate;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
@@ -15,5 +17,6 @@ public class BlueAutoDepotNoSpike extends RedAutoDepotNoSpike {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = 0;
+        shouldBangBangCompensate = true;
     }
 }

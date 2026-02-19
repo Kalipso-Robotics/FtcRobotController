@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldBangBangCompensate;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
@@ -57,6 +59,7 @@ public class RedAutoDepot extends KOpMode {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = 0;
+        shouldBangBangCompensate = true;
     }
 
     @Override

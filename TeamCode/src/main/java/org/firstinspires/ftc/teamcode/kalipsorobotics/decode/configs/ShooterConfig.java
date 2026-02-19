@@ -12,9 +12,11 @@ public class ShooterConfig {
     public static double kf = 0.01147578609; //0.01205432614;
     public static double kA = 0;
 
+    public static boolean shouldBangBangCompensate = false;
+
     public static double accelBoostDeltaRPSThreshold = 3;
     public static double decelBoostDeltaRPSThreshold = -3;
     public static double SHOOTER_LOOKUP_TIME = 50;
     public static boolean hoodFlipDirection = true;
-    public static boolean shouldShootOnTheMoveRPS = false;
+    public static boolean shouldShootOnTheMoveRPS = true;
 }

@@ -249,4 +249,7 @@ public class KMotor {
     public void setTicksOffset(int ticksOffset) {
         this.ticksOffset = ticksOffset;
     }
+    public void setTargetRPS(double targetRPS) {
+        this.targetRPS = targetRPS;
+    }
 }

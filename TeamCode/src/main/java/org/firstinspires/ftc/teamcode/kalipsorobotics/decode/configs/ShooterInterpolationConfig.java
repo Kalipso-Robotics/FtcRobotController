@@ -47,8 +47,8 @@ public class ShooterInterpolationConfig {
     private static final double rpsTune = 0.1;
     public static final int BETWEEN_FAR_NEAR_TIP = 3240;
     public static double[] shooterData = {
-            810, 45.7 + rpsTune, MIN_HOOD,
-            1050, 45.7 + rpsTune, compensatedMaxHood - 0.07,
+            810, 45.4 + rpsTune, MIN_HOOD,
+            1050, 45.4 + rpsTune, compensatedMaxHood - 0.075,
             1310, 47.7 + rpsTune, compensatedMaxHood - 0.07, //roughly first shot for near auto
             1518, 49.6 + rpsTune, compensatedMaxHood - 0.05,
             1705, 51.6 + rpsTune, compensatedMaxHood - 0.05,

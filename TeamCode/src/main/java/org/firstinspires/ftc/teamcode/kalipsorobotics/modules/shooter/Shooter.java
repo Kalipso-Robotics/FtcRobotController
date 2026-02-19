@@ -111,6 +111,7 @@ public class Shooter {
 
     /**
      * Calculate shooter parameters based on distance to target
+     *
      * @param distanceMM distance to target in millimeters
      * @return shooter parameters containing RPS and hood position
      */
@@ -124,6 +125,7 @@ public class Shooter {
 
     /**
      * Set hood position based on distance to target
+     *
      * @param distanceMM distance to target in millimeters
      */
     private void setCalculatedHood(double distanceMM) {
@@ -147,6 +149,7 @@ public class Shooter {
 
     /**
      * Set motor power directly
+     *
      * @param power motor power (-1.0 to 1.0)
      */
     public void setPower(double power) {
@@ -157,6 +160,7 @@ public class Shooter {
     /**
      * Set target RPS for both motors using PID control
      * Uses adaptive kF based on target RPS from lookup table
+     *
      * @param targetRPS desired rotations per second
      */
     public void goToRPS(double targetRPS) {
@@ -184,8 +188,9 @@ public class Shooter {
 
     /**
      * Get the target RPS for a given position and target
+     *
      * @param currentPosition current robot position from odometry (x, y, theta)
-     * @param target target point to shoot at
+     * @param target          target point to shoot at
      * @return target RPS for the shooter
      */
     public double getDistance(Position currentPosition, Point target) {
@@ -194,6 +199,7 @@ public class Shooter {
         double distance = Math.sqrt((dx * dx) + (dy * dy));
         return distance;
     }
+
     public double getTargetRPS(Position currentPosition, Point target) {
         // Calculate distance between current position and target (ignoring theta)
         double distance = getDistance(currentPosition, target);
@@ -201,16 +207,17 @@ public class Shooter {
         IShooterPredictor.ShooterParams params = getPrediction(distance);
 
         KLog.d("TargetRPS", () -> "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
-              "), Target: (" + target.getX() + ", " + target.getY() +
-              "), Distance: " + distance + "mm, Predicted RPS: " + params.rps + ", Hood: " + params.hoodPosition);
+                "), Target: (" + target.getX() + ", " + target.getY() +
+                "), Distance: " + distance + "mm, Predicted RPS: " + params.rps + ", Hood: " + params.hoodPosition);
 
         return params.rps;
     }
 
     /**
      * Update hood position based on current position and target
+     *
      * @param currentPosition current robot position from odometry (x, y, theta)
-     * @param target target point to shoot at
+     * @param target          target point to shoot at
      */
     public void updateHoodFromPosition(Position currentPosition, Point target) {
         // Calculate distance between current position and target (ignoring theta)
@@ -233,6 +240,10 @@ public class Shooter {
 
     public void setTargetRPS(double targetRPS) {
         this.targetRPS = targetRPS;
-    }
+        if (shooter1 != null) {
+            shooter1.setTargetRPS(targetRPS);
+            shooter2.setTargetRPS(targetRPS);
+        }
 
+    }
 }

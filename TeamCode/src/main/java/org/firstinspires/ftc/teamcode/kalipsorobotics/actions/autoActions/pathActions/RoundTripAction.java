@@ -92,7 +92,7 @@ public class RoundTripAction extends KActionSet {
 
         //warm - shorter
         shooterRun = new ShooterRun(opModeUtilities, shooter, targetPoint, launchPoint);
-        shooterRun.setName("shooterRun");  // FIX: Correct name (was "shooterReady")
+        shooterRun.setName("shooterRun");
         shooterRun.setDependentActions(waitUntilShootRun);
         this.addAction(shooterRun);
 
