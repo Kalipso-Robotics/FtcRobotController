@@ -46,7 +46,7 @@ public class RunIntake extends Action {
             motor.setPower(fullPower);
             hasStarted = true;
             runTimer.reset();
-            KLog.d("RunIntake", String.format("[%s] STARTED at power %.2f",
+            KLog.d("RunIntake", () -> String.format("[%s] STARTED at power %.2f",
                     getName() != null ? getName() : "unnamed", fullPower));
             return;
         }
@@ -54,7 +54,7 @@ public class RunIntake extends Action {
         double velocity = Math.abs(motor.getVelocity());
         double currentMA = motor.getCurrent(CurrentUnit.MILLIAMPS);
         double expectedVelocity = Math.abs(fullPower) * MAX_VELOCITY_TICKS_PER_SEC;
-        KLog.d("RunIntake", String.format("Velocity %% %.2f", ((velocity / expectedVelocity) * 100)) + " current: " + currentMA + "mA");
+        KLog.d("RunIntake", () -> String.format("Velocity %% %.2f", ((velocity / expectedVelocity) * 100)) + " current: " + currentMA + "mA");
         // Skip stall detection during first second (motor spin-up)
         if (runTimer.milliseconds() < 1000) {
             motor.setPower(fullPower);
@@ -77,7 +77,7 @@ public class RunIntake extends Action {
                 stallCount = 0;
                 clearCount = 0;
                 motor.setPower(STALL_POWER);
-                KLog.d("RunIntake", String.format("[%s] STALL — dropping to %.2f power (current: %.0fmA, velocity: %.1f)",
+                KLog.d("RunIntake", () -> String.format("[%s] STALL — dropping to %.2f power (current: %.0fmA, velocity: %.1f)",
                         getName() != null ? getName() : "unnamed", STALL_POWER, currentMA, velocity));
             } else {
                 motor.setPower(fullPower);
@@ -99,7 +99,7 @@ public class RunIntake extends Action {
                 isStalled = false;
                 clearCount = 0;
                 motor.setPower(fullPower);
-                KLog.d("RunIntake", String.format("[%s] RECOVERED — back to full power %.2f (velocity: %.1f)",
+                KLog.d("RunIntake", () -> String.format("[%s] RECOVERED — back to full power %.2f (velocity: %.1f)",
                         getName() != null ? getName() : "unnamed", fullPower, velocity));
             } else {
                 motor.setPower(STALL_POWER);

@@ -38,24 +38,24 @@ public class TestAuto extends KOpMode {
         waitForStart();
         while (opModeIsActive()) {
             purePursuitAction.updateCheckDone();
-            KLog.d("debug_OpMode_Transfer", "Auto Position " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d("debug_OpMode_Transfer", () -> "Auto Position " + SharedData.getOdometryWheelIMUPosition());
         }
-        KLog.d("debug_OpMode_Transfer", "Auto End right (supposed to be 0)" +
+        KLog.d("debug_OpMode_Transfer", () -> "Auto End right (supposed to be 0)" +
                 odometry.getRightEncoderMM() +
                 " left " + odometry.getLeftEncoderMM() +
                 " back " + odometry.getBackEncoderMM() +
                 " imu " + odometry.getIMUHeading());
 
 
-        KLog.d("debug_OpMode_Transfer", "Auto End " + odometry.toString());
+        KLog.d("debug_OpMode_Transfer", () -> "Auto End " + odometry.toString());
         cleanupRobot();
-        KLog.d("debug_OpMode_Transfer", "Auto After Cleanup right " +
+        KLog.d("debug_OpMode_Transfer", () -> "Auto After Cleanup right " +
                 odometry.getRightEncoderMM() +
                 " left " + odometry.getLeftEncoderMM() +
                 " back " + odometry.getBackEncoderMM() +
                 " imu " + odometry.getIMUHeading());
 
 
-        KLog.d("debug_OpMode_Transfer", "Auto After Cleanup " + odometry.toString());
+        KLog.d("debug_OpMode_Transfer", () -> "Auto After Cleanup " + odometry.toString());
     }
 }

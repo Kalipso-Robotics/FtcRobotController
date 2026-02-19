@@ -15,7 +15,7 @@ public class ResetOdometryToPos extends Action {
 
     @Override
     protected void update() {
-        KLog.d("ResetOdometryToPosition", "MANUAL CORNER ZERO, Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() +
+        KLog.d("ResetOdometryToPosition", () -> "MANUAL CORNER ZERO, Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() +
                 "Odometry Wheel, " + SharedData.getOdometryWheelPosition() +
                 " to position, " + zeroPos);
         SharedData.setOdometryWheelPosition(zeroPos);

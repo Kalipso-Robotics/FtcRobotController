@@ -81,13 +81,13 @@ public class RedAutoDepot extends KOpMode {
 
         autoDepot = new KActionSet();
         KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");
-        KLog.d("RedAutoDepot-Init", "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
+        KLog.d("RedAutoDepot-Init", () -> "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
         shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
         shooterRun.setShooterRunMode(ShooterRunMode.STOP);
-        KLog.d("RedAutoDepot-Init", "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
+        KLog.d("RedAutoDepot-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
@@ -186,21 +186,21 @@ public class RedAutoDepot extends KOpMode {
         autoDepot.addAction(park);
         KLog.d("auto", "-------------" +
                 "-DEPOT AUTO STARTED-------------");
-        KLog.d("RedAutoDepot-Run", "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        KLog.d("RedAutoDepot-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         waitForStart();
         KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
         while (opModeIsActive()) {
             autoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
-        KLog.d("RedAutoDepot-Run", "Autonomous loop ended - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        KLog.d("RedAutoDepot-Run", () -> "Autonomous loop ended - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         KLog.d("Auto→TeleOp", "=== AUTO ENDING ===");
-        KLog.d("Auto→TeleOp", "Final position: " + SharedData.getOdometryWheelIMUPosition());
+        KLog.d("Auto→TeleOp", () -> "Final position: " + SharedData.getOdometryWheelIMUPosition());
         KLog.d("RedAutoDepot-Run", "Calling cleanupRobot()");
         cleanupRobot();
-        KLog.d("Auto→TeleOp", "After cleanup position: " + SharedData.getOdometryWheelIMUPosition());
-        KLog.d("RedAutoDepot-Run", "After cleanupRobot() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        KLog.d("Auto→TeleOp", () -> "After cleanup position: " + SharedData.getOdometryWheelIMUPosition());
+        KLog.d("RedAutoDepot-Run", () -> "After cleanupRobot() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
     }
 
 

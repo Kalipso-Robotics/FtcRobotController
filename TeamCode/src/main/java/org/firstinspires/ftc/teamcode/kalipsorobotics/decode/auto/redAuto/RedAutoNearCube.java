@@ -195,9 +195,10 @@ public class RedAutoNearCube extends KOpMode {
 
             // Log overall progress every 500ms
             if (loopCount % 25 == 0) {  // Assuming ~50Hz loop rate
-                KLog.d("AutoProgress", String.format("=== RedAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
-                        elapsedSec, loopCount, redAutoNear.getIsDone()));
-                KLog.d("AutoProgress", String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
+                int finalLoopCount = loopCount;
+                KLog.d("AutoProgress", () -> String.format("=== RedAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
+                        elapsedSec, finalLoopCount, redAutoNear.getIsDone()));
+                KLog.d("AutoProgress", () -> String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
                         trip1.getIsDone() ? "✓" : "...",
                         trip2.getIsDone() ? "✓" : "...",
                         trip4.getIsDone() ? "✓" : "...",
@@ -207,7 +208,7 @@ public class RedAutoNearCube extends KOpMode {
 
             redAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         cleanupRobot();
     }

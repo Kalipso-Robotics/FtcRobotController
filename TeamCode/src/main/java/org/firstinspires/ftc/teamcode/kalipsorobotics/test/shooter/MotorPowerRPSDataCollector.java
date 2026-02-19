@@ -96,8 +96,10 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
             telemetry.addData("Stabilization Time", "%d ms", STABILIZATION_TIME_MS);
             telemetry.update();
 
-            KLog.d("MotorPowerRPSDataCollector", String.format("Test %d/%d - Power: %.2f - Stabilizing...",
-                testNumber, totalTests, currentPower));
+            double finalCurrentPower = currentPower;
+            int finalTestNumber = testNumber;
+            KLog.d("MotorPowerRPSDataCollector", () -> String.format("Test %d/%d - Power: %.2f - Stabilizing...",
+                    finalTestNumber, totalTests, finalCurrentPower));
 
             // Step 2: Wait for stabilization
             sleep(STABILIZATION_TIME_MS);
@@ -148,9 +150,11 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
 //            // Uncomment the line below to also log shooter2 data
             // fileWriter.writeLine(line2);
 
-            KLog.d("MotorPowerRPSDataCollector", String.format(
+            int finalTestNumber1 = testNumber;
+            double finalCurrentPower1 = currentPower;
+            KLog.d("MotorPowerRPSDataCollector", () -> String.format(
                 "Test %d/%d Complete - Power: %.2f | Shooter1: MAX=%.2f MIN=%.2f AVG=%.2f | Battery: %.2fV",
-                testNumber, totalTests, currentPower, rpsMax1, rpsMin1, rpsAvg1, batteryVoltage));
+                    finalTestNumber1, totalTests, finalCurrentPower1, rpsMax1, rpsMin1, rpsAvg1, batteryVoltage));
 
             telemetry.addLine("Status: Data recorded!");
             telemetry.addData("RPS Max (Shooter1)", "%.2f", rpsMax1);

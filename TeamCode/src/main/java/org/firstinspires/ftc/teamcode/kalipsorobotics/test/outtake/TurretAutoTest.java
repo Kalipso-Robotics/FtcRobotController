@@ -46,14 +46,14 @@ public class TurretAutoTest extends KOpMode {
 
         waitForStart();
         while(opModeIsActive()) {
-            KLog.d("Turret_Singleton", "In Auto " + turret.turretMotor.getCurrentPosition());
+            KLog.d("Turret_Singleton", () -> "In Auto " + turret.turretMotor.getCurrentPosition());
 
             turretAutoAlign.updateCheckDone();
         }
 
-        KLog.d("Turret_Singleton", "Before cleanup Auto " + turret.turretMotor.getCurrentPosition());
+        KLog.d("Turret_Singleton", () -> "Before cleanup Auto " + turret.turretMotor.getCurrentPosition());
         cleanupRobot();
-        KLog.d("Turret_Singleton", "After cleanup Auto " + turret.turretMotor.getCurrentPosition());
+        KLog.d("Turret_Singleton", () -> "After cleanup Auto " + turret.turretMotor.getCurrentPosition());
 
     }
 }

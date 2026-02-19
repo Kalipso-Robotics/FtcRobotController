@@ -85,7 +85,7 @@ public class SpeedAdaptivePurePursuitAction extends PurePursuitAction {
         previousPosition = currentPosition;
         previousTimeMs = currentTimeMs;
         
-        KLog.d("SpeedAdaptivePP", String.format("Raw Speed: %.3f mm/ms, Filtered: %.3f mm/ms", 
+        KLog.d("SpeedAdaptivePP", () -> String.format("Raw Speed: %.3f mm/ms, Filtered: %.3f mm/ms",
             currentSpeed, filteredSpeed));
     }
     
@@ -109,7 +109,7 @@ public class SpeedAdaptivePurePursuitAction extends PurePursuitAction {
         }
         previousAdaptiveRadius = adaptiveRadius;
         
-        KLog.d("SpeedAdaptivePP", String.format("Speed: %.3f, Ratio: %.3f, Adaptive Radius: %.1f mm", 
+        KLog.d("SpeedAdaptivePP", () -> String.format("Speed: %.3f, Ratio: %.3f, Adaptive Radius: %.1f mm",
             filteredSpeed, smoothedRatio, adaptiveRadius));
     }
     
@@ -129,7 +129,7 @@ public class SpeedAdaptivePurePursuitAction extends PurePursuitAction {
             baseLookAheadField.setDouble(this, adaptiveRadius);
             
         } catch (Exception e) {
-            KLog.d("SpeedAdaptivePP", "Could not set adaptive radius: " + e.getMessage());
+            KLog.d("SpeedAdaptivePP", () -> "Could not set adaptive radius: " + e.getMessage());
             // Fallback: use parent's setLookAheadRadius method
             super.setLookAheadRadius(adaptiveRadius);
         }
@@ -169,10 +169,13 @@ public class SpeedAdaptivePurePursuitAction extends PurePursuitAction {
         double angleDamping = Math.min(distanceToTarget / 150.0, 1.0) * (1.0 - filteredSpeed / (SPEED_THRESHOLD * 2));
         angleDamping = Math.max(angleDamping, 0.2); // Maintain minimum angular authority
         powerAngle *= angleDamping;
-        
-        KLog.d("SpeedAdaptivePP_Power", String.format(
-            "Enhanced Powers - X: %.4f, Y: %.4f, Angle: %.4f, Speed Scale: %.3f, Distance Scale: %.3f", 
-            powerX, powerY, powerAngle, speedScale, distanceScale));
+
+        double finalPowerX = powerX;
+        double finalPowerY = powerY;
+        double finalPowerAngle = powerAngle;
+        KLog.d("SpeedAdaptivePP_Power", () -> String.format(
+            "Enhanced Powers - X: %.4f, Y: %.4f, Angle: %.4f, Speed Scale: %.3f, Distance Scale: %.3f",
+                finalPowerX, finalPowerY, finalPowerAngle, speedScale, distanceScale));
         
         // Calculate motor powers
         double fLeftPower = powerX + powerY + powerAngle;
@@ -207,13 +210,17 @@ public class SpeedAdaptivePurePursuitAction extends PurePursuitAction {
             DriveTrain driveTrain = (DriveTrain) driveTrainField.get(this);
             
             driveTrain.setPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
-            
-            KLog.d("SpeedAdaptivePP_Motors", String.format(
-                "Motor Powers - FL: %.4f, FR: %.4f, BL: %.4f, BR: %.4f", 
-                fLeftPower, fRightPower, bLeftPower, bRightPower));
+
+            double finalFLeftPower = fLeftPower;
+            double finalFRightPower = fRightPower;
+            double finalBLeftPower = bLeftPower;
+            double finalBRightPower = bRightPower;
+            KLog.d("SpeedAdaptivePP_Motors", () -> String.format(
+                "Motor Powers - FL: %.4f, FR: %.4f, BL: %.4f, BR: %.4f",
+                    finalFLeftPower, finalFRightPower, finalBLeftPower, finalBRightPower));
                 
         } catch (Exception e) {
-            KLog.d("SpeedAdaptivePP", "Could not access drive train: " + e.getMessage());
+            KLog.d("SpeedAdaptivePP", () -> "Could not access drive train: " + e.getMessage());
             // Could not set motor powers directly - parent will handle it
         }
     }

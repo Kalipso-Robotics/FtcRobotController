@@ -47,7 +47,7 @@ public class ShooterMotorTest extends LinearOpMode {
         telemetry.update();
 
         KLog.d("ShooterMotorTest", "=== Shooter Motor Test Initialized ===");
-        KLog.d("ShooterMotorTest", "Target RPS: " + TARGET_RPS);
+        KLog.d("ShooterMotorTest", () -> "Target RPS: " + TARGET_RPS);
 
         waitForStart();
 
@@ -57,7 +57,7 @@ public class ShooterMotorTest extends LinearOpMode {
         // Set target velocity
         shooter1Motor.setVelocity(targetTPS);
 
-        KLog.d("ShooterMotorTest", "Motor started - Target: " + TARGET_RPS + " RPS (" + targetTPS + " TPS)");
+        KLog.d("ShooterMotorTest", () -> "Motor started - Target: " + TARGET_RPS + " RPS (" + targetTPS + " TPS)");
 
         // Main loop
         while (opModeIsActive()) {
@@ -90,7 +90,7 @@ public class ShooterMotorTest extends LinearOpMode {
 
             // Log to logcat every 500ms
             if (System.currentTimeMillis() % 500 < 50) {
-                KLog.d("ShooterMotorTest", String.format("Encoder: %d ticks | Velocity: %.2f TPS (%.2f RPS) | Error: %.2f RPS (%.1f%%)",
+                KLog.d("ShooterMotorTest", () -> String.format("Encoder: %d ticks | Velocity: %.2f TPS (%.2f RPS) | Error: %.2f RPS (%.1f%%)",
                     encoderPosition, velocityTPS, velocityRPS, errorRPS, errorPercent));
             }
 

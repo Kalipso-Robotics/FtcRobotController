@@ -38,7 +38,7 @@ public class HoodLengthCalculationTest extends LinearOpMode {
         while(opModeIsActive()) {
             //TODO make into action so it dosnt pause other things
             ShooterLUTCornerGrid.ShotParams sp = lut.queryInches(xIn, yIn);
-            KLog.d("Hood Length Calculation", "hood length: " + sp.thetaDeg + "Motor rpm: " + sp.rpm);
+            KLog.d("Hood Length Calculation", () -> "hood length: " + sp.thetaDeg + "Motor rpm: " + sp.rpm);
 
             //replce with  real hood and flywheel motor
             //hood.setAngleDegrees(sp.thetaDeg);

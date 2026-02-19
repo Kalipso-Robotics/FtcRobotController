@@ -140,7 +140,7 @@ public class KPTuning extends LinearOpMode {
         telemetry.addLine(isResuming ? "Press PLAY to resume" : "Press PLAY to start");
         telemetry.update();
 
-        KLog.d("KPTuning", String.format("Ready to test %d Kp values × %d RPS values = %d total tests",
+        KLog.d("KPTuning", () -> String.format("Ready to test %d Kp values × %d RPS values = %d total tests",
             totalKpTests, totalRpsTests, totalTests));
 
         waitForStart();
@@ -159,8 +159,10 @@ public class KPTuning extends LinearOpMode {
             shooter1.getPIDFController().setKp(currentKp);
             shooter2.getPIDFController().setKp(currentKp);
 
-            KLog.d("KPTuning", String.format("========== Testing Kp = %.4f (%d/%d) ==========",
-                currentKp, kpTestNumber, totalKpTests));
+            int finalKpTestNumber = kpTestNumber;
+            double finalCurrentKp = currentKp;
+            KLog.d("KPTuning", () -> String.format("========== Testing Kp = %.4f (%d/%d) ==========",
+                    finalCurrentKp, finalKpTestNumber, totalKpTests));
 
             // Loop through RPS values for this Kp
             // If resuming and on the same Kp, start from the next RPS after saved progress
@@ -177,7 +179,7 @@ public class KPTuning extends LinearOpMode {
                 double batteryVoltage = getBatteryVoltage();
                 if (batteryVoltage < MINIMUM_BATTERY_VOLTAGE) {
                     // Save progress and stop
-                    KLog.d("KPTuning", String.format("Battery voltage %.2fV below minimum %.2fV - stopping and saving progress",
+                    KLog.d("KPTuning", () -> String.format("Battery voltage %.2fV below minimum %.2fV - stopping and saving progress",
                         batteryVoltage, MINIMUM_BATTERY_VOLTAGE));
 
                     saveProgress(currentKp, targetRPS - RPS_INCREMENT, overallTestNumber - 1);
@@ -219,9 +221,12 @@ public class KPTuning extends LinearOpMode {
                 // Save progress after each test
                 saveProgress(currentKp, targetRPS, overallTestNumber);
 
-                KLog.d("KPTuning", String.format(
+                int finalOverallTestNumber = overallTestNumber;
+                double finalCurrentKp1 = currentKp;
+                double finalTargetRPS = targetRPS;
+                KLog.d("KPTuning", () -> String.format(
                     "Test %d/%d | Kp=%.4f RPS=%.1f | RampUp=%.2fms MAX=%.2f MIN=%.2f AVG=%.2f",
-                    overallTestNumber, totalTests, currentKp, targetRPS,
+                        finalOverallTestNumber, totalTests, finalCurrentKp1, finalTargetRPS,
                     result.rampUpTime, result.maxRPS, result.minRPS, result.avgRPS));
 
                 // Move to next RPS value
@@ -302,7 +307,7 @@ public class KPTuning extends LinearOpMode {
             if (Math.abs(currentRPS - targetRPS) <= RPS_TOLERANCE) {
                 reachedTarget = true;
                 result.rampUpTime = timer.milliseconds();
-                KLog.d("KPTuning", String.format("Reached target! Time: %.2fms, RPS: %.2f",
+                KLog.d("KPTuning", () -> String.format("Reached target! Time: %.2fms, RPS: %.2f",
                     result.rampUpTime, currentRPS));
                 break;
             }
@@ -319,7 +324,7 @@ public class KPTuning extends LinearOpMode {
         // If didn't reach target, record the time taken anyway
         if (!reachedTarget) {
             result.rampUpTime = timer.milliseconds();
-            KLog.d("KPTuning", String.format("Did not reach target RPS %.1f within %dms",
+            KLog.d("KPTuning", () -> String.format("Did not reach target RPS %.1f within %dms",
                 targetRPS, MAX_RAMP_TIME_MS));
         }
 
@@ -483,7 +488,7 @@ public class KPTuning extends LinearOpMode {
             writer.write(String.format("%.4f,%.1f,%d", currentKp, currentRPS, testNumber));
             writer.newLine();
             writer.close();
-            KLog.d("KPTuning", String.format("Progress saved: Kp=%.4f, RPS=%.1f, Test#=%d",
+            KLog.d("KPTuning", () -> String.format("Progress saved: Kp=%.4f, RPS=%.1f, Test#=%d",
                 currentKp, currentRPS, testNumber));
         } catch (IOException e) {
             KLog.e("KPTuning", "Failed to save progress", e);
@@ -523,7 +528,7 @@ public class KPTuning extends LinearOpMode {
             progress.lastRPS = Double.parseDouble(parts[1]);
             progress.lastTestNumber = Integer.parseInt(parts[2]);
 
-            KLog.d("KPTuning", String.format("Progress loaded: Kp=%.4f, RPS=%.1f, Test#=%d",
+            KLog.d("KPTuning", () -> String.format("Progress loaded: Kp=%.4f, RPS=%.1f, Test#=%d",
                 progress.lastKp, progress.lastRPS, progress.lastTestNumber));
 
             return progress;

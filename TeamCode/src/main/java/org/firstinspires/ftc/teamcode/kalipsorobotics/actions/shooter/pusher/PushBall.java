@@ -17,7 +17,7 @@ public class PushBall extends KActionSet {
     private KServoAutoAction openStopper;
     public PushBall(Stopper stopper, Intake intake) {
 
-        KLog.d("PushAllBalls", "current pos " + SharedData.getOdometryWheelIMUPosition());
+        KLog.d("PushAllBalls", () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
 
         IntakeStop intakeStop = new IntakeStop(intake);
         this.addAction(intakeStop);
@@ -27,7 +27,7 @@ public class PushBall extends KActionSet {
         openStopper.setDependentActions(intakeStop);
         this.addAction(openStopper);
 
-        KLog.d("PushAllBalls", "openStopper " + openStopper.getIsDone());
+        KLog.d("PushAllBalls", () -> "openStopper " + openStopper.getIsDone());
 
         RunIntakeTime runIntakeTime = new RunIntakeTime(intake, IntakeConfig.shootTimeMS, IntakeConfig.intakePower);
         runIntakeTime.setName("runIntakeTime");

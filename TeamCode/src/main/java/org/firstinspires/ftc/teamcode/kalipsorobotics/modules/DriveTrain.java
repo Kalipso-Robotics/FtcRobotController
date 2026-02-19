@@ -65,10 +65,10 @@ public class DriveTrain {
         driveTrain.bLeft = hardwareMap.dcMotor.get("bLeft");
         driveTrain.bRight = hardwareMap.dcMotor.get("bRight");
 
-        KLog.d("drive", "fleft port #:" + driveTrain.fLeft.getPortNumber());
-        KLog.d("drive", "fRight port #:" + driveTrain.fRight.getPortNumber());
-        KLog.d("drive", "bLeft port #:" + driveTrain.bLeft.getPortNumber());
-        KLog.d("drive", "bRight port #:" + driveTrain.bRight.getPortNumber());
+        KLog.d("drive", () -> "fleft port #:" + driveTrain.fLeft.getPortNumber());
+        KLog.d("drive", () -> "fRight port #:" + driveTrain.fRight.getPortNumber());
+        KLog.d("drive", () -> "bLeft port #:" + driveTrain.bLeft.getPortNumber());
+        KLog.d("drive", () -> "bRight port #:" + driveTrain.bRight.getPortNumber());
 
         driveTrain.fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         driveTrain.fRight.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -112,7 +112,7 @@ public class DriveTrain {
         setFRightPower(fRightPower);
         setBLeftPower(bLeftPower);
         setBRightPower(bRightPower);
-        KLog.d("purepursaction_power", "power " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
+        KLog.d("purepursaction_power", () -> "power " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
     }
 
     public void setPower(double power) {
@@ -179,13 +179,14 @@ public class DriveTrain {
     }
 
     public void resetDrivetrainOdometryEncoders() {
-        KLog.d("debug_OpMode_Transfer", "Reset Encoders" + Thread.currentThread().getId());
+        KLog.d("debug_OpMode_Transfer", () -> "Reset Encoders" + Thread.currentThread().getId());
 
         // Print stack trace to see where this is being called from
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         KLog.d("debug_OpMode_Transfer", "resetWheelOdom() called from:");
         for (int i = 0; i < stackTrace.length; i++) {
-            KLog.d("debug_OpMode_Transfer", "  [" + i + "] " + stackTrace[i].toString());
+            int finalI = i;
+            KLog.d("debug_OpMode_Transfer", () -> "  [" + finalI + "] " + stackTrace[finalI].toString());
         }
 
         fLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

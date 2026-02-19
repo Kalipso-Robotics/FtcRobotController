@@ -116,7 +116,7 @@ public class Shooter {
      */
     public IShooterPredictor.ShooterParams getPrediction(double distanceMM) {
         if (distanceMM > 4200) {
-            KLog.d("shooter_ready", "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY + " Distance: " + distanceMM);
+            KLog.d("shooter_ready", () -> "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY + " Distance: " + distanceMM);
             return predictor.predict(FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY);
         }
         return predictor.predict(distanceMM);
@@ -129,13 +129,13 @@ public class Shooter {
     private void setCalculatedHood(double distanceMM) {
         IShooterPredictor.ShooterParams params = getPrediction(distanceMM);
 
-        KLog.d("Hood", "Hood Pos: " + hood.getPosition());
-        KLog.d("Wheel", "Target RPS: " + params.rps + ", Current RPS: " + getRPS());
+        KLog.d("Hood", () -> "Hood Pos: " + hood.getPosition());
+        KLog.d("Wheel", () -> "Target RPS: " + params.rps + ", Current RPS: " + getRPS());
 
         // Note: This does NOT set motor power - use ShooterReady action for power ramping
         // This only sets the hood position
         // Hood offset is already included in predictor implementations
-        KLog.d("Hood", "Hood Pos: " + params.hoodPosition);
+        KLog.d("Hood", () -> "Hood Pos: " + params.hoodPosition);
         hood.setPosition(params.hoodPosition);
     }
 
@@ -200,7 +200,7 @@ public class Shooter {
 
         IShooterPredictor.ShooterParams params = getPrediction(distance);
 
-        KLog.d("TargetRPS", "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
+        KLog.d("TargetRPS", () -> "Current: (" + currentPosition.getX() + ", " + currentPosition.getY() +
               "), Target: (" + target.getX() + ", " + target.getY() +
               "), Distance: " + distance + "mm, Predicted RPS: " + params.rps + ", Hood: " + params.hoodPosition);
 
@@ -218,7 +218,7 @@ public class Shooter {
         double dy = target.getY() - currentPosition.getY();
         double distance = Math.sqrt((dx * dx) + (dy * dy));
 
-        KLog.d("Distance", "distance: " + distance);
+        KLog.d("Distance", () -> "distance: " + distance);
         // Use distance as xMM to set hood position
         setCalculatedHood(distance);
     }

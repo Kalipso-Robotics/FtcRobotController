@@ -193,7 +193,7 @@ public class AdaptivePurePursuitAction extends Action {
         }
 
         double robotAngle = currentPos.getTheta();
-        KLog.d("ppDebug", "robotAngle: " + robotAngle);
+        KLog.d("ppDebug", () -> "robotAngle: " + robotAngle);
 
         // Robot‑relative vector to lookahead (in meters)
         double dx = target.getX() - currentPos.getX();
@@ -219,11 +219,14 @@ public class AdaptivePurePursuitAction extends Action {
 
         // If we're far from the target, scale the velocities based on the lookahead vector.
         // This is the true Pure Pursuit approach for linear velocity.
-        double vx = 0;
-        double vy = 0;
+        double vx;
+        double vy;
         if (lookaheadDist > 1e-6) {
             vx = velocity * (x_r / lookaheadDist);
             vy = velocity * (y_r / lookaheadDist);
+        } else {
+            vy = 0;
+            vx = 0;
         }
 
         double angleError = MathFunctions.angleWrapRad(
@@ -241,9 +244,9 @@ public class AdaptivePurePursuitAction extends Action {
 
         double omega = omegaAngularVelocity * K_omega; // This is now in mm/s
 
-        KLog.d("ppDebug", "vx: " + vx);
-        KLog.d("ppDebug", "vy: " + vy);
-        KLog.d("ppDebug", "omega: " + omega);
+        KLog.d("ppDebug", () -> "vx: " + vx);
+        KLog.d("ppDebug", () -> "vy: " + vy);
+        KLog.d("ppDebug", () -> "omega: " + omega);
 
 //        double fLeftVelocity = vx + vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
 //        double bLeftVelocity = vx - vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
@@ -255,12 +258,12 @@ public class AdaptivePurePursuitAction extends Action {
         double fRightVelocity = vx - vy - omega;
         double bRightVelocity = vx + vy - omega;
 
-        KLog.d("wheels", "fLeftVelocity: " + fLeftVelocity);
-        KLog.d("wheels", "bLeftVelocity: " + bLeftVelocity);
-        KLog.d("wheels", "fRightVelocity: " + fRightVelocity);
-        KLog.d("wheels", "bRightVelocity: " + bRightVelocity);
+        KLog.d("wheels", () -> "fLeftVelocity: " + fLeftVelocity);
+        KLog.d("wheels", () -> "bLeftVelocity: " + bLeftVelocity);
+        KLog.d("wheels", () -> "fRightVelocity: " + fRightVelocity);
+        KLog.d("wheels", () -> "bRightVelocity: " + bRightVelocity);
 
-        KLog.d("ppDebug", "acceleration: " + target.getAcceleration());
+        KLog.d("ppDebug", () -> "acceleration: " + target.getAcceleration());
 
         double fLeftPower = calculateMotorOutput(fLeftVelocity, target.getAcceleration());
         double bLeftPower = calculateMotorOutput(bLeftVelocity, target.getAcceleration());
@@ -275,15 +278,15 @@ public class AdaptivePurePursuitAction extends Action {
 //        fRightPower /= max;
 //        bRightPower /= max;
 
-        KLog.d("wheels", "fLeftPower: " + fLeftPower);
-        KLog.d("wheels", "bLeftPower: " + bLeftPower);
-        KLog.d("wheels", "fRightPower: " + fRightPower);
-        KLog.d("wheels", "bRightPower: " + bRightPower);
+        KLog.d("wheels", () -> "fLeftPower: " + fLeftPower);
+        KLog.d("wheels", () -> "bLeftPower: " + bLeftPower);
+        KLog.d("wheels", () -> "fRightPower: " + fRightPower);
+        KLog.d("wheels", () -> "bRightPower: " + bRightPower);
 
         driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.25);
 
-        KLog.d("ppDebug", "velocity target: " + velocity);
-        KLog.d("ppDebug", "velocity current: " + filteredVelocityMmPerS);
+        KLog.d("ppDebug", () -> "velocity target: " + velocity);
+        KLog.d("ppDebug", () -> "velocity current: " + filteredVelocityMmPerS);
 
         prevFollow = Optional.of(target);
     }
@@ -328,11 +331,11 @@ public class AdaptivePurePursuitAction extends Action {
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
-            KLog.d("ppDebug", "currentPosition: " + currentPosition);
+            KLog.d("ppDebug", () -> "currentPosition: " + currentPosition);
 
             int lastIdx = path.numPoints() - 1;
             int closestIdx = findClosestPointIndex(path, currentPosition);
-            KLog.d("ppDebug", "closestIdx index: " + closestIdx);
+            KLog.d("ppDebug", () -> "closestIdx index: " + closestIdx);
 
             double elapsedTime = System.currentTimeMillis() - startTimeMS;
 
@@ -374,15 +377,15 @@ public class AdaptivePurePursuitAction extends Action {
             }
 
             if (follow.isPresent()) {
-                KLog.d("ppDebugFollow", "is follow.get() == path.getLastPoint()? " + (follow.get() == path.getLastPoint()));
+                KLog.d("ppDebugFollow", () -> "is follow.get() == path.getLastPoint()? " + (follow.get() == path.getLastPoint()));
 
                 int followIndex = path.getIndex(follow.get());
                 int lastIndex = path.numPoints() - 1;
-                KLog.d("ppDebugFollow", "follow index: " + followIndex + " | last index: " + lastIndex);
+                KLog.d("ppDebugFollow", () -> "follow index: " + followIndex + " | last index: " + lastIndex);
 
                 // We have a point to follow
                 targetPosition(follow.get(), currentPosition);
-                KLog.d("ppDebugFollow", "follow found point: " + path.getIndex(follow.get()) + ": " + follow.get().getPoint());
+                KLog.d("ppDebugFollow", () -> "follow found point: " + path.getIndex(follow.get()) + ": " + follow.get().getPoint());
 
             } else {
                 KLog.d("ppDebugFollow", "No lookahead found, switching to final lock");
@@ -471,7 +474,7 @@ public class AdaptivePurePursuitAction extends Action {
                 }
 
                 injectedPathPoints.add(new Position(x, y, theta));
-                KLog.d("ppDebug", "injected point: " + x + ", " + y + ", " + theta);
+                KLog.d("ppDebug", () -> "injected point: " + x + ", " + y + ", " + theta);
 
                 pointInject++;
             } else {
@@ -496,7 +499,7 @@ public class AdaptivePurePursuitAction extends Action {
 
 //            injectedPathPoints.add(path.getLastPoint());
 
-            KLog.d("ppDebug", "injected last point: " + path.getLastPoint().getX() + ", " + path.getLastPoint().getY() + ", " + path.getLastPoint().getTheta());
+            KLog.d("ppDebug", () -> "injected last point: " + path.getLastPoint().getX() + ", " + path.getLastPoint().getY() + ", " + path.getLastPoint().getTheta());
 
         }
     }
@@ -568,7 +571,7 @@ public class AdaptivePurePursuitAction extends Action {
                 Vector vector = Vector.between(path.getPoint(calcDistanceIndex - 1), path.getPoint(calcDistanceIndex));
                 path.getPoint(calcDistanceIndex).setDistanceAlongPath(path.getPoint(calcDistanceIndex - 1).getDistanceAlongPath() + vector.getLength());
 
-                KLog.d("ppDebug", "set distance of point " + calcDistanceIndex + " to: " + (path.getPoint(calcDistanceIndex - 1).getDistanceAlongPath() + vector.getLength()));
+                KLog.d("ppDebug", () -> "set distance of point " + calcDistanceIndex + " to: " + (path.getPoint(calcDistanceIndex - 1).getDistanceAlongPath() + vector.getLength()));
             }
 
             calcDistanceIndex++;
@@ -585,7 +588,7 @@ public class AdaptivePurePursuitAction extends Action {
 
             // Step 2: Set the loop index to start from the second-to-last point
             calcVAIndex = path.numPoints() - 2;
-            KLog.d("adaptive pure pursuit velocity", "set calcpoint to last point: " + calcVAIndex);
+            KLog.d("adaptive pure pursuit velocity", () -> "set calcpoint to last point: " + calcVAIndex);
         }
 
         if (calcVAIndex >=0) {
@@ -605,17 +608,17 @@ public class AdaptivePurePursuitAction extends Action {
                 double vCurr = path.getPoint(calcVAIndex).getVelocity();          // mm/s
                 double sCurr = path.getPoint(calcVAIndex).getDistanceAlongPath(); // mm
 
-                KLog.d("ppDebug", "set acceleration of point " + calcVAIndex + " using vPrev: " + vPrev + ", sPrev: " + sPrev+ ", vCurr: " + vCurr+ ", sCurr: " + sCurr);
+                KLog.d("ppDebug", () -> "set acceleration of point " + calcVAIndex + " using vPrev: " + vPrev + ", sPrev: " + sPrev+ ", vCurr: " + vCurr+ ", sCurr: " + sCurr);
 
                 double deltaS = sCurr - sPrev;                          // mm
                 // avoid divide‑by‑zero for back‑to‑back identical points
                 double accelMmPerS2 = (vCurr*vCurr - vPrev*vPrev) / (2.0 * deltaS);
                 path.getPoint(calcVAIndex).setAcceleration(accelMmPerS2);
-                KLog.d("ppDebug", "set acceleration of point " + calcVAIndex + " to: " + accelMmPerS2);
+                KLog.d("ppDebug", () -> "set acceleration of point " + calcVAIndex + " to: " + accelMmPerS2);
 
             }
 
-            KLog.d("adaptive pure pursuit velocity", "calculated point: " + calcVAIndex);
+            KLog.d("adaptive pure pursuit velocity", () -> "calculated point: " + calcVAIndex);
             calcVAIndex--;
 
         } else {
@@ -701,7 +704,7 @@ public class AdaptivePurePursuitAction extends Action {
         // calculate max velocity (v_f) at the current point to be able to decelerate to v_next over the distance d
         double v_f = Math.sqrt(MathFunctions.square(v_next) + (2 * MAX_ACCELERATION * d));
 
-        KLog.d("ppDebug", "velocity of " + positionIndex + " set to " + (Math.min(v_f, calculateVelocity(path, positionIndex)) == v_f ? "v_f" : "calculated vel"));
+        KLog.d("ppDebug", () -> "velocity of " + positionIndex + " set to " + (Math.min(v_f, calculateVelocity(path, positionIndex)) == v_f ? "v_f" : "calculated vel"));
         //robot velocity at the current point is the minimum of max velocity allowed by the path's curvature, and max velocity allowed by deceleration to the next point.
         return Math.min(v_f, calculateVelocity(path, positionIndex));
     }

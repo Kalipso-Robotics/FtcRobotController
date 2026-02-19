@@ -39,11 +39,11 @@ public class TurretTest extends KOpMode {
     public void runOpMode() throws InterruptedException {
 
         initializeRobot();
-        KLog.d("Turret_Singleton", "Starting TeleOp " + turret.turretMotor.getCurrentPosition());
+        KLog.d("Turret_Singleton", () -> "Starting TeleOp " + turret.turretMotor.getCurrentPosition());
 
         waitForStart();
         while(opModeIsActive()) {
-            KLog.d("Turret_Singleton", "In TeleOp " + turret.turretMotor.getCurrentPosition());
+            KLog.d("Turret_Singleton", () -> "In TeleOp " + turret.turretMotor.getCurrentPosition());
 
             turretAutoAlign.updateCheckDone();
         }

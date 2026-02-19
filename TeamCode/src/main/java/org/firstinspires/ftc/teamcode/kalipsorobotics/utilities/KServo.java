@@ -79,9 +79,9 @@ public class KServo {
 
     public boolean isDone() {
         double deltaTime = (getTime() - startTime);
-        KLog.d("KServo_isDone", "time " + deltaTime + " estimated " + estimatedFinishTime);
+        KLog.d("KServo_isDone", () -> "time " + deltaTime + " estimated " + estimatedFinishTime);
         if (deltaTime > estimatedFinishTime) {
-            KLog.d("KServo_isDone", String.format("doneTimeMs: %.2f", deltaTime) + " TargetPosition: " + targetPosition + " Port: " + getPortNumber());
+            KLog.d("KServo_isDone", () -> String.format("doneTimeMs: %.2f", deltaTime) + " TargetPosition: " + targetPosition + " Port: " + getPortNumber());
             lastPosition = servo.getPosition();
             return true;
         }

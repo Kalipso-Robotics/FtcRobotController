@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldShootOnTheMoveRPS;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.*;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig.*;
 
 import android.util.Log;
 
@@ -114,7 +115,7 @@ public class TeleOp extends KOpMode {
         TurretConfig.kF = TurretConfig.kF_teleop;
         TurretConfig.kS = TurretConfig.kS_teleop;
         shouldShootOnTheMoveRPS = true;
-        TurretConfig.shouldShootOnTheMoveTurret = true;
+        shouldShootOnTheMoveTurret = true;
     }
 
     @Override
@@ -467,6 +468,8 @@ public class TeleOp extends KOpMode {
 
         if (toggleSOTM) {
             shouldShootOnTheMoveRPS = !shouldShootOnTheMoveRPS;
+            shouldShootOnTheMoveTurret = ! shouldShootOnTheMoveTurret;
+
         }
 
         // Priority 1- Stop shooter

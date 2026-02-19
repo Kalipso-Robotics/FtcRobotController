@@ -30,11 +30,11 @@ public class RunIntakeTime extends Action {
         intake.getIntakeMotor().setPower(power);
 
         if (timer.milliseconds() > timeMS) {
-            KLog.d("intake", "RunIntake Timer met, stopping intake " + "current time: " + timer.milliseconds() + " ms");
+            KLog.d("intake", () -> "RunIntake Timer met, stopping intake " + "current time: " + timer.milliseconds() + " ms");
             intake.getIntakeMotor().setPower(0);
             isDone = true;
         }
-        KLog.d("intake", "RunIntake Timer, current time: " + timer.milliseconds() + " ms" + " threshold: " + timeMS);
+        KLog.d("intake", () -> "RunIntake Timer, current time: " + timer.milliseconds() + " ms" + " threshold: " + timeMS);
     }
 
     public void setTimeMS(double timeMS) {

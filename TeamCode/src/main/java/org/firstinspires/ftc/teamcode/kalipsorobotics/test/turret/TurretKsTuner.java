@@ -173,8 +173,10 @@ public class TurretKsTuner extends LinearOpMode {
             results.add(result);
 
             // Log result
-            KLog.d("TurretKsTuner", String.format("Power: %.4f, Moved: %s, Success: %d/%d",
-                currentPower, moved, successCount, TRIALS_PER_POWER * 2));
+            double finalCurrentPower = currentPower;
+            int finalSuccessCount = successCount;
+            KLog.d("TurretKsTuner", () -> String.format("Power: %.4f, Moved: %s, Success: %d/%d",
+                    finalCurrentPower, moved, finalSuccessCount, TRIALS_PER_POWER * 2));
 
             // Save periodically (every 10 tests)
             if (results.size() % 10 == 0) {
@@ -232,8 +234,9 @@ public class TurretKsTuner extends LinearOpMode {
         // Calculate average velocity
         double avgVelocity = samples > 0 ? velocitySum / samples : 0.0;
 
-        KLog.d("TurretKsTuner", String.format("Power: %.4f, Avg Velocity: %.4f RPS, Samples: %d",
-            power, avgVelocity, samples));
+        int finalSamples = samples;
+        KLog.d("TurretKsTuner", () -> String.format("Power: %.4f, Avg Velocity: %.4f RPS, Samples: %d",
+            power, avgVelocity, finalSamples));
 
         return avgVelocity;
     }
@@ -338,7 +341,7 @@ public class TurretKsTuner extends LinearOpMode {
             }
 
             writer.close();
-            KLog.d("TurretKsTuner", "Results saved to " + dataFile.getAbsolutePath());
+            KLog.d("TurretKsTuner", () -> "Results saved to " + dataFile.getAbsolutePath());
         } catch (IOException e) {
             KLog.e("TurretKsTuner", "Failed to save results: " + e.getMessage());
             telemetry.addLine("ERROR: Could not save data!");

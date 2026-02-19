@@ -146,7 +146,7 @@ public class RampCycleAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
-        KLog.d("RampCycle", String.format("[%s] Status - MoveToRamp: %s, MoveToEat: %s, Intake: %s, ShooterRun: %s, TripToShoot: %s",
+        KLog.d("RampCycle", () -> String.format("[%s] Status - MoveToRamp: %s, MoveToEat: %s, Intake: %s, ShooterRun: %s, TripToShoot: %s",
                 getName() != null ? getName() : "unnamed",
                 moveToRamp.getIsDone() ? "DONE" : "NOT DONE",
                 moveToEat.getIsDone() ? "DONE" : "NOT DONE",
@@ -159,7 +159,7 @@ public class RampCycleAction extends KActionSet {
     public void afterUpdate() {
         if (moveToRamp.getIsDone()) {
             intakeFullAction.setIsDone(true);
-            KLog.d("RampCycle", String.format("[%s] IntakeFullAction stopped by MoveToRamp completion",
+            KLog.d("RampCycle", () -> String.format("[%s] IntakeFullAction stopped by MoveToRamp completion",
                     getName() != null ? getName() : "unnamed"));
         }
     }

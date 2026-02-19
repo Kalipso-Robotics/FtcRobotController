@@ -178,7 +178,7 @@ public class PIDIterativeLearning extends LinearOpMode {
         telemetry.addLine("Press PLAY to start learning");
         telemetry.update();
 
-        KLog.d("PIDIterativeLearning", String.format("Starting with PID: kp=%.6f, ki=%.6f, kd=%.6f, kf=%.6f",
+        KLog.d("PIDIterativeLearning", () -> String.format("Starting with PID: kp=%.6f, ki=%.6f, kd=%.6f, kf=%.6f",
             currentKp, currentKi, currentKd, currentKf));
 
         waitForStart();

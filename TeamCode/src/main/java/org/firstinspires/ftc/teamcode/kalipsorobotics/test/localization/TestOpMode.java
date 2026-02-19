@@ -29,18 +29,18 @@ public class TestOpMode extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        KLog.d("debug_OpMode_Transfer", "TeleOp right " +
+        KLog.d("debug_OpMode_Transfer", () -> "TeleOp right " +
                 odometry.getRightEncoderMM() +
                 " left " + odometry.getLeftEncoderMM() +
                 " back " + odometry.getBackEncoderMM() +
                 " imu " + odometry.getIMUHeading());
 
 
-        KLog.d("debug_OpMode_Transfer", "TeleOp " + odometry.toString());
+        KLog.d("debug_OpMode_Transfer", () -> "TeleOp " + odometry.toString());
 
         waitForStart();
         while (opModeIsActive()) {
-            KLog.d("debug_OpMode_Transfer", "TeleOp Position " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d("debug_OpMode_Transfer", () -> "TeleOp Position " + SharedData.getOdometryWheelIMUPosition());
         }
 
         cleanupRobot();

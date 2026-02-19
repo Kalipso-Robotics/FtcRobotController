@@ -36,7 +36,7 @@ public class LimeLightTest extends LinearOpMode {
 
             limelight.start();
 
-            KLog.d("limelight", "limelight started at " + elapsedTime.milliseconds());
+            KLog.d("limelight", () -> "limelight started at " + elapsedTime.milliseconds());
 
             LLResult result = limelight.getLatestResult();
 
@@ -64,7 +64,7 @@ public class LimeLightTest extends LinearOpMode {
 
                     double flatDist = Math.hypot(xCam,zCam) * kDistanceScale; //flat distance on floor with scaling
 
-                    KLog.d("limelight", "got flat dist at " + elapsedTime.milliseconds());
+                    KLog.d("limelight", () -> "got flat dist at " + elapsedTime.milliseconds());
 
                     telemetry.addData("LL GOAL TAG", fr.getFiducialId());
                     telemetry.addData("Goal X (offset left-right)", "%.3fmm, %.3fin", xCam, xCam/25.4);
@@ -86,7 +86,7 @@ public class LimeLightTest extends LinearOpMode {
 
             telemetry.update();
 
-            KLog.d("limelight", "finished loop at " + elapsedTime.milliseconds());
+            KLog.d("limelight", () -> "finished loop at " + elapsedTime.milliseconds());
 
             limelight.stop();
 

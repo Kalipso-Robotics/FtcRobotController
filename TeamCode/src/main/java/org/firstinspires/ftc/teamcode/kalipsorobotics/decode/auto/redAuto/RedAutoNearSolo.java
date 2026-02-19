@@ -213,9 +213,10 @@ public class RedAutoNearSolo extends KOpMode {
 
             // Log overall progress every 500ms
             if (loopCount % 25 == 0) {  // Assuming ~50Hz loop rate
-                KLog.d("AutoProgress", String.format("=== RedAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
-                        elapsedSec, loopCount, redAutoNear.getIsDone()));
-                KLog.d("AutoProgress", String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
+                int finalLoopCount = loopCount;
+                KLog.d("AutoProgress", () -> String.format("=== RedAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
+                        elapsedSec, finalLoopCount, redAutoNear.getIsDone()));
+                KLog.d("AutoProgress", () -> String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
                         trip1.getIsDone() ? "✓" : "...",
                         trip2.getIsDone() ? "✓" : "...",
                         trip4.getIsDone() ? "✓" : "...",
@@ -225,7 +226,7 @@ public class RedAutoNearSolo extends KOpMode {
 
             redAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         cleanupRobot();
     }
@@ -255,7 +256,6 @@ public class RedAutoNearSolo extends KOpMode {
         depotTrip.getIntakeFullAction().getRunIntakeTime().setTimeMS(5000);
         depotTrip.getMoveToBall().addPoint(shootPoint.getX(), shootPoint.multiplyY(allianceColor.getPolarity()).getY(), 150 * allianceColor.getPolarity());
 
-        depotTrip.getMoveToBall().setMaxTimeOutMS(2000);
         depotTrip.getMoveToBall().setFinalSearchRadius(150);
         depotTrip.getMoveToBall().setFinalAngleLockingThresholdDegree(20);
 

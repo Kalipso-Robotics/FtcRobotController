@@ -103,7 +103,7 @@ public class DetectColorsAction extends Action {
             reader.close();
             KLog.d("ColorCalibration", "Calibration data loaded successfully");
         } catch (Exception e) {
-            KLog.d("ColorCalibration", "No existing calibration data found or failed to load: " + e.getMessage());
+            KLog.d("ColorCalibration", () -> "No existing calibration data found or failed to load: " + e.getMessage());
         }
     }
 
@@ -203,15 +203,15 @@ public class DetectColorsAction extends Action {
             return false;
         }
 
-        KLog.d("teleoprevolver", "front color " + getFrontColor());
-        KLog.d("teleoprevolver", "bleft color " + getBLeftColor());
-        KLog.d("teleoprevolver", "bright color " + getBrightColor());
+        KLog.d("teleoprevolver", () -> "front color " + getFrontColor());
+        KLog.d("teleoprevolver", () -> "bleft color " + getBLeftColor());
+        KLog.d("teleoprevolver", () -> "bright color " + getBrightColor());
 
         boolean isFull = getFrontColor().isPurpleOrGreen() &&
                 getBLeftColor().isPurpleOrGreen() &&
                 getBrightColor().isPurpleOrGreen();
 
-        KLog.d("teleoprevolver", "is full " + isFull);
+        KLog.d("teleoprevolver", () -> "is full " + isFull);
 
 
         return isFull;

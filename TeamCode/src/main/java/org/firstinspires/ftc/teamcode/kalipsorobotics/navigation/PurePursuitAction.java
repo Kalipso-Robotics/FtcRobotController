@@ -163,7 +163,7 @@ public class  PurePursuitAction extends Action {
         }
         int targetIndex = path.getIndex(target);
         int lastIndex = path.numPoints() - 1;
-        KLog.d("PurePursuitWithinRange", String.format("isTargetLast: targetIndex=%d, lastIndex=%d, result=%b",
+        KLog.d("PurePursuitWithinRange", () -> String.format("isTargetLast: targetIndex=%d, lastIndex=%d, result=%b",
                 targetIndex, lastIndex, targetIndex == lastIndex));
         return targetIndex == lastIndex;
     }
@@ -251,7 +251,9 @@ public class  PurePursuitAction extends Action {
             KLog.d("PurePursuitScale", "Scaling UP x and y");
         }
 
-        KLog.d("directionalpowerlook", String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", powerX, powerY,
+        double finalPowerX = powerX;
+        double finalPowerY = powerY;
+        KLog.d("directionalpowerlook", () -> String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", finalPowerX, finalPowerY,
                 powerAngle));
 
         double fLeftPower = powerX + powerY + powerAngle;
@@ -267,9 +269,13 @@ public class  PurePursuitAction extends Action {
                 fRightPower = fRightPower * scale;
                 bRightPower = bRightPower * scale;
         }
-        KLog.d("PurePursuit_Log",
-                "running " + name + "set power values " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " +
-                bRightPower);
+        double finalFLeftPower = fLeftPower;
+        double finalFRightPower = fRightPower;
+        double finalBLeftPower = bLeftPower;
+        double finalBRightPower = bRightPower;
+        KLog.d("PurePursuit_Log", () ->
+                "running " + name + "set power values " + finalFLeftPower + " " + finalFRightPower + " " + finalBLeftPower + " " +
+                        finalBRightPower);
 
         driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, MINIMUM_POWER);
 //        driveTrain.setPower(fLeftPower, fRightPower, bLeftPower, bRightPower);
@@ -310,7 +316,7 @@ public class  PurePursuitAction extends Action {
 
         if (elapsedTime >= maxTimeOutMS) {
             setIsDone(true);
-            KLog.d("ActionTime", this.getName() + " done in " + actionTime.milliseconds() + " ms");
+            KLog.d("ActionTime", () -> this.getName() + " done in " + actionTime.milliseconds() + " ms");
             //Log.d("purepursaction_debug_follow", "done timeout  " + getName());
             return;
         }
@@ -329,7 +335,7 @@ public class  PurePursuitAction extends Action {
         if (follow.isPresent()) {
             Position followPos = follow.get();
             double distToLast = currentPosition.distanceTo(path.getLastPoint());
-            KLog.d("purepursaction_debug_follow",
+            KLog.d("purepursaction_debug_follow", () ->
                     "Follow lookahead point:  " + followPos + "current pos:    " + currentPosition.toString());
             targetPosition(follow.get(), currentPosition);
 
@@ -339,7 +345,7 @@ public class  PurePursuitAction extends Action {
 
             // this is not smart
             if ((xVelocity < 0.005 && yVelocity < 0.005 && thetaVelocity < 0.0001)) {
-                KLog.d("purepursuit", "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
+                KLog.d("purepursuit", () -> "Low velocity detected. Unstucking " + xVelocity + " | yVelocity " + yVelocity + " | thetaVelocity " + thetaVelocity);
 //                    finishedMoving();
                 if (timeoutTimer.milliseconds() > 250) {
                     path.incrementCurrentSearchWayPointIndex();
@@ -365,21 +371,21 @@ public class  PurePursuitAction extends Action {
         } else {
             double distToLast = currentPosition.distanceTo(lastPoint);
             double angleError = Math.abs(lastPoint.getTheta() - currentPosition.getTheta());
-            KLog.d("purepursaction_debug_follow",
+            KLog.d("purepursaction_debug_follow", () ->
                     "Lookahead returns nothing. Last point " + lastPoint + "current pos:    " + currentPosition.toString());
-            KLog.d("PurePursuitWithinRange", String.format("[%s] follow EMPTY | distToLast=%.1f | withinRadiusMM=%.1f | angleError=%.1fdeg | threshold=%.1fdeg",
+            KLog.d("PurePursuitWithinRange", () -> String.format("[%s] follow EMPTY | distToLast=%.1f | withinRadiusMM=%.1f | angleError=%.1fdeg | threshold=%.1fdeg",
                     name, distToLast, withinRangeRadiusMM, Math.toDegrees(angleError), finalAngleLockingThresholdDegree));
 
 
             //11-22 13:04:54.212  3107  3301 D KLog_purepursaction_debug_follow: locking final angle:  x=2598.00 (102.28 in), y=441.38 (17.38 in), theta=-2.4136 (-138.3 deg)
             //11-22 13:04:54.213  3107  3301 D KLog_purepursaction_debug_follow: current pos:    x=2616.11 (103.00 in), y=432.30 (17.02 in), theta=-2.4347 (-139.5 deg)
             if (angleError < Math.toRadians(finalAngleLockingThresholdDegree) ) {
-                KLog.d("purepursaction_debug_follow",
+                KLog.d("purepursaction_debug_follow", () ->
                         "Final angle is within range. Finish moving. Last point  " + lastPoint + "current pos:    " + currentPosition.toString());
                 finishedMoving();
                 return;
             } else {
-                KLog.d("purepursaction_debug_follow",
+                KLog.d("purepursaction_debug_follow", () ->
                         "Locking final angle:  " + lastPoint + "current pos:    " + currentPosition.toString());
                 targetPosition(lastPoint, currentPosition);
             }
@@ -407,7 +413,7 @@ public class  PurePursuitAction extends Action {
                 targetAngle = target.getTheta();
             }
 
-            KLog.d("PurePursuitTargeting", String.format("Target index: %d | Target theta: %.2f | distanceFromPrev: %.2f | segmentLength: %.2f | targetAngle: %.2f",
+            KLog.d("PurePursuitTargeting", () -> String.format("Target index: %d | Target theta: %.2f | distanceFromPrev: %.2f | segmentLength: %.2f | targetAngle: %.2f",
                             path.getIndex(target), target.getTheta(), distanceFromPrev, segmentLength, targetAngle));
 
             return targetAngle;
@@ -430,8 +436,8 @@ public class  PurePursuitAction extends Action {
             //Log.d("purepursaction_debug_checkDone",
                     //"Done" + checkDoneCounter + "name:" +  name + "Pos: " + currentPosition);
             isDone = true;
-            KLog.d("ActionTime", this.getName() + " done in " + actionTime.milliseconds() + " ms");
-            KLog.d("PurePursuitTime", "Finished at: " + timer.milliseconds());
+            KLog.d("ActionTime", () -> this.getName() + " done in " + actionTime.milliseconds() + " ms");
+            KLog.d("PurePursuitTime", () -> "Finished at: " + timer.milliseconds());
         }
 
         if (sleepTimeMS != 0) {

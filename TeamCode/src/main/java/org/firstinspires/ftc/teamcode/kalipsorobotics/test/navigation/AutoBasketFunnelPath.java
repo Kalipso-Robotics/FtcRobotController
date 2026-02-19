@@ -169,8 +169,8 @@ public class AutoBasketFunnelPath extends LinearOpMode {
         while (opModeIsActive()) {
 
             redAutoBasket.updateCheckDone();
-            KLog.d("homePos", SharedData.getOdometryWheelIMUPosition().toString());
-            KLog.d("homePosMap", SharedData.getOdometryPositionMap().toString());
+            KLog.d("homePos", () -> SharedData.getOdometryWheelIMUPosition().toString());
+            KLog.d("homePosMap", () -> SharedData.getOdometryPositionMap().toString());
 
         }
 

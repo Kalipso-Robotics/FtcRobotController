@@ -38,19 +38,19 @@ public class AdjustShooterSpeedAction extends Action {
             return;
         }
 
-        KLog.d("shooterAdjust", "RPS " + shooter.getRPS());
+        KLog.d("shooterAdjust", () -> "RPS " + shooter.getRPS());
 
         if (!hasStarted) {
             targetRPS = shooter.getRPS();
             timeoutTimer = new ElapsedTime();
             hasStarted = true;
-            KLog.d("shooterAdjust", "shooter boost started, targetRPS " + targetRPS);
+            KLog.d("shooterAdjust", () -> "shooter boost started, targetRPS " + targetRPS);
         }
 
         if (shooter.getRPS() < targetRPS * dropBelowThreshold) {
                 double boostPower = calculateBoostPower();
                 //shooter.setPower(boostPower);
-                KLog.d("shooterAdjust", "BOOSTING started, boosted to : " + boostPower);
+                KLog.d("shooterAdjust", () -> "BOOSTING started, boosted to : " + boostPower);
         }
 
         if (timeoutTimer.milliseconds() > timeoutMS) {

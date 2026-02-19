@@ -55,7 +55,7 @@ public class OdometryFileWriter extends KFileWriter {
         }
     }
     public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap, String action) {
-        KLog.d("odometryData", "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
+        KLog.d("odometryData", () -> "writeOdometryPositionHistory" + positionHistoryHashMap.toString());
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(System.currentTimeMillis());
         stringBuilder.append(",");
@@ -75,14 +75,14 @@ public class OdometryFileWriter extends KFileWriter {
 
         }
         stringBuilder.append(action);
-        KLog.d("odometry_file_writer_line", stringBuilder.toString());
+        KLog.d("odometry_file_writer_line", () -> stringBuilder.toString());
         bufferedLines.add(stringBuilder.toString());
     }
     public void writeOdometryPositionHistory(HashMap<OdometrySensorCombinations, PositionHistory> positionHistoryHashMap) {
         writeOdometryPositionHistory(positionHistoryHashMap, "");
     }
     public void close() {
-        KLog.d("OdometryFileWriter", "Writing " + bufferedLines.size() + " buffered lines to file");
+        KLog.d("OdometryFileWriter", () -> "Writing " + bufferedLines.size() + " buffered lines to file");
         for (String line : bufferedLines) {
             super.writeLine(line);
         }

@@ -307,8 +307,10 @@ public class TestNavigation extends LinearOpMode {
         
         // Log final performance stats
         double avgLoopTime = loopCount > 0 ? totalLoopTime / loopCount : 0;
-        KLog.d(TAG, String.format("Execution completed - %d loops, avg: %.1fms, max: %.1fms", 
-                loopCount, avgLoopTime, maxLoopTime));
+        double finalMaxLoopTime = maxLoopTime;
+        int finalLoopCount = loopCount;
+        KLog.d(TAG, () -> String.format("Execution completed - %d loops, avg: %.1fms, max: %.1fms",
+                finalLoopCount, avgLoopTime, finalMaxLoopTime));
     }
     
     private void displayExecutionTelemetry(Position currentPose, int loopCount) {
@@ -374,7 +376,7 @@ public class TestNavigation extends LinearOpMode {
                 String filename = "/sdcard/FIRST/navigation_data.csv";
                 boolean exported = navigationSystem.exportData(filename);
                 if (exported) {
-                    KLog.d(TAG, "Navigation data exported to " + filename);
+                    KLog.d(TAG, () -> "Navigation data exported to " + filename);
                 } else {
                     Log.w(TAG, "Failed to export navigation data");
                 }

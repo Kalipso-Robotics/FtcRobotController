@@ -85,29 +85,29 @@ public class TurretAutoAlign extends Action {
         if (!hasStarted) {
             hasStarted = true;
             velocityTimer.reset();
-            KLog.d("Turret_PID", "PIDF constants " + turretMotor.getPIDFController());
+            KLog.d("Turret_PID", () -> "PIDF constants " + turretMotor.getPIDFController());
         }
 
         updateAngularVelocity();
 
         targetTicks = calculateTargetTicks(targetPoint, SharedData.getOdometryWheelIMUPosition());
-        KLog.d("turret", "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
+        KLog.d("turret", () -> "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
 
 
 
-        KLog.d("turret_position", " ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+        KLog.d("turret_position", () -> " ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
 
 
         if (Math.abs(turretMotor.getCurrentPosition() - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turret.stop();
-            KLog.d("turret_position", "Within RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+            KLog.d("turret_position", () -> "Within RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
         } else {
             isWithinRange = false;
             moveToTargetTicks();
-            KLog.d("turret_position", "NOT WITHIN RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
+            KLog.d("turret_position", () -> "NOT WITHIN RANGE, ticks " + targetTicks + " motor position " + turretMotor.getCurrentPosition() + " target ticks " + targetTicks);
         }
-        KLog.d("turret_in_range", "is the turret in range " + isWithinRange);
+        KLog.d("turret_in_range", () -> "is the turret in range " + isWithinRange);
 
     }
 

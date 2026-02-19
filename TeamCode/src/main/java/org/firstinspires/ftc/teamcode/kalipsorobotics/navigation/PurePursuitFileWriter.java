@@ -61,7 +61,7 @@ public class PurePursuitFileWriter extends KFileWriter {
                 driveTrain.getbLeftPower() +
                 "," +
                 driveTrain.getbRightPower();
-        KLog.d("purepursaction_power", "power " + driveTrain.getfLeftPower() + " " + driveTrain.getfRightPower() + " " + driveTrain.getbLeftPower() + " " + driveTrain.getbRightPower());
+        KLog.d("purepursaction_power", () -> "power " + driveTrain.getfLeftPower() + " " + driveTrain.getfRightPower() + " " + driveTrain.getbLeftPower() + " " + driveTrain.getbRightPower());
         super.writeLine(stringBuilder);
     }
 

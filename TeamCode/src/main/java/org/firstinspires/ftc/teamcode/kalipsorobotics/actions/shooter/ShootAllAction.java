@@ -105,7 +105,6 @@ public class ShootAllAction extends KActionSet {
 
         turretReadyTeleOp = new TurretReadyTeleOp(turretAutoAlignTeleop);
         turretReadyTeleOp.setName("turretReady");
-        turretReadyTeleOp.setDependentActions(resetOdometryToPosition);
         this.addAction(turretReadyTeleOp);
 
 //        TurretStop turretStop = new TurretStop(turretAutoAlignTeleop);
@@ -151,7 +150,7 @@ public class ShootAllAction extends KActionSet {
             }
         }
 
-        KLog.d("ShootAllAction_Status", "ShooterReady: " + shooterReady.getIsDone() + " TurretReady: " + turretReadyTeleOp.getIsDone() + " PushBall: " + pushBall.getIsDone());
+        KLog.d("ShootAllAction_Status", () -> "ShooterReady: " + shooterReady.getIsDone() + " TurretReady: " + turretReadyTeleOp.getIsDone() + " PushBall: " + pushBall.getIsDone());
     }
 
     @Override
@@ -162,7 +161,7 @@ public class ShootAllAction extends KActionSet {
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
             //KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
         }
-        KLog.d("ShootAllAction", String.format("StopperStatus: %s, Turret Delta Angle: %.2f, Within Range: %s, Delta RPS: %.2f",
+        KLog.d("ShootAllAction", () -> String.format("StopperStatus: %s, Turret Delta Angle: %.2f, Within Range: %s, Delta RPS: %.2f",
                 (pushBall.getOpenStopper().getIsDone()),
                 (turretAutoAlignTeleop.getDeltaAngleDeg()),
                 (turretAutoAlignTeleop.isWithinRange()),

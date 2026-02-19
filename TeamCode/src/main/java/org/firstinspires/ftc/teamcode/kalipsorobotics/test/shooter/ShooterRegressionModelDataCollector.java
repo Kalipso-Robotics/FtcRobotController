@@ -82,7 +82,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
             distance = shooter.getDistance(SharedData.getOdometryWheelIMUPosition(), Shooter.TARGET_POINT);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
-                KLog.d("Regression Module Data Collector", "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);
+                KLog.d("Regression Module Data Collector", () -> "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);
             }
 
 

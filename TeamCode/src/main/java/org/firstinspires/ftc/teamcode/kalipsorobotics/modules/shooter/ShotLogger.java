@@ -88,7 +88,7 @@ public class ShotLogger {
         lastShot = shot;
 
         // Log to KLog immediately
-        KLog.d("ShotLogger", String.format("Shot #%d: %s", shots.size(), shot));
+        KLog.d("ShotLogger", () -> String.format("Shot #%d: %s", shots.size(), shot));
     }
 
     /**
@@ -97,7 +97,7 @@ public class ShotLogger {
     public void markLastShotAsUndershot() {
         if (lastShot != null) {
             lastShot.markAsUndershot();
-            KLog.d("ShotLogger", String.format("Shot #%d marked as UNDERSHOT", shots.size()));
+            KLog.d("ShotLogger", () -> String.format("Shot #%d marked as UNDERSHOT", shots.size()));
         }
     }
 
@@ -107,7 +107,7 @@ public class ShotLogger {
     public void markLastShotAsOvershot() {
         if (lastShot != null) {
             lastShot.markAsOvershot();
-            KLog.d("ShotLogger", String.format("Shot #%d marked as OVERSHOT", shots.size()));
+            KLog.d("ShotLogger", () -> String.format("Shot #%d marked as OVERSHOT", shots.size()));
         }
     }
 
@@ -141,7 +141,7 @@ public class ShotLogger {
 
             fileWriter.close();
 
-            KLog.d("ShotLogger", String.format("Successfully wrote %d shots to file", shots.size()));
+            KLog.d("ShotLogger", () -> String.format("Successfully wrote %d shots to file", shots.size()));
         } catch (Exception e) {
             KLog.e("ShotLogger", "Failed to write shots to file", e);
             if (fileWriter != null) {

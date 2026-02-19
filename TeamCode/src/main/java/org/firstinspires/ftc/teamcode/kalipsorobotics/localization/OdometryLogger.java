@@ -120,8 +120,8 @@ public class OdometryLogger extends KFileWriter {
         stringBuilder.append(SharedData.getUnhealthyCounter());
 
         bufferedLines.add(stringBuilder.toString());
-        KLog.d("OdometryLogger_Line", stringBuilder.toString());
-        KLog.d("OdometryLogger", "Buffered line " + bufferedLines.size());
+        KLog.d("OdometryLogger_Line", () -> stringBuilder.toString());
+        KLog.d("OdometryLogger", () -> "Buffered line " + bufferedLines.size());
     }
 
     /**
@@ -138,7 +138,7 @@ public class OdometryLogger extends KFileWriter {
      */
     @Override
     public void close() {
-        KLog.d("OdometryLogger", "Writing " + bufferedLines.size() + " buffered lines to file");
+        KLog.d("OdometryLogger", () -> "Writing " + bufferedLines.size() + " buffered lines to file");
         for (String line : bufferedLines) {
             super.writeLine(line);
         }

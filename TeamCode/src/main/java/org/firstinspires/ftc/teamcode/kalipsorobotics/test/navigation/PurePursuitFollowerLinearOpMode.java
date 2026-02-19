@@ -114,7 +114,7 @@ public class PurePursuitFollowerLinearOpMode extends LinearOpMode {
 
             driveTrain.setPower(mp.fL, mp.fR, mp.bL, mp.bR);
 
-            KLog.d("MotorPowers", String.format("fL=%.3f fR=%.3f bL=%.3f bR=%.3f", mp.fL, mp.fR, mp.bL, mp.bR));
+            KLog.d("MotorPowers", () -> String.format("fL=%.3f fR=%.3f bL=%.3f bR=%.3f", mp.fL, mp.fR, mp.bL, mp.bR));
             telemetry.addData("Pose (mm, rad)", "(%.1f, %.1f, %.3f)", curPose.x_mm, curPose.y_mm, curPose.heading_rad);
             telemetry.addData("Finished", pp.isFinished());
             telemetry.update();

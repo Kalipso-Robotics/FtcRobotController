@@ -88,8 +88,6 @@ public class RedAutoNear extends KOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
-        turretAutoAlign.setToleranceDeg(5);
-
         turretAutoAlign.setToleranceDeg(3);
     }
 
@@ -195,9 +193,10 @@ public class RedAutoNear extends KOpMode {
 
             // Log overall progress every 500ms
             if (loopCount % 25 == 0) {  // Assuming ~50Hz loop rate
-                KLog.d("AutoProgress", String.format("=== RedAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
-                        elapsedSec, loopCount, redAutoNear.getIsDone()));
-                KLog.d("AutoProgress", String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
+                int finalLoopCount = loopCount;
+                KLog.d("AutoProgress", () -> String.format("=== RedAutoNear - Time: %.1fs, Loop: %d, AutoDone: %b ===",
+                        elapsedSec, finalLoopCount, redAutoNear.getIsDone()));
+                KLog.d("AutoProgress", () -> String.format("Trips -> Trip1: %s, Trip2: %s, Trip3: %s",
                         trip1.getIsDone() ? "✓" : "...",
                         trip2.getIsDone() ? "✓" : "...",
                         trip4.getIsDone() ? "✓" : "...",
@@ -207,13 +206,13 @@ public class RedAutoNear extends KOpMode {
 
             redAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
-            KLog.d("Odometry", "Position: " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         cleanupRobot();
     }
 
     public void handleTrip3() {
-        trip3 = generateTunnelTrip("trip4", nearLaunchPoint);
+        trip3 = generateTunnelTrip("trip3", nearLaunchPoint);
         trip3.setDependentActions(trip2);
         redAutoNear.addAction(trip3);
     }

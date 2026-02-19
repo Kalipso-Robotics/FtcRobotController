@@ -28,7 +28,7 @@ public class MotifDetectionTest extends LinearOpMode {
             driveTrain.setPower(0.4);
             kMotifDetection.updateCheckDone();
             //Detectable from across field
-            KLog.d("Motif Detection", "Motif Pattern: " + kMotifDetection.getMotifPattern());
+            KLog.d("Motif Detection", () -> "Motif Pattern: " + kMotifDetection.getMotifPattern());
             if (kMotifDetection.getIsDone()) {
                 break;
             }

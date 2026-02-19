@@ -86,7 +86,7 @@ public class DriveTrainKsTuner extends KOpMode {
         writeLog("Trials Per Power: " + TRIALS_PER_POWER);
         writeLog("");
 
-        KLog.d(LOG_TAG, String.format("Starting tuning: Power %.3f to %.3f, increment %.3f",
+        KLog.d(LOG_TAG, () -> String.format("Starting tuning: Power %.3f to %.3f, increment %.3f",
                 MIN_POWER, MAX_POWER, POWER_INCREMENT));
 
         // Main testing loop
@@ -130,7 +130,7 @@ public class DriveTrainKsTuner extends KOpMode {
         telemetry.addData("Progress", String.format("%.1f%%", (power / MAX_POWER) * 100));
         telemetry.update();
 
-        KLog.d(LOG_TAG, String.format("Testing Linear - Power: %.4f, Trial: %d/%d",
+        KLog.d(LOG_TAG, () -> String.format("Testing Linear - Power: %.4f, Trial: %d/%d",
                 power, trial + 1, TRIALS_PER_POWER));
 
         // Set all motors to test power
@@ -166,7 +166,7 @@ public class DriveTrainKsTuner extends KOpMode {
         String result = String.format("Linear Test - Power: %.4f, Trial: %d, Velocity: %.2f ticks/sec, Moved: %b",
                 power, trial + 1, avgVelocity, moved);
         writeLog(result);
-        KLog.d(LOG_TAG, result);
+        KLog.d(LOG_TAG, () -> result);
 
         if (moved) {
             linearValidPowers.add(power);
@@ -187,7 +187,7 @@ public class DriveTrainKsTuner extends KOpMode {
         telemetry.addData("Progress", String.format("%.1f%%", (power / MAX_POWER) * 100));
         telemetry.update();
 
-        KLog.d(LOG_TAG, String.format("Testing Rotational - Power: %.4f, Trial: %d/%d",
+        KLog.d(LOG_TAG, () -> String.format("Testing Rotational - Power: %.4f, Trial: %d/%d",
                 power, trial + 1, TRIALS_PER_POWER));
 
         // Set motors for rotation (left positive, right negative)
@@ -228,7 +228,7 @@ public class DriveTrainKsTuner extends KOpMode {
         String result = String.format("Rotational Test - Power: %.4f, Trial: %d, Angular Velocity: %.2f deg/sec, Rotated: %b",
                 power, trial + 1, angularVelocity, rotated);
         writeLog(result);
-        KLog.d(LOG_TAG, result);
+        KLog.d(LOG_TAG, () -> result);
 
         if (rotated) {
             rotationalValidPowers.add(power);
@@ -270,10 +270,10 @@ public class DriveTrainKsTuner extends KOpMode {
         writeLog("Rotational valid powers: " + rotationalValidPowers.size() + " trials succeeded");
 
         KLog.d(LOG_TAG, "=== FINAL RESULTS ===");
-        KLog.d(LOG_TAG, linearResult);
-        KLog.d(LOG_TAG, rotationalResult);
-        KLog.d(LOG_TAG, "Linear trials succeeded: " + linearValidPowers.size());
-        KLog.d(LOG_TAG, "Rotational trials succeeded: " + rotationalValidPowers.size());
+        KLog.d(LOG_TAG, () -> linearResult);
+        KLog.d(LOG_TAG, () -> rotationalResult);
+        KLog.d(LOG_TAG, () -> "Linear trials succeeded: " + linearValidPowers.size());
+        KLog.d(LOG_TAG, () -> "Rotational trials succeeded: " + rotationalValidPowers.size());
     }
 
     private void displayResults() {

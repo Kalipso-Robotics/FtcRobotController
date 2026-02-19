@@ -20,12 +20,12 @@ public class ResetOdometryToLimelight extends Action {
     protected void update() {
         double turretVelocity = turret.getCurrentVelocity();
         if (SharedData.getLimelightRawPosition().isEmpty() || turretVelocity > 10) {
-            KLog.d("ResetOdometryToPosition", "No Valid Detection Not Updating. turretVelocity (deg / sec):  " + turretVelocity);
+            KLog.d("ResetOdometryToPosition", () -> "No Valid Detection Not Updating. turretVelocity (deg / sec):  " + turretVelocity);
             isDone = true;
             return;
         }
         Position limelightGlobalPosition = SharedData.getLimelightGlobalPosition();
-        KLog.d("ResetOdometryToPosition", "If I were resetting but I am not. Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() + " Odometry Wheel, " + SharedData.getOdometryWheelPosition() + " to position, " + limelightGlobalPosition);
+        KLog.d("ResetOdometryToPosition", () -> "If I were resetting but I am not. Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() + " Odometry Wheel, " + SharedData.getOdometryWheelPosition() + " to position, " + limelightGlobalPosition);
         SharedData.setOdometryWheelPosition(limelightGlobalPosition);
         SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
         isDone = true;

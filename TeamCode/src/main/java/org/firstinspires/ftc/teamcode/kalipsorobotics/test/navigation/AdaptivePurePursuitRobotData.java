@@ -69,9 +69,11 @@ public class AdaptivePurePursuitRobotData extends LinearOpMode {
             }
         }
 
-        KLog.d("AdaptivePurePursuitRobotData", "maxLinearAcceleration: " + maxLinearAcceleration);
-        KLog.d("AdaptivePurePursuitRobotData", "maxLinearVelocity: " + maxLinearVelocity);
-        KLog.d("AdaptivePurePursuitRobotData", "maxAngularVelocity: " + maxAngularVelocity);
+        double finalMaxLinearAcceleration = maxLinearAcceleration;
+        KLog.d("AdaptivePurePursuitRobotData", () -> "maxLinearAcceleration: " + finalMaxLinearAcceleration);
+        KLog.d("AdaptivePurePursuitRobotData", () -> "maxLinearVelocity: " + maxLinearVelocity);
+        double finalMaxAngularVelocity = maxAngularVelocity;
+        KLog.d("AdaptivePurePursuitRobotData", () -> "maxAngularVelocity: " + finalMaxAngularVelocity);
 
     }
 }

@@ -99,7 +99,7 @@ public class ShooterRPSTest extends LinearOpMode {
         telemetry.update();
 
         KLog.d("ShooterRPSTest", "Starting shooter test");
-        KLog.d("ShooterRPSTest", String.format("PID: kp=%.6f, ki=%.6f, kd=%.6f, kf=%.6f",
+        KLog.d("ShooterRPSTest", () -> String.format("PID: kp=%.6f, ki=%.6f, kd=%.6f, kf=%.6f",
             ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf));
 
         waitForStart();
@@ -125,8 +125,11 @@ public class ShooterRPSTest extends LinearOpMode {
                 }
                 telemetry.update();
 
-                KLog.d("ShooterRPSTest", String.format("========== Test %d/%d: %.1f RPS (Attempt %d) ==========",
-                    testNumber, totalTests, targetRPS, attempt));
+                double finalTargetRPS = targetRPS;
+                int finalAttempt = attempt;
+                int finalTestNumber = testNumber;
+                KLog.d("ShooterRPSTest", () -> String.format("========== Test %d/%d: %.1f RPS (Attempt %d) ==========",
+                        finalTestNumber, totalTests, finalTargetRPS, finalAttempt));
 
                 // Run single test
                 result = runSingleTest(targetRPS);
@@ -134,11 +137,13 @@ public class ShooterRPSTest extends LinearOpMode {
                 // Check if target was reached
                 if (result.reachedTarget) {
                     success = true;
-                    KLog.d("ShooterRPSTest", "Test successful on attempt " + attempt);
+                    int finalAttempt1 = attempt;
+                    KLog.d("ShooterRPSTest", () -> "Test successful on attempt " + finalAttempt1);
                 } else {
-                    KLog.d("ShooterRPSTest", String.format(
+                    int finalAttempt2 = attempt;
+                    KLog.d("ShooterRPSTest", () -> String.format(
                         "Test failed on attempt %d - target not reached within %dms",
-                        attempt, MAX_RAMP_TIME_MS));
+                            finalAttempt2, MAX_RAMP_TIME_MS));
 
                     if (attempt < MAX_RETRIES) {
                         telemetry.addLine();
@@ -166,9 +171,11 @@ public class ShooterRPSTest extends LinearOpMode {
                 telemetry.addData("Reached Target", result.reachedTarget ? "YES" : "NO");
                 telemetry.update();
 
-                KLog.d("ShooterRPSTest", String.format(
+                TestResult finalResult = result;
+                int finalAttempt3 = attempt;
+                KLog.d("ShooterRPSTest", () -> String.format(
                     "Final Result: Attempts=%d | Ramp=%.0fms | Min=%.2f | Max=%.2f | Avg=%.2f | Reached=%b",
-                    attempt, result.rampUpTimeMs, result.minRPS, result.maxRPS, result.avgRPS, result.reachedTarget));
+                        finalAttempt3, finalResult.rampUpTimeMs, finalResult.minRPS, finalResult.maxRPS, finalResult.avgRPS, finalResult.reachedTarget));
             }
 
             // Brief pause between tests
@@ -193,7 +200,8 @@ public class ShooterRPSTest extends LinearOpMode {
         telemetry.addLine("files/OdometryLog/");
         telemetry.update();
 
-        KLog.d("ShooterRPSTest", String.format("Test complete! %d tests finished", testNumber));
+        int finalTestNumber1 = testNumber;
+        KLog.d("ShooterRPSTest", () -> String.format("Test complete! %d tests finished", finalTestNumber1));
 
         // Keep telemetry visible
         while (opModeIsActive()) {
@@ -266,7 +274,7 @@ public class ShooterRPSTest extends LinearOpMode {
                     reachedTarget = true;
                     result.rampUpTimeMs = timer.milliseconds();
                     result.reachedTarget = true;
-                    KLog.d("ShooterRPSTest", String.format(
+                    KLog.d("ShooterRPSTest", () -> String.format(
                         "Reached target %.1f RPS in %.0fms (actual: %.2f, error: %.2f)",
                         targetRPS, result.rampUpTimeMs, currentRPS, error));
                     break;
@@ -283,7 +291,7 @@ public class ShooterRPSTest extends LinearOpMode {
         if (!reachedTarget) {
             result.rampUpTimeMs = timer.milliseconds();
             result.reachedTarget = false;
-            KLog.d("ShooterRPSTest", String.format(
+            KLog.d("ShooterRPSTest", () -> String.format(
                 "Timeout: Did not reach target RPS %.1f within %dms",
                 targetRPS, MAX_RAMP_TIME_MS));
         }
@@ -316,7 +324,7 @@ public class ShooterRPSTest extends LinearOpMode {
                 // Check if RPS is within allowed overshoot tolerance
                 if (currentRPS > maxAllowedOvershoot || currentRPS < minAllowedUndershoot) {
                     stableInObservation = false;
-                    KLog.d("ShooterRPSTest", String.format(
+                    KLog.d("ShooterRPSTest", () -> String.format(
                         "Excessive deviation during observation: %.2f RPS (allowed: %.2f to %.2f)",
                         currentRPS, minAllowedUndershoot, maxAllowedOvershoot));
                 }
@@ -346,7 +354,7 @@ public class ShooterRPSTest extends LinearOpMode {
             // Update reachedTarget flag based on observation stability
             if (!stableInObservation) {
                 result.reachedTarget = false;
-                KLog.d("ShooterRPSTest", String.format(
+                KLog.d("ShooterRPSTest", () -> String.format(
                     "Target marked as NOT reached due to excessive deviation during observation (min=%.2f, max=%.2f, avg=%.2f)",
                     result.minRPS, result.maxRPS, result.avgRPS));
             }

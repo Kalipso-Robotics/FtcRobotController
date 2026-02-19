@@ -154,7 +154,7 @@ public class NavigationSystem {
             biasAdaptor.reset();
             terminalController.reset();
             
-            KLog.d(TAG, String.format("Path set with %d waypoints", waypoints.size()));
+            KLog.d(TAG, () -> String.format("Path set with %d waypoints", waypoints.size()));
             
         } catch (Exception e) {
             KLog.e(TAG, "Failed to set path", e);
@@ -1239,7 +1239,7 @@ public class NavigationSystem {
 
             driveTrain.setPower(powers[0], powers[1], powers[2], powers[3]);
 
-            KLog.d(TAG, String.format("Motor Powers: FL=%.3f FR=%.3f BL=%.3f BR=%.3f",
+            KLog.d(TAG, () -> String.format("Motor Powers: FL=%.3f FR=%.3f BL=%.3f BR=%.3f",
                     powers[0], powers[1], powers[2], powers[3]));
                     
             // TODO: Implement actual motor control based on your DriveTrain interface
@@ -1334,12 +1334,12 @@ public class NavigationSystem {
             this.startTime = System.currentTimeMillis();
             this.isCollecting = true;
             
-            KLog.d(TAG, "Started data collection: " + this.sessionName);
+            KLog.d(TAG, () -> "Started data collection: " + this.sessionName);
         }
         
         public void stopCollection() {
             this.isCollecting = false;
-            KLog.d(TAG, String.format("Stopped data collection: %s (%d points)", sessionName, dataPoints.size()));
+            KLog.d(TAG, () -> String.format("Stopped data collection: %s (%d points)", sessionName, dataPoints.size()));
         }
         
         public boolean exportToCSV(String filename) {
@@ -1381,7 +1381,7 @@ public class NavigationSystem {
                 writer.flush();
                 writer.close();
                 
-                KLog.d(TAG, String.format("Exported %d data points to %s", dataPoints.size(), filename));
+                KLog.d(TAG, () -> String.format("Exported %d data points to %s", dataPoints.size(), filename));
                 return true;
                 
             } catch (IOException e) {

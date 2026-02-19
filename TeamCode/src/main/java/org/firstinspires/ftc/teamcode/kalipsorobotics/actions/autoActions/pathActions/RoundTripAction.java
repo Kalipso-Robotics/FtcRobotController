@@ -54,7 +54,6 @@ public class RoundTripAction extends KActionSet {
         this.targetPoint = targetPoint;
         this.shooter = shooter;
         this.turretAutoAlign = turretAutoAlign;
-        this.shouldShooterStop = shouldShooterStop;
 
         WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
         waitUntilShootRun.setName("waitUntilShootReady");
@@ -153,24 +152,24 @@ public class RoundTripAction extends KActionSet {
             shooterStop.setDependentActions(pushBall);
         }
         if (moveToBall.getIsDone()){
-            KLog.d("RoundTrip", String.format("[%s] MoveToBall COMPLETED - Stopping intake and updating shooter position",
+            KLog.d("RoundTrip", () -> String.format("[%s] MoveToBall COMPLETED - Stopping intake and updating shooter position",
                 getName() != null ? getName() : "unnamed"));
 
             if (!hasUpdatedShooterReady) {
                 Point currentPos = new Position(SharedData.getOdometryWheelIMUPosition()).toPoint();
-                KLog.d("RoundTrip", String.format("[%s] Updating shooter position - Current: (%.1f, %.1f), Target: (%.1f, %.1f)",
+                KLog.d("RoundTrip", () -> String.format("[%s] Updating shooter position - Current: (%.1f, %.1f), Target: (%.1f, %.1f)",
                     getName() != null ? getName() : "unnamed",
                     currentPos.getX(), currentPos.getY(),
                     targetPoint.getX(), targetPoint.getY()));
 //                shooterRun.setNewLaunchPosition(currentPos, target);
                 hasUpdatedShooterReady = true;
-                KLog.d("RoundTrip", String.format("[%s] Shooter position updated successfully",
+                KLog.d("RoundTrip", () -> String.format("[%s] Shooter position updated successfully",
                     getName() != null ? getName() : "unnamed"));
             }
         }
 
 
-        KLog.d("RoundTrip", String.format("[%s] Status - MoveToBall: %s, PurePursuitReady: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s",
+        KLog.d("RoundTrip", () -> String.format("[%s] Status - MoveToBall: %s, PurePursuitReady: %s, Intake: %s, ShooterReady %s, ShooterRun: %s, PushBall: %s, TurretReady: %s",
                 getName() != null ? getName() : "unnamed",
                 moveToBall.getIsDone() ? "DONE" : "NOT DONE",
                 purePursuitReadyShooting.getIsDone() ? "DONE" : "NOT DONE",
@@ -193,7 +192,7 @@ public class RoundTripAction extends KActionSet {
         if (moveToBall.getIsDone()) {
             intakeFullAction.setIsDone(true); //don't need to stop intake because push ball starts intake
 
-            KLog.d("RoundTrip", String.format("[%s] IntakeFullAction stopped by pure pursuit completion",
+            KLog.d("RoundTrip", () -> String.format("[%s] IntakeFullAction stopped by pure pursuit completion",
                     getName() != null ? getName() : "unnamed"));
         }
     }

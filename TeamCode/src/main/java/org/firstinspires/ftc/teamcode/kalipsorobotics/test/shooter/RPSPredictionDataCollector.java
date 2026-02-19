@@ -207,7 +207,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                     lastShoot = new ShootData(currentRPS, shooterPower, currentVoltage, hoodPosition, distanceToTargetMM);
 
                     // Log to KLog
-                    KLog.d("RPSPredictionData", "SHOOT RECORDED: " + lastShoot);
+                    KLog.d("RPSPredictionData", () -> "SHOOT RECORDED: " + lastShoot);
 
                     wasLeftTriggerPressed = true;
                 }
@@ -227,7 +227,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             if (gamepad1.y) {
                 if (lastShoot != null) {
                     fileWriter.writeLine(lastShoot.toCSV());
-                    KLog.d("RPSPredictionData", "SAVED TO FILE: " + lastShoot.toString());
+                    KLog.d("RPSPredictionData", () -> "SAVED TO FILE: " + lastShoot.toString());
                     telemetry.addLine("*** SAVED TO FILE ***");
                 } else {
                     KLog.d("RPSPredictionData", "No shoot data to save!");

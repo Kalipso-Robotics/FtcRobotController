@@ -230,7 +230,7 @@ public class CheckStuckRobot {
 
         if (safePosition != null) {
             // Use pure pursuit to reverse to the safe position
-            KLog.d("unstuck", "Reversing to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
+            KLog.d("unstuck", () -> "Reversing to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
             purePursuitAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
 
             // Add a few intermediate points for smoother navigation

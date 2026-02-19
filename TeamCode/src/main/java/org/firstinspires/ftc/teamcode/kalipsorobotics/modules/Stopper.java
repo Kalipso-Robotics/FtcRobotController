@@ -19,7 +19,7 @@ public class Stopper {
 //        CRServo kickerLeftHW = opModeUtilities.getHardwareMap().crservo.get("pusherLeft");
         try {
             Servo stopper = opModeUtilities.getHardwareMap().servo.get("stopper");
-            KLog.d("Stopper", "Hardware servo retrieved: " + (stopper != null ? "SUCCESS" : "NULL"));
+            KLog.d("Stopper", () -> "Hardware servo retrieved: " + (stopper != null ? "SUCCESS" : "NULL"));
 //        this.kickerLeft = new KCRServo(kickerLeftHW,false);
 //        this.kickerRight = new KCRServo(kickerRightHW,true);
             this.stopper = new KServo(stopper);

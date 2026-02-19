@@ -129,7 +129,7 @@ public class AutoWithCheckStuck extends LinearOpMode {
                         Position safePosition = checkStuckRobot.findBestSafePosition(currentPosition);
                         
                         if (safePosition != null) {
-                            KLog.d("unstuck", "Moving to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
+                            KLog.d("unstuck", () -> "Moving to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
                             unstuckAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
                         } else {
                             // Fallback: move backward 100mm
@@ -169,8 +169,8 @@ public class AutoWithCheckStuck extends LinearOpMode {
                 telemetry.update();
             }
 
-            KLog.d("homePos", SharedData.getOdometryWheelIMUPosition().toString());
-            KLog.d("homePosMap", SharedData.getOdometryPositionMap().toString());
+            KLog.d("homePos", () -> SharedData.getOdometryWheelIMUPosition().toString());
+            KLog.d("homePosMap", () -> SharedData.getOdometryPositionMap().toString());
         }
         
         odometryFileWriter.close();

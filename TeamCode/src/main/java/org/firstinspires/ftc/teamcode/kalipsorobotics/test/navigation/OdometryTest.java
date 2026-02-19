@@ -22,7 +22,7 @@ public class OdometryTest extends LinearOpMode {
         
         waitForStart();
         while(opModeIsActive()) {
-            KLog.d("OdometryTest","x: " + odometry.update().getX() + "y: " + odometry.update().getY() + "theta: " + odometry.getIMUHeading());
+            KLog.d("OdometryTest", () -> "x: " + odometry.update().getX() + "y: " + odometry.update().getY() + "theta: " + odometry.getIMUHeading());
         }
     }
 }

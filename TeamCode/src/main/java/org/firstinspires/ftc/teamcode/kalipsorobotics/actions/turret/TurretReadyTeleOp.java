@@ -21,7 +21,7 @@ public class TurretReadyTeleOp extends Action {
     @Override
     protected void update() {
         if (isDone) {
-            KLog.d(this.getName(), "time to done: " + timeoutTimer.milliseconds());
+            KLog.d(this.getName(), () -> "time to done: " + timeoutTimer.milliseconds());
             return;
         }
 
@@ -29,12 +29,12 @@ public class TurretReadyTeleOp extends Action {
             timeoutTimer.reset();
             hasStarted = true;
             turretAutoAlignTeleop.updateCheckDone();
-            KLog.d(this.getName(), "current pos " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d(this.getName(), () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
         }
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {
-            KLog.d(this.getName(), "Turret TIMEOUT in " + maxTimeoutMS + " ms");
-            KLog.d("TurretReady_ActionTime","ActionTime: " + timeoutTimer.milliseconds() + " ms");
+            KLog.d(this.getName(), () -> "Turret TIMEOUT in " + maxTimeoutMS + " ms");
+            KLog.d("TurretReady_ActionTime", () -> "ActionTime: " + timeoutTimer.milliseconds() + " ms");
             isDone = true;
             return;
         }
@@ -44,9 +44,9 @@ public class TurretReadyTeleOp extends Action {
             if (!TurretConfig.shouldShootOnTheMoveTurret) {
                 turretAutoAlignTeleop.stop();
             }
-            KLog.d(this.getName(), "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
+            KLog.d(this.getName(), () -> "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlignTeleop.getTargetTicks());
-            KLog.d("ActionTime", this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
+            KLog.d("ActionTime", () -> this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
         } else if (TurretConfig.shouldShootOnTheMoveTurret) {
             isDone = true;
         }

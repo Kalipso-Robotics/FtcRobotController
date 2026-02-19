@@ -40,13 +40,13 @@ public class RunUntilStallAction extends Action {
     @Override
     public void update() {
         if (isDone) {
-            KLog.d("RunUntilStall", String.format("[%s] Already done, skipping update",
+            KLog.d("RunUntilStall", () -> String.format("[%s] Already done, skipping update",
                 getName() != null ? getName() : "unnamed"));
             return;
         }
 
         if (!hasStarted) {
-            KLog.d("RunUntilStall", String.format("[%s] STARTING - Setting motor power to %.2f, timeout: %.1fs",
+            KLog.d("RunUntilStall", () -> String.format("[%s] STARTING - Setting motor power to %.2f, timeout: %.1fs",
                 getName() != null ? getName() : "unnamed", power, maxTimeoutMS / 1000.0));
             motor.setPower(power);
             hasStarted = true;
@@ -60,7 +60,7 @@ public class RunUntilStallAction extends Action {
 
         // Check timeout
         if (elapsedTimeMs > maxTimeoutMS) {
-            KLog.d("RunUntilStall", String.format("[%s] TIMEOUT after %.1fs - Stopping motor",
+            KLog.d("RunUntilStall", () -> String.format("[%s] TIMEOUT after %.1fs - Stopping motor",
                 getName() != null ? getName() : "unnamed", elapsedTimeSec));
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0.2);
@@ -75,7 +75,7 @@ public class RunUntilStallAction extends Action {
 
         // Log motor state every 500ms
         if (((int)elapsedTimeMs) % 500 < 20) {
-            KLog.d("RunUntilStall", String.format("[%s] Motor State - Time: %.1fs, Velocity: %.1f/%.1f (threshold: %.1f), Current: %.0fmA, StallCount: %d",
+            KLog.d("RunUntilStall", () -> String.format("[%s] Motor State - Time: %.1fs, Velocity: %.1f/%.1f (threshold: %.1f), Current: %.0fmA, StallCount: %d",
                 getName() != null ? getName() : "unnamed",
                 elapsedTimeSec,
                 curVelocity,
@@ -94,7 +94,7 @@ public class RunUntilStallAction extends Action {
         if (pastInitialDelay && powerAboveThreshold && currentAboveThreshold && velocityBelowThreshold) {
             stallCount++;
             if (stallCount == 1 || stallCount % 20 == 0) {
-                KLog.d("RunUntilStall", String.format("[%s] STALL DETECTED (count: %d) - Current: %.0fmA > %.0fmA, Velocity: %.1f < %.1f",
+                KLog.d("RunUntilStall", () -> String.format("[%s] STALL DETECTED (count: %d) - Current: %.0fmA > %.0fmA, Velocity: %.1f < %.1f",
                     getName() != null ? getName() : "unnamed",
                     stallCount,
                     currentDraw,
@@ -104,7 +104,7 @@ public class RunUntilStallAction extends Action {
             }
         } else {
             if (stallCount > 0) {
-                KLog.d("RunUntilStall", String.format("[%s] Stall conditions cleared - Resetting count from %d (pastDelay:%b, power:%.2f>%.2f=%b, current:%.0f>%.0f=%b, vel:%.1f<%.1f=%b)",
+                KLog.d("RunUntilStall", () -> String.format("[%s] Stall conditions cleared - Resetting count from %d (pastDelay:%b, power:%.2f>%.2f=%b, current:%.0f>%.0f=%b, vel:%.1f<%.1f=%b)",
                     getName() != null ? getName() : "unnamed",
                     stallCount,
                     pastInitialDelay,
@@ -116,7 +116,7 @@ public class RunUntilStallAction extends Action {
         }
 
         if (stallCount > 100) {
-            KLog.d("RunUntilStall", String.format("[%s] STALL CONFIRMED (count: %d > 100) - Stopping motor after %.1fs",
+            KLog.d("RunUntilStall", () -> String.format("[%s] STALL CONFIRMED (count: %d > 100) - Stopping motor after %.1fs",
                 getName() != null ? getName() : "unnamed", stallCount, elapsedTimeSec));
             regMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motor.setPower(0.2);
