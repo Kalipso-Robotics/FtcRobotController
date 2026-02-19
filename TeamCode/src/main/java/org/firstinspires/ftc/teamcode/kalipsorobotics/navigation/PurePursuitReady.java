@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 public class PurePursuitReady extends Action {

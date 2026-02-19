@@ -4,8 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KA
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.PurePursuitReady;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
