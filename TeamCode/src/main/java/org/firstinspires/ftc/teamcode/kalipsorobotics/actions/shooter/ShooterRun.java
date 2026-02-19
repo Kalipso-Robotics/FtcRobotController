@@ -154,7 +154,7 @@ public class ShooterRun extends Action {
                 break;
         }
         shooter.setTargetRPS(targetRPS);
-        KLog.d("ShooterRun", () -> "Running mode " + shooterRunMode);
+        KLog.d("ShooterRun", () -> "Running mode " + shooterRunMode + " targetRPS: " + targetRPS + " distance: " + distanceMM);
 
         double deltaRPS = targetRPS - currentRPS;
         double hoodCompensation = MathFunctions.clamp(deltaRPS * hoodCompensateCoefficient, minHoodCompensate, maxHoodCompensate);

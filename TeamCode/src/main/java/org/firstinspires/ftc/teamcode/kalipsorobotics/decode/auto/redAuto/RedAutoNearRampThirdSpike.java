@@ -215,14 +215,16 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
         trip4Spike.getMoveToBall().clearPoints();
         trip4Spike.getMoveToBall().clearPoints();
+        //Before Eat
         trip4Spike.getMoveToBall().addPoint(775, 370 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4Spike.getMoveToBall().addPoint(775, 850 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        //Eating
+        trip4Spike.getMoveToBall().addPoint(775, 875 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip4Spike.getMoveToBall().addPoint(775, 850 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4Spike.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4Spike.getMoveToBall().setEnablePowerScalingForPath(true);
         trip4Spike.setShouldShooterStop(false);
         trip4Spike.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
-        trip4Spike.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(1200);
+        trip4Spike.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(800);
         trip4Spike.getMoveToBall().setFinalSearchRadius(200);
         trip4Spike.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         KLog.d("Auto_Shooting", () -> "Shot_4" + " - " +
@@ -248,7 +250,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         // move to first spike
         trip5.getMoveToBall().addPoint(1950, 175 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // eat balls
-        trip5.getMoveToBall().addPoint(1950, 745 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
+        trip5.getMoveToBall().addPoint(1950, 800 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
 
         trip5.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
         trip5.setShouldShooterStop(false);
