@@ -8,7 +8,7 @@ public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
     public static final double HOOD_INIT_OFFSET = 0;
-    public final static double MIN_HOOD = 0.1226; //0.72 old hood
+    public final static double MIN_HOOD = 0.1284; //0.72 old hood
     public final static double MAX_HOOD = 0.3; // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5;
     public static final double MAX_RPS = 73;
@@ -47,8 +47,8 @@ public class ShooterInterpolationConfig {
     private static final double rpsTune = 0.1;
     public static final int BETWEEN_FAR_NEAR_TIP = 3240;
     public static double[] shooterData = {
-            810, 45.7 + rpsTune, compensatedMaxHood - 0.18,
-            1050, 45.9 + rpsTune, compensatedMaxHood - 0.07,
+            810, 45.7 + rpsTune, MIN_HOOD,
+            1050, 45.7 + rpsTune, compensatedMaxHood - 0.07,
             1310, 47.7 + rpsTune, compensatedMaxHood - 0.07, //roughly first shot for near auto
             1518, 49.6 + rpsTune, compensatedMaxHood - 0.05,
             1705, 51.6 + rpsTune, compensatedMaxHood - 0.05,
