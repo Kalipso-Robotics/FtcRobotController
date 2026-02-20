@@ -54,7 +54,7 @@ public class ShooterInterpolationConfig {
             1518, 49.6 + rpsTune, compensatedMaxHood - 0.05,
             1705, 51.6 + rpsTune, compensatedMaxHood - 0.05,
             1898, 52.8 + rpsTune, compensatedMaxHood - 0.02,
-            2075, 54.5 + rpsTune, compensatedMaxHood,
+            2075, 54.7 + rpsTune, compensatedMaxHood,
             2244, 56.6 + rpsTune, compensatedMaxHood,
             2417, 57.6 + rpsTune, compensatedMaxHood,
             2561, 60 + rpsTune, compensatedMaxHood,
