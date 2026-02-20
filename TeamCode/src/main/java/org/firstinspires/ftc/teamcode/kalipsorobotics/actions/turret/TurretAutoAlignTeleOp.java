@@ -307,11 +307,12 @@ public class TurretAutoAlignTeleOp extends Action {
             Position predictedPos = currentPos.predictPos(currentVelocity, lookAheadTimeMS);
             //SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
             targetHeadingRad = Math.atan2(targetPoint.getY() - predictedPos.getY(), targetPoint.getX() - predictedPos.getX());
+            double finalTargetHeadingRad = targetHeadingRad;
             KLog.d("SOTM_Turret", () -> "Look Ahead Time MS: " + lookAheadTimeMS +
                     " CurrentVelocity: " + currentVelocity +
                     " Delta Pos: " + predictedPos.minus(currentPos) +
                     " Delta Dist. to goal: " + (predictedPos.toPoint().distanceTo(targetPoint) - distanceToGoal) +
-                    " Delta Heading: " + Math.toDegrees(predictedPos.getTheta() - rawTargetHeadingRad)
+                    " Delta Heading: " + Math.toDegrees(finalTargetHeadingRad - rawTargetHeadingRad)
             );
         }
         return targetHeadingRad;

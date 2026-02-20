@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.localization;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.DrivetrainConfig.*;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryConfig.alpha;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryConfig.alphaLinear;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryConfig.alphaTheta;
 
 import android.os.SystemClock;
@@ -80,8 +80,8 @@ public class Odometry {
         this.rightOffset = this.getRightEncoderMM();
         this.leftOffset = this.getLeftEncoderMM();
         this.backOffset = this.getBackEncoderMM();
-        this.emaWheelIMU = new ExponentialVelocityFiltering(alpha, alphaTheta);
-        this.emaWheel = new ExponentialVelocityFiltering(alpha, alphaTheta);
+        this.emaWheelIMU = new ExponentialVelocityFiltering(alphaLinear, alphaTheta);
+        this.emaWheel = new ExponentialVelocityFiltering(alphaLinear, alphaTheta);
 
         this.wheelPositionHistory.setCurrentPosition(startPosMMRad);
         this.wheelIMUPositionHistory.setCurrentPosition(startPosMMRad);
