@@ -116,7 +116,6 @@ public class TeleOp extends KOpMode {
         TurretConfig.kS = TurretConfig.kS_teleop;
         shouldShootOnTheMoveRPS = true;
         shouldShootOnTheMoveTurret = true;
-        shouldBangBangCompensate = true;
     }
 
     @Override

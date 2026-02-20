@@ -59,7 +59,6 @@ public class RedAutoDepot extends KOpMode {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = 0;
-        shouldBangBangCompensate = true;
     }
 
     @Override

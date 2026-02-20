@@ -17,6 +17,5 @@ public class BlueAutoDepotNoSpike extends RedAutoDepotNoSpike {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = 0;
-        shouldBangBangCompensate = true;
     }
 }
