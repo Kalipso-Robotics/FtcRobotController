@@ -4,6 +4,8 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class ShooterConfig {
+
+    public static final double OUT_OF_RANGE_THRESHOLD = 20 * 12 * 25.4;
     public static double timeToStabilize = 50; //50
     public static double kp = 0.085; //0.006; //TODO tune until going from depot to near is fast enough
     public static double kp_rampDown = 0.085; // 0.003

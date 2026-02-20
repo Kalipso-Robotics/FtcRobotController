@@ -148,6 +148,7 @@ public class RoundTripAction extends KActionSet {
         super.beforeUpdate();
 
         if (shouldShooterStop && !hasStarted){
+            hasStarted = true;
             this.addAction(shooterStop);
             shooterStop.setDependentActions(pushBall);
         }

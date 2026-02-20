@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_X_REL_FIELD_MM;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_Y_REL_FIELD_MM;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.OUT_OF_RANGE_THRESHOLD;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.hoodFlipDirection;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
@@ -30,8 +31,6 @@ public class Shooter {
     public static final double HOOD_OFFSET = 0; // 0.25
 
     public final double TARGET_RPS_TOLERANCE = 1;
-
-    public static final double FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY = 2370.0 / 2.0;
 
     private final OpModeUtilities opModeUtilities;
 
@@ -116,9 +115,9 @@ public class Shooter {
      * @return shooter parameters containing RPS and hood position
      */
     public IShooterPredictor.ShooterParams getPrediction(double distanceMM) {
-        if (distanceMM > 4200) {
-            KLog.d("shooter_ready", () -> "FALLBACK!!! distance to target is too high, defaulting to " + FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY + " Distance: " + distanceMM);
-            return predictor.predict(FALLBACK_DISTANCE_IF_DISTANCE_MM_IS_WACKY);
+        if (distanceMM > OUT_OF_RANGE_THRESHOLD) {
+            KLog.d("shooter_ready", () -> "FALLBACK!!! distance to target is too high, defaulting to " + ShooterInterpolationConfig.FALLBACK_OUT_OF_RANGE_DISTANCE_MM + " Distance: " + distanceMM);
+            return predictor.predict(ShooterInterpolationConfig.FALLBACK_OUT_OF_RANGE_DISTANCE_MM);
         }
         return predictor.predict(distanceMM);
     }

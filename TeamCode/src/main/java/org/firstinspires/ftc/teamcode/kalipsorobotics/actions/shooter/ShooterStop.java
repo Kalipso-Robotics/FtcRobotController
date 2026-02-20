@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 public class ShooterStop extends Action {
     Shooter shooter;
@@ -25,6 +26,7 @@ public class ShooterStop extends Action {
         if (isDone) {
             return;
         }
+        KLog.d("ShooterStop", () -> "Stopping shooter");
         shooter.setPower(0);
         if (shooterRun != null) {
             shooterRun.stop();

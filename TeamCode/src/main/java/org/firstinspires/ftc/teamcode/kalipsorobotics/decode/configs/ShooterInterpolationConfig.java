@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class ShooterInterpolationConfig {
+    public static final double FALLBACK_OUT_OF_RANGE_DISTANCE_MM = 3460;
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
     public static final double HOOD_INIT_OFFSET = 0;
