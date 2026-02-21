@@ -10,20 +10,32 @@ public class Tilter {
 
     private final OpModeUtilities opModeUtilities;
 
-    private final KServo tilter;
+    private final KServo tilterRight;
+
+    private final KServo tilterLeft;
 
     public Tilter(OpModeUtilities opModeUtilities) {
         KLog.d("Tilter", "Constructor called - starting initialization");
         this.opModeUtilities = opModeUtilities;
-        Servo tilter = opModeUtilities.getHardwareMap().servo.get("tilter");
-        this.tilter = new KServo(tilter);
-        this.tilter.setTargetPosition(ModuleConfig.TILTER_SERVO_UP_POS);
+        Servo tilterLeft = opModeUtilities.getHardwareMap().servo.get("tilterLeft");
+        this.tilterLeft = new KServo(tilterLeft);
+        this.tilterLeft.setTargetPosition(ModuleConfig.TILT_LEFT_UP_POS);
+
+        Servo tilterRight = opModeUtilities.getHardwareMap().servo.get("tilterRight");
+        this.tilterRight = new KServo(tilterRight);
+        this.tilterRight.setTargetPosition(ModuleConfig.TILT_LEFT_UP_POS);
     }
 
-    public KServo getTilter() {return tilter;}
-
-    public void setPosition(double target) {
-        tilter.setPosition(target);
+    public KServo getTilterLeft() {return tilterLeft;}
+    public void setTilterLeftPosition(double target) {
+        tilterLeft.setPosition(target);
     }
+
+    public KServo getTilterRight() {return tilterRight;}
+    public void setTilterRightPosition(double target) {
+        tilterRight.setPosition(target);
+    }
+
+
 
 }

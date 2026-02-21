@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltDown;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltUp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReverse;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
@@ -40,7 +42,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
-
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
 public class TeleOp extends KOpMode {
     private boolean hasClosedStopperInnit = false;
@@ -59,8 +60,8 @@ public class TeleOp extends KOpMode {
 
     PurePursuitAction parkAction = null;
     PurePursuitAction leverAction = null;
-    KServoAutoAction tiltDown = null;
-    KServoAutoAction tiltUp = null;
+    TiltDown tiltDown = null;
+    TiltUp tiltUp = null;
 
 
     KServoAutoAction openStopper = null;
@@ -171,7 +172,8 @@ public class TeleOp extends KOpMode {
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         KLog.d("TeleOp-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
-        tilter.setPosition(ModuleConfig.TILTER_SERVO_UP_POS);
+        tilter.setTilterLeftPosition(ModuleConfig.TILT_LEFT_UP_POS);
+        tilter.setTilterRightPosition(ModuleConfig.TILT_RIGHT_DOWN_POS);
         waitForStart();
         telemetry.setMsTransmissionInterval(200);
         sleep(50);
@@ -322,13 +324,13 @@ public class TeleOp extends KOpMode {
         if (tiltUpPressed) {
             if (!isPending(tiltUp)) {
                 tiltDown = null;
-                tiltUp = new KServoAutoAction(tilter.getTilter(), ModuleConfig.TILTER_SERVO_UP_POS);
+                tiltUp = new TiltUp(tilter);
                 setLastTiltAction(tiltUp);
             }
         } else if (tiltDownPressed) {
             if (!isPending(tiltDown)) {
                 tiltUp = null;
-                tiltDown = new KServoAutoAction(tilter.getTilter(), ModuleConfig.TILTER_SERVO_DOWN_POS);
+                tiltDown = new TiltDown(tilter);
                 setLastTiltAction(tiltDown);
             }
         }

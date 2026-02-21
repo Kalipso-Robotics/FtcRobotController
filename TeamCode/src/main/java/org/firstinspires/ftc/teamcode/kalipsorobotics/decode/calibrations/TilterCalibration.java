@@ -27,7 +27,9 @@ public class TilterCalibration extends KOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double tilterPosition = 0.5;
+        double tilterPositionRight = 0.5;
+
+        double tilterPositionLeft = 0.5;
 
 
         initializeRobot();
@@ -35,17 +37,26 @@ public class TilterCalibration extends KOpMode {
         while (opModeIsActive()) {
 
             if (kGamePad2.isDpadLeftFirstPressed()) {
-                tilterPosition += POSITION_INCREMENT;
-                tilter.getTilter().setPosition(tilterPosition);
+                tilterPositionRight += POSITION_INCREMENT;
+                tilter.getTilterRight().setPosition(tilterPositionRight);
             } else if (kGamePad2.isDpadRightFirstPressed()) {
-                tilterPosition -= POSITION_INCREMENT;
-                tilter.getTilter().setPosition(tilterPosition);
+                tilterPositionRight -= POSITION_INCREMENT;
+                tilter.getTilterRight().setPosition(tilterPositionRight);
+            }
+
+            if (kGamePad2.isButtonYFirstPressed()) {
+                tilterPositionLeft += POSITION_INCREMENT;
+                tilter.getTilterLeft().setPosition(tilterPositionLeft);
+            } else if (kGamePad2.isButtonAFirstPressed()) {
+                tilterPositionLeft -= POSITION_INCREMENT;
+                tilter.getTilterLeft().setPosition(tilterPositionLeft);
             }
 
 
 
-            KLog.d("tilterPosition", "tilterPosition" + tilterPosition);
-            telemetry.addData("tilterPosition", tilterPosition); //0.11 0.51 0.91
+            KLog.d("tilterPositionRight", "tilterPositionRight" + tilterPositionRight);
+            telemetry.addData("tilterPositionRight", tilterPositionRight); //0.11 0.51 0.91
+            telemetry.addData("tilterPositionLeft", tilterPositionLeft); //0.11 0.51 0.91
             telemetry.update();
         }
 
