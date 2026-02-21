@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 public class PushBall extends KActionSet {
 //    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
     private KServoAutoAction openStopper;
+    private RunIntakeTime runIntakeTime;
+    private KServoAutoAction closeStopper;
     public PushBall(Stopper stopper, Intake intake) {
 
         KLog.d("PushAllBalls", () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
@@ -29,12 +31,12 @@ public class PushBall extends KActionSet {
 
         KLog.d("PushAllBalls", () -> "openStopper " + openStopper.getIsDone());
 
-        RunIntakeTime runIntakeTime = new RunIntakeTime(intake, IntakeConfig.shootTimeMS, IntakeConfig.intakePower);
+        runIntakeTime = new RunIntakeTime(intake, IntakeConfig.shootTimeMS, IntakeConfig.intakePower);
         runIntakeTime.setName("runIntakeTime");
         runIntakeTime.setDependentActions(openStopper);
         this.addAction(runIntakeTime);
 
-        KServoAutoAction closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
+        closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         closeStopper.setName("closeStopper");
         closeStopper.setDependentActions(runIntakeTime);
         this.addAction(closeStopper);
@@ -58,5 +60,15 @@ public class PushBall extends KActionSet {
 
     public KServoAutoAction getOpenStopper() {
         return openStopper;
+    }
+
+    @Override
+    protected void afterUpdate() {
+        KLog.d("PushBall_Status", () -> String.format("[%s] Status - OpenStopper: %s, RunIntake: %s, CloseStopper: %s",
+                getName() != null ? getName() : "unnamed",
+                openStopper.getIsDone() ? "DONE" : "NOT DONE",
+                runIntakeTime.getIsDone() ? "DONE" : "NOT DONE",
+                closeStopper.getIsDone() ? "DONE" : "NOT DONE"
+                ));
     }
 }
