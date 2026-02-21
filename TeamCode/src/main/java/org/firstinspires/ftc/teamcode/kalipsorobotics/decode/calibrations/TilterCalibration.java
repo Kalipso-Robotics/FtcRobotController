@@ -44,10 +44,10 @@ public class TilterCalibration extends KOpMode {
                 tilter.getTilterRight().setPosition(tilterPositionRight);
             }
 
-            if (kGamePad2.isButtonYFirstPressed()) {
+            if (kGamePad2.isDpadUpFirstPressed()) {
                 tilterPositionLeft += POSITION_INCREMENT;
                 tilter.getTilterLeft().setPosition(tilterPositionLeft);
-            } else if (kGamePad2.isButtonAFirstPressed()) {
+            } else if (kGamePad2.isDpadDownFirstPressed()) {
                 tilterPositionLeft -= POSITION_INCREMENT;
                 tilter.getTilterLeft().setPosition(tilterPositionLeft);
             }

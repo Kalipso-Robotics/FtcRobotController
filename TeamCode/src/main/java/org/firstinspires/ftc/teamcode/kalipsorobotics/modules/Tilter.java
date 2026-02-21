@@ -23,7 +23,7 @@ public class Tilter {
 
         Servo tilterRight = opModeUtilities.getHardwareMap().servo.get("tilterRight");
         this.tilterRight = new KServo(tilterRight);
-        this.tilterRight.setTargetPosition(ModuleConfig.TILT_LEFT_UP_POS);
+        this.tilterRight.setTargetPosition(ModuleConfig.TILT_RIGHT_UP_POS);
     }
 
     public KServo getTilterLeft() {return tilterLeft;}

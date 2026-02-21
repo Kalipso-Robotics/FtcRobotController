@@ -20,7 +20,7 @@ public class ModuleConfig {
     public static final double TILT_LEFT_DOWN_POS = 0.43; //0.35
 
     public static final double TILT_RIGHT_UP_POS = 0.5;
-    public static final double TILT_RIGHT_DOWN_POS = 0.5;
+    public static final double TILT_RIGHT_DOWN_POS = 0.92;
 
 
 
