@@ -16,7 +16,7 @@ public class PushBall extends KActionSet {
 //    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
     private KServoAutoAction openStopper;
     private RunIntakeTime runIntakeTime;
-    private KServoAutoAction closeStopper;
+    private CloseStopperInstantDone closeStopperInstantDone;
     public PushBall(Stopper stopper, Intake intake) {
 
         KLog.d("PushAllBalls", () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
@@ -36,10 +36,10 @@ public class PushBall extends KActionSet {
         runIntakeTime.setDependentActions(openStopper);
         this.addAction(runIntakeTime);
 
-        closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-        closeStopper.setName("closeStopper");
-        closeStopper.setDependentActions(runIntakeTime);
-        this.addAction(closeStopper);
+        closeStopperInstantDone = new CloseStopperInstantDone(stopper);
+        closeStopperInstantDone.setName("closeStopperInstantDone");
+        closeStopperInstantDone.setDependentActions(runIntakeTime);
+        this.addAction(closeStopperInstantDone);
 //
 //        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
 //        runUntilFullSpeed.setDependentActions(openStopper);
@@ -68,7 +68,7 @@ public class PushBall extends KActionSet {
                 getName() != null ? getName() : "unnamed",
                 openStopper.getIsDone() ? "DONE" : "NOT DONE",
                 runIntakeTime.getIsDone() ? "DONE" : "NOT DONE",
-                closeStopper.getIsDone() ? "DONE" : "NOT DONE"
+                closeStopperInstantDone.getIsDone() ? "DONE" : "NOT DONE"
                 ));
     }
 }
