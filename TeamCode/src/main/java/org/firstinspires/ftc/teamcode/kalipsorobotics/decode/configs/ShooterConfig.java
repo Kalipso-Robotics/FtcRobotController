@@ -20,5 +20,5 @@ public class ShooterConfig {
     public static double decelBoostDeltaRPSThreshold = -3;
     public static double SHOOTER_LOOKUP_TIME = 50;
     public static boolean hoodFlipDirection = true;
-    public static boolean shouldShootOnTheMoveRPS = true;
+    public static boolean shouldShootOnTheMoveRPS = false;
 }
