@@ -32,8 +32,10 @@ enum DepotTrips {
     SWEEP_IN,
     SWEEP_OUT,
     INTAKE_IN,
-    INTAKE_OUT,
     SWEEP_TUNNEL,
+    SWEEP_0,
+    SWEEP_400,
+    SWEEP_800
 }
 
 @Autonomous(name = "RedAutoDepot")
@@ -241,7 +243,7 @@ public class RedAutoDepot extends KOpMode {
     }
 
     protected DepotRoundTrip handleTrip6(DepotRoundTrip trip5) {
-        return generateRetryTrip(trip5, DepotTrips.INTAKE_OUT);
+        return generateRetryTrip(trip5, DepotTrips.SWEEP_800);
     }
 
 
@@ -271,20 +273,25 @@ public class RedAutoDepot extends KOpMode {
             case SWEEP_OUT:
                 retryTrip.getTrip().getMoveToBall().addPoint(25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 retryTrip.getTrip().getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-
                 // retry
                 retryTrip.getTrip().getMoveToBall().addPoint(325, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case INTAKE_IN:
                 retryTrip.getTrip().getMoveToBall().addPoint(10, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
-            case INTAKE_OUT:
-                retryTrip.getTrip().getMoveToBall().addPoint(800, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                break;
             case SWEEP_TUNNEL:
                 retryTrip.getTrip().getMoveToBall().addPoint(25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 retryTrip.getTrip().getMoveToBall().addPoint(25, 700 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 retryTrip.getTrip().getMoveToBall().addPoint(850, 1075 * allianceColor.getPolarity(), 25 * allianceColor.getPolarity());
+                break;
+            case SWEEP_0:
+                retryTrip.getTrip().getMoveToBall().addPoint(0  , 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                break;
+            case SWEEP_400:
+                retryTrip.getTrip().getMoveToBall().addPoint(400  , 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                break;
+            case SWEEP_800:
+                retryTrip.getTrip().getMoveToBall().addPoint(800  , 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
         }
 
