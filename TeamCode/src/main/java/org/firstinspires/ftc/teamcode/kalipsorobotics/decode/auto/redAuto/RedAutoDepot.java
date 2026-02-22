@@ -33,6 +33,7 @@ enum DepotTrips {
     SWEEP_OUT,
     INTAKE_IN,
     INTAKE_OUT,
+    SWEEP_TUNNEL,
 }
 
 @Autonomous(name = "RedAutoDepot")
@@ -52,6 +53,14 @@ public class RedAutoDepot extends KOpMode {
     Stopper stopper = null;
     Turret turret = null;
     DepotRoundTrip trip1 = null;
+    RoundTripAction trip0 = null;
+    DepotRoundTrip trip2 = null;
+    DepotRoundTrip trip3 = null;
+    DepotRoundTrip trip4 = null;
+    DepotRoundTrip trip5 = null;
+    DepotRoundTrip trip6 = null;
+
+
     TurretAutoAlign turretAutoAlign = null;
 
     @Override
@@ -106,7 +115,7 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- FIRST SHOOT ----------------------
 
-        RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
+        trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
         trip0.setName("trip0");
         trip0.getShooterReady().setName("ShooterReady_trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
@@ -115,6 +124,7 @@ public class RedAutoDepot extends KOpMode {
         autoDepot.addAction(trip0);
 
         // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
+
         trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip1.setName("trip1");
         trip1.getTrip().getShooterReady().setName("ShooterReady_trip1");
@@ -126,7 +136,7 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
 
-        DepotRoundTrip trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip2.setName("trip2");
         trip2.getTrip().getShooterReady().setName("ShooterReady_trip2");
         trip2.setDependentActions(trip1);
@@ -149,24 +159,19 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- TRIP 3 (retry) ---------------------- ~5 sec
 
-        DepotRoundTrip trip3 = generateRetryTrip(trip2, DepotTrips.SWEEP_IN);
-        autoDepot.addAction(trip3);
-
+        handleTrip3();
 
         //-------------------TRIP 4 (retry) -------------------
 
-        DepotRoundTrip trip4 = generateRetryTrip(trip3, DepotTrips.SWEEP_OUT);
-        autoDepot.addAction(trip4);
-
+        handleTrip4();
 
         //-------------------TRIP 5 (retry) -------------------
 
-        DepotRoundTrip trip5 = generateRetryTrip(trip4, DepotTrips.SWEEP_IN);
-        autoDepot.addAction(trip5);
+        handleTrip5();
 
         //-------------------TRIP 6 (retry) -------------------
 
-        DepotRoundTrip trip6 = handleTrip6(trip5);
+        trip6 = handleTrip6(trip5);
         lastTrip = trip6;
         autoDepot.addAction(trip6);
 
@@ -219,9 +224,26 @@ public class RedAutoDepot extends KOpMode {
 //        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 //    }
 
+
+    protected void handleTrip3() {
+        trip3 = generateRetryTrip(trip2, DepotTrips.SWEEP_IN);
+        autoDepot.addAction(trip3);
+    }
+
+    protected void handleTrip4() {
+        trip4 = generateRetryTrip(trip3, DepotTrips.SWEEP_OUT);
+        autoDepot.addAction(trip4);
+    }
+
+    protected void handleTrip5() {
+        trip5 = generateRetryTrip(trip4, DepotTrips.SWEEP_IN);
+        autoDepot.addAction(trip5);
+    }
+
     protected DepotRoundTrip handleTrip6(DepotRoundTrip trip5) {
         return generateRetryTrip(trip5, DepotTrips.INTAKE_OUT);
     }
+
 
     // GO TO SPIKE MARK FIRST ---------------------
     public void addPointsToTrip1SpikeMark() {
@@ -254,10 +276,15 @@ public class RedAutoDepot extends KOpMode {
                 retryTrip.getTrip().getMoveToBall().addPoint(325, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case INTAKE_IN:
-                retryTrip.getTrip().getMoveToBall().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(10, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case INTAKE_OUT:
-                retryTrip.getTrip().getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(800, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                break;
+            case SWEEP_TUNNEL:
+                retryTrip.getTrip().getMoveToBall().addPoint(25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(25, 700 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(850, 1075 * allianceColor.getPolarity(), 25 * allianceColor.getPolarity());
                 break;
         }
 
