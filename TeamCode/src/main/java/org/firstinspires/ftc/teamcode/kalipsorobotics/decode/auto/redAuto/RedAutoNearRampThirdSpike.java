@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous
 public class RedAutoNearRampThirdSpike extends KOpMode {
 //    public static final int WAIT_AT_GATE_TIME_MS = 500;
-    public static final int WAIT_AT_GATE_TIME_MS = 1100;
+    public static final int WAIT_AT_GATE_TIME_MS = 1250;
 
     KActionSet redAutoNear;
     final double SHOOT_NEAR_X = 1790; //2400
@@ -292,7 +292,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
         // single eating point with no move
 //        rampTrip.getMoveToEat().addPoint(1485, 975 * allianceColor.getPolarity(), 50 * allianceColor.getPolarity()); // eating point //theta 57.3
-        rampTrip.getMoveToEat().addPoint(1390, 965 * allianceColor.getPolarity(), 50 * allianceColor.getPolarity()); // eating point //theta 57.3
+        rampTrip.getMoveToEat().addPoint(1420, 975 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity()); // eating point //theta 57.3
         rampTrip.getMoveToEat().setPathAngleTolerance(3);
         rampTrip.getMoveToEat().setLookAheadRadius(75);
         rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(10);
@@ -308,7 +308,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         rampTrip.getTripToShoot().getMoveToBall().setMaxTimeOutMS(4000);
         rampTrip.getTripToShoot().getMoveToBall().setFinalSearchRadius(200);
         rampTrip.getTripToShoot().getMoveToBall().setLookAheadRadius(75);
-        rampTrip.getTripToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(200);
+        rampTrip.getTripToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         rampTrip.getTripToShoot().getPurePursuitReadyIntakeStop().setDistanceThresholdMM(700);
         rampTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDegree(30);
 
