@@ -30,7 +30,7 @@ public class DepotRoundTrip extends KActionSet {
         trip = new RoundTripAction(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, target, launchPos, 2000, true, true);
         trip.setName("trip");
         trip.getMoveToBall().setLookAheadRadius(150);
-        trip.getMoveToBall().setMaxTimeOutMS(8000);
+        trip.getMoveToBall().setMaxTimeOutMS(4000);
         trip.getMoveToBall().setFinalSearchRadius(150);
         trip.getMoveToBall().setFinalAngleLockingThresholdDegree(30);
         trip.getPurePursuitReadyShooting().setDistanceThresholdMM(100);

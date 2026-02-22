@@ -16,11 +16,11 @@ public class ModuleConfig {
     public static final double STOPPER_SERVO_OPEN_POS = 0.31; //0.35
 
     //========TILTER========
-    public static final double TILT_LEFT_UP_POS = 0.83; //0.49
-    public static final double TILT_LEFT_DOWN_POS = 0.43; //0.35
+    public static final double TILT_LEFT_DOWN_POS = 0.83; //0.49
+    public static final double TILT_LEFT_UP_POS = 0.43; //0.35
 
-    public static final double TILT_RIGHT_UP_POS = 0.5;
-    public static final double TILT_RIGHT_DOWN_POS = 0.92;
+    public static final double TILT_RIGHT_DOWN_POS = 0.5;
+    public static final double TILT_RIGHT_UP_POS = 0.92;
 
 
 

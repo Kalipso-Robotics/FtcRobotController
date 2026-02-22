@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltDown;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltUp;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltDown;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReverse;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
@@ -60,8 +60,8 @@ public class TeleOp extends KOpMode {
 
     PurePursuitAction parkAction = null;
     PurePursuitAction leverAction = null;
-    TiltDown tiltDown = null;
     TiltUp tiltUp = null;
+    TiltDown tiltDown = null;
 
 
     KServoAutoAction openStopper = null;
@@ -173,7 +173,7 @@ public class TeleOp extends KOpMode {
         KLog.d("TeleOp-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
         tilter.setTilterLeftPosition(ModuleConfig.TILT_LEFT_UP_POS);
-        tilter.setTilterRightPosition(ModuleConfig.TILT_RIGHT_DOWN_POS);
+        tilter.setTilterRightPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         waitForStart();
         telemetry.setMsTransmissionInterval(200);
         sleep(50);
@@ -322,16 +322,16 @@ public class TeleOp extends KOpMode {
         }
 
         if (tiltUpPressed) {
-            if (!isPending(tiltUp)) {
-                tiltDown = null;
-                tiltUp = new TiltUp(tilter);
-                setLastTiltAction(tiltUp);
-            }
-        } else if (tiltDownPressed) {
             if (!isPending(tiltDown)) {
                 tiltUp = null;
                 tiltDown = new TiltDown(tilter);
                 setLastTiltAction(tiltDown);
+            }
+        } else if (tiltDownPressed) {
+            if (!isPending(tiltUp)) {
+                tiltDown = null;
+                tiltUp = new TiltUp(tilter);
+                setLastTiltAction(tiltUp);
             }
         }
     }

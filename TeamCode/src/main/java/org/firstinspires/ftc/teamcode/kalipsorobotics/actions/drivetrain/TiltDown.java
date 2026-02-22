@@ -8,13 +8,13 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 public class TiltDown extends KActionSet {
 
     public TiltDown(Tilter tilter) {
-        KServoAutoAction tiltLeftDown = new KServoAutoAction(tilter.getTilterLeft(), ModuleConfig.TILT_LEFT_DOWN_POS);
-        tiltLeftDown.setName("tiltLeftDown");
-        this.addAction(tiltLeftDown);
+        KServoAutoAction tiltLeftUp = new KServoAutoAction(tilter.getTilterLeft(), ModuleConfig.TILT_LEFT_DOWN_POS);
+        tiltLeftUp.setName("tiltLeftUp");
+        this.addAction(tiltLeftUp);
 
-        KServoAutoAction tiltRightDown = new KServoAutoAction(tilter.getTilterRight(), ModuleConfig.TILT_RIGHT_DOWN_POS);
-        tiltRightDown.setName("tiltRightDown");
-        this.addAction(tiltRightDown);
+        KServoAutoAction tiltRightUp = new KServoAutoAction(tilter.getTilterRight(), ModuleConfig.TILT_RIGHT_DOWN_POS);
+        tiltRightUp.setName("tiltRightUp");
+        this.addAction(tiltRightUp);
     }
 
 }

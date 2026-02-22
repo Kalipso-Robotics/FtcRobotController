@@ -25,7 +25,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous
 public class RedAutoNearRampThirdSpike extends KOpMode {
-    public static final int WAIT_AT_GATE_TIME_MS = 1400;
+    public static final int WAIT_AT_GATE_TIME_MS = 500;
     KActionSet redAutoNear;
     final double FIRST_SHOOT_X = 2400;
     final double FIRST_SHOOT_Y = 128;
@@ -200,7 +200,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     }
 
     public void handleTrip3() { //new ramp 2
-        trip3 = generateRampTrip(1200);
+        trip3 = generateRampTrip(WAIT_AT_GATE_TIME_MS);
         trip3.setName("trip3");
         trip3.setDependentActions(trip2);
         redAutoNear.addAction(trip3);
@@ -279,7 +279,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         rampTrip.getMoveToRamp().addPoint(1600, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //eat at lever
         rampTrip.getMoveToRamp().setMaxTimeOutMS(3500);
-        rampTrip.getMoveToEat().addPoint(1315, 1050 * allianceColor.getPolarity(), 75 * allianceColor.getPolarity()); // eating point //theta 57.3
+        rampTrip.getMoveToEat().addPoint(1315, 1050 * allianceColor.getPolarity(), 70 * allianceColor.getPolarity()); // eating point //theta 57.3
 //        rampTrip.getMoveToEat().addPoint(1325, 1035 * allianceColor.getPolarity(), 80 * allianceColor.getPolarity()); // eating point //theta 57.3
 
         rampTrip.getMoveToEat().setPathAngleTolerance(3);
