@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
 
 @Autonomous
-public class RedAutoDepotLogic extends RedAutoDepot{
+public class RedAutoDepotScanning extends RedAutoDepot{
 
     @Override
     protected void handleTrip3() {

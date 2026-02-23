@@ -19,8 +19,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Disabled
-@TeleOp
+
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "OdometryEncoderCalcTest")
 public class OdometryEncoderCalcTest extends LinearOpMode {
 
     @Override
