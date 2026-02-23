@@ -32,7 +32,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     final double SHOOT_NEAR_X = 1790; //2400
     final double SHOOT_NEAR_Y = 0; //300
 
-    final double FIRST_SHOOT_X = 2400;
+    final double FIRST_SHOOT_X = 2400; //1077
     final double FIRST_SHOOT_Y = 128;
 
 //    final double FIRST_SHOOT_X = SHOOT_NEAR_X;
@@ -292,7 +292,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
         // single eating point with no move
 //        rampTrip.getMoveToEat().addPoint(1485, 975 * allianceColor.getPolarity(), 50 * allianceColor.getPolarity()); // eating point //theta 57.3
-        rampTrip.getMoveToEat().addPoint(1420, 975 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity()); // eating point //theta 57.3
+        rampTrip.getMoveToEat().addPoint(1390, 985 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity()); // eating point //theta 57.3
         rampTrip.getMoveToEat().setPathAngleTolerance(3);
         rampTrip.getMoveToEat().setLookAheadRadius(75);
         rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(10);
