@@ -207,8 +207,8 @@ public class TeleOp extends KOpMode {
 
             slowDrivePressed = kGamePad1.isRightBumperPressed();
 
-            tiltUpPressed = kGamePad1.isDpadUpFirstPressed();
-            tiltDownPressed = kGamePad1.isDpadDownPressed();
+            tiltUpPressed = kGamePad1.isDpadDownFirstPressed();
+            tiltDownPressed = kGamePad1.isDpadUpFirstPressed();
 
             shootAllActionPressed = kGamePad1.isLeftBumperPressed();
             stopShooterPressed = kGamePad1.isLeftTriggerFirstPressed();
@@ -288,7 +288,8 @@ public class TeleOp extends KOpMode {
         if (parkButtonPressed) {
             if (parkAction == null || parkAction.getIsDone()) {
                 parkAction = new PurePursuitAction(driveTrain);
-                parkAction.addPoint(557.99, -1316.56 * allianceColor.getPolarity(), 0);
+                parkAction.addPoint(650, -1400 * allianceColor.getPolarity(), -90 * allianceColor.getPolarity());
+                parkAction.setFinalSearchRadius(50);
                 setLastMoveAction(parkAction);
             }
         }
@@ -307,7 +308,7 @@ public class TeleOp extends KOpMode {
         }
 
         if (slowDrivePressed) {
-            driveAction.setPowerCoefficient(0.5);
+            driveAction.setPowerCoefficient(0.3);
         } else {
             driveAction.setPowerCoefficient(1);
         }
