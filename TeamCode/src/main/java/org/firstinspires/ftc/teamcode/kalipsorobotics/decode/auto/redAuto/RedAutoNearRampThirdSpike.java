@@ -300,6 +300,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         rampTrip.getMoveToRamp().setFinalSearchRadius(250);
         rampTrip.getMoveToRamp().setMaxTimeOutMS(3000);
         //MOVE TO EATING POINT
+        //overshooting purposefully to use timeout to hold ramp and collect balls, uses smaller PID so slamming into gate not so hard
         rampTrip.getMoveToEat().addPoint(1381, 1100 * allianceColor.getPolarity(), 63 * allianceColor.getPolarity(), PurePursuitAction.P_XY / 1.2, PurePursuitAction.P_ANGLE / 1.2); // eating point //theta 57.3
         rampTrip.getMoveToEat().setPathAngleTolerance(3);
         rampTrip.getMoveToEat().setLookAheadRadius(10);
