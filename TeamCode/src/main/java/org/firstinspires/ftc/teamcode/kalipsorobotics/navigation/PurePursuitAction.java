@@ -453,12 +453,6 @@ public class  PurePursuitAction extends Action {
         this.enablePowerScalingForPath = enablePowerScalingForPath;
     }
 
-    public void setPID(double px, double py, double pangle) {
-        pidX.setP(px);
-        pidY.setP(py);
-        pidAngle.setP(pangle);
-    }
-
     public void setSleep(long sleepTimeMS) {
         this.sleepTimeMS = sleepTimeMS;
     }

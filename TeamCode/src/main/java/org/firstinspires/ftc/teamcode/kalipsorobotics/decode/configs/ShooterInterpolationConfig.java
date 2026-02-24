@@ -50,7 +50,7 @@ public class ShooterInterpolationConfig {
     public static double[] shooterData = {
             810, 45.4 + rpsTune, MIN_HOOD,
             1050, 45.4 + rpsTune, compensatedMaxHood - 0.08,
-            1310, 47.7 + rpsTune, compensatedMaxHood - 0.075, //roughly first shot for near auto
+            1310, 47.7 + rpsTune, compensatedMaxHood - 0.08, //roughly first shot for near auto
             1518, 49.6 + rpsTune, compensatedMaxHood - 0.05,
             1705, 51.6 + rpsTune, compensatedMaxHood - 0.05,
             1898, 52.8 + rpsTune, compensatedMaxHood - 0.02,

@@ -33,13 +33,13 @@ public class RampCycleAction extends KActionSet {
     Point targetPoint;
     Point launchPos;
     double waitForShooterReadyMS;
-    double waitTime; // wait for intake
+    double waitTimeAfterMoveToEat; // wait for intake
     double waitForGate;
 
     ShooterRun shooterRun;
 
     public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTime, double waitForGate) {
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTimeAfterMoveToEat, double waitForGate) {
         this.opModeUtilities = opModeUtilities;
         this.driveTrain = driveTrain;
         this.turretAutoAlign = turretAutoAlign;
@@ -49,7 +49,7 @@ public class RampCycleAction extends KActionSet {
         this.targetPoint = targetPoint;
         this.launchPos = launchPos;
         this.waitForShooterReadyMS = waitForShooterReadyMS;
-        this.waitTime = waitTime;
+        this.waitTimeAfterMoveToEat = waitTimeAfterMoveToEat;
         this.waitForGate = waitForGate;
 
         moveToRamp = new PurePursuitAction(driveTrain);
@@ -84,8 +84,8 @@ public class RampCycleAction extends KActionSet {
     }
 
     public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTime) {
-        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, waitTime, 0);
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTimeAfterMoveToEat) {
+        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, waitTimeAfterMoveToEat, 0);
     }
 
     @Override
@@ -110,19 +110,19 @@ public class RampCycleAction extends KActionSet {
         intakeFullAction.setDependentActions(moveToRamp);
         this.addAction(intakeFullAction);
 
-        WaitAction waitGate = new WaitAction(waitForGate);
-        waitGate.setName("waitForGate");
-        waitGate.setDependentActions(moveToRamp);
-        this.addAction(waitGate);
+//        WaitAction waitGate = new WaitAction(waitForGate);
+//        waitGate.setName("waitForGate");
+//        waitGate.setDependentActions(moveToRamp);
+//        this.addAction(waitGate);
 
-        moveToEat.setDependentActions(waitGate);
+        moveToEat.setDependentActions(moveToRamp);
 
-        WaitAction waitAction = new WaitAction(waitTime);
-        waitAction.setName("waitForIntake");
-        waitAction.setDependentActions(moveToEat);
-        this.addAction(waitAction);
+        WaitAction waitActionAfterMoveToEat = new WaitAction(waitTimeAfterMoveToEat);
+        waitActionAfterMoveToEat.setName("waitForIntake");
+        waitActionAfterMoveToEat.setDependentActions(moveToEat);
+        this.addAction(waitActionAfterMoveToEat);
 
-        tripToShoot.setDependentActions(waitAction);
+        tripToShoot.setDependentActions(waitActionAfterMoveToEat);
 
         ShooterStop shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
