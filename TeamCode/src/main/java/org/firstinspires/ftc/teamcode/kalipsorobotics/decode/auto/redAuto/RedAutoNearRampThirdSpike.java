@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 @Autonomous
 public class RedAutoNearRampThirdSpike extends KOpMode {
 //    public static final int WAIT_AT_GATE_TIME_MS = 500;
-    public static final int WAIT_AT_GATE_TIME_MS = 1250;
+    public static final int WAIT_AT_GATE_TIME_MS = 0; //1250
 
     KActionSet redAutoNear;
     final double SHOOT_NEAR_X = 1790; //2400
@@ -292,14 +292,23 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
         // single eating point with no move
 //        rampTrip.getMoveToEat().addPoint(1485, 975 * allianceColor.getPolarity(), 50 * allianceColor.getPolarity()); // eating point //theta 57.3
-        rampTrip.getMoveToEat().addPoint(1390, 985 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity()); // eating point //theta 57.3
+        //MOVE TO RAMP
+        rampTrip.getMoveToRamp().addPoint(1300, 900 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity());
+        rampTrip.getMoveToRamp().setPathAngleTolerance(10);
+        rampTrip.getMoveToRamp().setLookAheadRadius(75);
+        rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(10);
+        rampTrip.getMoveToRamp().setFinalSearchRadius(75);
+        rampTrip.getMoveToRamp().setMaxTimeOutMS(3000);
+        //MOVE TO EATING POINT
+        rampTrip.getMoveToEat().addPoint(1425, 1025 * allianceColor.getPolarity(), 55 * allianceColor.getPolarity()); // eating point //theta 57.3
         rampTrip.getMoveToEat().setPathAngleTolerance(3);
-        rampTrip.getMoveToEat().setLookAheadRadius(75);
-        rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(10);
-        rampTrip.getMoveToEat().setFinalSearchRadius(75);
+        rampTrip.getMoveToEat().setLookAheadRadius(10);
+        rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(3);
+        rampTrip.getMoveToEat().setFinalSearchRadius(10);
+        rampTrip.getMoveToEat().setPID(PurePursuitAction.P_XY / 3, PurePursuitAction.P_XY / 3, PurePursuitAction.P_ANGLE / 3);
 //        rampTrip.getMoveToEat().setMaxTimeOutMS(1300);
-        rampTrip.getMoveToEat().setMaxTimeOutMS(3000);
-        // move to launch
+        rampTrip.getMoveToEat().setMaxTimeOutMS(1300);
+        //MOVE TO SHOOT
 //        rampTrip.getTripToShoot().getMoveToBall().addPoint(1535, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         rampTrip.getTripToShoot().getMoveToBall().addPoint(1509 , 932  * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         rampTrip.getTripToShoot().getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
