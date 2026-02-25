@@ -38,7 +38,7 @@ enum DepotTrips {
     SWEEP_800
 }
 
-@Autonomous(name = "RedAutoDepot")
+@Autonomous
 public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
     public final static double SHOOT_FAR_X = 150;
