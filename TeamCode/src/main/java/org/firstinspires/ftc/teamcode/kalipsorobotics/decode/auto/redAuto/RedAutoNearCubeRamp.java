@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 
 
-@Autonomous
+@Disabled
 public class RedAutoNearCubeRamp extends RedAutoNearRamp {
 
     @Override

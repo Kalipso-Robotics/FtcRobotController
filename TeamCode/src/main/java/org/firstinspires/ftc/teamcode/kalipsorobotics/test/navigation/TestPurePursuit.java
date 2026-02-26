@@ -13,7 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Disabled
-@TeleOp
 public class TestPurePursuit extends KOpMode {
 
     @Override

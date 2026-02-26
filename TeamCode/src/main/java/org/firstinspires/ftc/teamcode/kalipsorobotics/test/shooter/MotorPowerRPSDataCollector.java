@@ -5,6 +5,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -30,7 +32,7 @@ import java.util.ArrayList;
  * Output file columns: Power, RPS_MAX, RPS_MIN, RPS_avg, Battery_Voltage
  */
 
-@TeleOp(name = "Motor Power RPS Data Collector", group = "Test")
+@Disabled
 public class MotorPowerRPSDataCollector extends LinearOpMode {
 
     // Test parameters

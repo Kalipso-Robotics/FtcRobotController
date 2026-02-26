@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.blueAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAutoNearCubeRamp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
-@Autonomous
+@Disabled
 public class BlueAutoNearCubeRamp extends RedAutoNearCubeRamp {
 
     @Override

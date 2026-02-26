@@ -15,7 +15,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 @Disabled
-@TeleOp
 public class TestTeleOp extends KOpMode {
 
     KActionSet testAutoDrive;

@@ -30,7 +30,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     public static final int WAIT_AT_GATE_TIME_MS = 0; //1250
 
     KActionSet redAutoNear;
-    final double SHOOT_NEAR_X = 1790; //2400
+    final double SHOOT_NEAR_X = 1850; //2400
     final double SHOOT_NEAR_Y = 0; //300
 
     final double FIRST_SHOOT_X = 2400; //1077
@@ -39,8 +39,8 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 //    final double FIRST_SHOOT_X = SHOOT_NEAR_X;
 //    final double FIRST_SHOOT_Y = SHOOT_NEAR_Y;
 
-    final double FINAL_SHOOT_NEAR_X = 2475;
-    final double FINAL_SHOOT_NEAR_Y = 0; //300
+    final double FINAL_SHOOT_NEAR_X = 2625;
+    final double FINAL_SHOOT_NEAR_Y = -100; //300
     final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300
     Point firstShotTargetPoint = Shooter.TARGET_POINT;
@@ -186,8 +186,8 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip1.setName("trip1");
         trip1.getShooterReady().setName("shooterReady_trip1");
         trip1.getMoveToBall().clearPoints();
-        trip1.getMoveToBall().addPoint(1450, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getMoveToBall().addPoint(1450, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1400, 225 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToBall().addPoint(1400, 1025 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         // move to launch
         trip1.getMoveToBall().addPoint(1500, nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip1.getMoveToBall().addPoint(nearLaunchPoint.getX(), nearLaunchPoint.getY() * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
@@ -229,7 +229,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         //Before Eat
         trip4Spike.getMoveToBall().addPoint(775, 370 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //Eating
-        trip4Spike.getMoveToBall().addPoint(775, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4Spike.getMoveToBall().addPoint(775, 950 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip4Spike.getMoveToBall().addPoint(775, 850 * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4Spike.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 150 * allianceColor.getPolarity());
         trip4Spike.getMoveToBall().setEnablePowerScalingForPath(true);
@@ -295,15 +295,15 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         // single eating point with no move
 //        rampTrip.getMoveToEat().addPoint(1485, 975 * allianceColor.getPolarity(), 50 * allianceColor.getPolarity()); // eating point //theta 57.3
         //MOVE TO RAMP
-        rampTrip.getMoveToRamp().addPoint(1350, 800 * allianceColor.getPolarity(), 53 * allianceColor.getPolarity());
+        rampTrip.getMoveToRamp().addPoint(1325, 825 * allianceColor.getPolarity(), 53 * allianceColor.getPolarity());
         rampTrip.getMoveToRamp().setPathAngleTolerance(45);
         rampTrip.getMoveToRamp().setLookAheadRadius(75);
         rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(30);
-        rampTrip.getMoveToRamp().setFinalSearchRadius(250);
+        rampTrip.getMoveToRamp().setFinalSearchRadius(150);
         rampTrip.getMoveToRamp().setMaxTimeOutMS(3000);
         //MOVE TO EATING POINT
         //overshooting purposefully to use timeout to hold ramp and collect balls, uses smaller PID so slamming into gate not so hard
-        rampTrip.getMoveToEat().addPoint(1350, 1140 * allianceColor.getPolarity(), 59 * allianceColor.getPolarity()); // eating point //theta 57.3
+        rampTrip.getMoveToEat().addPoint(1325, 1100 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity(), PurePursuitAction.P_XY / 1.2, PurePursuitAction.P_ANGLE / 1.2); // eating point //theta 57.3
         rampTrip.getMoveToEat().setPathAngleTolerance(3);
         rampTrip.getMoveToEat().setLookAheadRadius(10);
         rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(3);

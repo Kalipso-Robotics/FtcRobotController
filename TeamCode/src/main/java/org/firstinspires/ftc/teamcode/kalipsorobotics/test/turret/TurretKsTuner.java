@@ -4,6 +4,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -30,7 +32,7 @@ import java.util.Locale;
  *
  * Data is automatically saved periodically to prevent loss if program stops.
  */
-@TeleOp(name = "Turret kS Tuner", group = "Tuning")
+@Disabled
 public class TurretKsTuner extends LinearOpMode {
 
     private OpModeUtilities opModeUtilities;
