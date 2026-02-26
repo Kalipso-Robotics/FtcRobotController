@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Wa
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.RampCycleAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
@@ -168,6 +169,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
             setAutoDelayAction.updateCheckDone();
         }
         KLog.d("auto", "--------------NEAR AUTO STARTED-------------");
+        stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         waitForStart();
         while (opModeIsActive()) {
             redAutoNear.updateCheckDone();

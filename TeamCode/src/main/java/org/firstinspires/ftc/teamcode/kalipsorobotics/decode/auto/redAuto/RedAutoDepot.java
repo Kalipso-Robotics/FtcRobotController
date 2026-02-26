@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
@@ -196,6 +197,7 @@ public class RedAutoDepot extends KOpMode {
         KLog.d("auto", "-------------" +
                 "-DEPOT AUTO STARTED-------------");
         KLog.d("RedAutoDepot-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         waitForStart();
         KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
         while (opModeIsActive()) {

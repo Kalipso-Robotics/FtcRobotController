@@ -89,7 +89,7 @@ public class  PurePursuitAction extends Action {
     private boolean hasOvershot = false;
 
     ElapsedTime timer;
-    private double pathAngleToleranceRadian;
+    private double pathAngleToleranceDeg;
 
     /**
      * Should not do more than 24 inches or 600mm moves in X and Y (single move)
@@ -104,7 +104,7 @@ public class  PurePursuitAction extends Action {
         this.pidAngle = new PidNav(P_ANGLE, 0, 0, 0.0050);
 
         finalAngleLockingThresholdDegree = FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE;
-        this.pathAngleToleranceRadian = Path.PATH_ANGLE_TOLERANCE;
+        this.pathAngleToleranceDeg = Path.PATH_ANGLE_TOLERANCE;
         this.timeoutTimer = new ElapsedTime();
         this.actionTime = new ElapsedTime();
         this.prevFollow = Optional.empty();
@@ -121,9 +121,6 @@ public class  PurePursuitAction extends Action {
         this.pidY = new PidNav(pidXY, 0, 0, 0.1000);
         this.pidAngle = new PidNav(pidAngle, 0, 0, 0.0050);
 
-        finalAngleLockingThresholdDegree = FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE;
-        this.pathAngleToleranceRadian = Path.PATH_ANGLE_TOLERANCE;
-
         this.timeoutTimer = new ElapsedTime();
         this.actionTime = new ElapsedTime();
 
@@ -138,7 +135,7 @@ public class  PurePursuitAction extends Action {
     public void addPoint(double x, double y, double headingDeg) {
         double headingRad = Math.toRadians(headingDeg);
         //double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
-       // double adaptivePAngel = calcAdaptivePAngle(headingRad);
+        // double adaptivePAngel = calcAdaptivePAngle(headingRad);
         //double[] adaptiveP = {P_XY, P_ANGLE};
         pathPoints.add(new Position(x, y, headingRad, P_XY, P_ANGLE));
         //Log.d("purepursaction", "added point " + x + ", " + y);
@@ -174,7 +171,7 @@ public class  PurePursuitAction extends Action {
     private double calcAdaptivePAngle(double theta) {
         Position pos = pathPoints.isEmpty() ? new Position(0, 0, 0) : pathPoints.get(pathPoints.size() - 1);
         double headingDelta = Math.abs(pos.getTheta() - theta);
-        if (headingDelta < Math.toRadians(finalAngleLockingThresholdDegree)) {
+        if (headingDelta < finalAngleLockingThresholdDegree) {
             return P_ANGLE_SLOW;
         }
         return 1.0 / headingDelta;
@@ -248,17 +245,16 @@ public class  PurePursuitAction extends Action {
         double powerX = target.getPidX().getPower(xError);
         double powerY = target.getPidY().getPower(yError);
 
-        if (!isTargetLast(target) || (isTargetLast(target) && !nearEndPoint(currentPosition))) {
+        if (!isTargetLast(currentPosition) || (isTargetLast(currentPosition) && !nearEndPoint(currentPosition))) {
             powerX *= 1.5;
             powerY *= 1.5;
-            powerAngle *= 1.5;
             KLog.d("PurePursuitScale", "Scaling UP x and y");
         }
 
         double finalPowerX = powerX;
         double finalPowerY = powerY;
-        double finalPowerAngle = powerAngle;
-        KLog.d("directionalpowerlook", () -> String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", finalPowerX, finalPowerY, finalPowerAngle));
+        KLog.d("directionalpowerlook", () -> String.format("power x=%.4f, power y=%.5f, powertheta=%.6f", finalPowerX, finalPowerY,
+                powerAngle));
 
         double fLeftPower = powerX + powerY + powerAngle;
         double bLeftPower = powerX - powerY + powerAngle;
@@ -266,12 +262,12 @@ public class  PurePursuitAction extends Action {
         double bRightPower = powerX + powerY - powerAngle;
 
         if (enablePowerScalingForPath && (distanceToTarget > (Math.max(currentLookAheadRadius, lastSearchRadius) * 2))) {
-                double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
-                double scale = 1/max * 0.93;
-                fLeftPower = fLeftPower * scale;
-                bLeftPower = bLeftPower * scale;
-                fRightPower = fRightPower * scale;
-                bRightPower = bRightPower * scale;
+            double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
+            double scale = 1/max * 0.93;
+            fLeftPower = fLeftPower * scale;
+            bLeftPower = bLeftPower * scale;
+            fRightPower = fRightPower * scale;
+            bRightPower = bRightPower * scale;
         }
         double finalFLeftPower = fLeftPower;
         double finalFRightPower = fRightPower;
@@ -304,7 +300,7 @@ public class  PurePursuitAction extends Action {
         if (!hasStarted) {
             pathPoints.add(0, new Position(SharedData.getOdometryWheelIMUPosition())); //add starting position
             path = new Path(pathPoints);
-            path.setPathAngleTolerance(pathAngleToleranceRadian);
+            path.setPathAngleTolerance(pathAngleToleranceDeg);
             startTimeMS = System.currentTimeMillis();
             hasStarted = true;
             //lastPosition = wheelOdometry.getCurrentPosition();
@@ -418,7 +414,7 @@ public class  PurePursuitAction extends Action {
             }
 
             KLog.d("PurePursuitTargeting", () -> String.format("Target index: %d | Target theta: %.2f | distanceFromPrev: %.2f | segmentLength: %.2f | targetAngle: %.2f",
-                            path.getIndex(target), target.getTheta(), distanceFromPrev, segmentLength, targetAngle));
+                    path.getIndex(target), target.getTheta(), distanceFromPrev, segmentLength, targetAngle));
 
             return targetAngle;
         }
@@ -438,7 +434,7 @@ public class  PurePursuitAction extends Action {
 
         if (checkDoneCounter >= maxCheckDoneCounter) {
             //Log.d("purepursaction_debug_checkDone",
-                    //"Done" + checkDoneCounter + "name:" +  name + "Pos: " + currentPosition);
+            //"Done" + checkDoneCounter + "name:" +  name + "Pos: " + currentPosition);
             isDone = true;
             KLog.d("ActionTime", () -> this.getName() + " done in " + actionTime.milliseconds() + " ms");
             KLog.d("PurePursuitTime", () -> "Finished at: " + timer.milliseconds());
@@ -478,7 +474,7 @@ public class  PurePursuitAction extends Action {
     }
 
     public void setPathAngleTolerance(double pathAngleTolerance) {
-        this.pathAngleToleranceRadian = Math.toRadians(pathAngleTolerance);
+        this.pathAngleToleranceDeg = pathAngleTolerance;
     }
 
 
@@ -491,7 +487,7 @@ public class  PurePursuitAction extends Action {
             if ((distanceToPoint < distanceThreshold)) {
                 KLog.d("PurePursuitAction_WithinDistancePoint", () ->
                         "distanceToPoint: " + distanceToPoint +
-                        " targetPosition " + path.getPoint(index));
+                                " targetPosition " + path.getPoint(index));
                 return true;
             }
         }
