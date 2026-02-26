@@ -73,14 +73,14 @@ public class Shooter {
     }
 
     public double getRPS() {
-        return shooter2.getRPS();
+        return shooter1.getRPS();
     }
 
     public boolean isAtTargetRPS(double effectiveTolerance) {
-        boolean isWithinTarget = shooter2.isAtTargetRPS(effectiveTolerance);
+        boolean isWithinTarget = shooter1.isAtTargetRPS(effectiveTolerance);
         KLog.d("ShooterRun_Metrics", () ->
                 "Delta: " + (targetRPS - currentRPS) +
-                        " Power: " + getShooter2().getPower() +
+                        " Power: " + getShooter1().getPower() +
                         " Voltage: " + SharedData.getVoltage() +
                         " targetRps: " + targetRPS +
                         " currentRps: " + currentRPS +
@@ -91,7 +91,7 @@ public class Shooter {
     }
 
     public boolean isRunning() {
-        return Math.abs(shooter2.getPower()) > 0;
+        return Math.abs(shooter1.getPower()) > 0;
     }
 
 
@@ -174,8 +174,8 @@ public class Shooter {
 //        shooter1.getPIDFController().setKa(ShooterConfig.kA);
 //        shooter2.getPIDFController().setKa(ShooterConfig.kA);
 
-        currentRPS = shooter2.goToRPS(targetRPS);
-        shooter1.goToRPS(targetRPS);
+        currentRPS = shooter1.goToRPS(targetRPS);
+        shooter2.goToRPS(targetRPS);
         //asymetric PID
 //        if (targetRPS - currentRPS < 0) {
 //            shooter1.getPIDFController().setKp(ShooterConfig.kp_rampDown);
@@ -239,7 +239,7 @@ public class Shooter {
 
     public void setTargetRPS(double targetRPS) {
         this.targetRPS = targetRPS;
-        if (shooter2 != null) {
+        if (shooter1 != null) {
             shooter1.setTargetRPS(targetRPS);
             shooter2.setTargetRPS(targetRPS);
         }

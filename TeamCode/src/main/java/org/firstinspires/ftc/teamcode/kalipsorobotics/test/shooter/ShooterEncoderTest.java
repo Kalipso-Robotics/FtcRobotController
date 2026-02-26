@@ -18,6 +18,19 @@ public class ShooterEncoderTest extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
 
+            if (gamepad1.right_bumper) {
+                shooter.getShooter1().setPower(0.1);
+            } else {
+                shooter.getShooter1().setPower(0);
+            }
+
+            if (gamepad1.left_bumper) {
+                shooter.getShooter2().setPower(0.1);
+            } else {
+                shooter.getShooter2().setPower(0);
+            }
+
+
             telemetry.addData("shooter1", shooter.getShooter1().getCurrentPosition());
             telemetry.addData("shooter2", shooter.getShooter2().getCurrentPosition());
 
