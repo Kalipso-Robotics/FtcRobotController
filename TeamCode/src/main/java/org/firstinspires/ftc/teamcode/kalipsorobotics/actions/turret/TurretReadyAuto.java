@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class TurretReadyAuto extends Action {
     private final double maxTimeoutMS;
     private final ElapsedTime timeoutTimer;
-    private static final double DEFAULT_MAX_TIMEOUT_MS = 4000;
+    private static final double DEFAULT_MAX_TIMEOUT_MS = 3000;
     private final TurretAutoAlign turretAutoAlign;
     public TurretReadyAuto(TurretAutoAlign turretAutoAlign) {
         this.turretAutoAlign = turretAutoAlign;

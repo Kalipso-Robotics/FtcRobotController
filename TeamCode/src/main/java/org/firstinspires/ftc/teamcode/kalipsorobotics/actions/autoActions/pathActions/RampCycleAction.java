@@ -54,27 +54,27 @@ public class RampCycleAction extends KActionSet {
 
         moveToRamp = new PurePursuitAction(driveTrain);
         moveToRamp.setName("rampCycleTrip1");
-        moveToRamp.setPathAngleTolerance(10);
-        moveToRamp.setFinalSearchRadius(100);
-        moveToRamp.setFinalAngleLockingThresholdDegree(10);
+        moveToRamp.setPathAngleToleranceDeg(10);
+        moveToRamp.setFinalSearchRadiusMM(100);
+        moveToRamp.setFinalAngleLockingThresholdDeg(10);
         moveToRamp.setMaxTimeOutMS(3000);
         this.addAction(moveToRamp);
 
         moveToEat = new PurePursuitAction(driveTrain);
         moveToEat.setName("rampCycleTrip2");
-        moveToEat.setPathAngleTolerance(10);
-        moveToEat.setFinalSearchRadius(100);
-        moveToEat.setFinalAngleLockingThresholdDegree(10);
+        moveToEat.setPathAngleToleranceDeg(10);
+        moveToEat.setFinalSearchRadiusMM(100);
+        moveToEat.setFinalAngleLockingThresholdDeg(10);
         moveToRamp.setMaxTimeOutMS(2000);
         this.addAction(moveToEat);
 
         tripToShoot = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,targetPoint, launchPos, 500);
         tripToShoot.setName("rampCycleTrip3");
         tripToShoot.getMoveToBall().clearPoints();
-        tripToShoot.getMoveToBall().setFinalSearchRadius(200);
+        tripToShoot.getMoveToBall().setFinalSearchRadiusMM(200);
         tripToShoot.getMoveToBall().setMaxTimeOutMS(4000);
-        tripToShoot.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
-        tripToShoot.getMoveToBall().setPathAngleTolerance(50);
+        tripToShoot.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
+        tripToShoot.getMoveToBall().setPathAngleToleranceDeg(50);
         this.addAction(tripToShoot);
     }
 

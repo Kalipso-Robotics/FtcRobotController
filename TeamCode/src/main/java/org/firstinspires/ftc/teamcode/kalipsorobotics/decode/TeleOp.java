@@ -289,7 +289,7 @@ public class TeleOp extends KOpMode {
             if (parkAction == null || parkAction.getIsDone()) {
                 parkAction = new PurePursuitAction(driveTrain);
                 parkAction.addPoint(650, -1400 * allianceColor.getPolarity(), -90 * allianceColor.getPolarity());
-                parkAction.setFinalSearchRadius(50);
+                parkAction.setFinalSearchRadiusMM(50);
                 setLastMoveAction(parkAction);
             }
         }

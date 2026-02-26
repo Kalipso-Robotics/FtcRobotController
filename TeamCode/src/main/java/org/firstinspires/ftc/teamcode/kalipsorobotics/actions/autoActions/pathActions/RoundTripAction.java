@@ -63,9 +63,9 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setName("moveToBall");
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
-        moveToBalls.setFinalAngleLockingThresholdDegree(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE);
+        moveToBalls.setFinalAngleLockingThresholdDeg(FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE);
         moveToBalls.setLookAheadRadius(125);  // Increased from default 75 to reduce oscillation during heading changes
-        moveToBalls.setFinalSearchRadius(150);
+        moveToBalls.setFinalSearchRadiusMM(150);
         moveToBalls.setMaxTimeOutMS(8000);
 
         purePursuitReadyIntakeStop = new PurePursuitReady(moveToBalls, 600);
@@ -86,7 +86,7 @@ public class RoundTripAction extends KActionSet {
         intakeStop.setDependentActions(purePursuitReadyIntakeStop);
         this.addAction(intakeStop);
 
-        this.purePursuitReadyShooting = new PurePursuitReady(moveToBalls, moveToBall.getLastSearchRadius());
+        this.purePursuitReadyShooting = new PurePursuitReady(moveToBalls, moveToBall.getLastSearchRadiusMM());
         purePursuitReadyShooting.setName("purePursuitReadyShooting");
         this.addAction(purePursuitReadyShooting);
 

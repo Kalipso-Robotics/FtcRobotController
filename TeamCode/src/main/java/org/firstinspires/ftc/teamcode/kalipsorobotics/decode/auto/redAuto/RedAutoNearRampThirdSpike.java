@@ -127,8 +127,8 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip0.setDependentActions(delayBeforeStart);
         trip0.setShouldShooterStop(false);
         trip0.getPurePursuitReadyShooting().setDistanceThresholdMM(150);
-        trip0.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
-        trip0.getMoveToBall().setFinalSearchRadius(150);
+        trip0.getMoveToBall().setFinalAngleLockingThresholdDeg(50);
+        trip0.getMoveToBall().setFinalSearchRadiusMM(150);
         redAutoNear.addAction(trip0);
 
         // ----------------- TRIP 1 ----------------------
@@ -195,9 +195,9 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip1.setShouldShooterStop(false);
         trip1.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         trip1.getMoveToBall().setMaxTimeOutMS(9000);
-        trip1.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
-        trip1.getMoveToBall().setPathAngleTolerance(50);
-        trip1.getMoveToBall().setFinalSearchRadius(200);
+        trip1.getMoveToBall().setFinalAngleLockingThresholdDeg(50);
+        trip1.getMoveToBall().setPathAngleToleranceDeg(50);
+        trip1.getMoveToBall().setFinalSearchRadiusMM(200);
 
         KLog.d("Auto_Shooting", () -> "Shot_1" + " - " +
                         "Delta RPS: " + (shooter.getRPS() - trip1.getShooterReady().getShooterRun().getTargetRPS())  +
@@ -236,8 +236,8 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         trip4Spike.setShouldShooterStop(false);
         trip4Spike.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         trip4Spike.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(800);
-        trip4Spike.getMoveToBall().setFinalSearchRadius(200);
-        trip4Spike.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
+        trip4Spike.getMoveToBall().setFinalSearchRadiusMM(200);
+        trip4Spike.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
         KLog.d("Auto_Shooting", () -> "Shot_4" + " - " +
                 "Delta RPS: " + (shooter.getRPS() - trip4Spike.getShooterReady().getShooterRun().getTargetRPS())  +
                 "Distance " + trip4Spike.getShooterReady().getShooterRun().getDistanceMM() +
@@ -263,9 +263,9 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         // eat balls
         trip5.getMoveToBall().addPoint(1950, 800 * allianceColor.getPolarity() , 90 * allianceColor.getPolarity()); //600 y
 
-        trip5.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
+        trip5.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
         trip5.setShouldShooterStop(true);
-        trip5.getMoveToBall().setFinalSearchRadius(300);
+        trip5.getMoveToBall().setFinalSearchRadiusMM(300);
         trip5.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         trip5.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(400);
         // move to launch
@@ -296,18 +296,18 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 //        rampTrip.getMoveToEat().addPoint(1485, 975 * allianceColor.getPolarity(), 50 * allianceColor.getPolarity()); // eating point //theta 57.3
         //MOVE TO RAMP
         rampTrip.getMoveToRamp().addPoint(1325, 825 * allianceColor.getPolarity(), 53 * allianceColor.getPolarity());
-        rampTrip.getMoveToRamp().setPathAngleTolerance(45);
-        rampTrip.getMoveToRamp().setLookAheadRadius(75);
-        rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(30);
-        rampTrip.getMoveToRamp().setFinalSearchRadius(150);
+        rampTrip.getMoveToRamp().setPathAngleToleranceDeg(30);
+        rampTrip.getMoveToRamp().setLookAheadRadius(150);
+        rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDeg(30);
+        rampTrip.getMoveToRamp().setFinalSearchRadiusMM(150);
         rampTrip.getMoveToRamp().setMaxTimeOutMS(3000);
         //MOVE TO EATING POINT
         //overshooting purposefully to use timeout to hold ramp and collect balls, uses smaller PID so slamming into gate not so hard
-        rampTrip.getMoveToEat().addPoint(1325, 1100 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity(), PurePursuitAction.P_XY / 1.2, PurePursuitAction.P_ANGLE / 1.2); // eating point //theta 57.3
-        rampTrip.getMoveToEat().setPathAngleTolerance(3);
+        rampTrip.getMoveToEat().addPoint(1325, 1125 * allianceColor.getPolarity(), 75 * allianceColor.getPolarity(), PurePursuitAction.P_XY / 1.2, PurePursuitAction.P_ANGLE / 1.2); // eating point //theta 57.3
+        rampTrip.getMoveToEat().setPathAngleToleranceDeg(1);
         rampTrip.getMoveToEat().setLookAheadRadius(10);
-        rampTrip.getMoveToEat().setFinalAngleLockingThresholdDegree(3);
-        rampTrip.getMoveToEat().setFinalSearchRadius(10);
+        rampTrip.getMoveToEat().setFinalAngleLockingThresholdDeg(1);
+        rampTrip.getMoveToEat().setFinalSearchRadiusMM(10);
         rampTrip.getMoveToEat().setMaxTimeOutMS(1500);
         //MOVE TO SHOOT
 //        rampTrip.getTripToShoot().getMoveToBall().addPoint(1535, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
@@ -316,11 +316,11 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         rampTrip.getTripToShoot().setShouldShooterStop(false);
 //        rampTrip.getTripToShoot().getMoveToBall().setMaxTimeOutMS(3000);
         rampTrip.getTripToShoot().getMoveToBall().setMaxTimeOutMS(4000);
-        rampTrip.getTripToShoot().getMoveToBall().setFinalSearchRadius(200);
+        rampTrip.getTripToShoot().getMoveToBall().setFinalSearchRadiusMM(200);
         rampTrip.getTripToShoot().getMoveToBall().setLookAheadRadius(75);
         rampTrip.getTripToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         rampTrip.getTripToShoot().getPurePursuitReadyIntakeStop().setDistanceThresholdMM(700);
-        rampTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDegree(30);
+        rampTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDeg(30);
 
         KLog.d("Auto_Shooting", () -> "Shot_Ramp" + " - " +
                 "Delta RPS: " + (shooter.getRPS() - rampTrip.getTripToShoot().getShooterReady().getShooterRun().getTargetRPS())  +

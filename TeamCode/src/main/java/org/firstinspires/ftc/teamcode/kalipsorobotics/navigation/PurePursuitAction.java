@@ -29,7 +29,7 @@ public class  PurePursuitAction extends Action {
     public static final double P_ANGLE_SLOW = P_ANGLE / 2;
     private static final double MINIMUM_POWER = 0.12;
 
-    private double lastSearchRadius = LAST_RADIUS_MM;
+    private double lastSearchRadiusMM = LAST_RADIUS_MM;
     private double lookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
     private final List<Position> pathPoints = new ArrayList<>();
@@ -112,7 +112,7 @@ public class  PurePursuitAction extends Action {
         //Log.d("purepursaction", "constructed");
 
         this.dependentActions.add(new DoneStateAction());
-        this.withinRangeRadiusMM = lastSearchRadius;
+        this.withinRangeRadiusMM = lastSearchRadiusMM;
     }
 
     public PurePursuitAction(DriveTrain driveTrain, double pidXY, double pidAngle) {
@@ -132,7 +132,7 @@ public class  PurePursuitAction extends Action {
         //Log.d("purepursaction", "constructed");
 
         this.dependentActions.add(new DoneStateAction());
-        this.withinRangeRadiusMM = lastSearchRadius;
+        this.withinRangeRadiusMM = lastSearchRadiusMM;
     }
 
     public void addPoint(double x, double y, double headingDeg) {
@@ -212,8 +212,8 @@ public class  PurePursuitAction extends Action {
         return new double[] {adaptiveXY, adaptiveTheta};
     }
 
-    public void setFinalSearchRadius(double searchRadiusMM){
-        this.lastSearchRadius = searchRadiusMM;
+    public void setFinalSearchRadiusMM(double searchRadiusMM){
+        this.lastSearchRadiusMM = searchRadiusMM;
     }
     public void setLookAheadRadius(double radiusMM){
         this.lookAheadRadius = radiusMM;
@@ -265,7 +265,7 @@ public class  PurePursuitAction extends Action {
         double fRightPower = powerX - powerY - powerAngle;
         double bRightPower = powerX + powerY - powerAngle;
 
-        if (enablePowerScalingForPath && (distanceToTarget > (Math.max(currentLookAheadRadius, lastSearchRadius) * 2))) {
+        if (enablePowerScalingForPath && (distanceToTarget > (Math.max(currentLookAheadRadius, lastSearchRadiusMM) * 2))) {
             double max = Math.max(Math.max(Math.abs(fLeftPower), Math.abs(bLeftPower)), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)));
             double scale = 1/max * 0.93;
             fLeftPower = fLeftPower * scale;
@@ -331,7 +331,7 @@ public class  PurePursuitAction extends Action {
         Position lastPoint = path.getLastPoint();
 
         if (prevFollow.isPresent() && (path.getIndex(prevFollow.get()) > (path.numPoints() - 2))) {
-            currentLookAheadRadius = lastSearchRadius;
+            currentLookAheadRadius = lastSearchRadiusMM;
         }
         follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
@@ -473,12 +473,12 @@ public class  PurePursuitAction extends Action {
         return finalAngleLockingThresholdDegree;
     }
 
-    public void setFinalAngleLockingThresholdDegree(double finalAngleLockingThresholdDegree) {
+    public void setFinalAngleLockingThresholdDeg(double finalAngleLockingThresholdDegree) {
         this.finalAngleLockingThresholdDegree = finalAngleLockingThresholdDegree;
     }
 
-    public void setPathAngleTolerance(double pathAngleTolerance) {
-        this.pathAngleToleranceRadian = Math.toRadians(pathAngleTolerance);
+    public void setPathAngleToleranceDeg(double pathAngleToleranceDeg) {
+        this.pathAngleToleranceRadian = Math.toRadians(pathAngleToleranceDeg);
     }
 
 
@@ -499,7 +499,7 @@ public class  PurePursuitAction extends Action {
     }
 
 
-    public double getLastSearchRadius() {
-        return lastSearchRadius;
+    public double getLastSearchRadiusMM() {
+        return lastSearchRadiusMM;
     }
 }

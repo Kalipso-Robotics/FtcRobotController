@@ -117,7 +117,7 @@ public class RedAutoNearCube extends KOpMode {
         trip0.setDependentActions(delayBeforeStart);
         trip0.setShouldShooterStop(false);
         trip0.getPurePursuitReadyShooting().setDistanceThresholdMM(250);
-        trip0.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
+        trip0.getMoveToBall().setFinalAngleLockingThresholdDeg(50);
         redAutoNear.addAction(trip0);
 
         // ----------------- TRIP 1 (1st Spike + Lever)----------------------
@@ -134,9 +134,9 @@ public class RedAutoNearCube extends KOpMode {
         trip1.getMoveToBall().addPoint(1725, 850 * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
         // move to shoot
         trip1.getMoveToBall().addPoint(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity(), 45 * allianceColor.getPolarity());
-        trip1.getMoveToBall().setFinalAngleLockingThresholdDegree(45);
+        trip1.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
         trip1.setShouldShooterStop(false);
-        trip1.getMoveToBall().setFinalSearchRadius(200);
+        trip1.getMoveToBall().setFinalSearchRadiusMM(200);
         trip1.getPurePursuitReadyShooting().setDistanceThresholdMM(300);
         trip1.setDependentActions(trip0);
         redAutoNear.addAction(trip1);
@@ -158,7 +158,7 @@ public class RedAutoNearCube extends KOpMode {
         trip2.setShouldShooterStop(false);
         trip2.getMoveToBall().setLookAheadRadius(200);
         trip2.getPurePursuitReadyShooting().setDistanceThresholdMM(350);
-        trip2.getMoveToBall().setFinalAngleLockingThresholdDegree(50);
+        trip2.getMoveToBall().setFinalAngleLockingThresholdDeg(50);
         redAutoNear.addAction(trip2);
 
         // ----------------- TRIP 3 (Tunnel) ----------------------
@@ -263,13 +263,13 @@ public class RedAutoNearCube extends KOpMode {
         tunnelTrip.getTripToShoot().getMoveToBall().addPoint(shootPoint.getX(), shootPoint.multiplyY(allianceColor.getPolarity()).getY(), 150 * allianceColor.getPolarity());
 
         tunnelTrip.getMoveToRamp().setMaxTimeOutMS(2000);
-        tunnelTrip.getMoveToRamp().setFinalSearchRadius(150);
-        tunnelTrip.getMoveToRamp().setFinalAngleLockingThresholdDegree(20);
+        tunnelTrip.getMoveToRamp().setFinalSearchRadiusMM(150);
+        tunnelTrip.getMoveToRamp().setFinalAngleLockingThresholdDeg(20);
 
         tunnelTrip.getTripToShoot().setShouldShooterStop(false);
         tunnelTrip.getTripToShoot().getMoveToBall().setMaxTimeOutMS(6000);
         tunnelTrip.getTripToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(300);
-        tunnelTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDegree(45);
+        tunnelTrip.getTripToShoot().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
 
         return tunnelTrip;
     }

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.AUTO_SHOOTER_READY_TIMEOUT_MS;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -48,6 +50,10 @@ public class ShooterReady extends Action {
                 isDone = true;
             }
             KLog.d("ShooterReady", "** Still waiting for shooter to reach target RPS **");
+        }
+
+        if (actionTime.milliseconds() > AUTO_SHOOTER_READY_TIMEOUT_MS) {
+            isDone = true;
         }
 
     }
