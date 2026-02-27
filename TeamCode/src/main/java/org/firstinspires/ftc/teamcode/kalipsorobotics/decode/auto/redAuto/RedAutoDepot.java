@@ -145,10 +145,10 @@ public class RedAutoDepot extends KOpMode {
         // first try
 //        trip2.getTrip().getMoveToBall().addPoint(200, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity()); // x=15 -> corner
 //        trip2.getTrip().getMoveToBall().addPoint(200, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getTrip().getMoveToBall().addPoint(-25,  1140 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(-25,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         // retry
-        trip2.getTrip().getMoveToBall().addPoint(250,  1160 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getTrip().getMoveToBall().addPoint(250,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 //        trip2.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         trip2.getTrip().getMoveToBall().setFinalSearchRadiusMM(150);
@@ -265,33 +265,33 @@ public class RedAutoDepot extends KOpMode {
 //        retryTrip.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         switch (trip) {
             case SWEEP_IN:
-                retryTrip.getTrip().getMoveToBall().addPoint(325, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 // retry
                 retryTrip.getTrip().getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                retryTrip.getTrip().getMoveToBall().addPoint(55, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_OUT:
-                retryTrip.getTrip().getMoveToBall().addPoint(25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 retryTrip.getTrip().getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 // retry
-                retryTrip.getTrip().getMoveToBall().addPoint(325, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case INTAKE_IN:
-                retryTrip.getTrip().getMoveToBall().addPoint(10, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_TUNNEL:
-                retryTrip.getTrip().getMoveToBall().addPoint(35, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                retryTrip.getTrip().getMoveToBall().addPoint(60, 700 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                retryTrip.getTrip().getMoveToBall().addPoint(850, 1075 * allianceColor.getPolarity(), 25 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(35, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(100, 700 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(850, 1050 * allianceColor.getPolarity(), 25 * allianceColor.getPolarity());
                 break;
             case SWEEP_0:
-                retryTrip.getTrip().getMoveToBall().addPoint(0  , 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_400:
-                retryTrip.getTrip().getMoveToBall().addPoint(400  , 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(400  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_800:
-                retryTrip.getTrip().getMoveToBall().addPoint(800  , 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getTrip().getMoveToBall().addPoint(800  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
         }
 
@@ -300,6 +300,8 @@ public class RedAutoDepot extends KOpMode {
         retryTrip.getTrip().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
         retryTrip.getTrip().getMoveToBall().setPathAngleToleranceDeg(45);
         retryTrip.getTrip().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
+        retryTrip.getTrip().getMoveToBall().setMaxTimeOutMS(10000);
+
         retryTrip.getTrip().setShouldShooterStop(false);
         retryTrip.setName("depotTrip");
         retryTrip.setDependentActions(lastTrip);
