@@ -16,21 +16,21 @@ public class RedAutoDepotScanning extends RedAutoDepot {
     @Override
     protected void handleTrip4() {
         trip4 = generateRetryTrip(trip3, DepotTrips.SWEEP_800);
-        trip4.getTrip().getMoveToBall().setMaxTimeOutMS(4000);
+        trip4.getMoveToShoot().getMoveToBall().setMaxTimeOutMS(4000);
         autoDepot.addAction(trip4);
     }
 
     @Override
     protected void handleTrip5() {
         trip5 = generateRetryTrip(trip4, DepotTrips.SWEEP_0);
-        trip4.getTrip().getMoveToBall().setMaxTimeOutMS(4000);
+        trip4.getMoveToShoot().getMoveToBall().setMaxTimeOutMS(4000);
         autoDepot.addAction(trip5);
     }
 
     @Override
     protected DepotRoundTrip handleTrip6(DepotRoundTrip trip5) {
         DepotRoundTrip trip6 = generateRetryTrip(trip5, DepotTrips.SWEEP_TUNNEL);
-        trip6.getTrip().getMoveToBall().setMaxTimeOutMS(5000);
+        trip6.getMoveToShoot().getMoveToBall().setMaxTimeOutMS(5000);
         return trip6;
     }
 

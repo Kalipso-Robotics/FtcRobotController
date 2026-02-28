@@ -34,14 +34,14 @@ enum DepotTrips {
     SWEEP_TUNNEL,
     SWEEP_0,
     SWEEP_400,
-    SWEEP_800
+    SWEEP_800,
 }
 
 @Autonomous
 public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
     public final static double SHOOT_FAR_X = 150;
-    public final static double SHOOT_FAR_Y = 100;
+    public final static double SHOOT_FAR_Y = -50;
     Point farLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y);
     Point thirdLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y + 100);
     Point firstShootPoint = new Point(0,0);
@@ -128,34 +128,34 @@ public class RedAutoDepot extends KOpMode {
 
         trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip1.setName("trip1");
-        trip1.getTrip().getShooterReady().setName("ShooterReady_trip1");
+        trip1.getMoveToShoot().getShooterReady().setName("ShooterReady_trip1");
         trip1.setDependentActions(trip0);
 //        trip1.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         addPointsToTrip1SpikeMark();
-        trip1.getTrip().setShouldShooterStop(false);
+        trip1.getMoveToShoot().setShouldShooterStop(false);
         autoDepot.addAction(trip1);
 
         // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
 
         trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip2.setName("trip2");
-        trip2.getTrip().getShooterReady().setName("ShooterReady_trip2");
+        trip2.getMoveToShoot().getShooterReady().setName("ShooterReady_trip2");
         trip2.setDependentActions(trip1);
-        trip2.getTrip().getMoveToBall().clearPoints();
+        trip2.getMoveToDepot().clearPoints();
         // first try
 //        trip2.getTrip().getMoveToBall().addPoint(200, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity()); // x=15 -> corner
 //        trip2.getTrip().getMoveToBall().addPoint(200, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getTrip().getMoveToBall().addPoint(-25,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToDepot().addPoint(-25,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         // retry
-        trip2.getTrip().getMoveToBall().addPoint(250,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        trip2.getMoveToDepot().addPoint(250,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip2.getMoveToShoot().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
 //        trip2.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
-        trip2.getTrip().getMoveToBall().setFinalSearchRadiusMM(150);
-        trip2.getTrip().setShouldShooterStop(false);
-        trip2.getTrip().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
-        trip2.getTrip().getMoveToBall().setPathAngleToleranceDeg(45);
-        trip2.getTrip().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
+        trip2.getMoveToShoot().getMoveToBall().setFinalSearchRadiusMM(150);
+        trip2.getMoveToShoot().setShouldShooterStop(false);
+        trip2.getMoveToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
+        trip2.getMoveToShoot().getMoveToBall().setPathAngleToleranceDeg(45);
+        trip2.getMoveToShoot().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
         autoDepot.addAction(trip2);
 
         // ----------------- TRIP 3 (retry) ---------------------- ~5 sec
@@ -249,60 +249,60 @@ public class RedAutoDepot extends KOpMode {
 
     // GO TO SPIKE MARK FIRST ---------------------
     public void addPointsToTrip1SpikeMark() {
-        trip1.getTrip().getMoveToBall().clearPoints();
-        trip1.getTrip().getMoveToBall().addPoint(650, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(650, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(500, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip1.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToDepot().clearPoints();
+        trip1.getMoveToDepot().addPoint(650, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToDepot().addPoint(650, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip1.getMoveToDepot().addPoint(500, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip1.getMoveToDepot().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
     }
 
     public DepotRoundTrip generateRetryTrip(DepotRoundTrip lastTrip, DepotTrips trip) {
         DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
-        retryTrip.getTrip().getShooterReady().setName("ShooterReady_retryTrip");
-        retryTrip.getTrip().getMoveToBall().clearPoints();
+        retryTrip.getMoveToShoot().getShooterReady().setName("ShooterReady_retryTrip");
+        retryTrip.getMoveToDepot().clearPoints();
         // first try
 //        retryTrip.getTrip().getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        retryTrip.getTrip().getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         switch (trip) {
             case SWEEP_IN:
-                retryTrip.getTrip().getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 // retry
-                retryTrip.getTrip().getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                retryTrip.getTrip().getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_OUT:
-                retryTrip.getTrip().getMoveToBall().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                retryTrip.getTrip().getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 // retry
-                retryTrip.getTrip().getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case INTAKE_IN:
-                retryTrip.getTrip().getMoveToBall().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_TUNNEL:
-                retryTrip.getTrip().getMoveToBall().addPoint(35, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                retryTrip.getTrip().getMoveToBall().addPoint(100, 700 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-                retryTrip.getTrip().getMoveToBall().addPoint(850, 1050 * allianceColor.getPolarity(), 25 * allianceColor.getPolarity());
+//                retryTrip.getMoveToDepot().addPoint(35, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(100, 700 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(1000, 1050 * allianceColor.getPolarity(), 25 * allianceColor.getPolarity());
                 break;
             case SWEEP_0:
-                retryTrip.getTrip().getMoveToBall().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_400:
-                retryTrip.getTrip().getMoveToBall().addPoint(400  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(400  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_800:
-                retryTrip.getTrip().getMoveToBall().addPoint(800  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(800  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
         }
 
-        retryTrip.getTrip().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
-        retryTrip.getTrip().getMoveToBall().setFinalSearchRadiusMM(150);
-        retryTrip.getTrip().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
-        retryTrip.getTrip().getMoveToBall().setPathAngleToleranceDeg(45);
-        retryTrip.getTrip().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
-        retryTrip.getTrip().getMoveToBall().setMaxTimeOutMS(10000);
+//        retryTrip.getMoveToShoot().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        retryTrip.getMoveToShoot().getMoveToBall().setFinalSearchRadiusMM(150);
+        retryTrip.getMoveToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
+        retryTrip.getMoveToShoot().getMoveToBall().setPathAngleToleranceDeg(45);
+        retryTrip.getMoveToShoot().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
+        retryTrip.getMoveToShoot().getMoveToBall().setMaxTimeOutMS(10000);
 
-        retryTrip.getTrip().setShouldShooterStop(false);
+        retryTrip.getMoveToShoot().setShouldShooterStop(false);
         retryTrip.setName("depotTrip");
         retryTrip.setDependentActions(lastTrip);
         return retryTrip;
