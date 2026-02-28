@@ -54,10 +54,10 @@ public class RampCycleAction extends KActionSet {
 
         moveToRamp = new PurePursuitAction(driveTrain);
         moveToRamp.setName("rampCycleTrip1");
-        moveToRamp.setPathAngleToleranceDeg(10);
-        moveToRamp.setFinalSearchRadiusMM(100);
-        moveToRamp.setFinalAngleLockingThresholdDeg(10);
-        moveToRamp.setMaxTimeOutMS(3000);
+//        moveToRamp.setPathAngleToleranceDeg(10);
+//        moveToRamp.setFinalSearchRadiusMM(100);
+//        moveToRamp.setFinalAngleLockingThresholdDeg(10);
+//        moveToRamp.setMaxTimeOutMS(3000);
         this.addAction(moveToRamp);
 
         moveToEat = new PurePursuitAction(driveTrain);
