@@ -300,20 +300,21 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         // single eating point with no move
 //        rampTrip.getMoveToEat().addPoint(1485, 975 * allianceColor.getPolarity(), 50 * allianceColor.getPolarity()); // eating point //theta 57.3
         //MOVE TO RAMP
-        rampTrip.getMoveToRamp().addPoint(1300, 825 * allianceColor.getPolarity(), 53 * allianceColor.getPolarity());
-        rampTrip.getMoveToRamp().setPathAngleToleranceDeg(30);
-        rampTrip.getMoveToRamp().setLookAheadRadius(150);
-        rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDeg(30);
-        rampTrip.getMoveToRamp().setFinalSearchRadiusMM(150);
-        rampTrip.getMoveToRamp().setMaxTimeOutMS(900);
+//        rampTrip.getMoveToRamp().addPoint(1300, 825 * allianceColor.getPolarity(), 53 * allianceColor.getPolarity());
+//        rampTrip.getMoveToRamp().setPathAngleToleranceDeg(30);
+//        rampTrip.getMoveToRamp().setLookAheadRadius(150);
+//        rampTrip.getMoveToRamp().setFinalAngleLockingThresholdDeg(30);
+//        rampTrip.getMoveToRamp().setFinalSearchRadiusMM(150);
+//        rampTrip.getMoveToRamp().setMaxTimeOutMS(900);
         //MOVE TO EATING POINT
         //overshooting purposefully to use timeout to hold ramp and collect balls, uses smaller PID so slamming into gate not so hard
-        rampTrip.getMoveToEat().addPoint(1315, 1105 * allianceColor.getPolarity(), 75 * allianceColor.getPolarity(), PurePursuitAction.P_XY / 1.2, PurePursuitAction.P_ANGLE / 1.2); // eating point //theta 57.3
-        rampTrip.getMoveToEat().setPathAngleToleranceDeg(1);
-        rampTrip.getMoveToEat().setLookAheadRadius(10);
+        rampTrip.getMoveToEat().addPoint(1330, 825 * allianceColor.getPolarity(), 53 * allianceColor.getPolarity()); // eating point //theta 57.3
+        rampTrip.getMoveToEat().addPoint(1340, 1105 * allianceColor.getPolarity(), 75 * allianceColor.getPolarity(), PurePursuitAction.P_XY / 1.2, PurePursuitAction.P_ANGLE / 1.2); // eating point //theta 57.3
+        rampTrip.getMoveToEat().setPathAngleToleranceDeg(30);
+        rampTrip.getMoveToEat().setLookAheadRadius(150);
         rampTrip.getMoveToEat().setFinalAngleLockingThresholdDeg(1);
         rampTrip.getMoveToEat().setFinalSearchRadiusMM(10);
-        rampTrip.getMoveToEat().setMaxTimeOutMS(2000);
+        rampTrip.getMoveToEat().setMaxTimeOutMS(2300);
         //MOVE TO SHOOT
 //        rampTrip.getTripToShoot().getMoveToBall().addPoint(1535, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         rampTrip.getTripToShoot().getMoveToBall().addPoint(1509 , 942  * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
