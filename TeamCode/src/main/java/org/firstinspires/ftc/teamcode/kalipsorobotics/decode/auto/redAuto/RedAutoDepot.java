@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -53,6 +54,7 @@ public class RedAutoDepot extends KOpMode {
     Intake intake = null;
     Stopper stopper = null;
     Turret turret = null;
+    Tilter tilter = null;
     DepotRoundTrip trip1 = null;
     RoundTripAction trip0 = null;
     DepotRoundTrip trip2 = null;
@@ -97,6 +99,7 @@ public class RedAutoDepot extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
+        tilter = new Tilter(opModeUtilities);
         shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
         shooterRun.setShooterRunMode(ShooterRunMode.STOP);
         KLog.d("RedAutoDepot-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
@@ -195,6 +198,8 @@ public class RedAutoDepot extends KOpMode {
         KLog.d("auto", "-------------" +
                 "-DEPOT AUTO STARTED-------------");
         KLog.d("RedAutoDepot-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
+        tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
+        tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         waitForStart();
         KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
@@ -288,10 +293,10 @@ public class RedAutoDepot extends KOpMode {
                 retryTrip.getMoveToDepot().addPoint(10, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
                 break;
             case SWEEP_400:
-                retryTrip.getMoveToDepot().addPoint(400  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(400  , 1050 * allianceColor.getPolarity(), 80 * allianceColor.getPolarity());
                 break;
             case SWEEP_800:
-                retryTrip.getMoveToDepot().addPoint(800  , 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+                retryTrip.getMoveToDepot().addPoint(800  , 1050 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity());
                 break;
         }
 
