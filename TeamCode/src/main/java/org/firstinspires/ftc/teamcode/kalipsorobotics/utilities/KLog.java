@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 public class KLog {
 
-    private final static boolean DEBUG = false;
+    private final static boolean DEBUG = true;
 
     public static boolean isDebug() {
         return DEBUG;

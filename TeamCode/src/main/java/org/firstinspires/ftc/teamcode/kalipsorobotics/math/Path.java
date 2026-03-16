@@ -47,18 +47,22 @@ public class Path {
 //    }
 
     public Optional<Position> lookAhead(Position currentPosition, Optional<Position> lastFollowPosition, double radiusInch) {
+        KLog.d("purepursaction_debug_follow", "Radius Inch: " + radiusInch);
+        KLog.d("purepursaction_debug_follow", "Last Follow Position: " + lastFollowPosition);
         for (int i = currentSearchWayPointIndex; i < numPoints(); i++) {
             Position currentFollowPosition = getPoint(i);
 
             // has a point to follow
             if (!lastFollowPosition.isPresent()) {
                 currentSearchWayPointIndex = i;
+                KLog.d("purepursaction_debug_follow", () -> "Doesn't have a last follow point, current point is last follow point moving on");
                 return Optional.of(currentFollowPosition);
             }
 
             // not within distance
             if (currentPosition.distanceTo(currentFollowPosition) > radiusInch) {
                 currentSearchWayPointIndex = i;
+                KLog.d("purepursaction_debug_follow", () -> "Not within Distance trying to achieve angle and distance | Curr Pos : " + currentPosition);
                 return Optional.of(currentFollowPosition);
             } else {
                 // within distance and try to lock angle
