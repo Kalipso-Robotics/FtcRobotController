@@ -54,10 +54,10 @@ public class RampCycleAction extends KActionSet {
 
         moveToRamp = new PurePursuitAction(driveTrain);
         moveToRamp.setName("rampCycleTrip1");
-        moveToRamp.setPathAngleToleranceDeg(10);
-        moveToRamp.setFinalSearchRadiusMM(100);
-        moveToRamp.setFinalAngleLockingThresholdDeg(10);
-        moveToRamp.setMaxTimeOutMS(3000);
+//        moveToRamp.setPathAngleToleranceDeg(10);
+//        moveToRamp.setFinalSearchRadiusMM(100);
+//        moveToRamp.setFinalAngleLockingThresholdDeg(10);
+//        moveToRamp.setMaxTimeOutMS(3000);
         this.addAction(moveToRamp);
 
         moveToEat = new PurePursuitAction(driveTrain);
@@ -76,20 +76,7 @@ public class RampCycleAction extends KActionSet {
         tripToShoot.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
         tripToShoot.getMoveToBall().setPathAngleToleranceDeg(50);
         this.addAction(tripToShoot);
-    }
 
-    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
-        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, 1000, 0);
-    }
-
-    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTimeAfterMoveToEat) {
-        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, waitTimeAfterMoveToEat, 0);
-    }
-
-    @Override
-    public void initActions(){
 
         WaitAction waitUntilShootRun = new WaitAction(waitForShooterReadyMS);
         waitUntilShootRun.setName("waitUntilShootReady");
@@ -129,6 +116,17 @@ public class RampCycleAction extends KActionSet {
         shooterStop.setDependentActions(tripToShoot);
         this.addAction(shooterStop);
     }
+
+    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS) {
+        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, 1000, 0);
+    }
+
+    public RampCycleAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
+                           Point targetPoint, Point launchPos, double waitForShooterReadyMS, double waitTimeAfterMoveToEat) {
+        this(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, waitTimeAfterMoveToEat, 0);
+    }
+
 
     public PurePursuitAction getMoveToRamp() {
         return moveToRamp;
