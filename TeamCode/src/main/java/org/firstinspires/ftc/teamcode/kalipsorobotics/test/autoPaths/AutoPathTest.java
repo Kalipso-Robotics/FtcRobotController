@@ -5,11 +5,14 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 public class AutoPathTest extends KOpMode {
     DriveTrain driveTrain = null;
+    //change to test different purepursuits
     PurePursuitAction purePursuit = null;
 
     @Override
@@ -30,7 +33,12 @@ public class AutoPathTest extends KOpMode {
     }
     @Override
     public void runOpMode() throws InterruptedException {
-
-
+        //add points
+        purePursuit.addPoint(0, 0, 0);
+        waitForStart();
+        while (opModeIsActive()) {
+            purePursuit.updateCheckDone();
+            KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
+        }
     }
 }
