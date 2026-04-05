@@ -189,4 +189,9 @@ public abstract class KOpMode extends LinearOpMode {
         return (action != null && !action.getIsDone());
     }
 
+    protected void updateSensorData(){
+        SensorData.setIntakeMotorTicks(hardwareMap.dcMotor.get("intake").getCurrentPosition());
+        SensorData.setTurretMotorTicks(hardwareMap.dcMotor.get("turret").getCurrentPosition());
+        SensorData.setShooterMotorTicks(hardwareMap.dcMotor.get("shooter").getCurrentPosition());
+    }
 }
