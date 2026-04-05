@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
@@ -142,6 +144,4 @@ public class SharedData {
             unfilteredLimelightGlobalPos.reset(new Position(0,0,0));
         }
     }
-
-
 }
