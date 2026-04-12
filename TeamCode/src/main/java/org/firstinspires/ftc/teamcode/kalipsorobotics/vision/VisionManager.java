@@ -1,0 +1,149 @@
+package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
+
+import android.util.Size;
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.VisionProcessor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Owns the robot's single VisionPortal and manages all processors on it.
+ *
+ * WHY ONE PORTAL:
+ *   Each VisionPortal starts a dedicated OS thread for camera I/O. Creating
+ *   more than one portal on the same camera either crashes or silently steals
+ *   frames from the other. VisionManager enforces one portal so all processors
+ *   share the same frame at zero extra CPU cost.
+ *
+ * MULTIPLE CONSUMERS, SAME FRAME:
+ *   Any number of processors can be registered. VisionPortal delivers every
+ *   frame to every processor on the same camera thread. Each processor runs
+ *   independently — one team member's auto code can read artifact blobs while
+ *   another reads AprilTags from the same camera without any conflicts.
+ *
+ * USAGE:
+ *   ArtifactDetectionProcessor artifacts = new ArtifactDetectionProcessor();
+ *   AprilTagProcessor aprilTags = AprilTagProcessor.easyCreateWithDefaults();
+ *
+ *   VisionManager visionManager = new VisionManager.Builder(hardwareMap)
+ *       .addProcessor(artifacts)
+ *       .addProcessor(aprilTags)
+ *       .build();
+ *
+ *   // Enable / disable at runtime — disabled processors cost zero CPU
+ *   visionManager.enable(artifacts);
+ *   visionManager.disable(artifacts);
+ *
+ *   // Pause / resume the entire camera (saves battery mid-auto)
+ *   visionManager.pauseCamera();
+ *   visionManager.resumeCamera();
+ *
+ *   // In OpMode.stop()
+ *   visionManager.close();
+ */
+public class VisionManager {
+
+    private final VisionPortal portal;
+
+    private VisionManager(VisionPortal portal) {
+        this.portal = portal;
+    }
+
+    // -------------------------------------------------------------------------
+    // Runtime controls
+    // -------------------------------------------------------------------------
+
+    /** Resume a processor that was previously disabled. */
+    public void enable(VisionProcessor processor) {
+        portal.setProcessorEnabled(processor, true);
+    }
+
+    /** Disable a processor — it will no longer receive frames or consume CPU. */
+    public void disable(VisionProcessor processor) {
+        portal.setProcessorEnabled(processor, false);
+    }
+
+    /**
+     * Pause the camera stream entirely.
+     * Useful mid-autonomous when no vision data is needed for several seconds.
+     * Note: resuming takes ~200ms while the camera reinitialises.
+     */
+    public void pauseCamera()  { portal.stopStreaming();  }
+    public void resumeCamera() { portal.resumeStreaming(); }
+
+    public VisionPortal getPortal() { return portal; }
+
+    public void close() {
+        if (portal != null) portal.close();
+    }
+
+    // -------------------------------------------------------------------------
+    // Builder
+    // -------------------------------------------------------------------------
+
+    public static class Builder {
+
+        private final HardwareMap hardwareMap;
+        private String cameraName = "Webcam 1";
+        private Size resolution = new Size(640, 480);
+        private boolean streamImmediately = false;
+        private final List<VisionProcessor> processors = new ArrayList<>();
+
+        public Builder(HardwareMap hardwareMap) {
+            this.hardwareMap = hardwareMap;
+        }
+
+        /** Override the hardware map camera name. Default: "Webcam 1". */
+        public Builder withCamera(String cameraName) {
+            this.cameraName = cameraName;
+            return this;
+        }
+
+        /** Override the capture resolution. Default: 640x480. */
+        public Builder withResolution(int width, int height) {
+            this.resolution = new Size(width, height);
+            return this;
+        }
+
+        /**
+         * Start the camera stream immediately on build() instead of waiting for
+         * an explicit resumeCamera() call. Adds ~500ms to build() but means
+         * frames are available the moment the object is constructed.
+         *
+         * Default: false — build() returns instantly; call visionManager.resumeCamera()
+         * when you actually need frames (e.g. at opModeStart).
+         */
+        public Builder streamImmediately() {
+            this.streamImmediately = true;
+            return this;
+        }
+
+        /**
+         * Register any VisionProcessor — KVisionProcessor subclasses,
+         * KRoboflowDetector subclasses, AprilTagProcessor, or any custom processor.
+         * All registered processors share the same camera frame.
+         */
+        public Builder addProcessor(VisionProcessor processor) {
+            processors.add(processor);
+            return this;
+        }
+
+        public VisionManager build() {
+            VisionPortal.Builder portalBuilder = new VisionPortal.Builder()
+                    .setCamera(hardwareMap.get(WebcamName.class, cameraName))
+                    .setCameraResolution(resolution)
+                    .setAutoStartStreamOnBuild(streamImmediately);
+
+            for (VisionProcessor processor : processors) {
+                portalBuilder.addProcessor(processor);
+            }
+
+            return new VisionManager(portalBuilder.build());
+        }
+    }
+}
