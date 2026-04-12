@@ -55,6 +55,7 @@ public class AdaptivePurePursuitAction extends Action {
 
     List<Position> injectedPathPoints = new ArrayList<>();
     private int pointInject = 0;
+    private double injectDistance = 0;
     private int segInject = 0;
     private boolean injectDone = false;
 
@@ -62,6 +63,7 @@ public class AdaptivePurePursuitAction extends Action {
     private boolean finishedCurrentLoop = false;
     private final double SMOOTHER_A = 0.25;
     private final double SMOOTHER_B = 1 - SMOOTHER_A;
+    private final double SMOOTHER_CORNER_PULL = 5.0;
     private final double SMOOTHER_TOLERANCE = 0.025;
     private double change = SMOOTHER_TOLERANCE;
     private int smootherI = 1;
@@ -164,6 +166,7 @@ public class AdaptivePurePursuitAction extends Action {
 
         // Reset counters and temporary values
         pointInject = 0;
+        injectDistance = 0;
         segInject = 0;
         finishedCurrentLoop = false;
         change = SMOOTHER_TOLERANCE;
@@ -469,24 +472,42 @@ public class AdaptivePurePursuitAction extends Action {
 
 
     private void injectPoints(Path path) {
-        int spacingMM = 100;
+//        int spacingMM = 100;
 
-        if (segInject == 0 && pointInject == 0 && injectedPathPoints.isEmpty()) {
-            injectedPathPoints.add(SharedData.getOdometryWheelIMUPosition());
+        if (segInject == 0 && injectDistance == 0 && injectedPathPoints.isEmpty()) {
+            Position robotStart = new Position(SharedData.getOdometryWheelIMUPosition());
+            injectedPathPoints.add(robotStart);
+
             // Add the very first point from the original path only once
-            injectedPathPoints.add(path.getPoint(0));
+            Position pathFirstPoint = path.getPoint(0);
+            if (Vector.between(robotStart, pathFirstPoint).getLength() > 1e-6) {
+                injectedPathPoints.add(pathFirstPoint);
+            }
+
             pointInject = 1;
         }
 
         if (segInject < path.numSegments()) {
             Vector vector = path.getSegment(segInject).getVector();
             double segmentLength = vector.getLength();
-            double eps = 1e-6;
-            double numPointsFit = (int) Math.ceil((segmentLength - eps) / spacingMM);
-            //Log.d("ppDebug", "num points fit: " + numPointsFit);
+//            double eps = 1e-6;
+//            double numPointsFit = (int) Math.floor((segmentLength - eps) / spacingMM);
+//            //Log.d("ppDebug", "num points fit: " + numPointsFit);
+//
+//            if (Math.abs(numPointsFit * spacingMM - segmentLength) < 1e-6) {
+//                numPointsFit--;
+//            }
+
+            if (segmentLength < 1e-6) {
+                Position end = path.getSegment(segInject).getFinish();
+                injectedPathPoints.add(end);
+                segInject++;
+                injectDistance = 0;
+                return;
+            }
 
             Vector norm = vector.normalize();
-            Vector unitVector = new Vector(norm.getX() * spacingMM, norm.getY() * spacingMM);
+//            Vector unitVector = new Vector(norm.getX() * spacingMM, norm.getY() * spacingMM);
 
             Position start = path.getSegment(segInject).getStart();
             Position end = path.getSegment(segInject).getFinish();
@@ -494,57 +515,84 @@ public class AdaptivePurePursuitAction extends Action {
             double startTheta = start.getTheta();
             double endTheta = end.getTheta();
 
-            int i = pointInject + ((segInject == 0) ? 1 : 0);
+            double nextSpacing = getSpacingForDistance(injectDistance, segmentLength);
+            double nextDistance = injectDistance + nextSpacing;
 
-            if (i <= numPointsFit) {
-                double x = start.getX() + unitVector.getX() * pointInject;
-                double y = start.getY() + unitVector.getY() * pointInject;
+//            int i = pointInject + ((segInject == 0) ? 1 : 0);
+
+            if (nextDistance < segmentLength - 1e-6) {
+                double x = start.getX() + norm.getX() * nextDistance;
+                double y = start.getY() + norm.getY() * nextDistance;
 
 //                double t = pointInject / numPointsFit;
 //                double theta = MathFunctions.interpolateAngle(startTheta, endTheta, t);
 
-                double theta;
-                if (MAX_ANGULAR_VELOCITY * pointInject > endTheta) {
-                    theta = endTheta;
-                } else {
-                    theta = MAX_ANGULAR_VELOCITY * pointInject;
-                }
+                double thetaT = nextDistance / segmentLength;
+                thetaT = Math.max(0.0, Math.min(1.0, thetaT));
+                double theta = MathFunctions.interpolateAngle(startTheta, endTheta, thetaT);
+
+//                double theta;
+//                if (MAX_ANGULAR_VELOCITY * pointInject > endTheta) {
+//                    theta = endTheta;
+//                } else {
+//                    theta = MAX_ANGULAR_VELOCITY * pointInject;
+//                }
 
                 injectedPathPoints.add(new Position(x, y, theta));
                 KLog.d("ppDebug", () -> "injected point: " + x + ", " + y + ", " + theta);
 
-                pointInject++;
+                injectDistance = nextDistance;
             } else {
-                pointInject = 0;
+                injectedPathPoints.add(end);
+                KLog.d("ppDebug", () -> "segment endpoint: " + end.getX() + ", " + end.getY() + ", " + end.getTheta());
+
+                injectDistance = 0;
                 segInject++;
             }
 
         } else {
             injectDone = true;
 
-            Position finalOriginalPoint = path.getLastPoint();
-            Position lastInjectedPoint = injectedPathPoints.get(injectedPathPoints.size() - 1);
-
-            // If the last injected point is NOT the same as the final original point,
-            // then we need to add the final original point.
-            final double EPSILON = 1e-6;
-            if (Math.abs(lastInjectedPoint.getX() - finalOriginalPoint.getX()) > EPSILON ||
-                    Math.abs(lastInjectedPoint.getY() - finalOriginalPoint.getY()) > EPSILON) {
-
-                injectedPathPoints.add(finalOriginalPoint);
-            }
-
+//            Position finalOriginalPoint = path.getLastPoint();
+//            Position lastInjectedPoint = injectedPathPoints.get(injectedPathPoints.size() - 1);
+//
+//            // If the last injected point is NOT the same as the final original point,
+//            // then we need to add the final original point.
+//            final double EPSILON = 1e-6;
+//            if (Math.abs(lastInjectedPoint.getX() - finalOriginalPoint.getX()) > EPSILON ||
+//                    Math.abs(lastInjectedPoint.getY() - finalOriginalPoint.getY()) > EPSILON) {
+//
+//                injectedPathPoints.add(finalOriginalPoint);
+//            }
+//
 //            injectedPathPoints.add(path.getLastPoint());
-
-            KLog.d("ppDebug", () -> "injected last point: " + path.getLastPoint().getX() + ", " + path.getLastPoint().getY() + ", " + path.getLastPoint().getTheta());
+//
+//            KLog.d("ppDebug", () -> "injected last point: " + path.getLastPoint().getX() + ", " + path.getLastPoint().getY() + ", " + path.getLastPoint().getTheta());
 
         }
+    }
+
+    private double getSpacingForDistance(double distanceAlongSegment, double segmentLength) {
+        double smallSpacing = 50.0;
+        double largeSpacing = 100.0;
+
+        double distToEnd = segmentLength - distanceAlongSegment;
+
+        if (distanceAlongSegment < 2 * smallSpacing) {
+            return smallSpacing;
+        }
+
+        if (distToEnd <= largeSpacing + 2 * smallSpacing) {
+            return smallSpacing;
+        }
+
+        return largeSpacing;
     }
 
     private void smoother(Path path) {
 
         if (newPath == null && injectDone) {
-            newPath = path;
+            newPath = new Path(path.getPath());
         }
 
         if (injectDone && (!finishedCurrentLoop || change >= SMOOTHER_TOLERANCE)) {
@@ -574,14 +622,23 @@ public class AdaptivePurePursuitAction extends Action {
                     return;
                 }
 
+                Vector cornerBias = getCornerBias(path, smootherI);
+                double cornerWeight = getCornerWeight(path, smootherI);
+                double localA = getOriginalPullWeight(path, smootherI);
+                double localB = getNeighborPullWeight(path, smootherI);
+
                 if (smootherJ <= 1) {
                     if (smootherJ == 0) {
                         double aux = newPath.getPoint(smootherI).getX();
-                        newPath.getPoint(smootherI).addX(SMOOTHER_A * (path.getPoint(smootherI).getX() - newPath.getPoint(smootherI).getX()) + SMOOTHER_B * (newPath.getPoint(smootherI-1).getX() + newPath.getPoint(smootherI+1).getX() - (2.0 * newPath.getPoint(smootherI).getX())));
+                        newPath.getPoint(smootherI).addX(localA * (path.getPoint(smootherI).getX() - newPath.getPoint(smootherI).getX())
+                                + localB * (newPath.getPoint(smootherI-1).getX() + newPath.getPoint(smootherI+1).getX() - (2.0 * newPath.getPoint(smootherI).getX()))
+                        + SMOOTHER_CORNER_PULL * cornerWeight * cornerBias.getX());
                         change += Math.abs(aux - newPath.getPoint(smootherI).getX());
                     } else {
                         double aux = newPath.getPoint(smootherI).getY();
-                        newPath.getPoint(smootherI).addY(SMOOTHER_A * (path.getPoint(smootherI).getY() - newPath.getPoint(smootherI).getY()) + SMOOTHER_B * (newPath.getPoint(smootherI-1).getY() + newPath.getPoint(smootherI+1).getY() - (2.0 * newPath.getPoint(smootherI).getY())));
+                        newPath.getPoint(smootherI).addY(localA * (path.getPoint(smootherI).getY() - newPath.getPoint(smootherI).getY())
+                                + localB * (newPath.getPoint(smootherI-1).getY() + newPath.getPoint(smootherI+1).getY() - (2.0 * newPath.getPoint(smootherI).getY()))
+                        + SMOOTHER_CORNER_PULL * cornerWeight * cornerBias.getY());
                         change += Math.abs(aux - newPath.getPoint(smootherI).getY());
                     }
                     smootherJ++;
@@ -598,6 +655,147 @@ public class AdaptivePurePursuitAction extends Action {
         } else {
             smootherDone = true;
         }
+    }
+
+    private double getOriginalPullWeight(Path path, int pointIndex) {
+        if (pointIndex + 1 < path.numPoints()) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex + 1)) != -1) {
+                return 0.025;
+            }
+        }
+        if (pointIndex - 1 >= 0) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex - 1)) != -1) {
+                return 0.025;
+            }
+        }
+
+        if (pointIndex + 2 < path.numPoints()) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex + 2)) != -1) {
+                return 0.05;
+            }
+        }
+        if (pointIndex - 2 >= 0) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex - 2)) != -1) {
+                return 0.05;
+            }
+        }
+
+        return SMOOTHER_A;
+    }
+
+    private double getNeighborPullWeight(Path path, int pointIndex) {
+        if (pointIndex + 1 < path.numPoints()) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex + 1)) != -1) {
+                return 0.2;
+            }
+        }
+        if (pointIndex - 1 >= 0) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex - 1)) != -1) {
+                return 0.2;
+            }
+        }
+
+        if (pointIndex + 2 < path.numPoints()) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex + 2)) != -1) {
+                return 0.3;
+            }
+        }
+        if (pointIndex - 2 >= 0) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex - 2)) != -1) {
+                return 0.3;
+            }
+        }
+
+        return SMOOTHER_B;
+    }
+
+    private int getOriginalWaypointIndex(Position p) {
+        for (int i = 0; i < pathPoints.size(); i++) {
+            Position original = pathPoints.get(i);
+            if (Math.abs(p.getX() - original.getX()) < 1e-6 &&
+                    Math.abs(p.getY() - original.getY()) < 1e-6) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private Vector getCornerBias(Path path, int pointIndex) {
+        final double EPS = 1e-6;
+
+        int originalIdx = -1;
+
+        // find which waypoint the corner is
+        if (pointIndex + 1 < path.numPoints()) {
+            originalIdx = getOriginalWaypointIndex(path.getPoint(pointIndex + 1));
+        }
+        if (originalIdx == -1 && pointIndex - 1 >= 0) {
+            originalIdx = getOriginalWaypointIndex(path.getPoint(pointIndex - 1));
+        }
+
+        // must be an actual corner, not start or end
+        if (originalIdx <= 0 || originalIdx >= pathPoints.size() - 1) {
+            return new Vector(0, 0);
+        }
+
+        Position fixedPrev = pathPoints.get(originalIdx - 1);
+        Position fixed = pathPoints.get(originalIdx);
+        Position fixedNext = pathPoints.get(originalIdx + 1);
+
+        Vector in = Vector.between(fixedPrev, fixed).normalize();
+        Vector out = Vector.between(fixed, fixedNext).normalize();
+
+        // cross product, if >0 left turn, <0 right turn, =0 straight line
+        double cross = in.getX() * out.getY() - in.getY() * out.getX();
+
+        Vector outwardIn;
+        Vector outwardOut;
+
+        if (cross > 0) { // left turn
+            outwardIn = new Vector(in.getY(), -in.getX()); // right normal vector (vector 90deg right)
+            outwardOut = new Vector(out.getY(), -out.getX()); // right normal vector (vector 90deg right)
+        } else if (cross < 0) { // right turn
+            outwardIn = new Vector(-in.getY(), in.getX()); // left normal vector (vector 90 left)
+            outwardOut = new Vector(-out.getY(), out.getX()); // left normal vector (vector 90 left)
+        } else {
+            return new Vector(0, 0); // straight line
+        }
+
+        double bx = outwardIn.getX() + outwardOut.getX();
+        double by = outwardIn.getY() + outwardOut.getY();
+
+        double mag = Math.sqrt(bx * bx + by * by);
+        if (mag < EPS) { // if vector is extremely small it's basically 0
+            return new Vector(0, 0);
+        }
+
+        return new Vector(bx / mag, by / mag); // unit vector that bisects the corner but points outward
+    }
+
+    private double getCornerWeight(Path path, int pointIndex) {
+        if (pointIndex + 1 < path.numPoints()) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex + 1)) != -1) {
+                return 1.0;
+            }
+        }
+        if (pointIndex - 1 >= 0) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex - 1)) != -1) {
+                return 1.0;
+            }
+        }
+
+        if (pointIndex + 2 < path.numPoints()) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex + 2)) != -1) {
+                return 0.5;
+            }
+        }
+        if (pointIndex - 2 >= 0) {
+            if (getOriginalWaypointIndex(path.getPoint(pointIndex - 2)) != -1) {
+                return 0.5;
+            }
+        }
+
+        return 0.0;
     }
 
     private void calculateDistanceAlongPath(Path path) {
