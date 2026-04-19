@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class  PurePursuitAction extends Action {
+public class  PurePursuitAction extends Action implements InterfacePurePursuitAction{
     public static final double P_XY = 1.0/350.0;
     public static final double P_ANGLE = (1.0 / Math.toRadians(90));
     public static final double D_XY = 1.0/200;
@@ -142,6 +142,10 @@ public class  PurePursuitAction extends Action {
         //double[] adaptiveP = {P_XY, P_ANGLE};
         pathPoints.add(new Position(x, y, headingRad, P_XY, P_ANGLE));
         //Log.d("purepursaction", "added point " + x + ", " + y);
+    }
+
+    public List<Position> getPathPoints() {
+        return pathPoints;
     }
 
     public void addPoint(double x, double y, double headingDeg, double pXY, double pAngle) {
