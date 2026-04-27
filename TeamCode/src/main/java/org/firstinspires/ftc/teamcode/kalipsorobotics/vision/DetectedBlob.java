@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 public class DetectedBlob {
 
     /** Bounding box in full camera resolution (e.g. 640x480) pixels. */
+    //Rectangle starts top left, ends bottom right
     public final Rect boundingBox;
 
     /** Blob center in full camera resolution pixels. Uses the team's Point class. */
@@ -43,6 +44,10 @@ public class DetectedBlob {
         this.colorLabel = colorLabel;
         this.label = String.format(Locale.US, "%s (%.0f,%.0f) A:%.0f C:%.2f",
             colorLabel, center.getX(), center.getY(), area, circularity);
+    }
+
+    public Point getBottomMiddlePixel() {
+        return new Point(boundingBox.x + (double) boundingBox.width / 2, boundingBox.y + boundingBox.height);
     }
 
     @Override

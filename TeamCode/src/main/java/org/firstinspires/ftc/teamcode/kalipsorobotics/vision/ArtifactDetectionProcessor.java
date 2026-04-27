@@ -17,10 +17,10 @@ public class ArtifactDetectionProcessor extends KColorBlobProcessor {
     public static final String PURPLE = "Purple";
     public static final String GREEN  = "Green";
 
-    private static final Scalar PURPLE_HSV_LOWER = new Scalar(117, 50, 40);
-    private static final Scalar PURPLE_HSV_UPPER = new Scalar(155, 255, 255);
-    private static final Scalar GREEN_HSV_LOWER  = new Scalar(40, 60, 40);
-    private static final Scalar GREEN_HSV_UPPER  = new Scalar(85, 255, 255);
+    private static final Scalar PURPLE_HSV_LOWER = new Scalar(117, 58, 54);
+    private static final Scalar PURPLE_HSV_UPPER = new Scalar(180, 255, 255);
+    private static final Scalar GREEN_HSV_LOWER  = new Scalar(68, 70, 22);
+    private static final Scalar GREEN_HSV_UPPER  = new Scalar(92, 255, 255);
 
     @Override
     protected ColorChannel[] defineChannels() {
@@ -31,8 +31,8 @@ public class ArtifactDetectionProcessor extends KColorBlobProcessor {
     }
 
     // Named accessors so callers never write string literals
-    public DetectedBlob getLargestPurpleBlob() { return getLargestBlobByLabel(PURPLE); }
-    public DetectedBlob getLargestGreenBlob()  { return getLargestBlobByLabel(GREEN);  }
-    public boolean hasPurpleBlob()             { return hasBlobWithLabel(PURPLE); }
-    public boolean hasGreenBlob()              { return hasBlobWithLabel(GREEN);  }
+    public DetectedBlob getLargestPurpleBlob() { return getLargestBlobByLabel(PURPLE);}
+    public DetectedBlob getLargestGreenBlob() { return getLargestBlobByLabel(GREEN);}
+    public boolean hasPurpleBlob() { return hasBlobWithLabel(PURPLE);}
+    public boolean hasGreenBlob() { return hasBlobWithLabel(GREEN);}
 }

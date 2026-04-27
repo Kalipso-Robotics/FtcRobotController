@@ -22,12 +22,13 @@ import java.util.List;
  *
  * HOW IT WORKS:
  *   1. Downsamples the 640x480 capture to 320x240 for fast OpenCV work.
- *   2. Converts to HSV — more robust than RGB under changing venue lighting.
- *   3. Thresholds each ColorChannel to produce a binary mask.
- *   4. Applies morphological OPEN (removes noise) then CLOSE (fills sphere holes).
- *   5. Finds external contours, filters by area and circularity.
- *   6. Scales surviving bounding boxes back to full 640x480 resolution.
- *   7. Returns a List<DetectedBlob> sorted largest-first.
+ *   2. Gaussian-blurs the downsampled frame to suppress pixel noise before thresholding.
+ *   3. Converts to HSV — more robust than RGB under changing venue lighting.
+ *   4. Thresholds each ColorChannel to produce a binary mask.
+ *   5. Applies morphological OPEN (removes noise) then CLOSE (fills sphere holes).
+ *   6. Finds external contours, filters by area and circularity.
+ *   7. Scales surviving bounding boxes back to full 640x480 resolution.
+ *   8. Returns a List<DetectedBlob> sorted largest-first.
  *
  * HOW TO CREATE A NEW PROCESSOR:
  *   Just define your color channels. Everything else is handled here.
@@ -91,6 +92,9 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<Detected
     protected double maxContourArea    = 30_000;
     protected double minCircularity    = 0.55;
 
+    /** Gaussian blur kernel size (must be odd). Larger = more smoothing, less noise. */
+    protected int gaussianKernelSize = 5;
+
     // -------------------------------------------------------------------------
     // Processing resolution
     // -------------------------------------------------------------------------
@@ -101,6 +105,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<Detected
     // Reusable OpenCV Mats — allocated once, never inside detect()
     // -------------------------------------------------------------------------
     private Mat downsampledFrame;
+    private Mat blurredFrame;
     private Mat hsvFrame;
     private Mat morphologyBuffer;
     private Mat noiseRemovalKernel;  // MORPH_OPEN  — erode then dilate
@@ -138,6 +143,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<Detected
         channels = defineChannels();
 
         downsampledFrame       = new Mat();
+        blurredFrame           = new Mat();
         hsvFrame               = new Mat();
         morphologyBuffer       = new Mat();
         reusableContourBuffer  = new MatOfPoint2f();
@@ -158,7 +164,9 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<Detected
     protected List<DetectedBlob> detect(Mat frame) {
         Imgproc.resize(frame, downsampledFrame,
                 new Size(PROCESSING_WIDTH, PROCESSING_HEIGHT), 0, 0, Imgproc.INTER_LINEAR);
-        Imgproc.cvtColor(downsampledFrame, hsvFrame, Imgproc.COLOR_RGB2HSV);
+        Imgproc.GaussianBlur(downsampledFrame, blurredFrame,
+                new Size(gaussianKernelSize, gaussianKernelSize), 0);
+        Imgproc.cvtColor(blurredFrame, hsvFrame, Imgproc.COLOR_RGB2HSV);
 
         List<DetectedBlob> allBlobs = new ArrayList<>();
         for (ColorChannel channel : channels) {

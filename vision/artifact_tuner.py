@@ -34,8 +34,8 @@ MORPH_CLOSE_SIZE = (7, 7)
 
 # ── Robot defaults (sync with ArtifactDetectionProcessor.java) ────────────────
 DEFAULTS = {
-    "Purple": {"h_lo": 117, "h_hi": 155, "s_lo": 50,  "s_hi": 255, "v_lo": 40,  "v_hi": 255},
-    "Green":  {"h_lo": 40,  "h_hi": 85,  "s_lo": 60,  "s_hi": 255, "v_lo": 40,  "v_hi": 255},
+    "Purple": {"h_lo": 117, "h_hi": 180, "s_lo": 58,  "s_hi": 255, "v_lo": 54,  "v_hi": 255},
+    "Green":  {"h_lo": 68,  "h_hi": 92,  "s_lo": 70,  "s_hi": 255, "v_lo": 22,  "v_hi": 255},
 }
 
 # Detection thresholds — match KColorBlobProcessor fields
