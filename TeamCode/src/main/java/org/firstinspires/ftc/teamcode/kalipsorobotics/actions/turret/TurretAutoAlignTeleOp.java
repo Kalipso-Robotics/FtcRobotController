@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTMCompen
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SensorData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -201,7 +202,7 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     private void moveToTargetTicks() {
-        int currentTicks = turretMotor.getCurrentPosition();
+        int currentTicks = SensorData.getTurretMotorTicks();
         int error = (int) targetTicks - currentTicks;
 
         deltaAngleDeg = error / TurretConfig.TICKS_PER_DEGREE;

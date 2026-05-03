@@ -190,6 +190,7 @@ public class RedAutoNearCube extends KOpMode {
         long startTime = System.currentTimeMillis();
         int loopCount = 0;
         while (opModeIsActive()) {
+            updateSensorData();
             loopCount++;
             double elapsedSec = (System.currentTimeMillis() - startTime) / 1000.0;
 
