@@ -17,19 +17,19 @@ public class Path {
         this.path = Collections.unmodifiableList(path);
     }
 
-//    public Optional<Position> searchFrom(Position currentPosition, double radius) {
-//        for (int i = numSegments() - 1; i >= 0; i--) {
-//            Segment segment = getSegment(i);
-//
-//            Optional<Position> result = segment.lineCircleIntersection(currentPosition, radius);
-//
-//            if (result.isPresent()) {
-//                return result;
-//            }
-//        }
-//
-//        return Optional.empty();
-//    }
+    public Optional<Position> searchFrom(Position currentPosition, double radius) {
+        for (int i = numSegments() - 1; i >= 0; i--) {
+            Segment segment = getSegment(i);
+
+            Optional<Position> result = segment.lineCircleIntersection(currentPosition, radius);
+
+            if (result.isPresent()) {
+                return result;
+            }
+        }
+
+        return Optional.empty();
+    }
 //
 //    public Optional<Position> searchFrom(Position currentPosition, double radius) {
 //        for (int i = numSegments() - 1; i >= 0; i--) {

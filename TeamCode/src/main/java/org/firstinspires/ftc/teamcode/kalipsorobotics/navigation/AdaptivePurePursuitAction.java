@@ -375,7 +375,7 @@ public class AdaptivePurePursuitAction extends Action {
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
-            follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
+            follow = path.searchFrom(currentPosition, currentLookAheadRadius);
 
             KLog.d("ppDebugFollow", () -> String.format("Lookahead: radius=%.1f, found=%s, prevFollow=%s",
                 currentLookAheadRadius,
@@ -515,7 +515,7 @@ public class AdaptivePurePursuitAction extends Action {
             double startTheta = start.getTheta();
             double endTheta = end.getTheta();
 
-            double nextSpacing = getSpacingForDistance(injectDistance, segmentLength);
+            double nextSpacing = getSpacingForDistance(injectDistance, segmentLength, segInject, path.numSegments());
             double nextDistance = injectDistance + nextSpacing;
 
 //            int i = pointInject + ((segInject == 0) ? 1 : 0);
@@ -572,19 +572,16 @@ public class AdaptivePurePursuitAction extends Action {
         }
     }
 
-    private double getSpacingForDistance(double distanceAlongSegment, double segmentLength) {
+    private double getSpacingForDistance(double distanceAlongSegment, double segmentLength, int segInject, int totalSegments) {
         double smallSpacing = 50.0;
         double largeSpacing = 100.0;
 
         double distToEnd = segmentLength - distanceAlongSegment;
 
-        if (distanceAlongSegment < 2 * smallSpacing) {
+        if ((!(segInject == 0) && distanceAlongSegment < 2 * smallSpacing) || (!(segInject == totalSegments - 1) && distToEnd <= largeSpacing + 2 * smallSpacing)) {
             return smallSpacing;
         }
 
-        if (distToEnd <= largeSpacing + 2 * smallSpacing) {
-            return smallSpacing;
-        }
 
         return largeSpacing;
     }
