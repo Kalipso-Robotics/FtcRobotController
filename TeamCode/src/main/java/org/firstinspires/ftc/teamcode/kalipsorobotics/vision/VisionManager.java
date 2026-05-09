@@ -133,6 +133,7 @@ public class VisionManager {
         private final HardwareMap hardwareMap;
         private String cameraName = "Arducam";
         private Size resolution = new Size(640, 480);
+        private VisionPortal.StreamFormat streamFormat = VisionPortal.StreamFormat.MJPEG;
         private boolean streamImmediately = false;
         private final List<VisionProcessor> processors = new ArrayList<>();
 
@@ -140,15 +141,28 @@ public class VisionManager {
             this.hardwareMap = hardwareMap;
         }
 
-        /** Override the hardware map camera name. Default: "Webcam 1". */
+        /** Override the hardware map camera name. Default: "Arducam". */
         public Builder withCamera(String cameraName) {
             this.cameraName = cameraName;
             return this;
         }
 
-        /** Override the capture resolution. Default: 640x480. */
+        /**
+         * Override the capture resolution. Default: 640x480.
+         * Supported resolutions for this camera: 320x240, 640x480, 800x600, 1280x720, 1280x800.
+         */
         public Builder withResolution(int width, int height) {
             this.resolution = new Size(width, height);
+            return this;
+        }
+
+        /**
+         * Override the stream format. Default: MJPEG.
+         * MJPEG is preferred — lower USB bandwidth and better color fidelity than YUY2.
+         * Use YUY2 only if you need raw uncompressed frames.
+         */
+        public Builder withStreamFormat(VisionPortal.StreamFormat format) {
+            this.streamFormat = format;
             return this;
         }
 
@@ -179,6 +193,7 @@ public class VisionManager {
             VisionPortal.Builder portalBuilder = new VisionPortal.Builder()
                     .setCamera(hardwareMap.get(WebcamName.class, cameraName))
                     .setCameraResolution(resolution)
+                    .setStreamFormat(streamFormat)
                     .setAutoStartStreamOnBuild(streamImmediately);
 
             for (VisionProcessor processor : processors) {
