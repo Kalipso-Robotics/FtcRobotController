@@ -17,20 +17,6 @@ public class Path {
         this.path = Collections.unmodifiableList(path);
     }
 
-    public Optional<Position> searchFrom(Position currentPosition, double radius) {
-        for (int i = numSegments() - 1; i >= 0; i--) {
-            Segment segment = getSegment(i);
-
-            Optional<Position> result = segment.lineCircleIntersection(currentPosition, radius);
-
-            if (result.isPresent()) {
-                return result;
-            }
-        }
-
-        return Optional.empty();
-    }
-//
 //    public Optional<Position> searchFrom(Position currentPosition, double radius) {
 //        for (int i = numSegments() - 1; i >= 0; i--) {
 //            Segment segment = getSegment(i);
@@ -38,13 +24,27 @@ public class Path {
 //            Optional<Position> result = segment.lineCircleIntersection(currentPosition, radius);
 //
 //            if (result.isPresent()) {
-//                Position position = new Position(result.get().getX(), result.get().getY(), segment.getFinish().getTheta());
-//                return Optional.of(position);
+//                return result;
 //            }
 //        }
 //
 //        return Optional.empty();
 //    }
+//
+    public Optional<Position> searchFrom(Position currentPosition, double radius) {
+        for (int i = numSegments() - 1; i >= 0; i--) {
+            Segment segment = getSegment(i);
+
+            Optional<Position> result = segment.lineCircleIntersection(currentPosition, radius);
+
+            if (result.isPresent()) {
+                Position position = new Position(result.get().getX(), result.get().getY(), segment.getFinish().getTheta());
+                return Optional.of(position);
+            }
+        }
+
+        return Optional.empty();
+    }
 
     public Optional<Position> lookAhead(Position currentPosition, Optional<Position> lastFollowPosition, double radiusInch) {
         KLog.d("purepursaction_debug_follow", "Radius Inch: " + radiusInch);

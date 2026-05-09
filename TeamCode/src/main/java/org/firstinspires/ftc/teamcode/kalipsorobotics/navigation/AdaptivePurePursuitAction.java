@@ -375,7 +375,7 @@ public class AdaptivePurePursuitAction extends Action {
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
-            follow = path.searchFrom(currentPosition, currentLookAheadRadius);
+            follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
 
             KLog.d("ppDebugFollow", () -> String.format("Lookahead: radius=%.1f, found=%s, prevFollow=%s",
                 currentLookAheadRadius,
