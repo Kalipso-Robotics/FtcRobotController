@@ -27,7 +27,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
  *   [A] — re-enable artifact processor
  */
 @Config
-@TeleOp
+@Disabled
+@TeleOp(name = "Test: Artifact Detection", group = "Test Vision")
 public class ArtifactDetectionTest extends LinearOpMode {
 
     // ── Tunable via FTC Dashboard — change without redeploying ───────────────
