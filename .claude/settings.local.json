@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew:*)",
+      "Bash(find:*)",
+      "Bash(python3:*)",
+      "Bash(javac:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:repo.dairy.foundation)",
+      "Bash(node --version:*)",
+      "Bash(pip3 install:*)",
+      "WebFetch(domain:www.youtube.com)",
+      "WebFetch(domain:ftc-docs.firstinspires.org)",
+      "Bash(/Users/ethan/Kalipso-Robotics/.venv/bin/pip install:*)",
+      "Bash(git -C /Users/ethan/Kalipso-Robotics status)",
+      "Bash(git -C /Users/ethan/Kalipso-Robotics log --oneline -5)",
+      "Bash(git -C /Users/ethan/Kalipso-Robotics add TeamCode/src/test/java/org/firstinspires/ftc/teamcode/kalipsorobotics/vision/ requirements.txt vision/artifact_tuner.py)",
+      "Bash(git *)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
