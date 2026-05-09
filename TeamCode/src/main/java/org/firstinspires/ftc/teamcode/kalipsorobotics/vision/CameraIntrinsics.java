@@ -83,5 +83,21 @@ public class CameraIntrinsics{
         return new Point(xFromRobotCenter, zFromRobotCenter);
     }
 
+    public double getDistanceFromRobot(double pixelX, double pixelY, double robotX, double robotY) {
+        Point object = calculateWorldPos(pixelX, pixelY);
+        if (object == null) {
+            return Double.POSITIVE_INFINITY;
+        }
+        Point robot = new Point(robotX, robotY);
+        return robot.distanceTo(object);
+    }
 
+    public double getDistanceFromRobot(DetectedBlob blob, Point robotPos) {
+        Point bottomCenter = blob.getBottomMiddlePixel();
+        return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(),
+                robotPos.getX(), robotPos.getY());
+    }
+
+    public double getCx() { return cx; }
+    public double getCy() { return cy; }
 }

@@ -5,11 +5,14 @@ import android.util.Size;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Owns the robot's single VisionPortal and manages all processors on it.
@@ -76,6 +79,45 @@ public class VisionManager {
     public void pauseCamera()  { portal.stopStreaming();  }
     public void resumeCamera() { portal.resumeStreaming(); }
 
+    /**
+     * Lock exposure and gain to fixed values for consistent color detection.
+     *
+     * Call this once after build(), before your autonomous loop starts. Locking
+     * prevents the camera from auto-adjusting to venue lighting changes, which
+     * would shift the HSV values you tuned with artifact_tuner.py.
+     *
+     * Use the same exposureMs and gain values you set in artifact_tuner.py so the
+     * HSV thresholds transfer correctly from your laptop to the robot.
+     *
+     * Recommended starting values for the Arducam:
+     *   exposureMs = 20,  gain = 250  (bright venue)
+     *   exposureMs = 35,  gain = 350  (dim venue)
+     *
+     * @param exposureMs  Shutter time in milliseconds. Lower = darker but less motion blur.
+     * @param gain        Sensor gain. Higher = brighter but more noise.
+     * @return true if controls were applied, false if camera did not start in time.
+     */
+    public boolean lockCameraControls(long exposureMs, int gain) {
+        long deadline = System.currentTimeMillis() + 3_000;
+        while (portal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            if (System.currentTimeMillis() > deadline) return false;
+            try { Thread.sleep(20); } catch (InterruptedException ignored) {}
+        }
+
+        ExposureControl exposure = portal.getCameraControl(ExposureControl.class);
+        if (exposure != null) {
+            exposure.setMode(ExposureControl.Mode.Manual);
+            exposure.setExposure(exposureMs, TimeUnit.MILLISECONDS);
+        }
+
+        GainControl gainControl = portal.getCameraControl(GainControl.class);
+        if (gainControl != null) {
+            gainControl.setGain(gain);
+        }
+
+        return true;
+    }
+
     public VisionPortal getPortal() { return portal; }
 
     public void close() {
@@ -89,8 +131,9 @@ public class VisionManager {
     public static class Builder {
 
         private final HardwareMap hardwareMap;
-        private String cameraName = "Webcam 1";
+        private String cameraName = "Arducam";
         private Size resolution = new Size(640, 480);
+        private VisionPortal.StreamFormat streamFormat = VisionPortal.StreamFormat.MJPEG;
         private boolean streamImmediately = false;
         private final List<VisionProcessor> processors = new ArrayList<>();
 
@@ -98,15 +141,28 @@ public class VisionManager {
             this.hardwareMap = hardwareMap;
         }
 
-        /** Override the hardware map camera name. Default: "Webcam 1". */
+        /** Override the hardware map camera name. Default: "Arducam". */
         public Builder withCamera(String cameraName) {
             this.cameraName = cameraName;
             return this;
         }
 
-        /** Override the capture resolution. Default: 640x480. */
+        /**
+         * Override the capture resolution. Default: 640x480.
+         * Supported resolutions for this camera: 320x240, 640x480, 800x600, 1280x720, 1280x800.
+         */
         public Builder withResolution(int width, int height) {
             this.resolution = new Size(width, height);
+            return this;
+        }
+
+        /**
+         * Override the stream format. Default: MJPEG.
+         * MJPEG is preferred — lower USB bandwidth and better color fidelity than YUY2.
+         * Use YUY2 only if you need raw uncompressed frames.
+         */
+        public Builder withStreamFormat(VisionPortal.StreamFormat format) {
+            this.streamFormat = format;
             return this;
         }
 
@@ -137,6 +193,7 @@ public class VisionManager {
             VisionPortal.Builder portalBuilder = new VisionPortal.Builder()
                     .setCamera(hardwareMap.get(WebcamName.class, cameraName))
                     .setCameraResolution(resolution)
+                    .setStreamFormat(streamFormat)
                     .setAutoStartStreamOnBuild(streamImmediately);
 
             for (VisionProcessor processor : processors) {

@@ -9,9 +9,16 @@ Usage:
     python vision/artifact_tuner.py --camera 1   # if webcam index isn't 0
 
 Controls:
-    [s]  Print current values as Java Scalar constants (copy into ArtifactDetectionProcessor)
+    [s]  Print current HSV values as Java constants to paste into ArtifactDetectionProcessor
     [r]  Reset all sliders to the current robot defaults
     [q]  Quit
+
+Note on exposure/gain:
+    macOS does not support manual camera control through OpenCV, so tune HSV
+    with auto-exposure on your computer. On the robot, call
+    visionManager.lockCameraControls(exposureMs, gain) to lock the camera —
+    start with (20, 250) and adjust during a practice run until the image
+    looks similar to what you see here.
 
 Mirrors the exact KColorBlobProcessor pipeline:
   - Downsamples to 320x240
@@ -47,7 +54,7 @@ MIN_CIRCULARITY = 0.55
 WIN_MAIN   = "Artifact Tuner — Live Feed  [s=save  r=reset  q=quit]"
 WIN_PURPLE = "Mask: Purple"
 WIN_GREEN  = "Mask: Green"
-WIN_CTRL   = "Controls"
+WIN_CTRL   = "HSV Controls"
 
 MORPH_OPEN  = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, MORPH_OPEN_SIZE)
 MORPH_CLOSE = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, MORPH_CLOSE_SIZE)
@@ -176,7 +183,7 @@ def main() -> None:
     cv2.namedWindow(WIN_GREEN,  cv2.WINDOW_NORMAL)
 
     cv2.resizeWindow(WIN_MAIN,   640, 480)
-    cv2.resizeWindow(WIN_CTRL,   500, 220)
+    cv2.resizeWindow(WIN_CTRL,   500, 240)
     cv2.resizeWindow(WIN_PURPLE, 320, 240)
     cv2.resizeWindow(WIN_GREEN,  320, 240)
 
