@@ -33,7 +33,8 @@ public class Segment {
         }
         // edge case, handle ||f|| > ||v|| (past the point)
         if (follow.getLength() > vector.getLength()) {
-            return Optional.of(vector);
+//            return Optional.of(vector);
+            return Optional.empty();
         }
         // edge case, handle f behind v, then no intersection
         if (vector.dot(follow) < 0) {

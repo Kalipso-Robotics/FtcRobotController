@@ -46,6 +46,27 @@ public class Path {
         return Optional.empty();
     }
 
+    public Optional<Position> searchFrom(Position currentPosition, double radius, int startSegmentIndex) {
+        int start = Math.max(0, Math.min(startSegmentIndex, numSegments() - 1));
+
+        for (int i = start; i < numSegments(); i++) {
+            Segment segment = getSegment(i);
+
+            Optional<Position> result = segment.lineCircleIntersection(currentPosition, radius);
+
+            if (result.isPresent()) {
+                Position position = new Position(
+                        result.get().getX(),
+                        result.get().getY(),
+                        segment.getFinish().getTheta()
+                );
+                return Optional.of(position);
+            }
+        }
+
+        return Optional.empty();
+    }
+
     public Optional<Position> lookAhead(Position currentPosition, Optional<Position> lastFollowPosition, double radiusInch) {
         KLog.d("purepursaction_debug_follow", "Radius Inch: " + radiusInch);
         KLog.d("purepursaction_debug_follow", "Last Follow Position: " + lastFollowPosition);

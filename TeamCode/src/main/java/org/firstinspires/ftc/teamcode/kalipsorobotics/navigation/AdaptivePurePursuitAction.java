@@ -14,10 +14,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 public class AdaptivePurePursuitAction extends Action {
 
@@ -78,6 +76,7 @@ public class AdaptivePurePursuitAction extends Action {
     private double lastUpdateTime;
     private final double lastHeadingError = 0;
 
+    private int lastClosestIndex = 0;
 
     //TUNING NUMBERS: USE DATA ABOUT ROBOT
     private final double PATH_MAX_VELOCITY = 1500; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
@@ -182,20 +181,27 @@ public class AdaptivePurePursuitAction extends Action {
         lastUpdateTime = timeoutTimer.milliseconds();
     }
 
-    private void targetPosition(Position target, Position currentPos) {
+    private void targetPosition(Position target, Position currentPos, int closestIndex) {
 
         double velocity;
+        double acceleration;
 
-        if (target == path.getLastPoint()) { //if the current target is the very last point
+        if (Vector.between(target, path.getLastPoint()).getLength() < 1e-6) { //if the current target is the very last point
 
             // Final approach: Use a kinematic model for deceleration to a stop
             double distanceToEnd = Vector.between(currentPos, path.getLastPoint()).getLength();
 
             // Calculate the maximum velocity allowed to decelerate and stop at the target
             velocity = Math.sqrt(2 * MAX_ACCELERATION_FINAL * distanceToEnd);
+            acceleration = 0;
 
         } else {
-            velocity = target.getVelocity();
+//            velocity = target.getVelocity();
+            closestIndex = Math.max(1, closestIndex);
+
+            Position closestPoint = path.getPoint(closestIndex);
+            velocity = closestPoint.getVelocity();
+            acceleration = closestPoint.getAcceleration();
         }
 
         double robotAngle = currentPos.getTheta();
@@ -269,12 +275,12 @@ public class AdaptivePurePursuitAction extends Action {
         KLog.d("wheels", () -> "fRightVelocity: " + fRightVelocity);
         KLog.d("wheels", () -> "bRightVelocity: " + bRightVelocity);
 
-        KLog.d("ppDebug", () -> "acceleration: " + target.getAcceleration());
+        KLog.d("ppDebug", () -> "acceleration: " + acceleration);
 
-        double fLeftPower = calculateMotorOutput(fLeftVelocity, target.getAcceleration());
-        double bLeftPower = calculateMotorOutput(bLeftVelocity, target.getAcceleration());
-        double fRightPower = calculateMotorOutput(fRightVelocity, target.getAcceleration());
-        double bRightPower = calculateMotorOutput(bRightVelocity, target.getAcceleration());
+        double fLeftPower = calculateMotorOutput(fLeftVelocity, acceleration);
+        double bLeftPower = calculateMotorOutput(bLeftVelocity, acceleration);
+        double fRightPower = calculateMotorOutput(fRightVelocity, acceleration);
+        double bRightPower = calculateMotorOutput(bRightVelocity, acceleration);
 
 //        double max = Math.max(1.0, Math.max(Math.abs(fLeftPower),
 //                Math.max(Math.abs(bLeftPower), Math.max(Math.abs(fRightPower), Math.abs(bRightPower)))));
@@ -290,7 +296,7 @@ public class AdaptivePurePursuitAction extends Action {
         driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.25);
 
         KLog.d("ppDebug", () -> String.format("Target vel=%.1f mm/s, Current vel=%.1f mm/s, Accel=%.1f mm/s²",
-            velocity, filteredVelocityMmPerS, target.getAcceleration()));
+            velocity, filteredVelocityMmPerS, acceleration));
 
         prevFollow = Optional.of(target);
     }
@@ -307,6 +313,7 @@ public class AdaptivePurePursuitAction extends Action {
             hasStarted = true;
             lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             timeoutTimer.reset();
+            lastClosestIndex = 0;
         }
 
         if (!injectDone) {
@@ -337,9 +344,9 @@ public class AdaptivePurePursuitAction extends Action {
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             KLog.d("ppDebug", () -> "currentPosition: " + currentPosition);
 
-            int lastIdx = path.numPoints() - 1;
-            int closestIdx = findClosestPointIndex(path, currentPosition);
-            KLog.d("ppDebug", () -> "closestIdx index: " + closestIdx);
+//            int lastIdx = path.numPoints() - 1;
+//            int closestIdx = findClosestNextPointIndex(path, currentPosition);
+//            KLog.d("ppDebug", () -> "closestIdx index: " + closestIdx);
 
             double elapsedTime = System.currentTimeMillis() - startTimeMS;
 
@@ -375,7 +382,10 @@ public class AdaptivePurePursuitAction extends Action {
 
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
-            follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
+            int closestIdx = findClosestNextPointIndex(path, currentPosition);
+            int startSegment = Math.max(0, closestIdx - 1);
+
+            follow = path.searchFrom(currentPosition, currentLookAheadRadius, startSegment);
 
             KLog.d("ppDebugFollow", () -> String.format("Lookahead: radius=%.1f, found=%s, prevFollow=%s",
                 currentLookAheadRadius,
@@ -386,24 +396,24 @@ public class AdaptivePurePursuitAction extends Action {
             // If lookAhead finds a point AND that point is the last point,
             // it means we should shrink our search radius for the next iteration.
             // This is a more robust way to handle the end of the path.
-            if (follow.isPresent() && follow.get() == path.getLastPoint()) {
+            if (follow.isPresent() && Vector.between(follow.get(), path.getLastPoint()).getLength() < 1e-6) {
                 KLog.d("ppDebugFollow", "Follow point is last point, shrinking radius");
                 currentLookAheadRadius = LAST_RADIUS_MM;
-                follow = path.lookAhead(currentPosition, prevFollow, currentLookAheadRadius);
+                follow = path.searchFrom(currentPosition, currentLookAheadRadius, startSegment);
                 KLog.d("ppDebugFollow", () -> String.format("After shrink: radius=%.1f, found=%s",
                     currentLookAheadRadius, follow.isPresent() ? "YES" : "NO"));
             }
 
             if (follow.isPresent()) {
-                int followIndex = path.getIndex(follow.get());
-                int lastIndex = path.numPoints() - 1;
-
-                KLog.d("ppDebugFollow", () -> String.format("Following point %d/%d: (%.1f, %.1f, %.1f°)",
-                    followIndex, lastIndex,
-                    follow.get().getX(), follow.get().getY(), Math.toDegrees(follow.get().getTheta())));
+//                int followIndex = path.getIndex(follow.get());
+//                int lastIndex = path.numPoints() - 1;
+//
+//                KLog.d("ppDebugFollow", () -> String.format("Following point %d/%d: (%.1f, %.1f, %.1f°)",
+//                    followIndex, lastIndex,
+//                    follow.get().getX(), follow.get().getY(), Math.toDegrees(follow.get().getTheta())));
 
                 // We have a point to follow
-                targetPosition(follow.get(), currentPosition);
+                targetPosition(follow.get(), currentPosition, closestIdx);
 
             } else {
                 // If no lookahead point is found, we are at the end of the path.
@@ -424,7 +434,7 @@ public class AdaptivePurePursuitAction extends Action {
                     finishedMoving();
                 } else {
                     KLog.d("ppDebugFollow", "Driving to final point");
-                    targetPosition(path.getLastPoint(), currentPosition);
+                    targetPosition(path.getLastPoint(), currentPosition, closestIdx);
                 }
             }
 
@@ -466,7 +476,7 @@ public class AdaptivePurePursuitAction extends Action {
             return Optional.empty();
         }
         Position current = new Position(SharedData.getOdometryWheelIMUPosition());
-        int closestIdx = findClosestPointIndex(path, current);
+        int closestIdx = findClosestNextPointIndex(path, current);
         return Optional.of(path.getPoint(closestIdx));
     }
 
@@ -827,7 +837,7 @@ public class AdaptivePurePursuitAction extends Action {
             if (calcVAIndex == 0) {
                 path.getPoint(calcVAIndex).setCurvature(curvature(path, calcVAIndex));
                 path.getPoint(calcVAIndex).setVelocity(0);
-
+//                path.getPoint(0).setAcceleration(0);
                 calcVelocityAccelDone = true;
             } else {
                 path.getPoint(calcVAIndex).setCurvature(curvature(path, calcVAIndex));
@@ -914,9 +924,7 @@ public class AdaptivePurePursuitAction extends Action {
         // For pure pursuit, often the magnitude is used for speed, and steering is determined by the look-ahead point's position relative to the robot's heading.
         // However, if you want signed curvature, you can divide area2 by the radius components.
         // For general usage in path following, a simple 1/R is often sufficient, with the controller deciding the turn direction. If the original intent was signed curvature:
-        return area2 / (radius * radius * 2); // This gives signed curvature more robustly.
-        // If your system only needs positive curvature, use Math.abs(1/radius)
-        // or just 1/radius if radius is always positive.
+        return Math.signum(area2)/radius;
 
     }
 
@@ -949,24 +957,51 @@ public class AdaptivePurePursuitAction extends Action {
         return Math.min(v_f, calculateVelocity(path, positionIndex));
     }
 
-    private int findClosestPointIndex(Path path, Position current) {
-        List<Position> pts = path.getPath();
+    private int findClosestNextPointIndex(Path path, Position current) {
+//        List<Position> pts = path.getPath();
+//
+//        return IntStream.range(0, pts.size())
+//                .boxed()
+//                .min(
+//                        Comparator
+//                                // 1) compare by distance²
+//                                .comparingDouble((Integer i) -> {
+//                                    Position p = pts.get(i);
+//                                    double dx = current.getX() - p.getX();
+//                                    double dy = current.getY() - p.getY();
+//                                    return dx*dx + dy*dy;
+//                                })
+//                                // 2) if distances tie, prefer the higher index
+//                                .thenComparing(Comparator.reverseOrder())
+//                )
+//                .orElse(0);
+//    }
+        int bestIndex = lastClosestIndex;
+        double bestDist = distSq(path.getPoint(bestIndex), current);
 
-        return IntStream.range(0, pts.size())
-                .boxed()
-                .min(
-                        Comparator
-                                // 1) compare by distance²
-                                .comparingDouble((Integer i) -> {
-                                    Position p = pts.get(i);
-                                    double dx = current.getX() - p.getX();
-                                    double dy = current.getY() - p.getY();
-                                    return dx*dx + dy*dy;
-                                })
-                                // 2) if distances tie, prefer the higher index
-                                .thenComparing(Comparator.reverseOrder())
-                )
-                .orElse(0);
+        // Tune this based on point spacing and robot speed.
+        // If points are every 50–100 mm, 10–20 points is usually plenty.
+        int searchWindow = 20;
+
+        int end = Math.min(path.numPoints() - 1, lastClosestIndex + searchWindow);
+
+        for (int i = lastClosestIndex + 1; i <= end; i++) {
+            double d = distSq(path.getPoint(i), current);
+
+            if (d < bestDist) {
+                bestDist = d;
+                bestIndex = i;
+            }
+        }
+
+        lastClosestIndex = bestIndex;
+        return bestIndex;
+    }
+
+    private double distSq(Position a, Position b) {
+        double dx = a.getX() - b.getX();
+        double dy = a.getY() - b.getY();
+        return dx * dx + dy * dy;
     }
 
     private double calculateMotorOutput(double wheelVelocity, double acceleration) {
