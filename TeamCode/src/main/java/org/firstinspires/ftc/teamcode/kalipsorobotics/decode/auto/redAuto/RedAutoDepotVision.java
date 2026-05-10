@@ -16,7 +16,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -30,10 +29,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.ArtifactDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BlobSelectionStrategy;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
 
 @Autonomous(name = "RedAutoDepotVision")
 public class RedAutoDepotVision extends KOpMode {
@@ -58,7 +57,7 @@ public class RedAutoDepotVision extends KOpMode {
     private ShooterRun shooterRun;
 
     // Vision
-    private ArtifactDetectionProcessor artifactProcessor;
+    private TFLiteArtifactDetector artifactProcessor;
     private VisionManager visionManager;
     private CameraIntrinsics cameraIntrinsics;
 
@@ -105,7 +104,7 @@ public class RedAutoDepotVision extends KOpMode {
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
         // Initialize vision
-        artifactProcessor = new ArtifactDetectionProcessor();
+        artifactProcessor = new TFLiteArtifactDetector(hardwareMap.appContext);
         visionManager = new VisionManager.Builder(hardwareMap)
                 .addProcessor(artifactProcessor)
                 .build();

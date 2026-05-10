@@ -7,18 +7,19 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.ArtifactDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BlobSelectionStrategy;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BlobUtils;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.DetectedBlob;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MoveToBallAction extends Action {
 
     private final DriveTrain driveTrain;
-    private final ArtifactDetectionProcessor artifactProcessor;
+    private final KVisionProcessor<List<VisionRecognition>> artifactProcessor;
     private final CameraIntrinsics cameraIntrinsics;
     private final String targetColor;
     private final BlobSelectionStrategy selectionStrategy;
@@ -27,10 +28,10 @@ public class MoveToBallAction extends Action {
     private Point detectedBallWorldPos;
 
     public MoveToBallAction(DriveTrain driveTrain,
-                              ArtifactDetectionProcessor artifactProcessor,
-                              CameraIntrinsics cameraIntrinsics,
-                              String targetColor,
-                              BlobSelectionStrategy selectionStrategy) {
+                            KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+                            CameraIntrinsics cameraIntrinsics,
+                            String targetColor,
+                            BlobSelectionStrategy selectionStrategy) {
         this.driveTrain = driveTrain;
         this.artifactProcessor = artifactProcessor;
         this.cameraIntrinsics = cameraIntrinsics;
@@ -39,16 +40,16 @@ public class MoveToBallAction extends Action {
     }
 
     public MoveToBallAction(DriveTrain driveTrain,
-                              ArtifactDetectionProcessor artifactProcessor,
-                              CameraIntrinsics cameraIntrinsics,
-                              String targetColor) {
+                            KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+                            CameraIntrinsics cameraIntrinsics,
+                            String targetColor) {
         this(driveTrain, artifactProcessor, cameraIntrinsics, targetColor,
                 BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
     }
 
     public MoveToBallAction(DriveTrain driveTrain,
-                              ArtifactDetectionProcessor artifactProcessor,
-                              CameraIntrinsics cameraIntrinsics) {
+                            KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+                            CameraIntrinsics cameraIntrinsics) {
         this(driveTrain, artifactProcessor, cameraIntrinsics, null,
                 BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
     }
@@ -57,76 +58,65 @@ public class MoveToBallAction extends Action {
     protected void update() {
         if (isDone) return;
 
-        DetectedBlob targetBlob = selectBlob();
-        if (targetBlob == null) {
+        VisionRecognition target = selectRecognition();
+        if (target == null) {
             String colorFilter = targetColor != null ? targetColor + " " : "";
             KLog.d("MoveToBall", () -> String.format("No %sball detected", colorFilter));
             isDone = true;
             return;
         }
 
-        Point bottomCenter = targetBlob.getBottomMiddlePixel();
+        Point bottomCenter = target.getBottomMiddlePixel();
         Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
 
         if (worldPos == null) {
-            KLog.d("MoveToBall", "Failed to convert blob to world coordinates");
+            KLog.d("MoveToBall", "Failed to convert detection to world coordinates");
             isDone = true;
             return;
         }
 
         detectedBallWorldPos = worldPos;
-        String colorLabel = targetBlob.colorLabel != null ? targetBlob.colorLabel + " " : "";
-        KLog.d("MoveToBall", () -> String.format("%sball detected (%s) at world position: (%.1f, %.1f)",
-                colorLabel, selectionStrategy, worldPos.getX(), worldPos.getY()));
+        KLog.d("MoveToBall", () -> String.format("%s detected (%s) at world position: (%.1f, %.1f)",
+                target.label, selectionStrategy, worldPos.getX(), worldPos.getY()));
 
         approachPath = createApproachPath(worldPos);
         isDone = true;
     }
 
-    private DetectedBlob selectBlob() {
-        List<DetectedBlob> allBlobs = artifactProcessor.getLatestResult();
-        if (allBlobs == null || allBlobs.isEmpty()) {
-            return null;
-        }
+    private VisionRecognition selectRecognition() {
+        List<VisionRecognition> all = artifactProcessor.getLatestResult();
+        if (all == null || all.isEmpty()) return null;
 
-        // Filter by color if specified
-        List<DetectedBlob> candidateBlobs = filterByColor(allBlobs, targetColor);
-        if (candidateBlobs.isEmpty()) {
-            return null;
-        }
+        List<VisionRecognition> candidates = filterByLabel(all, targetColor);
+        if (candidates.isEmpty()) return null;
 
-        // Select blob using strategy
         switch (selectionStrategy) {
             case LARGEST_AREA:
-                return BlobUtils.findLargestByArea(candidateBlobs);
+                return BlobUtils.findLargestByArea(candidates);
 
             case CLOSEST_TO_CAMERA_CENTER:
-                return BlobUtils.findClosestToCameraCenter(candidateBlobs,
+                return BlobUtils.findClosestToCameraCenter(candidates,
                         cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
 
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
-                return BlobUtils.findClosestToRobotWorld(candidateBlobs,
+                return BlobUtils.findClosestToRobotWorld(candidates,
                         cameraIntrinsics, robotPos.toPoint());
 
             case MOST_CIRCULAR:
-                return BlobUtils.findMostCircular(candidateBlobs);
+                return BlobUtils.findMostCircular(candidates);
 
             default:
-                return candidateBlobs.get(0);
+                return candidates.get(0);
         }
     }
 
-    private List<DetectedBlob> filterByColor(List<DetectedBlob> blobs, String colorLabel) {
-        if (colorLabel == null) {
-            return blobs;
-        }
+    private List<VisionRecognition> filterByLabel(List<VisionRecognition> recognitions, String label) {
+        if (label == null) return recognitions;
 
-        List<DetectedBlob> filtered = new java.util.ArrayList<>();
-        for (DetectedBlob blob : blobs) {
-            if (colorLabel.equals(blob.colorLabel)) {
-                filtered.add(blob);
-            }
+        List<VisionRecognition> filtered = new ArrayList<>();
+        for (VisionRecognition recognition : recognitions) {
+            if (label.equals(recognition.label)) filtered.add(recognition);
         }
         return filtered;
     }

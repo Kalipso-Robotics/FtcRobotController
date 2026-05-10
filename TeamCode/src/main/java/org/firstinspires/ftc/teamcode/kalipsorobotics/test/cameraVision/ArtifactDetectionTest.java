@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.ArtifactDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.DetectedBlob;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.DetectedBlob;
 
 /**
  * Live tuning OpMode for ArtifactDetectionProcessor.
@@ -40,7 +40,7 @@ public class ArtifactDetectionTest extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.setMsTransmissionInterval(50);
 
-        ArtifactDetectionProcessor artifacts = new ArtifactDetectionProcessor();
+        ArtifactColorBlobDetectionProcessor artifacts = new ArtifactColorBlobDetectionProcessor();
 
         VisionManager visionManager = new VisionManager.Builder(hardwareMap)
                 .addProcessor(artifacts)

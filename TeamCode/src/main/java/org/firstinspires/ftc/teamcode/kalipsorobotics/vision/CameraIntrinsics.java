@@ -92,8 +92,8 @@ public class CameraIntrinsics{
         return robot.distanceTo(object);
     }
 
-    public double getDistanceFromRobot(DetectedBlob blob, Point robotPos) {
-        Point bottomCenter = blob.getBottomMiddlePixel();
+    public double getDistanceFromRobot(VisionRecognition recognition, Point robotPos) {
+        Point bottomCenter = recognition.getBottomMiddlePixel();
         return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(),
                 robotPos.getX(), robotPos.getY());
     }
