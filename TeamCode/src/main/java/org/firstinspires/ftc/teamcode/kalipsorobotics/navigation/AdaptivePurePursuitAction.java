@@ -92,7 +92,7 @@ public class AdaptivePurePursuitAction extends Action {
     private final double K_p = 0.00002; // 0.000015
     private final double K_a = 0.0; // 0.001
     private final double K_v = 0.0004; // 0.0004 0.00225
-    private final double K = 1000; //based on how slow you want the robot to go around turns, 1100
+    private final double K = 3.0; //based on how slow you want the robot to go around turns, 1000
 
     /*
     * ↑ Raising K_p
@@ -588,7 +588,7 @@ public class AdaptivePurePursuitAction extends Action {
 
         double distToEnd = segmentLength - distanceAlongSegment;
 
-        if ((!(segInject == 0) && distanceAlongSegment < 2 * smallSpacing) || (!(segInject == totalSegments - 1) && distToEnd <= largeSpacing + 2 * smallSpacing)) {
+        if ((!(segInject == 0) && distanceAlongSegment < 2 * smallSpacing) || (distToEnd <= largeSpacing + 2 * smallSpacing)) {
             return smallSpacing;
         }
 
