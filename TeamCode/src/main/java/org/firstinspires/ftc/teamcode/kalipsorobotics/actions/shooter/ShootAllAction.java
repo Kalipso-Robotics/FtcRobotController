@@ -23,8 +23,6 @@ public class ShootAllAction extends KActionSet {
     private final Stopper stopper;
     private final Intake intake;
     private final Shooter shooter;
-    private final DriveBrake driveBrake;
-
     private final ShooterRun shooterRun;
     private final TurretAutoAlignTeleOp turretAutoAlignTeleop;
     private double targetRPS;
@@ -47,11 +45,10 @@ public class ShootAllAction extends KActionSet {
 
     private boolean enableLimelightZeroing = true;
 
-    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos) {
+    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos) {
         this.stopper = stopper;
         this.intake = intake;
         this.shooter = shooter;
-        this.driveBrake = driveBrake;
         this.shooterRun = shooterRun;
         this.turretAutoAlignTeleop = turretAutoAlignTeleop;
         this.targetRPS = targetRPS;
@@ -65,11 +62,10 @@ public class ShootAllAction extends KActionSet {
         generateBasicAction(shooterRun, stopper, intake, turretAutoAlignTeleop);
     }
 
-    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, DriveBrake driveBrake, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
+    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
         this.stopper = stopper;
         this.intake = intake;
         this.shooter = shooter;
-        this.driveBrake = driveBrake;
         this.shooterRun = shooterRun;
         this.turretAutoAlignTeleop = turretAutoAlignTeleop;
         this.turret = turret;

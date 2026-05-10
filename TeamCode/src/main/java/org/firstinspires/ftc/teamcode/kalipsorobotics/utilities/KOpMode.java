@@ -190,8 +190,10 @@ public abstract class KOpMode extends LinearOpMode {
     }
 
     protected void updateSensorData(){
+        // Note: Reading encoder values directly from hardware.
+        // If using ticksOffset on motors, this may not match KMotor.getCurrentPosition()
         SensorData.setIntakeMotorTicks(hardwareMap.dcMotor.get("intake").getCurrentPosition());
         SensorData.setTurretMotorTicks(hardwareMap.dcMotor.get("turret").getCurrentPosition());
-        SensorData.setShooterMotorTicks(hardwareMap.dcMotor.get("shooter").getCurrentPosition());
+        SensorData.setShooterMotorTicks(hardwareMap.dcMotor.get("shooter1").getCurrentPosition());
     }
 }

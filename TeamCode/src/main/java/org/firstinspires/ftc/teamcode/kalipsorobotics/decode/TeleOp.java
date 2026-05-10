@@ -46,7 +46,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 public class TeleOp extends KOpMode {
     private boolean hasClosedStopperInnit = false;
     private DriveTrain driveTrain;
-    private DriveBrake driveBrake;
 
     private Shooter shooter = null;
     private Intake intake = null;
@@ -131,7 +130,6 @@ public class TeleOp extends KOpMode {
         }
         // ============== MODULES =================
         driveTrain = DriveTrain.getInstance(opModeUtilities);
-        driveBrake = new DriveBrake(opModeUtilities);
         turret = Turret.getInstance(opModeUtilities);
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
@@ -503,7 +501,7 @@ public class TeleOp extends KOpMode {
                     turnOnTurret();
                 }
 
-                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, driveBrake, shooterRun, turretAutoAlignTeleOp);
+                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp);
                 shootAllAction.setEnableLimelightZeroing(enableLimelightZeroing);
                 shooterRun.setUseOdometry(toggleTurretAlign);
                 setLastShooterAction(shootAllAction);

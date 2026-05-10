@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  * Blue Near autonomous with vision-guided ball collection.
  * Mirrors RedAutoNearVision with alliance-specific configuration.
  */
-@Autonomous(name = "BlueAutoNearVision")
+@Autonomous(name = "BlueAutoDepotVision")
 public class BlueAutoDepotVision extends RedAutoDepotVision {
 
     @Override

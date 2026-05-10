@@ -49,7 +49,6 @@ public class RedAutoDepot extends KOpMode {
     Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX(), Shooter.TARGET_POINT.getY() + 141.4213562373);
     private KActionSet lastTrip;
     private DriveTrain driveTrain;
-    private DriveBrake driveBrake;
     Shooter shooter = null;
     Intake intake = null;
     Stopper stopper = null;
@@ -82,7 +81,6 @@ public class RedAutoDepot extends KOpMode {
         // Create your modules
         DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);
-        driveBrake = new DriveBrake(opModeUtilities);
 
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
