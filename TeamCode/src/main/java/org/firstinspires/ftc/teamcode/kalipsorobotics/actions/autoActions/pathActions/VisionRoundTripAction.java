@@ -26,6 +26,11 @@ public class VisionRoundTripAction extends RoundTripAction {
     private final String targetBallColor;
     private final BlobSelectionStrategy selectionStrategy;
 
+    // When set, vision is deferred until the robot is within lookoutRadiusMM of this point.
+    // The path always drives through the lookout point first; vision decides what comes next.
+    private final Point visionLookoutPoint;
+    private final double lookoutRadiusMM;
+
     private boolean visionProcessed = false;
     private Point detectedBallWorldPos;
 
@@ -40,6 +45,8 @@ public class VisionRoundTripAction extends RoundTripAction {
         this.cameraIntrinsics = builder.cameraIntrinsics;
         this.targetBallColor = builder.targetBallColor;
         this.selectionStrategy = builder.selectionStrategy;
+        this.visionLookoutPoint = builder.visionLookoutPoint;
+        this.lookoutRadiusMM = builder.lookoutRadiusMM;
 
         if (useVision && (artifactProcessor == null || cameraIntrinsics == null)) {
             throw new IllegalArgumentException(
@@ -66,6 +73,9 @@ public class VisionRoundTripAction extends RoundTripAction {
         private CameraIntrinsics cameraIntrinsics;
         private String targetBallColor;
         private BlobSelectionStrategy selectionStrategy = BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER;
+
+        private Point visionLookoutPoint = null;
+        private double lookoutRadiusMM = 250;
 
         public Builder(OpModeUtilities opModeUtilities,
                        DriveTrain driveTrain,
@@ -106,6 +116,21 @@ public class VisionRoundTripAction extends RoundTripAction {
             return this;
         }
 
+        /**
+         * Set a mandatory lookout point. The robot drives to this point first.
+         * Vision is processed once the robot is within radiusMM of the lookout.
+         * If a ball is seen → navigate to it. If not → continue on fallback waypoints.
+         */
+        public Builder setVisionLookoutPoint(Point lookoutPoint, double radiusMM) {
+            this.visionLookoutPoint = lookoutPoint;
+            this.lookoutRadiusMM = radiusMM;
+            return this;
+        }
+
+        public Builder setVisionLookoutPoint(Point lookoutPoint) {
+            return setVisionLookoutPoint(lookoutPoint, 250);
+        }
+
         public Builder enableVision(ArtifactDetectionProcessor artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics,
                                     String targetBallColor,
@@ -144,9 +169,22 @@ public class VisionRoundTripAction extends RoundTripAction {
 
     @Override
     protected void beforeUpdate() {
-        if (useVision && !visionProcessed && !hasStarted) {
-            processVision();
-            visionProcessed = true;
+        if (useVision && !visionProcessed) {
+            if (visionLookoutPoint != null) {
+                // Defer vision until the robot reaches the lookout point.
+                // The path always drives through it first; this fires once it arrives.
+                Position currentPos = SharedData.getOdometryWheelIMUPosition();
+                double dist = currentPos.toPoint().distanceTo(visionLookoutPoint);
+                if (dist < lookoutRadiusMM) {
+                    KLog.d("VisionRoundTrip", () -> String.format("[%s] At lookout (dist=%.0fmm) - processing vision", getName(), dist));
+                    processVision();
+                    visionProcessed = true;
+                }
+            } else if (!hasStarted) {
+                // No lookout point configured: process immediately at trip start (original behavior)
+                processVision();
+                visionProcessed = true;
+            }
         }
         super.beforeUpdate();
     }
@@ -155,7 +193,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         DetectedBlob targetBlob = getTargetBlob();
         if (targetBlob == null) {
             String colorFilter = targetBallColor != null ? targetBallColor + " " : "";
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] No %sball detected - using manual waypoints",
+            KLog.d("VisionRoundTrip", () -> String.format("[%s] No %sball detected - continuing on fallback waypoints",
                     getName(), colorFilter));
             return;
         }
@@ -164,7 +202,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
 
         if (worldPos == null) {
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] Failed to convert blob to world coordinates", getName()));
+            KLog.d("VisionRoundTrip", () -> String.format("[%s] Failed to convert blob to world coordinates - using fallback", getName()));
             return;
         }
 
@@ -175,6 +213,7 @@ public class VisionRoundTripAction extends RoundTripAction {
                 bottomCenter.getX(), bottomCenter.getY(),
                 worldPos.getX(), worldPos.getY()));
 
+        // Ball found: replace remaining path with the ball's world position
         Position currentPos = new Position(SharedData.getOdometryWheelIMUPosition());
         PurePursuitAction moveToBall = getMoveToBall();
         moveToBall.clearPoints();
@@ -187,13 +226,11 @@ public class VisionRoundTripAction extends RoundTripAction {
             return null;
         }
 
-        // Filter by color if specified
         List<DetectedBlob> candidateBlobs = filterByColor(allBlobs, targetBallColor);
         if (candidateBlobs.isEmpty()) {
             return null;
         }
 
-        // Select blob using strategy
         switch (selectionStrategy) {
             case LARGEST_AREA:
                 return BlobUtils.findLargestByArea(candidateBlobs);

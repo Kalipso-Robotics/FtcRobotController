@@ -177,7 +177,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         waitForStart();
         while (opModeIsActive()) {
-            updateSensorData();
+            opModeUtilities.clearBulkCache();
             redAutoNear.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());

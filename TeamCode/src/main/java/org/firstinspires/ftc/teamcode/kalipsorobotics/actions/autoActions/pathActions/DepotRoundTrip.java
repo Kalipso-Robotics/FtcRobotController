@@ -33,7 +33,7 @@ public class DepotRoundTrip extends KActionSet {
     IntakeFullAction intakeBalls;
     double intakeTimeMS = IntakeConfig.intakeBallTimeMS;
     public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
-        turretAutoAlign.setToleranceDeg(0.5);
+        turretAutoAlign.setToleranceDeg(1.5);
 
         moveToDepot = new PurePursuitAction(drivetrain);
         moveToDepot.setName("moveToDepot");

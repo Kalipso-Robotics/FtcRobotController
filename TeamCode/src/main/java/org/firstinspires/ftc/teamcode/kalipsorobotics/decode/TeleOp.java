@@ -190,7 +190,7 @@ public class TeleOp extends KOpMode {
         KLog.d("TeleOp-Run", "closeStopper created successfully");
 
         while (opModeIsActive()) {
-            updateSensorData();
+            opModeUtilities.clearBulkCache();
             lastLoopTime = loopTimer.milliseconds();
             loopTimer.reset();
             Log.d("Loop_Speed", (int) lastLoopTime + "ms");

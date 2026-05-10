@@ -44,7 +44,8 @@ public class RedAutoDepotVision extends KOpMode {
     Point thirdLaunchPoint = new Point(SHOOT_FAR_X, SHOOT_FAR_Y + 100);
     Point firstShootPoint = new Point(0, 0);
     Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX(), Shooter.TARGET_POINT.getY() + 141.4213562373);
-    Point depotLookoutPoint = new Point(500, 1050);  // Vision lookout point at depot
+    // Mandatory lookout: robot always drives here first; vision fires on arrival and decides next move
+    Point depotLookoutPoint = new Point(500, 1050);
 
     // Modules
     private DriveTrain driveTrain;
@@ -149,14 +150,17 @@ public class RedAutoDepotVision extends KOpMode {
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(thirdLaunchPoint.multiplyY(allianceColor.getPolarity()))
             .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
+            .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();
         trip2.setName("trip2_CornerVision");
         trip2.setDependentActions(trip1);
 
-        // Add lookout point and fallback route (same as RedAutoDepot trip2)
+        // Drive to lookout first — vision decides at that point.
+        // Fallback path used if no ball is seen from the lookout.
         trip2.getMoveToBall().clearPoints();
+        trip2.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(-25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());  // Lookout point for vision
+        trip2.getMoveToBall().addPoint(250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         trip2.getMoveToBall().setFinalSearchRadiusMM(150);
         trip2.setShouldShooterStop(false);
@@ -167,8 +171,11 @@ public class RedAutoDepotVision extends KOpMode {
 
         // ----------------- TRIP 3+ (vision-guided retries) ----------------------
 
+        // All retry trips: drive to lookout first, vision decides; fallback sweeps if nothing seen.
+
         VisionRoundTripAction trip3 = createVisionRetryTrip(trip2, "trip3_Vision");
         trip3.getMoveToBall().clearPoints();
+        trip3.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
@@ -176,20 +183,24 @@ public class RedAutoDepotVision extends KOpMode {
 
         VisionRoundTripAction trip4 = createVisionRetryTrip(trip3, "trip4_Vision");
         trip4.getMoveToBall().clearPoints();
+        trip4.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip4);
 
+        // trip5 sweeps opposite direction to trip3 to cover different ground
         VisionRoundTripAction trip5 = createVisionRetryTrip(trip4, "trip5_Vision");
         trip5.getMoveToBall().clearPoints();
-        trip5.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip5.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip5.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip5.getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip5.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip5.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip5);
 
         VisionRoundTripAction trip6 = createVisionRetryTrip(trip5, "trip6_Vision");
         trip6.getMoveToBall().clearPoints();
+        trip6.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip6.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity());
         autoDepot.addAction(trip6);
 
@@ -219,7 +230,7 @@ public class RedAutoDepotVision extends KOpMode {
         KLog.d("RedAutoDepotVision-Run", "After waitForStart() - starting autonomous loop");
 
         while (opModeIsActive()) {
-            updateSensorData();
+            opModeUtilities.clearBulkCache();
             autoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
@@ -247,6 +258,7 @@ public class RedAutoDepotVision extends KOpMode {
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(farLaunchPoint.multiplyY(allianceColor.getPolarity()))
             .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
+            .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();
         retryTrip.setName(name);
         retryTrip.setDependentActions(lastTrip);

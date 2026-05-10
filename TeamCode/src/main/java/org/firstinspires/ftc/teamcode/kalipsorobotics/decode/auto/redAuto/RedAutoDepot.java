@@ -202,7 +202,7 @@ public class RedAutoDepot extends KOpMode {
         waitForStart();
         KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
         while (opModeIsActive()) {
-            updateSensorData();
+            opModeUtilities.clearBulkCache();
             autoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
