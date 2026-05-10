@@ -17,7 +17,7 @@ public class CameraIntrinsics{
             0.045011, -0.059862, 0.000330,
             0.001499, 0.005590,
             Math.toRadians(0),
-            new Vector3d(0, 0, 0)
+            new Vector3d(157.548, 236.163, 151.868)
     );
 
 

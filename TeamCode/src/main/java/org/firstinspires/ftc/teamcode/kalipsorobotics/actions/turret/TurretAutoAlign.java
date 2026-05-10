@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SensorData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -96,17 +95,17 @@ public class TurretAutoAlign extends Action {
 
 
 
-        KLog.d("turret_position", () -> " ticks " + targetTicks + " motor position " + SensorData.getTurretMotorTicks() + " target ticks " + targetTicks);
+        int currentTicks = turretMotor.getCurrentPosition();
+        KLog.d("turret_position", () -> " motor position " + currentTicks + " target ticks " + targetTicks);
 
-
-        if (Math.abs(SensorData.getTurretMotorTicks() - targetTicks) < Math.abs(toleranceTicks)) {
+        if (Math.abs(currentTicks - targetTicks) < Math.abs(toleranceTicks)) {
             isWithinRange = true;
             turret.stop();
-            KLog.d("turret_position", () -> "Within RANGE, ticks " + targetTicks + " motor position " + SensorData.getTurretMotorTicks() + " target ticks " + targetTicks);
+            KLog.d("turret_position", () -> "Within RANGE, motor position " + currentTicks + " target ticks " + targetTicks);
         } else {
             isWithinRange = false;
             moveToTargetTicks();
-            KLog.d("turret_position", () -> "NOT WITHIN RANGE, ticks " + targetTicks + " motor position " + SensorData.getTurretMotorTicks() + " target ticks " + targetTicks);
+            KLog.d("turret_position", () -> "NOT WITHIN RANGE, motor position " + currentTicks + " target ticks " + targetTicks);
         }
         KLog.d("turret_in_range", () -> "is the turret in range " + isWithinRange);
 
@@ -179,7 +178,7 @@ public class TurretAutoAlign extends Action {
     }
 
     private void moveToTargetTicks() {
-        int currentTicks = SensorData.getTurretMotorTicks();
+        int currentTicks = turretMotor.getCurrentPosition();
         int error = (int) targetTicks - currentTicks;
 
         deltaAngleDeg = error / TurretConfig.TICKS_PER_DEGREE;

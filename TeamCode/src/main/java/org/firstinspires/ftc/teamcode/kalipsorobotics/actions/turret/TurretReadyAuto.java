@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SensorData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -40,7 +39,7 @@ public class TurretReadyAuto extends Action {
             isDone = true;
             KLog.d("ActionTime", () -> this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
             KLog.d(this.getName(), () -> "Turret took " + timeoutTimer.milliseconds() + " milliseconds");
-            KLog.d(this.getName(), () -> "TurretReady is done, turret is within range " + SensorData.getTurretMotorTicks() + "ticks, " +
+            KLog.d(this.getName(), () -> "TurretReady is done, turret is within range " + turretAutoAlign.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlign.getTargetTicks());
         }
     }

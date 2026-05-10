@@ -5,11 +5,13 @@ import android.os.Process;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryLogger;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -17,6 +19,7 @@ public class OpModeUtilities {
     private final HardwareMap hardwareMap;
     private final LinearOpMode opMode;
     private final Telemetry telemetry;
+    private List<LynxModule> allHubs;
 
     public OpModeUtilities(HardwareMap hardwareMap, LinearOpMode opMode, Telemetry telemetry) {
         KLog.d("OpModeUtilities", "Constructor called. OpMode: " + opMode.getClass().getName());
@@ -35,6 +38,18 @@ public class OpModeUtilities {
 
     public Telemetry getTelemetry() {
         return telemetry;
+    }
+
+    public void setAllHubs(List<LynxModule> hubs) {
+        this.allHubs = hubs;
+    }
+
+    public void clearBulkCache() {
+        if (allHubs != null) {
+            for (LynxModule hub : allHubs) {
+                hub.clearBulkCache();
+            }
+        }
     }
 
     public static void shutdownExecutorService(ExecutorService executorService) throws InterruptedException {
@@ -75,6 +90,7 @@ public class OpModeUtilities {
                         KLog.d("ExecutorService_Run", () -> "Odometry Thread is running. OpMode.isActive: " + odometry.getOpModeUtilities().getOpMode().opModeIsActive());
                         if (odometry.getOpModeUtilities().getOpMode().opModeIsActive()) {
                             KLog.d("ExecutorService_Run", () -> "Odometry OpModeIsActive. Running");
+                            odometry.getOpModeUtilities().clearBulkCache();
                             odometry.updateAll();
                             odometryLogger.log(SharedData.getOdometryPositionMap());
                         }

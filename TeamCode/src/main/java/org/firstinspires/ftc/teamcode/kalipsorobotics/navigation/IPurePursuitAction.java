@@ -4,7 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 import java.util.List;
 
-public interface InterfacePurePursuitAction {
+public interface IPurePursuitAction {
     double DEFAULT_P_XY = 1.0 / 350.0;
     double DEFAULT_P_ANGLE = 1.0 / Math.toRadians(90);
 

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class  PurePursuitAction extends Action implements InterfacePurePursuitAction{
+public class  PurePursuitAction extends Action implements IPurePursuitAction {
     public static final double P_XY = 1.0/350.0;
     public static final double P_ANGLE = (1.0 / Math.toRadians(90));
     public static final double D_XY = 1.0/200;
