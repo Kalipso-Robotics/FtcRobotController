@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
 
 /**
  * Live raytracing validation for CameraIntrinsics.calculateWorldPos /
@@ -85,7 +86,7 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.setMsTransmissionInterval(50);
 
-        TFLiteArtifactDetector artifacts = new TFLiteArtifactDetector(hardwareMap.appContext);
+        ArtifactColorBlobDetectionProcessor artifacts = new ArtifactColorBlobDetectionProcessor();
 
         VisionManager visionManager = new VisionManager.Builder(hardwareMap)
                 .withResolution(CAM_WIDTH, CAM_HEIGHT)
