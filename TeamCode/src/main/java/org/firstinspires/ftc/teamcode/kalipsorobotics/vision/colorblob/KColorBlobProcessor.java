@@ -89,6 +89,12 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
     /** Gaussian blur kernel size (must be odd). Larger = more smoothing, less noise. */
     protected int gaussianKernelSize = 5;
 
+    // Diagnostic counters — written on camera thread, read from main thread via getDiagnosticSummary()
+    private volatile int diagFrameCount = 0;
+    private volatile int diagRawContours = 0;
+    private volatile int diagAreaRejected = 0;
+    private volatile int diagCircRejected = 0;
+
     private static final int PROCESSING_WIDTH  = 320;
     private static final int PROCESSING_HEIGHT = 240;
 
@@ -141,6 +147,11 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
     @Override
     protected List<VisionRecognition> detect(Mat frame) {
+        diagFrameCount++;
+        diagRawContours = 0;
+        diagAreaRejected = 0;
+        diagCircRejected = 0;
+
         Imgproc.resize(frame, downsampledFrame,
                 new Size(PROCESSING_WIDTH, PROCESSING_HEIGHT), 0, 0, Imgproc.INTER_LINEAR);
         Imgproc.GaussianBlur(downsampledFrame, blurredFrame,
@@ -155,6 +166,13 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
         allBlobs.sort((first, second) -> Double.compare(second.getArea(), first.getArea()));
         return allBlobs;
+    }
+
+    @Override
+    public String getDiagnosticSummary() {
+        return String.format("frames=%d rawContours=%d areaRej=%d circRej=%d minArea=%.0f minCirc=%.2f",
+                diagFrameCount, diagRawContours, diagAreaRejected, diagCircRejected,
+                minContourArea, minCircularity);
     }
 
     @Override
@@ -218,10 +236,13 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
         Imgproc.findContours(morphologyBuffer, reusableContourList, contourHierarchy,
                 Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
+        diagRawContours += reusableContourList.size();
+
         List<DetectedBlob> blobs = new ArrayList<>();
         for (MatOfPoint contour : reusableContourList) {
             double area = Imgproc.contourArea(contour);
             if (area < minContourArea || area > maxContourArea) {
+                diagAreaRejected++;
                 contour.release();
                 continue;
             }
@@ -229,6 +250,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
             reusableContourBuffer.fromArray(contour.toArray());
             double circularity = computeCircularity(area, Imgproc.arcLength(reusableContourBuffer, true));
             if (circularity < minCircularity) {
+                diagCircRejected++;
                 contour.release();
                 continue;
             }

@@ -118,6 +118,9 @@ public abstract class KVisionProcessor<T> implements VisionProcessor {
     /** True once at least one frame has been processed. */
     public boolean hasResult() { return latestResult != null; }
 
+    /** Diagnostic string for the last processed frame. Override in subclasses to provide detail. */
+    public String getDiagnosticSummary() { return ""; }
+
     // -------------------------------------------------------------------------
     // DrawContext — passed to annotate() so subclasses never need to touch the
     //              raw scale parameters from the VisionProcessor interface.
