@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob;
 
 import android.graphics.Color;
 
@@ -12,7 +12,7 @@ import org.opencv.core.Scalar;
  *
  * To add a color next season, add a new ColorChannel here — nothing else changes.
  */
-public class ArtifactDetectionProcessor extends KColorBlobProcessor {
+public class ArtifactColorBlobDetectionProcessor extends KColorBlobProcessor {
 
     public static final String PURPLE = "Purple";
     public static final String GREEN  = "Green";
@@ -30,9 +30,8 @@ public class ArtifactDetectionProcessor extends KColorBlobProcessor {
         };
     }
 
-    // Named accessors so callers never write string literals
-    public DetectedBlob getLargestPurpleBlob() { return getLargestBlobByLabel(PURPLE);}
-    public DetectedBlob getLargestGreenBlob() { return getLargestBlobByLabel(GREEN);}
-    public boolean hasPurpleBlob() { return hasBlobWithLabel(PURPLE);}
-    public boolean hasGreenBlob() { return hasBlobWithLabel(GREEN);}
+    public DetectedBlob getLargestPurpleBlob() { return getLargestBlobByLabel(PURPLE); }
+    public DetectedBlob getLargestGreenBlob()  { return getLargestBlobByLabel(GREEN);  }
+    public boolean hasPurpleBlob()             { return hasBlobWithLabel(PURPLE);      }
+    public boolean hasGreenBlob()              { return hasBlobWithLabel(GREEN);       }
 }

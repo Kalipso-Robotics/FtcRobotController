@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.math;
 
 public class Vector3d {
-    private double x, y, z;
+    private final double x;
+    private final double y;
+    private final double z;
 
     // Constructor to create a new vector
     public Vector3d(double x, double y, double z) {

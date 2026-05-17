@@ -132,7 +132,7 @@ public class SharedData {
         voltage = newVoltage;
     }
 
-    private static Position unfilteredLimelightGlobalPos = new Position(0,0,0);
+    private static final Position unfilteredLimelightGlobalPos = new Position(0,0,0);
     public static Position getUnfilteredLimelightGlobalPos() {
         return new Position(unfilteredLimelightGlobalPos);
     }

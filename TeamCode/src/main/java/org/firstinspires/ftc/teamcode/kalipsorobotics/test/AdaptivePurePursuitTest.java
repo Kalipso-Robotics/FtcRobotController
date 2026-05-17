@@ -71,7 +71,7 @@ public class AdaptivePurePursuitTest extends KOpMode {
 
         // Log test configuration
         KLog.d("AdaptivePPTest", "========== TEST CONFIGURATION ==========");
-        KLog.d("AdaptivePPTest", String.format("Starting Position: (3060, -712, 2.4049 rad)"));
+        KLog.d("AdaptivePPTest", "Starting Position: (3060, -712, 2.4049 rad)");
         KLog.d("AdaptivePPTest", String.format("Path points: %d", 9));
         KLog.d("AdaptivePPTest", String.format("Target: (%.1f, %.1f, %.1f°)",
             targetPosition.getX(), targetPosition.getY(), Math.toDegrees(targetPosition.getTheta())));

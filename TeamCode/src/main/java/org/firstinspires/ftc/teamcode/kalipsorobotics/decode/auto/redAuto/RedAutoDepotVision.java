@@ -16,7 +16,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -30,12 +29,13 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.ArtifactDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BlobSelectionStrategy;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
 
-@Autonomous(name = "RedAutoDepotVision")
+@Autonomous
 public class RedAutoDepotVision extends KOpMode {
 
     public final static double SHOOT_FAR_X = 150;
@@ -58,7 +58,7 @@ public class RedAutoDepotVision extends KOpMode {
     private ShooterRun shooterRun;
 
     // Vision
-    private ArtifactDetectionProcessor artifactProcessor;
+    private ArtifactColorBlobDetectionProcessor artifactProcessor;
     private VisionManager visionManager;
     private CameraIntrinsics cameraIntrinsics;
 
@@ -105,12 +105,12 @@ public class RedAutoDepotVision extends KOpMode {
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
         // Initialize vision
-        artifactProcessor = new ArtifactDetectionProcessor();
+        artifactProcessor = new ArtifactColorBlobDetectionProcessor();
         visionManager = new VisionManager.Builder(hardwareMap)
                 .addProcessor(artifactProcessor)
                 .build();
 
-        cameraIntrinsics = CameraIntrinsics.Arducam.withMount(
+        cameraIntrinsics = CameraIntrinsics.ARDUCAM.withMount(
                 Math.toRadians(0),      // Mount angle (tilt)
                 new Vector3d(0, 150, 100)  // Camera offset from robot center (x, y, z in mm)
         );
@@ -157,10 +157,10 @@ public class RedAutoDepotVision extends KOpMode {
 
         // Drive to lookout first — vision decides at that point.
         // Fallback path used if no ball is seen from the lookout.
-        trip2.getMoveToBall().clearPoints();
-        trip2.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(-25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip2.getMoveToBall().addPoint(250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip2.getMoveToBall().clearPoints();
+//        trip2.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip2.getMoveToBall().addPoint(-25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip2.getMoveToBall().addPoint(250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 
         trip2.getMoveToBall().setFinalSearchRadiusMM(150);
         trip2.setShouldShooterStop(false);
@@ -175,33 +175,33 @@ public class RedAutoDepotVision extends KOpMode {
 
         VisionRoundTripAction trip3 = createVisionRetryTrip(trip2, "trip3_Vision");
         trip3.getMoveToBall().clearPoints();
-        trip3.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip3.getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip3.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip3.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip3.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip3.getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip3);
 
         VisionRoundTripAction trip4 = createVisionRetryTrip(trip3, "trip4_Vision");
         trip4.getMoveToBall().clearPoints();
-        trip4.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip4.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip4);
 
         // trip5 sweeps opposite direction to trip3 to cover different ground
         VisionRoundTripAction trip5 = createVisionRetryTrip(trip4, "trip5_Vision");
-        trip5.getMoveToBall().clearPoints();
-        trip5.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip5.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip5.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip5.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip5.getMoveToBall().clearPoints();
+//        trip5.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip5.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip5.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip5.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip5);
 
         VisionRoundTripAction trip6 = createVisionRetryTrip(trip5, "trip6_Vision");
         trip6.getMoveToBall().clearPoints();
-        trip6.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        trip6.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity());
+//        trip6.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip6.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity());
         autoDepot.addAction(trip6);
 
         // ----------------- PARK (same as RedAutoDepot) ----------------------

@@ -81,7 +81,7 @@ public class  PurePursuitAction extends Action implements IPurePursuitAction {
     private double prevYVelocity;
     private double thetaVelocity;
 
-    private double withinRangeRadiusMM;
+    private final double withinRangeRadiusMM;
 
     private boolean enablePowerScalingForPath = false;
 //    private final double threshold = 10;

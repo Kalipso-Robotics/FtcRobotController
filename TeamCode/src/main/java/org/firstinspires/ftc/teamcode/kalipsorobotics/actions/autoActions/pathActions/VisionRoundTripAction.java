@@ -11,17 +11,18 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitActi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.ArtifactDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BlobSelectionStrategy;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BlobUtils;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.DetectedBlob;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class VisionRoundTripAction extends RoundTripAction {
     private final boolean useVision;
-    private final ArtifactDetectionProcessor artifactProcessor;
+    private final KVisionProcessor<List<VisionRecognition>> artifactProcessor;
     private final CameraIntrinsics cameraIntrinsics;
     private final String targetBallColor;
     private final BlobSelectionStrategy selectionStrategy;
@@ -69,7 +70,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         private boolean shouldDependOnFlywheel = false;
 
         private boolean useVision = false;
-        private ArtifactDetectionProcessor artifactProcessor;
+        private KVisionProcessor<List<VisionRecognition>> artifactProcessor;
         private CameraIntrinsics cameraIntrinsics;
         private String targetBallColor;
         private BlobSelectionStrategy selectionStrategy = BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER;
@@ -131,7 +132,17 @@ public class VisionRoundTripAction extends RoundTripAction {
             return setVisionLookoutPoint(lookoutPoint, 250);
         }
 
-        public Builder enableVision(ArtifactDetectionProcessor artifactProcessor,
+        /**
+         * Enable vision-guided ball selection.
+         *
+         * @param artifactProcessor Any KVisionProcessor that produces List<KVisionRecognition>
+         *                          — works for color blob processors AND TFLite detectors.
+         * @param cameraIntrinsics  Camera calibration for pixel-to-world conversion.
+         * @param targetBallColor   Filter by recognition.label (e.g. "Purple", "Green").
+         *                          Pass null to accept any color/label (use for TFLite-single-class).
+         * @param selectionStrategy Which detection to pick when multiple are seen.
+         */
+        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics,
                                     String targetBallColor,
                                     BlobSelectionStrategy selectionStrategy) {
@@ -143,20 +154,20 @@ public class VisionRoundTripAction extends RoundTripAction {
             return this;
         }
 
-        public Builder enableVision(ArtifactDetectionProcessor artifactProcessor,
+        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics,
                                     String targetBallColor) {
             return enableVision(artifactProcessor, cameraIntrinsics, targetBallColor,
                     BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
-        public Builder enableVision(ArtifactDetectionProcessor artifactProcessor,
+        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics) {
             return enableVision(artifactProcessor, cameraIntrinsics, null,
                     BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
-        public Builder enableVision(ArtifactDetectionProcessor artifactProcessor,
+        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics,
                                     BlobSelectionStrategy selectionStrategy) {
             return enableVision(artifactProcessor, cameraIntrinsics, null, selectionStrategy);
@@ -171,8 +182,6 @@ public class VisionRoundTripAction extends RoundTripAction {
     protected void beforeUpdate() {
         if (useVision && !visionProcessed) {
             if (visionLookoutPoint != null) {
-                // Defer vision until the robot reaches the lookout point.
-                // The path always drives through it first; this fires once it arrives.
                 Position currentPos = SharedData.getOdometryWheelIMUPosition();
                 double dist = currentPos.toPoint().distanceTo(visionLookoutPoint);
                 if (dist < lookoutRadiusMM) {
@@ -181,7 +190,6 @@ public class VisionRoundTripAction extends RoundTripAction {
                     visionProcessed = true;
                 }
             } else if (!hasStarted) {
-                // No lookout point configured: process immediately at trip start (original behavior)
                 processVision();
                 visionProcessed = true;
             }
@@ -190,78 +198,68 @@ public class VisionRoundTripAction extends RoundTripAction {
     }
 
     private void processVision() {
-        DetectedBlob targetBlob = getTargetBlob();
-        if (targetBlob == null) {
+        VisionRecognition target = getTargetRecognition();
+        if (target == null) {
             String colorFilter = targetBallColor != null ? targetBallColor + " " : "";
             KLog.d("VisionRoundTrip", () -> String.format("[%s] No %sball detected - continuing on fallback waypoints",
                     getName(), colorFilter));
             return;
         }
 
-        Point bottomCenter = targetBlob.getBottomMiddlePixel();
+        Point bottomCenter = target.getBottomMiddlePixel();
         Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
 
         if (worldPos == null) {
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] Failed to convert blob to world coordinates - using fallback", getName()));
+            KLog.d("VisionRoundTrip", () -> String.format("[%s] Failed to convert detection to world coordinates - using fallback", getName()));
             return;
         }
 
         detectedBallWorldPos = worldPos;
-        String colorLabel = targetBlob.colorLabel != null ? targetBlob.colorLabel + " " : "";
-        KLog.d("VisionRoundTrip", () -> String.format("[%s] %sball detected (%s): pixel=(%.0f,%.0f) world=(%.1f,%.1f)",
-                getName(), colorLabel, selectionStrategy,
+        KLog.d("VisionRoundTrip", () -> String.format("[%s] %s detected (%s): pixel=(%.0f,%.0f) world=(%.1f,%.1f)",
+                getName(), target.label, selectionStrategy,
                 bottomCenter.getX(), bottomCenter.getY(),
                 worldPos.getX(), worldPos.getY()));
 
-        // Ball found: replace remaining path with the ball's world position
         Position currentPos = new Position(SharedData.getOdometryWheelIMUPosition());
         PurePursuitAction moveToBall = getMoveToBall();
         moveToBall.clearPoints();
         moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(currentPos.getTheta()));
     }
 
-    private DetectedBlob getTargetBlob() {
-        List<DetectedBlob> allBlobs = artifactProcessor.getLatestResult();
-        if (allBlobs == null || allBlobs.isEmpty()) {
-            return null;
-        }
+    private VisionRecognition getTargetRecognition() {
+        List<VisionRecognition> all = artifactProcessor.getLatestResult();
+        if (all == null || all.isEmpty()) return null;
 
-        List<DetectedBlob> candidateBlobs = filterByColor(allBlobs, targetBallColor);
-        if (candidateBlobs.isEmpty()) {
-            return null;
-        }
+        List<VisionRecognition> candidates = filterByLabel(all, targetBallColor);
+        if (candidates.isEmpty()) return null;
 
         switch (selectionStrategy) {
             case LARGEST_AREA:
-                return BlobUtils.findLargestByArea(candidateBlobs);
+                return BlobUtils.findLargestByArea(candidates);
 
             case CLOSEST_TO_CAMERA_CENTER:
-                return BlobUtils.findClosestToCameraCenter(candidateBlobs,
+                return BlobUtils.findClosestToCameraCenter(candidates,
                         cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
 
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
-                return BlobUtils.findClosestToRobotWorld(candidateBlobs,
+                return BlobUtils.findClosestToRobotWorld(candidates,
                         cameraIntrinsics, robotPos.toPoint());
 
             case MOST_CIRCULAR:
-                return BlobUtils.findMostCircular(candidateBlobs);
+                return BlobUtils.findMostCircular(candidates);
 
             default:
-                return candidateBlobs.get(0);
+                return candidates.get(0);
         }
     }
 
-    private List<DetectedBlob> filterByColor(List<DetectedBlob> blobs, String colorLabel) {
-        if (colorLabel == null) {
-            return blobs;
-        }
+    private List<VisionRecognition> filterByLabel(List<VisionRecognition> recognitions, String label) {
+        if (label == null) return recognitions;
 
-        List<DetectedBlob> filtered = new java.util.ArrayList<>();
-        for (DetectedBlob blob : blobs) {
-            if (colorLabel.equals(blob.colorLabel)) {
-                filtered.add(blob);
-            }
+        List<VisionRecognition> filtered = new ArrayList<>();
+        for (VisionRecognition recognition : recognitions) {
+            if (label.equals(recognition.label)) filtered.add(recognition);
         }
         return filtered;
     }

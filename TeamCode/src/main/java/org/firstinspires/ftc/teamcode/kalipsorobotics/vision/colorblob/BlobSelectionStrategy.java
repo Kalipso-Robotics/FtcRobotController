@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob;
 
 public enum BlobSelectionStrategy {
     LARGEST_AREA,

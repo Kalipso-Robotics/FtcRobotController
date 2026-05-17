@@ -11,9 +11,11 @@ public class CameraIntrinsics{
     private final Vector3d cameraOffset;
     private final double focalLength;
     private final double k1, k2, k3, p1, p2; //distortions
-    public static final CameraIntrinsics Arducam = new CameraIntrinsics(
-            888.2839, 887.1260,
-            700.0372, 354.0664,
+    // Calibrated at 1280x800 (see calibrate_camera.py), scaled to 640x480:
+    //   fx,cx *= 0.5   fy,cy *= 0.6   distortion coeffs are dimensionless.
+    public static final CameraIntrinsics ARDUCAM = new CameraIntrinsics(
+            444.14195, 532.27560,
+            350.01860, 212.43984,
             0.045011, -0.059862, 0.000330,
             0.001499, 0.005590,
             Math.toRadians(0),
@@ -54,7 +56,8 @@ public class CameraIntrinsics{
     public Point calculateWorldPos(double pixelX, double pixelY) { // these pixels should be the bottom center of the blob
         // normalize center to middle of image not corner
         double norm_x = pixelX - this.cx;
-        double norm_y = pixelY - this.cy;
+//        double norm_y = pixelY - this.cy;
+        double norm_y = this.cy - pixelY;
 
         double x_direction = norm_x / this.focalLength;
         double y_direction = norm_y / this.focalLength;
@@ -92,8 +95,8 @@ public class CameraIntrinsics{
         return robot.distanceTo(object);
     }
 
-    public double getDistanceFromRobot(DetectedBlob blob, Point robotPos) {
-        Point bottomCenter = blob.getBottomMiddlePixel();
+    public double getDistanceFromRobot(VisionRecognition recognition, Point robotPos) {
+        Point bottomCenter = recognition.getBottomMiddlePixel();
         return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(),
                 robotPos.getX(), robotPos.getY());
     }

@@ -62,8 +62,8 @@ public class Odometry {
     private Position prevPositionWheelIMU;
     private Velocity robotWheelIMUVelocity;
     private Velocity robotWheelVelocity;
-    private ExponentialVelocityFiltering emaWheelIMU;
-    private ExponentialVelocityFiltering emaWheel;
+    private final ExponentialVelocityFiltering emaWheelIMU;
+    private final ExponentialVelocityFiltering emaWheel;
     double rightDistanceMM;
     double leftDistanceMM;
     double backDistanceMM;

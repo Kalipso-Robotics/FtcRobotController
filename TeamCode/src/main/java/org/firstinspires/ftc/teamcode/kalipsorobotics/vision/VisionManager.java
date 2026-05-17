@@ -180,8 +180,8 @@ public class VisionManager {
         }
 
         /**
-         * Register any VisionProcessor — KVisionProcessor subclasses,
-         * KRoboflowDetector subclasses, AprilTagProcessor, or any custom processor.
+         * Register any VisionProcessor — KVisionProcessor subclasses (color blob,
+         * TFLite, etc.), AprilTagProcessor, or any custom processor.
          * All registered processors share the same camera frame.
          */
         public Builder addProcessor(VisionProcessor processor) {

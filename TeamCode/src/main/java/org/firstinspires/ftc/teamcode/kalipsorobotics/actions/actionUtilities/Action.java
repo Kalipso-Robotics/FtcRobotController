@@ -92,7 +92,7 @@ public abstract class Action {
                     KLog.d("ActionBlocking", () -> String.format("[%s] STILL BLOCKED for %.1fs - Waiting on: [%s]",
                         getName() != null ? getName() : "unnamed",
                         blockedDurationMs / 1000.0,
-                            blockedBy.toString()));
+                            blockedBy));
                 }
             }
             return false;
