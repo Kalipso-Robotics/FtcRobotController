@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 public class SOTMCompensation {
 
     public static class SOTMResult {
-        private double distance;
-        private double targetAngleRad;
+        private final double distance;
+        private final double targetAngleRad;
         public SOTMResult(double distance, double targetAngleRad) {
            this.distance = distance;
            this.targetAngleRad = targetAngleRad;

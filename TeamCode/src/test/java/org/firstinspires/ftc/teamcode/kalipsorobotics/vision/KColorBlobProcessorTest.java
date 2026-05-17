@@ -8,6 +8,7 @@ import org.opencv.core.Scalar;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -125,7 +126,7 @@ public class KColorBlobProcessorTest {
 
     @Test
     public void testGetByLabelNullWhenColorAbsent() throws Exception {
-        injectResult(Arrays.asList(blob("Green", 2000, 0.80)));
+        injectResult(Collections.singletonList(blob("Green", 2000, 0.80)));
         assertNull(processor.getLargestBlobByLabel("Purple"));
     }
 
@@ -147,7 +148,7 @@ public class KColorBlobProcessorTest {
 
     @Test
     public void testHasBlobWithLabelTrueWhenPresent() throws Exception {
-        injectResult(Arrays.asList(blob("Purple", 3000, 0.85)));
+        injectResult(Collections.singletonList(blob("Purple", 3000, 0.85)));
         assertTrue(processor.hasBlobWithLabel("Purple"));
         assertFalse(processor.hasBlobWithLabel("Green"));
     }

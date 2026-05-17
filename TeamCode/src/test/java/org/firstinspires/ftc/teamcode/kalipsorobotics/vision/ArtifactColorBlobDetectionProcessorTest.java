@@ -7,6 +7,7 @@ import org.opencv.core.Scalar;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -84,7 +85,7 @@ public class ArtifactColorBlobDetectionProcessorTest {
 
     @Test
     public void testDetectsPurpleBlob() throws Exception {
-        injectResult(Arrays.asList(makeBlob("Purple", 150, 100, 90, 90, 8100)));
+        injectResult(Collections.singletonList(makeBlob("Purple", 150, 100, 90, 90, 8100)));
         assertTrue(processor.hasPurpleBlob());
         assertFalse(processor.hasGreenBlob());
 
@@ -95,7 +96,7 @@ public class ArtifactColorBlobDetectionProcessorTest {
 
     @Test
     public void testDetectsGreenBlob() throws Exception {
-        injectResult(Arrays.asList(makeBlob("Green", 300, 200, 80, 80, 6400)));
+        injectResult(Collections.singletonList(makeBlob("Green", 300, 200, 80, 80, 6400)));
         assertTrue(processor.hasGreenBlob());
         assertFalse(processor.hasPurpleBlob());
     }
@@ -184,7 +185,7 @@ public class ArtifactColorBlobDetectionProcessorTest {
         // Ball bounding box at (200, 150) with size 90x90
         // Expected center: (245, 195)
         DetectedBlob ball = new DetectedBlob(new Rect(200, 150, 90, 90), 8100, 0.91, "Purple");
-        injectResult(Arrays.asList(ball));
+        injectResult(Collections.singletonList(ball));
 
         DetectedBlob result = processor.getLargestPurpleBlob();
         assertNotNull(result);

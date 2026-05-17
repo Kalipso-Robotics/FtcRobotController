@@ -14,9 +14,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 public class PushBall extends KActionSet {
 //    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
-    private KServoAutoAction openStopper;
-    private RunIntakeTime runIntakeTime;
-    private CloseStopperInstantDone closeStopperInstantDone;
+    private final KServoAutoAction openStopper;
+    private final RunIntakeTime runIntakeTime;
+    private final CloseStopperInstantDone closeStopperInstantDone;
     public PushBall(Stopper stopper, Intake intake) {
 
         KLog.d("PushAllBalls", () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
