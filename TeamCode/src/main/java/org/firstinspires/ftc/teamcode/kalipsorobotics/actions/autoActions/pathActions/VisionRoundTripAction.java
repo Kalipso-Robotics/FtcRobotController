@@ -26,16 +26,11 @@ public class VisionRoundTripAction extends RoundTripAction {
     private final CameraIntrinsics cameraIntrinsics;
     private final String targetBallColor;
     private final BlobSelectionStrategy selectionStrategy;
-
-    // When set, vision is deferred until the robot is within lookoutRadiusMM of this point.
-    // The path always drives through the lookout point first; vision decides what comes next.
     private final Point visionLookoutPoint;
     private final double lookoutRadiusMM;
-
     private boolean visionProcessed = false;
     private Point detectedBallWorldPos;
-    private int beforeUpdateCallCount = 0;
-    private boolean wasMoveToBallDone = false;
+    private int frameCount = 0;
 
     private VisionRoundTripAction(Builder builder) {
         super(builder.opModeUtilities, builder.driveTrain, builder.turretAutoAlign,
@@ -52,8 +47,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         this.lookoutRadiusMM = builder.lookoutRadiusMM;
 
         if (useVision && (artifactProcessor == null || cameraIntrinsics == null)) {
-            throw new IllegalArgumentException(
-                    "Vision mode requires: artifactProcessor and cameraIntrinsics");
+            throw new IllegalArgumentException("Vision mode requires artifactProcessor and cameraIntrinsics");
         }
     }
 
@@ -80,12 +74,9 @@ public class VisionRoundTripAction extends RoundTripAction {
         private Point visionLookoutPoint = null;
         private double lookoutRadiusMM = 250;
 
-        public Builder(OpModeUtilities opModeUtilities,
-                       DriveTrain driveTrain,
-                       TurretAutoAlign turretAutoAlign,
-                       Shooter shooter,
-                       Stopper stopper,
-                       Intake intake) {
+        public Builder(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
+                       TurretAutoAlign turretAutoAlign, Shooter shooter,
+                       Stopper stopper, Intake intake) {
             this.opModeUtilities = opModeUtilities;
             this.driveTrain = driveTrain;
             this.turretAutoAlign = turretAutoAlign;
@@ -94,36 +85,12 @@ public class VisionRoundTripAction extends RoundTripAction {
             this.intake = intake;
         }
 
-        public Builder setTargetPoint(Point targetPoint) {
-            this.targetPoint = targetPoint;
-            return this;
-        }
+        public Builder setTargetPoint(Point targetPoint) { this.targetPoint = targetPoint; return this; }
+        public Builder setLaunchPoint(Point launchPoint) { this.launchPoint = launchPoint; return this; }
+        public Builder setWaitForShooterReadyMS(double waitMS) { this.waitForShooterReadyMS = waitMS; return this; }
+        public Builder setShouldRunIntake(boolean v) { this.shouldRunIntake = v; return this; }
+        public Builder setShouldDependOnFlywheel(boolean v) { this.shouldDependOnFlywheel = v; return this; }
 
-        public Builder setLaunchPoint(Point launchPoint) {
-            this.launchPoint = launchPoint;
-            return this;
-        }
-
-        public Builder setWaitForShooterReadyMS(double waitMS) {
-            this.waitForShooterReadyMS = waitMS;
-            return this;
-        }
-
-        public Builder setShouldRunIntake(boolean shouldRunIntake) {
-            this.shouldRunIntake = shouldRunIntake;
-            return this;
-        }
-
-        public Builder setShouldDependOnFlywheel(boolean shouldDependOnFlywheel) {
-            this.shouldDependOnFlywheel = shouldDependOnFlywheel;
-            return this;
-        }
-
-        /**
-         * Set a mandatory lookout point. The robot drives to this point first.
-         * Vision is processed once the robot is within radiusMM of the lookout.
-         * If a ball is seen → navigate to it. If not → continue on fallback waypoints.
-         */
         public Builder setVisionLookoutPoint(Point lookoutPoint, double radiusMM) {
             this.visionLookoutPoint = lookoutPoint;
             this.lookoutRadiusMM = radiusMM;
@@ -134,16 +101,6 @@ public class VisionRoundTripAction extends RoundTripAction {
             return setVisionLookoutPoint(lookoutPoint, 250);
         }
 
-        /**
-         * Enable vision-guided ball selection.
-         *
-         * @param artifactProcessor Any KVisionProcessor that produces List<KVisionRecognition>
-         *                          — works for color blob processors AND TFLite detectors.
-         * @param cameraIntrinsics  Camera calibration for pixel-to-world conversion.
-         * @param targetBallColor   Filter by recognition.label (e.g. "Purple", "Green").
-         *                          Pass null to accept any color/label (use for TFLite-single-class).
-         * @param selectionStrategy Which detection to pick when multiple are seen.
-         */
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics,
                                     String targetBallColor,
@@ -157,72 +114,47 @@ public class VisionRoundTripAction extends RoundTripAction {
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                                    CameraIntrinsics cameraIntrinsics,
-                                    String targetBallColor) {
-            return enableVision(artifactProcessor, cameraIntrinsics, targetBallColor,
-                    BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
+                                    CameraIntrinsics cameraIntrinsics, String targetBallColor) {
+            return enableVision(artifactProcessor, cameraIntrinsics, targetBallColor, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics) {
-            return enableVision(artifactProcessor, cameraIntrinsics, null,
-                    BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
+            return enableVision(artifactProcessor, cameraIntrinsics, null, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                                    CameraIntrinsics cameraIntrinsics,
-                                    BlobSelectionStrategy selectionStrategy) {
+                                    CameraIntrinsics cameraIntrinsics, BlobSelectionStrategy selectionStrategy) {
             return enableVision(artifactProcessor, cameraIntrinsics, null, selectionStrategy);
         }
 
-        public VisionRoundTripAction build() {
-            return new VisionRoundTripAction(this);
-        }
+        public VisionRoundTripAction build() { return new VisionRoundTripAction(this); }
     }
 
     @Override
     protected void beforeUpdate() {
-        beforeUpdateCallCount++;
-
-        // On trip start: snapshot camera state and moveToBall before sub-actions run this frame
-        if (beforeUpdateCallCount == 1 && useVision) {
-            List<VisionRecognition> camNow = artifactProcessor.getLatestResult();
-            final int camCount = camNow == null ? 0 : camNow.size();
-            StringBuilder sb = new StringBuilder();
-            if (camCount > 0) for (VisionRecognition r : camNow) sb.append(r.formattedLabel).append("; ");
-            final String camStr = sb.toString().trim();
-            final double lx = visionLookoutPoint != null ? visionLookoutPoint.getX() : Double.NaN;
-            final double ly = visionLookoutPoint != null ? visionLookoutPoint.getY() : Double.NaN;
-            KLog.d("VisionRoundTrip", () -> String.format(
-                    "[%s] TRIP START camDetections=%d [%s] moveToBallDone=%s moveToBallPoints=%d lookout=(%.0f,%.0f) threshold=%.0fmm",
-                    getName(), camCount, camStr, getMoveToBall().getIsDone(),
-                    getMoveToBall().getPathPoints().size(), lx, ly, lookoutRadiusMM));
-        }
+        frameCount++;
 
         if (useVision && !visionProcessed) {
             if (visionLookoutPoint != null) {
                 Position currentPos = SharedData.getOdometryWheelIMUPosition();
                 double dist = currentPos.toPoint().distanceTo(visionLookoutPoint);
-                if (beforeUpdateCallCount == 1 || beforeUpdateCallCount % 30 == 0) {
-                    List<VisionRecognition> camNow = artifactProcessor.getLatestResult();
-                    final int camCount = camNow == null ? 0 : camNow.size();
-                    final double logDist = dist;
-                    final int logCount = beforeUpdateCallCount;
+                if (frameCount % 30 == 0) {
+                    final int fc = frameCount;
+                    final double d = dist;
                     KLog.d("VisionRoundTrip", () -> String.format(
-                            "[%s] frame=%d dist-to-lookout=%.0fmm (threshold=%.0fmm) pos=(%.0f,%.0f) moveToBallPoints=%d camDetections=%d moveToBallDone=%s",
-                            getName(), logCount, logDist, lookoutRadiusMM,
+                            "[%s] frame=%d dist-to-lookout=%.0fmm pos=(%.0f,%.0f) cam=%s",
+                            getName(), fc, d,
                             currentPos.toPoint().getX(), currentPos.toPoint().getY(),
-                            getMoveToBall().getPathPoints().size(), camCount, getMoveToBall().getIsDone()));
+                            artifactProcessor.getDiagnosticSummary()));
                 }
                 if (dist < lookoutRadiusMM) {
-                    KLog.d("VisionRoundTrip", () -> String.format("[%s] At lookout (dist=%.0fmm) - processing vision", getName(), dist));
+                    final double d = dist;
+                    KLog.d("VisionRoundTrip", () -> String.format("[%s] At lookout (%.0fmm) - processing vision", getName(), d));
                     processVision();
                     visionProcessed = true;
                 }
             } else if (!hasStarted) {
-                KLog.d("VisionRoundTrip", () -> String.format(
-                        "[%s] No lookout point - processing vision immediately (moveToBallPoints=%d)",
-                        getName(), getMoveToBall().getPathPoints().size()));
                 processVision();
                 visionProcessed = true;
             }
@@ -230,106 +162,70 @@ public class VisionRoundTripAction extends RoundTripAction {
         super.beforeUpdate();
     }
 
-    @Override
-    public void afterUpdate() {
-        super.afterUpdate();
-        if (!wasMoveToBallDone && getMoveToBall().getIsDone()) {
-            wasMoveToBallDone = true;
-            KLog.d("VisionRoundTrip", () -> String.format(
-                    "[%s] moveToBall DONE on frame=%d visionFired=%s ballDetected=%s",
-                    getName(), beforeUpdateCallCount, visionProcessed,
-                    detectedBallWorldPos != null
-                            ? String.format("world=(%.0f,%.0f)", detectedBallWorldPos.getX(), detectedBallWorldPos.getY())
-                            : "null"));
-        }
-    }
-
     private void processVision() {
-        KLog.d("VisionRoundTrip", () -> String.format("[%s] processVision() - moveToBall has %d waypoints before vision",
-                getName(), getMoveToBall().getPathPoints().size()));
         VisionRecognition target = getTargetRecognition();
+        PurePursuitAction moveToBall = getMoveToBall();
+
         if (target == null) {
-            String colorFilter = targetBallColor != null ? targetBallColor + " " : "";
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] No %sball detected - continuing on fallback waypoints",
-                    getName(), colorFilter));
+            KLog.d("VisionRoundTrip", () -> String.format("[%s] No ball - returning to launch (%.0f,%.0f)",
+                    getName(), launchPoint.getX(), launchPoint.getY()));
+            moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), 0);
             return;
         }
 
         Point bottomCenter = target.getBottomMiddlePixel();
         Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
-
         if (worldPos == null) {
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] Failed to convert detection to world coordinates - using fallback", getName()));
+            KLog.d("VisionRoundTrip", () -> String.format("[%s] World conversion failed - returning to launch (%.0f,%.0f)",
+                    getName(), launchPoint.getX(), launchPoint.getY()));
+            moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), 0);
             return;
         }
 
         detectedBallWorldPos = worldPos;
-        KLog.d("VisionRoundTrip", () -> String.format("[%s] %s detected (%s): pixel=(%.0f,%.0f) world=(%.1f,%.1f)",
-                getName(), target.label, selectionStrategy,
+        KLog.d("VisionRoundTrip", () -> String.format("[%s] Ball %s: pixel=(%.0f,%.0f) world=(%.1f,%.1f) → launch=(%.0f,%.0f)",
+                getName(), target.label,
                 bottomCenter.getX(), bottomCenter.getY(),
-                worldPos.getX(), worldPos.getY()));
+                worldPos.getX(), worldPos.getY(),
+                launchPoint.getX(), launchPoint.getY()));
 
         Position currentPos = new Position(SharedData.getOdometryWheelIMUPosition());
-        PurePursuitAction moveToBall = getMoveToBall();
         moveToBall.clearPoints();
         moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(currentPos.getTheta()));
+        moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), 0);
     }
 
     private VisionRecognition getTargetRecognition() {
         List<VisionRecognition> all = artifactProcessor.getLatestResult();
-        final boolean isNull = all == null;
-        final int rawCount = isNull ? 0 : all.size();
-        KLog.d("VisionRoundTrip", () -> String.format(
-                "[%s] Vision result: %s count=%d | processor: [%s]",
+        KLog.d("VisionRoundTrip", () -> String.format("[%s] Vision: %s | %s",
                 getName(),
-                isNull ? "NULL-no-frames-received" : "OK",
-                rawCount,
+                all == null ? "NULL" : "count=" + all.size(),
                 artifactProcessor.getDiagnosticSummary()));
-        if (rawCount > 0) {
-            StringBuilder sb = new StringBuilder();
-            for (VisionRecognition r : all) sb.append(r.formattedLabel).append("; ");
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] Detection labels: [%s]", getName(), sb.toString().trim()));
-        }
-        if (isNull || all.isEmpty()) return null;
+        if (all == null || all.isEmpty()) return null;
 
         List<VisionRecognition> candidates = filterByLabel(all, targetBallColor);
-        final int filteredCount = candidates.size();
-        KLog.d("VisionRoundTrip", () -> String.format("[%s] After label filter (color='%s'): %d candidates",
-                getName(), targetBallColor != null ? targetBallColor : "ANY", filteredCount));
         if (candidates.isEmpty()) return null;
 
-        VisionRecognition selected;
         switch (selectionStrategy) {
             case LARGEST_AREA:
-                selected = BlobUtils.findLargestByArea(candidates);
-                break;
+                return BlobUtils.findLargestByArea(candidates);
             case CLOSEST_TO_CAMERA_CENTER:
-                selected = BlobUtils.findClosestToCameraCenter(candidates,
-                        cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
-                break;
+                return BlobUtils.findClosestToCameraCenter(candidates, cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
-                selected = BlobUtils.findClosestToRobotWorld(candidates,
-                        cameraIntrinsics, robotPos.toPoint());
-                break;
+                return BlobUtils.findClosestToRobotWorld(candidates, cameraIntrinsics, robotPos.toPoint());
             case MOST_CIRCULAR:
-                selected = BlobUtils.findMostCircular(candidates);
-                break;
+                return BlobUtils.findMostCircular(candidates);
             default:
-                selected = candidates.get(0);
+                return candidates.get(0);
         }
-        final VisionRecognition finalSelected = selected;
-        KLog.d("VisionRoundTrip", () -> String.format("[%s] Selected by %s: %s",
-                getName(), selectionStrategy, finalSelected != null ? finalSelected.toString() : "null"));
-        return selected;
     }
 
     private List<VisionRecognition> filterByLabel(List<VisionRecognition> recognitions, String label) {
         if (label == null) return recognitions;
-
         List<VisionRecognition> filtered = new ArrayList<>();
-        for (VisionRecognition recognition : recognitions) {
-            if (label.equals(recognition.label)) filtered.add(recognition);
+        for (VisionRecognition r : recognitions) {
+            if (label.equals(r.label)) filtered.add(r);
         }
         return filtered;
     }
