@@ -34,6 +34,8 @@ public class VisionRoundTripAction extends RoundTripAction {
 
     private boolean visionProcessed = false;
     private Point detectedBallWorldPos;
+    private int beforeUpdateCallCount = 0;
+    private boolean wasMoveToBallDone = false;
 
     private VisionRoundTripAction(Builder builder) {
         super(builder.opModeUtilities, builder.driveTrain, builder.turretAutoAlign,
@@ -180,16 +182,47 @@ public class VisionRoundTripAction extends RoundTripAction {
 
     @Override
     protected void beforeUpdate() {
+        beforeUpdateCallCount++;
+
+        // On trip start: snapshot camera state and moveToBall before sub-actions run this frame
+        if (beforeUpdateCallCount == 1 && useVision) {
+            List<VisionRecognition> camNow = artifactProcessor.getLatestResult();
+            final int camCount = camNow == null ? 0 : camNow.size();
+            StringBuilder sb = new StringBuilder();
+            if (camCount > 0) for (VisionRecognition r : camNow) sb.append(r.formattedLabel).append("; ");
+            final String camStr = sb.toString().trim();
+            final double lx = visionLookoutPoint != null ? visionLookoutPoint.getX() : Double.NaN;
+            final double ly = visionLookoutPoint != null ? visionLookoutPoint.getY() : Double.NaN;
+            KLog.d("VisionRoundTrip", () -> String.format(
+                    "[%s] TRIP START camDetections=%d [%s] moveToBallDone=%s moveToBallPoints=%d lookout=(%.0f,%.0f) threshold=%.0fmm",
+                    getName(), camCount, camStr, getMoveToBall().getIsDone(),
+                    getMoveToBall().getPathPoints().size(), lx, ly, lookoutRadiusMM));
+        }
+
         if (useVision && !visionProcessed) {
             if (visionLookoutPoint != null) {
                 Position currentPos = SharedData.getOdometryWheelIMUPosition();
                 double dist = currentPos.toPoint().distanceTo(visionLookoutPoint);
+                if (beforeUpdateCallCount == 1 || beforeUpdateCallCount % 30 == 0) {
+                    List<VisionRecognition> camNow = artifactProcessor.getLatestResult();
+                    final int camCount = camNow == null ? 0 : camNow.size();
+                    final double logDist = dist;
+                    final int logCount = beforeUpdateCallCount;
+                    KLog.d("VisionRoundTrip", () -> String.format(
+                            "[%s] frame=%d dist-to-lookout=%.0fmm (threshold=%.0fmm) pos=(%.0f,%.0f) moveToBallPoints=%d camDetections=%d moveToBallDone=%s",
+                            getName(), logCount, logDist, lookoutRadiusMM,
+                            currentPos.toPoint().getX(), currentPos.toPoint().getY(),
+                            getMoveToBall().getPathPoints().size(), camCount, getMoveToBall().getIsDone()));
+                }
                 if (dist < lookoutRadiusMM) {
                     KLog.d("VisionRoundTrip", () -> String.format("[%s] At lookout (dist=%.0fmm) - processing vision", getName(), dist));
                     processVision();
                     visionProcessed = true;
                 }
             } else if (!hasStarted) {
+                KLog.d("VisionRoundTrip", () -> String.format(
+                        "[%s] No lookout point - processing vision immediately (moveToBallPoints=%d)",
+                        getName(), getMoveToBall().getPathPoints().size()));
                 processVision();
                 visionProcessed = true;
             }
@@ -197,7 +230,23 @@ public class VisionRoundTripAction extends RoundTripAction {
         super.beforeUpdate();
     }
 
+    @Override
+    public void afterUpdate() {
+        super.afterUpdate();
+        if (!wasMoveToBallDone && getMoveToBall().getIsDone()) {
+            wasMoveToBallDone = true;
+            KLog.d("VisionRoundTrip", () -> String.format(
+                    "[%s] moveToBall DONE on frame=%d visionFired=%s ballDetected=%s",
+                    getName(), beforeUpdateCallCount, visionProcessed,
+                    detectedBallWorldPos != null
+                            ? String.format("world=(%.0f,%.0f)", detectedBallWorldPos.getX(), detectedBallWorldPos.getY())
+                            : "null"));
+        }
+    }
+
     private void processVision() {
+        KLog.d("VisionRoundTrip", () -> String.format("[%s] processVision() - moveToBall has %d waypoints before vision",
+                getName(), getMoveToBall().getPathPoints().size()));
         VisionRecognition target = getTargetRecognition();
         if (target == null) {
             String colorFilter = targetBallColor != null ? targetBallColor + " " : "";
@@ -228,30 +277,51 @@ public class VisionRoundTripAction extends RoundTripAction {
 
     private VisionRecognition getTargetRecognition() {
         List<VisionRecognition> all = artifactProcessor.getLatestResult();
-        if (all == null || all.isEmpty()) return null;
+        final boolean isNull = all == null;
+        final int rawCount = isNull ? 0 : all.size();
+        KLog.d("VisionRoundTrip", () -> String.format(
+                "[%s] Vision result: %s count=%d | processor: [%s]",
+                getName(),
+                isNull ? "NULL-no-frames-received" : "OK",
+                rawCount,
+                artifactProcessor.getDiagnosticSummary()));
+        if (rawCount > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (VisionRecognition r : all) sb.append(r.formattedLabel).append("; ");
+            KLog.d("VisionRoundTrip", () -> String.format("[%s] Detection labels: [%s]", getName(), sb.toString().trim()));
+        }
+        if (isNull || all.isEmpty()) return null;
 
         List<VisionRecognition> candidates = filterByLabel(all, targetBallColor);
+        final int filteredCount = candidates.size();
+        KLog.d("VisionRoundTrip", () -> String.format("[%s] After label filter (color='%s'): %d candidates",
+                getName(), targetBallColor != null ? targetBallColor : "ANY", filteredCount));
         if (candidates.isEmpty()) return null;
 
+        VisionRecognition selected;
         switch (selectionStrategy) {
             case LARGEST_AREA:
-                return BlobUtils.findLargestByArea(candidates);
-
+                selected = BlobUtils.findLargestByArea(candidates);
+                break;
             case CLOSEST_TO_CAMERA_CENTER:
-                return BlobUtils.findClosestToCameraCenter(candidates,
+                selected = BlobUtils.findClosestToCameraCenter(candidates,
                         cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
-
+                break;
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
-                return BlobUtils.findClosestToRobotWorld(candidates,
+                selected = BlobUtils.findClosestToRobotWorld(candidates,
                         cameraIntrinsics, robotPos.toPoint());
-
+                break;
             case MOST_CIRCULAR:
-                return BlobUtils.findMostCircular(candidates);
-
+                selected = BlobUtils.findMostCircular(candidates);
+                break;
             default:
-                return candidates.get(0);
+                selected = candidates.get(0);
         }
+        final VisionRecognition finalSelected = selected;
+        KLog.d("VisionRoundTrip", () -> String.format("[%s] Selected by %s: %s",
+                getName(), selectionStrategy, finalSelected != null ? finalSelected.toString() : "null"));
+        return selected;
     }
 
     private List<VisionRecognition> filterByLabel(List<VisionRecognition> recognitions, String label) {

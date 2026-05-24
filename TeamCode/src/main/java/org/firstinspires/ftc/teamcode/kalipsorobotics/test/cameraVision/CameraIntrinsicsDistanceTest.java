@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics.CAM_HEIGHT;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics.CAM_WIDTH;
+
 import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -17,6 +20,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
 
 /**
  * Live raytracing validation for CameraIntrinsics.calculateWorldPos /
@@ -67,8 +71,6 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
     public static long EXPOSURE_MS = 20;
     public static int  GAIN        = 250;
     /** Camera resolution — must match the resolution used for intrinsic calibration. */
-    public static int  CAM_WIDTH   = 640;
-    public static int  CAM_HEIGHT  = 480;
 
     // ── Mount-geometry tunables (this is what you're hunting for) ────────────
     /** Camera tilt below horizontal, in degrees. Positive = lens points downward. */
@@ -85,7 +87,7 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.setMsTransmissionInterval(50);
 
-        TFLiteArtifactDetector artifacts = new TFLiteArtifactDetector(hardwareMap.appContext);
+        ArtifactColorBlobDetectionProcessor artifacts = new ArtifactColorBlobDetectionProcessor();
 
         VisionManager visionManager = new VisionManager.Builder(hardwareMap)
                 .withResolution(CAM_WIDTH, CAM_HEIGHT)

@@ -52,7 +52,7 @@ public class TFLiteArtifactDetector extends KVisionProcessor<List<VisionRecognit
     private static final String MODEL_FILE = "best_float32.tflite";
     private static final String LABEL      = "Artifact";
 
-    private static final float DEFAULT_MIN_CONFIDENCE = 0.40f;
+    private static final float DEFAULT_MIN_CONFIDENCE = 0.05f;
     private static final float NMS_IOU_THRESHOLD      = 0.45f;
 
     private final Context appContext;

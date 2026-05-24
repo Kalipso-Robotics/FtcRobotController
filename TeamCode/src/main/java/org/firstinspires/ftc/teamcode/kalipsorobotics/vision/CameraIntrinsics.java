@@ -4,6 +4,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 
 public class CameraIntrinsics{
+    public static int  CAM_WIDTH   = 640;
+    public static int  CAM_HEIGHT  = 480;
 
     private final double fx, fy;
     private final double cx, cy;

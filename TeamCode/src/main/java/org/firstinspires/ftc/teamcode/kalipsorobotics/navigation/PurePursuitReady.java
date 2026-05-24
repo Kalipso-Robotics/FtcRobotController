@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
+
+import java.util.List;
 
 public class PurePursuitReady extends Action {
     private final PurePursuitAction purePursuitAction;
@@ -27,6 +30,19 @@ public class PurePursuitReady extends Action {
 
         if (pointIndex < 0) {
             pointIndex = purePursuitAction.getLastPointIndex();
+            final int resolvedIdx = pointIndex;
+            List<Position> pts = purePursuitAction.getPathPoints();
+            if (resolvedIdx >= 0 && resolvedIdx < pts.size()) {
+                Position wp = pts.get(resolvedIdx);
+                KLog.d("PurePursuitReady", () -> String.format(
+                        "[%s] Watching pathPoints[%d]=(%.0f,%.0f) threshold=%.0fmm pp=%s",
+                        getName(), resolvedIdx, wp.getX(), wp.getY(),
+                        distanceThresholdMM, purePursuitAction.getName()));
+            } else {
+                KLog.d("PurePursuitReady", () -> String.format(
+                        "[%s] WARNING: pointIndex=%d but pathPoints.size=%d pp=%s — path not built yet?",
+                        getName(), resolvedIdx, pts.size(), purePursuitAction.getName()));
+            }
         }
         boolean withinRange = purePursuitAction.isWithinDistancePoint(pointIndex, distanceThresholdMM);
 
@@ -37,13 +53,25 @@ public class PurePursuitReady extends Action {
 
         if (withinRange) {
             isDone = true;
-            KLog.d("PurePursuitReady", () -> "PurePursuit IS WITHIN RANGE, SETTING DONE TO READY: " + purePursuitAction.getName());
+            final int idx = pointIndex;
+            List<Position> pts = purePursuitAction.getPathPoints();
+            String ptStr = (idx >= 0 && idx < pts.size())
+                    ? String.format("(%.0f,%.0f)", pts.get(idx).getX(), pts.get(idx).getY()) : "?";
+            KLog.d("PurePursuitReady", () -> String.format(
+                    "[%s] DONE — within %.0fmm of pathPoints[%d]=%s pp=%s",
+                    getName(), distanceThresholdMM, idx, ptStr, purePursuitAction.getName()));
             return;
         }
 
         // Fallback: if PurePursuitAction is done but isWithinRange wasn't set, still mark as done
         if (ppDone) {
-            KLog.d("PurePursuitReady", () -> String.format("[%s] WARNING: PP is done but isWithinRange=false! Marking ready anyway.", getName()));
+            final int idx = pointIndex;
+            List<Position> pts = purePursuitAction.getPathPoints();
+            String ptStr = (idx >= 0 && idx < pts.size())
+                    ? String.format("(%.0f,%.0f)", pts.get(idx).getX(), pts.get(idx).getY()) : "?";
+            KLog.d("PurePursuitReady", () -> String.format(
+                    "[%s] DONE (fallback) — pp finished but robot never reached pathPoints[%d]=%s within %.0fmm pp=%s",
+                    getName(), idx, ptStr, distanceThresholdMM, purePursuitAction.getName()));
             isDone = true;
         }
     }

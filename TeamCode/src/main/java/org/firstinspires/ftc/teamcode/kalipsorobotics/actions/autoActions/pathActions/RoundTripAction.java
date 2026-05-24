@@ -45,13 +45,15 @@ public class RoundTripAction extends KActionSet {
     private final TurretReadyAuto turretReadyAuto;
     private boolean hasUpdatedShooterReady = false;
     private boolean shouldShooterStop = true;
-
+    private boolean wasShootFired = false;
 
     Point targetPoint;
+    Point launchPoint;
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
                            Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake, boolean shouldDependOnFlywheel) {
         this.targetPoint = targetPoint;
+        this.launchPoint = launchPoint;
         this.shooter = shooter;
         this.turretAutoAlign = turretAutoAlign;
 
@@ -188,6 +190,21 @@ public class RoundTripAction extends KActionSet {
             shooterReady.setIsDone(true);
             shooterRun.setIsDone(true);
             intakeFullAction.setIsDone(true);
+        }
+
+        if (!wasShootFired && pushBall.getIsDone()) {
+            wasShootFired = true;
+            Point robotPos = new Position(SharedData.getOdometryWheelIMUPosition()).toPoint();
+            double distFromLaunch = launchPoint != null ? robotPos.distanceTo(launchPoint) : -1;
+            KLog.d("RoundTrip", () -> String.format(
+                    "[%s] SHOT FIRED: robotPos=(%.0f,%.0f) launchPoint=(%.0f,%.0f) distFromLaunch=%.0fmm intakeDone=%s ppReadyDone=%s",
+                    getName() != null ? getName() : "unnamed",
+                    robotPos.getX(), robotPos.getY(),
+                    launchPoint != null ? launchPoint.getX() : 0,
+                    launchPoint != null ? launchPoint.getY() : 0,
+                    distFromLaunch,
+                    intakeFullAction.getIsDone(),
+                    purePursuitReadyShooting.getIsDone()));
         }
 
         if (moveToBall.getIsDone()) {
