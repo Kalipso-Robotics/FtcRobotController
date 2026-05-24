@@ -33,7 +33,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
@@ -47,10 +46,8 @@ public class RedAutoDepotVision extends KOpMode {
     Point thirdLaunchPoint = new Point(SHOOT_FAR_X, SHOOT_FAR_Y + 100);
     Point firstShootPoint = new Point(0, 0);
     Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX(), Shooter.TARGET_POINT.getY() + 141.4213562373);
-    // Mandatory lookout: robot always drives here first; vision fires on arrival and decides next move
     Point depotLookoutPoint = new Point(500, 1050);
 
-    // Modules
     private DriveTrain driveTrain;
     private Shooter shooter;
     private Intake intake;
@@ -60,12 +57,10 @@ public class RedAutoDepotVision extends KOpMode {
     private TurretAutoAlign turretAutoAlign;
     private ShooterRun shooterRun;
 
-    // Vision
     private ArtifactColorBlobDetectionProcessor artifactProcessor;
     private VisionManager visionManager;
     private CameraIntrinsics cameraIntrinsics;
 
-    // Action set
     private KActionSet autoDepot;
 
     @Override
@@ -79,9 +74,6 @@ public class RedAutoDepotVision extends KOpMode {
     protected void initializeRobot() {
         super.initializeRobot();
 
-        KLog.d("RedAutoDepotVision-Init", "Starting initializeRobot()");
-
-        // Create modules
         DriveTrain.setInstanceNull();
         driveTrain = DriveTrain.getInstance(opModeUtilities);
 
@@ -89,13 +81,11 @@ public class RedAutoDepotVision extends KOpMode {
 
         sleep(1000);
 
-        // Create odometry - starting at (0,0,0) like RedAutoDepot
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         autoDepot = new KActionSet();
-        KLog.d("RedAutoDepotVision-Init", "Creating intake, shooter, stopper modules");
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
@@ -107,7 +97,6 @@ public class RedAutoDepotVision extends KOpMode {
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
 
-        // Initialize vision
         artifactProcessor = new ArtifactColorBlobDetectionProcessor();
         visionManager = new VisionManager.Builder(hardwareMap)
                 .withResolution(CAM_WIDTH, CAM_HEIGHT)
@@ -116,18 +105,16 @@ public class RedAutoDepotVision extends KOpMode {
                 .build();
 
         cameraIntrinsics = CameraIntrinsics.ARDUCAM.withMount(
-                Math.toRadians(0),      // Mount angle (tilt)
-                new Vector3d(0, 150, 100)  // Camera offset from robot center (x, y, z in mm)
+                Math.toRadians(0),
+                new Vector3d(0, 150, 100)
         );
-
-        KLog.d("RedAutoDepotVision-Init", "Finished initializeRobot()");
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        // ----------------- FIRST SHOOT (same as RedAutoDepot) ----------------------
+        // ----------------- TRIP 0 (first shot from start) ----------------------
 
         RoundTripAction trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,
                 firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
@@ -137,7 +124,7 @@ public class RedAutoDepotVision extends KOpMode {
         trip0.setShouldShooterStop(false);
         autoDepot.addAction(trip0);
 
-        // ----------------- TRIP 1 (spike mark - same as RedAutoDepot) ----------------------
+        // ----------------- TRIP 1 (spike mark) ----------------------
 
         DepotRoundTrip trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,
                 Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
@@ -148,7 +135,7 @@ public class RedAutoDepotVision extends KOpMode {
         trip1.getMoveToShoot().setShouldShooterStop(false);
         autoDepot.addAction(trip1);
 
-        // ----------------- TRIP 2 (corner with vision fallback) ----------------------
+        // ----------------- TRIP 2 (vision-guided depot) ----------------------
 
         VisionRoundTripAction trip2 = new VisionRoundTripAction.Builder(
                 opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake)
@@ -159,74 +146,49 @@ public class RedAutoDepotVision extends KOpMode {
             .build();
         trip2.setName("trip2_CornerVision");
         trip2.setDependentActions(trip1);
-
-        // Drive to lookout first — vision decides at that point.
-        // Fallback path used if no ball is seen from the lookout.
-//        trip2.getMoveToBall().clearPoints();
         trip2.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip2.getMoveToBall().addPoint(-25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip2.getMoveToBall().addPoint(250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-
         trip2.getMoveToBall().setFinalSearchRadiusMM(150);
-        trip2.setShouldShooterStop(false);
-        trip2.getPurePursuitReadyShooting().setDistanceThresholdMM(150);
         trip2.getMoveToBall().setPathAngleToleranceDeg(45);
         trip2.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
-        KLog.d("RedAutoDepotVision-Setup", () -> String.format(
-                "trip2 moveToBallPoints=%d lookout=(%.0f,%.0f) [0 pts = robot won't reach lookout unless vision adds ball]",
-                trip2.getMoveToBall().getPathPoints().size(),
-                depotLookoutPoint.multiplyY(allianceColor.getPolarity()).getX(),
-                depotLookoutPoint.multiplyY(allianceColor.getPolarity()).getY()));
+        trip2.getPurePursuitReadyShooting().setDistanceThresholdMM(150);
+        trip2.setShouldShooterStop(false);
         autoDepot.addAction(trip2);
 
-        // ----------------- TRIP 3+ (vision-guided retries) ----------------------
-
-        // All retry trips: drive to lookout first, vision decides; fallback sweeps if nothing seen.
+        // ----------------- TRIPS 3-6 (vision-guided retries) ----------------------
 
         VisionRoundTripAction trip3 = createVisionRetryTrip(trip2, "trip3_Vision");
-        trip3.getMoveToBall().clearPoints();
         trip3.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip3.getMoveToBall().clearPoints();
 //        trip3.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip3.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip3.getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        KLog.d("RedAutoDepotVision-Setup", () -> String.format(
-                "trip3 moveToBallPoints=%d after clearPoints [WARNING: 0 pts means trip will skip immediately]",
-                trip3.getMoveToBall().getPathPoints().size()));
         autoDepot.addAction(trip3);
 
         VisionRoundTripAction trip4 = createVisionRetryTrip(trip3, "trip4_Vision");
-        trip4.getMoveToBall().clearPoints();
         trip4.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip4.getMoveToBall().clearPoints();
 //        trip4.getMoveToBall().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip4.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip4.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        KLog.d("RedAutoDepotVision-Setup", () -> String.format(
-                "trip4 moveToBallPoints=%d after clearPoints [WARNING: 0 pts means trip will skip immediately]",
-                trip4.getMoveToBall().getPathPoints().size()));
         autoDepot.addAction(trip4);
 
-        // trip5 sweeps opposite direction to trip3 to cover different ground
         VisionRoundTripAction trip5 = createVisionRetryTrip(trip4, "trip5_Vision");
-//        trip5.getMoveToBall().clearPoints();
         trip5.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip5.getMoveToBall().clearPoints();
 //        trip5.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip5.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip5.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        KLog.d("RedAutoDepotVision-Setup", () -> String.format(
-                "trip5 moveToBallPoints=%d",
-                trip5.getMoveToBall().getPathPoints().size()));
         autoDepot.addAction(trip5);
 
         VisionRoundTripAction trip6 = createVisionRetryTrip(trip5, "trip6_Vision");
-        trip6.getMoveToBall().clearPoints();
         trip6.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip6.getMoveToBall().clearPoints();
 //        trip6.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity());
-        KLog.d("RedAutoDepotVision-Setup", () -> String.format(
-                "trip6 moveToBallPoints=%d after clearPoints [WARNING: 0 pts means trip will skip immediately]",
-                trip6.getMoveToBall().getPathPoints().size()));
         autoDepot.addAction(trip6);
 
-        // ----------------- PARK (same as RedAutoDepot) ----------------------
+        // ----------------- PARK ----------------------
 
         shooterRun.setDependentActions(trip6);
         autoDepot.addAction(shooterRun);
@@ -249,7 +211,6 @@ public class RedAutoDepotVision extends KOpMode {
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
 
         waitForStart();
-        KLog.d("RedAutoDepotVision-Run", "After waitForStart() - starting autonomous loop");
 
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
@@ -258,15 +219,11 @@ public class RedAutoDepotVision extends KOpMode {
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
 
-        KLog.d("Auto→TeleOp", "=== AUTO ENDING ===");
         KLog.d("Auto→TeleOp", () -> "Final position: " + SharedData.getOdometryWheelIMUPosition());
-        KLog.d("RedAutoDepotVision-Run", "Calling cleanupRobot()");
         visionManager.close();
         cleanupRobot();
-        KLog.d("Auto→TeleOp", () -> "After cleanup position: " + SharedData.getOdometryWheelIMUPosition());
     }
 
-    // GO TO SPIKE MARK FIRST - copied from RedAutoDepot
     private void addPointsToTrip1SpikeMark(DepotRoundTrip trip1) {
         trip1.getMoveToDepot().clearPoints();
         trip1.getMoveToDepot().addPoint(650, 110 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
@@ -285,10 +242,10 @@ public class RedAutoDepotVision extends KOpMode {
         retryTrip.setName(name);
         retryTrip.setDependentActions(lastTrip);
         retryTrip.getMoveToBall().setFinalSearchRadiusMM(150);
-        retryTrip.getPurePursuitReadyShooting().setDistanceThresholdMM(150);
         retryTrip.getMoveToBall().setPathAngleToleranceDeg(45);
         retryTrip.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
         retryTrip.getMoveToBall().setMaxTimeOutMS(10000);
+        retryTrip.getPurePursuitReadyShooting().setDistanceThresholdMM(150);
         retryTrip.setShouldShooterStop(false);
         return retryTrip;
     }
