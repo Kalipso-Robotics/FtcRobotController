@@ -18,7 +18,6 @@ public class LinearSlideTest extends LinearOpMode {
     private double s;
 
     private double integralSum = 0;
-    private double lestError = 0;
     private double lastTime = 0;
     private double lastError = 0;
 
@@ -52,15 +51,24 @@ public class LinearSlideTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         linearSlideMotor = opModeUtilities.getHardwareMap().dcMotor.get("slideMotor");
+        linearSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linearSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        PIDFController(0.005,0.0,0.0001,0.01);
+        double targetPosition = 0;
 
         waitForStart();
-        while(opModeIsActive()){
-            if(gamepad1.left_stick_y != 0) {
-                linearSlideMotor.setPower(-gamepad1.left_stick_y / 2);
-            } else {
-                linearSlideMotor.setPower(0);
-            }
-        }
 
+        lastTime = System.nanoTime() / 1E9;
+        while(opModeIsActive()){
+            targetPosition +=-gamepad1.left_stick_y ;
+            double currentPosition = linearSlideMotor.getCurrentPosition();
+            double motorPower = calculate(targetPosition,currentPosition);
+            linearSlideMotor.setPower(motorPower);
+            telemetry.addData("Target Position",targetPosition);
+            telemetry.addData("Current Data",currentPosition);
+            telemetry.addData("Motor Power",motorPower);
+            telemetry.update();
+        }
+//871
     }
 }
