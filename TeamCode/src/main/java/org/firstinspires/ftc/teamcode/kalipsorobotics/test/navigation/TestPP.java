@@ -3,17 +3,21 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.test.navigation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Disabled
-public class TestPurePursuit extends KOpMode {
+@TeleOp
+public class TestPP extends KOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -31,25 +35,28 @@ public class TestPurePursuit extends KOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-        PurePursuitAction test = new PurePursuitAction(driveTrain);
-//        test.addPoint(0, 0, 0);
-//        test.addPoint(1200, 0, 0);
-//        test.addPoint(1200, 1200, 90);
-//        test.addPoint(600, 1200, 90);
-
-        test.addPoint(1422.4, -508, -90);
-        test.addPoint(1422.4, -1219.2, -90);
-        test.addPoint(0, 0, 0);
-
-
+        AdaptivePurePursuitAction test = new AdaptivePurePursuitAction(driveTrain, odometry);
+        test.addPoint(0,0,0);
+        test.addPoint(400,0,90);
+        test.addPoint(400,800,180);
+        test.addPoint(0,800,0);
 
         waitForStart();
+
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+        opModeUtilities.setAllHubs(allHubs);
+
+        odoExecutorService = Executors.newSingleThreadExecutor();
 
         OpModeUtilities.runOdometryExecutorService(executorService, odometry);
 
         while (opModeIsActive()) {
 
-
+            opModeUtilities.clearBulkCache();
+//            OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
             test.updateCheckDone();
 
             if (test.getIsDone()) {
@@ -59,5 +66,6 @@ public class TestPurePursuit extends KOpMode {
 
         OpModeUtilities.shutdownExecutorService(executorService);
 
+        cleanupRobot();
     }
 }

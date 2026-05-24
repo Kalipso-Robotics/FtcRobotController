@@ -14,10 +14,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class AdaptivePurePursuitAction extends Action {
+public class AdaptivePurePursuitAction extends Action{
 
     DriveTrain driveTrain;
     Odometry wheelOdometry;
@@ -139,6 +140,7 @@ public class AdaptivePurePursuitAction extends Action {
         pathPoints.add(new Position(x, y, headingRad));
     }
 
+
     @Override
     public void setIsDone(boolean isDone) {
         this.isDone = isDone;
@@ -245,6 +247,10 @@ public class AdaptivePurePursuitAction extends Action {
                 target.getTheta() - currentPos.getTheta()
         );
 
+        if (!Double.isFinite(angleError)) {
+            angleError = 0.0;
+        }
+
 //        Log.d("ppDebug", "angleError: " + angleError);
 //        Log.d("ppDebug", "headingError: " + headingError);
 
@@ -256,9 +262,14 @@ public class AdaptivePurePursuitAction extends Action {
 
         double omega = omegaAngularVelocity * K_omega; // This is now in mm/s
 
+        if (!Double.isFinite(omega)) {
+            omega = 0.0;
+        }
+
         KLog.d("ppDebug", () -> "vx: " + vx);
         KLog.d("ppDebug", () -> "vy: " + vy);
-        KLog.d("ppDebug", () -> "omega: " + omega);
+        double finalOmega = omega;
+        KLog.d("ppDebug", () -> "omega: " + finalOmega);
 
 //        double fLeftVelocity = vx + vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
 //        double bLeftVelocity = vx - vy + ((WHEELBASE_LENGTH + TRACK_WIDTH) / 2) * omega;
@@ -293,7 +304,7 @@ public class AdaptivePurePursuitAction extends Action {
         KLog.d("wheels", () -> String.format("Motor powers: FL=%.3f, FR=%.3f, BL=%.3f, BR=%.3f",
             fLeftPower, fRightPower, bLeftPower, bRightPower));
 
-        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.25);
+        driveTrain.setPowerWithRangeClippingMinThreshold(fLeftPower, fRightPower, bLeftPower, bRightPower, 0.05);
 
         KLog.d("ppDebug", () -> String.format("Target vel=%.1f mm/s, Current vel=%.1f mm/s, Accel=%.1f mm/s²",
             velocity, filteredVelocityMmPerS, acceleration));
@@ -302,7 +313,7 @@ public class AdaptivePurePursuitAction extends Action {
     }
 
     @Override
-    protected void update() {
+    public void update() {
         if (isDone) {
             return;
         }
@@ -384,6 +395,21 @@ public class AdaptivePurePursuitAction extends Action {
 
             int closestIdx = findClosestNextPointIndex(path, currentPosition);
             int startSegment = Math.max(0, closestIdx - 1);
+
+            int lastIdx = path.numPoints() - 1;
+
+            double dError = Vector.between(currentPosition, path.getLastPoint()).getLength();
+
+            double aError = MathFunctions.angleWrapRad(
+                    path.getLastPoint().getTheta() - currentPosition.getTheta()
+            );
+
+            if (closestIdx >= lastIdx - 1 &&
+                    dError < lastSearchRadius &&
+                    Math.abs(aError) <= Math.toRadians(finalAngleLockingThreshholdDeg)) {
+                finishedMoving();
+                return;
+            }
 
             follow = path.searchFrom(currentPosition, currentLookAheadRadius, startSegment);
 

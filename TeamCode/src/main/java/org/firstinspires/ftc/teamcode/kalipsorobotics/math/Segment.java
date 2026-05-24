@@ -20,6 +20,10 @@ public class Segment {
     }
 
     private static Optional<Vector> lineCircleIntersection(Vector vector, Position shiftedCurrent, double radius) {
+        if (vector.getLength() < 1e-6) {
+            return Optional.empty();
+        }
+
         Vector projection = shiftedCurrent.projectOnto(vector);
         double distance = Math.hypot(shiftedCurrent.getX() - projection.getX(), shiftedCurrent.getY() - projection.getY());
 
@@ -28,8 +32,15 @@ public class Segment {
             // edge case, handle no intersection
             return Optional.empty();
         } else {
-            follow =
-                    projection.add(vector.withLength(Math.sqrt(Math.pow(radius, 2) - Math.pow(distance, 2))));
+            double inside = radius * radius - distance * distance;
+
+            if (inside < -1e-6) {
+                return Optional.empty();
+            }
+
+            inside = Math.max(0.0, inside);
+
+            follow = projection.add(vector.withLength(Math.sqrt(inside)));
         }
         // edge case, handle ||f|| > ||v|| (past the point)
         if (follow.getLength() > vector.getLength()) {

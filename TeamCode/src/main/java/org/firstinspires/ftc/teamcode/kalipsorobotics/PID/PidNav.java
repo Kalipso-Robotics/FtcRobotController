@@ -30,7 +30,7 @@ public class PidNav {
         double deltaTime = currentTime - lastTime;
 
         errorIntegral += error * (deltaTime/100);
-        double errorDerivative = (error - lastError)/deltaTime;
+        double errorDerivative = (deltaTime > 0) ? (error - lastError) / deltaTime : 0;
         double staticBase = S * Math.signum(error);
 
         lastTime = currentTime;
