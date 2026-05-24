@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class AdaptivePurePursuitAction extends Action{
+public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     DriveTrain driveTrain;
     Odometry wheelOdometry;
@@ -138,6 +138,11 @@ public class AdaptivePurePursuitAction extends Action{
     public void addPoint(double x, double y, double headingDeg) {
         double headingRad = Math.toRadians(headingDeg);
         pathPoints.add(new Position(x, y, headingRad));
+    }
+
+    @Override
+    public List<Position> getPathPoints() {
+        return pathPoints;
     }
 
 

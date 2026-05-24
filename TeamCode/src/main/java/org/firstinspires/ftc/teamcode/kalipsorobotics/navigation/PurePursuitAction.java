@@ -16,10 +16,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class  PurePursuitAction extends Action implements IPurePursuitAction {
+public class  PurePursuitAction extends IPurePursuitAction {
     public static final double P_XY = 1.0/350.0;
     public static final double P_ANGLE = (1.0 / Math.toRadians(90));
     public static final double D_XY = 1.0/200;
@@ -135,22 +136,8 @@ public class  PurePursuitAction extends Action implements IPurePursuitAction {
         this.withinRangeRadiusMM = lastSearchRadiusMM;
     }
 
-    public void addPoint(double x, double y, double headingDeg) {
-        double headingRad = Math.toRadians(headingDeg);
-        //double[] adaptiveP = calcAdaptiveP(x, y, headingRad);
-        // double adaptivePAngel = calcAdaptivePAngle(headingRad);
-        //double[] adaptiveP = {P_XY, P_ANGLE};
-        pathPoints.add(new Position(x, y, headingRad, P_XY, P_ANGLE));
-        //Log.d("purepursaction", "added point " + x + ", " + y);
-    }
-
     public List<Position> getPathPoints() {
         return pathPoints;
-    }
-
-    public void addPoint(double x, double y, double headingDeg, double pXY, double pAngle) {
-        pathPoints.add(new Position(x, y, Math.toRadians(headingDeg), pXY, pAngle));
-        //Log.d("purepursaction", "added point " + x + ", " + y);
     }
 
     public void clearPoints() {
@@ -216,12 +203,17 @@ public class  PurePursuitAction extends Action implements IPurePursuitAction {
         return new double[] {adaptiveXY, adaptiveTheta};
     }
 
+    @Override
     public void setFinalSearchRadiusMM(double searchRadiusMM){
         this.lastSearchRadiusMM = searchRadiusMM;
     }
+
+    @Override
     public void setLookAheadRadius(double radiusMM){
         this.lookAheadRadius = radiusMM;
     }
+
+
     public void setPAngle(double p) {
         this.pidAngle = new PidNav(p, 0,0);
     }
@@ -469,6 +461,7 @@ public class  PurePursuitAction extends Action implements IPurePursuitAction {
         return maxTimeOutMS;
     }
 
+    @Override
     public void setMaxTimeOutMS(double maxTimeOutMS) {
         this.maxTimeOutMS = maxTimeOutMS;
     }
@@ -477,14 +470,15 @@ public class  PurePursuitAction extends Action implements IPurePursuitAction {
         return finalAngleLockingThresholdDegree;
     }
 
+    @Override
     public void setFinalAngleLockingThresholdDeg(double finalAngleLockingThresholdDegree) {
         this.finalAngleLockingThresholdDegree = finalAngleLockingThresholdDegree;
     }
 
+    @Override
     public void setPathAngleToleranceDeg(double pathAngleToleranceDeg) {
         this.pathAngleToleranceRadian = Math.toRadians(pathAngleToleranceDeg);
     }
-
 
     public int getLastPointIndex() {
         return path.getPath().size() - 1;
