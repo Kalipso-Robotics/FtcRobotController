@@ -53,14 +53,24 @@ public class LinearSlideTest extends LinearOpMode {
         linearSlideMotor = opModeUtilities.getHardwareMap().dcMotor.get("slideMotor");
         linearSlideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         linearSlideMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        PIDFController(0.005,0.0,0.0001,0.01);
+        PIDFController(0.005,0.0,0.0001,0.05);
         double targetPosition = 0;
 
         waitForStart();
 
         lastTime = System.nanoTime() / 1E9;
         while(opModeIsActive()){
-            targetPosition +=-gamepad1.left_stick_y ;
+            if(gamepad1.y){
+
+                targetPosition = 800;
+            }
+            if(gamepad1.b){
+                targetPosition = 400;
+            }
+            if(gamepad1.a){
+                targetPosition = 20;
+            }
+            //targetPosition +=-gamepad1.left_stick_y ;
             double currentPosition = linearSlideMotor.getCurrentPosition();
             double motorPower = calculate(targetPosition,currentPosition);
             linearSlideMotor.setPower(motorPower);
