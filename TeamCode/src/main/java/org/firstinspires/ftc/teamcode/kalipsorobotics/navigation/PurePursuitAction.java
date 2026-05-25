@@ -484,6 +484,9 @@ public class  PurePursuitAction extends IPurePursuitAction {
         return path.getPath().size() - 1;
     }
     public boolean isWithinDistancePoint(int index, double distanceThreshold) {
+        if (index < 0 || index >= pathPoints.size()) {
+            return false;
+        }
         if (path.getCurrentSearchWayPointIndex() == index) {
             double distanceToPoint = pathPoints.get(index).distanceTo(currentPosition);
             if ((distanceToPoint < distanceThreshold)) {

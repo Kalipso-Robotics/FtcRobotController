@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -19,6 +20,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobUtils
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class VisionRoundTripAction extends RoundTripAction {
     private final boolean useVision;
@@ -142,15 +144,19 @@ public class VisionRoundTripAction extends RoundTripAction {
                 if (frameCount % 30 == 0) {
                     final int fc = frameCount;
                     final double d = dist;
-                    KLog.d("VisionRoundTrip", () -> String.format(
+                    KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
                             "[%s] frame=%d dist-to-lookout=%.0fmm pos=(%.0f,%.0f) cam=%s",
                             getName(), fc, d,
                             currentPos.toPoint().getX(), currentPos.toPoint().getY(),
                             artifactProcessor.getDiagnosticSummary()));
                 }
                 if (dist < lookoutRadiusMM) {
+                    // Single attempt at the lookout. Whether vision finds a ball
+                    // or not, we move on — the pre-configured path (lookout →
+                    // launch) keeps executing if vision returns nothing.
                     final double d = dist;
-                    KLog.d("VisionRoundTrip", () -> String.format("[%s] At lookout (%.0fmm) - processing vision", getName(), d));
+                    KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                            "[%s] At lookout (%.0fmm) - processing vision", getName(), d));
                     processVision();
                     visionProcessed = true;
                 }
@@ -163,61 +169,124 @@ public class VisionRoundTripAction extends RoundTripAction {
     }
 
     private void processVision() {
-        VisionRecognition target = getTargetRecognition();
         PurePursuitAction moveToBall = getMoveToBall();
+        int polarity = SharedData.getAllianceColor().getPolarity();
+        double launchHeading = 90 * polarity;
+        Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
 
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                "[%s] processVision START robot=(%.1f,%.1f,%.1f°) launchPt=(%.1f,%.1f) heading=%.1f° polarity=%d",
+                getName(), robotPos.getX(), robotPos.getY(), Math.toDegrees(robotPos.getTheta()),
+                launchPoint.getX(), launchPoint.getY(), launchHeading, polarity));
+
+        VisionRecognition target = getTargetRecognition();
         if (target == null) {
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] No ball - returning to launch (%.0f,%.0f)",
-                    getName(), launchPoint.getX(), launchPoint.getY()));
-            moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), 0);
+            KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                    "[%s] NO BALL DETECTED - using pre-configured path (lookout → launch). cam=%s",
+                    getName(), artifactProcessor.getDiagnosticSummary()));
             return;
         }
 
         Point bottomCenter = target.getBottomMiddlePixel();
         Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
         if (worldPos == null) {
-            KLog.d("VisionRoundTrip", () -> String.format("[%s] World conversion failed - returning to launch (%.0f,%.0f)",
-                    getName(), launchPoint.getX(), launchPoint.getY()));
-            moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), 0);
+            KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                    "[%s] WORLD CONVERSION FAILED for pixel=(%.1f,%.1f) - using pre-configured path",
+                    getName(), bottomCenter.getX(), bottomCenter.getY()));
             return;
         }
 
         detectedBallWorldPos = worldPos;
-        KLog.d("VisionRoundTrip", () -> String.format("[%s] Ball %s: pixel=(%.0f,%.0f) world=(%.1f,%.1f) → launch=(%.0f,%.0f)",
-                getName(), target.label,
+        double dx = worldPos.getX() - robotPos.getX();
+        double dy = worldPos.getY() - robotPos.getY();
+        double distToBall = Math.hypot(dx, dy);
+        double bearingToBallDeg = Math.toDegrees(Math.atan2(dy, dx));
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                "[%s] SELECTED %s conf=%.2f pixel=(%.1f,%.1f) world=(%.1f,%.1f) "
+                        + "distFromRobot=%.1fmm bearing=%.1f° → launch=(%.1f,%.1f) heading=%.1f°",
+                getName(), target.label, target.confidence,
                 bottomCenter.getX(), bottomCenter.getY(),
                 worldPos.getX(), worldPos.getY(),
-                launchPoint.getX(), launchPoint.getY()));
+                distToBall, bearingToBallDeg,
+                launchPoint.getX(), launchPoint.getY(), launchHeading));
 
-        Position currentPos = new Position(SharedData.getOdometryWheelIMUPosition());
         moveToBall.clearPoints();
-        moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(currentPos.getTheta()));
-        moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), 0);
+        moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(robotPos.getTheta()));
+        moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
+        logPlannedPath(moveToBall);
+    }
+
+    private void logPlannedPath(PurePursuitAction moveToBall) {
+        List<Position> path = moveToBall.getPathPoints();
+        StringBuilder sb = new StringBuilder();
+        sb.append('[').append(getName()).append("] planned path (").append(path.size()).append(" pts):");
+        for (int i = 0; i < path.size(); i++) {
+            Position p = path.get(i);
+            sb.append(String.format(Locale.US, " #%d=(%.1f,%.1f,%.1f°)",
+                    i, p.getX(), p.getY(), Math.toDegrees(p.getTheta())));
+        }
+        final String msg = sb.toString();
+        KLog.d("VisionRoundTrip", () -> msg);
     }
 
     private VisionRecognition getTargetRecognition() {
         List<VisionRecognition> all = artifactProcessor.getLatestResult();
-        KLog.d("VisionRoundTrip", () -> String.format("[%s] Vision: %s | %s",
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US, "[%s] Vision: %s | %s",
                 getName(),
                 all == null ? "NULL" : "count=" + all.size(),
                 artifactProcessor.getDiagnosticSummary()));
         if (all == null || all.isEmpty()) return null;
 
         List<VisionRecognition> candidates = filterByLabel(all, targetBallColor);
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                "[%s] After label filter (%s): %d candidates",
+                getName(), targetBallColor == null ? "ANY" : targetBallColor, candidates.size()));
+        logCandidatesWithWorld(candidates);
         if (candidates.isEmpty()) return null;
 
+        VisionRecognition chosen;
         switch (selectionStrategy) {
             case LARGEST_AREA:
-                return BlobUtils.findLargestByArea(candidates);
+                chosen = BlobUtils.findLargestByArea(candidates);
+                break;
             case CLOSEST_TO_CAMERA_CENTER:
-                return BlobUtils.findClosestToCameraCenter(candidates, cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
+                chosen = BlobUtils.findClosestToCameraCenter(candidates, cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
+                break;
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
-                return BlobUtils.findClosestToRobotWorld(candidates, cameraIntrinsics, robotPos.toPoint());
+                chosen = BlobUtils.findClosestToRobotWorld(candidates, cameraIntrinsics, robotPos.toPoint());
+                break;
             case MOST_CIRCULAR:
-                return BlobUtils.findMostCircular(candidates);
+                chosen = BlobUtils.findMostCircular(candidates);
+                break;
             default:
-                return candidates.get(0);
+                chosen = candidates.get(0);
+        }
+        final VisionRecognition c = chosen;
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                "[%s] Strategy=%s chose %s conf=%.2f area=%.0f pixel=(%.1f,%.1f)",
+                getName(), selectionStrategy,
+                c == null ? "NULL" : c.label,
+                c == null ? 0f : c.confidence,
+                c == null ? 0.0 : c.getArea(),
+                c == null ? 0.0 : c.getBottomMiddlePixel().getX(),
+                c == null ? 0.0 : c.getBottomMiddlePixel().getY()));
+        return chosen;
+    }
+
+    private void logCandidatesWithWorld(List<VisionRecognition> candidates) {
+        for (int i = 0; i < candidates.size(); i++) {
+            VisionRecognition r = candidates.get(i);
+            Point px = r.getBottomMiddlePixel();
+            Point world = cameraIntrinsics.calculateWorldPos(px.getX(), px.getY());
+            final int idx = i;
+            final String worldStr = world == null
+                    ? "world=NULL"
+                    : String.format(Locale.US, "world=(%.1f,%.1f)", world.getX(), world.getY());
+            KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                    "[%s]   cand#%d %s conf=%.2f area=%.0f pixel=(%.1f,%.1f) %s",
+                    getName(), idx, r.label, r.confidence, r.getArea(),
+                    px.getX(), px.getY(), worldStr));
         }
     }
 

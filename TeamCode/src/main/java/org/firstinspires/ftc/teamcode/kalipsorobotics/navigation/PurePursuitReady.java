@@ -8,6 +8,7 @@ import java.util.List;
 
 public class PurePursuitReady extends Action {
     private final PurePursuitAction purePursuitAction;
+    private final boolean trackLastPoint;
     private int pointIndex;
     private double distanceThresholdMM;
 
@@ -15,6 +16,7 @@ public class PurePursuitReady extends Action {
         this.purePursuitAction = purePursuitAction;
         this.pointIndex = pointIndex;
         this.distanceThresholdMM = distanceThresholdMM;
+        this.trackLastPoint = (pointIndex < 0);
     }
 
     public PurePursuitReady(PurePursuitAction purePursuitAction, double distanceThresholdMM) {
@@ -28,23 +30,26 @@ public class PurePursuitReady extends Action {
             return;
         }
 
-        if (pointIndex < 0) {
-            pointIndex = purePursuitAction.getLastPointIndex();
-            final int resolvedIdx = pointIndex;
-            List<Position> pts = purePursuitAction.getPathPoints();
-            if (resolvedIdx >= 0 && resolvedIdx < pts.size()) {
-                Position wp = pts.get(resolvedIdx);
+        // In track-last-point mode, re-resolve every update so we follow dynamic
+        // paths (e.g., vision-driven path replacements that change the last index).
+        if (trackLastPoint) {
+            int newIndex = purePursuitAction.getLastPointIndex();
+            if (newIndex != pointIndex) {
+                final int prev = pointIndex;
+                final int next = newIndex;
+                List<Position> pts = purePursuitAction.getPathPoints();
+                String wpStr = (next >= 0 && next < pts.size())
+                        ? String.format("(%.0f,%.0f)", pts.get(next).getX(), pts.get(next).getY())
+                        : "?";
                 KLog.d("PurePursuitReady", () -> String.format(
-                        "[%s] Watching pathPoints[%d]=(%.0f,%.0f) threshold=%.0fmm pp=%s",
-                        getName(), resolvedIdx, wp.getX(), wp.getY(),
-                        distanceThresholdMM, purePursuitAction.getName()));
-            } else {
-                KLog.d("PurePursuitReady", () -> String.format(
-                        "[%s] WARNING: pointIndex=%d but pathPoints.size=%d pp=%s — path not built yet?",
-                        getName(), resolvedIdx, pts.size(), purePursuitAction.getName()));
+                        "[%s] last point moved %d → %d (now %s) pp=%s",
+                        getName(), prev, next, wpStr, purePursuitAction.getName()));
+                pointIndex = newIndex;
             }
         }
-        boolean withinRange = purePursuitAction.isWithinDistancePoint(pointIndex, distanceThresholdMM);
+
+        boolean withinRange = pointIndex >= 0
+                && purePursuitAction.isWithinDistancePoint(pointIndex, distanceThresholdMM);
 
         boolean ppDone = purePursuitAction.getIsDone();
 
