@@ -46,7 +46,7 @@ public class RedAutoDepotVision extends KOpMode {
     Point thirdLaunchPoint = new Point(SHOOT_FAR_X, SHOOT_FAR_Y + 100);
     Point firstShootPoint = new Point(0, 0);
     Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX(), Shooter.TARGET_POINT.getY() + 141.4213562373);
-    Point depotLookoutPoint = new Point(500, 1050);
+    Point depotLookoutPoint = new Point(50, 300);
 
     private DriveTrain driveTrain;
     private Shooter shooter;
@@ -246,7 +246,7 @@ public class RedAutoDepotVision extends KOpMode {
                 opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake)
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(farLaunchPoint.multiplyY(allianceColor.getPolarity()))
-            .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
+            .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.LARGEST_AREA)
             .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();
         retryTrip.setName(name);

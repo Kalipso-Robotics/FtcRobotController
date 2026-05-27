@@ -170,6 +170,9 @@ public class VisionRoundTripAction extends RoundTripAction {
 
     private void processVision() {
         PurePursuitAction moveToBall = getMoveToBall();
+
+        KLog.d("VisionRoundTrip", () -> "BEFORE clearPoints: " + moveToBall.getPathPoints().size() + " points");
+
         int polarity = SharedData.getAllianceColor().getPolarity();
         double launchHeading = 90 * polarity;
         Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
@@ -211,6 +214,9 @@ public class VisionRoundTripAction extends RoundTripAction {
                 launchPoint.getX(), launchPoint.getY(), launchHeading));
 
         moveToBall.clearPoints();
+
+        KLog.d("VisionRoundTrip", () -> "AFTER clearPoints: " + moveToBall.getPathPoints().size() + " points");
+
         moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(robotPos.getTheta()));
         moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
         logPlannedPath(moveToBall);

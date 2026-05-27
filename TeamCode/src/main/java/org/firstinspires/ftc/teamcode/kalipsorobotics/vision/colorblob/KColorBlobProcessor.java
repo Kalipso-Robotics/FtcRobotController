@@ -88,8 +88,8 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
         }
     }
 
-    protected double minContourArea = 300;
-    protected double maxContourArea = 100_000;
+    protected double minContourArea = 100;
+    protected double maxContourArea = 2000;
     protected double minCircularity = 0.30;
 
     /** Gaussian blur kernel size (must be odd). Larger = more smoothing, less noise. */

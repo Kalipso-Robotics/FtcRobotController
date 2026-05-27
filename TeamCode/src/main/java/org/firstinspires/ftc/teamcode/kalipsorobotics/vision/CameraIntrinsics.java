@@ -21,7 +21,7 @@ public class CameraIntrinsics{
             0.045011, -0.059862, 0.000330,
             0.001499, 0.005590,
             Math.toRadians(0),
-            new Vector3d(157.548, 236.163, 151.868)
+            new Vector3d(-157.548, 236.163, 151.868)
     );
 
 
@@ -57,9 +57,11 @@ public class CameraIntrinsics{
      */
     public Point calculateWorldPos(double pixelX, double pixelY) { // these pixels should be the bottom center of the blob
         // normalize center to middle of image not corner
-        double norm_x = pixelX - this.cx;
-//        double norm_y = pixelY - this.cy;
-        double norm_y = this.cy - pixelY;
+//        double norm_x = pixelX - this.cx;
+        double norm_x = this.cx - pixelX;
+
+        double norm_y = pixelY - this.cy;
+//        double norm_y = this.cy - pixelY;
 
         double x_direction = norm_x / this.focalLength;
         double y_direction = norm_y / this.focalLength;
@@ -73,7 +75,7 @@ public class CameraIntrinsics{
         double world_z = y_direction * Math.sin(theta) + z_direction * Math.cos(theta);
         double world_x = x_direction;
 
-        if (world_y > 1e-6) {
+        if (world_y > -0.01) {
             return null;
         }
 
