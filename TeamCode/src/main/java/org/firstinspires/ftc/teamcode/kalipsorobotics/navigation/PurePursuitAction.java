@@ -144,6 +144,16 @@ public class  PurePursuitAction extends IPurePursuitAction {
         pathPoints.clear();
     }
 
+    public void rebuildPath() {
+        if ((path != null) && hasStarted) {
+            path = new Path(pathPoints);
+            path.setPathAngleTolerance(pathAngleToleranceRadian);
+            prevFollow = Optional.empty();
+            checkDoneCounter = 0;
+            KLog.d("PurePursuitAction", () -> "Path rebuilt with " + pathPoints.size() + " points");
+        }
+    }
+
     public boolean nearEndPoint(Position robotPosition) {
         Position endPoint = pathPoints.get(pathPoints.size()-1);
         double distance = Math.sqrt(Math.pow(Math.abs(robotPosition.getX() - endPoint.getX()), 2) + Math.pow(Math.abs(robotPosition.getY() - endPoint.getY()), 2));

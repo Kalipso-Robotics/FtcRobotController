@@ -170,33 +170,30 @@ public class VisionRoundTripAction extends RoundTripAction {
 
     private void processVision() {
         PurePursuitAction moveToBall = getMoveToBall();
-
-        KLog.d("VisionRoundTrip", () -> "BEFORE clearPoints: " + moveToBall.getPathPoints().size() + " points");
-
         int polarity = SharedData.getAllianceColor().getPolarity();
         double launchHeading = 90 * polarity;
         Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
 
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
-                "[%s] processVision START robot=(%.1f,%.1f,%.1f°) launchPt=(%.1f,%.1f) heading=%.1f° polarity=%d",
-                getName(), robotPos.getX(), robotPos.getY(), Math.toDegrees(robotPos.getTheta()),
-                launchPoint.getX(), launchPoint.getY(), launchHeading, polarity));
+                        "[%s] processVision START robot=(%.1f,%.1f,%.1f°) launchPt=(%.1f,%.1f) heading=%.1f° polarity=%d",
+                        getName(), robotPos.getX(), robotPos.getY(), Math.toDegrees(robotPos.getTheta()),
+                        launchPoint.getX(), launchPoint.getY(), launchHeading, polarity));
 
         VisionRecognition target = getTargetRecognition();
         if (target == null) {
-            KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
-                    "[%s] NO BALL DETECTED - using pre-configured path (lookout → launch). cam=%s",
-                    getName(), artifactProcessor.getDiagnosticSummary()));
-            return;
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                            "[%s] NO BALL DETECTED - keeping fallback path. cam=%s",
+                            getName(), artifactProcessor.getDiagnosticSummary()));
+        return;
         }
 
         Point bottomCenter = target.getBottomMiddlePixel();
         Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
         if (worldPos == null) {
-            KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
-                    "[%s] WORLD CONVERSION FAILED for pixel=(%.1f,%.1f) - using pre-configured path",
-                    getName(), bottomCenter.getX(), bottomCenter.getY()));
-            return;
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                            "[%s] WORLD CONVERSION FAILED for pixel=(%.1f,%.1f) - keeping fallback path",
+                            getName(), bottomCenter.getX(), bottomCenter.getY()));
+        return;
         }
 
         detectedBallWorldPos = worldPos;
@@ -205,22 +202,21 @@ public class VisionRoundTripAction extends RoundTripAction {
         double distToBall = Math.hypot(dx, dy);
         double bearingToBallDeg = Math.toDegrees(Math.atan2(dy, dx));
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
-                "[%s] SELECTED %s conf=%.2f pixel=(%.1f,%.1f) world=(%.1f,%.1f) "
-                        + "distFromRobot=%.1fmm bearing=%.1f° → launch=(%.1f,%.1f) heading=%.1f°",
-                getName(), target.label, target.confidence,
-                bottomCenter.getX(), bottomCenter.getY(),
-                worldPos.getX(), worldPos.getY(),
-                distToBall, bearingToBallDeg,
-                launchPoint.getX(), launchPoint.getY(), launchHeading));
+                                "[%s] SELECTED %s conf=%.2f pixel=(%.1f,%.1f) world=(%.1f,%.1f) "
+                                + "distFromRobot=%.1fmm bearing=%.1f° → launch=(%.1f,%.1f) heading=%.1f°",
+                        getName(), target.label, target.confidence,
+                        bottomCenter.getX(), bottomCenter.getY(),
+                        worldPos.getX(), worldPos.getY(),
+                        distToBall, bearingToBallDeg,
+                        launchPoint.getX(), launchPoint.getY(), launchHeading));
 
         moveToBall.clearPoints();
-
-        KLog.d("VisionRoundTrip", () -> "AFTER clearPoints: " + moveToBall.getPathPoints().size() + " points");
-
         moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(robotPos.getTheta()));
         moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
+        moveToBall.rebuildPath();
         logPlannedPath(moveToBall);
     }
+
 
     private void logPlannedPath(PurePursuitAction moveToBall) {
         List<Position> path = moveToBall.getPathPoints();

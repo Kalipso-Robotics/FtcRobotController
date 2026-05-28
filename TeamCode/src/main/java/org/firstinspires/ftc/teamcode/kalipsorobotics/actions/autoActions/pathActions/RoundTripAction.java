@@ -149,6 +149,13 @@ public class RoundTripAction extends KActionSet {
     protected void beforeUpdate() {
         super.beforeUpdate();
 
+        KLog.d("RoundTrip", () -> String.format("[%s] Current pos: (%.1f, %.1f) | MoveToBall done: %s | Path points: %d",
+                getName(),
+                SharedData.getOdometryWheelIMUPosition().getX(),
+                SharedData.getOdometryWheelIMUPosition().getY(),
+                moveToBall.getIsDone(),
+                moveToBall.getPathPoints().size()));
+        
         if (shouldShooterStop && !hasStarted){
             hasStarted = true;
             this.addAction(shooterStop);
