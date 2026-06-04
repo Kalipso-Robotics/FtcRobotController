@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
@@ -119,7 +120,7 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
                     Math.toRadians(MOUNT_ANGLE_DEG),
                     new Vector3d(CAM_OFFSET_X_MM, CAM_HEIGHT_MM, CAM_OFFSET_Z_MM));
 
-            Point robotPos = new Point(ROBOT_X, ROBOT_Y);
+            Position robotPos = new Position(ROBOT_X, ROBOT_Y, 0);
 
             // ─── A. Probe-pixel raytrace (detector-independent) ──────────────
             double px = (PROBE_PX < 0) ? intrinsics.getCx()                        : PROBE_PX;
@@ -157,7 +158,7 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
     }
 
     private void reportRecognitionWithDump(String name, VisionRecognition r,
-                                           CameraIntrinsics intrinsics, Point robotPos) {
+                                           CameraIntrinsics intrinsics, Position robotPos) {
         if (r == null) {
             telemetry.addData(name, "no detection");
             return;
@@ -175,7 +176,7 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
      *   adb logcat -s RAYTRACE_DBG
      */
     private void dumpRayTrace(String label, double pixelX, double pixelY,
-                              Point robotPos, CameraIntrinsics intrinsics) {
+                              Position robotPos, CameraIntrinsics intrinsics) {
         double cx = intrinsics.getCx();
         double cy = intrinsics.getCy();
         // We can't read fx/fy/focalLength from the intrinsics without a getter,
@@ -204,10 +205,10 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
         double xFromRobot = rejected ? Double.NaN : floorX + CAM_OFFSET_X_MM;
         double zFromRobot = rejected ? Double.NaN : floorZ + CAM_OFFSET_Z_MM;
 
-        // Also call the real method so we know we match.
-        Point realWorld = intrinsics.calculateWorldPos(pixelX, pixelY);
-        double realDist = intrinsics.getDistanceFromRobot(pixelX, pixelY,
-                robotPos.getX(), robotPos.getY());
+        // Also call the real method so we know we match. Use the robot-frame
+        // helper here since this test recomputes the unrotated floor projection.
+        Point realWorld = intrinsics.calculateRobotFramePos(pixelX, pixelY);
+        double realDist = intrinsics.getDistanceFromRobot(pixelX, pixelY, robotPos);
 
         String dump = String.format(Locale.US,
                 "[%s] px=(%.2f,%.2f) cxy=(%.2f,%.2f) focal=%.2f mountDeg=%.3f " +

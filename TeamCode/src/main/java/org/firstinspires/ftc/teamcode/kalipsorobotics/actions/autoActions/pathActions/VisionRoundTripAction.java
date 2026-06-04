@@ -188,7 +188,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         }
 
         Point bottomCenter = target.getBottomMiddlePixel();
-        Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
+        Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY(), robotPos);
         if (worldPos == null) {
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
                             "[%s] WORLD CONVERSION FAILED for pixel=(%.1f,%.1f) - keeping fallback path",
@@ -197,24 +197,59 @@ public class VisionRoundTripAction extends RoundTripAction {
         }
 
         detectedBallWorldPos = worldPos;
-        double dx = worldPos.getX() - robotPos.getX();
-        double dy = worldPos.getY() - robotPos.getY();
-        double distToBall = Math.hypot(dx, dy);
-        double bearingToBallDeg = Math.toDegrees(Math.atan2(dy, dx));
+
+        Point sectorGrabPoint = chooseSectorGrabPoint(worldPos, polarity);
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
-                                "[%s] SELECTED %s conf=%.2f pixel=(%.1f,%.1f) world=(%.1f,%.1f) "
-                                + "distFromRobot=%.1fmm bearing=%.1f° → launch=(%.1f,%.1f) heading=%.1f°",
-                        getName(), target.label, target.confidence,
-                        bottomCenter.getX(), bottomCenter.getY(),
-                        worldPos.getX(), worldPos.getY(),
-                        distToBall, bearingToBallDeg,
-                        launchPoint.getX(), launchPoint.getY(), launchHeading));
+                        "[%s] SELECTED %s conf=%.2f pixel=(%.1f,%.1f) ballWorld=(%.1f,%.1f) "
+                        + "→ sectorGrab=(%.1f,%.1f) → launch=(%.1f,%.1f) heading=%.1f°",
+                getName(), target.label, target.confidence,
+                bottomCenter.getX(), bottomCenter.getY(),
+                worldPos.getX(), worldPos.getY(),
+                sectorGrabPoint.getX(), sectorGrabPoint.getY(),
+                launchPoint.getX(), launchPoint.getY(), launchHeading));
 
         moveToBall.clearPoints();
-        moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(robotPos.getTheta()));
+        moveToBall.addPoint(sectorGrabPoint.getX(), sectorGrabPoint.getY(), Math.toDegrees(robotPos.getTheta()));
         moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
         moveToBall.rebuildPath();
         logPlannedPath(moveToBall);
+
+        // Original "drive straight to ball" path — replaced by sector grab logic above.
+        // moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(robotPos.getTheta()));
+        // moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
+    }
+
+    private static final double[] SECTOR_CENTERS_X = {450, 1350, 2250, 3150};
+    private static final double SECTOR_GRAB_Y_ABS = 1050;
+
+    private Point chooseSectorGrabPoint(Point ballWorld, int polarity) {
+        double bestDx = Double.MAX_VALUE;
+        double bestX = SECTOR_CENTERS_X[0];
+        int bestIdx = 0;
+        StringBuilder sb = new StringBuilder();
+        sb.append('[').append(getName()).append("] sector eval ballX=")
+                .append(String.format(Locale.US, "%.1f", ballWorld.getX())).append(" polarity=")
+                .append(polarity).append(" candidates:");
+        for (int i = 0; i < SECTOR_CENTERS_X.length; i++) {
+            double sx = SECTOR_CENTERS_X[i];
+            double d = Math.abs(ballWorld.getX() - sx);
+            sb.append(String.format(Locale.US, " S%d(x=%.0f,dx=%.1f)", i, sx, d));
+            if (d < bestDx) {
+                bestDx = d;
+                bestX = sx;
+                bestIdx = i;
+            }
+        }
+        double grabY = SECTOR_GRAB_Y_ABS * polarity;
+        final String evalMsg = sb.toString();
+        final int chosenIdx = bestIdx;
+        final double chosenX = bestX;
+        final double chosenDx = bestDx;
+        KLog.d("VisionRoundTrip", () -> evalMsg);
+        KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                "[%s] sector CHOSEN S%d centerX=%.1f dx=%.1f grabY=%.1f → grab=(%.1f,%.1f)",
+                getName(), chosenIdx, chosenX, chosenDx, grabY, chosenX, grabY));
+        return new Point(bestX, grabY);
     }
 
 
@@ -256,7 +291,7 @@ public class VisionRoundTripAction extends RoundTripAction {
                 break;
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
-                chosen = BlobUtils.findClosestToRobotWorld(candidates, cameraIntrinsics, robotPos.toPoint());
+                chosen = BlobUtils.findClosestToRobotWorld(candidates, cameraIntrinsics, robotPos);
                 break;
             case MOST_CIRCULAR:
                 chosen = BlobUtils.findMostCircular(candidates);
@@ -277,10 +312,11 @@ public class VisionRoundTripAction extends RoundTripAction {
     }
 
     private void logCandidatesWithWorld(List<VisionRecognition> candidates) {
+        Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
         for (int i = 0; i < candidates.size(); i++) {
             VisionRecognition r = candidates.get(i);
             Point px = r.getBottomMiddlePixel();
-            Point world = cameraIntrinsics.calculateWorldPos(px.getX(), px.getY());
+            Point world = cameraIntrinsics.calculateWorldPos(px.getX(), px.getY(), robotPos);
             final int idx = i;
             final String worldStr = world == null
                     ? "world=NULL"

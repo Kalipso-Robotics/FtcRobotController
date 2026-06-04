@@ -151,10 +151,10 @@ public class RedAutoDepotVision extends KOpMode {
         trip2.setName("trip2_CornerVision");
         trip2.setDependentActions(trip1);
         trip2.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        // Pre-configured fallback: if vision misses, robot still drives to launch and shoots.
+        // Fallback (vision miss): mirror RedAutoDepot trip2 corner sweep → launch.
+        trip2.getMoveToBall().addPoint(-25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToBall().addPoint(250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getMoveToBall().addPoint(thirdLaunchPoint.getX(), thirdLaunchPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip2.getMoveToBall().addPoint(-25, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip2.getMoveToBall().addPoint(250, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip2.getMoveToBall().setFinalSearchRadiusMM(150);
         trip2.getMoveToBall().setPathAngleToleranceDeg(45);
         trip2.getMoveToBall().setFinalAngleLockingThresholdDeg(45);
@@ -166,36 +166,36 @@ public class RedAutoDepotVision extends KOpMode {
 
         VisionRoundTripAction trip3 = createVisionRetryTrip(trip2, "trip3_Vision");
         trip3.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        // Fallback: RedAutoDepot SWEEP_IN.
+        trip3.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(55,  800  * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip3.getMoveToBall().addPoint(55,  1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip3.getMoveToBall().addPoint(farLaunchPoint.getX(), farLaunchPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip3.getMoveToBall().clearPoints();
-//        trip3.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip3.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip3.getMoveToBall().addPoint(55, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip3);
 
         VisionRoundTripAction trip4 = createVisionRetryTrip(trip3, "trip4_Vision");
         trip4.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        // Fallback: RedAutoDepot SWEEP_OUT.
+        trip4.getMoveToBall().addPoint(25,  1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(325, 800  * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip4.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip4.getMoveToBall().addPoint(farLaunchPoint.getX(), farLaunchPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip4.getMoveToBall().clearPoints();
-//        trip4.getMoveToBall().addPoint(25, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip4.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip4.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip4);
 
         VisionRoundTripAction trip5 = createVisionRetryTrip(trip4, "trip5_Vision");
         trip5.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        // Fallback: RedAutoDepot SWEEP_IN (same as trip3).
+        trip5.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip5.getMoveToBall().addPoint(55,  800  * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip5.getMoveToBall().addPoint(55,  1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip5.getMoveToBall().addPoint(farLaunchPoint.getX(), farLaunchPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip5.getMoveToBall().clearPoints();
-//        trip5.getMoveToBall().addPoint(55, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip5.getMoveToBall().addPoint(325, 800 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip5.getMoveToBall().addPoint(325, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         autoDepot.addAction(trip5);
 
         VisionRoundTripAction trip6 = createVisionRetryTrip(trip5, "trip6_Vision");
         trip6.getMoveToBall().addPoint(depotLookoutPoint.getX(), depotLookoutPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        // Fallback: RedAutoDepot SWEEP_800.
+        trip6.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity());
         trip6.getMoveToBall().addPoint(farLaunchPoint.getX(), farLaunchPoint.getY() * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip6.getMoveToBall().clearPoints();
-//        trip6.getMoveToBall().addPoint(800, 1050 * allianceColor.getPolarity(), 65 * allianceColor.getPolarity());
         autoDepot.addAction(trip6);
 
         // ----------------- PARK ----------------------
@@ -246,7 +246,7 @@ public class RedAutoDepotVision extends KOpMode {
                 opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake)
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(farLaunchPoint.multiplyY(allianceColor.getPolarity()))
-            .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.LARGEST_AREA)
+            .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
             .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();
         retryTrip.setName(name);

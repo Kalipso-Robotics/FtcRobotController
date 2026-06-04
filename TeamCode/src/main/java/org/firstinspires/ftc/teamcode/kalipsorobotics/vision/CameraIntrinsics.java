@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 
 public class CameraIntrinsics{
@@ -53,23 +54,36 @@ public class CameraIntrinsics{
     }
 
     /**
-     * converts a 2D pixel coordinate (blob) to a 2D world coordinate on the floor
+     * Converts a bottom-center pixel of a blob to a field-frame floor point,
+     * using the robot's current pose to rotate/translate out of robot-local frame.
      */
-    public Point calculateWorldPos(double pixelX, double pixelY) { // these pixels should be the bottom center of the blob
-        // normalize center to middle of image not corner
-//        double norm_x = pixelX - this.cx;
-        double norm_x = this.cx - pixelX;
+    public Point calculateWorldPos(double pixelX, double pixelY, Position robotPose) {
+        Point local = calculateRobotFramePos(pixelX, pixelY);
+        if (local == null) return null;
+        double cosT = Math.cos(robotPose.getTheta());
+        double sinT = Math.sin(robotPose.getTheta());
+        double fieldX = robotPose.getX() + local.getY() * cosT - local.getX() * sinT;
+        double fieldY = robotPose.getY() + local.getY() * sinT + local.getX() * cosT;
+        return new Point(fieldX, fieldY);
+    }
 
-        double norm_y = pixelY - this.cy;
-//        double norm_y = this.cy - pixelY;
+    /**
+     * Robot-frame floor position of a blob's bottom-center pixel.
+     * +X = left of camera axis, +Y = forward depth. Most callers want the
+     * field-frame variant above; this is exposed for diagnostics/tests.
+     */
+    public Point calculateRobotFramePos(double pixelX, double pixelY) {
+        double norm_x = this.cx - pixelX;
+        // Flipped: image-Y increases downward, but the rest of this math expects
+        // a Y-up world (rejection check + t = -height/world_y both need world_y
+        // negative for floor pixels). With this sign, bottom-of-image pixels
+        // (the floor) actually project; the old `pixelY - cy` rejected them.
+        double norm_y = this.cy - pixelY;
 
         double x_direction = norm_x / this.focalLength;
         double y_direction = norm_y / this.focalLength;
-
-        // the direction of the z in the camera space is always forward (1.0)
         double z_direction = 1.0;
 
-        // account for the pitch of the camera (tilt towards the ground)
         double theta = this.mountAngle;
         double world_y = y_direction * Math.cos(theta) - z_direction * Math.sin(theta);
         double world_z = y_direction * Math.sin(theta) + z_direction * Math.cos(theta);
@@ -84,25 +98,20 @@ public class CameraIntrinsics{
         double floorX = t * world_x;
         double floorZ = t * world_z;
 
-        double xFromRobotCenter = floorX + cameraOffset.getX();
-        double zFromRobotCenter = floorZ + cameraOffset.getZ();
-
-        return new Point(xFromRobotCenter, zFromRobotCenter);
+        return new Point(floorX + cameraOffset.getX(), floorZ + cameraOffset.getZ());
     }
 
-    public double getDistanceFromRobot(double pixelX, double pixelY, double robotX, double robotY) {
-        Point object = calculateWorldPos(pixelX, pixelY);
+    public double getDistanceFromRobot(double pixelX, double pixelY, Position robotPose) {
+        Point object = calculateWorldPos(pixelX, pixelY, robotPose);
         if (object == null) {
             return Double.POSITIVE_INFINITY;
         }
-        Point robot = new Point(robotX, robotY);
-        return robot.distanceTo(object);
+        return robotPose.toPoint().distanceTo(object);
     }
 
-    public double getDistanceFromRobot(VisionRecognition recognition, Point robotPos) {
+    public double getDistanceFromRobot(VisionRecognition recognition, Position robotPose) {
         Point bottomCenter = recognition.getBottomMiddlePixel();
-        return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(),
-                robotPos.getX(), robotPos.getY());
+        return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(), robotPose);
     }
 
     public double getCx() { return cx; }

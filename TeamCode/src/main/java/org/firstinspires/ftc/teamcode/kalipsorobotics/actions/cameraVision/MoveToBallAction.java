@@ -67,7 +67,8 @@ public class MoveToBallAction extends Action {
         }
 
         Point bottomCenter = target.getBottomMiddlePixel();
-        Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY());
+        Position robotPose = new Position(SharedData.getOdometryWheelIMUPosition());
+        Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY(), robotPose);
 
         if (worldPos == null) {
             KLog.d("MoveToBall", "Failed to convert detection to world coordinates");
@@ -101,7 +102,7 @@ public class MoveToBallAction extends Action {
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
                 return BlobUtils.findClosestToRobotWorld(candidates,
-                        cameraIntrinsics, robotPos.toPoint());
+                        cameraIntrinsics, robotPos);
 
             case MOST_CIRCULAR:
                 return BlobUtils.findMostCircular(candidates);

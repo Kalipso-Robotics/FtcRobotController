@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 
@@ -30,13 +31,13 @@ public class BlobUtils {
 
     public static VisionRecognition findClosestToRobotWorld(List<VisionRecognition> recognitions,
                                                             CameraIntrinsics intrinsics,
-                                                            Point robotPos) {
+                                                            Position robotPose) {
         if (recognitions == null || recognitions.isEmpty()) return null;
 
         VisionRecognition closest = null;
         double minDistance = Double.POSITIVE_INFINITY;
         for (VisionRecognition recognition : recognitions) {
-            double distance = intrinsics.getDistanceFromRobot(recognition, robotPos);
+            double distance = intrinsics.getDistanceFromRobot(recognition, robotPose);
             if (distance < minDistance) {
                 minDistance = distance;
                 closest = recognition;
