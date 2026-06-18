@@ -52,7 +52,6 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
  * - Hood Position
  * - Distance to target (MM)
  */
-@Disabled
 @TeleOp(name = "RPS Prediction Data Collector", group = "Test")
 public class RPSPredictionDataCollector extends LinearOpMode {
 
@@ -116,8 +115,8 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
-        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, AllianceColor.RED);
-        turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
+//        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, AllianceColor.RED);
+//        turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
 
@@ -144,7 +143,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         while (opModeIsActive()) {
             // Update odometry
             odometry.updateAll();
-            turretAutoAlignTeleop.updateCheckDone();
+//            turretAutoAlignTeleop.updateCheckDone();
             aprilTagDetectionAction.updateCheckDone();
 
             // ========== Power Control ==========
