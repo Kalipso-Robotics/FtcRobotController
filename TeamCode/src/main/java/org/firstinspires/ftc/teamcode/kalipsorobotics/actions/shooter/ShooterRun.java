@@ -119,6 +119,11 @@ public class ShooterRun extends Action {
         switch (shooterRunMode) {
             case STOP:
                 shooter.stop();
+                // Zero the target so the continuous hold (Shooter.holdTargetRPS) keeps the
+                // flywheel stopped instead of spinning it back up to the last shooting target.
+                shooter.setTargetRPS(0);
+                targetRPS = 0;
+                logPowerIfZero();
                 return;
             case SHOOT_USING_TARGET_RPS_HOOD:
                 // Direct RPS mode
@@ -140,6 +145,7 @@ public class ShooterRun extends Action {
                 params = getPrediction(distanceMM);
                 this.targetRPS = params.rps;
                 this.targetHoodPosition = params.hoodPosition;
+                KLog.d("ShooterRun_SHOOT_USING_FIXED_POINT", "TargetRPS: " + targetRPS + " distanceMM: " + distanceMM);
                 break;
             case SHOOT_USING_CURRENT_POINT:
                 double currentDist = getCurrentDistanceMM();
@@ -202,6 +208,10 @@ public class ShooterRun extends Action {
             shooter.goToRPS(targetRPS);
             KLog.d("ShooterRun_BangControl", () -> String.format("PID CONTROL: deltaRPS = %.2f", deltaRPS));
         }
+
+        // Debug: if the shooter motor power ended up at 0.0, dump the stack trace so we can
+        // see which code path drove the power to zero during the routine.
+        logPowerIfZero();
 
         // Update hood position
         shooter.getHood().setPosition(effectiveTargetHood);
@@ -353,5 +363,53 @@ public class ShooterRun extends Action {
 
     public double getCurrentRPS() {
         return currentRPS;
+    }
+
+    /**
+     * When true, {@link #logPowerIfZero()} dumps a full stack trace every time the shooter power
+     * is floored to 0 while a non-zero RPS is still wanted. This is a HEAVY diagnostic - a stack
+     * walk plus ~30 logcat writes - and it runs inside the per-loop control path. Leaving it on
+     * throttles the main loop and degrades everything that shares that loop (turret auto-align,
+     * shooter RPS settling). Keep it false for normal driving/matches; flip it true only for a
+     * focused debug session, then turn it back off.
+     */
+    public static boolean DEBUG_POWER_ZERO_STACK_TRACE = false;
+
+    /**
+     * Reads back the actual shooter motor power and, if it is 0.0, logs the full stack trace
+     * to the debug log. This is a debugging aid to discover which caller / code path is
+     * driving the shooter power to zero during the routine. Gated behind
+     * {@link #DEBUG_POWER_ZERO_STACK_TRACE} so it is zero-cost during normal play.
+     */
+    private void logPowerIfZero() {
+        if (!DEBUG_POWER_ZERO_STACK_TRACE) {
+            return;
+        }
+
+        double power1 = shooter.getShooter1().getPower();
+        double power2 = shooter.getShooter2().getPower();
+
+        boolean powerIsZero = Math.abs(power1) < 1e-9 || Math.abs(power2) < 1e-9;
+        if (!powerIsZero) {
+            return;
+        }
+
+        // Power 0 while target is 0 (STOP / park) is expected - just note it, no stack trace.
+        if (Math.abs(targetRPS) < 1e-9) {
+            KLog.d("ShooterRun_PowerZero", () -> "Power 0.0 with target 0 (expected stop) -> shooter1: " +
+                    power1 + " shooter2: " + power2 + " | mode: " + shooterRunMode);
+            return;
+        }
+
+        // Power 0 while we still want a non-zero RPS is the bug we are hunting - dump the trace.
+        KLog.d("ShooterRun_PowerZero", () -> "UNEXPECTED POWER 0.0 -> shooter1: " + power1 + " shooter2: " + power2 +
+                " | mode: " + shooterRunMode + " targetRPS: " + targetRPS + " currentRPS: " + currentRPS);
+
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        KLog.d("ShooterRun_PowerZero", "Power set to 0.0 - called from:");
+        for (int i = 0; i < stackTrace.length; i++) {
+            final int finalI = i;
+            KLog.d("ShooterRun_PowerZero", () -> "  [" + finalI + "] " + stackTrace[finalI].toString());
+        }
     }
 }

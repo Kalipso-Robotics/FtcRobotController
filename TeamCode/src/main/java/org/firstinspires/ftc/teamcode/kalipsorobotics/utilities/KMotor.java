@@ -119,6 +119,7 @@ public class KMotor {
                 );
         // Set new power
         motor.setPower(newPower);
+        KLog.d("Shooter_Power", () -> "Power" + newPower);
 
         // Log for debugging
         KLog.d("KMotor", () -> String.format(

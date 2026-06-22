@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter.TARGET_POINT;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
@@ -115,8 +117,8 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
-//        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, AllianceColor.RED);
-//        turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
+        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, AllianceColor.RED);
+        turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
         // Write CSV header
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
 
@@ -143,7 +145,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         while (opModeIsActive()) {
             // Update odometry
             odometry.updateAll();
-//            turretAutoAlignTeleop.updateCheckDone();
+            turretAutoAlignTeleop.updateCheckDone();
             aprilTagDetectionAction.updateCheckDone();
 
             // ========== Power Control ==========
@@ -241,6 +243,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             telemetry.addData("Hood Position", "%.2f", hoodPosition);
             telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
             telemetry.addData("Limelight Distance to Target", "%.2f mm", calculateDistanceToTarget());
+            telemetry.addData("Odometry Distance to Target", shooter.getDistance(SharedData.getOdometryWheelIMUPosition(), TARGET_POINT));
             telemetry.addLine();
 
             if (lastShoot != null) {
@@ -303,6 +306,8 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         shooter = new Shooter(opModeUtilities);
         intake = new Intake(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
+
+
 
         KLog.d("RPSPredictionDataCollector", "Hardware initialized successfully");
     }

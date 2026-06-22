@@ -43,9 +43,8 @@ public class DepotRoundTrip extends KActionSet {
         moveToDepot.setFinalAngleLockingThresholdDeg(40);
         moveToDepot.setPathAngleToleranceDeg(40);
         moveToDepot.addPoint(100, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        moveToDepot.addPoint(100, 1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        moveToDepot.addPoint(100, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         this.addAction(moveToDepot);
-
         intakeBalls = new IntakeFullAction(stopper, intake, intakeTimeMS, 1);
         intakeBalls.setName("intakeBalls");
         this.addAction(intakeBalls);
@@ -53,11 +52,11 @@ public class DepotRoundTrip extends KActionSet {
         moveToShoot = new RoundTripAction(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, target, launchPos, waitForShooterReadyMS, true, true);
         moveToShoot.setName("moveToShoot");
         moveToShoot.getMoveToBall().setLookAheadRadius(150);
-        moveToShoot.getMoveToBall().setMaxTimeOutMS(4000);
+        moveToShoot.getMoveToBall().setMaxTimeOutMS(1800);
         moveToShoot.getMoveToBall().setFinalSearchRadiusMM(150);
         moveToShoot.getMoveToBall().setFinalAngleLockingThresholdDeg(30);
         moveToShoot.getPurePursuitReadyShooting().setDistanceThresholdMM(100);
-        moveToShoot.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(250);
+        moveToShoot.getPurePursuitReadyIntakeStop().setDistanceThresholdMM(800);
         moveToShoot.getMoveToBall().setPathAngleToleranceDeg(10);
         moveToShoot.setDependentActions(moveToDepot);
 //        trip.getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(200);

@@ -205,6 +205,7 @@ public class RedAutoDepot extends KOpMode {
             opModeUtilities.clearBulkCache();
             autoDepot.updateCheckDone();
             turretAutoAlign.updateCheckDone();
+            shooter.holdTargetRPS();
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         KLog.d("RedAutoDepot-Run", () -> "Autonomous loop ended - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));

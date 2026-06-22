@@ -182,7 +182,22 @@ public class Shooter {
 //            shooter2.getPIDFController().setKp(ShooterConfig.kp_rampDown);
 //        }
         // Set target RPS
+        KLog.d("Shooter_targetRPS", () -> "targetRPS" + targetRPS);
+    }
 
+    /**
+     * Continuously re-apply PID control toward the last commanded target RPS.
+     *
+     * Call this every loop iteration (even between actions) so the flywheel never coasts
+     * or runs away during the gaps when no {@code ShooterRun} action is actively updating it.
+     * When the target is 0 (e.g. after a STOP) the PID naturally floors to 0 power, so this
+     * also keeps a stopped flywheel stopped.
+     */
+    public void holdTargetRPS() {
+        goToRPS(targetRPS);
+        KLog.d("ShooterHold", () -> "Continuous hold -> targetRPS: " + targetRPS +
+                " currentRPS: " + currentRPS +
+                " power: " + shooter1.getPower());
     }
 
     /**

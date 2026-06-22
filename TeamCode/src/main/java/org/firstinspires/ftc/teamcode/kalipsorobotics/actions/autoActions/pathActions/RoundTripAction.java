@@ -70,7 +70,7 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setFinalSearchRadiusMM(150);
         moveToBalls.setMaxTimeOutMS(8000);
 
-        purePursuitReadyIntakeStop = new PurePursuitReady(moveToBalls, 600);
+        purePursuitReadyIntakeStop = new PurePursuitReady(moveToBalls, 900);
         purePursuitReadyIntakeStop.setName("purePursuitReadyIntakeStop");
         this.addAction(purePursuitReadyIntakeStop);
 
