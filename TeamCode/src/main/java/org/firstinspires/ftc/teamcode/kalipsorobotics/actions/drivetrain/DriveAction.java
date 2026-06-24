@@ -8,6 +8,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -35,7 +37,8 @@ public class DriveAction {
     private double filteredVYCurrent = 0;
     private double filteredVThetaCurrent = 0;
 
-
+    private final double joystickDeadZone = 0.05;
+    private double targetHeading = SharedData.getOdometryWheelIMUPosition().getTheta();
 
     private double powerCoefficient = 1;
 
@@ -116,32 +119,37 @@ public class DriveAction {
 
     public double[] calculatePowerSmarter(Gamepad gamepad) {
         //negative because gamepad y is flip
-        double forward = 1 * -gamepad.left_stick_y; //cube so fast is fast and slow is slow       * -gamepad.left_stick_y * -gamepad.left_stick_y
-        double turn = 1 * gamepad.right_stick_x; //* gamepad.right_stick_x * gamepad.right_stick_x
-        double strafe = 1 * gamepad.left_stick_x; //* gamepad.left_stick_x * gamepad.left_stick_x
+        double forward = -1 * Math.pow(gamepad.left_stick_y, 3); //cube so fast is fast and slow is slow       * -gamepad.left_stick_y * -gamepad.left_stick_y
+        double turn = 1 * Math.pow(gamepad.right_stick_x, 3); //* gamepad.right_stick_x * gamepad.right_stick_x
+        double strafe = 1 * Math.pow(gamepad.left_stick_x, 3); //* gamepad.left_stick_x * gamepad.left_stick_x
 
         KLog.d("drive", () -> "forward " + forward);
         KLog.d("drive", () -> "turn " + turn);
         KLog.d("drive", () -> "strafe " + strafe);
 
-        final double turnReserve = 0.4;
-        final double translationScale = 1.0 - turnReserve;
+        // Heading correction (only when not turning)
+        double correction = 0;
+        if (Math.abs(gamepad.right_stick_x) < joystickDeadZone) {
+            double yaw = SharedData.getOdometryWheelIMUPosition().getTheta();
+            correction = (targetHeading - yaw) * K_pTheta;
+        } else {
+            targetHeading = SharedData.getOdometryWheelIMUPosition().getTheta();
+        }
 
-        double translationMagnitude = Math.max(Math.abs(forward) + Math.abs(strafe), 1.0);
+        double fLeftPowerTarget = forward + strafe + turn + correction;
+        double fRightPowerTarget = forward - strafe - turn - correction;
+        double bLeftPowerTarget = forward - strafe + turn + correction;
+        double bRightPowerTarget = forward + strafe - turn - correction;
 
-        double scaledForward = (forward / translationMagnitude) * translationScale;
-        double scaledStrafe = (strafe  / translationMagnitude) * translationScale;
+        double fLeftPowerDiff = fLeftPowerTarget - fLeft.getPower();
+        double fRightPowerDiff = fRightPowerTarget - fRight.getPower();
+        double bLeftPowerDiff = bLeftPowerTarget - bLeft.getPower();
+        double bRightPowerDiff = bRightPowerTarget - bRight.getPower();
 
-        double scaledTurn = turn * turnReserve;
-
-        KLog.d("drive", () -> "scaled forward " + scaledForward);
-        KLog.d("drive", () -> "scaled strafe " + scaledStrafe);
-        KLog.d("drive", () -> "scaled turn " + scaledTurn);
-
-        double fLeftPower = scaledForward + scaledStrafe + scaledTurn;
-        double fRightPower = scaledForward - scaledStrafe - scaledTurn;
-        double bLeftPower = scaledForward - scaledStrafe + scaledTurn;
-        double bRightPower = scaledForward + scaledStrafe - scaledTurn;
+        double fLeftPower = fLeft.getPower() + K_px * fLeftPowerDiff;
+        double fRightPower = fRight.getPower() + K_px * fRightPowerDiff;
+        double bLeftPower = bLeft.getPower() + K_px * bLeftPowerDiff;
+        double bRightPower = bRight.getPower() + K_px * bRightPowerDiff;
 
         //safety
         double absMaxPower = MathFunctions.maxAbsValueDouble(fLeftPower, fRightPower, bLeftPower, bRightPower);
