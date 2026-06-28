@@ -636,6 +636,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             newPath = new Path(path.getPath());
         }
 
+        // No interior points to smooth (indices 1..numPoints-2 don't exist)
+        if (path.numPoints() < 3) {
+            smootherDone = true;
+            return;
+        }
+
         if (injectDone && (!finishedCurrentLoop || change >= SMOOTHER_TOLERANCE)) {
 
             if (finishedCurrentLoop && change >= SMOOTHER_TOLERANCE) {
@@ -1032,6 +1038,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     }
 
     public boolean isWithinDistancePoint(int index, double distanceThreshold) {
+        if (path == null || !calcVelocityAccelDone) {
+            return false;
+        }
         if (index < 0 || index >= pathPoints.size()) {
             return false;
         }

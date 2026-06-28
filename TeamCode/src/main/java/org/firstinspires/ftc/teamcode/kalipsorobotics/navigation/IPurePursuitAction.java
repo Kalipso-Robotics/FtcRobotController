@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public abstract class IPurePursuitAction extends Action {
         getPathPoints().add(
                 new Position(x, y, Math.toRadians(headingDeg), DEFAULT_P_XY, DEFAULT_P_ANGLE)
         );
+        KLog.d("ppDebugFollow", this.getName() + " added point: " + x + ", " + y);
     }
 
     public void addPoint(double x, double y, double headingDeg, double pXY, double pAngle) {
@@ -24,6 +26,7 @@ public abstract class IPurePursuitAction extends Action {
 
     public void clearPoints() {
         getPathPoints().clear();
+        KLog.d("ppDebugFollow", this.getName() + " cleared points, remaining: " + getPathPoints().toString());
     }
 
     public int getLastPointIndex() {

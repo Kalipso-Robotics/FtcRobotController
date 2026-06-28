@@ -64,7 +64,6 @@ public class RoundTripAction extends KActionSet {
         this.addAction(waitUntilShootRun);
 
         IPurePursuitAction moveToBalls;
-
         if (!useAdaptivePP) {
             moveToBalls = new PurePursuitAction(drivetrain);
         } else {
