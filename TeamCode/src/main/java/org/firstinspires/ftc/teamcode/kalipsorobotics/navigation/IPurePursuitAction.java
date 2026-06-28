@@ -25,10 +25,21 @@ public abstract class IPurePursuitAction extends Action {
     public void clearPoints() {
         getPathPoints().clear();
     }
-    public void setLookAheadRadius(double radiusMM) {};
-    public void setFinalSearchRadiusMM(double searchRadiusMM) {};
-    public void setMaxTimeOutMS(double maxTimeOutMS) {};
-    public void setFinalAngleLockingThresholdDeg(double deg) {};
-    public void setPathAngleToleranceDeg(double deg) {};
+
+    public int getLastPointIndex() {
+        return getPathPoints().size() - 1;
+    }
+
+    public abstract void rebuildPath();
+    public abstract void setLookAheadRadius(double radiusMM);
+    public abstract double getLastSearchRadiusMM();
+    public abstract void setFinalSearchRadiusMM(double searchRadiusMM);
+    public abstract void setMaxTimeOutMS(double maxTimeOutMS);
+    public abstract void setFinalAngleLockingThresholdDeg(double deg);
+    public abstract boolean isWithinDistancePoint(int index, double distanceThreshold);
+    public abstract void setPathAngleToleranceDeg(double pathAngleToleranceDeg);
+    public abstract void setEnablePowerScalingForPath(boolean enablePowerScalingForPath);
+
     public abstract List<Position> getPathPoints();
+
 }

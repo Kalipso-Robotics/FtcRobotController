@@ -4,7 +4,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.PID.PidNav;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.DoneStateAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Path;
@@ -16,7 +15,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,6 +142,7 @@ public class  PurePursuitAction extends IPurePursuitAction {
         pathPoints.clear();
     }
 
+    @Override
     public void rebuildPath() {
         if ((path != null) && hasStarted) {
             path = new Path(pathPoints);
@@ -459,6 +458,7 @@ public class  PurePursuitAction extends IPurePursuitAction {
         }
     }
 
+    @Override
     public void setEnablePowerScalingForPath(boolean enablePowerScalingForPath) {
         this.enablePowerScalingForPath = enablePowerScalingForPath;
     }
@@ -493,6 +493,7 @@ public class  PurePursuitAction extends IPurePursuitAction {
     public int getLastPointIndex() {
         return path.getPath().size() - 1;
     }
+
     public boolean isWithinDistancePoint(int index, double distanceThreshold) {
         if (index < 0 || index >= pathPoints.size()) {
             return false;

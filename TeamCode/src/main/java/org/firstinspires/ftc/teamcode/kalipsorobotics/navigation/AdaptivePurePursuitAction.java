@@ -26,7 +26,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     List<Position> pathPoints = new ArrayList<Position>();
 
     Path path;
-    static final private double LOOK_AHEAD_RADIUS_MM = 150;
+    static private double LOOK_AHEAD_RADIUS_MM = 150;
 
     private double currentLookAheadRadius;
     static final private double LAST_RADIUS_MM = 15;
@@ -36,12 +36,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     Optional<Position> follow;
     Optional<Position> prevFollow;
 
-    private final double lastSearchRadius = LAST_RADIUS_MM;
+    private double lastSearchRadius = LAST_RADIUS_MM;
 
-    private final double finalAngleLockingThreshholdDeg = 1.5;
+    private double finalAngleLockingThreshholdDeg = 1.5;
 
     private double startTimeMS = System.currentTimeMillis();
-    private final double maxTimeOutMS = 1000000000;
+    private double maxTimeOutMS = 1000000000;
 
     private Position lastPosition;
     private double lastMilli = 0;
@@ -135,16 +135,10 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         this.dependentActions.add(new DoneStateAction());
     }
 
-    public void addPoint(double x, double y, double headingDeg) {
-        double headingRad = Math.toRadians(headingDeg);
-        pathPoints.add(new Position(x, y, headingRad));
-    }
-
     @Override
     public List<Position> getPathPoints() {
         return pathPoints;
     }
-
 
     @Override
     public void setIsDone(boolean isDone) {
@@ -186,6 +180,15 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         // Reset timers
         timeoutTimer.reset();
         lastUpdateTime = timeoutTimer.milliseconds();
+    }
+
+    @Override
+    public void rebuildPath() {
+        if ((path != null) && hasStarted) {
+            path = new Path(pathPoints);
+            prevFollow = Optional.empty();
+            KLog.d("PurePursuitAction", () -> "Path rebuilt with " + pathPoints.size() + " points");
+        }
     }
 
     private void targetPosition(Position target, Position currentPos, int closestIndex) {
@@ -1044,4 +1047,36 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
         return false;
     }
+
+
+    @Override
+    public void setMaxTimeOutMS(double maxTimeOutMS) {
+        this.maxTimeOutMS = maxTimeOutMS;
+    }
+
+    @Override
+    public void setFinalSearchRadiusMM(double searchRadiusMM){
+        this.lastSearchRadius = searchRadiusMM;
+    }
+
+    @Override
+    public void setLookAheadRadius(double radiusMM){
+        this.LOOK_AHEAD_RADIUS_MM = radiusMM;
+    }
+
+    @Override
+    public double getLastSearchRadiusMM() {
+        return lastSearchRadius;
+    }
+
+    @Override
+    public void setFinalAngleLockingThresholdDeg(double finalAngleLockingThresholdDegree) {
+        this.finalAngleLockingThreshholdDeg = finalAngleLockingThresholdDegree;
+    }
+
+    @Override
+    public void setPathAngleToleranceDeg(double pathAngleToleranceDeg) {}
+
+    @Override
+    public void setEnablePowerScalingForPath(boolean enablePowerScalingForPath) {}
 }

@@ -5,6 +5,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Wa
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
@@ -26,7 +28,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 public class RoundTripAction extends KActionSet {
     private final double FINAL_ANGLE_LOCKING_THRESHOLD_DEGREE = 30;
-    private final PurePursuitAction moveToBall;
+    private final IPurePursuitAction moveToBall;
 
     private final IntakeFullAction intakeFullAction;
 
@@ -51,7 +53,7 @@ public class RoundTripAction extends KActionSet {
     Point launchPoint;
 
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
-                           Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake, boolean shouldDependOnFlywheel) {
+                           Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake, boolean shouldDependOnFlywheel, boolean useAdaptivePP) {
         this.targetPoint = targetPoint;
         this.launchPoint = launchPoint;
         this.shooter = shooter;
@@ -61,7 +63,13 @@ public class RoundTripAction extends KActionSet {
         waitUntilShootRun.setName("waitUntilShootReady");
         this.addAction(waitUntilShootRun);
 
-        PurePursuitAction moveToBalls = new PurePursuitAction(drivetrain);
+        IPurePursuitAction moveToBalls;
+
+        if (!useAdaptivePP) {
+            moveToBalls = new PurePursuitAction(drivetrain);
+        } else {
+            moveToBalls = new AdaptivePurePursuitAction(drivetrain);
+        }
         moveToBalls.setName("moveToBall");
         this.addAction(moveToBalls);
         this.moveToBall = moveToBalls;
@@ -137,7 +145,12 @@ public class RoundTripAction extends KActionSet {
         this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPos, waitForShooterReadyMS, true, shouldDependOnFlywheel);
     }
 
-    public PurePursuitAction getMoveToBall() {
+    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
+                           Point targetPoint, Point launchPoint, double waitForShooterReadyMS, boolean shouldRunIntake, boolean shouldDependOnFlywheel) {
+        this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPoint, waitForShooterReadyMS, shouldRunIntake, shouldDependOnFlywheel, false);
+    }
+
+    public IPurePursuitAction getMoveToBall() {
         return moveToBall;
     }
 

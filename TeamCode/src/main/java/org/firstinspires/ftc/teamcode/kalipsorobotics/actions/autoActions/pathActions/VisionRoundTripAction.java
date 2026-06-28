@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -169,7 +170,7 @@ public class VisionRoundTripAction extends RoundTripAction {
     }
 
     private void processVision() {
-        PurePursuitAction moveToBall = getMoveToBall();
+        IPurePursuitAction moveToBall = getMoveToBall();
         int polarity = SharedData.getAllianceColor().getPolarity();
         double launchHeading = 90 * polarity;
         Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
@@ -253,7 +254,7 @@ public class VisionRoundTripAction extends RoundTripAction {
     }
 
 
-    private void logPlannedPath(PurePursuitAction moveToBall) {
+    private void logPlannedPath(IPurePursuitAction moveToBall) {
         List<Position> path = moveToBall.getPathPoints();
         StringBuilder sb = new StringBuilder();
         sb.append('[').append(getName()).append("] planned path (").append(path.size()).append(" pts):");
