@@ -51,7 +51,7 @@ public class AdaptivePurePursuitTest extends KOpMode {
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3060, -712, 2.4049);
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
-        adaptivePP = new AdaptivePurePursuitAction(driveTrain, odometry);
+        adaptivePP = new AdaptivePurePursuitAction(driveTrain);
         adaptivePP.setName("AdaptivePP_Test");
 
         // Blue path - all waypoints from RedAutoNearRampThirdSpike

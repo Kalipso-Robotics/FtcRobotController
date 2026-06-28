@@ -21,7 +21,7 @@ import java.util.Optional;
 public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     DriveTrain driveTrain;
-    Odometry wheelOdometry;
+//    Odometry wheelOdometry;
 
     List<Position> pathPoints = new ArrayList<Position>();
 
@@ -122,9 +122,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     * Cons: may feel sluggish at the beginning of each motion segment or in tight decelerations.
      */
 
-    public AdaptivePurePursuitAction(DriveTrain driveTrain, Odometry wheelOdometry) {
+    public AdaptivePurePursuitAction(DriveTrain driveTrain) {
         this.driveTrain = driveTrain;
-        this.wheelOdometry = wheelOdometry;
+//        this.wheelOdometry = wheelOdometry;
 
         this.timeoutTimer = new ElapsedTime();
         lastUpdateTime = timeoutTimer.milliseconds();
