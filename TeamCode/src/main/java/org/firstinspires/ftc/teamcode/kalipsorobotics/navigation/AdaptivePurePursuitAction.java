@@ -988,39 +988,28 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         return Math.min(v_f, calculateVelocity(path, positionIndex));
     }
 
-    private int findClosestNextPointIndex(Path path, Position current) {
-//        List<Position> pts = path.getPath();
-//
-//        return IntStream.range(0, pts.size())
-//                .boxed()
-//                .min(
-//                        Comparator
-//                                // 1) compare by distance²
-//                                .comparingDouble((Integer i) -> {
-//                                    Position p = pts.get(i);
-//                                    double dx = current.getX() - p.getX();
-//                                    double dy = current.getY() - p.getY();
-//                                    return dx*dx + dy*dy;
-//                                })
-//                                // 2) if distances tie, prefer the higher index
-//                                .thenComparing(Comparator.reverseOrder())
-//                )
-//                .orElse(0);
-//    }
-        int bestIndex = lastClosestIndex;
-        double bestDist = distSq(path.getPoint(bestIndex), current);
+    // Weight for arc-length penalty in findClosestNextPointIndex. Higher values make the
+    // search prefer points that are closer along the path over points that are closer in
+    // Euclidean distance, preventing jumps to the return leg of U-turns.
+    private static final double CLOSEST_POINT_LAMBDA = 1.0;
 
-        // Tune this based on point spacing and robot speed.
-        // If points are every 50–100 mm, 10–20 points is usually plenty.
-        int searchWindow = 20;
+    private int findClosestNextPointIndex(Path path, Position current) {
+        int bestIndex = lastClosestIndex;
+        double baseArc = path.getPoint(lastClosestIndex).getDistanceAlongPath();
+        double bestScore = dist(path.getPoint(bestIndex), current);
+
+        // Large window so U-turns (many points ahead but physically nearby) are visible,
+        // while the arc-length penalty prevents jumping to the wrong leg.
+        int searchWindow = 50;
 
         int end = Math.min(path.numPoints() - 1, lastClosestIndex + searchWindow);
 
         for (int i = lastClosestIndex + 1; i <= end; i++) {
-            double d = distSq(path.getPoint(i), current);
+            double arcPenalty = path.getPoint(i).getDistanceAlongPath() - baseArc;
+            double score = dist(path.getPoint(i), current) + CLOSEST_POINT_LAMBDA * arcPenalty;
 
-            if (d < bestDist) {
-                bestDist = d;
+            if (score < bestScore) {
+                bestScore = score;
                 bestIndex = i;
             }
         }
@@ -1029,13 +1018,30 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         return bestIndex;
     }
 
-    private double distSq(Position a, Position b) {
+    private double dist(Position a, Position b) {
         double dx = a.getX() - b.getX();
         double dy = a.getY() - b.getY();
-        return dx * dx + dy * dy;
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     private double calculateMotorOutput(double wheelVelocity, double acceleration) {
         return (K_p * (wheelVelocity - filteredVelocityMmPerS) + K_v * wheelVelocity + K_a * Math.signum(wheelVelocity) * Math.abs(acceleration));
+    }
+
+    public boolean isWithinDistancePoint(int index, double distanceThreshold) {
+        if (index < 0 || index >= pathPoints.size()) {
+            return false;
+        }
+
+        if (findClosestNextPointIndex(path, currentPosition) == index) {
+            double distanceToPoint = pathPoints.get(index).distanceTo(currentPosition);
+            if ((distanceToPoint < distanceThreshold)) {
+                KLog.d("PurePursuitAction_WithinDistancePoint", () ->
+                        "distanceToPoint: " + distanceToPoint +
+                                " targetPosition " + path.getPoint(index));
+                return true;
+            }
+        }
+        return false;
     }
 }
