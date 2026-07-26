@@ -20,7 +20,7 @@ import java.util.Optional;
 
 public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
-    private static final double MIN_TURN_WHEEL_VELOCITY = 175.0;
+    private static final double MIN_TURN_WHEEL_VELOCITY = 160.0;
     DriveTrain driveTrain;
 //    Odometry wheelOdometry;
 
@@ -39,9 +39,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     private double lastSearchRadius = LAST_RADIUS_MM;
 
-    private double finalAngleLockingThreshholdDeg = 1.5;
+    private double finalAngleLockingThreshholdDeg = 3;
 
-    int maxCheckDoneCounter = 5;
+    int maxCheckDoneCounter = 1;
     int checkDoneCounter = 0;
 
     private double startTimeMS = System.currentTimeMillis();
@@ -96,7 +96,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private final double TRACK_WIDTH = 12.5*25.4; //side to side
     private final double K_p = 0.000016; // 0.00002
     private final double K_a = 0.000001; // 0.001
-    private final double K_v = 0.00039; // 0.00036 0.00225
+    private final double K_v = 0.00038; // 0.00036 0.00225
     private final double K = 3.0; //based on how slow you want the robot to go around turns, 1000
 
     /*
