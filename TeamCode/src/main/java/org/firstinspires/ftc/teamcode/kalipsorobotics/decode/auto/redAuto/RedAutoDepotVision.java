@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInte
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -103,15 +102,13 @@ public class RedAutoDepotVision extends KOpMode {
                 .addProcessor(artifactProcessor)
                 .streamImmediately()
                 .build();
+        visionManager.lockCameraControls(20, 250);
 
         // DEBUG: save annotated frames to /sdcard/FIRST/data/vision_snapshots/
         // Pull them off with: adb pull /sdcard/FIRST/data/vision_snapshots ~/Desktop
         artifactProcessor.enableSnapshotSaving(5);
 
-        cameraIntrinsics = CameraIntrinsics.ARDUCAM.withMount(
-                Math.toRadians(0),
-                new Vector3d(0, 150, 100)
-        );
+        cameraIntrinsics = CameraIntrinsics.ARDUCAM;
     }
 
     @Override
