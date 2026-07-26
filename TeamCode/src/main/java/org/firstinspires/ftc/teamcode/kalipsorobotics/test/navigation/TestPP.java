@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 
@@ -37,9 +38,11 @@ public class TestPP extends KOpMode {
 
         IPurePursuitAction test = new AdaptivePurePursuitAction(driveTrain);
         test.addPoint(0,0,0);
-        test.addPoint(400,0,90);
-        test.addPoint(400,800,180);
-        test.addPoint(0,800,0);
+        test.addPoint(609.6,0,0);
+        test.addPoint(0,0,0);
+//        test.addPoint(0,0,0);
+//        test.addPoint(400,800,180);
+//        test.addPoint(0,800,0);
 
         waitForStart();
 
@@ -60,6 +63,7 @@ public class TestPP extends KOpMode {
             test.updateCheckDone();
 
             if (test.getIsDone()) {
+                KLog.e("ppDebug", "pp done final ");
                 break;
             }
         }
