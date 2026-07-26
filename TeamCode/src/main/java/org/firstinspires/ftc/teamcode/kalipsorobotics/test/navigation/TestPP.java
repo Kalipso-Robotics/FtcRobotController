@@ -38,8 +38,8 @@ public class TestPP extends KOpMode {
 
         IPurePursuitAction test = new AdaptivePurePursuitAction(driveTrain);
         test.addPoint(0,0,0);
-        test.addPoint(609.6,0,0);
-        test.addPoint(0,0,0);
+//        test.addPoint(609.6,0,0);
+        test.addPoint(0,0,90);
 //        test.addPoint(0,0,0);
 //        test.addPoint(400,800,180);
 //        test.addPoint(0,800,0);
