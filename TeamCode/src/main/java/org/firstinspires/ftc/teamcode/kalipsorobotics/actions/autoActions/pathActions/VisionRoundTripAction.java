@@ -239,9 +239,8 @@ public class VisionRoundTripAction extends RoundTripAction {
     // Field bounds so a bad vision read can't drive us into a wall.
     // X is not mirrored per alliance (robot starts centered on X) so the back-wall
     // limit is absolute. Y is mirrored by polarity like every other point in this class.
-    private static final double MM_PER_INCH = 25.4;
-    private static final double MIN_X_MM = -4 * MM_PER_INCH;
-    private static final double MAX_Y_ABS_MM = 47 * MM_PER_INCH;
+    private static final double MIN_X_MM = -101.6;
+    private static final double MAX_Y_ABS_MM = 1093.8; // pulled in 100mm, robot was still hitting the wall
 
     private Point clampToFieldBounds(Point p, int polarity) {
         double clampedX = Math.max(p.getX(), MIN_X_MM);

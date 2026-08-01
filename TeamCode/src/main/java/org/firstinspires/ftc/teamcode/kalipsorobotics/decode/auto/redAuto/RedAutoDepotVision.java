@@ -143,6 +143,7 @@ public class RedAutoDepotVision extends KOpMode {
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(thirdLaunchPoint.multiplyY(allianceColor.getPolarity()))
             .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
+            .setUseDirectPathing(true)
             .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();
         trip2.setName("trip2_CornerVision");
@@ -244,6 +245,7 @@ public class RedAutoDepotVision extends KOpMode {
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(farLaunchPoint.multiplyY(allianceColor.getPolarity()))
             .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
+            .setUseDirectPathing(true)
             .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();
         retryTrip.setName(name);

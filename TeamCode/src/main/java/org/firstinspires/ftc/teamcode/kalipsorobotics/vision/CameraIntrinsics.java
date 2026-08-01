@@ -12,7 +12,6 @@ public class CameraIntrinsics{
     private final double cx, cy;
     private final double mountAngle;
     private final Vector3d cameraOffset;
-    private final double focalLength;
     private final double k1, k2, k3, p1, p2; //distortions
     // Calibrated at 1280x800 (see calibrate_camera.py), scaled to 640x480:
     //   fx,cx *= 0.5   fy,cy *= 0.6   distortion coeffs are dimensionless.
@@ -40,7 +39,6 @@ public class CameraIntrinsics{
         this.p2 = p2;
         this.mountAngle = mountAngle;
         this.cameraOffset = cameraOffset;
-        this.focalLength = (fx + fy) / 2;
     }
 
     public CameraIntrinsics(double fx, double fy, double cx, double cy,
@@ -80,8 +78,8 @@ public class CameraIntrinsics{
         // (the floor) actually project; the old `pixelY - cy` rejected them.
         double norm_y = this.cy - pixelY;
 
-        double x_direction = norm_x / this.focalLength;
-        double y_direction = norm_y / this.focalLength;
+        double x_direction = norm_x / this.fx;
+        double y_direction = norm_y / this.fy;
         double z_direction = 1.0;
 
         double theta = this.mountAngle;
