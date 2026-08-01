@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-public class FieldOrientedDriveAction {
+public class FieldOrientedDriveAction implements DriveController {
     OpModeUtilities opModeUtilities;
 
     DriveTrain driveTrain;
@@ -18,6 +18,8 @@ public class FieldOrientedDriveAction {
     private final DcMotor backEncoder;
     private final DcMotor rightEncoder;
     private final DcMotor leftEncoder;
+
+    private double powerCoefficient = 1;
 
     private final double[] driveTrainPower = new double[4];
 
@@ -71,9 +73,9 @@ public class FieldOrientedDriveAction {
     }
 
     public double[] calculateFieldOrientedPowerFromGamepad(Gamepad gamepad) {
-        double forward = -gamepad.left_stick_y * -gamepad.left_stick_y * -gamepad.left_stick_y;
-        double turn = gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x;
-        double strafe = gamepad.left_stick_x * gamepad.left_stick_x * gamepad.left_stick_x;
+        double forward = -gamepad.left_stick_y * -gamepad.left_stick_y * -gamepad.left_stick_y * powerCoefficient;
+        double turn = gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x * powerCoefficient;
+        double strafe = gamepad.left_stick_x * gamepad.left_stick_x * gamepad.left_stick_x * powerCoefficient;
 
         double botHeading = imuModule.getIMU().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
@@ -107,6 +109,11 @@ public class FieldOrientedDriveAction {
         return driveTrainPowers;
     }
 
+    @Override
+    public void move(Gamepad gamepad) {
+        moveFieldOriented(gamepad);
+    }
+
     public void moveFieldOriented(Gamepad gamepad) {
         double[] driveTrainPower = calculateFieldOrientedPowerFromGamepad(gamepad);
 
@@ -137,5 +144,15 @@ public class FieldOrientedDriveAction {
 
     public OpModeUtilities getOpModeUtilities() {
         return opModeUtilities;
+    }
+
+    @Override
+    public double getPowerCoefficient() {
+        return powerCoefficient;
+    }
+
+    @Override
+    public void setPowerCoefficient(double powerCoefficient) {
+        this.powerCoefficient = powerCoefficient;
     }
 }

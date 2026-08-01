@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain;
 
+// Superseded by FieldOrientedDriveAction (standard rotation-matrix field-centric mix).
+// Left commented out rather than deleted in case anything here is still wanted for reference.
+/*
 import static java.lang.Math.PI;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -73,3 +76,4 @@ public class FieldOrientedDrive {
         driveAction.moveWithXYValues(fixedGamepadValue.x, fixedGamepadValue.y, gamepad);
     }
 }
+*/

@@ -31,6 +31,7 @@ public class VisionRoundTripAction extends RoundTripAction {
     private final BlobSelectionStrategy selectionStrategy;
     private final Point visionLookoutPoint;
     private final double lookoutRadiusMM;
+    private final boolean useDirectPathing;
     private boolean visionProcessed = false;
     private Point detectedBallWorldPos;
     private int frameCount = 0;
@@ -48,6 +49,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         this.selectionStrategy = builder.selectionStrategy;
         this.visionLookoutPoint = builder.visionLookoutPoint;
         this.lookoutRadiusMM = builder.lookoutRadiusMM;
+        this.useDirectPathing = builder.useDirectPathing;
 
         if (useVision && (artifactProcessor == null || cameraIntrinsics == null)) {
             throw new IllegalArgumentException("Vision mode requires artifactProcessor and cameraIntrinsics");
@@ -76,6 +78,7 @@ public class VisionRoundTripAction extends RoundTripAction {
 
         private Point visionLookoutPoint = null;
         private double lookoutRadiusMM = 250;
+        private boolean useDirectPathing = false;
 
         public Builder(OpModeUtilities opModeUtilities, DriveTrain driveTrain,
                        TurretAutoAlign turretAutoAlign, Shooter shooter,
@@ -102,6 +105,12 @@ public class VisionRoundTripAction extends RoundTripAction {
 
         public Builder setVisionLookoutPoint(Point lookoutPoint) {
             return setVisionLookoutPoint(lookoutPoint, 250);
+        }
+
+        /** When true, drive straight to the detected ball's world position instead of the nearest pre-coded sector point. */
+        public Builder setUseDirectPathing(boolean useDirectPathing) {
+            this.useDirectPathing = useDirectPathing;
+            return this;
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
@@ -199,29 +208,47 @@ public class VisionRoundTripAction extends RoundTripAction {
 
         detectedBallWorldPos = worldPos;
 
-        Point sectorGrabPoint = chooseSectorGrabPoint(worldPos, polarity);
+        Point rawGrabPoint = useDirectPathing ? worldPos : chooseSectorGrabPoint(worldPos, polarity);
+        Point grabPoint = clampToFieldBounds(rawGrabPoint, polarity);
+        if (grabPoint.getX() != rawGrabPoint.getX() || grabPoint.getY() != rawGrabPoint.getY()) {
+            KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
+                    "[%s] GRAB POINT CLAMPED (%.1f,%.1f) → (%.1f,%.1f)",
+                    getName(), rawGrabPoint.getX(), rawGrabPoint.getY(),
+                    grabPoint.getX(), grabPoint.getY()));
+        }
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
                         "[%s] SELECTED %s conf=%.2f pixel=(%.1f,%.1f) ballWorld=(%.1f,%.1f) "
-                        + "→ sectorGrab=(%.1f,%.1f) → launch=(%.1f,%.1f) heading=%.1f°",
+                        + "→ %s=(%.1f,%.1f) → launch=(%.1f,%.1f) heading=%.1f°",
                 getName(), target.label, target.confidence,
                 bottomCenter.getX(), bottomCenter.getY(),
                 worldPos.getX(), worldPos.getY(),
-                sectorGrabPoint.getX(), sectorGrabPoint.getY(),
+                useDirectPathing ? "directGrab" : "sectorGrab",
+                grabPoint.getX(), grabPoint.getY(),
                 launchPoint.getX(), launchPoint.getY(), launchHeading));
 
         moveToBall.clearPoints();
-        moveToBall.addPoint(sectorGrabPoint.getX(), sectorGrabPoint.getY(), Math.toDegrees(robotPos.getTheta()));
+        moveToBall.addPoint(grabPoint.getX(), grabPoint.getY(), Math.toDegrees(robotPos.getTheta()));
         moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
         moveToBall.rebuildPath();
         logPlannedPath(moveToBall);
-
-        // Original "drive straight to ball" path — replaced by sector grab logic above.
-        // moveToBall.addPoint(worldPos.getX(), worldPos.getY(), Math.toDegrees(robotPos.getTheta()));
-        // moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
     }
 
     private static final double[] SECTOR_CENTERS_X = {450, 1350, 2250, 3150};
     private static final double SECTOR_GRAB_Y_ABS = 1050;
+
+    // Field bounds so a bad vision read can't drive us into a wall.
+    // X is not mirrored per alliance (robot starts centered on X) so the back-wall
+    // limit is absolute. Y is mirrored by polarity like every other point in this class.
+    private static final double MM_PER_INCH = 25.4;
+    private static final double MIN_X_MM = -4 * MM_PER_INCH;
+    private static final double MAX_Y_ABS_MM = 47 * MM_PER_INCH;
+
+    private Point clampToFieldBounds(Point p, int polarity) {
+        double clampedX = Math.max(p.getX(), MIN_X_MM);
+        double maxYSigned = MAX_Y_ABS_MM * polarity;
+        double clampedY = polarity >= 0 ? Math.min(p.getY(), maxYSigned) : Math.max(p.getY(), maxYSigned);
+        return new Point(clampedX, clampedY);
+    }
 
     private Point chooseSectorGrabPoint(Point ballWorld, int polarity) {
         double bestDx = Double.MAX_VALUE;
