@@ -21,7 +21,7 @@ public class CameraIntrinsics{
             0.045011, -0.059862, 0.000330,
             0.001499, 0.005590,
             Math.toRadians(0),
-            new Vector3d(-157.548, 236.163, 151.868)
+            new Vector3d(-157.548, 236.163, 151.868) // offsets
     );
 
 
@@ -51,10 +51,6 @@ public class CameraIntrinsics{
                 mountAngle, offset);
     }
 
-    /**
-     * Converts a bottom-center pixel of a blob to a field-frame floor point,
-     * using the robot's current pose to rotate/translate out of robot-local frame.
-     */
     public Point calculateWorldPos(double pixelX, double pixelY, Position robotPose) {
         Point local = calculateRobotFramePos(pixelX, pixelY);
         if (local == null) return null;
@@ -65,11 +61,6 @@ public class CameraIntrinsics{
         return new Point(fieldX, fieldY);
     }
 
-    /**
-     * Robot-frame floor position of a blob's bottom-center pixel.
-     * +X = left of camera axis, +Y = forward depth. Most callers want the
-     * field-frame variant above; this is exposed for diagnostics/tests.
-     */
     public Point calculateRobotFramePos(double pixelX, double pixelY) {
         double norm_x = this.cx - pixelX;
         // Flipped: image-Y increases downward, but the rest of this math expects
