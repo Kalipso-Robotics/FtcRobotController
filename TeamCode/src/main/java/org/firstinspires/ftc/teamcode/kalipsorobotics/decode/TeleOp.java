@@ -47,7 +47,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = " TeleOp")
 public class TeleOp extends KOpMode {
     // Robot-centric is the default drive mode. Flip to true to drive field-oriented instead.
-    private static final boolean USE_FIELD_ORIENTED_DRIVE = true;
+    private static final boolean USE_FIELD_ORIENTED_DRIVE = false;
 
     private boolean hasClosedStopperInnit = false;
     private DriveTrain driveTrain;
