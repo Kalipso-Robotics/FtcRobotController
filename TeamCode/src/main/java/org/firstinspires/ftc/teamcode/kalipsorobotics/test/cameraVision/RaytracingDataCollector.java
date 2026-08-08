@@ -122,7 +122,7 @@ public class RaytracingDataCollector extends LinearOpMode {
                 if (!wasLeftTriggerPressed && largest != null && worldPos != null) {
                     lastSample = new GroundTruthSample(knownDistanceMM, raytracedDistanceMM,
                             pixel.getX(), pixel.getY(), worldPos.getX(), worldPos.getY(), largest.label);
-                    KLog.d("RaytracingDataCollector", () -> "RECORDED: " + lastSample);
+                    KLog.d("RaytracingDataCollector", () -> "RECORDRECORDEDED: " + lastSample);
                     wasLeftTriggerPressed = true;
                 }
             } else {
@@ -146,8 +146,12 @@ public class RaytracingDataCollector extends LinearOpMode {
             if (largest != null) {
                 telemetry.addData("Largest Blob", largest.formattedLabel);
                 telemetry.addData("Bottom-Middle Pixel", "(%.1f, %.1f)", pixel.getX(), pixel.getY());
-                telemetry.addData("Raytraced World Pos", "(%.1f, %.1f)", worldPos.getX(), worldPos.getY());
-                telemetry.addData("Raytraced Distance", "%.1f mm", raytracedDistanceMM);
+                if (worldPos != null) {
+                    telemetry.addData("Raytraced World Pos", "(%.1f, %.1f)", worldPos.getX(), worldPos.getY());
+                    telemetry.addData("Raytraced Distance", "%.1f mm", raytracedDistanceMM);
+                } else {
+                    telemetry.addLine("Blob above horizon - no raytrace.");
+                }
             } else {
                 telemetry.addLine("No blob detected.");
             }
@@ -171,7 +175,7 @@ public class RaytracingDataCollector extends LinearOpMode {
 
         telemetry.addLine("=== DATA COLLECTION COMPLETE ===");
         telemetry.addLine("File saved to:");
-        telemetry.addLine("/sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/");
+        telemetry.addLine("/sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs/");
         telemetry.update();
 
         KLog.d("RaytracingDataCollector", "Data collection complete. File closed.");
