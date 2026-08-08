@@ -77,7 +77,6 @@ public class RaytracingDataCollector extends LinearOpMode {
     private double knownDistanceMM = 500.0;
     private GroundTruthSample lastSample = null;
     private boolean wasLeftTriggerPressed = false;
-    private boolean wasYPressed = false;
     private int savedCount = 0;
 
     @Override
@@ -105,10 +104,10 @@ public class RaytracingDataCollector extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            if (gamepad1.dpad_up) knownDistanceMM += 10;
-            if (gamepad1.dpad_down) knownDistanceMM -= 10;
-            if (gamepad1.dpad_right) knownDistanceMM += 100;
-            if (gamepad1.dpad_left) knownDistanceMM -= 100;
+            if (gamepad1.dpadUpWasPressed()) knownDistanceMM += 10;
+            if (gamepad1.dpadDownWasPressed()) knownDistanceMM -= 10;
+            if (gamepad1.dpadRightWasPressed()) knownDistanceMM += 100;
+            if (gamepad1.dpadLeftWasPressed()) knownDistanceMM -= 100;
             knownDistanceMM = Math.max(0, knownDistanceMM);
 
             List<VisionRecognition> recognitions = artifacts.getLatestResult();
@@ -134,25 +133,22 @@ public class RaytracingDataCollector extends LinearOpMode {
                 wasLeftTriggerPressed = false;
             }
 
-            if (gamepad1.y) {
-                if (!wasYPressed) {
-                    if (lastSample != null) {
-                        fileWriter.writeLine(lastSample.toCSV());
-                        try {
-                            fileWriter.flush();
-                        } catch (IOException e) {
-                            KLog.e("RaytracingDataCollector", "Failed to flush sample to disk", e);
-                        }
-                        savedCount++;
-                        KLog.d("RaytracingDataCollector", () -> "SAVED TO FILE: " + lastSample);
-                    } else {
-                        KLog.d("RaytracingDataCollector", "No sample to save!");
+            if (gamepad1.yWasPressed()) {
+                if (lastSample != null) {
+                    fileWriter.writeLine(lastSample.toCSV());
+                    try {
+                        fileWriter.flush();
+                    } catch (IOException e) {
+                        KLog.e("RaytracingDataCollector", "Failed to flush sample to disk", e);
                     }
-                    wasYPressed = true;
+                    savedCount++;
+                    KLog.d("RaytracingDataCollector", () -> "SAVED TO FILE: " + lastSample);
+                } else {
+                    KLog.d("RaytracingDataCollector", "No sample to save!");
                 }
+            }
+            if (gamepad1.y) {
                 telemetry.addLine(lastSample != null ? "*** SAVED TO FILE ***" : "*** NO DATA TO SAVE ***");
-            } else {
-                wasYPressed = false;
             }
 
             telemetry.addLine("=== Raytracing Data Collector ===");
