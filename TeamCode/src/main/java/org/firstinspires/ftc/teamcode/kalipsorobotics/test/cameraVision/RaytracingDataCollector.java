@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrin
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -76,6 +77,7 @@ public class RaytracingDataCollector extends LinearOpMode {
     private double knownDistanceMM = 500.0;
     private GroundTruthSample lastSample = null;
     private boolean wasLeftTriggerPressed = false;
+    private int savedCount = 0;
 
     @Override
     public void runOpMode() {
@@ -93,17 +95,19 @@ public class RaytracingDataCollector extends LinearOpMode {
 
         telemetry.addLine("=== Raytracing Data Collector ===");
         telemetry.addLine("Place artifact at a known distance, dial it in, and record.");
+        telemetry.addData("Writing to", fileWriter.getPath());
         telemetry.addLine("Press PLAY to start");
         telemetry.update();
 
+        KLog.d("RaytracingDataCollector", "Writing to " + fileWriter.getPath());
         KLog.d("RaytracingDataCollector", "Initialization complete. Waiting for start...");
         waitForStart();
 
         while (opModeIsActive()) {
-            if (gamepad1.dpad_up) knownDistanceMM += 10;
-            if (gamepad1.dpad_down) knownDistanceMM -= 10;
-            if (gamepad1.dpad_right) knownDistanceMM += 100;
-            if (gamepad1.dpad_left) knownDistanceMM -= 100;
+            if (gamepad1.dpadUpWasPressed()) knownDistanceMM += 10;
+            if (gamepad1.dpadDownWasPressed()) knownDistanceMM -= 10;
+            if (gamepad1.dpadRightWasPressed()) knownDistanceMM += 100;
+            if (gamepad1.dpadLeftWasPressed()) knownDistanceMM -= 100;
             knownDistanceMM = Math.max(0, knownDistanceMM);
 
             List<VisionRecognition> recognitions = artifacts.getLatestResult();
@@ -122,26 +126,34 @@ public class RaytracingDataCollector extends LinearOpMode {
                 if (!wasLeftTriggerPressed && largest != null && worldPos != null) {
                     lastSample = new GroundTruthSample(knownDistanceMM, raytracedDistanceMM,
                             pixel.getX(), pixel.getY(), worldPos.getX(), worldPos.getY(), largest.label);
-                    KLog.d("RaytracingDataCollector", () -> "RECORDRECORDEDED: " + lastSample);
+                    KLog.d("RaytracingDataCollector", () -> "RECORDED: " + lastSample);
                     wasLeftTriggerPressed = true;
                 }
             } else {
                 wasLeftTriggerPressed = false;
             }
 
-            if (gamepad1.y) {
+            if (gamepad1.yWasPressed()) {
                 if (lastSample != null) {
                     fileWriter.writeLine(lastSample.toCSV());
+                    try {
+                        fileWriter.flush();
+                    } catch (IOException e) {
+                        KLog.e("RaytracingDataCollector", "Failed to flush sample to disk", e);
+                    }
+                    savedCount++;
                     KLog.d("RaytracingDataCollector", () -> "SAVED TO FILE: " + lastSample);
-                    telemetry.addLine("*** SAVED TO FILE ***");
                 } else {
                     KLog.d("RaytracingDataCollector", "No sample to save!");
-                    telemetry.addLine("*** NO DATA TO SAVE ***");
                 }
+            }
+            if (gamepad1.y) {
+                telemetry.addLine(lastSample != null ? "*** SAVED TO FILE ***" : "*** NO DATA TO SAVE ***");
             }
 
             telemetry.addLine("=== Raytracing Data Collector ===");
             telemetry.addData("Known Distance (dial)", "%.1f mm", knownDistanceMM);
+            telemetry.addData("Rows Saved", savedCount);
             telemetry.addData("Objects Detected", recognitions == null ? 0 : recognitions.size());
             if (largest != null) {
                 telemetry.addData("Largest Blob", largest.formattedLabel);
@@ -170,19 +182,11 @@ public class RaytracingDataCollector extends LinearOpMode {
             telemetry.update();
         }
 
+        String path = fileWriter.getPath();
         fileWriter.close();
         visionManager.close();
 
-        telemetry.addLine("=== DATA COLLECTION COMPLETE ===");
-        telemetry.addLine("File saved to:");
-        telemetry.addLine("/sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs/");
-        telemetry.update();
-
-        KLog.d("RaytracingDataCollector", "Data collection complete. File closed.");
-        KLog.d("RaytracingDataCollector", "Pull files using: adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/ ~/");
-
-        while (opModeIsActive()) {
-            sleep(100);
-        }
+        KLog.d("RaytracingDataCollector", "Data collection complete. " + savedCount + " rows written to " + path);
+        KLog.d("RaytracingDataCollector", "Pull it using: adb pull " + path + " ~/");
     }
 }
