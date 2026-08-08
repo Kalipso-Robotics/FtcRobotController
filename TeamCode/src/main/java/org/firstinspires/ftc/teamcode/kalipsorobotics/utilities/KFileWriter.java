@@ -27,6 +27,7 @@ public class KFileWriter {
 
     String name;
     BufferedWriter writer;
+    File file;
 
 
     public KFileWriter(String name, OpModeUtilities opModeUtilities) {
@@ -44,7 +45,7 @@ public class KFileWriter {
             }
         }
 
-        File file = new File(path, name + "_" + formattedDateTime + ".csv");
+        file = new File(path, name + "_" + formattedDateTime + ".csv");
 
         try {
             writer = new BufferedWriter(new FileWriter(file));
@@ -77,6 +78,10 @@ public class KFileWriter {
         } catch (IOException e) {
             KLog.e("KFileWriter", "Failed to close file writer for " + name, e);
         }
+    }
+
+    public String getPath() {
+        return file.getAbsolutePath();
     }
 
     public BufferedWriter getWriter() {
