@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathAc
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
@@ -33,8 +33,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
 
 @Autonomous
 public class RedAutoDepotVision extends KOpMode {

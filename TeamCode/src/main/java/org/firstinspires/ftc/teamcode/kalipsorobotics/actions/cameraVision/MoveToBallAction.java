@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobUtils;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobUtils;
 
 import java.util.ArrayList;
 import java.util.List;

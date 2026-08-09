@@ -4,6 +4,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 import com.acmerobotics.dashboard.config.Config;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AprilTagFieldLayout;
 
 @Config
 public class AprilTagConfig {
@@ -15,6 +17,8 @@ public class AprilTagConfig {
     public static double APRILTAG_X_REL_FIELD_MM = 3076.6; // 3115 FROM TUNE | 3,076.6 FROM MEASURE FIELD WITH TAPE MEASURE
     public static double APRILTAG_Y_REL_FIELD_MM = 1013.5; //951.43 Tuned until zero | 1,013.5 mm IS FROM MEASURED FIELD WITH TAPE MEASURE
 
+    public static int RED_GOAL_APRILTAG_ID = 24;
+    public static int BLUE_GOAL_APRILTAG_ID = 20;
 
     public static double GOAL_OFFSET_REL_APRIL_TAG_IN_CAMERA_SPACE_Z = 300.232 / 2; // FROM CAD in camera system
 
@@ -24,5 +28,19 @@ public class AprilTagConfig {
 
     public static Position TURRET_REL_CAM_POS = new Position(-147.565, 0.977, 0);
     public static Point ROBOT_REL_TURRET_POINT = new Point(-24.51971493, 2.50233587);
+
+    public static int getGoalAprilTagId(AllianceColor allianceColor) {
+        return allianceColor == AllianceColor.RED ? RED_GOAL_APRILTAG_ID : BLUE_GOAL_APRILTAG_ID;
+    }
+
+    /**
+     * Builds the field's known tag layout from the current (dashboard-tunable) constants
+     * above. Called fresh rather than cached statically so live tuning still takes effect.
+     */
+    public static AprilTagFieldLayout buildFieldLayout() {
+        return new AprilTagFieldLayout()
+                .put(RED_GOAL_APRILTAG_ID, new Position(APRILTAG_X_REL_FIELD_MM, APRILTAG_Y_REL_FIELD_MM, APRIL_TAG_HEADING_REL_FIELD_RAD))
+                .put(BLUE_GOAL_APRILTAG_ID, new Position(APRILTAG_X_REL_FIELD_MM, -APRILTAG_Y_REL_FIELD_MM, -APRIL_TAG_HEADING_REL_FIELD_RAD));
+    }
 
 }

@@ -4,7 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Ac
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 
 import com.qualcomm.hardware.lynx.LynxModule;

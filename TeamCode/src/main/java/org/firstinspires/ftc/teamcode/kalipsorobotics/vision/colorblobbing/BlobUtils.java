@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;

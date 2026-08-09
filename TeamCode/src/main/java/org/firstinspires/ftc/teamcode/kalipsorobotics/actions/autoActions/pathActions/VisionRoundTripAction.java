@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobSelectionStrategy;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobUtils;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobUtils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometry
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;

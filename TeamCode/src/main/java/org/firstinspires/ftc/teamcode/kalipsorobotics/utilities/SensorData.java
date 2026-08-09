@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;

@@ -4,7 +4,7 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Shoo
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAutoDepot;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAutoDepotNoSpike;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;

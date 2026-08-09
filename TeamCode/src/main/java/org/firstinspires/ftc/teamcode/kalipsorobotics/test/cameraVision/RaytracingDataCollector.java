@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.BlobUtils;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobUtils;
 
 /**
  * Ground-truth data collector for CameraIntrinsics raytracing accuracy.

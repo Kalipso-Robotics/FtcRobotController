@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.blueAuto;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.cameraVision.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAutoNearRamp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
