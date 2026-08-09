@@ -113,13 +113,16 @@ public class DriveTrain {
         setBLeftPower(bLeftPower);
         setBRightPower(bRightPower);
         KLog.d("purepursaction_power", () -> "power " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
+        KLog.d("ppDebug", () -> "power " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
     }
 
     public void setPower(double power) {
+        KLog.d("ppDebug", () -> "power before " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
         setFLeftPower(power);
         setFRightPower(power);
         setBLeftPower(power);
         setBRightPower(power);
+        KLog.d("ppDebug", () -> "power after " + fLeftPower + " " + fRightPower + " " + bLeftPower + " " + bRightPower);
     }
     public DcMotor getBackEncoder() {
         return backEncoder;

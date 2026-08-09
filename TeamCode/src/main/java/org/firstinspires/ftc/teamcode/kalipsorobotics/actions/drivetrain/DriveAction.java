@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-public class DriveAction {
+public class DriveAction implements DriveController {
     OpModeUtilities opModeUtilities;
 
     DriveTrain driveTrain;

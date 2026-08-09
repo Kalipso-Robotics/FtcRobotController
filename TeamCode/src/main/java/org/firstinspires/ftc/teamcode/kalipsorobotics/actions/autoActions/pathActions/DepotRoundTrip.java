@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 
@@ -29,13 +31,17 @@ SHOOT_FAR_X SHOOT_FAR_Y
 public class DepotRoundTrip extends KActionSet {
 
     RoundTripAction moveToShoot;
-    PurePursuitAction moveToDepot;
+    IPurePursuitAction moveToDepot;
     IntakeFullAction intakeBalls;
     double intakeTimeMS = IntakeConfig.intakeBallTimeMS;
-    public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
+    public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor, boolean useAdaptivePP) {
         turretAutoAlign.setToleranceDeg(1.5);
 
-        moveToDepot = new PurePursuitAction(drivetrain);
+        if (!useAdaptivePP) {
+            moveToDepot = new PurePursuitAction(drivetrain);
+        } else {
+            moveToDepot = new AdaptivePurePursuitAction(drivetrain);
+        }
         moveToDepot.setName("moveToDepot");
         moveToDepot.setMaxTimeOutMS(4000);
         moveToDepot.setLookAheadRadius(150);
@@ -68,6 +74,10 @@ public class DepotRoundTrip extends KActionSet {
         this.addAction(moveToShoot);
     }
 
+    public DepotRoundTrip(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, Point target, Point launchPos, double waitForShooterReadyMS, AllianceColor allianceColor) {
+        this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, target, launchPos, waitForShooterReadyMS, allianceColor, false);
+    }
+
     @Override
     protected void afterUpdate() {
         if (moveToShoot.getPurePursuitReadyIntakeStop().getIsDone()) {
@@ -79,7 +89,7 @@ public class DepotRoundTrip extends KActionSet {
         return moveToShoot;
     }
 
-    public PurePursuitAction getMoveToDepot() {
+    public IPurePursuitAction getMoveToDepot() {
         return moveToDepot;
     }
 

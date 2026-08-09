@@ -88,9 +88,9 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
         }
     }
 
-    protected double minContourArea = 100;
-    protected double maxContourArea = 2000;
-    protected double minCircularity = 0.30;
+    protected double minContourArea = 250;
+    protected double maxContourArea = 30_000;
+    protected double minCircularity = 0.55;
 
     /** Gaussian blur kernel size (must be odd). Larger = more smoothing, less noise. */
     protected int gaussianKernelSize = 5;
@@ -154,7 +154,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
         hsvFrame              = new Mat();
         morphologyBuffer      = new Mat();
         reusableContourBuffer = new MatOfPoint2f();
-        noiseRemovalKernel    = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5, 5));
+        noiseRemovalKernel    = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
         holeFillingKernel     = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(7, 7));
         contourHierarchy      = new Mat();
 

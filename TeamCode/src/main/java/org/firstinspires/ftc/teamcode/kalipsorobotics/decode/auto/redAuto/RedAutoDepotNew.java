@@ -107,7 +107,7 @@ public class RedAutoDepotNew extends KOpMode {
 
         // ----------------- FIRST SHOOT ----------------------
 
-        trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true);
+        trip0 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, firstShotTargetPoint.multiplyY(allianceColor.getPolarity()), firstShootPoint, 0, false, true, true);
         trip0.setName("trip0");
         trip0.getShooterReady().setName("ShooterReady_trip0");
         trip0.getMoveToBall().addPoint(0, 0, 0);
@@ -115,41 +115,43 @@ public class RedAutoDepotNew extends KOpMode {
         trip0.setShouldShooterStop(false);
         autoDepot.addAction(trip0);
 
-        lastTrip = trip0;
+        // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
 
-//        // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
-//
-//        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
-//        trip1.setName("trip1");
-//        trip1.getMoveToShoot().getShooterReady().setName("ShooterReady_trip1");
-//        trip1.setDependentActions(trip0);
-////        trip1.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
-//        addPointsToTrip1SpikeMark();
-//        trip1.getMoveToShoot().setShouldShooterStop(false);
-//        autoDepot.addAction(trip1);
-//
-//        // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
-//
-//        trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
-//        trip2.setName("trip2");
-//        trip2.getMoveToShoot().getShooterReady().setName("ShooterReady_trip2");
-//        trip2.setDependentActions(trip1);
-//        trip2.getMoveToDepot().clearPoints();
-//        // first try
-////        trip2.getTrip().getMoveToBall().addPoint(200, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity()); // x=15 -> corner
-////        trip2.getTrip().getMoveToBall().addPoint(200, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//        trip2.getMoveToDepot().addPoint(-25,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-//
-//        // retry
-//        trip2.getMoveToDepot().addPoint(250,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-////        trip2.getMoveToShoot().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
-////        trip2.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
-//        trip2.getMoveToShoot().getMoveToBall().setFinalSearchRadiusMM(150);
-//        trip2.getMoveToShoot().setShouldShooterStop(false);
-//        trip2.getMoveToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
-//        trip2.getMoveToShoot().getMoveToBall().setPathAngleToleranceDeg(45);
-//        trip2.getMoveToShoot().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
-//        autoDepot.addAction(trip2);
+        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor, true);
+        trip1.setName("trip1");
+        trip1.getMoveToShoot().getShooterReady().setName("ShooterReady_trip1");
+        trip1.setDependentActions(trip0);
+//        trip1.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
+        addPointsToTrip1SpikeMark();
+        KLog.d("ppDebugFollow", "Added points to trip 1");
+        trip1.getMoveToShoot().setShouldShooterStop(false);
+        autoDepot.addAction(trip1);
+
+        // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
+
+        trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        trip2.setName("trip2");
+        trip2.getMoveToShoot().getShooterReady().setName("ShooterReady_trip2");
+        trip2.setDependentActions(trip1);
+        trip2.getMoveToDepot().clearPoints();
+        // first try
+//        trip2.getTrip().getMoveToBall().addPoint(200, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity()); // x=15 -> corner
+//        trip2.getTrip().getMoveToBall().addPoint(200, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        trip2.getMoveToDepot().addPoint(-25,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+
+        // retry
+        trip2.getMoveToDepot().addPoint(250,  1075 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+//        trip2.getMoveToShoot().getMoveToBall().addPoint(SHOOT_FAR_X, (SHOOT_FAR_Y) * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+//        trip2.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
+        trip2.getMoveToShoot().getMoveToBall().setFinalSearchRadiusMM(150);
+        trip2.getMoveToShoot().setShouldShooterStop(false);
+        trip2.getMoveToShoot().getPurePursuitReadyShooting().setDistanceThresholdMM(150);
+        trip2.getMoveToShoot().getMoveToBall().setPathAngleToleranceDeg(45);
+        trip2.getMoveToShoot().getMoveToBall().setFinalAngleLockingThresholdDeg(45);
+        autoDepot.addAction(trip2);
+
+        lastTrip = trip2;
+
 //
 //        // ----------------- TRIP 3 (retry) ---------------------- ~5 sec
 //

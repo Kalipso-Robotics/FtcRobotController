@@ -11,20 +11,20 @@
 
 // Custom definitions may go here
 
-//buildscript {
-//    repositories {
-//        mavenCentral()
-//        maven { url = "https://repo.dairy.foundation/releases" }
-//    }
-//    dependencies {
-//        classpath "dev.frozenmilk:Load:0.2.4"
-//    }
-//}
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = "https://repo.dairy.foundation/releases" }
+    }
+    dependencies {
+        classpath "dev.frozenmilk:Load:0.2.4"
+    }
+}
 
 // Include common definitions from above.
 apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
-//apply plugin: 'dev.frozenmilk.sinister.sloth.load'
+apply plugin: 'dev.frozenmilk.sinister.sloth.load'
 
 android {
 
@@ -57,8 +57,8 @@ android {
 
 repositories {
     maven { url = 'https://maven.brott.dev/' }
-//    maven { url = "https://repo.dairy.foundation/releases" }
-//    maven { url = "https://repo.dairy.foundation/snapshots" }
+    maven { url = "https://repo.dairy.foundation/releases" }
+    maven { url = "https://repo.dairy.foundation/snapshots" }
     google()
     mavenCentral()
 }
@@ -75,9 +75,8 @@ dependencies {
     implementation 'org.openftc:easyopencv:1.5.2'
     implementation 'com.google.ai.edge.litert:litert-support-api:1.0.1'
     implementation 'com.google.ai.edge.litert:litert:1.0.1'
-//    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
-//    implementation("com.acmerobotics.slothboard:dashboard:0.2.4+0.5.1")
-    implementation 'com.acmerobotics.dashboard:dashboard:0.6.0'
+    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
+    implementation("com.acmerobotics.slothboard:dashboard:0.2.4+0.5.1")
 
 
 }

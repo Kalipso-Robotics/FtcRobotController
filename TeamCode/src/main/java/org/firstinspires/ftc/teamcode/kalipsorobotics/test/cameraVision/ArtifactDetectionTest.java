@@ -27,7 +27,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.DetectedB
  *   [A] — re-enable artifact processor
  */
 @Config
-@Disabled
 @TeleOp(name = "Test: Artifact Detection", group = "Test Vision")
 public class ArtifactDetectionTest extends LinearOpMode {
 

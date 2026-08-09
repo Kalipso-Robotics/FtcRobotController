@@ -7,19 +7,19 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import java.util.List;
 
 public class PurePursuitReady extends Action {
-    private final PurePursuitAction purePursuitAction;
+    private final IPurePursuitAction purePursuitAction;
     private final boolean trackLastPoint;
     private int pointIndex;
     private double distanceThresholdMM;
 
-    public PurePursuitReady(PurePursuitAction purePursuitAction, int pointIndex, double distanceThresholdMM) {
+    public PurePursuitReady(IPurePursuitAction purePursuitAction, int pointIndex, double distanceThresholdMM) {
         this.purePursuitAction = purePursuitAction;
         this.pointIndex = pointIndex;
         this.distanceThresholdMM = distanceThresholdMM;
         this.trackLastPoint = (pointIndex < 0);
     }
 
-    public PurePursuitReady(PurePursuitAction purePursuitAction, double distanceThresholdMM) {
+    public PurePursuitReady(IPurePursuitAction purePursuitAction, double distanceThresholdMM) {
         //Cannot do pointIndex = lastIndex in construction time because points get added later.
         this(purePursuitAction, -1, distanceThresholdMM);
     }

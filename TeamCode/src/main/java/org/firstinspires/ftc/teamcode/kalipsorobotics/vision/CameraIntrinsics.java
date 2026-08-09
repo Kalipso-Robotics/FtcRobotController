@@ -12,7 +12,6 @@ public class CameraIntrinsics{
     private final double cx, cy;
     private final double mountAngle;
     private final Vector3d cameraOffset;
-    private final double focalLength;
     private final double k1, k2, k3, p1, p2; //distortions
     // Calibrated at 1280x800 (see calibrate_camera.py), scaled to 640x480:
     //   fx,cx *= 0.5   fy,cy *= 0.6   distortion coeffs are dimensionless.
@@ -22,7 +21,7 @@ public class CameraIntrinsics{
             0.045011, -0.059862, 0.000330,
             0.001499, 0.005590,
             Math.toRadians(0),
-            new Vector3d(-157.548, 236.163, 151.868)
+            new Vector3d(-157.548, 236.163, 151.868) // offsets
     );
 
 
@@ -40,7 +39,6 @@ public class CameraIntrinsics{
         this.p2 = p2;
         this.mountAngle = mountAngle;
         this.cameraOffset = cameraOffset;
-        this.focalLength = (fx + fy) / 2;
     }
 
     public CameraIntrinsics(double fx, double fy, double cx, double cy,
@@ -53,10 +51,6 @@ public class CameraIntrinsics{
                 mountAngle, offset);
     }
 
-    /**
-     * Converts a bottom-center pixel of a blob to a field-frame floor point,
-     * using the robot's current pose to rotate/translate out of robot-local frame.
-     */
     public Point calculateWorldPos(double pixelX, double pixelY, Position robotPose) {
         Point local = calculateRobotFramePos(pixelX, pixelY);
         if (local == null) return null;
@@ -67,11 +61,6 @@ public class CameraIntrinsics{
         return new Point(fieldX, fieldY);
     }
 
-    /**
-     * Robot-frame floor position of a blob's bottom-center pixel.
-     * +X = left of camera axis, +Y = forward depth. Most callers want the
-     * field-frame variant above; this is exposed for diagnostics/tests.
-     */
     public Point calculateRobotFramePos(double pixelX, double pixelY) {
         double norm_x = this.cx - pixelX;
         // Flipped: image-Y increases downward, but the rest of this math expects
@@ -80,8 +69,8 @@ public class CameraIntrinsics{
         // (the floor) actually project; the old `pixelY - cy` rejected them.
         double norm_y = this.cy - pixelY;
 
-        double x_direction = norm_x / this.focalLength;
-        double y_direction = norm_y / this.focalLength;
+        double x_direction = norm_x / this.fx;
+        double y_direction = norm_y / this.fy;
         double z_direction = 1.0;
 
         double theta = this.mountAngle;

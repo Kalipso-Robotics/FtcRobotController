@@ -12,9 +12,9 @@ public class KFileWriter {
     /**
      * Deleting and Pulling Logs
      * <p>
-     * alias deleteLog=adb shell "rm -r /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/*"
+     * alias deleteLog=adb shell "rm -r /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs/*"
      * <p>
-     * alias pullLog='adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog ~/
+     * alias pullLog='adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs ~/
      * '
      *
      */
@@ -27,6 +27,7 @@ public class KFileWriter {
 
     String name;
     BufferedWriter writer;
+    File file;
 
 
     public KFileWriter(String name, OpModeUtilities opModeUtilities) {
@@ -36,7 +37,7 @@ public class KFileWriter {
         formatter = new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss_SSS", Locale.US);
         formattedDateTime = formatter.format(now);
 
-        File path = new File(opModeUtilities.getHardwareMap().appContext.getExternalFilesDir(null), "OdometryLog");
+        File path = new File(opModeUtilities.getHardwareMap().appContext.getExternalFilesDir(null), "RobotLogs");
         if(!path.exists()) {
             if (!path.mkdirs()) {
                 KLog.d("KFileWriter", "Failed To Make Directory");
@@ -44,7 +45,7 @@ public class KFileWriter {
             }
         }
 
-        File file = new File(path, name + "_" + formattedDateTime + ".csv");
+        file = new File(path, name + "_" + formattedDateTime + ".csv");
 
         try {
             writer = new BufferedWriter(new FileWriter(file));
@@ -77,6 +78,10 @@ public class KFileWriter {
         } catch (IOException e) {
             KLog.e("KFileWriter", "Failed to close file writer for " + name, e);
         }
+    }
+
+    public String getPath() {
+        return file.getAbsolutePath();
     }
 
     public BufferedWriter getWriter() {

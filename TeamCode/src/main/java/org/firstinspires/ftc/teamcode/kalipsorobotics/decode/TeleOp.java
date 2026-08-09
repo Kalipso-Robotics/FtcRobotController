@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveController;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.FieldOrientedDriveAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltUp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltDown;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReverse;
@@ -44,6 +46,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = " TeleOp")
 public class TeleOp extends KOpMode {
+    // Robot-centric is the default drive mode. Flip to true to drive field-oriented instead.
+    private static final boolean USE_FIELD_ORIENTED_DRIVE = false;
+
     private boolean hasClosedStopperInnit = false;
     private DriveTrain driveTrain;
 
@@ -70,7 +75,7 @@ public class TeleOp extends KOpMode {
     IntakeStop intakeStop = null;
     IntakeReverse intakeReverse = null;
 
-    DriveAction driveAction = null;
+    DriveController driveAction = null;
 
     ResetOdometryToLimelight resetOdometryToLimelight = null;
     ResetOdometryToPos resetOdometryToPos = null;
@@ -149,7 +154,9 @@ public class TeleOp extends KOpMode {
 
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
         OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
-        driveAction = new DriveAction(driveTrain);
+        driveAction = USE_FIELD_ORIENTED_DRIVE
+                ? new FieldOrientedDriveAction(driveTrain, imuModule)
+                : new DriveAction(driveTrain);
         shooterRun = new ShooterRun(opModeUtilities, shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
         turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret, allianceColor);
 
