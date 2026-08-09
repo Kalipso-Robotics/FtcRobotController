@@ -4,37 +4,33 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.CalculateTickPer;
-
-import java.time.chrono.ThaiBuddhistEra;
-
 @TeleOp
 public class HardwareTest extends LinearOpMode {
-    private DcMotor leftBack, rightBack, leftFront, rightFront;
+    private DcMotor bLeft, bRight, fLeft, fRight;
     @Override
     public void runOpMode() throws InterruptedException {
-        leftBack = hardwareMap.get(DcMotor.class, "bLeft");
-        rightBack = hardwareMap.get(DcMotor.class, "bRight");
-        leftFront = hardwareMap.get(DcMotor.class, "fLeft");
-        rightFront = hardwareMap.get(DcMotor.class, "fRight");
+        bLeft = hardwareMap.get(DcMotor.class, "bLeft");
+        bRight = hardwareMap.get(DcMotor.class, "bRight");
+        fLeft = hardwareMap.get(DcMotor.class, "fLeft");
+        fRight = hardwareMap.get(DcMotor.class, "fRight");
         waitForStart();
         while(opModeIsActive()) {
-            int encoderPositionLB = leftBack.getCurrentPosition();
+            int encoderPositionLB = bLeft.getCurrentPosition();
             telemetry.addLine("--- Motor Data ---");
             telemetry.addData("Encoder Position", "%d ticks", encoderPositionLB);
             telemetry.addLine();
 
-            int encoderPositionRB = rightBack.getCurrentPosition();
+            int encoderPositionRB = bRight.getCurrentPosition();
             telemetry.addLine("--- Motor Data ---");
             telemetry.addData("Encoder Position", "%d ticks", encoderPositionRB);
             telemetry.addLine();
 
-            int encoderPositionLF = leftFront.getCurrentPosition();
+            int encoderPositionLF = fLeft.getCurrentPosition();
             telemetry.addLine("--- Motor Data ---");
             telemetry.addData("Encoder Position", "%d ticks", encoderPositionLF);
             telemetry.addLine();
 
-            int encoderPositionRF = rightFront.getCurrentPosition();
+            int encoderPositionRF = fRight.getCurrentPosition();
             telemetry.addLine("--- Motor Data ---");
             telemetry.addData("Encoder Position", "%d ticks", encoderPositionRF);
             telemetry.addLine();
