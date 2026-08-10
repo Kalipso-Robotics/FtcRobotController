@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.DetectedBlob;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.DetectedBlob;
 
 /**
  * Live tuning OpMode for ArtifactDetectionProcessor.

@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblob.ArtifactColorBlobDetectionProcessor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 
 /**
  * Live raytracing validation for CameraIntrinsics.calculateWorldPos /
