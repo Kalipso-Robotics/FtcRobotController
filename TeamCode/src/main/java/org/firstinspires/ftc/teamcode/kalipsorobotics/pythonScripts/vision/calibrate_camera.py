@@ -24,7 +24,7 @@ CHECKERBOARD = (9, 6)       # inner corners (cols, rows) — adjust to your boar
 SQUARE_SIZE  = 22.6         # physical square size in mm (or any unit you want)
 CAMERA_ID    = 0            # change if OV9782 is not /dev/video0
 MIN_SAMPLES  = 25           # minimum captures before calibration is allowed
-SAVE_PATH    = "camera_intrinsics.json"
+SAVE_PATH    = "../../../../../../../../../../../camera_intrinsics.json"
 
 
 def build_object_points():
