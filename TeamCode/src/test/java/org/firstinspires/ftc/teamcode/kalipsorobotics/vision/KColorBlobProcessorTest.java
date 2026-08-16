@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.KColorBlobProcessor;
 import org.junit.Before;
 import org.junit.Test;
 import org.opencv.core.Rect;
@@ -38,7 +39,7 @@ public class KColorBlobProcessorTest {
     /** Concrete subclass with no Android Color dependencies. */
     static class TestProcessor extends KColorBlobProcessor {
         @Override
-        protected ColorChannel[] defineChannels() {
+        protected KColorBlobProcessor.ColorChannel[] defineChannels() {
             return new ColorChannel[]{
                 new ColorChannel(new Scalar(117, 50, 40), new Scalar(155, 255, 255), "Purple", 0xFFB400FF),
                 new ColorChannel(new Scalar(40,  60, 40), new Scalar(85,  255, 255), "Green",  0xFF00DC3C)

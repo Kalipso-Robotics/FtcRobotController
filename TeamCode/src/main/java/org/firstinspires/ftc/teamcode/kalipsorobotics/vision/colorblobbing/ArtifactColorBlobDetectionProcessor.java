@@ -17,10 +17,18 @@ public class ArtifactColorBlobDetectionProcessor extends KColorBlobProcessor {
     public static final String PURPLE = "Purple";
     public static final String GREEN  = "Green";
 
-    private static final Scalar PURPLE_HSV_LOWER = new Scalar(117, 58, 54);
+    // OLD SET
+//    private static final Scalar PURPLE_HSV_LOWER = new Scalar(117, 58, 54);
+//    private static final Scalar PURPLE_HSV_UPPER = new Scalar(180, 255, 255);
+//    private static final Scalar GREEN_HSV_LOWER  = new Scalar(68, 70, 22);
+//    private static final Scalar GREEN_HSV_UPPER  = new Scalar(92, 255, 255);
+
+    // NEW SET TUNED W/HUY
+    private static final Scalar PURPLE_HSV_LOWER = new Scalar(135, 16   , 40);
     private static final Scalar PURPLE_HSV_UPPER = new Scalar(180, 255, 255);
-    private static final Scalar GREEN_HSV_LOWER  = new Scalar(68, 70, 22);
-    private static final Scalar GREEN_HSV_UPPER  = new Scalar(92, 255, 255);
+    private static final Scalar GREEN_HSV_LOWER  = new Scalar(69, 108, 38);
+    private static final Scalar GREEN_HSV_UPPER  = new Scalar(90, 255, 255);
+
 
     @Override
     protected ColorChannel[] defineChannels() {
