@@ -16,7 +16,7 @@ MORPH_CLOSE_SIZE = (9, 9)  # Larger size bridges holes in wiffle-style balls
 
 # ── Updated Defaults based on image sample ───────────────────────────────────
 DEFAULTS = {
-    "Yellow": {"h_lo": 18, "h_hi": 32, "s_lo": 73, "s_hi": 255, "v_lo": 149, "v_hi": 255},
+    "Yellow": {"h_lo": 20, "h_hi": 44, "s_lo": 107, "s_hi": 255, "v_lo": 122, "v_hi": 255},
 }
 
 # Detection thresholds
