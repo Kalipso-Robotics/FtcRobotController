@@ -95,11 +95,12 @@ public abstract class Action {
                             blockedBy));
                 }
             }
-            return false;
-        }
 
-        // No longer blocked
-        if (wasBlockedLastUpdate) {
+            if (!canPrecomputeWhileBlocked()) {
+                return false;
+            }
+        } else if (wasBlockedLastUpdate) {
+            // No longer blocked
             long totalBlockedMs = System.currentTimeMillis() - blockedStartTimeMs;
             KLog.d("ActionBlocking", () -> String.format("[%s] UNBLOCKED after %.1fs - Dependencies completed",
                 getName() != null ? getName() : "unnamed", totalBlockedMs / 1000.0));
@@ -129,6 +130,16 @@ public abstract class Action {
 
         return isUpdateDone();
 
+    }
+
+    /**
+     * Override to let update() run while blocked on dependent actions, e.g. to precompute
+     * expensive work (like path planning) in parallel instead of waiting idle. Subclasses that
+     * opt in must internally gate anything that shouldn't happen until dependents are actually
+     * done by checking dependentActionsDone() themselves.
+     */
+    protected boolean canPrecomputeWhileBlocked() {
+        return false;
     }
 
     public boolean dependentActionsDone() {
