@@ -96,9 +96,8 @@ public abstract class Action {
                 }
             }
 
-            if (!canPrecomputeWhileBlocked()) {
-                return false;
-            }
+            return false;
+
         } else if (wasBlockedLastUpdate) {
             // No longer blocked
             long totalBlockedMs = System.currentTimeMillis() - blockedStartTimeMs;
@@ -138,8 +137,8 @@ public abstract class Action {
      * opt in must internally gate anything that shouldn't happen until dependents are actually
      * done by checking dependentActionsDone() themselves.
      */
-    protected boolean canPrecomputeWhileBlocked() {
-        return false;
+    protected void precomputeWhileBlocked() {
+
     }
 
     public boolean dependentActionsDone() {
