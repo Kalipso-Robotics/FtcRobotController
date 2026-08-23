@@ -51,6 +51,7 @@ public class DepotRoundTrip extends KActionSet {
         moveToDepot.addPoint(100, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         moveToDepot.addPoint(100, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         this.addAction(moveToDepot);
+
         intakeBalls = new IntakeFullAction(stopper, intake, intakeTimeMS, 1);
         intakeBalls.setName("intakeBalls");
         this.addAction(intakeBalls);

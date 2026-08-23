@@ -62,6 +62,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private int segInject = 0;
     private boolean injectDone = false;
 
+    private boolean hasStartedDriving = false;
+
     Path newPath = null;
     private boolean finishedCurrentLoop = false;
     private final double SMOOTHER_A = 0.25;
@@ -162,6 +164,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         // Reset all boolean flags
         isDone = false;
         hasStarted = false;
+        hasStartedDriving = false;
         injectDone = false;
         smootherDone = false;
         calcDistanceDone = false;
@@ -345,6 +348,14 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         prevFollow = Optional.of(target);
     }
 
+    // Path-planning (inject/smooth/distance/velocity-accel) is expensive and was previously
+    // gated behind dependentActionsDone(), wasting time after dependents finished. This lets
+    // update() run while blocked so the path is already built by the time dependents complete.
+    @Override
+    protected boolean canPrecomputeWhileBlocked() {
+        return true;
+    }
+
     @Override
     public void update() {
         if (isDone) {
@@ -353,11 +364,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
         if (!hasStarted) {
             reset();
-            startTimeMS = System.currentTimeMillis();
             hasStarted = true;
-            lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
-            timeoutTimer.reset();
-            progressIndex = 0;
         }
 
         if (!injectDone) {
@@ -393,6 +400,20 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
+            // Path is fully built. Don't actually drive until dependent actions finish -
+            // just wait here (cheap) instead of blocking update() from running at all.
+            if (!dependentActionsDone()) {
+                return;
+            }
+
+            if (!hasStartedDriving) {
+                hasStartedDriving = true;
+                startTimeMS = System.currentTimeMillis();
+                lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
+                timeoutTimer.reset();
+                progressIndex = 0;
+            }
+
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             KLog.d("ppDebug", () -> "currentPosition: " + currentPosition);
 
@@ -668,12 +689,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 //                }
 
                 injectedPathPoints.add(new Position(x, y, theta));
-                KLog.d("ppDebug", () -> "injected point: " + x + ", " + y + ", " + theta);
+                KLog.d("ppDebug", () -> this.getName() + " injected point: " + x + ", " + y + ", " + theta);
 
                 injectDistance = nextDistance;
             } else {
                 injectedPathPoints.add(end);
-                KLog.d("ppDebug", () -> "segment endpoint: " + end.getX() + ", " + end.getY() + ", " + end.getTheta());
+                KLog.d("ppDebug", () -> this.getName() + " segment endpoint: " + end.getX() + ", " + end.getY() + ", " + end.getTheta());
 
                 injectDistance = 0;
                 segInject++;
@@ -681,6 +702,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
         } else {
             injectDone = true;
+
+            KLog.d("ppDebug", () -> "injection fin");
+
 
 //            Position finalOriginalPoint = path.getLastPoint();
 //            Position lastInjectedPoint = injectedPathPoints.get(injectedPathPoints.size() - 1);
@@ -710,7 +734,6 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         if ((!(segInject == 0) && distanceAlongSegment < 2 * smallSpacing) || (distToEnd <= largeSpacing + 2 * smallSpacing)) {
             return smallSpacing;
         }
-
 
         return largeSpacing;
     }
@@ -1046,7 +1069,6 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         double c = Math.sqrt(MathFunctions.square(x3 - x1) + MathFunctions.square(y3 - y1)); // Distance p1 to p3
 
         // Calculate the radius of the circumcircle of the triangle formed by p1, p2, p3
-        // R = (abc) / (4 * Area)
         double radius = (a * b * c) / (2 * Math.abs(area2)); // Use Math.abs(area2) since radius is always positive
 
         // If radius is extremely large (effectively infinite), curvature is 0
@@ -1175,7 +1197,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     }
 
     public boolean isWithinDistancePoint(int index, double distanceThreshold) {
-        if (path == null || !calcVelocityAccelDone) {
+        // hasStartedDriving guards against currentPosition still holding its stale
+        // pre-drive value while the path is precomputed ahead of dependents finishing.
+        if (path == null || !calcVelocityAccelDone || !hasStartedDriving) {
             return false;
         }
         if (index < 0 || index >= pathPoints.size()) {
