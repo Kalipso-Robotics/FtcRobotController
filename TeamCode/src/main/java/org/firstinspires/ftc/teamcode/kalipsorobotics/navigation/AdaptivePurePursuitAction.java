@@ -62,7 +62,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private int segInject = 0;
     private boolean injectDone = false;
 
-    private boolean hasStartedDriving = false;
+    private boolean hasStartedPrecompute = false;
 
     Path newPath = null;
     private boolean finishedCurrentLoop = false;
@@ -164,7 +164,6 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         // Reset all boolean flags
         isDone = false;
         hasStarted = false;
-        hasStartedDriving = false;
         injectDone = false;
         smootherDone = false;
         calcDistanceDone = false;
@@ -352,19 +351,11 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     // gated behind dependentActionsDone(), wasting time after dependents finished. This lets
     // update() run while blocked so the path is already built by the time dependents complete.
     @Override
-    protected boolean canPrecomputeWhileBlocked() {
-        return true;
-    }
+    protected void precomputeWhileBlocked() {
 
-    @Override
-    public void update() {
-        if (isDone) {
-            return;
-        }
-
-        if (!hasStarted) {
+        if(!hasStartedPrecompute) {
             reset();
-            hasStarted = true;
+            hasStartedPrecompute = true;
         }
 
         if (!injectDone) {
@@ -398,21 +389,23 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             }
             return;
         }
+    }
+
+    @Override
+    public void update() {
+        if (isDone) {
+            return;
+        }
+
+        if (!hasStarted) {
+            startTimeMS = System.currentTimeMillis();
+            hasStarted = true;
+            lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
+            timeoutTimer.reset();
+            progressIndex = 0;
+        }
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
-            // Path is fully built. Don't actually drive until dependent actions finish -
-            // just wait here (cheap) instead of blocking update() from running at all.
-            if (!dependentActionsDone()) {
-                return;
-            }
-
-            if (!hasStartedDriving) {
-                hasStartedDriving = true;
-                startTimeMS = System.currentTimeMillis();
-                lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
-                timeoutTimer.reset();
-                progressIndex = 0;
-            }
 
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             KLog.d("ppDebug", () -> "currentPosition: " + currentPosition);
@@ -580,6 +573,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
             lastMilli = elapsedTime;
             lastPosition = currentPosition;
+        } else {
+            precomputeWhileBlocked(); //finish precompute
         }
 
     }
@@ -1197,9 +1192,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     }
 
     public boolean isWithinDistancePoint(int index, double distanceThreshold) {
-        // hasStartedDriving guards against currentPosition still holding its stale
-        // pre-drive value while the path is precomputed ahead of dependents finishing.
-        if (path == null || !calcVelocityAccelDone || !hasStartedDriving) {
+        if (path == null || !calcVelocityAccelDone) {
             return false;
         }
         if (index < 0 || index >= pathPoints.size()) {
