@@ -92,6 +92,15 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
     protected double maxContourArea = 30_000;
     protected double minCircularity = 0.55;
 
+    /**
+     * Real-world diameter (mm) of the object this processor detects, e.g. a game ball.
+     * 0 = unset — size-based ranging (CameraIntrinsics.calculateRobotFramePosFromSize)
+     * is unavailable until a subclass sets this. Subclasses set it directly.
+     */
+    protected double objectDiameterMM = 0;
+
+    public double getObjectDiameterMM() { return objectDiameterMM; }
+
     /** Gaussian blur kernel size (must be odd). Larger = more smoothing, less noise. */
     protected int gaussianKernelSize = 5;
 

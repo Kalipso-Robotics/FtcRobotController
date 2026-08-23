@@ -10,6 +10,12 @@ public class PollenColorBlobDetectionProcessor extends KColorBlobProcessor{
     static final Scalar YELLOW_HSV_LOWER = new Scalar(22,81,79);
     static final Scalar YELLOW_HSV_UPPER = new Scalar(33,255,255);
 
+    private static final double POLLEN_DIAMETER_MM = 3 * 25.4; // 3 in balls
+
+    {
+        objectDiameterMM = POLLEN_DIAMETER_MM;
+    }
+
 
 
 
