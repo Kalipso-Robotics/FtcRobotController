@@ -406,11 +406,6 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
-            // Path is fully built. Don't actually drive until dependent actions finish -
-            // just wait here (cheap) instead of blocking update() from running at all.
-            if (!dependentActionsDone()) {
-                return;
-            }
 
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             KLog.d("ppDebug", () -> "currentPosition: " + currentPosition);
@@ -579,7 +574,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             lastMilli = elapsedTime;
             lastPosition = currentPosition;
         } else {
-            precomputeWhileBlocked();
+            precomputeWhileBlocked(); //finish precompute
         }
 
     }
