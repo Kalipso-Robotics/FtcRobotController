@@ -96,6 +96,7 @@ public abstract class Action {
                 }
             }
 
+            precomputeWhileBlocked();
             return false;
 
         } else if (wasBlockedLastUpdate) {
