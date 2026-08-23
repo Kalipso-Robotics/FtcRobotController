@@ -103,6 +103,54 @@ public class CameraIntrinsics{
         return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(), robotPose);
     }
 
+    /**
+     * Ranges by known real-world object size instead of floor-plane intersection.
+     * Unlike calculateRobotFramePos, this works for objects not resting on the floor
+     * (elevated, stacked, mid-air) since it never assumes a floor plane.
+     *
+     * @param objectDiameterMM real-world diameter of the (assumed circular) object,
+     *                         e.g. KColorBlobProcessor.getObjectDiameterMM()
+     */
+    public Point calculateRobotFramePosFromSize(VisionRecognition recognition, double objectDiameterMM) {
+        double pixelDiameter = (recognition.getWidth() + recognition.getHeight()) / 2.0;
+        if (pixelDiameter <= 0) return null;
+        double range = (objectDiameterMM * this.fx) / pixelDiameter; // depth along camera Z-axis
+
+        double norm_x = this.cx - recognition.center.getX();
+        double norm_y = this.cy - recognition.center.getY();
+        double x_direction = norm_x / this.fx;
+        double y_direction = norm_y / this.fy;
+        double z_direction = 1.0;
+
+        double theta = this.mountAngle;
+        double world_y = y_direction * Math.cos(theta) - z_direction * Math.sin(theta);
+        double world_z = y_direction * Math.sin(theta) + z_direction * Math.cos(theta);
+        double world_x = x_direction;
+
+        double floorX = range * world_x;
+        double floorZ = range * world_z;
+
+        return new Point(floorX + cameraOffset.getX(), floorZ + cameraOffset.getZ());
+    }
+
+    public Point calculateWorldPosFromSize(VisionRecognition recognition, double objectDiameterMM, Position robotPose) {
+        Point local = calculateRobotFramePosFromSize(recognition, objectDiameterMM);
+        if (local == null) return null;
+        double cosT = Math.cos(robotPose.getTheta());
+        double sinT = Math.sin(robotPose.getTheta());
+        double fieldX = robotPose.getX() + local.getY() * cosT - local.getX() * sinT;
+        double fieldY = robotPose.getY() + local.getY() * sinT + local.getX() * cosT;
+        return new Point(fieldX, fieldY);
+    }
+
+    public double getDistanceFromRobotBySize(VisionRecognition recognition, double objectDiameterMM, Position robotPose) {
+        Point object = calculateWorldPosFromSize(recognition, objectDiameterMM, robotPose);
+        if (object == null) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return robotPose.toPoint().distanceTo(object);
+    }
+
     public double getCx() { return cx; }
     public double getCy() { return cy; }
 }
