@@ -294,7 +294,7 @@ public class TurretDataCollector extends LinearOpMode {
                 // Calculate power using PID only (no feedforward for static targets)
                 // Feedforward in TurretAutoAlignLimelight is for tracking a MOVING target angle
                 // Here our target is static, so feedforward = 0
-                double pidOutput = turretMotor.getPIDFController().calculate(error);
+                double pidOutput = turretMotor.getPIDFController().calculateFromError(error);
 
                 double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput));
 
@@ -378,7 +378,7 @@ public class TurretDataCollector extends LinearOpMode {
 
             // Maintain position control during settling (PID only, no feedforward)
             if (Math.abs(error) >= TOLERANCE_TICKS) {
-                double pidOutput = turretMotor.getPIDFController().calculate(error);
+                double pidOutput = turretMotor.getPIDFController().calculateFromError(error);
                 double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput));
                 turretMotor.setPower(totalPower);
 

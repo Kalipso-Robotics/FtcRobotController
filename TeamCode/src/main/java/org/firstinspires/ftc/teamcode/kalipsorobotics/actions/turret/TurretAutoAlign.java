@@ -189,7 +189,7 @@ public class TurretAutoAlign extends Action {
             KLog.d("Turret_PID", () -> String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
         } else {
             isWithinRange = false;
-            double pidOutput = turretMotor.getPIDFController().calculate(error);
+            double pidOutput = turretMotor.getPIDFController().calculateFromError(error);
             double feedforward = TurretConfig.kF * currentAngularVelocity;
             double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
 

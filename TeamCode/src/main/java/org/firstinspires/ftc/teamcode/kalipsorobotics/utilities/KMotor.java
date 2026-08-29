@@ -141,7 +141,7 @@ public class KMotor {
         int currentTicks = motor.getCurrentPosition();
         // Error = where we want to be - where we are
         int error = targetTicks - currentTicks;
-        double newPower = clampPower(pidfController.calculate(error));
+        double newPower = clampPower(pidfController.calculateFromError(error));
         motor.setPower(newPower);
         KLog.d("KMotor", () -> String.format(
                 "Target: %d Ticks, Current: %d Ticks, Error: %d, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
