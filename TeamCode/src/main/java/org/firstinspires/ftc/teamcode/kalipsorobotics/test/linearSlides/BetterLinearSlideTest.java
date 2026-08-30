@@ -19,7 +19,7 @@ public class BetterLinearSlideTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             if(gamepad1.a){
-                PLACEHOLDER.setTargetPosition(500);
+//                PLACEHOLDER.setTargetPosition(500);
             }
 
         }

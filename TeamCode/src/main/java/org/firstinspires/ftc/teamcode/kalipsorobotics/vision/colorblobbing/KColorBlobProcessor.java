@@ -90,7 +90,46 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
     protected double minContourArea = 250;
     protected double maxContourArea = 30_000;
+    // REVIEW: measured spheres come out around 0.85-0.90, so 0.55 is loose enough
+    // to admit partially-merged clutter. 0.75 is the suggested value -- try it live
+    // from ArtifactDetectionTest before changing it here.
     protected double minCircularity = 0.55;
+
+    /**
+     * Expected bounding-box width/height ratio for the target object.
+     *
+     * A sphere subtending angle a projects to fx*a pixels wide by fy*a pixels tall,
+     * so the expected ratio is fx/fy, NOT 1.0. For the Arducam at 640x480
+     * (fx=444.14, fy=532.28) that is 0.835.
+     *
+     * This doubles as an intrinsics check: if real balls consistently measure ~1.0
+     * here, the 1280x800 -> 640x480 rescale in CameraIntrinsics is wrong and fy is
+     * off by ~19%. See fit_intrinsics.py.
+     */
+    protected double expectedAspect = 444.14195 / 532.27560; // = 0.8344
+
+    /**
+     * Half-width of the accepted aspect band around expectedAspect.
+     *
+     * 0 (or negative) DISABLES the gate entirely -- the default, so this class
+     * behaves exactly as before until the gate is deliberately switched on.
+     * REVIEW: 0.30 is the suggested value. Turn it on live from the dashboard in
+     * ArtifactDetectionTest, watch the ASPECT rejections in the snapshots, then
+     * decide whether to make it the default here.
+     */
+    protected double aspectTolerance = 0;
+
+    public void setMinContourArea(double v)  { this.minContourArea = v; }
+    public void setMaxContourArea(double v)  { this.maxContourArea = v; }
+    public void setMinCircularity(double v)  { this.minCircularity = v; }
+    public void setExpectedAspect(double v)  { this.expectedAspect = v; }
+    public void setAspectTolerance(double v) { this.aspectTolerance = v; }
+
+    public double getMinContourArea()  { return minContourArea; }
+    public double getMaxContourArea()  { return maxContourArea; }
+    public double getMinCircularity()  { return minCircularity; }
+    public double getExpectedAspect()  { return expectedAspect; }
+    public double getAspectTolerance() { return aspectTolerance; }
 
     /**
      * Real-world diameter (mm) of the object this processor detects, e.g. a game ball.
@@ -109,6 +148,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
     private volatile int diagRawContours = 0;
     private volatile int diagAreaRejected = 0;
     private volatile int diagCircRejected = 0;
+    private volatile int diagAspectRejected = 0;
 
     // Snapshot-to-disk debug feature
     private volatile int snapshotEveryNFrames = 0; // 0 = disabled
@@ -182,6 +222,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
         diagRawContours = 0;
         diagAreaRejected = 0;
         diagCircRejected = 0;
+        diagAspectRejected = 0;
         lastRejected.clear();
 
         Imgproc.resize(frame, downsampledFrame,
@@ -221,16 +262,21 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
             for (VisionRecognition r : blobs) {
                 if (!(r instanceof DetectedBlob)) continue;
                 DetectedBlob b = (DetectedBlob) r;
-                sb.append(String.format(Locale.US, " [%s a=%.0f c=%.2f px=(%.0f,%.0f)]",
+                double aspect = (b.getHeight() > 0) ? b.getWidth() / b.getHeight() : 0.0;
+                sb.append(String.format(Locale.US,
+                        " [%s a=%.0f c=%.2f wh=%.0fx%.0f ar=%.2f px=(%.0f,%.0f)]",
                         b.label, b.getArea(), b.getCircularity(),
+                        b.getWidth(), b.getHeight(), aspect,
                         b.center.getX(), b.center.getY()));
             }
             android.util.Log.i("KColorBlobProcessor", sb.toString());
         } else if (diagFrameCount % 30 == 0) {
             android.util.Log.i("KColorBlobProcessor", String.format(Locale.US,
-                    "f%d NONE  raw=%d areaRej=%d circRej=%d minArea=%.0f minCirc=%.2f",
+                    "f%d NONE  raw=%d areaRej=%d circRej=%d aspectRej=%d "
+                            + "minArea=%.0f minCirc=%.2f aspect=%.2f+/-%.2f",
                     diagFrameCount, diagRawContours, diagAreaRejected, diagCircRejected,
-                    minContourArea, minCircularity));
+                    diagAspectRejected, minContourArea, minCircularity,
+                    expectedAspect, aspectTolerance));
         }
     }
 
@@ -279,9 +325,10 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
                 diagFrameCount, elapsedMs / 1000.0, accepted, rejected);
         String line2 = (pose == null)
                 ? "pose=N/A"
-                : String.format(Locale.US, "pose=(%.0f,%.0f,%.1f deg)  raw=%d  areaRej=%d  circRej=%d",
+                : String.format(Locale.US,
+                        "pose=(%.0f,%.0f,%.1f deg) raw=%d areaRej=%d circRej=%d aspectRej=%d",
                         pose.getX(), pose.getY(), Math.toDegrees(pose.getTheta()),
-                        diagRawContours, diagAreaRejected, diagCircRejected);
+                        diagRawContours, diagAreaRejected, diagCircRejected, diagAspectRejected);
 
         Scalar white = new Scalar(255, 255, 255);
         Imgproc.putText(bgr, line1, new org.opencv.core.Point(4, 14),
@@ -352,9 +399,12 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
     @Override
     public String getDiagnosticSummary() {
-        return String.format("frames=%d rawContours=%d areaRej=%d circRej=%d minArea=%.0f minCirc=%.2f",
+        return String.format(Locale.US,
+                "frames=%d rawContours=%d areaRej=%d circRej=%d aspectRej=%d "
+                        + "minArea=%.0f minCirc=%.2f aspect=%.2f+/-%.2f",
                 diagFrameCount, diagRawContours, diagAreaRejected, diagCircRejected,
-                minContourArea, minCircularity);
+                diagAspectRejected, minContourArea, minCircularity,
+                expectedAspect, aspectTolerance);
     }
 
     @Override
@@ -410,6 +460,21 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
         return getLargestBlobByLabel(colorLabel) != null;
     }
 
+    /**
+     * Live color channels, for dashboard tuning. Scalar.val[] is mutable, so a
+     * tuning OpMode can write bounds in place:
+     *   getChannels()[0].hsvLowerBound.val[1] = newSaturationMin;
+     * Returns null before onInit() has run. Not for use in competition code.
+     */
+    public ColorChannel[] getChannels() { return channels; }
+
+    // Raw diagnostic counters, for CSV logging by tuning OpModes.
+    public int getDiagFrameCount()     { return diagFrameCount; }
+    public int getDiagRawContours()    { return diagRawContours; }
+    public int getDiagAreaRejected()   { return diagAreaRejected; }
+    public int getDiagCircRejected()   { return diagCircRejected; }
+    public int getDiagAspectRejected() { return diagAspectRejected; }
+
     private List<DetectedBlob> extractBlobsFromMask(Mat colorMask, String colorLabel) {
         Imgproc.morphologyEx(colorMask, morphologyBuffer, Imgproc.MORPH_OPEN, noiseRemovalKernel);
         Imgproc.morphologyEx(morphologyBuffer, morphologyBuffer, Imgproc.MORPH_CLOSE, holeFillingKernel);
@@ -422,12 +487,13 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
         List<DetectedBlob> blobs = new ArrayList<>();
         for (MatOfPoint contour : reusableContourList) {
+            Rect boundingBox = Imgproc.boundingRect(contour);
             double area = Imgproc.contourArea(contour);
             if (area < minContourArea || area > maxContourArea) {
                 diagAreaRejected++;
                 String reason = (area < minContourArea) ? "AREA<min" : "AREA>max";
                 lastRejected.add(new RejectedContour(
-                        scaleRectToFullResolution(Imgproc.boundingRect(contour)),
+                        scaleRectToFullResolution(boundingBox),
                         area, 0.0, colorLabel, reason));
                 contour.release();
                 continue;
@@ -438,14 +504,33 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
             if (circularity < minCircularity) {
                 diagCircRejected++;
                 lastRejected.add(new RejectedContour(
-                        scaleRectToFullResolution(Imgproc.boundingRect(contour)),
+                        scaleRectToFullResolution(boundingBox),
                         area, circularity, colorLabel, "CIRC<min"));
                 contour.release();
                 continue;
             }
 
+            // A ball is round. Elongated clutter (tape lines, bumpers, wall stripes)
+            // can survive the circularity gate once MORPH_CLOSE merges nearby specks,
+            // but it cannot survive an aspect-ratio gate. Downsample scaling is 2x on
+            // both axes, so the ratio is identical before and after rescaling.
+            //
+            // OPT-IN: disabled while aspectTolerance is 0, which is the default.
+            // Enable it live from ArtifactDetectionTest before adopting it here.
+            double aspect = (boundingBox.height > 0)
+                    ? (double) boundingBox.width / boundingBox.height : 0.0;
+            if (aspectTolerance > 0 && Math.abs(aspect - expectedAspect) > aspectTolerance) {
+                diagAspectRejected++;
+                lastRejected.add(new RejectedContour(
+                        scaleRectToFullResolution(boundingBox),
+                        area, circularity, colorLabel,
+                        String.format(Locale.US, "ASPECT=%.2f", aspect)));
+                contour.release();
+                continue;
+            }
+
             blobs.add(new DetectedBlob(
-                scaleRectToFullResolution(Imgproc.boundingRect(contour)),
+                scaleRectToFullResolution(boundingBox),
                 area, circularity, colorLabel
             ));
             contour.release();
