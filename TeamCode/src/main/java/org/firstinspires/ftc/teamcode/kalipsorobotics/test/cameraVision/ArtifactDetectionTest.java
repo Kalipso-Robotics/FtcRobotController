@@ -15,11 +15,12 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.Artif
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.KColorBlobProcessor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Live tuning OpMode + false-positive measuring rig for the artifact color blob pipeline.
+ * Guided trial runner + false-positive measuring rig for the artifact color blob pipeline.
  *
  * WHY THIS EXISTS:
  *   Pointing the camera at ONE ball was producing several detections, with background
@@ -27,23 +28,39 @@ import java.util.Locale;
  *   turns it into a number: the fraction of camera frames on which exactly one blob of
  *   the expected color was reported.
  *
+ * HOW A SESSION RUNS:
+ *   The condition matrix lives in TRIALS below and the OpMode walks you through it one
+ *   entry at a time. For each trial:
+ *
+ *     1. Telemetry names the condition and the ball color to place. Place exactly one ball.
+ *     2. Press [A]. It records TARGET_FRAMES distinct camera frames and stops on its own
+ *        (~3.5s at 30fps) - no holding a button.
+ *     3. It shows the pass rate and verdict for that trial.
+ *     4. Press [A] to commit and advance, or [B] to throw the trial away and redo it.
+ *
+ *   PASS = single-correct-blob rate >= PASS_RATE_TARGET on every condition.
+ *
+ *   Rows are deduplicated on the processor's own frame counter, so one row really is
+ *   one camera frame, not one OpMode loop. A trial's rows are held in memory until [A]
+ *   commits them, so a redo leaves nothing behind in the CSV.
+ *
+ * WHAT COMES OUT:
+ *   BlobFalsePositive_<ts>.csv   one row per blob per frame (the raw data)
+ *   BlobTrialSummary_<ts>.csv    one row per trial (the file you actually read)
+ *   logcat, tag KLog_ArtifactDetectionTest   one line per trial, plus a session block
+ *
+ *   The summary's ZeroBlob / MultiBlob / WrongLabel columns say WHY a condition failed:
+ *   nothing detected, background false positives, or color confusion. That is the
+ *   difference between raising PURPLE_S_MIN and lowering MIN_AREA.
+ *
  * TUNE WITHOUT REDEPLOYING:
  *   1. Connect to the robot WiFi, open http://192.168.43.1:8080 (FTC Dashboard).
  *   2. Expand "ArtifactDetectionTest" in the variable panel.
- *   3. Every gate below is live - HSV bounds, area, circularity, aspect, exposure.
- *   4. The camera stream is mirrored into the dashboard, so you can see the effect.
+ *   3. Every gate is live - HSV bounds, area, circularity, aspect, exposure.
+ *   4. Gates are FROZEN while a trial records, so a mid-trial tweak can never mix two
+ *      configurations into one measurement. Tune between trials, not during.
  *   5. When it looks right, paste the winners into ArtifactColorBlobDetectionProcessor
  *      (HSV) and KColorBlobProcessor (gates).
- *
- * MEASURE THE FALSE-POSITIVE RATE:
- *   Set CONDITION (e.g. "purple_1.0m_center") and EXPECT_LABEL, place exactly one ball,
- *   then hold [A] to record ~100 camera frames. Rows are appended to a CSV. Repeat for
- *   each of the 12 conditions: {purple,green} x {0.5m,1.0m,1.5m} x {center,+30deg,-30deg}.
- *
- *   PASS = single-correct-blob rate >= 98% on every condition.
- *
- *   Rows are deduplicated on the processor's own frame counter, so one row really is
- *   one camera frame, not one OpMode loop.
  *
  * READ THE ASPECT COLUMN - it is a free intrinsics check:
  *   A sphere projects to fx*a wide by fy*a tall, so bbox w/h should read fx/fy = 0.835.
@@ -51,8 +68,8 @@ import java.util.Locale;
  *   is wrong and fy is off by ~19%. Carry that straight into fit_intrinsics.py.
  *
  * Gamepad:
- *   [A] (hold)  record frames for the current CONDITION
- *   [B]         start a new condition block (resets the pass-rate counters)
+ *   [A]         start the armed trial / commit a finished trial and advance
+ *   [B]         discard the current trial and re-arm it (redo)
  *   [X]         disable processor (see the raw camera feed)
  *   [Y]         re-enable processor
  *   [DPad Up]   toggle annotated JPEG snapshots (rejected contours drawn in red)
@@ -83,20 +100,88 @@ public class ArtifactDetectionTest extends LinearOpMode {
     public static double GREEN_H_MIN  =  69, GREEN_S_MIN  = 108, GREEN_V_MIN  =  38;
     public static double GREEN_H_MAX  =  90, GREEN_S_MAX  = 255, GREEN_V_MAX  = 255;
 
-    // -- Test bookkeeping ----------------------------------------------------
-    /** Free-text tag written into every CSV row. e.g. "purple_1.0m_center". */
-    public static String CONDITION    = "purple_1.0m_center";
-    /** The colour that SHOULD be seen. A frame passes only if it sees exactly one of these. */
-    public static String EXPECT_LABEL = "Purple";
+    // -- Trial control -------------------------------------------------------
+    /** Camera frames recorded per trial. 100 gives 1% resolution on the pass rate. */
+    public static int    TARGET_FRAMES    = 100;
+    /** A trial passes when its single-correct-blob rate reaches this percentage. */
+    public static double PASS_RATE_TARGET = 98.0;
     /** Snapshot cadence used when snapshots are toggled on with DPad Up. */
     public static int    SNAPSHOT_EVERY_N = 5;
 
+    /**
+     * The condition matrix: {conditionLabel, expectedColorLabel}.
+     *
+     * {purple, green} x {0.5, 1.0, 1.5 m} x {center, +30deg, -30deg} = 18 trials.
+     * (An earlier version of this comment said 12, which is simply wrong: 2*3*3 = 18.)
+     *
+     * Ordered so you finish every purple placement before switching balls. Delete rows
+     * to shorten a session - nothing else depends on the length or the ordering.
+     */
+    private static final String[][] TRIALS = {
+        {"purple_0.5m_center", "Purple"},
+        {"purple_0.5m_+30deg", "Purple"},
+        {"purple_0.5m_-30deg", "Purple"},
+        {"purple_1.0m_center", "Purple"},
+        {"purple_1.0m_+30deg", "Purple"},
+        {"purple_1.0m_-30deg", "Purple"},
+        {"purple_1.5m_center", "Purple"},
+        {"purple_1.5m_+30deg", "Purple"},
+        {"purple_1.5m_-30deg", "Purple"},
+        {"green_0.5m_center",  "Green"},
+        {"green_0.5m_+30deg",  "Green"},
+        {"green_0.5m_-30deg",  "Green"},
+        {"green_1.0m_center",  "Green"},
+        {"green_1.0m_+30deg",  "Green"},
+        {"green_1.0m_-30deg",  "Green"},
+        {"green_1.5m_center",  "Green"},
+        {"green_1.5m_+30deg",  "Green"},
+        {"green_1.5m_-30deg",  "Green"},
+    };
+
     private static final String TAG = "ArtifactDetectionTest";
 
-    private int framesRecorded = 0;
-    private int framesPassing  = 0;
+    /** Warn on telemetry if a recording trial sees no new camera frame for this long. */
+    private static final long STALL_WARN_MS = 2_000;
+
+    private enum State { ARMED, RECORDING, DONE, COMPLETE }
+
+    private static final String FRAME_CSV_HEADER =
+            "TrialIndex,Condition,ExpectLabel,ProcFrame,BlobCount,Pass,"
+            + "Label,ContourArea,Circularity,W,H,Aspect,CenterX,CenterY,"
+            + "RawContours,AreaRej,CircRej,AspectRej,"
+            + "MinArea,MaxArea,MinCirc,ExpAspect,AspectTol,"
+            + "PurpleHMin,PurpleSMin,PurpleVMin,GreenHMin,GreenSMin,GreenVMin,ExposureMs,Gain";
+
+    private static final String SUMMARY_CSV_HEADER =
+            "TrialIndex,Condition,ExpectLabel,Frames,PassFrames,PassRate,Verdict,"
+            + "ZeroBlobFrames,MultiBlobFrames,WrongLabelFrames,"
+            + "MeanBlobCount,MeanArea,MeanCirc,MeanAspect,MeanRawContours,"
+            + "MinArea,MaxArea,MinCirc,ExpAspect,AspectTol,"
+            + "PurpleHMin,PurpleSMin,PurpleVMin,GreenHMin,GreenSMin,GreenVMin,ExposureMs,Gain";
+
+    // -- Session state -------------------------------------------------------
+    private State state = State.ARMED;
+    private int trialIndex = 0;
+    private int trialsPassing = 0;
+    private final List<String> sessionResults = new ArrayList<>();
+
+    // -- Current-trial state -------------------------------------------------
+    private final List<String> rowBuffer = new ArrayList<>();
+    private int framesRecorded, framesPassing;
+    private int zeroBlobFrames, multiBlobFrames, wrongLabelFrames;
+    private double sumBlobCount, sumRawContours;
+    private double sumArea, sumCirc, sumAspect;
+    private int blobStatSamples;
     private int lastLoggedFrame = -1;
+    private long lastFrameMillis;
     private boolean snapshotsOn = false;
+
+    // Gate values frozen at trial start, so the summary row describes the
+    // configuration the trial was actually measured under.
+    private double fMinArea, fMaxArea, fMinCirc, fExpAspect, fAspectTol;
+    private double fPurpleH, fPurpleS, fPurpleV, fGreenH, fGreenS, fGreenV;
+    private long   fExposure;
+    private int    fGain;
 
     @Override
     public void runOpMode() {
@@ -104,12 +189,10 @@ public class ArtifactDetectionTest extends LinearOpMode {
         telemetry.setMsTransmissionInterval(50);
 
         OpModeUtilities opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
-        KFileWriter fileWriter = new KFileWriter("BlobFalsePositive", opModeUtilities);
-        fileWriter.writeLine("Condition,ExpectLabel,ProcFrame,BlobCount,Pass,"
-                + "Label,ContourArea,Circularity,W,H,Aspect,CenterX,CenterY,"
-                + "RawContours,AreaRej,CircRej,AspectRej,"
-                + "MinArea,MaxArea,MinCirc,ExpAspect,AspectTol,"
-                + "PurpleHMin,PurpleSMin,PurpleVMin,GreenHMin,GreenSMin,GreenVMin,ExposureMs,Gain");
+        KFileWriter frameWriter = new KFileWriter("BlobFalsePositive", opModeUtilities);
+        frameWriter.writeLine(FRAME_CSV_HEADER);
+        KFileWriter summaryWriter = new KFileWriter("BlobTrialSummary", opModeUtilities);
+        summaryWriter.writeLine(SUMMARY_CSV_HEADER);
 
         ArtifactColorBlobDetectionProcessor artifacts = new ArtifactColorBlobDetectionProcessor();
 
@@ -125,11 +208,14 @@ public class ArtifactDetectionTest extends LinearOpMode {
         int  prevGain     = GAIN;
 
         telemetry.addLine("=== Artifact Detection Test ===");
-        telemetry.addData("CSV", fileWriter.getPath());
+        telemetry.addData("Trials", TRIALS.length);
+        telemetry.addData("Frame CSV", frameWriter.getPath());
+        telemetry.addData("Summary CSV", summaryWriter.getPath());
         telemetry.addLine("Dashboard: http://192.168.43.1:8080");
-        telemetry.addLine("Press PLAY, then hold [A] to record a condition.");
+        telemetry.addLine("Press PLAY, then follow the trial prompts.");
         telemetry.update();
-        KLog.d(TAG, "Writing to " + fileWriter.getPath());
+        KLog.d(TAG, "Frame CSV:   " + frameWriter.getPath());
+        KLog.d(TAG, "Summary CSV: " + summaryWriter.getPath());
 
         waitForStart();
 
@@ -137,13 +223,15 @@ public class ArtifactDetectionTest extends LinearOpMode {
 
             // Re-apply camera controls only when the dashboard values actually change -
             // lockCameraControls busy-waits for STREAMING, so calling it every loop stalls.
-            if (EXPOSURE_MS != prevExposure || GAIN != prevGain) {
+            // Never mid-trial: that would change the exposure the trial is measuring.
+            if (state != State.RECORDING && (EXPOSURE_MS != prevExposure || GAIN != prevGain)) {
                 visionManager.lockCameraControls(EXPOSURE_MS, GAIN);
                 prevExposure = EXPOSURE_MS;
                 prevGain     = GAIN;
             }
 
-            pushGates(artifacts);
+            // Gates are live between trials and frozen during one.
+            if (state != State.RECORDING) pushGates(artifacts);
 
             if (gamepad1.x) visionManager.disable(artifacts);
             if (gamepad1.y) visionManager.enable(artifacts);
@@ -153,71 +241,328 @@ public class ArtifactDetectionTest extends LinearOpMode {
                 artifacts.enableSnapshotSaving(snapshotsOn ? SNAPSHOT_EVERY_N : 0);
             }
 
-            if (gamepad1.bWasPressed()) {
-                framesRecorded = 0;
-                framesPassing  = 0;
-                lastLoggedFrame = -1;
-                KLog.d(TAG, "New condition block: " + CONDITION);
-            }
-
             List<VisionRecognition> blobs = artifacts.getLatestResult();
             int blobCount = (blobs == null) ? 0 : blobs.size();
-
-            // One CSV row per CAMERA frame, not per OpMode loop. The processor's own
-            // counter is the only honest frame clock available here.
             int procFrame = artifacts.getDiagFrameCount();
-            boolean newFrame = (procFrame != lastLoggedFrame);
 
-            boolean pass = (blobCount == 1)
-                    && blobs != null
-                    && EXPECT_LABEL.equals(blobs.get(0).label);
+            switch (state) {
+                case ARMED:
+                    if (gamepad1.aWasPressed()) startTrial(artifacts);
+                    break;
 
-            if (gamepad1.a && newFrame) {
-                lastLoggedFrame = procFrame;
-                framesRecorded++;
-                if (pass) framesPassing++;
-                writeRows(fileWriter, artifacts, blobs, blobCount, procFrame, pass);
+                case RECORDING:
+                    // Checked before the frame is consumed so an abort cannot be
+                    // overtaken by the trial completing in the same loop.
+                    if (gamepad1.bWasPressed()) {
+                        rearmTrial("aborted mid-recording");
+                        break;
+                    }
+                    if (procFrame != lastLoggedFrame) {
+                        lastLoggedFrame = procFrame;
+                        lastFrameMillis = System.currentTimeMillis();
+                        recordFrame(artifacts, blobs, blobCount, procFrame);
+                        if (framesRecorded >= Math.max(1, TARGET_FRAMES)) {
+                            state = State.DONE;
+                            KLog.d(TAG, String.format(Locale.US,
+                                    "TRIAL %02d/%02d %s recorded %d frames - %.1f%% (awaiting [A] to commit)",
+                                    trialIndex + 1, TRIALS.length, condition(),
+                                    framesRecorded, passRate()));
+                        }
+                    }
+                    break;
+
+                case DONE:
+                    if (gamepad1.aWasPressed()) {
+                        commitTrial(frameWriter, summaryWriter);
+                    } else if (gamepad1.bWasPressed()) {
+                        rearmTrial("redo requested");
+                    }
+                    break;
+
+                case COMPLETE:
+                default:
+                    break;
             }
 
-            double passRate = (framesRecorded == 0)
-                    ? 0.0 : (100.0 * framesPassing / framesRecorded);
-
-            telemetry.addLine("=== Artifact Detection Test ===");
-            telemetry.addData("CONDITION", CONDITION);
-            telemetry.addData("Expect", EXPECT_LABEL);
-            telemetry.addData("Recorded", "%d frames", framesRecorded);
-            telemetry.addData("Single-correct-blob rate", "%.1f%%  (target >= 98%%)", passRate);
-            telemetry.addData("Snapshots", snapshotsOn ? "ON every " + SNAPSHOT_EVERY_N : "off");
-            telemetry.addLine("-------------------");
-            telemetry.addData("Blobs this frame", blobCount);
-            if (blobs != null) {
-                for (VisionRecognition r : blobs) {
-                    double aspect = (r.getHeight() > 0) ? r.getWidth() / r.getHeight() : 0.0;
-                    telemetry.addLine(String.format(Locale.US,
-                            "  %s a=%.0f c=%.2f %.0fx%.0f ar=%.2f px=(%.0f,%.0f)",
-                            r.label, r.getArea(), r.getCircularity(),
-                            r.getWidth(), r.getHeight(), aspect,
-                            r.center.getX(), r.center.getY()));
-                }
-            }
-            telemetry.addLine("-------------------");
-            telemetry.addData("Pipeline", artifacts.getDiagnosticSummary());
-            telemetry.addLine("[A]=record  [B]=new condition  [X]/[Y]=disable/enable");
-            telemetry.addLine("[DPad Up]=toggle snapshots");
+            renderTelemetry(artifacts, blobs, blobCount);
             telemetry.update();
         }
 
         try {
-            fileWriter.flush();
+            frameWriter.flush();
+            summaryWriter.flush();
         } catch (IOException e) {
-            KLog.e(TAG, "Failed to flush CSV", e);
+            KLog.e(TAG, "Failed to flush CSVs", e);
         }
-        String path = fileWriter.getPath();
-        fileWriter.close();
+        String framePath   = frameWriter.getPath();
+        String summaryPath = summaryWriter.getPath();
+        frameWriter.close();
+        summaryWriter.close();
+        FtcDashboard.getInstance().stopCameraStream();
         visionManager.close();
-        KLog.d(TAG, "Done. " + framesRecorded + " frames written to " + path);
-        KLog.d(TAG, "Pull it using: adb pull " + path + " ~/");
+
+        logSessionBlock();
+        KLog.d(TAG, "Pull them using: adb pull " + framePath + " ~/");
+        KLog.d(TAG, "Pull them using: adb pull " + summaryPath + " ~/");
     }
+
+    // -------------------------------------------------------------------------
+    // Trial lifecycle
+    // -------------------------------------------------------------------------
+
+    private String condition()   { return TRIALS[trialIndex][0]; }
+    private String expectLabel() { return TRIALS[trialIndex][1]; }
+
+    private double passRate() {
+        return (framesRecorded == 0) ? 0.0 : (100.0 * framesPassing / framesRecorded);
+    }
+
+    private boolean trialPassed() { return passRate() >= PASS_RATE_TARGET; }
+
+    private void startTrial(ArtifactColorBlobDetectionProcessor artifacts) {
+        resetTrialCounters();
+        // Start on the NEXT camera frame, not whatever frame happens to be latched
+        // right now - that one was captured before the ball was in position.
+        lastLoggedFrame = artifacts.getDiagFrameCount();
+        lastFrameMillis = System.currentTimeMillis();
+        freezeGates();
+        state = State.RECORDING;
+        KLog.d(TAG, String.format(Locale.US, "TRIAL %02d/%02d %s expect=%s RECORDING %d frames",
+                trialIndex + 1, TRIALS.length, condition(), expectLabel(),
+                Math.max(1, TARGET_FRAMES)));
+    }
+
+    private void rearmTrial(String why) {
+        resetTrialCounters();
+        state = State.ARMED;
+        KLog.d(TAG, String.format(Locale.US, "TRIAL %02d/%02d %s DISCARDED (%s) - re-armed",
+                trialIndex + 1, TRIALS.length, condition(), why));
+    }
+
+    private void resetTrialCounters() {
+        rowBuffer.clear();
+        framesRecorded = 0;
+        framesPassing = 0;
+        zeroBlobFrames = 0;
+        multiBlobFrames = 0;
+        wrongLabelFrames = 0;
+        sumBlobCount = 0;
+        sumRawContours = 0;
+        sumArea = 0;
+        sumCirc = 0;
+        sumAspect = 0;
+        blobStatSamples = 0;
+        lastLoggedFrame = -1;
+    }
+
+    private void freezeGates() {
+        fMinArea   = MIN_AREA;
+        fMaxArea   = MAX_AREA;
+        fMinCirc   = MIN_CIRCULARITY;
+        fExpAspect = EXPECTED_ASPECT;
+        fAspectTol = ASPECT_TOLERANCE;
+        fPurpleH   = PURPLE_H_MIN;
+        fPurpleS   = PURPLE_S_MIN;
+        fPurpleV   = PURPLE_V_MIN;
+        fGreenH    = GREEN_H_MIN;
+        fGreenS    = GREEN_S_MIN;
+        fGreenV    = GREEN_V_MIN;
+        fExposure  = EXPOSURE_MS;
+        fGain      = GAIN;
+    }
+
+    /**
+     * One buffered row per blob, so extra detections are visible individually rather
+     * than collapsed into a count. A frame with zero blobs still writes one row so the
+     * denominator stays honest. Nothing reaches disk until [A] commits the trial.
+     */
+    private void recordFrame(ArtifactColorBlobDetectionProcessor artifacts,
+                             List<VisionRecognition> blobs, int blobCount, int procFrame) {
+        String expect = expectLabel();
+        boolean pass = (blobCount == 1) && expect.equals(blobs.get(0).label);
+
+        framesRecorded++;
+        if (pass) framesPassing++;
+        if (blobCount == 0) {
+            zeroBlobFrames++;
+        } else if (blobCount > 1) {
+            multiBlobFrames++;
+        } else if (!pass) {
+            wrongLabelFrames++;
+        }
+
+        sumBlobCount   += blobCount;
+        sumRawContours += artifacts.getDiagRawContours();
+
+        String tail = String.format(Locale.US,
+                ",%d,%d,%d,%d,%.0f,%.0f,%.2f,%.3f,%.2f,"
+                        + "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%d,%d",
+                artifacts.getDiagRawContours(), artifacts.getDiagAreaRejected(),
+                artifacts.getDiagCircRejected(), artifacts.getDiagAspectRejected(),
+                fMinArea, fMaxArea, fMinCirc, fExpAspect, fAspectTol,
+                fPurpleH, fPurpleS, fPurpleV, fGreenH, fGreenS, fGreenV,
+                fExposure, fGain);
+
+        String head = String.format(Locale.US, "%d,%s,%s,%d,%d,%d",
+                trialIndex + 1, condition(), expect, procFrame, blobCount, pass ? 1 : 0);
+
+        if (blobs == null || blobs.isEmpty()) {
+            rowBuffer.add(head + ",NONE,0,0,0,0,0,0,0" + tail);
+            return;
+        }
+        for (VisionRecognition r : blobs) {
+            double aspect = (r.getHeight() > 0) ? r.getWidth() / r.getHeight() : 0.0;
+            sumArea   += r.getArea();
+            sumCirc   += r.getCircularity();
+            sumAspect += aspect;
+            blobStatSamples++;
+            rowBuffer.add(head + String.format(Locale.US,
+                    ",%s,%.1f,%.3f,%.1f,%.1f,%.3f,%.1f,%.1f",
+                    r.label, r.getArea(), r.getCircularity(),
+                    r.getWidth(), r.getHeight(), aspect,
+                    r.center.getX(), r.center.getY()) + tail);
+        }
+    }
+
+    /** Flush the buffered trial to both CSVs, log it, and advance. */
+    private void commitTrial(KFileWriter frameWriter, KFileWriter summaryWriter) {
+        for (String row : rowBuffer) {
+            frameWriter.writeLine(row);
+        }
+
+        double rate = passRate();
+        boolean passed = trialPassed();
+        double meanBlobCount   = safeMean(sumBlobCount, framesRecorded);
+        double meanRawContours = safeMean(sumRawContours, framesRecorded);
+        double meanArea        = safeMean(sumArea, blobStatSamples);
+        double meanCirc        = safeMean(sumCirc, blobStatSamples);
+        double meanAspect      = safeMean(sumAspect, blobStatSamples);
+
+        summaryWriter.writeLine(String.format(Locale.US,
+                "%d,%s,%s,%d,%d,%.2f,%s,%d,%d,%d,%.3f,%.1f,%.3f,%.3f,%.2f,"
+                        + "%.0f,%.0f,%.2f,%.3f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%d,%d",
+                trialIndex + 1, condition(), expectLabel(),
+                framesRecorded, framesPassing, rate, passed ? "PASS" : "FAIL",
+                zeroBlobFrames, multiBlobFrames, wrongLabelFrames,
+                meanBlobCount, meanArea, meanCirc, meanAspect, meanRawContours,
+                fMinArea, fMaxArea, fMinCirc, fExpAspect, fAspectTol,
+                fPurpleH, fPurpleS, fPurpleV, fGreenH, fGreenS, fGreenV,
+                fExposure, fGain));
+
+        try {
+            frameWriter.flush();
+            summaryWriter.flush();
+        } catch (IOException e) {
+            KLog.e(TAG, "Failed to flush trial " + (trialIndex + 1), e);
+        }
+
+        String line = String.format(Locale.US,
+                "TRIAL %02d/%02d %-20s %5.1f%% %s  zero=%d multi=%d wrong=%d aspect=%.3f",
+                trialIndex + 1, TRIALS.length, condition(), rate, passed ? "PASS" : "FAIL",
+                zeroBlobFrames, multiBlobFrames, wrongLabelFrames, meanAspect);
+        KLog.d(TAG, line);
+        sessionResults.add(line);
+        if (passed) trialsPassing++;
+
+        resetTrialCounters();
+        trialIndex++;
+        if (trialIndex >= TRIALS.length) {
+            state = State.COMPLETE;
+            logSessionBlock();
+        } else {
+            state = State.ARMED;
+        }
+    }
+
+    private static double safeMean(double sum, int n) { return (n == 0) ? 0.0 : sum / n; }
+
+    private void logSessionBlock() {
+        if (sessionResults.isEmpty()) return;
+        KLog.d(TAG, "===== SESSION SUMMARY =====");
+        for (String line : sessionResults) {
+            KLog.d(TAG, line);
+        }
+        KLog.d(TAG, String.format(Locale.US, "%d/%d trials passing (target >= %.1f%%)",
+                trialsPassing, sessionResults.size(), PASS_RATE_TARGET));
+    }
+
+    // -------------------------------------------------------------------------
+    // Telemetry
+    // -------------------------------------------------------------------------
+
+    private void renderTelemetry(ArtifactColorBlobDetectionProcessor artifacts,
+                                 List<VisionRecognition> blobs, int blobCount) {
+        telemetry.addLine("=== Artifact Detection Test ===");
+
+        if (state == State.COMPLETE) {
+            telemetry.addLine(String.format(Locale.US, "ALL %d TRIALS COMPLETE - %d passing",
+                    TRIALS.length, trialsPassing));
+            telemetry.addLine("-------------------");
+            for (String line : sessionResults) {
+                telemetry.addLine(line);
+            }
+            telemetry.addLine("-------------------");
+            telemetry.addLine("Stop the OpMode. Both CSVs are written and flushed.");
+            return;
+        }
+
+        telemetry.addData("TRIAL", "%d / %d", trialIndex + 1, TRIALS.length);
+        telemetry.addData("CONDITION", condition());
+        telemetry.addData("BALL", ">>> %s <<<", expectLabel().toUpperCase(Locale.US));
+
+        switch (state) {
+            case ARMED:
+                telemetry.addData("STATUS", "ARMED - place the ball, press [A]");
+                break;
+            case RECORDING:
+                telemetry.addData("STATUS", "RECORDING  %d / %d",
+                        framesRecorded, Math.max(1, TARGET_FRAMES));
+                if (System.currentTimeMillis() - lastFrameMillis > STALL_WARN_MS) {
+                    telemetry.addLine("!! CAMERA STALLED - no new frames. [B] to redo.");
+                }
+                break;
+            case DONE:
+                telemetry.addData("STATUS", "DONE  %.1f%%  %s (target >= %.1f%%)",
+                        passRate(), trialPassed() ? "PASS" : "FAIL", PASS_RATE_TARGET);
+                telemetry.addData("Failures", "zero=%d  multi=%d  wrongLabel=%d",
+                        zeroBlobFrames, multiBlobFrames, wrongLabelFrames);
+                telemetry.addData("Mean aspect", "%.3f  (expect ~%.3f)",
+                        safeMean(sumAspect, blobStatSamples), EXPECTED_ASPECT);
+                telemetry.addLine("[A] commit + next    [B] discard + redo");
+                break;
+            default:
+                break;
+        }
+
+        telemetry.addLine("-------------------");
+        telemetry.addData("Session", "%d done, %d passing", trialIndex, trialsPassing);
+        if (trialIndex + 1 < TRIALS.length) {
+            telemetry.addData("NEXT", "%s (%s)", TRIALS[trialIndex + 1][0], TRIALS[trialIndex + 1][1]);
+        } else {
+            telemetry.addLine("NEXT: last trial of the session");
+        }
+        telemetry.addData("Snapshots", snapshotsOn ? "ON every " + SNAPSHOT_EVERY_N : "off");
+        telemetry.addLine("[A]=start/commit  [B]=redo  [X]/[Y]=disable/enable");
+        telemetry.addLine("[DPad Up]=toggle snapshots");
+
+        telemetry.addLine("-------------------");
+        telemetry.addData("Blobs this frame", blobCount);
+        if (blobs != null) {
+            for (VisionRecognition r : blobs) {
+                double aspect = (r.getHeight() > 0) ? r.getWidth() / r.getHeight() : 0.0;
+                telemetry.addLine(String.format(Locale.US,
+                        "  %s a=%.0f c=%.2f %.0fx%.0f ar=%.2f px=(%.0f,%.0f)",
+                        r.label, r.getArea(), r.getCircularity(),
+                        r.getWidth(), r.getHeight(), aspect,
+                        r.center.getX(), r.center.getY()));
+            }
+        }
+        telemetry.addData("Pipeline", artifacts.getDiagnosticSummary());
+    }
+
+    // -------------------------------------------------------------------------
+    // Gate plumbing
+    // -------------------------------------------------------------------------
 
     /** Push every dashboard gate into the live processor. */
     private void pushGates(ArtifactColorBlobDetectionProcessor artifacts) {
@@ -246,41 +591,5 @@ public class ArtifactDetectionTest extends LinearOpMode {
         channel.hsvUpperBound.val[0] = hMax;
         channel.hsvUpperBound.val[1] = sMax;
         channel.hsvUpperBound.val[2] = vMax;
-    }
-
-    /**
-     * One row per blob, so extra detections are visible individually rather than
-     * collapsed into a count. A frame with zero blobs still writes one row so the
-     * denominator stays honest.
-     */
-    private void writeRows(KFileWriter fileWriter,
-                           ArtifactColorBlobDetectionProcessor artifacts,
-                           List<VisionRecognition> blobs,
-                           int blobCount, int procFrame, boolean pass) {
-        String tail = String.format(Locale.US,
-                ",%d,%d,%d,%d,%.0f,%.0f,%.2f,%.3f,%.2f,"
-                        + "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%d,%d",
-                artifacts.getDiagRawContours(), artifacts.getDiagAreaRejected(),
-                artifacts.getDiagCircRejected(), artifacts.getDiagAspectRejected(),
-                MIN_AREA, MAX_AREA, MIN_CIRCULARITY, EXPECTED_ASPECT, ASPECT_TOLERANCE,
-                PURPLE_H_MIN, PURPLE_S_MIN, PURPLE_V_MIN,
-                GREEN_H_MIN, GREEN_S_MIN, GREEN_V_MIN,
-                EXPOSURE_MS, GAIN);
-
-        String head = String.format(Locale.US, "%s,%s,%d,%d,%d",
-                CONDITION, EXPECT_LABEL, procFrame, blobCount, pass ? 1 : 0);
-
-        if (blobs == null || blobs.isEmpty()) {
-            fileWriter.writeLine(head + ",NONE,0,0,0,0,0,0,0" + tail);
-            return;
-        }
-        for (VisionRecognition r : blobs) {
-            double aspect = (r.getHeight() > 0) ? r.getWidth() / r.getHeight() : 0.0;
-            fileWriter.writeLine(head + String.format(Locale.US,
-                    ",%s,%.1f,%.3f,%.1f,%.1f,%.3f,%.1f,%.1f",
-                    r.label, r.getArea(), r.getCircularity(),
-                    r.getWidth(), r.getHeight(), aspect,
-                    r.center.getX(), r.center.getY()) + tail);
-        }
     }
 }
