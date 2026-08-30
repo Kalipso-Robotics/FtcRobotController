@@ -363,6 +363,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             return;
         } else {
             path = new Path (injectedPathPoints);
+            KLog.d("ppDebug", "inject done");
         }
 
         if (injectDone && !smootherDone) {
@@ -370,10 +371,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             return;
         } else {
             path = newPath;
+            KLog.d("ppDebug", "smoother done");
         }
 
         if (injectDone && smootherDone && !calcDistanceDone) {
             calculateDistanceAlongPath(path);
+            KLog.d("ppDebug", "calc distance done");
             return;
         }
 
@@ -383,6 +386,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                 for (int i = 1; i < path.numPoints() - 1; i++) {
                     if (path.getPoint(i).getVelocity() < 1.0) {
                         lookaheadBarrierIndex = i;
+                        KLog.d("ppDebug", "calc velo accel done");
                         break;
                     }
                 }
