@@ -123,6 +123,8 @@ public class RedAutoDepotNew extends KOpMode {
         //trip1.setDependentActions(trip0);
 //        trip1.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         addPointsToTrip1SpikeMark();
+        KLog.d("ppDebugFollow", "added 3 points to trip1 move to depot"); //todo why is this not logging
+
         KLog.d("ppDebugFollow", "Added points to trip 1");
         trip1.getMoveToShoot().setShouldShooterStop(false);
         autoDepot.addAction(trip1);
@@ -253,7 +255,7 @@ public class RedAutoDepotNew extends KOpMode {
         trip1.getMoveToDepot().addPoint(650, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getMoveToDepot().addPoint(500, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip1.getMoveToDepot().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        KLog.d("ppdebug", "added 3 points to trip1 move to depot");
+        KLog.d("ppdebug", "added 3 points to trip1 move to depot"); //todo why is this not logging
     }
 
     public DepotRoundTrip generateRetryTrip(DepotRoundTrip lastTrip, DepotTrips trip) {
