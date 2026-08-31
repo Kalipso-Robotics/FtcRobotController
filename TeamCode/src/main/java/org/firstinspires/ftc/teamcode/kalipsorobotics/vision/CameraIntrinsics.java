@@ -112,9 +112,17 @@ public class CameraIntrinsics{
      *                         e.g. KColorBlobProcessor.getObjectDiameterMM()
      */
     public Point calculateRobotFramePosFromSize(VisionRecognition recognition, double objectDiameterMM) {
-        double pixelDiameter = (recognition.getWidth() + recognition.getHeight()) / 2.0;
-        if (pixelDiameter <= 0) return null;
-        double range = (objectDiameterMM * this.fx) / pixelDiameter; // depth along camera Z-axis
+        double pixelWidth  = recognition.getWidth();
+        double pixelHeight = recognition.getHeight();
+        if (pixelWidth <= 0 || pixelHeight <= 0) return null;
+
+        // Width is governed by fx, height by fy. Averaging the two PIXEL dimensions
+        // and then dividing by fx alone (as this did originally) is incoherent
+        // whenever fx != fy -- and here they differ by 19% (444.14 vs 532.28).
+        // Average the two independent RANGE estimates instead.
+        double rangeFromWidth  = (objectDiameterMM * this.fx) / pixelWidth;
+        double rangeFromHeight = (objectDiameterMM * this.fy) / pixelHeight;
+        double range = (rangeFromWidth + rangeFromHeight) / 2.0; // depth along camera Z-axis
 
         double norm_x = this.cx - recognition.center.getX();
         double norm_y = this.cy - recognition.center.getY();
@@ -153,4 +161,18 @@ public class CameraIntrinsics{
 
     public double getCx() { return cx; }
     public double getCy() { return cy; }
+    public double getFx() { return fx; }
+    public double getFy() { return fy; }
+    public double getMountAngle() { return mountAngle; }
+    public Vector3d getCameraOffset() { return cameraOffset; }
+
+    /**
+     * Expected bounding-box width/height ratio for a sphere, = fx/fy.
+     *
+     * A sphere subtending angle a projects to fx*a pixels wide by fy*a tall, so
+     * this is NOT 1.0 unless fx == fy. Measuring a real ball against this value is
+     * the cheapest available check on the 1280x800 -> 640x480 intrinsics rescale:
+     * if real balls read ~1.0, fy is wrong by roughly the fx/fy ratio.
+     */
+    public double getExpectedSphereAspect() { return fx / fy; }
 }
