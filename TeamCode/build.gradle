@@ -83,6 +83,5 @@ dependencies {
 
 // Fix for Sloth remove task issue
 tasks.matching { it.name == 'removeSlothRemote' }.configureEach {
-    commandLine 'adb', 'shell', 'rm', '-rf', '/storage/emulated/0/FIRST/dairy/sloth'
-    ignoreExitValue = true
+    enabled = false
 }
