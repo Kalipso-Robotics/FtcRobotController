@@ -749,6 +749,11 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             return;
         }
 
+        if (path.numPoints() < 5) {
+            smootherDone = true;
+            return;
+        }
+
         if (injectDone && (!finishedCurrentLoop || change >= SMOOTHER_TOLERANCE)) {
 
             if (finishedCurrentLoop && change >= SMOOTHER_TOLERANCE) {

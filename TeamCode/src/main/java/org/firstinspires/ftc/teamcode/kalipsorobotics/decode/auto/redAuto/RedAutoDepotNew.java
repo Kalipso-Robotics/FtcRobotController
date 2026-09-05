@@ -128,6 +128,7 @@ public class RedAutoDepotNew extends KOpMode {
         KLog.d("ppDebugFollow", "Added points to trip 1");
         trip1.getMoveToShoot().setShouldShooterStop(false);
         autoDepot.addAction(trip1);
+        lastTrip = trip1;
 
         // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
 
@@ -195,7 +196,14 @@ public class RedAutoDepotNew extends KOpMode {
         tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
         tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-        waitForStart();
+        // Custom wait-for-start: same idle-until-pressed behavior as waitForStart(), but also
+        // drives trip1's moveToDepot precompute (path injection/smoothing) each spin so that
+        // work is already done by the time the match starts, instead of stalling the robot's
+        // first move for however many ticks precompute needs after START is pressed.
+        while (!isStarted() && !isStopRequested()) {
+            trip1.getMoveToDepot().runPrecomputeStep();
+            idle();
+        }
         KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();

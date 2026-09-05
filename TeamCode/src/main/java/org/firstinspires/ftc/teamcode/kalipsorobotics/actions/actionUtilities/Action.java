@@ -142,6 +142,17 @@ public abstract class Action {
 
     }
 
+    /**
+     * Public entry point to run the same incremental work precomputeWhileBlocked() does,
+     * without going through update() / actually driving anything. Lets a caller (e.g. an
+     * OpMode's own wait-for-start loop) front-load slow one-time setup - like AdaptivePurePursuitAction's
+     * path injection/smoothing - during init, before waitForStart() returns, instead of burning
+     * match-time ticks on it once the OpMode is running.
+     */
+    public void runPrecomputeStep() {
+        precomputeWhileBlocked();
+    }
+
     public boolean dependentActionsDone() {
         for (Action a : dependentActions) {
             if (a != null && !a.getIsDone()) {
