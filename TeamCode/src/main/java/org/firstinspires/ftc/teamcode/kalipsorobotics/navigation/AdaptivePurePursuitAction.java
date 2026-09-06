@@ -89,16 +89,16 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     //TUNING NUMBERS: USE DATA ABOUT ROBOT 1500
     private final double PATH_MAX_VELOCITY = 2100; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private final double MAX_ACCELERATION = 4500; // mm/s^2, maximum acceleration of the robot, 6000
-    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 4; // mm/s^2
+    private final double MAX_ACCELERATION = 4750; // mm/s^2, maximum acceleration of the robot, 6000
+    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
     private final double MAX_ANGULAR_VELOCITY = 10.0; //rad/s, maximum turning velocity of the robot 5.5
 
     private final double WHEELBASE_LENGTH = 9.125*25.4; //front wheel to back wheel
     private final double TRACK_WIDTH = 12.5*25.4; //side to side
     private final double K_p = 0.000016; // 0.00002
-    private final double K_a = 0.000001; // 0.001
-    private final double K_v = 0.00038; // 0.00036 0.00225
+    private final double K_a = 0.00001; // 0.001
+    private final double K_v = 0.0004; // 0.00036 0.00225
     private final double K = 3.0; //based on how slow you want the robot to go around turns, 1000
 
     /*
@@ -387,6 +387,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                     if (path.getPoint(i).getVelocity() < 1.0) {
                         lookaheadBarrierIndex = i;
                         KLog.d("ppDebug", "calc velo accel done");
+                        KLog.d("PPTest", "pp calc done at " + timer.milliseconds());
                         break;
                     }
                 }
@@ -465,12 +466,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                     path.getLastPoint().getTheta() - currentPosition.getTheta()
             );
 
-//            if (closestIdx >= lastIdx - 1 &&
-//                    dError < lastSearchRadius &&
-//                    Math.abs(aError) <= Math.toRadians(finalAngleLockingThreshholdDeg)) {
-//                finishedMoving();
-//                return;
-//            }
+            // Position/angle proximity to the last point alone is vacuous for a path whose end
+            // coincides with (or is near) its start - e.g. an out-and-back path - since that's
+            // trivially true before the robot has moved at all. Require actual progress along
+            // the path (closestIdx near lastIdx) too.
+            boolean hasReachedEndOfPath = closestIdx >= lastIdx - 1;
+            KLog.d("ppDebug", "has reached end of path " + hasReachedEndOfPath);
 
             boolean atFinalPosition = dError < lastSearchRadius;
             KLog.e("ppDebug", "at final position " + atFinalPosition);
@@ -480,7 +481,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             KLog.e("ppDebug", "at final angle " + atFinalAngle);
 
 
-            if (atFinalPosition && atFinalAngle) {
+            if (hasReachedEndOfPath && atFinalPosition && atFinalAngle) {
                 finishedMoving();
                 return;
             }
