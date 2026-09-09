@@ -92,6 +92,12 @@ public class RaytracingDataCollector extends LinearOpMode {
      * Note X is NEGATIVE: the ray uses normX = cx - pixelX so +X is LEFT, and the
      * Arducam sits to the RIGHT of robot center.
      *
+     * MOUNT_ANGLE_DEG is the ONE constant worth sweeping here. Do not use this OpMode's
+     * CSV to "fit" fx/fy/cx/cy -- those belong to the lens and only a checkerboard can
+     * honestly change them; solving them from tape-measured distances launders mounting
+     * error into the lens model. With the intrinsics fixed, the angle is sharply
+     * identifiable from this data (RMS 570mm at 24 deg, 24.6mm at 29, 74.2mm at 30).
+     *
      * KEEP THESE IN SYNC WITH ARDUCAM. The 2026-09-08 run was collected with
      * MOUNT_ANGLE_DEG still at its old 0.0 default while ARDUCAM shipped 24 deg, and
      * Z at 151.868 (the pre-tilt value) instead of the tilt-corrected 163.470. A level
@@ -100,7 +106,7 @@ public class RaytracingDataCollector extends LinearOpMode {
      * 10 distances in that CSV. The ray math was never wrong; these constants were. The
      * raw pixel columns stayed valid, which is what the re-fit was recovered from.
      */
-    public static double MOUNT_ANGLE_DEG = 24.0;
+    public static double MOUNT_ANGLE_DEG = 29.0;
     public static double CAM_HEIGHT_MM   = 236.163;
     public static double CAM_OFFSET_X_MM = -157.548;
     public static double CAM_OFFSET_Z_MM = 163.470;

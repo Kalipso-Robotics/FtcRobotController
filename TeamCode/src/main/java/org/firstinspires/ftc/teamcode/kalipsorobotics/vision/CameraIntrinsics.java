@@ -27,11 +27,17 @@ public class CameraIntrinsics{
      * why the old size ranging fell apart with distance: 19 px is 11% of a 183 px blob
      * at 508mm but 31% of a 47 px blob at 1422mm.
      *
-     * ponytail: SIZE_FOCAL_PX (629.8) and fy (555.5) disagree by 8% and physically
-     * should not -- distortion is never applied and theta/cy stay partly coupled in the
-     * floor fit. Forcing one focal on both paths fails past 1200mm (+152mm at 1422mm),
-     * so both constants stay until the real fix: a checkerboard calibration taken at
-     * 640x480 directly rather than rescaled from 1280x800. See calibrate_camera.py.
+     * This is NOT a lens intrinsic and must not be read as one. It is a lumped empirical
+     * constant for "blob pixels per unit angular size of THIS ball under THIS
+     * segmentation", which is why it is named SIZE_FOCAL_PX and not fx.
+     *
+     * ponytail: it sits 18% above fy (629.8 vs 532.3) and physically should not. Part of
+     * that gap is the segmentation, part is that distortion is never applied, and part
+     * may be the assumed 127mm diameter -- a true focal of 532 would imply the visible
+     * blob is ~150mm across. Validating it against the same CSV it was fitted from is
+     * circular, so treat it as a calibration knob, not a measurement. Real fix: a
+     * checkerboard calibration at 640x480 directly rather than rescaled from 1280x800
+     * (see calibrate_camera.py), plus a caliper on the artifact.
      *
      * Note also that bbox dimensions are quantised to EVEN full-res pixels (320x240
      * processing, x2 in scaleRectToFullResolution), so +/-1 processing pixel is ~4% of a
@@ -48,17 +54,32 @@ public class CameraIntrinsics{
     // fit has no lever arm but the camera's own 157.5mm offset and just re-measures it.
     // Collect ~6 off-centre bursts and re-run fit_intrinsics.py to finish the job.
     //
-    // fy and cy ARE solved: fitted from that CSV (n=300, 508-1422mm) with the mount
-    // angle pinned at the measured 24 deg. R^2=0.993, floor-projection error mean
-    // +6.9mm / sd 32.5mm, inside max(5%, 50mm) at all ten distances. The old rescaled
-    // fy=532.27560 / cy=212.43984 gave errors growing 63mm -> 1079mm across that range.
+    // DO NOT "fit" fx/fy/cx/cy from ground-truth distance CSVs. They are properties of
+    // the lens and sensor; the only honest way to change them is a checkerboard
+    // calibration (calibrate_camera.py). Solving them from tape-measured ball distances
+    // just launders errors in cam height, cam offset, mount angle and the blob's
+    // floor-contact assumption INTO the lens model, where they are invisible. That was
+    // tried on the 2026-09-08 CSV and it fitted fy=555.5/cy=171.5 -- a principal point
+    // 68px off centre in a 480-tall image, which no real sensor has. It also scored
+    // WORSE end to end (RMS 28.7mm, worst 67.4mm) than leaving the intrinsics alone.
+    //
+    // MOUNT ANGLE is the exception and the one number that was fitted here. It is a
+    // property of the bracket, not the lens, it is a single parameter, and with the
+    // intrinsics held fixed it is sharply identifiable: RMS over the ten ground-truth
+    // distances is 570mm at 24 deg, 69.6mm at 28, 24.6mm at 29, 74.2mm at 30. 29 deg it
+    // is, and with it the floor projection lands inside max(5%, 50mm) at every distance.
+    //
+    // The bracket is nominally 24 deg. The data says 29 and leaves no room to argue: no
+    // plausible mounting geometry rescues 24 (the best-fitting cam height for it is
+    // 150mm against a measured 236, still at RMS 132). Re-measure the assembled tilt --
+    // this constant is currently absorbing whatever that discrepancy really is.
     public static final CameraIntrinsics ARDUCAM = new CameraIntrinsics(
-            444.14195, 555.532,
-            350.01860, 171.492,
+            444.14195, 532.27560,
+            350.01860, 212.43984,
             0.045011, -0.059862, 0.000330,
             0.001499, 0.005590,
-            Math.toRadians(24),
-            new Vector3d(-157.548, 236.163, 163.470) // offsets, z=151.868 before tilt 24deg,
+            Math.toRadians(29),
+            new Vector3d(-157.548, 236.163, 163.470) // offsets, z=151.868 before tilt,
     );
 
 
