@@ -13,15 +13,73 @@ public class CameraIntrinsics{
     private final double mountAngle;
     private final Vector3d cameraOffset;
     private final double k1, k2, k3, p1, p2; //distortions
-    // Calibrated at 1280x800 (see calibrate_camera.py), scaled to 640x480:
-    //   fx,cx *= 0.5   fy,cy *= 0.6   distortion coeffs are dimensionless.
+
+    /**
+     * Apparent-size ranging is calibrated separately from the floor ray, because the
+     * colour mask is a SMALLER disc than the ball's silhouette by a roughly constant
+     * ~19 px at full resolution: the 5x5 Gaussian and 3x3 MORPH_OPEN run at 320x240 and
+     * get doubled back to full res, and the HSV threshold clips the ball's shaded limb.
+     *
+     * The deficit is ADDITIVE, not multiplicative -- fitting
+     *     mean(bboxW, bboxH) = SIZE_FOCAL_PX * D / range + BLOB_EDGE_DEFICIT_PX
+     * to RaytracingGroundTruth_2026_09_08 gives R^2=0.997 over 508-1422mm, and range
+     * error mean +3.9mm / sd 24.5mm, inside max(5%, 50mm) at all ten distances. That is
+     * why the old size ranging fell apart with distance: 19 px is 11% of a 183 px blob
+     * at 508mm but 31% of a 47 px blob at 1422mm.
+     *
+     * This is NOT a lens intrinsic and must not be read as one. It is a lumped empirical
+     * constant for "blob pixels per unit angular size of THIS ball under THIS
+     * segmentation", which is why it is named SIZE_FOCAL_PX and not fx.
+     *
+     * ponytail: it sits 18% above fy (629.8 vs 532.3) and physically should not. Part of
+     * that gap is the segmentation, part is that distortion is never applied, and part
+     * may be the assumed 127mm diameter -- a true focal of 532 would imply the visible
+     * blob is ~150mm across. Validating it against the same CSV it was fitted from is
+     * circular, so treat it as a calibration knob, not a measurement. Real fix: a
+     * checkerboard calibration at 640x480 directly rather than rescaled from 1280x800
+     * (see calibrate_camera.py), plus a caliper on the artifact.
+     *
+     * Note also that bbox dimensions are quantised to EVEN full-res pixels (320x240
+     * processing, x2 in scaleRectToFullResolution), so +/-1 processing pixel is ~4% of a
+     * 47 px blob at 1422mm. That is the noise floor here; no constant removes it.
+     */
+    public static double SIZE_FOCAL_PX        = 629.786;
+    public static double BLOB_EDGE_DEFICIT_PX = -19.290;
+    // fx, cx and the distortion coeffs still come from the 1280x800 checkerboard
+    // (see calibrate_camera.py) rescaled by 0.5 on x. That rescale is KNOWN WRONG --
+    // real balls read a bbox aspect of 1.01-1.04 in the clean 610-813mm band while
+    // fx/fy says 0.834, so the pixels are square-ish and the camera crops rather than
+    // squashing. fx/cx are left as-is only because they are not yet solvable: every row
+    // of RaytracingGroundTruth_2026_09_08 is centred (KnownLateralMM 0), so a horizontal
+    // fit has no lever arm but the camera's own 157.5mm offset and just re-measures it.
+    // Collect ~6 off-centre bursts and re-run fit_intrinsics.py to finish the job.
+    //
+    // DO NOT "fit" fx/fy/cx/cy from ground-truth distance CSVs. They are properties of
+    // the lens and sensor; the only honest way to change them is a checkerboard
+    // calibration (calibrate_camera.py). Solving them from tape-measured ball distances
+    // just launders errors in cam height, cam offset, mount angle and the blob's
+    // floor-contact assumption INTO the lens model, where they are invisible. That was
+    // tried on the 2026-09-08 CSV and it fitted fy=555.5/cy=171.5 -- a principal point
+    // 68px off centre in a 480-tall image, which no real sensor has. It also scored
+    // WORSE end to end (RMS 28.7mm, worst 67.4mm) than leaving the intrinsics alone.
+    //
+    // MOUNT ANGLE is the exception and the one number that was fitted here. It is a
+    // property of the bracket, not the lens, it is a single parameter, and with the
+    // intrinsics held fixed it is sharply identifiable: RMS over the ten ground-truth
+    // distances is 570mm at 24 deg, 69.6mm at 28, 24.6mm at 29, 74.2mm at 30. 29 deg it
+    // is, and with it the floor projection lands inside max(5%, 50mm) at every distance.
+    //
+    // The bracket is nominally 24 deg. The data says 29 and leaves no room to argue: no
+    // plausible mounting geometry rescues 24 (the best-fitting cam height for it is
+    // 150mm against a measured 236, still at RMS 132). Re-measure the assembled tilt --
+    // this constant is currently absorbing whatever that discrepancy really is.
     public static final CameraIntrinsics ARDUCAM = new CameraIntrinsics(
             444.14195, 532.27560,
             350.01860, 212.43984,
             0.045011, -0.059862, 0.000330,
             0.001499, 0.005590,
-            Math.toRadians(0),
-            new Vector3d(-157.548, 236.163, 151.868) // offsets
+            Math.toRadians(29),
+            new Vector3d(-157.548, 236.163, 163.470) // offsets, z=151.868 before tilt,
     );
 
 
@@ -116,13 +174,16 @@ public class CameraIntrinsics{
         double pixelHeight = recognition.getHeight();
         if (pixelWidth <= 0 || pixelHeight <= 0) return null;
 
-        // Width is governed by fx, height by fy. Averaging the two PIXEL dimensions
-        // and then dividing by fx alone (as this did originally) is incoherent
-        // whenever fx != fy -- and here they differ by 19% (444.14 vs 532.28).
-        // Average the two independent RANGE estimates instead.
-        double rangeFromWidth  = (objectDiameterMM * this.fx) / pixelWidth;
-        double rangeFromHeight = (objectDiameterMM * this.fy) / pixelHeight;
-        double range = (rangeFromWidth + rangeFromHeight) / 2.0; // depth along camera Z-axis
+        // The blob is a shrunken disc, not the ball's silhouette: subtract the measured
+        // edge deficit before ranging, and use the focal that was fitted WITH that
+        // deficit (SIZE_FOCAL_PX), not fx/fy -- see the constants' javadoc. Averaging
+        // the two pixel dimensions is what the fit is calibrated against, and it is also
+        // the right thing for a sphere, whose projection is the same angular size on
+        // both axes.
+        double apparentDiameterPx =
+                (pixelWidth + pixelHeight) / 2.0 - BLOB_EDGE_DEFICIT_PX;
+        if (apparentDiameterPx <= 0) return null;
+        double range = (objectDiameterMM * SIZE_FOCAL_PX) / apparentDiameterPx;
 
         double norm_x = this.cx - recognition.center.getX();
         double norm_y = this.cy - recognition.center.getY();
@@ -135,8 +196,18 @@ public class CameraIntrinsics{
         double world_z = y_direction * Math.sin(theta) + z_direction * Math.cos(theta);
         double world_x = x_direction;
 
-        double floorX = range * world_x;
-        double floorZ = range * world_z;
+        // NORMALISE before scaling. The direction vector is built with z_direction = 1,
+        // so its length is sqrt(x^2 + y^2 + 1) -- up to 1.14 at the image edge, never 1.
+        // `range` is a true camera-to-object distance (that is what SIZE_FOCAL_PX was
+        // fitted against), so scaling the un-normalised vector by it overshot by that
+        // length: ~14% at 508mm and ~5% at 1422mm, varying with where the blob sat in
+        // frame. calculateRobotFramePos does NOT need this -- its t = -h/world_y is a
+        // ray-plane intersection, which is scale-invariant in the direction vector.
+        double norm = Math.sqrt(world_x * world_x + world_y * world_y + world_z * world_z);
+        if (norm <= 0) return null;
+
+        double floorX = range * world_x / norm;
+        double floorZ = range * world_z / norm;
 
         return new Point(floorX + cameraOffset.getX(), floorZ + cameraOffset.getZ());
     }
@@ -170,9 +241,19 @@ public class CameraIntrinsics{
      * Expected bounding-box width/height ratio for a sphere, = fx/fy.
      *
      * A sphere subtending angle a projects to fx*a pixels wide by fy*a tall, so
-     * this is NOT 1.0 unless fx == fy. Measuring a real ball against this value is
-     * the cheapest available check on the 1280x800 -> 640x480 intrinsics rescale:
-     * if real balls read ~1.0, fy is wrong by roughly the fx/fy ratio.
+     * this is NOT 1.0 unless fx == fy.
+     *
+     * That check has now been run and it FAILED: real balls read 1.01-1.04 in the clean
+     * 610-813mm band of RaytracingGroundTruth_2026_09_08, against the 0.834 the shipped
+     * fx/fy predicts. The pixels are square-ish and the 0.5/0.6 anamorphic rescale is
+     * wrong. fy has since been re-fitted, but fx has not (no off-centre samples exist to
+     * solve it), so this ratio is still built on a known-bad fx and currently reads 0.80.
+     *
+     * Consequence for callers: the aspect gate in KColorBlobProcessor is comparing
+     * against a value ~20% below what real spheres produce, so its tolerance is doing
+     * the work. Re-review that tolerance once fx is solved -- do not tighten it before.
+     * Outside that band the measurement drifts anyway (1.18 at 508mm, 1.30 at 1422mm) as
+     * the edge deficit eats height faster than width.
      */
     public double getExpectedSphereAspect() { return fx / fy; }
 }

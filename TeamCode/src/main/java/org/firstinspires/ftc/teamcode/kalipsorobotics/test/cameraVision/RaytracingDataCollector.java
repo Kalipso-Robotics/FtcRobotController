@@ -68,10 +68,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobU
  *   which makes per-sample noise visible in the CSV instead of hiding it.
  *
  * Controls:
- *   DPad Up/Down:      known distance +/- 10 mm
- *   DPad Right/Left:   known distance +/- 100 mm
+ *   B:                 toggle inches mode (resets dial to 20in / 0in)
+ *   DPad Up/Down:      known distance +/- 10 mm   (+/- 1 in in inches mode)
+ *   DPad Right/Left:   known distance +/- 100 mm  (+/- 4 in in inches mode)
  *   Right/Left bumper: known lateral  +/- 10 mm   (+ = LEFT of robot center)
- *   B / X:             known lateral  +/- 100 mm
  *   Left Trigger:      capture a burst of BURST_FRAMES frames
  *   Y:                 write the captured burst to CSV
  *   A:                 discard the captured burst
@@ -91,13 +91,28 @@ public class RaytracingDataCollector extends LinearOpMode {
      * fitted constants without a redeploy. Defaults match CameraIntrinsics.ARDUCAM.
      * Note X is NEGATIVE: the ray uses normX = cx - pixelX so +X is LEFT, and the
      * Arducam sits to the RIGHT of robot center.
+     *
+     * MOUNT_ANGLE_DEG is the ONE constant worth sweeping here. Do not use this OpMode's
+     * CSV to "fit" fx/fy/cx/cy -- those belong to the lens and only a checkerboard can
+     * honestly change them; solving them from tape-measured distances launders mounting
+     * error into the lens model. With the intrinsics fixed, the angle is sharply
+     * identifiable from this data (RMS 570mm at 24 deg, 24.6mm at 29, 74.2mm at 30).
+     *
+     * KEEP THESE IN SYNC WITH ARDUCAM. The 2026-09-08 run was collected with
+     * MOUNT_ANGLE_DEG still at its old 0.0 default while ARDUCAM shipped 24 deg, and
+     * Z at 151.868 (the pre-tilt value) instead of the tilt-corrected 163.470. A level
+     * camera puts the horizon at cy, so every floor-contact pixel above that row hit the
+     * world_y > -0.01 guard in calculateRobotFramePos and came back Infinity -- 9 of the
+     * 10 distances in that CSV. The ray math was never wrong; these constants were. The
+     * raw pixel columns stayed valid, which is what the re-fit was recovered from.
      */
-    public static double MOUNT_ANGLE_DEG = 0.0;
+    public static double MOUNT_ANGLE_DEG = 29.0;
     public static double CAM_HEIGHT_MM   = 236.163;
     public static double CAM_OFFSET_X_MM = -157.548;
-    public static double CAM_OFFSET_Z_MM = 151.868;
+    public static double CAM_OFFSET_Z_MM = 163.470;
 
     private static final String TAG = "RaytracingDataCollector";
+    private static final double MM_PER_INCH = 25.4;
 
     private static final String CSV_HEADER =
             "KnownDistMM,KnownLateralMM,"
@@ -122,6 +137,7 @@ public class RaytracingDataCollector extends LinearOpMode {
 
     private double knownDistanceMM = 500.0;
     private double knownLateralMM  = 0.0;
+    private boolean inchesMode = false;
 
     private final List<GroundTruthSample> burst = new ArrayList<>();
     private boolean capturing = false;
@@ -169,16 +185,22 @@ public class RaytracingDataCollector extends LinearOpMode {
                 prevGain     = GAIN;
             }
 
-            if (gamepad1.dpadUpWasPressed())    knownDistanceMM += 10;
-            if (gamepad1.dpadDownWasPressed())  knownDistanceMM -= 10;
-            if (gamepad1.dpadRightWasPressed()) knownDistanceMM += 100;
-            if (gamepad1.dpadLeftWasPressed())  knownDistanceMM -= 100;
+            if (gamepad1.bWasPressed()) {
+                inchesMode = !inchesMode;
+                knownDistanceMM = inchesMode ? 20 * MM_PER_INCH : 500.0;
+                knownLateralMM  = 0.0;
+            }
+
+            double smallStep = inchesMode ? MM_PER_INCH : 10;
+            double bigStep   = inchesMode ? 4 * MM_PER_INCH : 100;
+            if (gamepad1.dpadUpWasPressed())    knownDistanceMM += smallStep;
+            if (gamepad1.dpadDownWasPressed())  knownDistanceMM -= smallStep;
+            if (gamepad1.dpadRightWasPressed()) knownDistanceMM += bigStep;
+            if (gamepad1.dpadLeftWasPressed())  knownDistanceMM -= bigStep;
             knownDistanceMM = Math.max(0, knownDistanceMM);
 
             if (gamepad1.rightBumperWasPressed()) knownLateralMM += 10;
             if (gamepad1.leftBumperWasPressed())  knownLateralMM -= 10;
-            if (gamepad1.bWasPressed())           knownLateralMM += 100;
-            if (gamepad1.xWasPressed())           knownLateralMM -= 100;
 
             // Rebuild each loop so dashboard mount tweaks take effect live.
             CameraIntrinsics intrinsics = CameraIntrinsics.ARDUCAM.withMount(
@@ -256,8 +278,14 @@ public class RaytracingDataCollector extends LinearOpMode {
 
             // ── Telemetry ────────────────────────────────────────────────────
             telemetry.addLine("=== Raytracing Data Collector ===");
-            telemetry.addData("Known Distance (dial)", "%.1f mm", knownDistanceMM);
-            telemetry.addData("Known Lateral  (dial)", "%.1f mm  (+ = LEFT)", knownLateralMM);
+            telemetry.addData("Units", inchesMode ? "INCHES [B to switch to mm]" : "mm [B to switch to inches]");
+            if (inchesMode) {
+                telemetry.addData("Known Distance (dial)", "%.2f in", knownDistanceMM / MM_PER_INCH);
+                telemetry.addData("Known Lateral  (dial)", "%.2f in  (+ = LEFT)", knownLateralMM / MM_PER_INCH);
+            } else {
+                telemetry.addData("Known Distance (dial)", "%.1f mm", knownDistanceMM);
+                telemetry.addData("Known Lateral  (dial)", "%.1f mm  (+ = LEFT)", knownLateralMM);
+            }
             telemetry.addData("Burst", capturing
                     ? String.format(Locale.US, "CAPTURING %d/%d", burst.size(), BURST_FRAMES)
                     : String.format(Locale.US, "%d held", burst.size()));
@@ -300,8 +328,10 @@ public class RaytracingDataCollector extends LinearOpMode {
             if (!burst.isEmpty()) {
                 telemetry.addLine("Last captured: " + burst.get(burst.size() - 1).summary);
             }
-            telemetry.addLine("DPad U/D: dist +/-10   DPad L/R: dist +/-100");
-            telemetry.addLine("Bumpers: lateral +/-10   [B]/[X]: lateral +/-100");
+            telemetry.addLine(inchesMode
+                    ? "DPad U/D: dist +/-1in   DPad L/R: dist +/-4in"
+                    : "DPad U/D: dist +/-10mm   DPad L/R: dist +/-100mm");
+            telemetry.addLine("Bumpers: lateral +/-10mm   [B]: toggle inches mode");
             telemetry.addLine("LT: capture burst   [Y]: save burst   [A]: discard");
             telemetry.update();
         }
