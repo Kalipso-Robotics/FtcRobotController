@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.DetectedBlob;
 import org.junit.Test;
 import org.opencv.core.Rect;
 
@@ -34,9 +35,9 @@ public class DetectedBlobTest {
         DetectedBlob blob = new DetectedBlob(rect, 2500.0, 0.85, "Green");
 
         assertSame(rect, blob.boundingBox);
-        assertEquals(2500.0, blob.area, 0.001);
+        assertEquals(2500.0, blob.contourArea, 0.001);
         assertEquals(0.85,   blob.circularity, 0.001);
-        assertEquals("Green", blob.colorLabel);
+        assertEquals("Green", blob.label);
     }
 
     @Test
@@ -50,9 +51,14 @@ public class DetectedBlobTest {
     }
 
     @Test
-    public void testToStringMatchesLabel() {
+    public void testLabelIsJustTheColor() {
+        // toString() is the annotated overlay text; label is only the color name, and
+        // KColorBlobProcessor.getLargestBlobByLabel() matches on that bare color. If the
+        // two ever collapse back into one string, label lookups stop finding anything.
         DetectedBlob blob = new DetectedBlob(new Rect(0, 0, 100, 100), 10000.0, 0.80, "Purple");
-        assertEquals(blob.toString(), blob.label);
+        assertEquals("Purple", blob.label);
+        assertTrue(blob.toString().startsWith("Purple"));
+        assertNotEquals(blob.toString(), blob.label);
     }
 
     // -------------------------------------------------------------------------

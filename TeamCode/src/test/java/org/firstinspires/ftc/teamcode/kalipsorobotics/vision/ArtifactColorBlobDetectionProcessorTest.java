@@ -94,7 +94,7 @@ public class ArtifactColorBlobDetectionProcessorTest {
 
         DetectedBlob purple = processor.getLargestPurpleBlob();
         assertNotNull(purple);
-        assertEquals("Purple", purple.colorLabel);
+        assertEquals("Purple", purple.label);
     }
 
     @Test
@@ -112,8 +112,8 @@ public class ArtifactColorBlobDetectionProcessorTest {
 
         assertTrue(processor.hasPurpleBlob());
         assertTrue(processor.hasGreenBlob());
-        assertEquals("Purple", processor.getLargestPurpleBlob().colorLabel);
-        assertEquals("Green",  processor.getLargestGreenBlob().colorLabel);
+        assertEquals("Purple", processor.getLargestPurpleBlob().label);
+        assertEquals("Green",  processor.getLargestGreenBlob().label);
     }
 
     @Test
@@ -122,7 +122,7 @@ public class ArtifactColorBlobDetectionProcessorTest {
         DetectedBlob small = makeBlob("Purple", 400, 300, 40,  40,  1600);
         injectResult(Arrays.asList(big, small)); // sorted by detect()
 
-        assertEquals(14400.0, processor.getLargestPurpleBlob().area, 0.001);
+        assertEquals(14400.0, processor.getLargestPurpleBlob().contourArea, 0.001);
     }
 
     // -------------------------------------------------------------------------

@@ -22,7 +22,7 @@ public class DetectedBlob extends VisionRecognition {
     /** 0.0–1.0. 1.0 = perfect circle. Used as the parent confidence value. */
     public final double circularity;
 
-    DetectedBlob(Rect boundingBox, double contourArea, double circularity, String colorLabel) {
+    public DetectedBlob(Rect boundingBox, double contourArea, double circularity, String colorLabel) {
         super(colorLabel, (float) circularity,
                 boundingBox.x,
                 boundingBox.y,

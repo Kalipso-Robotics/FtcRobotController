@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.DetectedBlob;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.KColorBlobProcessor;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,8 +96,8 @@ public class KColorBlobProcessorTest {
 
         DetectedBlob result = processor.getLargestBlob();
         assertNotNull(result);
-        assertEquals(6400.0, result.area, 0.001);
-        assertEquals("Purple", result.colorLabel);
+        assertEquals(6400.0, result.contourArea, 0.001);
+        assertEquals("Purple", result.label);
     }
 
     @Test
@@ -118,11 +119,11 @@ public class KColorBlobProcessorTest {
 
         DetectedBlob purple = processor.getLargestBlobByLabel("Purple");
         assertNotNull(purple);
-        assertEquals(5000.0, purple.area, 0.001); // first Purple in list
+        assertEquals(5000.0, purple.contourArea, 0.001); // first Purple in list
 
         DetectedBlob green = processor.getLargestBlobByLabel("Green");
         assertNotNull(green);
-        assertEquals(3000.0, green.area, 0.001);
+        assertEquals(3000.0, green.contourArea, 0.001);
     }
 
     @Test
@@ -169,9 +170,9 @@ public class KColorBlobProcessorTest {
 
     @Test
     public void testDefaultThresholds() {
-        assertEquals("minContourArea should be 250",   250.0, processor.minContourArea,   0.001);
-        assertEquals("maxContourArea should be 30000", 30000.0, processor.maxContourArea, 0.001);
-        assertEquals("minCircularity should be 0.55",  0.55, processor.minCircularity,    0.001);
+        assertEquals("minContourArea should be 250",   250.0, processor.getMinContourArea(),   0.001);
+        assertEquals("maxContourArea should be 30000", 30000.0, processor.getMaxContourArea(), 0.001);
+        assertEquals("minCircularity should be 0.55",  0.55, processor.getMinCircularity(),    0.001);
     }
 
     @Test
@@ -179,22 +180,22 @@ public class KColorBlobProcessorTest {
         // A square has circularity ≈ π/4 ≈ 0.785 — it passes 0.55 but should be raiseable.
         double squareCircularity = Math.PI / 4.0;
         assertTrue("square passes current threshold — consider raising minCircularity",
-                squareCircularity >= processor.minCircularity);
+                squareCircularity >= processor.getMinCircularity());
     }
 
     @Test
     public void testCircleAtCloseRangePassesAreaFilter() {
         // 5-inch ball at ~3ft: contour area in 320x240 frame ≈ π*30² ≈ 2827 px²
         double closeRangeArea = Math.PI * 30 * 30;
-        assertTrue("close-range ball should pass minContourArea", closeRangeArea >= processor.minContourArea);
-        assertTrue("close-range ball should pass maxContourArea", closeRangeArea <= processor.maxContourArea);
+        assertTrue("close-range ball should pass minContourArea", closeRangeArea >= processor.getMinContourArea());
+        assertTrue("close-range ball should pass maxContourArea", closeRangeArea <= processor.getMaxContourArea());
     }
 
     @Test
     public void testCircleAtFarRangePassesAreaFilter() {
         // 5-inch ball at ~8ft: contour area in 320x240 frame ≈ π*11² ≈ 380 px²
         double farRangeArea = Math.PI * 11 * 11;
-        assertTrue("far-range ball should pass minContourArea", farRangeArea >= processor.minContourArea);
+        assertTrue("far-range ball should pass minContourArea", farRangeArea >= processor.getMinContourArea());
     }
 
     // -------------------------------------------------------------------------
