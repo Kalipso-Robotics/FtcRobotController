@@ -42,7 +42,7 @@ public class TestPP extends KOpMode {
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-        IPurePursuitAction test = new AdaptivePurePursuitAction(driveTrain);
+        IPurePursuitAction test = new PurePursuitAction(driveTrain);
         test.addPoint(0,0,0);
 //        test.addPoint(609.6,0,0);
 //        test.addPoint(0,0,0);

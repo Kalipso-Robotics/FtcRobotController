@@ -85,6 +85,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     private int progressIndex = 0;
     private int lookaheadBarrierIndex = -1;
+    private boolean barrierSatisfied = false;
 
     //TUNING NUMBERS: USE DATA ABOUT ROBOT 1500
     private final double PATH_MAX_VELOCITY = 2100; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
@@ -96,9 +97,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     private final double WHEELBASE_LENGTH = 9.125*25.4; //front wheel to back wheel
     private final double TRACK_WIDTH = 12.5*25.4; //side to side
-    private final double K_p = 0.000016; // 0.00002
-    private final double K_a = 0.00001; // 0.001
-    private final double K_v = 0.0004; // 0.00036 0.00225
+    private final double K_p = 0.000022; // 0.00002
+    private final double K_a = 0.000012; // 0.001
+    private final double K_v = 0.00045; // 0.00036 0.00225
     private final double K = 3.0; //based on how slow you want the robot to go around turns, 1000
 
     /*
@@ -189,6 +190,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         lastMilli = 0;
         lastPosition = null; // or new Position(...)
         lookaheadBarrierIndex = -1;
+        barrierSatisfied = false;
 
         // Reset timers
         timeoutTimer.reset();
@@ -385,6 +387,18 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             if (calcVelocityAccelDone && lookaheadBarrierIndex == -1) {
                 for (int i = 1; i < path.numPoints() - 1; i++) {
                     if (path.getPoint(i).getVelocity() < 1.0) {
+                        // The point *before* an in-place-rotation waypoint sits at the same
+                        // (x,y), so it also decelerates to ~0 velocity (zero distance to
+                        // decelerate over) even though it isn't itself the turn target. Skip
+                        // ahead past it so we lock onto the LAST point in this same-position
+                        // near-zero-velocity run - the final required heading - not an
+                        // intermediate one.
+                        boolean nextIsSamePositionAndAlsoStopped = i + 1 < path.numPoints() - 1
+                                && path.getPoint(i + 1).getVelocity() < 1.0
+                                && Vector.between(path.getPoint(i), path.getPoint(i + 1)).getLength() < 1e-6;
+                        if (nextIsSamePositionAndAlsoStopped) {
+                            continue;
+                        }
                         lookaheadBarrierIndex = i;
                         KLog.d("ppDebug", "calc velo accel done");
                         KLog.d("PPTest", "pp calc done at " + timer.milliseconds());
@@ -459,6 +473,40 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             int startSegment = Math.max(0, closestIdx - 1);
 
             int lastIdx = path.numPoints() - 1;
+
+            // An in-place-rotation waypoint (same x,y as the previous point, different theta)
+            // sits on a zero-length segment, which lineCircleIntersection() can never find -
+            // once the robot is within lookahead range, the search jumps straight past it to
+            // the segment after it. Only engage this override once we're actually close to the
+            // barrier (so normal lookahead pursuit still governs the rest of the path), and force
+            // the robot to fully reach and lock onto the barrier waypoint's heading before
+            // letting normal pursuit resume.
+            if (lookaheadBarrierIndex > 0 && !barrierSatisfied) {
+                Position barrierPoint = path.getPoint(lookaheadBarrierIndex);
+                double barrierDist = Vector.between(currentPosition, barrierPoint).getLength();
+
+                if (barrierDist <= LOOK_AHEAD_RADIUS_MM) {
+                    double barrierAngleError = MathFunctions.angleWrapRad(
+                            barrierPoint.getTheta() - currentPosition.getTheta()
+                    );
+                    boolean barrierPositionReached = barrierDist < lastSearchRadius;
+                    boolean barrierAngleReached =
+                            Math.abs(barrierAngleError) <= Math.toRadians(finalAngleLockingThreshholdDeg+3);
+
+                    if (barrierPositionReached && barrierAngleReached) {
+                        barrierSatisfied = true;
+                        KLog.d("ppDebug", "barrier waypoint satisfied at index " + lookaheadBarrierIndex);
+                    } else {
+                        KLog.d("ppDebugFollow", () -> String.format(
+                                "Driving to barrier waypoint: dist=%.1fmm angleErr=%.1f°",
+                                barrierDist, Math.toDegrees(barrierAngleError)));
+                        targetPosition(barrierPoint, currentPosition, closestIdx);
+                        lastMilli = elapsedTime;
+                        lastPosition = currentPosition;
+                        return;
+                    }
+                }
+            }
 
             double dError = Vector.between(currentPosition, path.getLastPoint()).getLength();
 
@@ -1062,6 +1110,20 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             // (negative dot product), return a very large curvature to force velocity → 0.
             double inX = x2 - x1, inY = y2 - y1;
             double outX = x3 - x2, outY = y3 - y2;
+
+            // p1 and p2 sit at the same (x,y): this waypoint is a pure in-place rotation
+            // (heading change with zero displacement), e.g. addPoint(x,y,90) followed by
+            // addPoint(x,y,180). The reversal check below can't see this case since the
+            // incoming vector is (0,0), so its dot product with anything is always 0, never
+            // negative. Force a hard stop here too so the robot fully turns in place instead
+            // of gliding through at full speed.
+            if (inX * inX + inY * inY < EPSILON) {
+                if (Math.abs(MathFunctions.angleWrapRad(p2.getTheta() - p1.getTheta())) > 1e-6) {
+                    return 1e6;
+                }
+                return 0.0;
+            }
+
             if (inX * outX + inY * outY < 0) {
                 return 1e6;
             }
