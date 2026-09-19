@@ -52,7 +52,9 @@ public class TestPP extends KOpMode {
 //        test.addPoint(400,800,180);
 //        test.addPoint(0,800,0);
 
-        waitForStart();
+        // Same idle-until-START behavior as waitForStart(), but any AdaptivePurePursuitAction
+        // built above gets its path planning done during init instead of on match time.
+        waitForStartPrecomputingPaths();
 
         timer.reset();
         Log.d("PPTest", "pure pursuit started");

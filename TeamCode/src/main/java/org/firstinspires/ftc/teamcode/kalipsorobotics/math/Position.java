@@ -26,6 +26,8 @@ public class Position {
     private double velocity;
     private double acceleration;
 
+    private boolean followAngleTight = false;
+
     private PidNav pidX = new PidNav(PurePursuitAction.P_XY, 0, PurePursuitAction.D_XY);
     private PidNav pidY = new PidNav(PurePursuitAction.P_XY, 0, PurePursuitAction.D_XY);
     private PidNav pidAngle = new PidNav(PurePursuitAction.P_ANGLE, 0, 0);
@@ -184,6 +186,14 @@ public class Position {
 
     public void setY(double newY) {
         this.y = newY;
+    }
+
+    public boolean isFollowAngleTight() {
+        return followAngleTight;
+    }
+
+    public void setFollowAngleTight(boolean followAngleTight) {
+        this.followAngleTight = followAngleTight;
     }
 
     /**

@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -44,6 +45,10 @@ public abstract class KOpMode extends LinearOpMode {
      * This is called automatically - override to add custom initialization after calling super.initializeRobot()
      */
     protected void initializeRobot() {
+        // Statics survive between OpMode runs, so drop any AdaptivePurePursuitActions left over
+        // from a previous run before this run registers its own.
+        AdaptivePurePursuitAction.clearInstanceRegistry();
+
         initializeRobotConfig();
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
 
@@ -61,6 +66,22 @@ public abstract class KOpMode extends LinearOpMode {
     }
 
     protected void initializeRobotConfig() {
+    }
+
+    /**
+     * Drop-in replacement for waitForStart() that also drives AdaptivePurePursuitAction path
+     * planning (inject/smooth/distance/velocity profile) while idling on START. Every
+     * AdaptivePurePursuitAction constructed in this OpMode is picked up automatically, so
+     * nothing needs to be listed here; if the OpMode builds none, this behaves like
+     * waitForStart(). Build the actions and add their points BEFORE calling this.
+     */
+    protected void waitForStartPrecomputingPaths() {
+        while (!isStarted() && !isStopRequested()) {
+            AdaptivePurePursuitAction.runPrecomputeStepForAll();
+            telemetry.addData("paths precomputed", AdaptivePurePursuitAction.allPrecomputeDone());
+            telemetry.update();
+            idle();
+        }
     }
 
     /**

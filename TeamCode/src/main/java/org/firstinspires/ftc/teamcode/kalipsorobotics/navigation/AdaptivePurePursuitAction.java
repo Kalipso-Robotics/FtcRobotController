@@ -13,12 +13,20 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 public class AdaptivePurePursuitAction extends IPurePursuitAction {
+
+    // Every instance registers itself here (weakly, so a dead OpMode's actions can still be
+    // garbage collected) so an OpMode can front-load path planning during init without having
+    // to name each action it built - see runPrecomputeStepForAll().
+    private static final List<WeakReference<AdaptivePurePursuitAction>> INSTANCES =
+            Collections.synchronizedList(new ArrayList<WeakReference<AdaptivePurePursuitAction>>());
 
     private static final double MIN_TURN_WHEEL_VELOCITY = 160.0;
     DriveTrain driveTrain;
@@ -40,6 +48,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private double lastSearchRadius = LAST_RADIUS_MM;
 
     private double finalAngleLockingThreshholdDeg = 3;
+    private double tightAngleLockingThresholdDeg = 5;
+    private double looseAngleLockingThresholdDeg = 10;
 
     int maxCheckDoneCounter = 1;
     int checkDoneCounter = 0;
@@ -146,6 +156,57 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
         this.actionTimer = new ElapsedTime();
         this.timer = new ElapsedTime();
+
+        INSTANCES.add(new WeakReference<>(this));
+    }
+
+    /**
+     * Runs one incremental precompute step on every AdaptivePurePursuitAction that has been
+     * constructed and is still alive. Call it from an OpMode's wait-for-start loop so path
+     * injection/smoothing/velocity profiling is finished before START is pressed instead of
+     * burning match-time ticks. Actions with no real path yet (fewer than 2 points) and actions
+     * that are already fully precomputed are skipped, so this is safe to spam every loop.
+     */
+    public static void runPrecomputeStepForAll() {
+        synchronized (INSTANCES) {
+            for (Iterator<WeakReference<AdaptivePurePursuitAction>> it = INSTANCES.iterator(); it.hasNext(); ) {
+                AdaptivePurePursuitAction action = it.next().get();
+                if (action == null) {
+                    it.remove();
+                    continue;
+                }
+                if (action.getPathPoints().size() < 2 || action.isPrecomputeDone()) {
+                    continue;
+                }
+                action.runPrecomputeStep();
+            }
+        }
+    }
+
+    /** True when every registered action with a real path has finished precomputing. */
+    public static boolean allPrecomputeDone() {
+        synchronized (INSTANCES) {
+            for (WeakReference<AdaptivePurePursuitAction> ref : INSTANCES) {
+                AdaptivePurePursuitAction action = ref.get();
+                if (action != null && action.getPathPoints().size() >= 2 && !action.isPrecomputeDone()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Drops every registered instance. Statics survive between OpMode runs on the robot
+     * controller, so this is called at init (see KOpMode.initializeRobot) to avoid precomputing
+     * paths that belong to a previous run's dead DriveTrain.
+     */
+    public static void clearInstanceRegistry() {
+        INSTANCES.clear();
+    }
+
+    public boolean isPrecomputeDone() {
+        return injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone;
     }
 
     @Override
@@ -490,8 +551,13 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                             barrierPoint.getTheta() - currentPosition.getTheta()
                     );
                     boolean barrierPositionReached = barrierDist < lastSearchRadius;
-                    boolean barrierAngleReached =
-                            Math.abs(barrierAngleError) <= Math.toRadians(finalAngleLockingThreshholdDeg+3);
+
+                    boolean barrierAngleReached;
+                    if (barrierPoint.isFollowAngleTight()) {
+                        barrierAngleReached = Math.abs(barrierAngleError) <= Math.toRadians(tightAngleLockingThresholdDeg);
+                    } else {
+                        barrierAngleReached = Math.abs(barrierAngleError) <= Math.toRadians(looseAngleLockingThresholdDeg);
+                    }
 
                     if (barrierPositionReached && barrierAngleReached) {
                         barrierSatisfied = true;
