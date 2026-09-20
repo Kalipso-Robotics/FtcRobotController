@@ -78,8 +78,15 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
     public static double MOUNT_ANGLE_DEG = 0.0;
     /** Camera height above floor in mm (Y component of cameraOffset). */
     public static double CAM_HEIGHT_MM   = 236.163;
-    /** Lateral offset of camera from robot center in mm (X). +X = right. */
-    public static double CAM_OFFSET_X_MM = 157.548;
+    /**
+     * Lateral offset of camera from robot center in mm (X).
+     *
+     * CameraIntrinsics builds its ray with normX = cx - pixelX, so +X is LEFT.
+     * The Arducam is mounted to the RIGHT of robot center, which is why
+     * CameraIntrinsics.ARDUCAM ships -157.548. This tuner previously defaulted to
+     * +157.548, contradicting it by 315 mm of lateral error. Now matched.
+     */
+    public static double CAM_OFFSET_X_MM = -157.548;
     /** Forward offset of camera from robot center in mm (Z). +Z = forward. */
     public static double CAM_OFFSET_Z_MM = 151.868;
 
@@ -135,8 +142,8 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
             telemetry.addLine("─── PROBE PIXEL ───");
             dumpRayTrace("PROBE", px, py, robotPos, intrinsics);
 
-            // ─── B. TFLite detections (end-to-end check) ────────────────────
-            telemetry.addLine("─── TFLITE DETECTIONS ───");
+            // ─── B. Color blob detections (end-to-end check) ─────────────────
+            telemetry.addLine("─── BLOB DETECTIONS ───");
             List<VisionRecognition> recognitions = artifacts.getLatestResult();
             if (recognitions == null || recognitions.isEmpty()) {
                 telemetry.addLine("No artifacts detected.");
@@ -171,52 +178,59 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
     }
 
     /**
-     * Recomputes every intermediate value in calculateWorldPos and logs them to
-     * both telemetry and logcat (tag = "RAYTRACE_DBG"). Pull with:
+     * Prints every intermediate of the real floor projection to telemetry and to
+     * logcat (tag = "RAYTRACE_DBG"). Pull with:
      *   adb logcat -s RAYTRACE_DBG
+     *
+     * This used to recompute the projection with its own hardcoded constants,
+     * which quietly disagreed with production in two ways: it used a single
+     * focal = (fx+fy)/2 for both axes where CameraIntrinsics divides x by fx and
+     * y by fy, and it used normX = pixelX - cx where the real code uses
+     * cx - pixelX (sign-flipped lateral). A debug dump that disagrees with the
+     * code it is debugging is worse than no dump, so it now reads the intrinsics
+     * through getters and mirrors the real math exactly.
      */
     private void dumpRayTrace(String label, double pixelX, double pixelY,
                               Position robotPos, CameraIntrinsics intrinsics) {
         double cx = intrinsics.getCx();
         double cy = intrinsics.getCy();
-        // We can't read fx/fy/focalLength from the intrinsics without a getter,
-        // so we mirror the math here using the same constants as CameraIntrinsics.ARDUCAM
-        // (1280x800 calibration scaled to 640x480 — see CameraIntrinsics.java).
-        double fx = 444.14195;
-        double fy = 532.27560;
-        double focal = (fx + fy) / 2.0;
-        double mountRad = Math.toRadians(MOUNT_ANGLE_DEG);
+        double fx = intrinsics.getFx();
+        double fy = intrinsics.getFy();
+        double mountRad = intrinsics.getMountAngle();
+        Vector3d offset = intrinsics.getCameraOffset();
 
-        double normX = pixelX - cx;
-        // Match CameraIntrinsics.calculateWorldPos: image-Y is flipped to world Y-up.
-        double normY = cy - pixelY;
-        double xDir = normX / focal;
-        double yDir = normY / focal;
+        // Mirrors CameraIntrinsics.calculateRobotFramePos exactly.
+        double normX = cx - pixelX;   // +X is LEFT
+        double normY = cy - pixelY;   // image-Y flipped to a Y-up world
+        double xDir = normX / fx;
+        double yDir = normY / fy;
         double zDir = 1.0;
 
         double worldX = xDir;
         double worldY = yDir * Math.cos(mountRad) - zDir * Math.sin(mountRad);
         double worldZ = yDir * Math.sin(mountRad) + zDir * Math.cos(mountRad);
 
-        boolean rejected = worldY > 1e-6;
-        double t = rejected ? Double.NaN : -CAM_HEIGHT_MM / worldY;
+        boolean rejected = worldY > -0.01;   // same horizon guard as production
+        double t = rejected ? Double.NaN : -offset.getY() / worldY;
         double floorX = rejected ? Double.NaN : t * worldX;
         double floorZ = rejected ? Double.NaN : t * worldZ;
-        double xFromRobot = rejected ? Double.NaN : floorX + CAM_OFFSET_X_MM;
-        double zFromRobot = rejected ? Double.NaN : floorZ + CAM_OFFSET_Z_MM;
+        double xFromRobot = rejected ? Double.NaN : floorX + offset.getX();
+        double zFromRobot = rejected ? Double.NaN : floorZ + offset.getZ();
 
-        // Also call the real method so we know we match. Use the robot-frame
-        // helper here since this test recomputes the unrotated floor projection.
         Point realWorld = intrinsics.calculateRobotFramePos(pixelX, pixelY);
         double realDist = intrinsics.getDistanceFromRobot(pixelX, pixelY, robotPos);
 
+        // Horizon row for a level-ish camera, i.e. the pixel row below which
+        // nothing can project. Handy for seeing how little of the frame is usable.
+        double horizonRow = cy + fy * Math.tan(-mountRad);
+
         String dump = String.format(Locale.US,
-                "[%s] px=(%.2f,%.2f) cxy=(%.2f,%.2f) focal=%.2f mountDeg=%.3f " +
-                "norm=(%.3f,%.3f) dir=(%.5f,%.5f,%.5f) world=(%.5f,%.5f,%.5f) " +
-                "rejected=%b t=%.2f floor=(%.2f,%.2f) fromRobot=(%.2f,%.2f) " +
-                "realWorld=%s realDist=%.2f",
-                label, pixelX, pixelY, cx, cy, focal, MOUNT_ANGLE_DEG,
-                normX, normY, xDir, yDir, zDir, worldX, worldY, worldZ,
+                "[%s] px=(%.2f,%.2f) cxy=(%.2f,%.2f) fx=%.2f fy=%.2f mountDeg=%.3f " +
+                "horizonRow=%.1f norm=(%.3f,%.3f) dir=(%.5f,%.5f,%.5f) " +
+                "world=(%.5f,%.5f,%.5f) rejected=%b t=%.2f floor=(%.2f,%.2f) " +
+                "fromRobot=(%.2f,%.2f) realWorld=%s realDist=%.2f",
+                label, pixelX, pixelY, cx, cy, fx, fy, Math.toDegrees(mountRad),
+                horizonRow, normX, normY, xDir, yDir, zDir, worldX, worldY, worldZ,
                 rejected, t, floorX, floorZ, xFromRobot, zFromRobot,
                 realWorld == null ? "null"
                         : String.format(Locale.US, "(%.2f,%.2f)", realWorld.getX(), realWorld.getY()),

@@ -30,7 +30,20 @@ public class ArtifactColorBlobDetectionProcessor extends KColorBlobProcessor {
 //    private static final Scalar GREEN_HSV_UPPER  = new Scalar(92, 255, 255);
 
     // NEW SET TUNED W/HUY
-    private static final Scalar PURPLE_HSV_LOWER = new Scalar(135, 16   , 40);
+    //
+    // REVIEW -- SUSPECTED CAUSE OF THE BACKGROUND FALSE POSITIVES:
+    // Purple S_min is 16 and V_min is 40. At S=16 almost any dark or grey
+    // background pixel with a vaguely magenta hue passes the mask, which matches
+    // the reported symptom of extra "balls" appearing in the background.
+    // KColorBlobProcessor's own HSV reference (see its class javadoc) says
+    // "always set S_min > 50 and V_min > 40". Suggested values: S_min 80, V_min 50.
+    // Green (108/38) is already tight and needs no change.
+    //
+    // Left at the shipped values deliberately -- drive them live from the
+    // dashboard in ArtifactDetectionTest (it mutates these channels in place via
+    // getChannels()), confirm against the single-blob pass rate, then paste the
+    // winners here.
+    private static final Scalar PURPLE_HSV_LOWER = new Scalar(135, 16, 40);
     private static final Scalar PURPLE_HSV_UPPER = new Scalar(180, 255, 255);
     private static final Scalar GREEN_HSV_LOWER  = new Scalar(69, 108, 38);
     private static final Scalar GREEN_HSV_UPPER  = new Scalar(90, 255, 255);
