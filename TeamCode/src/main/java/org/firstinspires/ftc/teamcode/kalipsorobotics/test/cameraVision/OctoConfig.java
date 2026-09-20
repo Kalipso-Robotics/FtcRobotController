@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -32,6 +33,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * IMU heading drifts slowly and smoothly, pod-differential heading jumps when a pod skips, so
  * when the two disagree the SHAPE of the disagreement tells you which sensor is lying.
  */
+@Config
 public final class OctoConfig {
 
     private OctoConfig() {}
