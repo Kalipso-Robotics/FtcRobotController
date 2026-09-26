@@ -1,6 +1,10 @@
 //package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 //
+<<<<<<< HEAD
 //import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.revolverActions.DetectColorsAction.CALIBRATION_FILENAME;
+=======
+//import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.DetectColorsAction.CALIBRATION_FILENAME;
+>>>>>>> fb07bfaa4d4f7405b2cba2391b96f401295cec13
 //import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.MotifColor.PURPLE;
 //import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.MotifColor.GREEN;
 //import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.MotifColor.NONE;
