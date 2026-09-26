@@ -10,6 +10,8 @@ public class PidNav {
     private double D;
     private double S;
 
+    private static final double MAX_UPDATE_GAP_MS = 500;
+
     private double errorIntegral = 0;
     private double lastTime = System.currentTimeMillis();
     private double lastError = 0;
@@ -28,6 +30,14 @@ public class PidNav {
     public double getPower(double error){
         double currentTime = System.currentTimeMillis();
         double deltaTime = currentTime - lastTime;
+
+        // lastTime starts at construction, and a path point's PID can be built at init and first
+        // used many seconds later. Integrating over that gap winds up the I term so much that it
+        // holds the robot tens of degrees off target. Treat a long gap as a fresh start instead.
+        if (deltaTime > MAX_UPDATE_GAP_MS) {
+            errorIntegral = 0;
+            deltaTime = 0;
+        }
 
         errorIntegral += error * (deltaTime/100);
         double errorDerivative = (deltaTime > 0) ? (error - lastError) / deltaTime : 0;
