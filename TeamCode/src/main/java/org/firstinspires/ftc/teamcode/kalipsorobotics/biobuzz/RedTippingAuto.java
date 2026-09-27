@@ -54,7 +54,7 @@ public class RedTippingAuto extends KOpMode {
         sleep(1000); // Optional: let hardware initialize
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, -171.5, 171.5, Math.toRadians(90));
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         autoTipping = new KActionSet();
@@ -79,7 +79,7 @@ public class RedTippingAuto extends KOpMode {
         // A shoot, go to garden
         RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
         trip1.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), 90);
-        trip1.getMoveToBalls().addPoint(0,0,0);
+        trip1.getMoveToBalls().addPoint(FieldConfig.gardenPoint.getX(),FieldConfig.gardenPoint.getY(),-90);
         trip1.setName("trip1");
         autoTipping.addAction(trip1);
 
@@ -117,5 +117,14 @@ public class RedTippingAuto extends KOpMode {
         trip6.getMoveToBalls().addPoint(0,0,0);
         trip6.setName("trip6");
         autoTipping.addAction(trip6);
+
+        waitForStartPrecomputingPaths();
+
+        while (opModeIsActive()) {
+            opModeUtilities.clearBulkCache();
+            autoTipping.updateCheckDone();
+            KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
+        }
+        cleanupRobot();
     }
 }

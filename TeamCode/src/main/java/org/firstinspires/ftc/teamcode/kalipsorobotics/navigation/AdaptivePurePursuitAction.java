@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
@@ -39,6 +40,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     private double currentLookAheadRadius;
     static final private double LAST_RADIUS_MM = 15;
+    static final private double REPLAN_DISTANCE_MM = 50;
 
     private Position currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
 
@@ -67,6 +69,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private static final double VELOCITY_DEADBAND = 5.0;
 
     List<Position> injectedPathPoints = new ArrayList<>();
+    private Path injectSourcePath = null; // robot start + pathPoints, captured when injection begins
+    private IPurePursuitAction planStartFrom = null; // if set, plan from this action's last point
+    private boolean startChecked = false; // whether the robot was checked to be at the planned start
     private int pointInject = 0;
     private double injectDistance = 0;
     private int segInject = 0;
@@ -76,10 +81,10 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     Path newPath = null;
     private boolean finishedCurrentLoop = false;
-    private final double SMOOTHER_A = 0.25;
+    private final double SMOOTHER_A = 0.75; // 0.25
     private final double SMOOTHER_B = 1 - SMOOTHER_A;
     private final double SMOOTHER_CORNER_PULL = 5.0;
-    private final double SMOOTHER_TOLERANCE = 0.025;
+    private final double SMOOTHER_TOLERANCE = 5.0; // 0.025
     private double change = SMOOTHER_TOLERANCE;
     private int smootherI = 1;
     private int smootherJ = 0;
@@ -157,14 +162,19 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         this.actionTimer = new ElapsedTime();
         this.timer = new ElapsedTime();
 
-        INSTANCES.add(new WeakReference<>(this));
+        // By default, assume this move follows the adaptive move constructed just before it, so
+        // it can be planned ahead from that move's end. Override with setPlanStartFrom().
+        synchronized (INSTANCES) {
+            this.planStartFrom = INSTANCES.isEmpty() ? null : INSTANCES.get(INSTANCES.size() - 1).get();
+            INSTANCES.add(new WeakReference<>(this));
+        }
     }
 
     /**
      * Runs one incremental precompute step on every AdaptivePurePursuitAction that has been
      * constructed and is still alive. Call it from an OpMode's wait-for-start loop so path
      * injection/smoothing/velocity profiling is finished before START is pressed instead of
-     * burning match-time ticks. Actions with no real path yet (fewer than 2 points) and actions
+     * burning match-time ticks. Actions with no points yet and actions
      * that are already fully precomputed are skipped, so this is safe to spam every loop.
      */
     public static void runPrecomputeStepForAll() {
@@ -175,7 +185,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                     it.remove();
                     continue;
                 }
-                if (action.getPathPoints().size() < 2 || action.isPrecomputeDone()) {
+                if (action.getPathPoints().isEmpty() || action.isPrecomputeDone()) {
                     continue;
                 }
                 action.runPrecomputeStep();
@@ -188,7 +198,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         synchronized (INSTANCES) {
             for (WeakReference<AdaptivePurePursuitAction> ref : INSTANCES) {
                 AdaptivePurePursuitAction action = ref.get();
-                if (action != null && action.getPathPoints().size() >= 2 && !action.isPrecomputeDone()) {
+                if (action != null && !action.getPathPoints().isEmpty() && !action.isPrecomputeDone()) {
                     return false;
                 }
             }
@@ -233,6 +243,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
         // Clear and reset data structures
         injectedPathPoints.clear();
+        injectSourcePath = null;
+        startChecked = false;
         path = null;
         newPath = null;
         follow = Optional.empty();
@@ -422,7 +434,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
 
         if (!injectDone) {
-            injectPoints(new Path(pathPoints));
+            injectPoints();
             return;
         } else {
             path = new Path (injectedPathPoints);
@@ -486,6 +498,20 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
+
+            // The path may have been planned from a predicted start (the previous move's end,
+            // or the init pose). Before driving it, make sure the robot is actually there;
+            // otherwise replan from where the robot is now.
+            if (!startChecked) {
+                startChecked = true;
+                if (Vector.between(new Position(SharedData.getOdometryWheelIMUPosition()),
+                        injectSourcePath.getPoint(0)).getLength() > REPLAN_DISTANCE_MM) {
+                    KLog.d("ppDebug", () -> getName() + " robot not at planned start, replanning");
+                    planStartFrom = null;
+                    reset();
+                    return;
+                }
+            }
 
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             KLog.d("ppDebug", () -> "currentPosition: " + currentPosition);
@@ -561,6 +587,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
                     if (barrierPositionReached && barrierAngleReached) {
                         barrierSatisfied = true;
+                        // The point before an in-place turn sits at the same (x,y) with ~0 velocity,
+                        // and updateProgressIndex() can't pick the barrier over it (equal distance),
+                        // so progress would stay there and the robot would get 0 drive velocity.
+                        // Move progress onto the barrier so targetPosition() steps past it.
+                        progressIndex = Math.max(progressIndex, lookaheadBarrierIndex);
+                        closestIdx = progressIndex;
                         KLog.d("ppDebug", "barrier waypoint satisfied at index " + lookaheadBarrierIndex);
                     } else {
                         KLog.d("ppDebugFollow", () -> String.format(
@@ -735,21 +767,31 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     }
 
 
-    private void injectPoints(Path path) {
+    private void injectPoints() {
 //        int spacingMM = 100;
 
-        if (segInject == 0 && injectDistance == 0 && injectedPathPoints.isEmpty()) {
-            Position robotStart = new Position(SharedData.getOdometryWheelIMUPosition());
-            injectedPathPoints.add(robotStart);
-
-            // Add the very first point from the original path only once
-            Position pathFirstPoint = path.getPoint(0);
-            if (Vector.between(robotStart, pathFirstPoint).getLength() > 1e-6) {
-                injectedPathPoints.add(pathFirstPoint);
+        if (injectSourcePath == null) {
+            // Inject along the robot -> first waypoint leg too, not just between waypoints.
+            // Otherwise a single-waypoint path is just [robotStart, waypoint], both with
+            // profile velocity 0, so the robot only rotates and never translates.
+            // If the previous move hasn't finished yet, plan from where it will end (known ahead of
+            // time, so this path can be precomputed during init). Otherwise the robot's live
+            // position is the best start.
+            Position robotStart = (planStartFrom != null && !planStartFrom.getIsDone() && !planStartFrom.getPathPoints().isEmpty())
+                    ? new Position(planStartFrom.getPathPoints().get(planStartFrom.getLastPointIndex()))
+                    : new Position(SharedData.getOdometryWheelIMUPosition());
+            List<Position> sourcePoints = new ArrayList<>(pathPoints);
+            if (!sourcePoints.isEmpty() && Vector.between(robotStart, sourcePoints.get(0)).getLength() <= 1e-6) {
+                sourcePoints.remove(0);
             }
+            sourcePoints.add(0, robotStart);
+            injectSourcePath = new Path(sourcePoints);
 
+            injectedPathPoints.add(robotStart);
             pointInject = 1;
         }
+
+        Path path = injectSourcePath;
 
         if (segInject < path.numSegments()) {
             Vector vector = path.getSegment(segInject).getVector();
@@ -855,7 +897,13 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private void smoother(Path path) {
 
         if (newPath == null && injectDone) {
-            newPath = new Path(path.getPath());
+            // Copy the points: if newPath shared Position objects with path, smoothing would move
+            // the "original" points too, so nothing anchors the path and it never converges.
+            newPath = new Path(path.getPath().stream().map(p -> {
+                Position copy = new Position(p);
+                copy.setFollowAngleTight(p.isFollowAngleTight());
+                return copy;
+            }).collect(Collectors.toList()));
         }
 
         // No interior points to smooth (indices 1..numPoints-2 don't exist)
@@ -934,23 +982,23 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private double getOriginalPullWeight(Path path, int pointIndex) {
         if (pointIndex + 1 < path.numPoints()) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex + 1)) != -1) {
-                return 0.025;
+                return 0.2; // 0.025
             }
         }
         if (pointIndex - 1 >= 0) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex - 1)) != -1) {
-                return 0.025;
+                return 0.2; // 0.025
             }
         }
 
         if (pointIndex + 2 < path.numPoints()) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex + 2)) != -1) {
-                return 0.05;
+                return 0.3; // 0.05
             }
         }
         if (pointIndex - 2 >= 0) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex - 2)) != -1) {
-                return 0.05;
+                return 0.3; // 0.05
             }
         }
 
@@ -960,23 +1008,23 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private double getNeighborPullWeight(Path path, int pointIndex) {
         if (pointIndex + 1 < path.numPoints()) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex + 1)) != -1) {
-                return 0.2;
+                return 0.4; // 0.2
             }
         }
         if (pointIndex - 1 >= 0) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex - 1)) != -1) {
-                return 0.2;
+                return 0.4; // 0.2
             }
         }
 
         if (pointIndex + 2 < path.numPoints()) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex + 2)) != -1) {
-                return 0.3;
+                return 0.5; // 0.3
             }
         }
         if (pointIndex - 2 >= 0) {
             if (getOriginalWaypointIndex(path.getPoint(pointIndex - 2)) != -1) {
-                return 0.3;
+                return 0.5; // 0.3
             }
         }
 
@@ -1349,6 +1397,17 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         return false;
     }
 
+
+    /**
+     * Plan this path starting from the last point of previousMove instead of the robot's live
+     * position, so it can be precomputed during init. Defaults to the adaptive move constructed
+     * just before this one; pass null to always plan from the robot's live position. If the robot
+     * turns out to be more than REPLAN_DISTANCE_MM from that point when this path is about to be
+     * driven, it replans from where it is.
+     */
+    public void setPlanStartFrom(IPurePursuitAction previousMove) {
+        this.planStartFrom = previousMove;
+    }
 
     @Override
     public void setMaxTimeOutMS(double maxTimeOutMS) {
