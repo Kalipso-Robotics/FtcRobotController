@@ -51,6 +51,15 @@ import java.util.Locale;
  * path, so a heading scale that is off by even 1% compounds over a full match in a way a fixed
  * TCP offset or a one-time counts/mm error does not.
  *
+ * The measurement is the NET signed rotation, not the summed absolute delta: ending back against
+ * the same wall after N full turns is exact, and any wobble while hand-turning cancels out of a
+ * net instead of being counted as extra rotation. Do one run clockwise and one counterclockwise
+ * and paste the average -- that cancels any one-sided bias in how the turns were done.
+ *
+ * apply() pushes whatever IMU_HEADING_SCALAR currently is, so a spin measures against an
+ * already-scaled heading. The accepted result folds that in: measuredScalar is expressed
+ * relative to the seed, not as if the board reported raw counts.
+ *
  * SPACE: two straight lanes with a hard stop at each end, tape-measured stop to stop, plus a
  * wall or other straightedge to spin the robot against. They do not have to be an L and there
  * is no rotation in the linear stages, so one lane used twice is fine if the robot can be set
@@ -118,8 +127,10 @@ public class OctoTune extends LinearOpMode {
     private int rawXAbs, rawYAbs, rawX2Abs;
     private int rawX0, rawY0, rawX20;
 
-    // HEADING stage: unwrapped total rotation, and how close the raw signal got to the
-    // board's own wire range while doing it. See updateHeadingUnwrap().
+    // HEADING stage: unwrapped total rotation (both net-signed, for the measurement, and
+    // summed-absolute, to show how much of that total was wobble), and how close the raw
+    // signal got to the board's own wire range while doing it. See updateHeadingUnwrap().
+    private double netDeg;
     private double turnedDeg;
     private double lastRawHeadingRad;
     private boolean headingUnwrapSeeded;
@@ -343,28 +354,32 @@ public class OctoTune extends LinearOpMode {
      * SDK's own prescribed procedure for setLocalizerImuHeadingScalar: seed at 1.0, spin the
      * robot a known number of full turns by hand, scalar = expected / measured.
      *
-     * Uses turnedDeg (summed absolute unwrapped delta), not the signed net rotation, so small
-     * wobble while hand-turning does not cancel out and hide a real gap.
+     * Uses netDeg (signed, unwrapped), not turnedDeg (summed absolute delta): ending back
+     * against the same wall after N full turns is exact, and turnedDeg counts any wobble while
+     * hand-turning as extra rotation, which biases the scalar low. turnedDeg is kept only to
+     * show how much of the total motion was wobble (turnedDeg - |netDeg|).
+     *
+     * The result is expressed relative to the CURRENT seed, not as if the board reported raw
+     * counts -- apply() already pushed imuHeadingScalar to the board, so the spin measures a
+     * heading that is already scaled. Treating targetDeg/netDeg as an absolute answer would
+     * compound every retune onto the last instead of correcting it.
      */
     private void renderHeading() {
         double targetDeg = OctoConfig.SPIN_ROTATIONS * 360.0;
-        double measuredScalar = turnedDeg <= 0 ? 0 : targetDeg / turnedDeg;
+        double measuredNetDeg = Math.abs(netDeg);
+        double measuredScalar = measuredNetDeg <= 0 ? 0
+                : imuHeadingScalar * targetDeg / measuredNetDeg;
+        double wobbleDeg = turnedDeg - measuredNetDeg;
 
         String reason = null;
-        if (turnedDeg <= 0) {
+        if (measuredNetDeg <= 0) {
             reason = "no rotation recorded yet. Zero with B against the wall, then spin.";
-        } else if (Math.abs(turnedDeg - targetDeg) / targetDeg > 0.20) {
+        } else if (Math.abs(measuredNetDeg - targetDeg) / targetDeg > 0.05) {
             reason = String.format(Locale.US,
                     "only %.0f deg of the expected %.0f deg recorded -- that is a miscounted "
                     + "turn, not an IMU error. B to zero and recount to exactly %d full turns, "
                     + "or press X to skip and keep the current scalar.",
-                    turnedDeg, targetDeg, OctoConfig.SPIN_ROTATIONS);
-        } else if (measuredScalar < 0.9 || measuredScalar > 1.1) {
-            reason = String.format(Locale.US,
-                    "scalar %.4f is outside 0.9-1.1. That is not a calibration bump, it is a "
-                    + "broken heading axis choice -- check getLocalizerHeadingAxisChoice() in "
-                    + "OctoStartup before accepting.",
-                    measuredScalar);
+                    measuredNetDeg, targetDeg, OctoConfig.SPIN_ROTATIONS);
         } else if (maxAbsHeadingRad > 3.2) {
             reason = String.format(Locale.US,
                     "raw heading reached %.2f rad mid-spin, more than a straight-line assumption "
@@ -381,10 +396,12 @@ public class OctoTune extends LinearOpMode {
         telemetry.addLine("3. spin " + OctoConfig.SPIN_ROTATIONS
                 + " full turns, same direction, back against the same wall");
         telemetry.addLine("4. press A to record");
+        telemetry.addLine("Do one run CW and one CCW; paste the average of the two scalars.");
         telemetry.addLine();
-        telemetry.addData("turned",   "%8.1f deg  <- THE measurement", turnedDeg);
-        telemetry.addData("expected", "%8.1f deg  (%d x 360)", targetDeg, OctoConfig.SPIN_ROTATIONS);
-        telemetry.addData("scalar",   "%8.4f  <- THE answer", measuredScalar);
+        telemetry.addData("net turned", "%8.1f deg  <- THE measurement", netDeg);
+        telemetry.addData("expected",   "%8.1f deg  (%d x 360)", targetDeg, OctoConfig.SPIN_ROTATIONS);
+        telemetry.addData("wobble",     "%8.1f deg  (total motion minus net)", wobbleDeg);
+        telemetry.addData("scalar",     "%8.4f  <- THE answer", measuredScalar);
         telemetry.addData("X to skip", "keep seeded %.4f, no spin needed", (double) imuHeadingScalar);
         telemetry.addLine();
         telemetry.addData("max |raw heading|", "%6.2f rad  (wire range +/-6.55)", maxAbsHeadingRad);
@@ -396,11 +413,11 @@ public class OctoTune extends LinearOpMode {
             imuHeadingScalar = (float) measuredScalar;
             results.add(String.format(Locale.US,
                     "spin %d turns  %7.1f / %7.1f deg expected = %.4f scalar",
-                    OctoConfig.SPIN_ROTATIONS, turnedDeg, targetDeg, measuredScalar));
+                    OctoConfig.SPIN_ROTATIONS, netDeg, targetDeg, measuredScalar));
             csv.writeLine(String.format(Locale.US,
-                    "# RESULT heading turnedDeg %.1f expectedDeg %.1f scalar %.4f "
+                    "# RESULT heading netDeg %.1f turnedDeg %.1f expectedDeg %.1f scalar %.4f "
                     + "maxAbsHeadingRad %.2f",
-                    turnedDeg, targetDeg, measuredScalar, maxAbsHeadingRad));
+                    netDeg, turnedDeg, targetDeg, measuredScalar, maxAbsHeadingRad));
             accept(Stage.DONE);
         } else if (gamepad1.xWasPressed()) {
             results.add(String.format(Locale.US,
@@ -482,6 +499,7 @@ public class OctoTune extends LinearOpMode {
         rawY0  = rawYAbs;
         rawX20 = rawX2Abs;
         bx = by = headingDeg = 0;
+        netDeg = 0;
         turnedDeg = 0;
         headingUnwrapSeeded = false;
         maxAbsHeadingRad = 0;
@@ -493,6 +511,10 @@ public class OctoTune extends LinearOpMode {
      * is undocumented, so summing bounded per-loop deltas is correct either way -- provided no
      * single loop iteration crosses whichever wrap point is real. maxAbsHeadingRad exists to
      * flag that possibility rather than silently trust a spin that got close to it.
+     *
+     * Tracks both the net signed delta (the actual measurement, see renderHeading) and the
+     * summed absolute delta (turnedDeg, telemetry only, to show how much of the motion was
+     * wobble rather than net rotation).
      */
     private void updateHeadingUnwrap(double rawHeadingRad) {
         maxAbsHeadingRad = Math.max(maxAbsHeadingRad, Math.abs(rawHeadingRad));
@@ -503,6 +525,7 @@ public class OctoTune extends LinearOpMode {
         }
         double d = OctoConfig.wrapDeltaRad(rawHeadingRad, lastRawHeadingRad);
         lastRawHeadingRad = rawHeadingRad;
+        netDeg += Math.toDegrees(d);
         turnedDeg += Math.abs(Math.toDegrees(d));
     }
 

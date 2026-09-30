@@ -531,7 +531,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
             blobs.add(new DetectedBlob(
                 scaleRectToFullResolution(boundingBox),
-                area, circularity, colorLabel
+                area, circularity, colorLabel, objectDiameterMM
             ));
             contour.release();
         }

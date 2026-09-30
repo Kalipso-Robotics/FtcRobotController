@@ -36,6 +36,10 @@ USAGE
                            for two-plane datasets.
     --evaluate             skip fitting, just score the FloorErrMM / SizeErrMM
                            columns already in the CSV against the pass criteria.
+    --ball-pitch-sweep     sweep the ball-ray pitch (centre pixel -> plane at the
+                           ball's own radius, not the floor) for the best forward-
+                           distance fit. This refits CameraIntrinsics.ARDUCAM_BALL_MOUNT,
+                           a SEPARATE constant from the --mount-angle floor-ray fit above.
 
 WHY --mount-angle-search CANNOT BE TRUSTED HERE
     Shifting cy by d pixels produces the same ray as tilting the camera by d/fy
@@ -486,6 +490,105 @@ def report_fit(rows, args):
           % (fx_final / vert["fy"]))
 
 
+def ball_ray_forward_lateral(u, v, fx, fy, cx, cy, radius, theta, cam_h, cam_x, cam_z):
+    """
+    Mirrors CameraIntrinsics.calculateBallRobotFramePos with yaw=roll=0: a ray through
+    the CENTRE pixel (u,v), rotated by a pitch-only camToRobot, intersected with the
+    horizontal plane at the ball's own radius instead of the floor. Returns
+    (forward_mm, lateral_mm) in robot-frame coordinates, or None if the ray never
+    reaches the plane (points above the horizon).
+    """
+    ray_x = (u - cx) / fx
+    ray_y = (v - cy) / fy
+    s, c = math.sin(theta), math.cos(theta)
+    # flip=diag(-1,-1,1) then Rx(theta), same as CameraIntrinsics.cameraToRobot.
+    dir_x = -ray_x
+    dir_y = c * -ray_y - s * 1.0
+    dir_z = s * -ray_y + c * 1.0
+    if dir_y > -0.01:
+        return None
+    t = (radius - cam_h) / dir_y
+    if t <= 0:
+        return None
+    return cam_z + t * dir_z, cam_x + t * dir_x
+
+
+def find_best_ball_pitch(rows, lo_deg=15.0, hi_deg=40.0, step_deg=0.1):
+    """
+    Core of --ball-pitch-sweep, split out so selftest() can call it directly on
+    synthetic data. Returns (best, results, usable) where best is
+    (deg, rms_mm, worst_mm, n) or None if no usable rows/pitch produced a solution.
+    """
+    usable = [r for r in rows
+              if r["px_center_x"] is not None and r["px_center_y"] is not None
+              and r["diameter"]]
+    if len(usable) < 3:
+        return None, [], usable
+
+    best = None
+    results = []
+    deg = lo_deg
+    while deg <= hi_deg + 1e-9:
+        theta = math.radians(deg)
+        errs = []
+        for r in usable:
+            fx = r["shipped_fx"] or 444.14195
+            fy = r["shipped_fy"] or 532.27560
+            cx = r["shipped_cx"] or 350.01860
+            cy = r["shipped_cy"] or 212.43984
+            radius = r["diameter"] / 2.0
+            out = ball_ray_forward_lateral(r["px_center_x"], r["px_center_y"], fx, fy, cx, cy,
+                                            radius, theta, r["cam_h"], r["cam_x"], r["cam_z"])
+            if out is None:
+                continue
+            fwd_hat, _ = out
+            errs.append(fwd_hat - r["known_fwd"])
+        if errs:
+            rms = math.sqrt(mean([e * e for e in errs]))
+            worst = max(errs, key=abs)
+            results.append((deg, rms, worst, len(errs)))
+            if best is None or rms < best[1]:
+                best = (deg, rms, worst, len(errs))
+        deg += step_deg
+    return best, results, usable
+
+
+def report_ball_pitch_sweep(rows):
+    """
+    Sweep the ball-ray pitch (15..40 deg, 0.1 deg steps) and report the forward-distance
+    RMS/worst error at each row's own shipped fx/fy/cx/cy, using the ball-centre pixel and
+    its own radius (ObjDiameterMM/2) as the plane height -- the model
+    calculateBallRobotFramePos now uses in place of the old bottom-pixel/floor-plane one.
+
+    This is NOT the degenerate theta/cy linearity search (search_mount_angle):  the target
+    here is a genuine physical error (predicted forward distance vs. tape-measured
+    known_fwd), which is sharply identifiable with the intrinsics held fixed -- the same
+    reasoning that found the old 29 deg floor-ray angle.
+    """
+    best, results, usable = find_best_ball_pitch(rows)
+    if len(usable) < 3:
+        sys.exit("Need >= 3 rows with a centre pixel and ObjDiameterMM to sweep the "
+                 "ball-ray pitch.")
+    if not best:
+        sys.exit("No pitch in [15,40] deg produced a valid ball-ray solution for any row.")
+
+    print("=" * 78)
+    print("BALL-RAY PITCH SWEEP   (centre pixel -> plane at ball radius, %d usable rows)"
+          % len(usable))
+    print("=" * 78)
+    print("  %-8s %10s %10s %6s" % ("pitch", "RMS mm", "worst mm", "n"))
+    for deg, rms, worst, n in results[::max(1, len(results) // 20)]:
+        marker = "  <== best" if (deg, rms, worst, n) == best else ""
+        print("  %-8.1f %10.1f %+10.1f %6d%s" % (deg, rms, worst, n, marker))
+    print()
+    print("BEST PITCH: %.1f deg   RMS %.1f mm   worst %+.1f mm   n=%d"
+          % best)
+    print()
+    print("Paste into CameraIntrinsics.ARDUCAM_BALL_MOUNT:")
+    print("    public static final Matrix ARDUCAM_BALL_MOUNT =")
+    print("            cameraToRobot(Math.toRadians(%.1f), 0, 0);" % best[0])
+
+
 def report_evaluate(rows):
     """Score a hold-out CSV against the plan's pass criteria."""
     print("=" * 78)
@@ -690,6 +793,49 @@ def selftest():
         failures.append("theta/cy degeneracy")
 
     print()
+    print("ball-ray pitch sweep recovers a known pitch from centre-pixel samples")
+    # Unlike synth() above (which projects the BOTTOM pixel onto the floor), this
+    # inverts calculateBallRobotFramePos to place the ball centre at an EXACT known
+    # (forward, lateral) position at height=radius, then solves for the centre pixel
+    # that ray-traces back to it -- the true inverse of the model find_best_ball_pitch
+    # is fitting. If the sweep can't recover the pitch it was generated from, the sweep
+    # (or the forward model it shares with CameraIntrinsics) is broken.
+    ball_radius = 35.6  # matches the hand-derived case in CameraIntrinsicsTest
+
+    def synth_ball(theta_deg):
+        theta = math.radians(theta_deg)
+        s, c = math.sin(theta), math.cos(theta)
+        out = []
+        plan = [(d, lat) for d in (500, 700, 900, 1200, 1600, 2000)
+                for lat in (-200, 0, 200)]
+        for fwd, lat in plan:
+            dx = lat - cam_x
+            dy = ball_radius - cam_h
+            dz = fwd - cam_z
+            # Invert flip then Rx(theta): ray = flip * Rx(-theta) * (dx,dy,dz).
+            ry = c * dy + s * dz
+            rz = -s * dy + c * dz
+            if rz <= 0:
+                continue
+            ray_x = -dx / rz
+            ray_y = -ry / rz
+            out.append({
+                "known_fwd": fwd, "known_lat": lat,
+                "px_center_x": truth_cx + truth_fx * ray_x,
+                "px_center_y": truth_cy + truth_fy * ray_y,
+                "diameter": ball_radius * 2.0,
+                "cam_h": cam_h, "cam_x": cam_x, "cam_z": cam_z,
+                "shipped_fx": truth_fx, "shipped_fy": truth_fy,
+                "shipped_cx": truth_cx, "shipped_cy": truth_cy,
+            })
+        return out
+
+    rows = synth_ball(29.0)
+    best, _, _ = find_best_ball_pitch(rows)
+    check("ball-ray pitch (deg)", best and best[0], 29.0, 0.15)
+    check("ball-ray RMS at best pitch (mm)", best and best[1], 0.0, 1.0)
+
+    print()
     if failures:
         print("SELF-CHECK FAILED: %s" % ", ".join(failures))
         return 1
@@ -715,6 +861,12 @@ def main():
                              "meaningful with samples on two different planes.")
     parser.add_argument("--evaluate", action="store_true",
                         help="score a hold-out CSV instead of fitting")
+    parser.add_argument("--ball-pitch-sweep", action="store_true",
+                        help="sweep the ball-ray pitch (centre pixel -> plane at ball "
+                             "radius) for the lowest forward-distance error. Use this "
+                             "to refit CameraIntrinsics.ARDUCAM_BALL_MOUNT -- it is a "
+                             "SEPARATE angle from --mount-angle, which fits the old "
+                             "bottom-pixel/floor-plane model.")
     parser.add_argument("--selftest", action="store_true",
                         help="verify the fits against synthetic known-truth data")
     args = parser.parse_args()
@@ -728,7 +880,9 @@ def main():
     if not rows:
         sys.exit("No usable rows in %s" % args.csv)
 
-    if args.evaluate:
+    if args.ball_pitch_sweep:
+        report_ball_pitch_sweep(rows)
+    elif args.evaluate:
         report_evaluate(rows)
     else:
         report_fit(rows, args)

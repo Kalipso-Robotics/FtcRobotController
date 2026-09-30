@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -147,7 +148,8 @@ public class TFLiteArtifactDetector extends KVisionProcessor<List<VisionRecognit
             float right  = (centerX + width  / 2f) * frameWidth;
             float bottom = (centerY + height / 2f) * frameHeight;
 
-            candidates.add(new VisionRecognition(LABEL, bestScore, left, top, right, bottom));
+            candidates.add(new VisionRecognition(LABEL, bestScore, left, top, right, bottom,
+                    ArtifactColorBlobDetectionProcessor.ARTIFACT_DIAMETER_MM));
         }
 
         candidates.sort((first, second) -> Float.compare(second.confidence, first.confidence));

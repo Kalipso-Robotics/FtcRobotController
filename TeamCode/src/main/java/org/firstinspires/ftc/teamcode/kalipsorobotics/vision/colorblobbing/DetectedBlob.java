@@ -23,11 +23,17 @@ public class DetectedBlob extends VisionRecognition {
     public final double circularity;
 
     public DetectedBlob(Rect boundingBox, double contourArea, double circularity, String colorLabel) {
+        this(boundingBox, contourArea, circularity, colorLabel, 0);
+    }
+
+    public DetectedBlob(Rect boundingBox, double contourArea, double circularity, String colorLabel,
+                         double objectDiameterMM) {
         super(colorLabel, (float) circularity,
                 boundingBox.x,
                 boundingBox.y,
                 boundingBox.x + boundingBox.width,
-                boundingBox.y + boundingBox.height);
+                boundingBox.y + boundingBox.height,
+                objectDiameterMM);
         this.boundingBox = boundingBox;
         this.contourArea = contourArea;
         this.circularity = circularity;

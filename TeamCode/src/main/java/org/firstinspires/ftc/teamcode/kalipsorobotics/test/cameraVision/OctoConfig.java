@@ -107,9 +107,10 @@ public final class OctoConfig {
     // [2026-09-22] Y re-measured after the L-test redo confirmed MIRROR_BOARD_FRAME/INVERT_Y
     // unchanged (still self-consistent, y-LEFT/CCW+): raw 16110 / 1219.2mm, 0.4% off theoretical.
     public static final float COUNTS_PER_MM_Y   = 13.21358f;     // [2026-09-22] OctoTune push Y
-    // [2026-09-22] HEADING re-measured, slower this time: turnedDeg 3541.8 vs 3600 expected
-    // (1.6% under, vs the prior run's 8.2% over), well clear of the wrap-safety gate.
-    public static final float IMU_HEADING_SCALAR = 1.0164f;      // [2026-09-22] OctoTune HEADING
+    // [2026-09-26] HEADING re-measured with the net-signed OctoTune fix, 10 turns each way:
+    // CW netDeg 3586.1 -> 1.0203, CCW netDeg -3587.7 -> 1.0199, averaged. (The 2026-09-22
+    // value 1.0164 came from the old abs-sum measurement, which counted wobble as rotation.)
+    public static final float IMU_HEADING_SCALAR = 1.0201f;      // [2026-09-26] OctoTune HEADING CW+CCW avg
     /**
      * Tracking-centre offsets, BOARD frame (y-LEFT while MIRROR_BOARD_FRAME is true).
      *
@@ -124,22 +125,28 @@ public final class OctoConfig {
      * straight-line scale error.
      *
      * The board's sign convention here is undocumented. If a spin-in-place makes XY wander more
-     * after setting these, negate both.
+     * after setting these, negate both. The SDK javadoc's own phrasing ("move the location of
+     * the localizer's virtual TCP AWAY FROM the true location") reads as centre-minus-offset,
+     * which would make these two the NEGATION of what is set below (63.5 -> -63.5, -152.4 ->
+     * +152.4). CONFIRMED 2026-09-26 by replaying spin logs: offset = -(pod position).
      */
-    // [2026-09-22] tape measure: 2.5in forward, 6in from centre to the port-0 (right) pod.
-    // Forward is unaffected by MIRROR_BOARD_FRAME; left/right is negated because the board's
-    // Y is LEFT-positive while the pod sits to the robot's RIGHT. Unverified by spin test --
-    // per OctoConfig's own javadoc above, negate both if a spin-in-place in OctoTest makes
-    // XY wander MORE than with these at zero.
-    public static final float TCP_OFFSET_MM_X   = 63.5f;         // [2026-09-22] tape measure
-    public static final float TCP_OFFSET_MM_Y   = -152.4f;       // [2026-09-22] tape measure
+    // [2026-09-26] solved from the two OctoTune HEADING spins, not taped. Over exactly 10 turns
+    // each pod reads (its distance from the spin centre) x (total radians):
+    //   perpendicular pod: -95.57 / -95.18 mm forward  -> 95.4 mm BEHIND centre
+    //   right pod (port 0): -146.64 / -151.13 mm left  -> 148.9 mm RIGHT of centre
+    // Sign convention SETTLED by replaying the CW run's raw counts: the board's reported pose is
+    // reproduced to 1 mm only if it places each pod at MINUS these offsets (the javadoc's
+    // centre-minus-offset reading); the other sign misses by 400 mm. So offset = -(pod position).
+    // The old 2026-09-22 tape values (63.5, -152.4) had X short and Y's sign backwards.
+    public static final float TCP_OFFSET_MM_X   = 95.4f;         // [2026-09-26] OctoTune spin replay
+    public static final float TCP_OFFSET_MM_Y   = 148.9f;        // [2026-09-26] OctoTune spin replay
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the
      * heading monitor, which is never fused into the pose, so a tape measure between the two
      * pod wheels is good enough. The board never sees this value.
      */
-    public static final float TRACK_WIDTH_MM = 298.45f;          // [2026-09-22] tape measure, 11.75in
+    public static final float TRACK_WIDTH_MM = 299.85f;          // [2026-09-26] OctoTune spins, parallel-pod difference / 20pi (299.89, 299.80); tape said 298.45
 
     public static final int VELOCITY_INTERVAL_MS = 25;
 
@@ -283,6 +290,9 @@ public final class OctoConfig {
      */
     public static void apply(OctoQuad q) {
         q.setChannelBankConfig(OctoQuad.ChannelBankConfig.ALL_QUADRATURE);
+        // Recovers the I2C bus after a corrupted frame (e.g. ESD from a collision) instead of
+        // silently wedging it. Recommended by the SDK's own SensorOctoQuadLocalization sample.
+        q.setI2cRecoveryMode(OctoQuad.I2cRecoveryMode.MODE_1_PERIPH_RST_ON_FRAME_ERR);
         setEncoderDirection(q, CH_X,  INVERT_X);
         setEncoderDirection(q, CH_Y,  INVERT_Y);
         setEncoderDirection(q, CH_X2, INVERT_X2);

@@ -17,7 +17,7 @@ public class ArtifactColorBlobDetectionProcessor extends KColorBlobProcessor {
     public static final String PURPLE = "Purple";
     public static final String GREEN  = "Green";
 
-    private static final double ARTIFACT_DIAMETER_MM = 5 * 25.4; // 5 in balls
+    public static final double ARTIFACT_DIAMETER_MM = 5 * 25.4; // 5 in balls
 
     {
         objectDiameterMM = ARTIFACT_DIAMETER_MM;

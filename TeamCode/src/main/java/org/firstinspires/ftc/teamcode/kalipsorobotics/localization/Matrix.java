@@ -18,6 +18,10 @@ public class Matrix {
         this.data = data;
     }
 
+    public double get(int row, int col) {
+        return data[row][col];
+    }
+
     // Matrix multiplication
     public Matrix multiply(Matrix other) {
         if (this.cols != other.rows) {

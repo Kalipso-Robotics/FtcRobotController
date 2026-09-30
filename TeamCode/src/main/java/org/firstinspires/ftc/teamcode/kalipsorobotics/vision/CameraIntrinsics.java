@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Matrix;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
@@ -11,6 +12,7 @@ public class CameraIntrinsics{
     private final double fx, fy;
     private final double cx, cy;
     private final double mountAngle;
+    private final Matrix mountRotation; // cameraToRobot(mountAngle, 0, 0), for the floor/size paths
     private final Vector3d cameraOffset;
     private final double k1, k2, k3, p1, p2; //distortions
 
@@ -83,6 +85,59 @@ public class CameraIntrinsics{
     );
 
 
+    /**
+     * Builds a row-major 3x3 rotation that maps a normalised OpenCV camera ray
+     * ((u-cx)/fx, (v-cy)/fy, 1) -- x right, y down, z forward out of the lens --
+     * into the robot frame (x left, y up, z forward), for use with
+     * calculateBallRobotFramePos.
+     *
+     * R = Ry(yaw) . Rx(pitchDown) . Rz(roll) . diag(-1,-1,1)
+     *
+     * diag(-1,-1,1) is the same right-to-left / down-to-up flip the old floor-ray
+     * code does inline via (cx-u), (cy-v). Rx(pitchDown) alone reproduces the old
+     * pitch-only transform exactly: world_y = y*cos(theta) - z*sin(theta),
+     * world_z = y*sin(theta) + z*cos(theta). Positive pitchDown tilts the lens
+     * down (matches the old mountAngle sign), positive yaw turns the lens left,
+     * and roll is about the optical axis. All three are in radians.
+     */
+    public static Matrix cameraToRobot(double pitchDown, double yaw, double roll) {
+        double cp = Math.cos(pitchDown), sp = Math.sin(pitchDown);
+        double cy2 = Math.cos(yaw), sy2 = Math.sin(yaw);
+        double cr = Math.cos(roll), sr = Math.sin(roll);
+
+        Matrix rx = new Matrix(new double[][]{{1, 0, 0}, {0, cp, -sp}, {0, sp, cp}});
+        Matrix ry = new Matrix(new double[][]{{cy2, 0, sy2}, {0, 1, 0}, {-sy2, 0, cy2}});
+        Matrix rz = new Matrix(new double[][]{{cr, -sr, 0}, {sr, cr, 0}, {0, 0, 1}});
+        Matrix flip = new Matrix(new double[][]{{-1, 0, 0}, {0, -1, 0}, {0, 0, 1}});
+
+        return ry.multiply(rx).multiply(rz).multiply(flip);
+    }
+
+    /** Pixel (u, v) as an un-normalised ray direction in the robot frame, rotated by camToRobot. */
+    private Vector3d rayInRobotFrame(double u, double v, Matrix camToRobot) {
+        Matrix ray = new Matrix(new double[][]{{(u - cx) / fx}, {(v - cy) / fy}, {1}});
+        Matrix dir = camToRobot.multiply(ray);
+        return new Vector3d(dir.get(0, 0), dir.get(1, 0), dir.get(2, 0));
+    }
+
+    /** Robot-frame point (x = left, y = forward) to field coordinates at robotPose. */
+    private static Point toField(Point local, Position robotPose) {
+        if (local == null) return null;
+        return new Position(local.getY(), local.getX(), 0).toNewFrame(robotPose).toPoint();
+    }
+
+    /**
+     * Pitch-only mount rotation for the ball-ray path (calculateBallRobotFramePos /
+     * calculateBallWorldPos). Starts at the old floor-ray mountAngle (29 deg) but is a
+     * SEPARATE constant on purpose: that 29 deg was fitted against the bottom-edge pixel,
+     * which is biased by the colour mask's shrink, so it does not carry over to a
+     * centre-pixel ray. MUST BE REFIT against ground-truth data using the centre-ray /
+     * ball-radius-plane model (see fit_intrinsics.py --ball-pitch-sweep) before this is
+     * trusted for anything beyond the unit test's hand-derived case.
+     */
+    public static final Matrix ARDUCAM_BALL_MOUNT =
+            cameraToRobot(Math.toRadians(29), 0, 0);
+
     public CameraIntrinsics(double fx, double fy, double cx, double cy,
                             double k1, double k2, double k3, double p1, double p2,
                             double mountAngle, Vector3d cameraOffset) {
@@ -96,6 +151,7 @@ public class CameraIntrinsics{
         this.p1 = p1;
         this.p2 = p2;
         this.mountAngle = mountAngle;
+        this.mountRotation = cameraToRobot(mountAngle, 0, 0);
         this.cameraOffset = cameraOffset;
     }
 
@@ -110,42 +166,12 @@ public class CameraIntrinsics{
     }
 
     public Point calculateWorldPos(double pixelX, double pixelY, Position robotPose) {
-        Point local = calculateRobotFramePos(pixelX, pixelY);
-        if (local == null) return null;
-        double cosT = Math.cos(robotPose.getTheta());
-        double sinT = Math.sin(robotPose.getTheta());
-        double fieldX = robotPose.getX() + local.getY() * cosT - local.getX() * sinT;
-        double fieldY = robotPose.getY() + local.getY() * sinT + local.getX() * cosT;
-        return new Point(fieldX, fieldY);
+        return toField(calculateRobotFramePos(pixelX, pixelY), robotPose);
     }
 
+    /** Bottom-edge pixel intersected with the floor, via the pitch-only mount rotation. */
     public Point calculateRobotFramePos(double pixelX, double pixelY) {
-        double norm_x = this.cx - pixelX;
-        // Flipped: image-Y increases downward, but the rest of this math expects
-        // a Y-up world (rejection check + t = -height/world_y both need world_y
-        // negative for floor pixels). With this sign, bottom-of-image pixels
-        // (the floor) actually project; the old `pixelY - cy` rejected them.
-        double norm_y = this.cy - pixelY;
-
-        double x_direction = norm_x / this.fx;
-        double y_direction = norm_y / this.fy;
-        double z_direction = 1.0;
-
-        double theta = this.mountAngle;
-        double world_y = y_direction * Math.cos(theta) - z_direction * Math.sin(theta);
-        double world_z = y_direction * Math.sin(theta) + z_direction * Math.cos(theta);
-        double world_x = x_direction;
-
-        if (world_y > -0.01) {
-            return null;
-        }
-
-        double t = -cameraOffset.getY() / world_y;
-
-        double floorX = t * world_x;
-        double floorZ = t * world_z;
-
-        return new Point(floorX + cameraOffset.getX(), floorZ + cameraOffset.getZ());
+        return calculateBallRobotFramePos(pixelX, pixelY, 0, mountRotation, cameraOffset);
     }
 
     public double getDistanceFromRobot(double pixelX, double pixelY, Position robotPose) {
@@ -159,6 +185,61 @@ public class CameraIntrinsics{
     public double getDistanceFromRobot(VisionRecognition recognition, Position robotPose) {
         Point bottomCenter = recognition.getBottomMiddlePixel();
         return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(), robotPose);
+    }
+
+    /**
+     * Ray-plane intersection through the BLOB CENTRE pixel, hitting the horizontal plane
+     * at the ball's own radius above the floor -- not the floor itself. The colour mask
+     * shrinks the blob evenly on all sides, so the centre pixel stays unbiased where the
+     * bottom edge (used by calculateRobotFramePos) is not.
+     *
+     * The ray direction is built from an explicit camToRobot rotation (see
+     * cameraToRobot), so a mount with yaw/roll -- or one that moves at runtime -- can
+     * supply its own rotation. calculateRobotFramePos is this with radius 0 and the
+     * pitch-only mount rotation. The direction is never normalised: t is solved directly against
+     * its un-normalised y-component, which is exact for a plane intersection.
+     *
+     * @param u          pixel X of the blob centre
+     * @param v          pixel Y of the blob centre
+     * @param radiusMM   ball radius above the floor, e.g. VisionRecognition.getRadiusMM().
+     *                   0 is legal and means the floor plane itself.
+     * @param camToRobot rotation from cameraToRobot(), camera ray -> robot frame
+     * @param camPos     camera position in the robot frame, e.g. ARDUCAM.getCameraOffset()
+     */
+    public Point calculateBallRobotFramePos(double u, double v, double radiusMM,
+                                             Matrix camToRobot, Vector3d camPos) {
+        Vector3d dir = rayInRobotFrame(u, v, camToRobot);
+        double dirY = dir.getY();
+        if (dirY > -0.01) {
+            return null;
+        }
+
+        double t = (radiusMM - camPos.getY()) / dirY;
+        if (t <= 0) {
+            return null;
+        }
+
+        Vector3d hit = camPos.add(dir.multiply(t));
+        return new Point(hit.getX(), hit.getZ());
+    }
+
+    /**
+     * Ball-ray overload keyed off a detection's own centre pixel and radius. Returns null
+     * when the detection doesn't carry a known object diameter (getRadiusMM() == 0), so an
+     * untyped detection never silently lands on the floor plane.
+     */
+    public Point calculateBallRobotFramePos(VisionRecognition recognition,
+                                             Matrix camToRobot, Vector3d camPos) {
+        double radiusMM = recognition.getRadiusMM();
+        if (radiusMM <= 0) return null;
+        return calculateBallRobotFramePos(recognition.center.getX(), recognition.center.getY(),
+                radiusMM, camToRobot, camPos);
+    }
+
+    /** calculateBallRobotFramePos, then rotated/translated into field coordinates by robotPose. */
+    public Point calculateBallWorldPos(VisionRecognition recognition, Matrix camToRobot,
+                                        Vector3d camPos, Position robotPose) {
+        return toField(calculateBallRobotFramePos(recognition, camToRobot, camPos), robotPose);
     }
 
     /**
@@ -185,41 +266,18 @@ public class CameraIntrinsics{
         if (apparentDiameterPx <= 0) return null;
         double range = (objectDiameterMM * SIZE_FOCAL_PX) / apparentDiameterPx;
 
-        double norm_x = this.cx - recognition.center.getX();
-        double norm_y = this.cy - recognition.center.getY();
-        double x_direction = norm_x / this.fx;
-        double y_direction = norm_y / this.fy;
-        double z_direction = 1.0;
-
-        double theta = this.mountAngle;
-        double world_y = y_direction * Math.cos(theta) - z_direction * Math.sin(theta);
-        double world_z = y_direction * Math.sin(theta) + z_direction * Math.cos(theta);
-        double world_x = x_direction;
-
-        // NORMALISE before scaling. The direction vector is built with z_direction = 1,
-        // so its length is sqrt(x^2 + y^2 + 1) -- up to 1.14 at the image edge, never 1.
-        // `range` is a true camera-to-object distance (that is what SIZE_FOCAL_PX was
-        // fitted against), so scaling the un-normalised vector by it overshot by that
-        // length: ~14% at 508mm and ~5% at 1422mm, varying with where the blob sat in
-        // frame. calculateRobotFramePos does NOT need this -- its t = -h/world_y is a
-        // ray-plane intersection, which is scale-invariant in the direction vector.
-        double norm = Math.sqrt(world_x * world_x + world_y * world_y + world_z * world_z);
-        if (norm <= 0) return null;
-
-        double floorX = range * world_x / norm;
-        double floorZ = range * world_z / norm;
-
-        return new Point(floorX + cameraOffset.getX(), floorZ + cameraOffset.getZ());
+        // NORMALISE before scaling: `range` is a true camera-to-object distance (that is
+        // what SIZE_FOCAL_PX was fitted against), but the ray has length sqrt(x^2+y^2+1),
+        // up to 1.14 at the image edge, so scaling it un-normalised overshoots by ~5-14%.
+        // The floor/ball paths don't need this -- a ray-plane intersection is
+        // scale-invariant in the direction vector.
+        Vector3d dir = rayInRobotFrame(recognition.center.getX(), recognition.center.getY(), mountRotation);
+        Vector3d hit = cameraOffset.add(dir.normalize().multiply(range));
+        return new Point(hit.getX(), hit.getZ());
     }
 
     public Point calculateWorldPosFromSize(VisionRecognition recognition, double objectDiameterMM, Position robotPose) {
-        Point local = calculateRobotFramePosFromSize(recognition, objectDiameterMM);
-        if (local == null) return null;
-        double cosT = Math.cos(robotPose.getTheta());
-        double sinT = Math.sin(robotPose.getTheta());
-        double fieldX = robotPose.getX() + local.getY() * cosT - local.getX() * sinT;
-        double fieldY = robotPose.getY() + local.getY() * sinT + local.getX() * cosT;
-        return new Point(fieldX, fieldY);
+        return toField(calculateRobotFramePosFromSize(recognition, objectDiameterMM), robotPose);
     }
 
     public double getDistanceFromRobotBySize(VisionRecognition recognition, double objectDiameterMM, Position robotPose) {
