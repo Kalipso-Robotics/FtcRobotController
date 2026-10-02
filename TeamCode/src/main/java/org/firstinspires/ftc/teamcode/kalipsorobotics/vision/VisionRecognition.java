@@ -35,7 +35,7 @@ public class VisionRecognition {
 
     /**
      * Real-world diameter (mm) of the object this detection is, e.g. a game ball's known
-     * diameter. 0 = unknown/unset. Used by CameraIntrinsics.calculateBallRobotFramePos to
+     * diameter. 0 = unknown/unset. Used by CameraIntrinsics.estimateBall to
      * intersect the centre ray with the plane at the ball's own radius instead of the floor.
      */
     public final double objectDiameterMM;

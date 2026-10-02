@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Matrix;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics.CAM_HEIGHT;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics.CAM_WIDTH;
 
@@ -21,7 +20,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallEstimate;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraPose;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
@@ -114,7 +115,7 @@ public class RaytracingDataCollector extends LinearOpMode {
 
     /**
      * Pitch for the NEW centre-pixel / ball-radius-plane ray (CameraIntrinsics.
-     * calculateBallRobotFramePos), separate from MOUNT_ANGLE_DEG above which still feeds
+     * estimateBall), separate from MOUNT_ANGLE_DEG above which still feeds
      * the OLD bottom-pixel / floor-plane one. Starts at the same 29 deg, but that number
      * absorbed the old method's bottom-edge bias, so it must be refit independently --
      * see fit_intrinsics.py --ball-pitch-sweep against the BallLateralMM/BallForwardMM/
@@ -133,7 +134,9 @@ public class RaytracingDataCollector extends LinearOpMode {
             + "SizeDistMM,SizeLateralMM,SizeForwardMM,SizeErrMM,"
             + "ObjDiameterMM,MountAngleDeg,CamHeightMM,CamOffsetXMM,CamOffsetZMM,"
             + "Fx,Fy,Cx,Cy,ProcFrame,"
-            + "BallPitchDeg,BallLateralMM,BallForwardMM,BallErrMM";
+            + "BallPitchDeg,BallLateralMM,BallForwardMM,BallErrMM,"
+            + "BallRayDepthMM,BallSizeVDepthMM,BallSizeHDepthMM,BallDisagree,BallConsistent,"
+            + "EdgeL,EdgeR,EdgeT,EdgeB";
 
     /** One captured camera frame. Held in memory until Y writes the burst. */
     private static class GroundTruthSample {
@@ -218,9 +221,8 @@ public class RaytracingDataCollector extends LinearOpMode {
             CameraIntrinsics intrinsics = CameraIntrinsics.ARDUCAM.withMount(
                     Math.toRadians(MOUNT_ANGLE_DEG),
                     new Vector3d(CAM_OFFSET_X_MM, CAM_HEIGHT_MM, CAM_OFFSET_Z_MM));
-            Vector3d camOffset = new Vector3d(CAM_OFFSET_X_MM, CAM_HEIGHT_MM, CAM_OFFSET_Z_MM);
-            Matrix ballCamToRobot = CameraIntrinsics.cameraToRobot(
-                    Math.toRadians(BALL_PITCH_DEG), 0, 0);
+            CameraPose ballCam = CameraPose.fromAngles(Math.toRadians(BALL_PITCH_DEG), 0, 0,
+                    new Vector3d(CAM_OFFSET_X_MM, CAM_HEIGHT_MM, CAM_OFFSET_Z_MM));
 
             List<VisionRecognition> recognitions = artifacts.getLatestResult();
             VisionRecognition largest = BlobUtils.findLargestByArea(recognitions);
@@ -236,6 +238,7 @@ public class RaytracingDataCollector extends LinearOpMode {
             double sizeDist   = Double.NaN;
             double objDiameterMM = artifacts.getObjectDiameterMM();
             // ── Ball-ray projection (NEW: centre pixel -> ball-radius plane) ───
+            BallEstimate ball = null;
             Point ballPos     = null;
             double ballDist   = Double.NaN;
 
@@ -248,7 +251,8 @@ public class RaytracingDataCollector extends LinearOpMode {
                 sizePos  = intrinsics.calculateRobotFramePosFromSize(largest, objDiameterMM);
                 sizeDist = intrinsics.getDistanceFromRobotBySize(largest, objDiameterMM, ROBOT_ORIGIN);
 
-                ballPos = intrinsics.calculateBallRobotFramePos(largest, ballCamToRobot, camOffset);
+                ball = intrinsics.estimateBall(largest, ballCam);
+                ballPos = (ball == null) ? null : ball.robotPos;
                 if (ballPos != null) {
                     ballDist = Math.hypot(ballPos.getX(), ballPos.getY());
                 }
@@ -269,7 +273,7 @@ public class RaytracingDataCollector extends LinearOpMode {
                 lastCapturedFrame = procFrame;
                 burst.add(buildSample(largest, pixelBottom, floorPos, floorDist,
                         sizePos, sizeDist, objDiameterMM, blobCount, procFrame, intrinsics,
-                        ballPos, ballDist));
+                        ballPos, ballDist, ball));
                 if (burst.size() >= BURST_FRAMES) {
                     capturing = false;
                     KLog.d(TAG, "Burst complete: " + burst.size() + " frames captured.");
@@ -348,6 +352,7 @@ public class RaytracingDataCollector extends LinearOpMode {
                 if (ballPos != null) {
                     telemetry.addData("BALL   robotFrame", "(lat %.1f, fwd %.1f)  pitch %.1f deg",
                             ballPos.getX(), ballPos.getY(), BALL_PITCH_DEG);
+                    telemetry.addData("BALL   size check", "%s", ball);
                     telemetry.addData("BALL   distance", "%.1f mm   err %+.1f mm",
                             ballDist, ballDist - knownDistanceMM);
                 } else {
@@ -383,7 +388,7 @@ public class RaytracingDataCollector extends LinearOpMode {
                                           Point sizePos, double sizeDist,
                                           double objDiameterMM, int blobCount, int procFrame,
                                           CameraIntrinsics intrinsics,
-                                          Point ballPos, double ballDist) {
+                                          Point ballPos, double ballDist, BallEstimate ball) {
         double aspect = (blob.getHeight() > 0) ? blob.getWidth() / blob.getHeight() : 0.0;
 
         double floorLat = (floorPos == null) ? Double.NaN : floorPos.getX();
@@ -406,7 +411,9 @@ public class RaytracingDataCollector extends LinearOpMode {
                 + "%.2f,%.2f,%.2f,%.2f,"
                 + "%.2f,%.4f,%.3f,%.3f,%.3f,"
                 + "%.5f,%.5f,%.5f,%.5f,%d,"
-                + "%.4f,%.2f,%.2f,%.2f",
+                + "%.4f,%.2f,%.2f,%.2f,"
+                + "%.2f,%.2f,%.2f,%.4f,%d,"
+                + "%.1f,%.1f,%.1f,%.1f",
                 knownDistanceMM, knownLateralMM,
                 pixelBottom.getX(), pixelBottom.getY(),
                 blob.center.getX(), blob.center.getY(),
@@ -417,7 +424,13 @@ public class RaytracingDataCollector extends LinearOpMode {
                 objDiameterMM, MOUNT_ANGLE_DEG, CAM_HEIGHT_MM, CAM_OFFSET_X_MM, CAM_OFFSET_Z_MM,
                 intrinsics.getFx(), intrinsics.getFy(), intrinsics.getCx(), intrinsics.getCy(),
                 procFrame,
-                BALL_PITCH_DEG, ballLat, ballFwd, ballErr);
+                BALL_PITCH_DEG, ballLat, ballFwd, ballErr,
+                ball == null ? Double.NaN : ball.rayDepthMM,
+                ball == null ? Double.NaN : ball.sizeDepthVMM,
+                ball == null ? Double.NaN : ball.sizeDepthHMM,
+                ball == null ? Double.NaN : ball.rangeDisagreement(),
+                ball != null && ball.isConsistent() ? 1 : 0,
+                blob.left, blob.right, blob.top, blob.bottom);
 
         String summary = String.format(Locale.US,
                 "known=%.0f floor=%.0f (%+.0f) size=%.0f (%+.0f) ball=%.0f (%+.0f) px=(%.0f,%.0f) %s",

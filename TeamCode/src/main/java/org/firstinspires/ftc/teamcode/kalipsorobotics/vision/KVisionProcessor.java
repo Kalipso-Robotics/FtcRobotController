@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 import android.graphics.Canvas;
 
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.opencv.core.Mat;
 
@@ -53,7 +54,19 @@ public abstract class KVisionProcessor<T> implements VisionProcessor {
     // -------------------------------------------------------------------------
     // Thread-safe result storage
     // -------------------------------------------------------------------------
-    private volatile T latestResult;
+    private volatile Frame<T> latest;
+    private int frameCounter = 0; // camera thread only
+
+    /** A detection result with the camera's capture timestamp (nanos, VisionPortal timebase). */
+    public static final class Frame<T> {
+        public final T result;
+        public final long captureTimeNanos;
+
+        Frame(T result, long captureTimeNanos) {
+            this.result = result;
+            this.captureTimeNanos = captureTimeNanos;
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Abstract contract — subclasses implement these
@@ -91,7 +104,14 @@ public abstract class KVisionProcessor<T> implements VisionProcessor {
     @Override
     public final Object processFrame(Mat frame, long captureTimeNanos) {
         T result = detect(frame);
-        latestResult = result;
+        latest = new Frame<>(result, captureTimeNanos);
+        // Timebase check: expect a steady 10-150 ms. Zero/negative/huge means the SDK is not
+        // stamping with System.nanoTime(); then stamp nanoTime() here instead (misses exposure
+        // and transfer time, but still beats pose-at-use-time).
+        if (++frameCounter % 30 == 0) {
+            final double ageMs = (System.nanoTime() - captureTimeNanos) / 1e6;
+            KLog.d("VisionFrameAge", () -> String.format(java.util.Locale.US, "frame age %.1f ms", ageMs));
+        }
         return result; // passed to onDrawFrame as userContext
     }
 
@@ -113,10 +133,19 @@ public abstract class KVisionProcessor<T> implements VisionProcessor {
      * The most recent detection result. Null until the first frame is processed.
      * Non-blocking — safe to call every loop iteration.
      */
-    public T getLatestResult() { return latestResult; }
+    public T getLatestResult() {
+        Frame<T> f = latest;
+        return f == null ? null : f.result;
+    }
+
+    /**
+     * Latest result together with the time its frame was captured, read as one volatile so the
+     * pair cannot tear. Use captureTimeNanos to look up the robot pose at capture, not now.
+     */
+    public Frame<T> getLatestFrame() { return latest; }
 
     /** True once at least one frame has been processed. */
-    public boolean hasResult() { return latestResult != null; }
+    public boolean hasResult() { return getLatestResult() != null; }
 
     /** Diagnostic string for the last processed frame. Override in subclasses to provide detail. */
     public String getDiagnosticSummary() { return ""; }

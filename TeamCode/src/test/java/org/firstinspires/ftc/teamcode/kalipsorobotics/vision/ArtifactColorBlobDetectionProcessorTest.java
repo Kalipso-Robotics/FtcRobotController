@@ -65,9 +65,9 @@ public class ArtifactColorBlobDetectionProcessorTest {
     }
 
     private void injectResult(List<DetectedBlob> blobs) throws Exception {
-        Field f = KVisionProcessor.class.getDeclaredField("latestResult");
+        Field f = KVisionProcessor.class.getDeclaredField("latest");
         f.setAccessible(true);
-        f.set(processor, blobs);
+        f.set(processor, new KVisionProcessor.Frame<Object>(blobs, 0L));
     }
 
     private DetectedBlob makeBlob(String label, int x, int y, int w, int h, double area) {

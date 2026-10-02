@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
  * Unit tests for KColorBlobProcessor query logic.
  *
  * These tests bypass the OpenCV image pipeline entirely. Results are injected
- * directly into the volatile latestResult field so we can test getLargestBlob(),
+ * directly into the volatile latest Frame field so we can test getLargestBlob(),
  * getLargestBlobByLabel(), and hasBlobWithLabel() in isolation.
  *
  * TUNING REFERENCE for 5-inch purple/green balls:
@@ -61,9 +61,9 @@ public class KColorBlobProcessorTest {
     // -------------------------------------------------------------------------
 
     private void injectResult(List<DetectedBlob> blobs) throws Exception {
-        Field f = KVisionProcessor.class.getDeclaredField("latestResult");
+        Field f = KVisionProcessor.class.getDeclaredField("latest");
         f.setAccessible(true);
-        f.set(processor, blobs);
+        f.set(processor, new KVisionProcessor.Frame<Object>(blobs, 0L));
     }
 
     private DetectedBlob blob(String label, double area, double circularity) {
