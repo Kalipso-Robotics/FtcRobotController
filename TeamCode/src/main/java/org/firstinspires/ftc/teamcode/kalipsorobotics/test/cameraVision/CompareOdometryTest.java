@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
 
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -90,9 +92,16 @@ public class CompareOdometryTest extends LinearOpMode {
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         IMUModule.setInstanceNull();
         imuModule = IMUModule.getInstance(opModeUtilities);
+        // This robot's Control Hub is logo-UP, not the comp robot's DrivetrainConfig mount (logo
+        // BACKWARD): the 2026-10-01 logs read pitch -91.5 deg while flat, which gimbal-locks yaw.
+        // USB direction only shifts the yaw zero, which zero() re-seeds, so any horizontal one works.
+        boolean hubImuOk = imuModule.getIMU().initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT)));
 
         csv = new KFileWriter("CompareOdometry", opModeUtilities);
         csv.writeLine("# old = LegacyOdometry (Odometry.java WHEEL_IMU math) on OctoQuad pod counts + hub IMU");
+        csv.writeLine("# hub imu mount: logo UP, usb RIGHT" + (hubImuOk ? "" : " -- hub imu reinit failed"));
         csv.writeLine("type,t_s,trial,octo_x,octo_y,octo_hdg_deg,old_x,old_y,old_hdg_deg,"
                 + "path_mm,turned_deg,octo_closure_mm,octo_hdg_err_deg,old_closure_mm,old_hdg_err_deg,crcOk,loop_ms");
         csv.writeLine("# LOOP rows (every loop): LOOP,t_s,running,octo_x,octo_y,octo_hdg_deg,old_x,old_y,old_hdg_deg,"
@@ -101,7 +110,14 @@ public class CompareOdometryTest extends LinearOpMode {
         telemetry.addLine("COMPARE ODOMETRY");
         telemetry.addLine("After START: B = zero + start lap (any time). A on the mark = log + stop.");
         telemetry.addLine("Keep the robot still after START (IMU cal).");
-        telemetry.update();
+        while (opModeInInit()) {
+            YawPitchRollAngles a = imuModule.getIMU().getRobotYawPitchRollAngles();
+            telemetry.addLine("COMPARE ODOMETRY. B = zero + start lap, A on the mark = log + stop.");
+            if (!hubImuOk) telemetry.addLine("!!! hub IMU reinit FAILED -- legacy heading invalid");
+            telemetry.addData("hub pitch / roll (flat robot: both ~0)", "%.1f / %.1f deg",
+                    a.getPitch(), a.getRoll());
+            telemetry.update();
+        }
 
         waitForStart();
         if (isStopRequested()) { csv.close(); return; }
