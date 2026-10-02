@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.DepotRoundTrip;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.RoundTripAction;
@@ -17,12 +19,15 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
+@Autonomous
 public class RedTippingAuto extends KOpMode {
 
     KActionSet autoTipping;
@@ -54,7 +59,7 @@ public class RedTippingAuto extends KOpMode {
         sleep(1000); // Optional: let hardware initialize
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, -171.5, 171.5, Math.toRadians(90));
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 171.5 + 1218, 3658 - 171.5, Math.toRadians(-90));
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         autoTipping = new KActionSet();
@@ -78,45 +83,71 @@ public class RedTippingAuto extends KOpMode {
 
         // A shoot, go to garden
         RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
-        trip1.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), 90);
-        trip1.getMoveToBalls().addPoint(FieldConfig.gardenPoint.getX(),FieldConfig.gardenPoint.getY(),-90);
+        trip1.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
+        trip1.getMoveToBalls().addPoint(FieldConfig.aLaunchPoint.getX(),FieldConfig.aLaunchPoint.getY(),-180);
+        trip1.getMoveToBalls().addPoint(600,FieldConfig.aLaunchPoint.getY(),-180);
+        trip1.getMoveToBalls().addPoint(400,FieldConfig.aLaunchPoint.getY() - 200,90);
+        trip1.getMoveToBalls().addPoint(FieldConfig.gardenPoint.getX(),FieldConfig.gardenPoint.getY() - 200,90);
+//        trip1.getMoveToBalls().addPoint(FieldConfig.gardenPoint.getX(),FieldConfig.gardenPoint.getY(),90);
         trip1.setName("trip1");
         autoTipping.addAction(trip1);
 
         // B shoot, go to B flower
         RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
-        trip2.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), -90);
-        trip2.getMoveToBalls().addPoint(FieldConfig.bFlowerPoint.getX(),FieldConfig.bFlowerPoint.getY(),0);
+        trip2.getMoveToShoot().addPoint(600, 3658-600, 0);
+        trip2.getMoveToShoot().addPoint(1500, 3658-600, 90);
+//        trip2.getMoveToShoot().addPoint(1300, 600, -90);
+        trip2.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
+        trip2.getMoveToBalls().addPoint(FieldConfig.bLaunchPoint.getX(), 700, -180);
+        trip2.getMoveToBalls().addPoint(FieldConfig.bFlowerPoint.getX(),FieldConfig.bFlowerPoint.getY() + 500,-90);
+        trip2.getMoveToBalls().addPoint(FieldConfig.bFlowerPoint.getX(),FieldConfig.bFlowerPoint.getY() + 300,-90);
         trip2.setName("trip2");
+        trip2.setDependentActions(trip1);
         autoTipping.addAction(trip2);
 
         // A shoot, go to A flower
         RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
-        trip3.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), 90);
-        trip3.getMoveToBalls().addPoint(FieldConfig.aFlowerPoint.getX(),FieldConfig.aFlowerPoint.getY(),0);
+        trip3.getMoveToShoot().addPoint(900, 600, -90);
+        trip3.getMoveToShoot().addPoint(900, 2700, -90);
+        trip3.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
+        trip3.getMoveToBalls().addPoint(FieldConfig.aFlowerPoint.getX() + 200,FieldConfig.aFlowerPoint.getY(),180);
         trip3.setName("trip3");
+        trip3.setDependentActions(trip2);
         autoTipping.addAction(trip3);
 
         // B shoot, stay B side
         RoundTripAction trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        trip4.getMoveToShoot().addPoint(600, 3658-600, 0);
+        trip4.getMoveToShoot().addPoint(1500, 3658-600, 90);
         trip4.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
-        trip4.getMoveToBalls().addPoint(0,0,0);
+        //trip4.getMoveToBalls().addPoint(0,0,0);
         trip4.setName("trip4");
+        trip4.setDependentActions(trip3);
         autoTipping.addAction(trip4);
 
         // A shoot, go to A side
         RoundTripAction trip5 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        trip5.getMoveToShoot().addPoint(900, 600, -90);
+        trip5.getMoveToShoot().addPoint(900, 2700, -90);
         trip5.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
-        trip5.getMoveToBalls().addPoint(0,0,0);
+//        trip5.getMoveToBalls().addPoint(0,0,0);
         trip5.setName("trip5");
+        trip5.setDependentActions(trip4);
         autoTipping.addAction(trip5);
 
-        // B shoot, go to A side
+        // B shoot
         RoundTripAction trip6 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        trip6.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), 90);
         trip6.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
-        trip6.getMoveToBalls().addPoint(0,0,0);
         trip6.setName("trip6");
-        autoTipping.addAction(trip6);
+        //autoTipping.addAction(trip6);
+
+        IPurePursuitAction park = new AdaptivePurePursuitAction(driveTrain);
+        park.addPoint(1000, 1000, 180);
+        park.addPoint(100, 3657.6-3350-200, 180);
+        park.setName("park");
+        park.setDependentActions(trip6);
+        autoTipping.addAction(park);
 
         waitForStartPrecomputingPaths();
 
