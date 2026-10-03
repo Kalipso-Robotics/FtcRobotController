@@ -143,8 +143,8 @@ public final class OctoConfig {
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the
-     * heading monitor, which is never fused into the pose, so a tape measure between the two
-     * pod wheels is good enough. The board never sees this value.
+     * heading monitor, which is never fused into the pose. The board never sees this value.
+     * Solved by OctoTune's HEADING spin (see spinGeometry), not tape.
      */
     public static final float TRACK_WIDTH_MM = 299.85f;          // [2026-09-26] OctoTune spins, parallel-pod difference / 20pi (299.89, 299.80); tape said 298.45
 
@@ -247,6 +247,30 @@ public final class OctoConfig {
         double mmRight = rawX  / COUNTS_PER_MM_X;
         double mmLeft  = rawX2 / COUNTS_PER_MM_X2;
         return Math.toDegrees((mmLeft - mmRight) / TRACK_WIDTH_MM);
+    }
+
+    /**
+     * EFFECTIVE RADIUS of each pod from N exact hand turns: r_eff = (mm the wheel rolled) /
+     * (total radians turned), mm, about the spin centre. No sin/cos needed: a wheel rolling
+     * along its own axis while the robot rotates by theta about a fixed point covers exactly
+     * (perpendicular distance from that point to the wheel's line) x theta. theta comes from the
+     * turn count, not the IMU, so IMU_HEADING_SCALAR does not enter.
+     *
+     * Returns {yPodBehind, xPodRight, x2PodLeft, trackWidth}:
+     *   TCP_OFFSET_MM_X = yPodBehind, TCP_OFFSET_MM_Y = xPodRight, TRACK_WIDTH_MM = trackWidth.
+     * Only the offset PERPENDICULAR to each pod's roll is observable; a pod cannot feel how far
+     * along its own axis it sits, and nothing here uses those numbers.
+     * Raw counts are in the BOARD's sign, so netDeg's sign picks the turn direction.
+     *
+     * If the spin centre drifts in the body frame, the individual radii shift (one pod's radius
+     * grows by what the other's shrinks), but xPodRight + x2PodLeft does NOT: track width is
+     * robust to where you pivot, the two TCP offsets are not.
+     */
+    public static double[] spinGeometry(int rawX, int rawX2, int rawY, double netDeg, int turns) {
+        double rad = Math.signum(netDeg) * turns * 2 * Math.PI;
+        double right = -(rawX  / COUNTS_PER_MM_X)  / rad;
+        double left  =  (rawX2 / COUNTS_PER_MM_X2) / rad;
+        return new double[] { (rawY / COUNTS_PER_MM_Y) / rad, right, left, right + left };
     }
 
     /**

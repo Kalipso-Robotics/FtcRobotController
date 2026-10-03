@@ -14,25 +14,28 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Measures COUNTS_PER_MM for the X and Y pods, and IMU_HEADING_SCALAR. Two tape-measure
- * pushes and one hand-turned spin, nothing else.
+ * Measures COUNTS_PER_MM for the X and Y pods, IMU_HEADING_SCALAR, and every pod offset
+ * (TCP_OFFSET_MM_X/Y and TRACK_WIDTH_MM). Two tape-measure pushes and one hand-turned spin,
+ * nothing else. The spin solves the offsets from raw counts over exact turns; see
+ * OctoConfig.spinGeometry.
  *
  * Run OctoStartup FIRST. That OpMode owns every BOOLEAN in OctoConfig. A pod wired backwards
  * produces a NEGATIVE counts/mm here, which is not a number you can paste anywhere.
  *
  * WHAT THIS DELIBERATELY DOES NOT DO, and where those numbers come from instead:
  *
- *   TCP_OFFSET_MM_X/Y    tape measure. See the javadoc on those constants in OctoConfig. The
- *                        SDK itself says they need not be accurate. Solving them with a circle
- *                        fit was 200 lines buying precision the board does not use.
- *   TRACK_WIDTH_MM       tape measure between the two parallel pod wheels. Monitor only; the
- *                        board never reads it.
  *   static drift, L-loop these measured nothing that gets pasted anywhere. Drift is a mounting
  *                        problem you see in OctoTest, and out-and-back CANCELS scale error, so
  *                        the loop was never a scale check to begin with.
  *
  * The board consumes exactly five floats (OctoConfig.apply -> setAllLocalizerParameters).
- * This file produces three of them. The other two are ruler work.
+ * This file produces all five, plus TRACK_WIDTH_MM for the heading monitor.
+ *
+ * OFFSETS COME FROM THE SPIN, NOT A TAPE. Over exactly N turns each pod reads
+ * (its lever arm from the spin centre) x (total radians). So Y pod -> TCP_OFFSET_MM_X,
+ * X pod -> TCP_OFFSET_MM_Y, and X2 + X lever arms -> TRACK_WIDTH_MM. The X pods' fore/aft
+ * position and the Y pod's left/right position are unobservable and unused.
+ * TCP assumes the spin was about the robot centre; track width does not.
  *
  * COUNTS/MM COMES FROM RAW COUNTS, NOT FROM THE REPORTED POSE.
  *
@@ -110,6 +113,9 @@ public class OctoTune extends LinearOpMode {
     private float cpmX2 = OctoConfig.COUNTS_PER_MM_X2;
     private float cpmY  = OctoConfig.COUNTS_PER_MM_Y;
     private float imuHeadingScalar = OctoConfig.IMU_HEADING_SCALAR;
+    private float tcpX = OctoConfig.TCP_OFFSET_MM_X;
+    private float tcpY = OctoConfig.TCP_OFFSET_MM_Y;
+    private float trackWidthMm = OctoConfig.TRACK_WIDTH_MM;
 
     /**
      * Board pose widened to double at the read site.
@@ -370,6 +376,8 @@ public class OctoTune extends LinearOpMode {
         double measuredScalar = measuredNetDeg <= 0 ? 0
                 : imuHeadingScalar * targetDeg / measuredNetDeg;
         double wobbleDeg = turnedDeg - measuredNetDeg;
+        double[] geo = OctoConfig.spinGeometry(rawX(), rawX2(), rawY(), netDeg,
+                OctoConfig.SPIN_ROTATIONS);
 
         String reason = null;
         if (measuredNetDeg <= 0) {
@@ -404,6 +412,13 @@ public class OctoTune extends LinearOpMode {
         telemetry.addData("scalar",     "%8.4f  <- THE answer", measuredScalar);
         telemetry.addData("X to skip", "keep seeded %.4f, no spin needed", (double) imuHeadingScalar);
         telemetry.addLine();
+        telemetry.addLine("EFFECTIVE RADII from this spin (mm)  measured | current");
+        telemetry.addData("r_eff Y pod  (TCP_X)", "%7.1f | %7.1f", geo[0], (double) tcpX);
+        telemetry.addData("r_eff X pod  (TCP_Y)", "%7.1f | %7.1f", geo[1], (double) tcpY);
+        telemetry.addData("r_eff X2 pod",         "%7.1f", geo[2]);
+        telemetry.addData("track = rX + rX2",     "%7.2f | %7.2f", geo[3], (double) trackWidthMm);
+        telemetry.addData("pivot off midline",    "%7.1f  (rX2 - rX)/2, pivot vs pod midpoint", (geo[2] - geo[1]) / 2);
+        telemetry.addLine();
         telemetry.addData("max |raw heading|", "%6.2f rad  (wire range +/-6.55)", maxAbsHeadingRad);
         renderHealth();
         renderBlock(reason);
@@ -411,13 +426,21 @@ public class OctoTune extends LinearOpMode {
         if (gamepad1.aWasPressed()) {
             if (reason != null) { shout(reason); return; }
             imuHeadingScalar = (float) measuredScalar;
+            tcpX = (float) geo[0];
+            tcpY = (float) geo[1];
+            trackWidthMm = (float) geo[3];
             results.add(String.format(Locale.US,
                     "spin %d turns  %7.1f / %7.1f deg expected = %.4f scalar",
                     OctoConfig.SPIN_ROTATIONS, netDeg, targetDeg, measuredScalar));
+            results.add(String.format(Locale.US,
+                    "offsets  Y pod behind %.1f  X pod right %.1f  X2 pod left %.1f  track %.2f mm",
+                    geo[0], geo[1], geo[2], geo[3]));
             csv.writeLine(String.format(Locale.US,
                     "# RESULT heading netDeg %.1f turnedDeg %.1f expectedDeg %.1f scalar %.4f "
-                    + "maxAbsHeadingRad %.2f",
-                    netDeg, turnedDeg, targetDeg, measuredScalar, maxAbsHeadingRad));
+                    + "maxAbsHeadingRad %.2f yPodBehind %.2f xPodRight %.2f x2PodLeft %.2f "
+                    + "trackWidth %.2f",
+                    netDeg, turnedDeg, targetDeg, measuredScalar, maxAbsHeadingRad,
+                    geo[0], geo[1], geo[2], geo[3]));
             accept(Stage.DONE);
         } else if (gamepad1.xWasPressed()) {
             results.add(String.format(Locale.US,
@@ -433,9 +456,8 @@ public class OctoTune extends LinearOpMode {
         telemetry.addLine();
         for (String s : pasteBlock()) telemetry.addLine(s);
         telemetry.addLine();
-        telemetry.addLine("Paste into OctoConfig. The other two board floats are tape work:");
-        telemetry.addLine("  TCP_OFFSET_MM_X/Y  where the two pod lines cross, to robot centre");
-        telemetry.addLine("Then rebuild and run OctoTest.");
+        telemetry.addLine("Paste into OctoConfig. Offsets are from the LAST spin: do one CW and");
+        telemetry.addLine("one CCW and average them. Then rebuild and run OctoTest.");
         telemetry.addData("bad reads", "%d", badReads);
         telemetry.addLine("CSV: " + csv.getPath());
         telemetry.addLine("Autosaved: OctoTune_LATEST.txt (same folder)");
@@ -569,6 +591,9 @@ public class OctoTune extends LinearOpMode {
                 String.format(Locale.US, "COUNTS_PER_MM_X2   = %.5ff;", cpmX2),
                 String.format(Locale.US, "COUNTS_PER_MM_Y    = %.5ff;", cpmY),
                 String.format(Locale.US, "IMU_HEADING_SCALAR = %.4ff;", imuHeadingScalar),
+                String.format(Locale.US, "TCP_OFFSET_MM_X    = %.1ff;", tcpX),
+                String.format(Locale.US, "TCP_OFFSET_MM_Y    = %.1ff;", tcpY),
+                String.format(Locale.US, "TRACK_WIDTH_MM     = %.2ff;", trackWidthMm),
         };
     }
 }
