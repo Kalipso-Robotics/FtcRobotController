@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Matrix;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.DetectedBlob;
@@ -56,6 +57,13 @@ public class CameraIntrinsicsTest {
     public void levelCamera_sizeDepthsAgreeWithRay() {
         BallEstimate e = CI.estimateBall(360.18, 405.06, 382.12, 429.04, R_NECTAR, level());
         assertEquals(800.0, e.rayDepthMM, 0.1);
+        // Level camera: the robot-frame ray is the camera ray flipped, so z = 1 and y = -tan(theta).
+        assertEquals(1.0, e.rayRobot.getZ(), 1e-12);
+        assertEquals(-Math.tan(e.thetaRad), e.rayRobot.getY(), 1e-12);
+        assertEquals(-Math.tan(e.psiRad), e.rayRobot.getX(), 1e-12);
+        // psi/theta are the mean of the edge angles.
+        double expPsi = (Math.atan((360.18 - 320) / 500.0) + Math.atan((405.06 - 320) / 500.0)) / 2;
+        assertEquals(expPsi, e.psiRad, 1e-12);
         assertEquals(800.0, e.sizeDepthHMM, 0.5);
         assertEquals(800.0, e.sizeDepthVMM, 0.5);
         assertTrue(e.isConsistent());
@@ -94,6 +102,22 @@ public class CameraIntrinsicsTest {
         BallEstimate e = CI.estimateBall(320, 320, 240, 240, 0.001, cam);
         assertEquals(519.6, e.robotPos.getX(), 0.1);
         assertEquals(0.0, e.robotPos.getY(), 1e-3);
+    }
+
+    @Test
+    public void cvToRobotIsRotationNotMirror() {
+        Matrix m = CameraPose.CV_TO_ROBOT;
+        double det = m.get(0, 0) * (m.get(1, 1) * m.get(2, 2) - m.get(1, 2) * m.get(2, 1))
+                - m.get(0, 1) * (m.get(1, 0) * m.get(2, 2) - m.get(1, 2) * m.get(2, 0))
+                + m.get(0, 2) * (m.get(1, 0) * m.get(2, 1) - m.get(1, 1) * m.get(2, 0));
+        assertEquals(1.0, det, 1e-12);
+    }
+
+    @Test
+    public void beyondFieldRange_isNull() {
+        // Level camera 300mm up, ball r=35.6: vB row for a ball ~6000mm out is ~1.5px below cy.
+        double v = 240 + 500.0 * (300 - R_NECTAR) / 6000.0;
+        assertNull(CI.estimateBall(318, 322, v - 0.3, v + 0.3, R_NECTAR, level()));
     }
 
     @Test

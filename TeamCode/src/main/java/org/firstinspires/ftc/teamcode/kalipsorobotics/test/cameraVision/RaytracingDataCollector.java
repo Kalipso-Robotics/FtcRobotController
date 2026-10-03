@@ -349,6 +349,8 @@ public class RaytracingDataCollector extends LinearOpMode {
                     telemetry.addLine("SIZE   no bbox - no projection.");
                 }
 
+                telemetry.addData("BALL   estimate", ball == null ? "none (gated)" : ball.toString());
+
                 if (ballPos != null) {
                     telemetry.addData("BALL   robotFrame", "(lat %.1f, fwd %.1f)  pitch %.1f deg",
                             ballPos.getX(), ballPos.getY(), BALL_PITCH_DEG);

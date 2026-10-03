@@ -1,19 +1,21 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Matrix;
+import com.acmerobotics.dashboard.config.Config;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 
+@Config
 public class CameraIntrinsics{
-    public static int  CAM_WIDTH   = 640;
-    public static int  CAM_HEIGHT  = 480;
+    // Fixed: these set the VisionPortal resolution the intrinsics were scaled to.
+    public static final int CAM_WIDTH  = 640;
+    public static final int CAM_HEIGHT = 480;
 
     private final double fx, fy;
     private final double cx, cy;
     private final double mountAngle;
-    private final Matrix mountRotation; // pitch-only CameraPose rotation, for the legacy floor/size paths
-    private final Vector3d cameraOffset;
+    private final CameraPose mount; // pitch-only pose, for the legacy floor/size paths
     private final double k1, k2, k3, p1, p2; //distortions
 
     /**
@@ -85,11 +87,9 @@ public class CameraIntrinsics{
     );
 
 
-    /** Pixel (u, v) as an un-normalised ray direction in the robot frame, rotated by camToRobot. */
-    private Vector3d rayInRobotFrame(double u, double v, Matrix camToRobot) {
-        Matrix ray = new Matrix(new double[][]{{(u - cx) / fx}, {(v - cy) / fy}, {1}});
-        Matrix dir = camToRobot.multiply(ray);
-        return new Vector3d(dir.get(0, 0), dir.get(1, 0), dir.get(2, 0));
+    /** Pixel (u, v) as an un-normalised ray direction in the robot frame, via the legacy mount. */
+    private Vector3d rayInRobotFrame(double u, double v) {
+        return mount.toRobot((u - cx) / fx, (v - cy) / fy, 1);
     }
 
     /** Robot-frame point (x = left, y = forward) to field coordinates at robotPose. */
@@ -111,8 +111,7 @@ public class CameraIntrinsics{
         this.p1 = p1;
         this.p2 = p2;
         this.mountAngle = mountAngle;
-        this.mountRotation = CameraPose.fromAngles(mountAngle, 0, 0, cameraOffset).camToRobot;
-        this.cameraOffset = cameraOffset;
+        this.mount = CameraPose.fromAngles(mountAngle, 0, 0, cameraOffset);
     }
 
     public CameraIntrinsics(double fx, double fy, double cx, double cy,
@@ -120,11 +119,15 @@ public class CameraIntrinsics{
         this(fx, fy, cx, cy, 0, 0, 0, 0, 0, mountAngle, cameraOffset);
     }
 
+    /** @deprecated legacy floor-ray path; build a CameraPose and use estimateBall. */
+    @Deprecated
     public CameraIntrinsics withMount(double mountAngle, Vector3d offset) {
         return new CameraIntrinsics(fx, fy, cx, cy, k1, k2, k3, p1, p2,
                 mountAngle, offset);
     }
 
+    /** @deprecated legacy floor-ray path; migrate to estimateBall + BallEstimate.fieldPos. */
+    @Deprecated
     public Point calculateWorldPos(double pixelX, double pixelY, Position robotPose) {
         return toField(calculateRobotFramePos(pixelX, pixelY), robotPose);
     }
@@ -134,26 +137,25 @@ public class CameraIntrinsics{
      * Its 29 deg pitch absorbs the colour mask's bottom-edge bias. Migrate to estimateBall
      * once the pitch has been refit for that method.
      */
+    @Deprecated
     public Point calculateRobotFramePos(double pixelX, double pixelY) {
-        Vector3d hit = intersectPlane(rayInRobotFrame(pixelX, pixelY, mountRotation), cameraOffset, 0);
-        return hit == null ? null : new Point(hit.getX(), hit.getZ());
+        Vector3d dir = rayInRobotFrame(pixelX, pixelY);
+        double t = planeT(dir, mount.position, 0);
+        if (Double.isNaN(t)) return null;
+        Vector3d hit = mount.position.add(dir.multiply(t));
+        return new Point(hit.getX(), hit.getZ());
     }
 
     /**
-     * Intersects the ray camPos + t*dir with the horizontal plane y = planeY (robot frame, y up).
-     * dir is never normalised: t is solved directly against its y-component, which is exact
-     * for a plane. Returns null for a flat or upward ray (dir.y > -0.01) or t <= 0.
+     * Parameter t where camPos + t*dir meets the horizontal plane y = planeY (robot frame, y up),
+     * or NaN for a flat/upward ray or a plane behind the camera. dir is not unit length, so
+     * "flat" is judged against its own length: dir.y > -0.01 * |dir|.
      */
-    private static Vector3d intersectPlane(Vector3d dir, Vector3d camPos, double planeY) {
+    private static double planeT(Vector3d dir, Vector3d camPos, double planeY) {
         double dirY = dir.getY();
-        if (dirY > -0.01) {
-            return null;
-        }
+        if (dirY > -0.01 * dir.magnitude()) return Double.NaN;
         double t = (planeY - camPos.getY()) / dirY;
-        if (t <= 0) {
-            return null;
-        }
-        return camPos.add(dir.multiply(t));
+        return t > 0 ? t : Double.NaN;
     }
 
     /** Edges are grown outward by half the colour mask's constant shrink before use. */
@@ -164,6 +166,9 @@ public class CameraIntrinsics{
 
     /** |size depth - ray depth| / ray depth above which a detection is flagged inconsistent. */
     public static double MAX_RANGE_DISAGREEMENT = 0.25;
+
+    /** Farthest a ball can be from the robot: the field diagonal. Beyond it the point is rejected. */
+    public static double MAX_BALL_RANGE_MM = 3657.6 * Math.sqrt(2);
 
     /**
      * Off by default: the distortion coefficients were fitted at 1280x800 and fx is known
@@ -183,51 +188,76 @@ public class CameraIntrinsics{
      * angle)), reported on the estimate as a consistency check. It is NOT fused in.
      *
      * @return null when geometrically impossible: unknown radius, bbox clipped by the frame,
-     *         flat/upward ray, or the plane behind the camera. A non-null estimate may still
-     *         be !isConsistent().
+     *         flat/upward ray, the plane behind the camera, or farther than MAX_BALL_RANGE_MM.
+     *         A non-null estimate may still be !isConsistent().
      */
     public BallEstimate estimateBall(VisionRecognition det, CameraPose cam) {
         double r = det.getRadiusMM();
-        if (r <= 0) return null;
-        if (det.left <= BORDER_MARGIN_PX || det.top <= BORDER_MARGIN_PX
-                || det.right >= CAM_WIDTH - BORDER_MARGIN_PX
-                || det.bottom >= CAM_HEIGHT - BORDER_MARGIN_PX) {
-            return null;
-        }
+        if (r <= 0 || isClipped(det)) return null;
         double g = edgeGrowPx();
         return estimateBall(det.left - g, det.right + g, det.top - g, det.bottom + g, r, cam);
+    }
+
+    private static boolean isClipped(VisionRecognition det) {
+        return det.left <= BORDER_MARGIN_PX || det.top <= BORDER_MARGIN_PX
+                || det.right >= CAM_WIDTH - BORDER_MARGIN_PX
+                || det.bottom >= CAM_HEIGHT - BORDER_MARGIN_PX;
     }
 
     /** Edge-pixel form of estimateBall: no growth, no border gate. Used directly by tests. */
     BallEstimate estimateBall(double uL, double uR, double vT, double vB, double radiusMM, CameraPose cam) {
         double uc = (uL + uR) / 2.0, vc = (vT + vB) / 2.0;
-        double aL = Math.atan(normX(uL, vc));
-        double aR = Math.atan(normX(uR, vc));
-        double aT = Math.atan(normY(vT, uc));
-        double aB = Math.atan(normY(vB, uc));
-        double psi = (aL + aR) / 2.0, theta = (aT + aB) / 2.0;
-        double deltaX = (aR - aL) / 2.0, deltaY = (aB - aT) / 2.0;
 
-        Vector3d dir = cam.toRobot(Math.tan(psi), Math.tan(theta), 1);
-        Vector3d hit = intersectPlane(dir, cam.position, radiusMM);
-        if (hit == null) return null;
+        // edges -> angles
+        double aL = angleX(uL, vc), aR = angleX(uR, vc);
+        double aT = angleY(vT, uc), aB = angleY(vB, uc);
 
-        // dir has camera-frame z of exactly 1 and the rotation is rigid, so t is the
-        // ball's camera-frame depth.
-        double rayDepth = (radiusMM - cam.position.getY()) / dir.getY();
-        double sizeV = radiusMM / Math.sin(deltaY) * Math.cos(theta);
-        double sizeH = radiusMM / Math.sin(deltaX) * Math.cos(psi);
-        return new BallEstimate(new Point(hit.getX(), hit.getZ()), rayDepth, sizeV, sizeH,
-                MAX_RANGE_DISAGREEMENT);
+        // centre ray (mean angle) and angular radius delta (half the span), per axis
+        double psi = (aL + aR) / 2.0, deltaX = (aR - aL) / 2.0;
+        double theta = (aT + aB) / 2.0, deltaY = (aB - aT) / 2.0;
+
+        // rotate (tan psi, tan theta, 1) into the robot frame
+        Vector3d ray = cam.toRobot(Math.tan(psi), Math.tan(theta), 1);
+
+        // intersect with the plane at the ball's radius; the ray's camera-frame z is exactly 1
+        // and the rotation is rigid, so t is the ball's camera-frame depth
+        double t = planeT(ray, cam.position, radiusMM);
+        if (Double.isNaN(t)) return null;
+        Vector3d hit = cam.position.add(ray.multiply(t));
+        if (Math.hypot(hit.getX(), hit.getZ()) > MAX_BALL_RANGE_MM) return null;
+
+        // size cross-check, per axis: reported, not fused
+        double sizeV = sizeDepth(radiusMM, deltaY, theta);
+        double sizeH = sizeDepth(radiusMM, deltaX, psi);
+        return new BallEstimate(new Point(hit.getX(), hit.getZ()), t, sizeV, sizeH,
+                psi, theta, deltaX, deltaY, ray, MAX_RANGE_DISAGREEMENT);
     }
 
-    /** Normalised x of pixel column u (on row vRef, which only matters when undistorting). */
-    private double normX(double u, double vRef) {
-        return APPLY_DISTORTION ? undistort(u, vRef)[0] : (u - cx) / fx;
+    /** Depth implied by angular radius delta at centre angle c: r / sin(delta) * cos(c). */
+    private static double sizeDepth(double radiusMM, double delta, double centreAngle) {
+        return radiusMM / Math.sin(delta) * Math.cos(centreAngle);
     }
 
-    private double normY(double v, double uRef) {
-        return APPLY_DISTORTION ? undistort(uRef, v)[1] : (v - cy) / fy;
+    /** Angle of pixel column u (row vRef only matters when undistorting). */
+    private double angleX(double u, double vRef) {
+        return Math.atan(APPLY_DISTORTION ? undistort(u, vRef)[0] : (u - cx) / fx);
+    }
+
+    private double angleY(double v, double uRef) {
+        return Math.atan(APPLY_DISTORTION ? undistort(uRef, v)[1] : (v - cy) / fy);
+    }
+
+    // Distortion model, defined once: x_d = x * radial(r2) + tangential(x, y, r2).
+    private double radial(double r2) {
+        return 1 + k1 * r2 + k2 * r2 * r2 + k3 * r2 * r2 * r2;
+    }
+
+    private double tangentialX(double x, double y, double r2) {
+        return 2 * p1 * x * y + p2 * (r2 + 2 * x * x);
+    }
+
+    private double tangentialY(double x, double y, double r2) {
+        return p1 * (r2 + 2 * y * y) + 2 * p2 * x * y;
     }
 
     /** Pixel -> undistorted normalised coordinates, same fixed-point scheme as cv::undistortPoints. */
@@ -236,11 +266,10 @@ public class CameraIntrinsics{
         double x = x0, y = y0;
         for (int i = 0; i < 5; i++) {
             double r2 = x * x + y * y;
-            double radial = 1 + k1 * r2 + k2 * r2 * r2 + k3 * r2 * r2 * r2;
-            double dx = 2 * p1 * x * y + p2 * (r2 + 2 * x * x);
-            double dy = p1 * (r2 + 2 * y * y) + 2 * p2 * x * y;
-            x = (x0 - dx) / radial;
-            y = (y0 - dy) / radial;
+            double rad = radial(r2);
+            double dx = tangentialX(x, y, r2), dy = tangentialY(x, y, r2);
+            x = (x0 - dx) / rad;
+            y = (y0 - dy) / rad;
         }
         return new double[]{x, y};
     }
@@ -248,12 +277,11 @@ public class CameraIntrinsics{
     /** Test hook: the forward model undistort inverts. */
     double[] distort(double x, double y) {
         double r2 = x * x + y * y;
-        double radial = 1 + k1 * r2 + k2 * r2 * r2 + k3 * r2 * r2 * r2;
-        return new double[]{
-                x * radial + 2 * p1 * x * y + p2 * (r2 + 2 * x * x),
-                y * radial + p1 * (r2 + 2 * y * y) + 2 * p2 * x * y};
+        double rad = radial(r2);
+        return new double[]{x * rad + tangentialX(x, y, r2), y * rad + tangentialY(x, y, r2)};
     }
 
+    @Deprecated
     public double getDistanceFromRobot(double pixelX, double pixelY, Position robotPose) {
         Point object = calculateWorldPos(pixelX, pixelY, robotPose);
         if (object == null) {
@@ -262,6 +290,7 @@ public class CameraIntrinsics{
         return robotPose.toPoint().distanceTo(object);
     }
 
+    @Deprecated
     public double getDistanceFromRobot(VisionRecognition recognition, Position robotPose) {
         Point bottomCenter = recognition.getBottomMiddlePixel();
         return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(), robotPose);
@@ -275,6 +304,7 @@ public class CameraIntrinsics{
      * @param objectDiameterMM real-world diameter of the (assumed circular) object,
      *                         e.g. KColorBlobProcessor.getObjectDiameterMM()
      */
+    @Deprecated
     public Point calculateRobotFramePosFromSize(VisionRecognition recognition, double objectDiameterMM) {
         double pixelWidth  = recognition.getWidth();
         double pixelHeight = recognition.getHeight();
@@ -296,15 +326,17 @@ public class CameraIntrinsics{
         // up to 1.14 at the image edge, so scaling it un-normalised overshoots by ~5-14%.
         // The floor/ball paths don't need this -- a ray-plane intersection is
         // scale-invariant in the direction vector.
-        Vector3d dir = rayInRobotFrame(recognition.center.getX(), recognition.center.getY(), mountRotation);
-        Vector3d hit = cameraOffset.add(dir.normalize().multiply(range));
+        Vector3d dir = rayInRobotFrame(recognition.center.getX(), recognition.center.getY());
+        Vector3d hit = mount.position.add(dir.normalize().multiply(range));
         return new Point(hit.getX(), hit.getZ());
     }
 
+    @Deprecated
     public Point calculateWorldPosFromSize(VisionRecognition recognition, double objectDiameterMM, Position robotPose) {
         return toField(calculateRobotFramePosFromSize(recognition, objectDiameterMM), robotPose);
     }
 
+    @Deprecated
     public double getDistanceFromRobotBySize(VisionRecognition recognition, double objectDiameterMM, Position robotPose) {
         Point object = calculateWorldPosFromSize(recognition, objectDiameterMM, robotPose);
         if (object == null) {
@@ -318,7 +350,7 @@ public class CameraIntrinsics{
     public double getFx() { return fx; }
     public double getFy() { return fy; }
     public double getMountAngle() { return mountAngle; }
-    public Vector3d getCameraOffset() { return cameraOffset; }
+    public Vector3d getCameraOffset() { return mount.position; }
 
     /**
      * Expected bounding-box width/height ratio for a sphere, = fx/fy.

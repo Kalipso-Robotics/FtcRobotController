@@ -13,6 +13,14 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 public class CameraPose {
 
     /**
+     * OpenCV camera axes (right, down, forward) -> robot axes (left, up, forward).
+     * A true rotation, not a mirror: det = +1, because both triads are right-handed.
+     */
+    public static final Matrix CV_TO_ROBOT =
+            new Matrix(new double[][]{{-1, 0, 0}, {0, -1, 0}, {0, 0, 1}});
+
+    // Declared first: the fixed poses below are built during class init and need it.
+    /**
      * Pitch (rad) of the Arducam bracket. Fitted against the old bottom-edge floor ray, so it
      * absorbs that method's bias. MUST BE REFIT for the edge-angle ball ray (a sweep over
      * the 2026-09-08 ground truth prefers ~28 deg).
@@ -34,28 +42,29 @@ public class CameraPose {
         this.position = position;
     }
 
+    public static Matrix rotX(double a) {
+        double c = Math.cos(a), s = Math.sin(a);
+        return new Matrix(new double[][]{{1, 0, 0}, {0, c, -s}, {0, s, c}});
+    }
+
+    public static Matrix rotY(double a) {
+        double c = Math.cos(a), s = Math.sin(a);
+        return new Matrix(new double[][]{{c, 0, s}, {0, 1, 0}, {-s, 0, c}});
+    }
+
+    public static Matrix rotZ(double a) {
+        double c = Math.cos(a), s = Math.sin(a);
+        return new Matrix(new double[][]{{c, -s, 0}, {s, c, 0}, {0, 0, 1}});
+    }
+
     /**
-     * Builds a row-major 3x3 rotation that maps a normalised OpenCV camera ray
-     * ((u-cx)/fx, (v-cy)/fy, 1) -- x right, y down, z forward out of the lens --
-     * into the robot frame (x left, y up, z forward).
-     *
-     * R = Ry(yaw) . Rx(pitchDown) . Rz(roll) . diag(-1,-1,1)
-     *
-     * diag(-1,-1,1) is the right-to-left / down-to-up flip. Positive pitchDown tilts the lens
-     * down, positive yaw turns the lens left, and roll is about the optical axis. All three
-     * are in radians.
+     * Rotation mapping a normalised OpenCV ray ((u-cx)/fx, (v-cy)/fy, 1) into the robot frame.
+     * Read right to left: flip to robot axes, roll about the optical axis, pitch the lens down,
+     * then yaw it left. Angles in radians.
      */
     public static CameraPose fromAngles(double pitchDown, double yaw, double roll, Vector3d position) {
-        double cp = Math.cos(pitchDown), sp = Math.sin(pitchDown);
-        double cy = Math.cos(yaw), sy = Math.sin(yaw);
-        double cr = Math.cos(roll), sr = Math.sin(roll);
-
-        Matrix rx = new Matrix(new double[][]{{1, 0, 0}, {0, cp, -sp}, {0, sp, cp}});
-        Matrix ry = new Matrix(new double[][]{{cy, 0, sy}, {0, 1, 0}, {-sy, 0, cy}});
-        Matrix rz = new Matrix(new double[][]{{cr, -sr, 0}, {sr, cr, 0}, {0, 0, 1}});
-        Matrix flip = new Matrix(new double[][]{{-1, 0, 0}, {0, -1, 0}, {0, 0, 1}});
-
-        return new CameraPose(ry.multiply(rx).multiply(rz).multiply(flip), position);
+        Matrix camToRobot = rotY(yaw).multiply(rotX(pitchDown)).multiply(rotZ(roll)).multiply(CV_TO_ROBOT);
+        return new CameraPose(camToRobot, position);
     }
 
     /** Rotates a camera-frame direction into the robot frame. Not normalised. */
