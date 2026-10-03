@@ -62,7 +62,7 @@ public class CompareOdometryTest extends LinearOpMode {
     private OpModeUtilities opModeUtilities;
     private DriveTrain driveTrain;
     private IMUModule imuModule;
-    private DcMotor intake;
+//    private DcMotor intake;
 
     private double pathMm, turnedDeg;
     private double prevX, prevY;
@@ -83,7 +83,7 @@ public class CompareOdometryTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         q = hardwareMap.get(OctoQuad.class, OctoConfig.HARDWARE_NAME);
-        intake = hardwareMap.get(DcMotor.class, "intake");
+//        intake = hardwareMap.get(DcMotor.class, "intake");
 
         OctoConfig.apply(q);
 
@@ -164,13 +164,13 @@ public class CompareOdometryTest extends LinearOpMode {
                     }
                 }
 
-                if (gamepad1.right_trigger > 0.1) {
-                    intake.setPower(-speed);
-                } else if (gamepad1.right_bumper) {
-                    intake.setPower(speed);
-                } else {
-                    intake.setPower(0);
-                }
+//                if (gamepad1.right_trigger > 0.1) {
+//                    intake.setPower(-speed);
+//                } else if (gamepad1.right_bumper) {
+//                    intake.setPower(speed);
+//                } else {
+//                    intake.setPower(0);
+//                }
 
                 if (gamepad1.dpadDownWasPressed()) {
                     speed = MathFunctions.clamp(speed - 0.1, 0, 1);
@@ -227,7 +227,7 @@ public class CompareOdometryTest extends LinearOpMode {
                 octoPose.x, octoPose.y, octoPose.headingDeg,
                 legacyPose.x, legacyPose.y, legacyPose.headingDeg,
                 podHeadingDeg(), ypr.getYaw() - hubYawZeroDeg, ypr.getPitch(), ypr.getRoll(),
-                legacy.usedWheel ? "WHEEL" : "IMU", intake.getPower(), loopMs));
+                legacy.usedWheel ? "WHEEL" : "IMU", -1.0, loopMs));
     }
 
     /** One TRIAL summary row: each algorithm's return-to-start error for this lap. */

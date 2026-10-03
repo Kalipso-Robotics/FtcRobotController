@@ -61,7 +61,7 @@ public final class OctoConfig {
     //   check 2 sideways:     SKIPPED (still trusted from 2026-09-21, port 1 untouched)
     public static final boolean INVERT_X  = false;  // [2026-09-22] OctoStartup check 1
     public static final boolean INVERT_Y  = true;   // [2026-09-22] OctoStartup check 3
-    public static final boolean INVERT_X2 = true;   // [2026-09-22] OctoStartup check 1
+    public static final boolean INVERT_X2 = false;   // [2026-09-22] OctoStartup check 1
 
     /**
      * True when the board's frame is the mirror of yours and the pose must be flipped.
