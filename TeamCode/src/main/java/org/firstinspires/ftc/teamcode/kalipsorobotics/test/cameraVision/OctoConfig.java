@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * RULE: every tuned number carries the DATE and the test that produced it. A constant with no
  * provenance is the one someone "fixes" at a competition with no record of what it used to be.
  *
- * Pods: 3x goBILDA Swingarm Odometry Pod, 48mm wheel, 2000 counts/rev.
- * Theoretical counts/mm = 2000 / (pi * 48) = 13.26291192.
+ * Pods: 3x goBILDA 4-Bar Odometry Pod, 32mm wheel, 2000 counts/rev.
+ * Theoretical counts/mm = 2000 / (pi * 32) = 19.8944.
  *
  * AXIS CONVENTION (yours): +X out the front of the robot, +Y out the RIGHT side,
  * heading positive CLOCKWISE seen from above. That is the aerospace/NED frame (x fwd,
@@ -94,7 +94,7 @@ public final class OctoConfig {
      * goBILDA Swingarm pod: 48mm wheel -> 13.263 counts/mm.
      */
     public static final float POD_COUNTS_PER_REV = 2000f;
-    public static final float POD_WHEEL_MM       = 48f;   // goBILDA Swingarm [VERIFY WITH CALIPERS]
+    public static final float POD_WHEEL_MM       = 32f;   // goBILDA 4-Bar [VERIFY WITH CALIPERS]
 
     public static final float CPM_THEORETICAL =
             (float) (POD_COUNTS_PER_REV / (Math.PI * POD_WHEEL_MM));
@@ -102,11 +102,11 @@ public final class OctoConfig {
     // [2026-09-22] re-measured via OctoTune after the INVERT_X/INVERT_X2 fix (see the booleans
     // above): raw 24408 / 1828.8mm, 0.6% off theoretical. COUNTS_PER_MM_X2 now tracks it
     // closely (13.344 vs 13.346), confirming port 2 is alive again -- it read ~0 before the fix.
-    public static final float COUNTS_PER_MM_X   = 13.34646f;     // [2026-09-22] OctoTune push X
-    public static final float COUNTS_PER_MM_X2  = 13.34372f;     // [2026-09-22] OctoTune push X
+    public static final float COUNTS_PER_MM_X   = CPM_THEORETICAL;  // SEED, new drivetrain: replace via OctoTune
+    public static final float COUNTS_PER_MM_X2  = CPM_THEORETICAL;  // SEED, new drivetrain: replace via OctoTune
     // [2026-09-22] Y re-measured after the L-test redo confirmed MIRROR_BOARD_FRAME/INVERT_Y
     // unchanged (still self-consistent, y-LEFT/CCW+): raw 16110 / 1219.2mm, 0.4% off theoretical.
-    public static final float COUNTS_PER_MM_Y   = 13.21358f;     // [2026-09-22] OctoTune push Y
+    public static final float COUNTS_PER_MM_Y   = CPM_THEORETICAL;  // SEED, new drivetrain: replace via OctoTune
     // [2026-09-26] HEADING re-measured with the net-signed OctoTune fix, 10 turns each way:
     // CW netDeg 3586.1 -> 1.0203, CCW netDeg -3587.7 -> 1.0199, averaged. (The 2026-09-22
     // value 1.0164 came from the old abs-sum measurement, which counted wobble as rotation.)
@@ -138,15 +138,15 @@ public final class OctoConfig {
     // reproduced to 1 mm only if it places each pod at MINUS these offsets (the javadoc's
     // centre-minus-offset reading); the other sign misses by 400 mm. So offset = -(pod position).
     // The old 2026-09-22 tape values (63.5, -152.4) had X short and Y's sign backwards.
-    public static final float TCP_OFFSET_MM_X   = 95.4f;         // [2026-09-26] OctoTune spin replay
-    public static final float TCP_OFFSET_MM_Y   = 148.9f;        // [2026-09-26] OctoTune spin replay
+    public static final float TCP_OFFSET_MM_X   = 0f;  // SEED, new drivetrain: replace via OctoTune HEADING spin
+    public static final float TCP_OFFSET_MM_Y   = 0f;  // SEED, new drivetrain: replace via OctoTune HEADING spin
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the
      * heading monitor, which is never fused into the pose. The board never sees this value.
      * Solved by OctoTune's HEADING spin (see spinGeometry), not tape.
      */
-    public static final float TRACK_WIDTH_MM = 299.85f;          // [2026-09-26] OctoTune spins, parallel-pod difference / 20pi (299.89, 299.80); tape said 298.45
+    public static final float TRACK_WIDTH_MM = 300f;  // SEED, new drivetrain: replace via OctoTune HEADING spin
 
     public static final int VELOCITY_INTERVAL_MS = 25;
 
@@ -157,20 +157,22 @@ public final class OctoConfig {
     // and error quantities in millimetres: you measure the first with a tape, you judge the
     // second as a small number.
     //
-    // Sized for an L-SHAPED space of 4 x 3 tiles (24 in tiles):
-    //   long leg  4 tiles = 96 in, minus an 18 in robot, minus slack -> 72 in of travel
-    //   short leg 3 tiles = 72 in, minus an 18 in robot, minus slack -> 48 in of travel
-    // The robot sits in the corner of the L facing down the long leg, with the short leg on
-    // its RIGHT. Stage 2 pushes down the long leg, stage 3 down the short leg, no rotation
-    // in between.
+    // ONE 48 in lane along a field wall, used for both axes. The wall is the straightedge, so
+    // twist error is ~0. X push: robot facing down the lane. Y push: set the robot down turned
+    // 90 so its RIGHT side faces down the lane and push it RIGHT. Needs ~66 in of wall
+    // (48 in travel + 18 in robot), under 3 tiles.
     //
-    // Calibration accuracy is limited by (tape error / distance), so measure stop-to-stop
-    // once, carefully. At 48 in a 1/16 in error is 0.13%; a 1/4 in error is 0.5%.
+    // PUSH_*_IN is the robot's TRAVEL, not the tape stop-to-stop: put a start stop behind the
+    // robot, push it back against it, then measure from the robot's leading face at the start
+    // to the far stop. Measure once, carefully.
+    //
+    // Error is ~2 mm fixed (tape read + seating) divided by travel: 0.16% at 48 in, 0.11% at
+    // 72 in. Past 48 in the gain is below tile-compression noise, so 48 in is the knee.
 
     public static final double MM_PER_IN = 25.4;
 
-    public static final double PUSH_X_IN = 72.0;   // long leg, stage 2
-    public static final double PUSH_Y_IN = 48.0;   // short leg, stage 3
+    public static final double PUSH_X_IN = 48.0;   // robot travel, stage 2
+    public static final double PUSH_Y_IN = 48.0;   // robot travel, stage 3 (same lane)
 
     public static final double PUSH_X_MM = PUSH_X_IN * MM_PER_IN;
     public static final double PUSH_Y_MM = PUSH_Y_IN * MM_PER_IN;

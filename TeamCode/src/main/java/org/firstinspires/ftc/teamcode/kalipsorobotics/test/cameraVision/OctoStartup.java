@@ -17,50 +17,50 @@ import java.util.Locale;
  * BRING-UP. Run this FIRST, before OctoTune, and before a tape measure comes out.
  *
  * This OpMode owns every BOOLEAN in OctoConfig. OctoTune owns every float. Signs and
- * handedness are wiring facts, not calibration, and they are cheap to get wrong in a way
- * that silently wastes an entire tuning session: tuning against a backwards pod produces
- * a negative counts/mm, which is not a number you can paste anywhere.
+ * handedness are wiring facts, not calibration, and tuning against a backwards pod produces a
+ * NEGATIVE counts/mm, which is not a number you can paste anywhere.
  *
- * It replaces a file that had become a verbatim copy of OctoTune. Because of that, nothing
- * in the repo ever set INVERT_X/Y/X2, which is why pushing the robot forward could report a
- * NEGATIVE x and why the old stage 5 refused to accept.
+ * ONE SCREEN, THREE GESTURES, ANY ORDER. Each gesture latches its answer when it is clean:
  *
- * Every direction here is toggled LIVE on the board with setSingleEncoderDirection. No
- * edit-rebuild-redeploy cycle to test a sign. That is the whole point of the tool.
+ *   FORWARD     push the robot forward ~100 mm+     ch0 and ch2 must count UP
+ *                                                   -> INVERT_X, INVERT_X2
+ *   TWIST LEFT  turn it left in place, 45 deg+      IMU heading sign
+ *                                                   -> MIRROR_BOARD_FRAME (+ means y-LEFT / CCW+)
+ *   PUSH LEFT   slide it left ~100 mm+, no turn     ch1 must count UP if mirror, else DOWN
+ *                                                   -> INVERT_Y
  *
- * The three checks:
- *   1 PUSH FORWARD   both parallel pods (ch0, ch2) must count UP, and pose x must go POSITIVE
- *   2 PUSH SIDEWAYS  ch1 must respond at all (alive, plugged into port 1)
- *   3 L-TEST         turn ~90 left and push forward: settles INVERT_Y and MIRROR_BOARD_FRAME
+ * Mirror comes from the IMU, not the encoders, so a twist settles it without an L-test, and
+ * once it is known the Y direction can be asserted outright. Press B between gestures: a twist
+ * moves ch0 and ch2 oppositely and would foul the forward gate.
  *
- * Why check 2 does NOT assert a direction for Y:
+ * Raw counts follow setSingleEncoderDirection at once, so a latch measured under the live
+ * direction gives the exact flip needed. The localizer only picks a direction up at its next
+ * reset, so nothing is relatched while you edit. A commits everything with ONE recalibration,
+ * then CONFIRM runs one short L-test as the end-to-end proof that rotation and translation
+ * compose. That is the only check that catches a Y port mix-up.
  *
- * The board fuses X and Y into a pose using its own frame, and that frame is undocumented.
- * Both candidate frames put +X out the front, so check 1 can assert a direction safely. They
- * disagree about Y. If this check demanded "pushing right reads +Y" and the board is natively
- * y-left, the operator would satisfy it by inverting the Y encoder, which is precisely the
- * corruption the warning block in OctoConfig exists to prevent: it passes every straight-line
- * test and fails the moment heading leaves zero.
- *
- * So INVERT_Y and MIRROR_BOARD_FRAME are resolved together, by the L-test. Of the four
- * combinations only two are self-consistent, and a correct fusion reports y and heading with
- * the SAME sign. Opposite signs mean the fusion is corrupted: flip INVERT_Y and redo. One
- * button, one retry, guaranteed to resolve.
- *
- * The legacy-odometry cross-check (does localization/Odometry call the same direction +Y?)
- * lives in OctoTest, which already has the drivetrain instantiated for driving.
+ * GAMEPAD (every value is editable, a manual edit always wins):
+ *   dpad UP/DOWN   move the cursor over INVERT_X, INVERT_X2, INVERT_Y, MIRROR_BOARD_FRAME
+ *   dpad LEFT/RIGHT flip the selected value
+ *   Y              adopt every latched suggestion
+ *   A              commit (recalibrates once, only if a value actually changed), go to CONFIRM
+ *   B              zero         X   clear all latches and redo the gestures
  *
  *   adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs ~/
  */
 @TeleOp
 public class OctoStartup extends LinearOpMode {
 
-    /** Enough counts to be a deliberate push rather than a nudge: ~100mm at the seed scale. */
-    private static final int MIN_PUSH_COUNTS = 2000;
-    /** The L-test is a sign test. Anything recognisably a quarter turn will do. */
-    private static final double LTEST_MIN_HEADING_DEG = 45.0;
+    /** ~100 mm of pod travel: a deliberate push, not a nudge. */
+    private static final int PUSH_COUNTS = (int) (100 * OctoConfig.CPM_THEORETICAL);
+    /** A push must stay this flat, or its counts are contaminated by rotation. */
+    private static final double QUIET_HEADING_DEG = 15.0;
+    /** Anything recognisably a quarter turn will do; this is a sign test. */
+    private static final double TWIST_MIN_DEG = 45.0;
 
-    private enum Check { FIRMWARE, PUSH_FORWARD, PUSH_SIDEWAYS, LTEST, DONE }
+    private static final String[] ROW = {"INVERT_X", "INVERT_X2", "INVERT_Y", "MIRROR_BOARD_FRAME"};
+
+    private enum Check { FIRMWARE, GESTURES, CONFIRM, DONE }
 
     private final OctoQuad.LocalizerDataBlock loc = new OctoQuad.LocalizerDataBlock();
     private final OctoQuad.EncoderDataBlock   enc = new OctoQuad.EncoderDataBlock();
@@ -71,11 +71,21 @@ public class OctoStartup extends LinearOpMode {
     private KFileWriter csv;
     private Check check = Check.FIRMWARE;
 
-    // Live working values. These are what the paste block prints.
+    // Working values, what the paste block prints. applied* is what the localizer last latched.
     private boolean invX  = OctoConfig.INVERT_X;
     private boolean invY  = OctoConfig.INVERT_Y;
     private boolean invX2 = OctoConfig.INVERT_X2;
     private boolean mirror = OctoConfig.MIRROR_BOARD_FRAME;
+    private boolean appliedInvX = invX, appliedInvY = invY, appliedInvX2 = invX2;
+
+    // Latched gesture results. null = not seen yet. Suggestions are absolute targets, so a
+    // later manual edit cannot make them stale.
+    private Boolean sugX, sugX2, sugMirror;
+    private boolean yLatched;
+    private int latchedRawY;
+    private boolean yInvAtLatch;
+    private boolean mirrorEdited;
+    private int cursor;
 
     // Widened to double at the read site: posX_mm and posY_mm are SHORTS, and a %f against a
     // boxed Short throws inside telemetry.update() rather than at the line that caused it.
@@ -86,6 +96,27 @@ public class OctoStartup extends LinearOpMode {
 
     private Byte chipId;
     private OctoQuad.FirmwareVersion firmware;
+
+    // ----------------------------------------------------------------- pure decisions
+
+    /** Flip needed so a pod that must count UP does. Measured under the direction `inv`. */
+    public static boolean suggestInvert(boolean inv, int raw) {
+        return inv ^ (raw < 0);
+    }
+
+    /**
+     * A left push must count UP when the board is y-LEFT (mirror) and DOWN when it is y-RIGHT.
+     * `inv` is the direction the pod was set to when rawY was measured.
+     */
+    public static boolean suggestInvertY(boolean inv, int rawY, boolean mirror) {
+        boolean wrong = (rawY > 0) != mirror;
+        return inv ^ wrong;
+    }
+
+    /** A left turn reading positive means CCW+ / y-left, which is the mirror of ours. */
+    public static boolean suggestMirror(double headingDeg) {
+        return headingDeg > 0;
+    }
 
     @Override
     public void runOpMode() {
@@ -104,11 +135,11 @@ public class OctoStartup extends LinearOpMode {
         telemetry.addLine("OCTO BRING-UP -- run this before OctoTune.");
         telemetry.addLine();
         telemetry.addLine("Settles the four booleans in OctoConfig:");
-        telemetry.addLine("  INVERT_X, INVERT_Y, INVERT_X2, MIRROR_BOARD_FRAME");
+        telemetry.addLine("  INVERT_X, INVERT_X2, INVERT_Y, MIRROR_BOARD_FRAME");
         telemetry.addLine();
-        telemetry.addLine("You push the robot by hand. Nothing here drives motors.");
-        telemetry.addLine("A accept | B zero | X skip this check (keep current value)");
-        telemetry.addLine("Every accept or skip autosaves to OctoStartup_LATEST.txt.");
+        telemetry.addLine("You move the robot by hand. Nothing here drives motors.");
+        telemetry.addLine("dpad U/D cursor | dpad L/R flip | Y adopt | A commit | B zero | X clear");
+        telemetry.addLine("Every commit or finish autosaves to OctoStartup_LATEST.txt.");
         telemetry.addLine("Press START.");
         telemetry.update();
 
@@ -142,48 +173,12 @@ public class OctoStartup extends LinearOpMode {
                 }
 
                 if (gamepad1.bWasPressed()) zero();
-                handleDirectionToggles();
+                if (check == Check.GESTURES) latchGestures();
                 render();
                 telemetry.update();
             }
         } finally {
             csv.close();
-        }
-    }
-
-    // ---------------------------------------------------------------- direction toggles
-
-    /**
-     * Live on the board, not in source. A sign is then a button press instead of an edit,
-     * a rebuild, a redeploy and a walk back to the field.
-     *
-     * *** A direction change does NOT reach the localizer until the localizer is reset. ***
-     *
-     * setSingleEncoderDirection flips the reported COUNTS immediately, but the localizer keeps
-     * using whatever direction was latched at the last resetLocalizerAndCalibrateIMU(). The SDK
-     * sample says so in one line above its direction calls: "these parameter changes will not
-     * take effect until the localizer is reset". Without the reset below, the toggle makes ch0
-     * and ch2 count up while pose x stays negative, and no combination of the three booleans
-     * ever fixes it -- the pose is not listening to any of them.
-     *
-     * Toggling therefore re-latches and re-zeros: the counts either side of a direction change
-     * are not comparable, and the IMU recalibration wants the robot still anyway, which it is
-     * while someone is pressing dpad.
-     */
-    private void handleDirectionToggles() {
-        boolean changed = false;
-        if (gamepad1.dpadUpWasPressed())    { invX  = !invX;  changed = true; }
-        if (gamepad1.dpadRightWasPressed()) { invY  = !invY;  changed = true; }
-        if (gamepad1.dpadDownWasPressed())  { invX2 = !invX2; changed = true; }
-        if (changed) {
-            OctoConfig.setEncoderDirection(q, OctoConfig.CH_X,  invX);
-            OctoConfig.setEncoderDirection(q, OctoConfig.CH_Y,  invY);
-            OctoConfig.setEncoderDirection(q, OctoConfig.CH_X2, invX2);
-            if (!OctoConfig.calibrateImu(q, this)) {
-                shout("localizer reset FAILED after a direction change. The pose is still "
-                        + "using the OLD directions -- do not trust it.");
-            }
-            zero();
         }
     }
 
@@ -194,15 +189,124 @@ public class OctoStartup extends LinearOpMode {
         bx = by = headingDeg = 0;
     }
 
+    // ------------------------------------------------------------------------ gestures
+
+    /**
+     * Each gate rejects cross-contamination: a forward push must not turn, a sideways push must
+     * not go forward. Results latch once and hold; X clears them to redo.
+     */
+    private void latchGestures() {
+        boolean flat = Math.abs(headingDeg) < QUIET_HEADING_DEG;
+
+        if (flat && Math.abs(rawX) >= PUSH_COUNTS && Math.abs(rawY) < Math.abs(rawX) / 3) {
+            if (sugX == null) {
+                sugX = suggestInvert(invX, rawX);
+                csv.writeLine("# LATCH forward ch0 " + rawX + " -> INVERT_X " + sugX);
+            }
+            if (sugX2 == null && Math.abs(rawX2) >= PUSH_COUNTS / 2) {
+                sugX2 = suggestInvert(invX2, rawX2);
+                csv.writeLine("# LATCH forward ch2 " + rawX2 + " -> INVERT_X2 " + sugX2);
+            }
+        }
+
+        if (sugMirror == null && Math.abs(headingDeg) > TWIST_MIN_DEG) {
+            sugMirror = suggestMirror(headingDeg);
+            csv.writeLine(String.format(Locale.US, "# LATCH twist heading %.1f -> mirror %b",
+                    headingDeg, sugMirror));
+        }
+
+        if (!yLatched && flat && Math.abs(rawY) >= PUSH_COUNTS
+                && Math.abs(rawX) < Math.abs(rawY) / 3) {
+            yLatched = true;
+            latchedRawY = rawY;
+            yInvAtLatch = invY;
+            csv.writeLine("# LATCH left push ch1 " + rawY + " (INVERT_Y was " + invY + ")");
+        }
+    }
+
+    private boolean mirrorKnown() { return sugMirror != null || mirrorEdited; }
+
+    /** Suggested value for a row, or null if its gesture has not latched (or cannot be read yet). */
+    private Boolean suggestion(int row) {
+        switch (row) {
+            case 0:  return sugX;
+            case 1:  return sugX2;
+            case 2:  return yLatched && mirrorKnown()
+                    ? suggestInvertY(yInvAtLatch, latchedRawY, mirror) : null;
+            default: return sugMirror;
+        }
+    }
+
+    private boolean value(int row) {
+        switch (row) {
+            case 0:  return invX;
+            case 1:  return invX2;
+            case 2:  return invY;
+            default: return mirror;
+        }
+    }
+
+    /**
+     * Live on the board so the raw counts show the effect at once, with no recalibration.
+     * The localizer itself only picks a direction up at the reset A performs.
+     */
+    private void setValue(int row, boolean v) {
+        switch (row) {
+            case 0:  invX  = v; OctoConfig.setEncoderDirection(q, OctoConfig.CH_X,  v); break;
+            case 1:  invX2 = v; OctoConfig.setEncoderDirection(q, OctoConfig.CH_X2, v); break;
+            case 2:  invY  = v; OctoConfig.setEncoderDirection(q, OctoConfig.CH_Y,  v); break;
+            default: mirror = v; mirrorEdited = true; break;
+        }
+    }
+
+    private void handleEditing() {
+        if (gamepad1.dpadUpWasPressed())   cursor = (cursor + ROW.length - 1) % ROW.length;
+        if (gamepad1.dpadDownWasPressed()) cursor = (cursor + 1) % ROW.length;
+        if (gamepad1.dpadLeftWasPressed() || gamepad1.dpadRightWasPressed()) {
+            setValue(cursor, !value(cursor));
+        }
+        if (gamepad1.yWasPressed()) {
+            // Mirror first: the Y suggestion reads it.
+            for (int row : new int[] {3, 0, 1, 2}) {
+                Boolean s = suggestion(row);
+                if (s != null) setValue(row, s);
+            }
+        }
+        if (gamepad1.xWasPressed()) {
+            sugX = sugX2 = sugMirror = null;
+            yLatched = mirrorEdited = false;
+        }
+    }
+
+    private boolean dirty() {
+        return invX != appliedInvX || invY != appliedInvY || invX2 != appliedInvX2;
+    }
+
+    /** The one relatch. Skipped when nothing changed: the localizer already has these values. */
+    private void commit() {
+        boolean relatched = dirty();
+        if (relatched) {
+            if (!OctoConfig.calibrateImu(q, this)) {
+                results.add("commit    IMU CALIBRATION FAILED -- nothing below is meaningful");
+                enterCheck(Check.DONE);
+                return;
+            }
+            appliedInvX = invX; appliedInvY = invY; appliedInvX2 = invX2;
+        }
+        results.add(String.format(Locale.US,
+                "gestures INVERT_X %b  INVERT_X2 %b  INVERT_Y %b  MIRROR %b%s",
+                invX, invX2, invY, mirror, relatched ? "  (relatched)" : ""));
+        enterCheck(Check.CONFIRM);
+    }
+
     // ------------------------------------------------------------------------ rendering
 
     private void render() {
         switch (check) {
-            case FIRMWARE:      renderFirmware();  break;
-            case PUSH_FORWARD:  renderForward();   break;
-            case PUSH_SIDEWAYS: renderSideways();  break;
-            case LTEST:         renderLTest();     break;
-            case DONE:          renderDone();      break;
+            case FIRMWARE: renderFirmware(); break;
+            case GESTURES: renderGestures(); break;
+            case CONFIRM:  renderConfirm();  break;
+            case DONE:     renderDone();     break;
         }
     }
 
@@ -222,7 +326,7 @@ public class OctoStartup extends LinearOpMode {
         boolean chipOk = chip == OctoQuad.OCTOQUAD_CHIP_ID;
         boolean fwOk = fw.maj >= OctoQuad.SUPPORTED_FW_VERSION_MAJ;
 
-        telemetry.addLine("0/3 BOARD IDENTITY");
+        telemetry.addLine("0/2 BOARD IDENTITY");
         telemetry.addData("chip id",  "0x%02X  (expect 0x%02X)  %s",
                 chip, OctoQuad.OCTOQUAD_CHIP_ID, chipOk ? "OK" : "WRONG");
         telemetry.addData("firmware", "%d.%d.%d  (need major >= %d)  %s",
@@ -252,7 +356,7 @@ public class OctoStartup extends LinearOpMode {
                     : String.format(Locale.US, "0 board   chip 0x%02X  fw %d.%d.%d  OK",
                             chip, fw.maj, fw.min, fw.eng));
             if (OctoConfig.calibrateImu(q, this)) {
-                enterCheck(Check.PUSH_FORWARD);
+                enterCheck(Check.GESTURES);
             } else {
                 results.add("0 board   IMU CALIBRATION FAILED -- nothing below is meaningful");
                 enterCheck(Check.DONE);
@@ -260,113 +364,53 @@ public class OctoStartup extends LinearOpMode {
         }
     }
 
-    /**
-     * The check that was missing from the repo, and the direct fix for "forward reads
-     * negative X".
-     *
-     * Both parallel pods point the same way, so both must count up when the robot moves
-     * forward. Pose x must go positive too: both candidate board frames put +X out the front,
-     * so unlike Y this is safe to assert outright.
-     */
-    private void renderForward() {
-        boolean moved = Math.abs(rawX) >= MIN_PUSH_COUNTS;
-        String reason = null;
-        if (!moved) {
-            reason = String.format(Locale.US,
-                    "ch0 moved only %d counts. Push at least ~100mm.", Math.abs(rawX));
-        } else if (rawX < 0) {
-            reason = "ch0 counts DOWN moving forward. Press DPAD UP to flip INVERT_X.";
-        } else if (rawX2 < 0) {
-            reason = "ch2 counts DOWN moving forward. Press DPAD DOWN to flip INVERT_X2.";
-        } else if (Math.abs(rawX2) < MIN_PUSH_COUNTS / 2) {
-            reason = "ch2 barely moved. Monitor pod unplugged, slipping, or on another port?";
-        } else if (bx < 0) {
-            reason = "pose x is NEGATIVE while moving forward, though ch0 counts up. "
-                    + "The localizer is not reading port " + OctoConfig.CH_X + " as X.";
-        }
-
-        telemetry.addLine("1/3 PUSH THE ROBOT FORWARD");
-        telemetry.addLine("B to zero, push forward ~1 to 2 ft in a straight line, A to accept");
+    private void renderGestures() {
+        telemetry.addLine("1/2 GESTURES -- any order, B to zero between them");
+        telemetry.addLine("  FORWARD     push it straight forward ~100 mm+");
+        telemetry.addLine("  TWIST LEFT  turn it left in place, 45 deg+");
+        telemetry.addLine("  PUSH LEFT   slide it left ~100 mm+, no turn");
         telemetry.addLine();
-        telemetry.addData("ch0 X  raw", "%9d  must count UP     %s",
-                rawX, verdict(rawX >= MIN_PUSH_COUNTS));
-        telemetry.addData("ch2 X2 raw", "%9d  must count UP     %s",
-                rawX2, verdict(rawX2 >= MIN_PUSH_COUNTS / 2));
-        telemetry.addData("pose x",     "%9.1f mm  must be POSITIVE %s", bx, verdict(bx > 0));
-        telemetry.addData("pose y",     "%9.1f mm  (ignore for now)", by);
+        telemetry.addLine(String.format(Locale.US,
+                "live  ch0 %7d  ch2 %7d  ch1 %7d  heading %7.1f", rawX, rawX2, rawY, headingDeg));
+        telemetry.addLine(String.format(Locale.US,
+                "FORWARD     %s", sugX == null && sugX2 == null ? "--"
+                        : "ch0 " + (sugX == null ? "--" : "latched")
+                        + "  ch2 " + (sugX2 == null ? "--" : "latched")));
+        telemetry.addLine("TWIST LEFT  " + (sugMirror == null ? "--"
+                : "latched, board is " + (sugMirror ? "y-LEFT / CCW+" : "y-RIGHT / CW+")));
+        telemetry.addLine("PUSH LEFT   " + (!yLatched ? "--"
+                : mirrorKnown() ? "latched" : "latched, needs TWIST (or edit MIRROR) to read"));
         telemetry.addLine();
-        renderToggleHelp();
-        renderBlock(reason);
 
-        boolean skip = gamepad1.xWasPressed();
-        if (gamepad1.aWasPressed() || skip) {
-            if (reason == null || skip) {
-                results.add(reason == null
-                        ? String.format(Locale.US,
-                                "1 forward  ch0 +%d  ch2 +%d  x +%.0fmm  OK", rawX, rawX2, bx)
-                        : "1 forward  SKIPPED");
-                enterCheck(Check.PUSH_SIDEWAYS);
-            } else {
-                shout(reason);
-            }
+        telemetry.addLine("   value                now    suggested");
+        for (int row = 0; row < ROW.length; row++) {
+            Boolean s = suggestion(row);
+            String sug = s == null ? "--" : (s == value(row) ? "ok" : s.toString() + " <- Y");
+            telemetry.addLine(String.format(Locale.US, "%s %-20s %-6b %s",
+                    row == cursor ? ">" : " ", ROW[row], value(row), sug));
         }
+        telemetry.addLine();
+        telemetry.addLine("dpad U/D cursor | dpad L/R flip | Y adopt | X clear | A commit");
+        telemetry.addLine(dirty()
+                ? "(A recalibrates once: hold the robot STILL for ~2 s)"
+                : "(no direction changed: A will not recalibrate)");
+        if (!dataOk) telemetry.addData("*** BAD READ", "crc/status invalid, %d so far", badReads);
+
+        handleEditing();
+        if (gamepad1.aWasPressed()) commit();
     }
 
     /**
-     * Liveness only. See the class comment for why this deliberately does not judge which
-     * way ch1 should count: that answer depends on the board's handedness, and forcing it
-     * here with INVERT_Y is the one mistake that corrupts the fusion instead of mirroring it.
+     * End-to-end proof, not discovery. The only check that combines rotation with translation,
+     * which is the one place a handedness error or a Y port mix-up can hide. A self-consistent
+     * board reports y and heading with the SAME sign, and a left turn must read as the mirror
+     * decision says. Anything recognisably a quarter turn left will do.
      */
-    private void renderSideways() {
-        boolean moved = Math.abs(rawY) >= MIN_PUSH_COUNTS;
-        String reason = moved ? null : String.format(Locale.US,
-                "ch1 moved only %d counts. Push the robot sideways ~100mm or more.",
-                Math.abs(rawY));
-
-        telemetry.addLine("2/3 PUSH THE ROBOT SIDEWAYS  (either direction)");
-        telemetry.addLine("B to zero, slide it sideways, A to accept");
-        telemetry.addLine();
-        telemetry.addData("ch1 Y raw", "%9d  just needs to MOVE  %s", rawY, verdict(moved));
-        telemetry.addData("counting",  "%s when pushed that way",
-                rawY >= 0 ? "UP" : "DOWN");
-        telemetry.addLine();
-        telemetry.addLine("This only proves the pod is alive and on port "
-                + OctoConfig.CH_Y + ".");
-        telemetry.addLine("Which way it SHOULD count depends on the board's handedness,");
-        telemetry.addLine("which is undocumented. Check 3 settles that and INVERT_Y together.");
-        telemetry.addLine();
-        renderToggleHelp();
-        renderBlock(reason);
-
-        boolean skip = gamepad1.xWasPressed();
-        if (gamepad1.aWasPressed() || skip) {
-            if (reason == null || skip) {
-                results.add(reason == null
-                        ? String.format(Locale.US, "2 sideways ch1 %+d  alive  OK", rawY)
-                        : "2 sideways SKIPPED");
-                enterCheck(Check.LTEST);
-            } else {
-                shout(reason);
-            }
-        }
-    }
-
-    /**
-     * The only check that combines rotation with translation, which is the one place a
-     * handedness error can hide. Everything else either goes straight or spins in place, and
-     * all of those pass a corrupted fusion happily.
-     *
-     * A self-consistent board reports y and heading with the SAME sign: +90 with +y (x fwd,
-     * y left, CCW positive) or -90 with -y (x fwd, y right, CW positive). Both are valid
-     * board frames; which one it is sets MIRROR_BOARD_FRAME.
-     *
-     * This is a SIGN test, so the turn does not need to be accurate. Anything recognisably a
-     * quarter turn to the left works.
-     */
-    private void renderLTest() {
-        boolean turned = Math.abs(headingDeg) > LTEST_MIN_HEADING_DEG;
+    private void renderConfirm() {
+        boolean turned = Math.abs(headingDeg) > TWIST_MIN_DEG;
         boolean travelled = Math.abs(by) > 100;
         boolean sameSign = Math.signum(by) == Math.signum(headingDeg);
+        boolean boardMirror = headingDeg > 0;
 
         String reason = null;
         if (!turned) {
@@ -376,42 +420,37 @@ public class OctoStartup extends LinearOpMode {
             reason = String.format(Locale.US,
                     "y is only %.0f mm. After turning, push it forward a foot or so.", by);
         } else if (!sameSign) {
-            reason = "y and heading DISAGREE in sign. Two possible causes, and this test "
-                    + "cannot tell them apart: (a) INVERT_Y is wrong, so press DPAD RIGHT "
-                    + "to flip it, B, and redo; or (b) you turned RIGHT instead of LEFT.";
+            reason = "y and heading DISAGREE in sign. Press Y to go back and check INVERT_Y "
+                    + "(or you turned RIGHT instead of LEFT).";
+        } else if (boardMirror != mirror) {
+            reason = "a left turn reads " + (boardMirror ? "+" : "-") + " but MIRROR_BOARD_FRAME is "
+                    + mirror + ". Press Y to go back and flip it.";
         }
 
-        boolean boardMirror = headingDeg > 0;
+        telemetry.addLine("2/2 CONFIRM -- L-test after the relatch");
+        telemetry.addLine("1. B to zero  2. turn about 90 deg LEFT  3. push FORWARD ~1 ft");
+        telemetry.addLine("Accuracy does not matter, only signs.");
+        telemetry.addLine();
+        telemetry.addLine(String.format(Locale.US, "heading %9.2f deg  %s", headingDeg, verdict(turned)));
+        telemetry.addLine(String.format(Locale.US, "y       %9.1f mm   %s", by, verdict(travelled)));
+        telemetry.addLine(String.format(Locale.US, "x       %9.1f mm   (near 0 if you did not drift)", bx));
+        telemetry.addLine("signs   " + (sameSign && turned && travelled
+                ? "AGREE -- fusion is self-consistent" : "disagree or move too small"));
+        telemetry.addLine();
+        OctoConfig.renderAcceptBlock(telemetry, reason);
+        telemetry.addLine("Y back to gestures | X skip this confirm");
+        if (!dataOk) telemetry.addData("*** BAD READ", "crc/status invalid, %d so far", badReads);
 
-        telemetry.addLine("3/3 L-TEST  (handedness + INVERT_Y)");
-        telemetry.addLine("1. B to zero");
-        telemetry.addLine("2. turn the robot about 90 deg LEFT, in place");
-        telemetry.addLine("3. push it FORWARD about a foot");
-        telemetry.addLine("4. A to accept.  Accuracy does not matter, only signs.");
-        telemetry.addLine();
-        telemetry.addData("heading", "%9.2f deg  %s", headingDeg, verdict(turned));
-        telemetry.addData("y",       "%9.1f mm   %s", by, verdict(travelled));
-        telemetry.addData("x",       "%9.1f mm   (near 0 if you did not drift)", bx);
-        telemetry.addData("signs",   "%s", sameSign && turned && travelled
-                ? "AGREE -- fusion is self-consistent" : "disagree or move too small");
-        telemetry.addLine();
-        if (reason == null) {
-            telemetry.addData("board frame", "%s", boardMirror ? "y-LEFT / CCW+" : "y-RIGHT / CW+");
-            telemetry.addData("=> MIRROR_BOARD_FRAME", "%b", boardMirror);
+        if (gamepad1.yWasPressed()) {
+            enterCheck(Check.GESTURES);
+            return;
         }
-        renderToggleHelp();
-        renderBlock(reason);
-
         boolean skip = gamepad1.xWasPressed();
         if (gamepad1.aWasPressed() || skip) {
             if (reason == null || skip) {
-                if (reason == null) {
-                    mirror = boardMirror;
-                    results.add("3 l-test   board " + (boardMirror ? "y-LEFT/CCW+" : "y-RIGHT/CW+")
-                            + String.format(Locale.US, "  h %+.0f  y %+.0f  OK", headingDeg, by));
-                } else {
-                    results.add("3 l-test   SKIPPED -- kept mirror=" + mirror);
-                }
+                results.add(reason == null
+                        ? String.format(Locale.US, "confirm   h %+.0f  y %+.0f  OK", headingDeg, by)
+                        : "confirm   SKIPPED");
                 for (String s : pasteBlock()) csv.writeLine(s);
                 flush();
                 enterCheck(Check.DONE);
@@ -434,17 +473,6 @@ public class OctoStartup extends LinearOpMode {
     }
 
     // ------------------------------------------------------------------------- helpers
-
-    private void renderToggleHelp() {
-        telemetry.addData("dpad UP / RIGHT / DOWN",
-                "flip INVERT_X %b / INVERT_Y %b / INVERT_X2 %b", invX, invY, invX2);
-        telemetry.addLine("  (a flip recalibrates the IMU -- hold the robot STILL for ~2s)");
-        if (!dataOk) telemetry.addData("*** BAD READ", "crc/status invalid, %d so far", badReads);
-    }
-
-    private void renderBlock(String reason) {
-        OctoConfig.renderAcceptBlock(telemetry, reason);
-    }
 
     private void shout(String reason) {
         telemetry.addLine();

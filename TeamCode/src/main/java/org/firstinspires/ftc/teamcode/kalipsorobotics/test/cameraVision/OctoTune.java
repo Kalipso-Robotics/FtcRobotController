@@ -63,11 +63,11 @@ import java.util.Locale;
  * already-scaled heading. The accepted result folds that in: measuredScalar is expressed
  * relative to the seed, not as if the board reported raw counts.
  *
- * SPACE: two straight lanes with a hard stop at each end, tape-measured stop to stop, plus a
- * wall or other straightedge to spin the robot against. They do not have to be an L and there
- * is no rotation in the linear stages, so one lane used twice is fine if the robot can be set
- * down facing either way. The calibration cannot be more accurate than that one tape
- * measurement: at 72 in, 1/16 in is 0.09%.
+ * SPACE: one 48 in straight lane along a wall, used for both pushes (turn the robot 90 for Y),
+ * plus a wall or other straightedge to spin the robot against. The wall keeps the push
+ * straight. PUSH_*_IN is the robot's travel (leading face at start to far stop), not the tape
+ * stop to stop. The calibration cannot be more accurate than that one tape measurement: at
+ * 48 in, 1/16 in is 0.13%.
  *
  * ALL MOVEMENT IS BY HAND. Nothing here drives a motor.
  *
@@ -164,11 +164,11 @@ public class OctoTune extends LinearOpMode {
         csv.writeLine("stage,t_s,rawX,rawY,rawX2,x_mm,y_mm,heading_deg,crcOk");
 
         telemetry.addLine("OCTO TUNE -- counts/mm only. Run OctoStartup first.");
-        telemetry.addData("Lane X", "%.0f in, hard stops both ends", OctoConfig.PUSH_X_IN);
-        telemetry.addData("Lane Y", "%.0f in, hard stops both ends", OctoConfig.PUSH_Y_IN);
-        telemetry.addLine("Measure each lane stop-to-stop with a tape and make PUSH_X_IN /");
-        telemetry.addLine("PUSH_Y_IN in OctoConfig match it. Nothing here is more accurate");
-        telemetry.addLine("than that one measurement.");
+        telemetry.addData("Lane X", "%.0f in robot travel, along a wall", OctoConfig.PUSH_X_IN);
+        telemetry.addData("Lane Y", "%.0f in robot travel, along a wall", OctoConfig.PUSH_Y_IN);
+        telemetry.addLine("Travel = robot's leading face at start -> far stop, by tape. Make");
+        telemetry.addLine("PUSH_X_IN / PUSH_Y_IN in OctoConfig match it. Nothing here is more");
+        telemetry.addLine("accurate than that one measurement.");
         telemetry.addLine();
         telemetry.addLine("A accept | B zero | X skip stage (keep current value)");
         telemetry.addLine("Press START.");
