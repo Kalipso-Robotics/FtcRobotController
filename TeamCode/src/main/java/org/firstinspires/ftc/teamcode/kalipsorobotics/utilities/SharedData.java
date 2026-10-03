@@ -144,4 +144,29 @@ public class SharedData {
             unfilteredLimelightGlobalPos.reset(new Position(0,0,0));
         }
     }
+ 
+    private static volatile List<BallDetection> pollenNectarDetections = new ArrayList<>();
+    private static volatile long pollenNectarDetectionsTimeMs = 0;
+
+
+    public static void setPollenNectarDetections(List<BallDetection> pollenNectarDetections) {
+        SharedData.pollenNectarDetections = new ArrayList<>(pollenNectarDetections);
+        pollenNectarDetectionsTimeMs = System.currentTimeMillis();
+    }
+
+
+    public static List<BallDetection> getPollenNectarDetections() {
+        return new ArrayList<>(pollenNectarDetections);
+    }
+
+
+    public static long getPollenNectarDetectionsTimeMs() {
+        return pollenNectarDetectionsTimeMs;
+    }
+
+
+    public static void resetPollenNectarDetections() {
+        pollenNectarDetections = new ArrayList<>();
+        pollenNectarDetectionsTimeMs = 0;
+    }
 }
