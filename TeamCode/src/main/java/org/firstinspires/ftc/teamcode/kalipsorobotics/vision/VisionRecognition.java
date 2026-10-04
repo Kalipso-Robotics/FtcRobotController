@@ -35,7 +35,7 @@ public class VisionRecognition {
 
     /**
      * Real-world diameter (mm) of the object this detection is, e.g. a game ball's known
-     * diameter. 0 = unknown/unset. Used by CameraIntrinsics.estimateBall to
+     * diameter. 0 = unknown/unset. Used by Raytracer.estimate to
      * intersect the centre ray with the plane at the ball's own radius instead of the floor.
      */
     public final double objectDiameterMM;
@@ -65,7 +65,7 @@ public class VisionRecognition {
     /** Half of objectDiameterMM, i.e. the ball's radius above the floor. 0 = unknown. */
     public double getRadiusMM() { return objectDiameterMM / 2.0; }
 
-    /** Bottom-middle pixel of the bounding box — used by CameraIntrinsics for floor projection. */
+    /** Bottom-middle pixel of the bounding box — bottom edge of the box. */
     public Point getBottomMiddlePixel() {
         return new Point((left + right) / 2.0, bottom);
     }

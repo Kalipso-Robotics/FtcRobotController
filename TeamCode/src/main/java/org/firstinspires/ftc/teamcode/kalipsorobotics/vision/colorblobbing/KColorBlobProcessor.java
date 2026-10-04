@@ -103,7 +103,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
      * (fx=444.14, fy=532.28) that is 0.835.
      *
      * This doubles as an intrinsics check: if real balls consistently measure ~1.0
-     * here, the 1280x800 -> 640x480 rescale in CameraIntrinsics is wrong and fy is
+     * here, the old 1280x800 -> 640x480 lens rescale was wrong and fy is
      * off by ~19%. See fit_intrinsics.py.
      */
     protected double expectedAspect = 444.14195 / 532.27560; // = 0.8344
@@ -133,7 +133,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
     /**
      * Real-world diameter (mm) of the object this processor detects, e.g. a game ball.
-     * 0 = unset — size-based ranging (CameraIntrinsics.calculateRobotFramePosFromSize)
+     * 0 = unset — size-based ranging (removed)
      * is unavailable until a subclass sets this. Subclasses set it directly.
      */
     protected double objectDiameterMM = 0;

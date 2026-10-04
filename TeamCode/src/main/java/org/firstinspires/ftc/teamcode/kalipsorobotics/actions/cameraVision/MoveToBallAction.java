@@ -7,7 +7,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.Raytracer;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
@@ -20,7 +21,7 @@ public class MoveToBallAction extends Action {
 
     private final DriveTrain driveTrain;
     private final KVisionProcessor<List<VisionRecognition>> artifactProcessor;
-    private final CameraIntrinsics cameraIntrinsics;
+    private final Raytracer raytracer;
     private final String targetColor;
     private final BlobSelectionStrategy selectionStrategy;
 
@@ -29,28 +30,28 @@ public class MoveToBallAction extends Action {
 
     public MoveToBallAction(DriveTrain driveTrain,
                             KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                            CameraIntrinsics cameraIntrinsics,
+                            Raytracer raytracer,
                             String targetColor,
                             BlobSelectionStrategy selectionStrategy) {
         this.driveTrain = driveTrain;
         this.artifactProcessor = artifactProcessor;
-        this.cameraIntrinsics = cameraIntrinsics;
+        this.raytracer = raytracer;
         this.targetColor = targetColor;
         this.selectionStrategy = selectionStrategy;
     }
 
     public MoveToBallAction(DriveTrain driveTrain,
                             KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                            CameraIntrinsics cameraIntrinsics,
+                            Raytracer raytracer,
                             String targetColor) {
-        this(driveTrain, artifactProcessor, cameraIntrinsics, targetColor,
+        this(driveTrain, artifactProcessor, raytracer, targetColor,
                 BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
     }
 
     public MoveToBallAction(DriveTrain driveTrain,
                             KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                            CameraIntrinsics cameraIntrinsics) {
-        this(driveTrain, artifactProcessor, cameraIntrinsics, null,
+                            Raytracer raytracer) {
+        this(driveTrain, artifactProcessor, raytracer, null,
                 BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
     }
 
@@ -66,9 +67,8 @@ public class MoveToBallAction extends Action {
             return;
         }
 
-        Point bottomCenter = target.getBottomMiddlePixel();
         Position robotPose = new Position(SharedData.getOdometryWheelIMUPosition());
-        Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY(), robotPose);
+        Point worldPos = raytracer.fieldPos(target, VisionConfig.COLOR_BLOB_EDGE_GROW_PX, robotPose);
 
         if (worldPos == null) {
             KLog.d("MoveToBall", "Failed to convert detection to world coordinates");
@@ -97,12 +97,12 @@ public class MoveToBallAction extends Action {
 
             case CLOSEST_TO_CAMERA_CENTER:
                 return BlobUtils.findClosestToCameraCenter(candidates,
-                        cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
+                        raytracer.getCamera().cx, raytracer.getCamera().cy);
 
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
                 return BlobUtils.findClosestToRobotWorld(candidates,
-                        cameraIntrinsics, robotPos);
+                        raytracer, robotPos);
 
             case MOST_CIRCULAR:
                 return BlobUtils.findMostCircular(candidates);

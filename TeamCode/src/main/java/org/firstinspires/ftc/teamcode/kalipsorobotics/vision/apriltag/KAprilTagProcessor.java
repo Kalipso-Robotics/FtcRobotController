@@ -6,7 +6,7 @@ import android.util.Log;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionConfig;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -64,7 +64,7 @@ public class KAprilTagProcessor implements VisionProcessor, AprilTagCamera {
     private static final String TAG = "KAprilTagProcessor";
 
     private final AprilTagProcessor delegate;
-    private final CameraIntrinsics intrinsics;
+    private final VisionConfig.Camera camera;
     private final float decimation;
 
     /** Latest converted detections. Written on the camera thread, read on the robot thread. */
@@ -77,9 +77,9 @@ public class KAprilTagProcessor implements VisionProcessor, AprilTagCamera {
     private volatile int lastDetectionCount = 0;
     private volatile int lastPoseSolveFailures = 0;
 
-    private KAprilTagProcessor(AprilTagProcessor delegate, CameraIntrinsics intrinsics, float decimation) {
+    private KAprilTagProcessor(AprilTagProcessor delegate, VisionConfig.Camera camera, float decimation) {
         this.delegate = delegate;
-        this.intrinsics = intrinsics;
+        this.camera = camera;
         this.decimation = decimation;
     }
 
@@ -176,12 +176,11 @@ public class KAprilTagProcessor implements VisionProcessor, AprilTagCamera {
 
     @Override
     public void init(int width, int height, CameraCalibration calibration) {
-        if (intrinsics != null
-                && (width != CameraIntrinsics.CAM_WIDTH || height != CameraIntrinsics.CAM_HEIGHT)) {
+        if (camera != null && (width != camera.width || height != camera.height)) {
             Log.w(TAG, String.format(Locale.US,
-                    "Stream is %dx%d but the supplied CameraIntrinsics are calibrated for %dx%d. "
-                            + "Pose estimates will be wrong - recalibrate or drop withIntrinsics().",
-                    width, height, CameraIntrinsics.CAM_WIDTH, CameraIntrinsics.CAM_HEIGHT));
+                    "Stream is %dx%d but %s is calibrated for %dx%d. "
+                            + "Pose estimates will be wrong - build the portal with withCamera() or drop withCamera(null).",
+                    width, height, camera.name, camera.width, camera.height));
         }
         delegate.init(width, height, calibration);
         delegate.setDecimation(decimation);
@@ -249,7 +248,7 @@ public class KAprilTagProcessor implements VisionProcessor, AprilTagCamera {
 
     public static class Builder {
 
-        private CameraIntrinsics intrinsics = CameraIntrinsics.ARDUCAM;
+        private VisionConfig.Camera camera = VisionConfig.ARDUCAM;
         private AprilTagLibrary tagLibrary = AprilTagGameDatabase.getCurrentGameTagLibrary();
         private AprilTagProcessor.TagFamily tagFamily = AprilTagProcessor.TagFamily.TAG_36h11;
         private float decimation = 2f;
@@ -260,15 +259,15 @@ public class KAprilTagProcessor implements VisionProcessor, AprilTagCamera {
         private boolean drawTagId = true;
 
         /**
-         * Lens calibration used by the pose solver. Defaults to CameraIntrinsics.ARDUCAM,
-         * which is calibrated for 640x480 - build the portal at that resolution or supply
-         * intrinsics that match it.
+         * Lens calibration used by the pose solver. Defaults to VisionConfig.ARDUCAM, which is
+         * calibrated for 1280x720 - build the portal with VisionManager.Builder.withCamera() so
+         * the stream matches it.
          *
          * Pass null to let the SDK use its own built-in calibration for the camera, which
          * is the right move for a webcam this team has not calibrated.
          */
-        public Builder withIntrinsics(CameraIntrinsics intrinsics) {
-            this.intrinsics = intrinsics;
+        public Builder withCamera(VisionConfig.Camera camera) {
+            this.camera = camera;
             return this;
         }
 
@@ -325,12 +324,11 @@ public class KAprilTagProcessor implements VisionProcessor, AprilTagCamera {
                     .setDrawTagOutline(drawOutline)
                     .setDrawTagID(drawTagId);
 
-            if (intrinsics != null) {
-                builder.setLensIntrinsics(intrinsics.getFx(), intrinsics.getFy(),
-                        intrinsics.getCx(), intrinsics.getCy());
+            if (camera != null) {
+                builder.setLensIntrinsics(camera.fx, camera.fy, camera.cx, camera.cy);
             }
 
-            return new KAprilTagProcessor(builder.build(), intrinsics, decimation);
+            return new KAprilTagProcessor(builder.build(), camera, decimation);
         }
     }
 }

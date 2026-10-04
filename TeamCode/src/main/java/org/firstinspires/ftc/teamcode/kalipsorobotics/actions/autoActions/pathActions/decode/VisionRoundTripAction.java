@@ -11,7 +11,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAct
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.Raytracer;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
@@ -24,7 +25,7 @@ import java.util.Locale;
 public class VisionRoundTripAction extends RoundTripAction {
     private final boolean useVision;
     private final KVisionProcessor<List<VisionRecognition>> artifactProcessor;
-    private final CameraIntrinsics cameraIntrinsics;
+    private final Raytracer raytracer;
     private final String targetBallColor;
     private final BlobSelectionStrategy selectionStrategy;
     private final Point visionLookoutPoint;
@@ -42,15 +43,15 @@ public class VisionRoundTripAction extends RoundTripAction {
 
         this.useVision = builder.useVision;
         this.artifactProcessor = builder.artifactProcessor;
-        this.cameraIntrinsics = builder.cameraIntrinsics;
+        this.raytracer = builder.raytracer;
         this.targetBallColor = builder.targetBallColor;
         this.selectionStrategy = builder.selectionStrategy;
         this.visionLookoutPoint = builder.visionLookoutPoint;
         this.lookoutRadiusMM = builder.lookoutRadiusMM;
         this.useDirectPathing = builder.useDirectPathing;
 
-        if (useVision && (artifactProcessor == null || cameraIntrinsics == null)) {
-            throw new IllegalArgumentException("Vision mode requires artifactProcessor and cameraIntrinsics");
+        if (useVision && (artifactProcessor == null || raytracer == null)) {
+            throw new IllegalArgumentException("Vision mode requires artifactProcessor and raytracer");
         }
     }
 
@@ -70,7 +71,7 @@ public class VisionRoundTripAction extends RoundTripAction {
 
         private boolean useVision = false;
         private KVisionProcessor<List<VisionRecognition>> artifactProcessor;
-        private CameraIntrinsics cameraIntrinsics;
+        private Raytracer raytracer;
         private String targetBallColor;
         private BlobSelectionStrategy selectionStrategy = BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER;
 
@@ -112,30 +113,30 @@ public class VisionRoundTripAction extends RoundTripAction {
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                                    CameraIntrinsics cameraIntrinsics,
+                                    Raytracer raytracer,
                                     String targetBallColor,
                                     BlobSelectionStrategy selectionStrategy) {
             this.useVision = true;
             this.artifactProcessor = artifactProcessor;
-            this.cameraIntrinsics = cameraIntrinsics;
+            this.raytracer = raytracer;
             this.targetBallColor = targetBallColor;
             this.selectionStrategy = selectionStrategy;
             return this;
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                                    CameraIntrinsics cameraIntrinsics, String targetBallColor) {
-            return enableVision(artifactProcessor, cameraIntrinsics, targetBallColor, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
+                                    Raytracer raytracer, String targetBallColor) {
+            return enableVision(artifactProcessor, raytracer, targetBallColor, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                                    CameraIntrinsics cameraIntrinsics) {
-            return enableVision(artifactProcessor, cameraIntrinsics, null, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
+                                    Raytracer raytracer) {
+            return enableVision(artifactProcessor, raytracer, null, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
         public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
-                                    CameraIntrinsics cameraIntrinsics, BlobSelectionStrategy selectionStrategy) {
-            return enableVision(artifactProcessor, cameraIntrinsics, null, selectionStrategy);
+                                    Raytracer raytracer, BlobSelectionStrategy selectionStrategy) {
+            return enableVision(artifactProcessor, raytracer, null, selectionStrategy);
         }
 
         public VisionRoundTripAction build() { return new VisionRoundTripAction(this); }
@@ -196,7 +197,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         }
 
         Point bottomCenter = target.getBottomMiddlePixel();
-        Point worldPos = cameraIntrinsics.calculateWorldPos(bottomCenter.getX(), bottomCenter.getY(), robotPos);
+        Point worldPos = raytracer.fieldPos(target, VisionConfig.COLOR_BLOB_EDGE_GROW_PX, robotPos);
         if (worldPos == null) {
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
                             "[%s] WORLD CONVERSION FAILED for pixel=(%.1f,%.1f) - keeping fallback path",
@@ -312,11 +313,11 @@ public class VisionRoundTripAction extends RoundTripAction {
                 chosen = BlobUtils.findLargestByArea(candidates);
                 break;
             case CLOSEST_TO_CAMERA_CENTER:
-                chosen = BlobUtils.findClosestToCameraCenter(candidates, cameraIntrinsics.getCx(), cameraIntrinsics.getCy());
+                chosen = BlobUtils.findClosestToCameraCenter(candidates, raytracer.getCamera().cx, raytracer.getCamera().cy);
                 break;
             case CLOSEST_TO_ROBOT_WORLD:
                 Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
-                chosen = BlobUtils.findClosestToRobotWorld(candidates, cameraIntrinsics, robotPos);
+                chosen = BlobUtils.findClosestToRobotWorld(candidates, raytracer, robotPos);
                 break;
             case MOST_CIRCULAR:
                 chosen = BlobUtils.findMostCircular(candidates);
@@ -341,7 +342,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         for (int i = 0; i < candidates.size(); i++) {
             VisionRecognition r = candidates.get(i);
             Point px = r.getBottomMiddlePixel();
-            Point world = cameraIntrinsics.calculateWorldPos(px.getX(), px.getY(), robotPos);
+            Point world = raytracer.fieldPos(r, VisionConfig.COLOR_BLOB_EDGE_GROW_PX, robotPos);
             final int idx = i;
             final String worldStr = world == null
                     ? "world=NULL"
