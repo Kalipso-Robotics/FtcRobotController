@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.opencv.core.Rect;
 
 import java.util.Locale;
@@ -11,7 +11,7 @@ import java.util.Locale;
  * Adds contour-area and circularity on top of the base KVisionRecognition.
  * The `label` field holds the color name ("Purple", "Green", etc.).
  */
-public class DetectedBlob extends BallDetection {
+public class DetectedBlob extends VisionRecognition {
 
     /** Bounding box in full camera resolution (e.g. 640x480) pixels. */
     public final Rect boundingBox;

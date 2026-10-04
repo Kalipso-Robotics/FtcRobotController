@@ -41,7 +41,7 @@ import java.util.Locale;
  * DIAGNOSTICS: getDiagnosticSummary() reports the model's input/output shape and
  * the strongest class score seen in the last frame, even below the threshold.
  */
-public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetection>> {
+public class TFLitePollenNectarDetector extends KVisionProcessor<List<VisionRecognition>> {
 
     private static final String MODEL_FILE = "deploy384_224x384.tflite";
     private static final String[] LABELS = {"nectar_blue", "nectar_red", "pollen"};
@@ -88,7 +88,7 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
     private Paint boxPaint;
     private Paint labelPaint;
 
-    private List<BallDetection> currentFrameRecognitions = new ArrayList<>();
+    private List<VisionRecognition> currentFrameRecognitions = new ArrayList<>();
 
     // Diagnostics: strongest score in the last frame, even below the threshold
     private volatile float lastMaxScore = 0f;
@@ -151,7 +151,7 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
     }
 
     @Override
-    protected List<BallDetection> detect(Mat frame) {
+    protected List<VisionRecognition> detect(Mat frame) {
         lastFrameInfo = frame.width() + "x" + frame.height() + " ch=" + frame.channels();
 
         Mat source;
@@ -211,7 +211,7 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
             }
         }
 
-        List<BallDetection> recognitions = new ArrayList<>();
+        List<VisionRecognition> recognitions = new ArrayList<>();
 
         float frameMaxScore = 0f;
         int frameMaxClass = -1;
@@ -265,7 +265,7 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
                 else if (label.equals("nectar_blue")) label = "nectar_red";
             }
 
-            recognitions.add(new BallDetection(label, bestScore, left, top, right, bottom));
+            recognitions.add(new VisionRecognition(label, bestScore, left, top, right, bottom));
         }
 
         lastMaxScore = frameMaxScore;
@@ -276,7 +276,7 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
         // The exported model uses the dense (one-to-many) head, which proposes
         // several overlapping boxes per ball. Keep the most confident box of each
         // cluster and drop same-class boxes that overlap it heavily.
-        List<BallDetection> kept = applyNms(recognitions, nmsIou);
+        List<VisionRecognition> kept = applyNms(recognitions, nmsIou);
 
         currentFrameRecognitions = kept;
         SharedData.setPollenNectarDetections(kept);
@@ -284,11 +284,11 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
     }
 
     @Override
-    protected void annotate(Canvas canvas, List<BallDetection> result, DrawContext drawContext) {
+    protected void annotate(Canvas canvas, List<VisionRecognition> result, DrawContext drawContext) {
         boxPaint.setStrokeWidth(STROKE_WIDTH_DP * drawContext.screenDensityScale);
         labelPaint.setTextSize(TEXT_SIZE_DP * drawContext.screenDensityScale);
 
-        for (BallDetection r : result) {
+        for (VisionRecognition r : result) {
             int color = colorFor(r.label);
             boxPaint.setColor(color);
             labelPaint.setColor(color);
@@ -321,11 +321,11 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
      * highest first. A box is dropped if it overlaps an already-kept box of the same
      * class by more than iouThreshold.
      */
-    private static List<BallDetection> applyNms(List<BallDetection> sorted, float iouThreshold) {
-        List<BallDetection> kept = new ArrayList<>();
-        for (BallDetection candidate : sorted) {
+    private static List<VisionRecognition> applyNms(List<VisionRecognition> sorted, float iouThreshold) {
+        List<VisionRecognition> kept = new ArrayList<>();
+        for (VisionRecognition candidate : sorted) {
             boolean suppressed = false;
-            for (BallDetection k : kept) {
+            for (VisionRecognition k : kept) {
                 if (k.label.equals(candidate.label) && iou(k, candidate) > iouThreshold) {
                     suppressed = true;
                     break;
@@ -337,7 +337,7 @@ public class TFLitePollenNectarDetector extends KVisionProcessor<List<BallDetect
     }
 
     /** Intersection-over-union of two boxes, 0 (no overlap) to 1 (identical). */
-    private static float iou(BallDetection a, BallDetection b) {
+    private static float iou(VisionRecognition a, VisionRecognition b) {
         float interLeft = Math.max(a.left, b.left);
         float interTop = Math.max(a.top, b.top);
         float interRight = Math.min(a.right, b.right);

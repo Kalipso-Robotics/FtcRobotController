@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 
 import java.util.List;
 
@@ -13,13 +13,13 @@ import java.util.List;
  */
 public class BlobUtils {
 
-    public static BallDetection findClosestToCameraCenter(List<BallDetection> recognitions,
-                                                          double cx, double cy) {
+    public static VisionRecognition findClosestToCameraCenter(List<VisionRecognition> recognitions,
+                                                              double cx, double cy) {
         if (recognitions == null || recognitions.isEmpty()) return null;
 
-        BallDetection closest = null;
+        VisionRecognition closest = null;
         double minDistance = Double.POSITIVE_INFINITY;
-        for (BallDetection recognition : recognitions) {
+        for (VisionRecognition recognition : recognitions) {
             double distance = recognition.center.distanceTo(new Point(cx, cy));
             if (distance < minDistance) {
                 minDistance = distance;
@@ -29,14 +29,14 @@ public class BlobUtils {
         return closest;
     }
 
-    public static BallDetection findClosestToRobotWorld(List<BallDetection> recognitions,
-                                                        CameraIntrinsics intrinsics,
-                                                        Position robotPose) {
+    public static VisionRecognition findClosestToRobotWorld(List<VisionRecognition> recognitions,
+                                                            CameraIntrinsics intrinsics,
+                                                            Position robotPose) {
         if (recognitions == null || recognitions.isEmpty()) return null;
 
-        BallDetection closest = null;
+        VisionRecognition closest = null;
         double minDistance = Double.POSITIVE_INFINITY;
-        for (BallDetection recognition : recognitions) {
+        for (VisionRecognition recognition : recognitions) {
             double distance = intrinsics.getDistanceFromRobot(recognition, robotPose);
             if (distance < minDistance) {
                 minDistance = distance;
@@ -46,10 +46,10 @@ public class BlobUtils {
         return closest;
     }
 
-    public static BallDetection findMostCircular(List<BallDetection> recognitions) {
+    public static VisionRecognition findMostCircular(List<VisionRecognition> recognitions) {
         if (recognitions == null || recognitions.isEmpty()) return null;
 
-        BallDetection mostCircular = recognitions.get(0);
+        VisionRecognition mostCircular = recognitions.get(0);
         for (int i = 1; i < recognitions.size(); i++) {
             if (recognitions.get(i).getCircularity() > mostCircular.getCircularity()) {
                 mostCircular = recognitions.get(i);
@@ -59,9 +59,9 @@ public class BlobUtils {
     }
 
     /** The KColorBlobProcessor sorts largest-first, so the first entry is the largest. */
-    public static BallDetection findLargestByArea(List<BallDetection> recognitions) {
+    public static VisionRecognition findLargestByArea(List<VisionRecognition> recognitions) {
         if (recognitions == null || recognitions.isEmpty()) return null;
-        BallDetection largest = recognitions.get(0);
+        VisionRecognition largest = recognitions.get(0);
         for (int i = 1; i < recognitions.size(); i++) {
             if (recognitions.get(i).getArea() > largest.getArea()) {
                 largest = recognitions.get(i);

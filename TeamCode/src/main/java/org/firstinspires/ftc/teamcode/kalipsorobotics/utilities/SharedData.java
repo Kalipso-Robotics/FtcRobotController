@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLitePollenNectarDetector;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
@@ -149,17 +146,17 @@ public class SharedData {
         }
     }
 
-    private static volatile List<BallDetection> pollenNectarDetections = new ArrayList<>();
+    private static volatile List<VisionRecognition> pollenNectarDetections = new ArrayList<>();
     private static volatile long pollenNectarDetectionsTimeMs = 0;
 
 
-    public static void setPollenNectarDetections(List<BallDetection> pollenNectarDetections) {
+    public static void setPollenNectarDetections(List<VisionRecognition> pollenNectarDetections) {
         SharedData.pollenNectarDetections = new ArrayList<>(pollenNectarDetections);
         pollenNectarDetectionsTimeMs = System.currentTimeMillis();
     }
 
 
-    public static List<BallDetection> getPollenNectarDetections() {
+    public static List<VisionRecognition> getPollenNectarDetections() {
         return new ArrayList<>(pollenNectarDetections);
     }
 

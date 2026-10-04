@@ -48,7 +48,7 @@ import java.util.List;
  *   For yolo11n at 640x640 with 1 class: shape is [1, 5, 8400].
  */
 public class
-TFLiteArtifactDetector extends KVisionProcessor<List<BallDetection>> {
+TFLiteArtifactDetector extends KVisionProcessor<List<VisionRecognition>> {
 
     private static final String MODEL_FILE = "best_float32.tflite";
     private static final String LABEL      = "Artifact";
@@ -77,7 +77,7 @@ TFLiteArtifactDetector extends KVisionProcessor<List<BallDetection>> {
     private Paint boxPaint;
     private Paint labelPaint;
 
-    private List<BallDetection> currentFrameRecognitions = Collections.emptyList();
+    private List<VisionRecognition> currentFrameRecognitions = Collections.emptyList();
 
     public TFLiteArtifactDetector(Context appContext) {
         this.appContext = appContext;
@@ -112,7 +112,7 @@ TFLiteArtifactDetector extends KVisionProcessor<List<BallDetection>> {
     }
 
     @Override
-    protected List<BallDetection> detect(Mat frame) {
+    protected List<VisionRecognition> detect(Mat frame) {
         Imgproc.resize(frame, resizedFrame, new Size(modelInputSize, modelInputSize));
 
         resizedFrame.get(0, 0, rawPixelBuffer);
@@ -128,7 +128,7 @@ TFLiteArtifactDetector extends KVisionProcessor<List<BallDetection>> {
 
         int frameWidth  = frame.width();
         int frameHeight = frame.height();
-        List<BallDetection> candidates = new ArrayList<>();
+        List<VisionRecognition> candidates = new ArrayList<>();
 
         for (int anchorIndex = 0; anchorIndex < numAnchors; anchorIndex++) {
             float bestScore = 0f;
@@ -148,22 +148,22 @@ TFLiteArtifactDetector extends KVisionProcessor<List<BallDetection>> {
             float right  = (centerX + width  / 2f) * frameWidth;
             float bottom = (centerY + height / 2f) * frameHeight;
 
-            candidates.add(new BallDetection(LABEL, bestScore, left, top, right, bottom));
+            candidates.add(new VisionRecognition(LABEL, bestScore, left, top, right, bottom));
         }
 
         candidates.sort((first, second) -> Float.compare(second.confidence, first.confidence));
-        List<BallDetection> recognitions = nonMaxSuppress(candidates);
+        List<VisionRecognition> recognitions = nonMaxSuppress(candidates);
 
         currentFrameRecognitions = recognitions;
         return recognitions;
     }
 
     @Override
-    protected void annotate(Canvas canvas, List<BallDetection> result, DrawContext drawContext) {
+    protected void annotate(Canvas canvas, List<VisionRecognition> result, DrawContext drawContext) {
         boxPaint.setStrokeWidth(STROKE_WIDTH_DP * drawContext.screenDensityScale);
         labelPaint.setTextSize(TEXT_SIZE_DP * drawContext.screenDensityScale);
 
-        for (BallDetection recognition : currentFrameRecognitions) {
+        for (VisionRecognition recognition : currentFrameRecognitions) {
             float scaledLeft   = recognition.left   * drawContext.bitmapToCanvasScale;
             float scaledTop    = recognition.top    * drawContext.bitmapToCanvasScale;
             float scaledRight  = recognition.right  * drawContext.bitmapToCanvasScale;
@@ -182,11 +182,11 @@ TFLiteArtifactDetector extends KVisionProcessor<List<BallDetection>> {
         return this;
     }
 
-    private static List<BallDetection> nonMaxSuppress(List<BallDetection> sortedByScore) {
-        List<BallDetection> kept = new ArrayList<>();
-        for (BallDetection candidate : sortedByScore) {
+    private static List<VisionRecognition> nonMaxSuppress(List<VisionRecognition> sortedByScore) {
+        List<VisionRecognition> kept = new ArrayList<>();
+        for (VisionRecognition candidate : sortedByScore) {
             boolean suppressed = false;
-            for (BallDetection keeper : kept) {
+            for (VisionRecognition keeper : kept) {
                 if (!candidate.label.equals(keeper.label)) continue;
                 if (intersectionOverUnion(candidate, keeper) > NMS_IOU_THRESHOLD) {
                     suppressed = true;
@@ -198,7 +198,7 @@ TFLiteArtifactDetector extends KVisionProcessor<List<BallDetection>> {
         return kept;
     }
 
-    private static float intersectionOverUnion(BallDetection a, BallDetection b) {
+    private static float intersectionOverUnion(VisionRecognition a, VisionRecognition b) {
         float interLeft   = Math.max(a.left,   b.left);
         float interTop    = Math.max(a.top,    b.top);
         float interRight  = Math.min(a.right,  b.right);

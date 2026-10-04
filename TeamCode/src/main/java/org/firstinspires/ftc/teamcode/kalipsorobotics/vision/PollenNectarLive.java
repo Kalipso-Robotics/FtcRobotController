@@ -36,10 +36,10 @@ public class PollenNectarLive extends LinearOpMode {
             telemetry.addData("FPS", "%.1f", portal.getFps());
             telemetry.addData("Model", detector.getDiagnosticSummary());
 
-            List<BallDetection> recs = detector.getLatestResult();
+            List<VisionRecognition> recs = detector.getLatestResult();
             telemetry.addData("Detections", recs == null ? 0 : recs.size());
             if (recs != null) {
-                for (BallDetection r : recs) {
+                for (VisionRecognition r : recs) {
                     telemetry.addLine(String.format("%s %.2f [%.0f,%.0f -> %.0f,%.0f]",
                             r.label, r.confidence, r.left, r.bottom, r.right, r.top));
                 }

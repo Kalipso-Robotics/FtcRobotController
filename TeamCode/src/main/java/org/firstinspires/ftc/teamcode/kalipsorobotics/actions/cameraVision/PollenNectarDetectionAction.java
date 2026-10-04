@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class PollenNectarDetectionAction extends Action {
     private long timeoutMs;
     private long startTimeMs = -1;
-    private List<BallDetection> detections = new ArrayList<>();
+    private List<VisionRecognition> detections = new ArrayList<>();
     private boolean timedOut;
     private static final long MAX_DATA_AGE_MS = 200;
     private PollenNectarDetectionAction(double seconds){
@@ -23,7 +23,7 @@ public class PollenNectarDetectionAction extends Action {
 
     @Override
     protected void update() {
-        
+
 
     }
 }

@@ -98,7 +98,7 @@ public class CameraIntrinsics{
         return robotPose.toPoint().distanceTo(object);
     }
 
-    public double getDistanceFromRobot(BallDetection recognition, Position robotPose) {
+    public double getDistanceFromRobot(VisionRecognition recognition, Position robotPose) {
         Point bottomCenter = recognition.getBottomMiddlePixel();
         return getDistanceFromRobot(bottomCenter.getX(), bottomCenter.getY(), robotPose);
     }
