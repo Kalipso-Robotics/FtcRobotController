@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics.CAM_HEIGHT;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics.CAM_WIDTH;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -31,7 +29,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.Raytracer;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
@@ -58,7 +57,7 @@ public class RedAutoDepotVision extends KOpMode {
 
     private ArtifactColorBlobDetectionProcessor artifactProcessor;
     private VisionManager visionManager;
-    private CameraIntrinsics cameraIntrinsics;
+    private Raytracer raytracer;
 
     private KActionSet autoDepot;
 
@@ -98,7 +97,7 @@ public class RedAutoDepotVision extends KOpMode {
 
         artifactProcessor = new ArtifactColorBlobDetectionProcessor();
         visionManager = new VisionManager.Builder(hardwareMap)
-                .withResolution(CAM_WIDTH, CAM_HEIGHT)
+                .withCamera(VisionConfig.ARDUCAM)
                 .addProcessor(artifactProcessor)
                 .streamImmediately()
                 .build();
@@ -108,7 +107,7 @@ public class RedAutoDepotVision extends KOpMode {
         // Pull them off with: adb pull /sdcard/FIRST/data/vision_snapshots ~/Desktop
         artifactProcessor.enableSnapshotSaving(5);
 
-        cameraIntrinsics = CameraIntrinsics.ARDUCAM;
+        raytracer = new Raytracer(VisionConfig.ARDUCAM);
     }
 
     @Override
@@ -142,7 +141,7 @@ public class RedAutoDepotVision extends KOpMode {
                 opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake)
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(thirdLaunchPoint.multiplyY(allianceColor.getPolarity()))
-            .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
+            .enableVision(artifactProcessor, raytracer, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
             .setUseDirectPathing(true)
             .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();
@@ -244,7 +243,7 @@ public class RedAutoDepotVision extends KOpMode {
                 opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake)
             .setTargetPoint(Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()))
             .setLaunchPoint(farLaunchPoint.multiplyY(allianceColor.getPolarity()))
-            .enableVision(artifactProcessor, cameraIntrinsics, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
+            .enableVision(artifactProcessor, raytracer, BlobSelectionStrategy.CLOSEST_TO_ROBOT_WORLD)
             .setUseDirectPathing(true)
             .setVisionLookoutPoint(depotLookoutPoint.multiplyY(allianceColor.getPolarity()))
             .build();

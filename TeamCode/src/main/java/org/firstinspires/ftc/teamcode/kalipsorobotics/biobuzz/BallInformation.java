@@ -21,14 +21,28 @@ public class BallInformation {
     public final double x;
     public final double y;
     public final Type type;
+    /** Detector confidence in [0, 1]; 1 when the source has none. */
+    public final float confidence;
+    /** Robot-to-ball distance (mm) when the frame was captured; NaN when unknown. */
+    public final double distanceMM;
 
-    public BallInformation(double x, double y, Type type){
+    public BallInformation(double x, double y, Type type, float confidence, double distanceMM){
         if (!Double.isFinite(x) || !Double.isFinite(y)) {
             throw new IllegalArgumentException("Ball coordinates must be finite: (" + x + ", " + y + ")");
         }
         this.x = x;
         this.y = y;
         this.type = Objects.requireNonNull(type, "type");
+        this.confidence = confidence;
+        this.distanceMM = distanceMM;
+    }
+
+    public BallInformation(double x, double y, Type type){
+        this(x, y, type, 1f, Double.NaN);
+    }
+
+    public BallInformation(Point point, Type type, float confidence, double distanceMM){
+        this(point.getX(), point.getY(), type, confidence, distanceMM);
     }
 
     public BallInformation(Point point, Type type){

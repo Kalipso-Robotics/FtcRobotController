@@ -199,6 +199,11 @@ public class VisionManager {
             return this;
         }
 
+        /** Camera name and resolution from one VisionConfig.Camera, so they can't disagree with its lens. */
+        public Builder withCamera(VisionConfig.Camera camera) {
+            return withCamera(camera.name).withResolution(camera.width, camera.height);
+        }
+
         /**
          * Override the capture resolution. Default: 640x480.
          * Supported resolutions for this camera: 320x240, 640x480, 800x600, 1280x720, 1280x800.

@@ -17,37 +17,46 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Tests for the edge-angle ball localisation (CameraIntrinsics.estimateBall): per-axis
+ * Tests for the edge-angle ball localisation (Raytracer.estimate): per-axis
  * averaged edge angles, ray intersected with the plane at the ball's radius, plus the
  * angular-size depth cross-check.
  */
-public class CameraIntrinsicsTest {
+public class RaytracerTest {
 
     private static final double R_NECTAR = 35.6;
     private static final Vector3d LENS = new Vector3d(0, 300, 0);
 
     /** f=500, principal point (320,240), no distortion -- only the numbers these tests need. */
-    private static final CameraIntrinsics CI = new CameraIntrinsics(500, 500, 320, 240, 0, LENS);
+    private static VisionConfig.Camera cam(VisionConfig.Mount m) {
+        return new VisionConfig.Camera("test", 640, 480, 500, 500, 320, 240, 0, 0, 0, 0, 0, m);
+    }
+
+    private static VisionConfig.Mount mount(double pitchDeg, double yawDeg, double rollDeg) {
+        return new VisionConfig.Mount(pitchDeg, yawDeg, rollDeg, LENS.getX(), LENS.getY(), LENS.getZ());
+    }
+
+    private static final VisionConfig.Mount LEVEL = mount(0, 0, 0);
+    private static final Raytracer CI = new Raytracer(cam(LEVEL));
 
     @After
     public void restoreDistortionFlag() {
-        CameraIntrinsics.APPLY_DISTORTION = false;
+        VisionConfig.APPLY_DISTORTION = false;
     }
 
-    private static CameraPose level() {
-        return CameraPose.fromAngles(0, 0, 0, LENS);
+    private static VisionConfig.Mount level() {
+        return LEVEL;
     }
 
     @Test
     public void levelCamera_forwardFromVerticalEdges() {
-        BallEstimate e = CI.estimateBall(300, 340, 382.12, 429.04, R_NECTAR, level());
+        Raytracer.Estimate e = CI.estimate(300, 340, 382.12, 429.04, R_NECTAR, level());
         assertEquals(800.0, e.robotPos.getY(), 0.1);
         assertEquals(0.0, e.robotPos.getX(), 0.1);
     }
 
     @Test
     public void levelCamera_sidewaysTowardUGreaterThanCx() {
-        BallEstimate e = CI.estimateBall(360.18, 405.06, 382.12, 429.04, R_NECTAR, level());
+        Raytracer.Estimate e = CI.estimate(360.18, 405.06, 382.12, 429.04, R_NECTAR, level());
         assertEquals(800.0, e.robotPos.getY(), 0.1);
         // +x is LEFT in the robot frame, so u > cx is negative x.
         assertEquals(-100.0, e.robotPos.getX(), 0.1);
@@ -55,7 +64,7 @@ public class CameraIntrinsicsTest {
 
     @Test
     public void levelCamera_sizeDepthsAgreeWithRay() {
-        BallEstimate e = CI.estimateBall(360.18, 405.06, 382.12, 429.04, R_NECTAR, level());
+        Raytracer.Estimate e = CI.estimate(360.18, 405.06, 382.12, 429.04, R_NECTAR, level());
         assertEquals(800.0, e.rayDepthMM, 0.1);
         // Level camera: the robot-frame ray is the camera ray flipped, so z = 1 and y = -tan(theta).
         assertEquals(1.0, e.rayRobot.getZ(), 1e-12);
@@ -87,8 +96,8 @@ public class CameraIntrinsicsTest {
     @Test
     public void pitchedCentreRay() {
         // Zero-width edges collapse to the single centre pixel (370,290): pitch 30 deg down.
-        CameraPose cam = CameraPose.fromAngles(Math.toRadians(30), 0, 0, LENS);
-        BallEstimate e = CI.estimateBall(370, 370, 290, 290, R_NECTAR, cam);
+        VisionConfig.Mount cam = mount(30, 0, 0);
+        Raytracer.Estimate e = CI.estimate(370, 370, 290, 290, R_NECTAR, cam);
         assertEquals(367.8, e.robotPos.getY(), 0.05);
         assertEquals(-45.07, e.robotPos.getX(), 0.01);
         // delta = 0 makes the size depths infinite, so the check is false by design here.
@@ -98,15 +107,15 @@ public class CameraIntrinsicsTest {
     @Test
     public void yawRotatesRayOntoLateralAxis() {
         // (cx,cy) pitched 30 deg then yawed +90 deg lands on the lateral axis.
-        CameraPose cam = CameraPose.fromAngles(Math.toRadians(30), Math.toRadians(90), 0, LENS);
-        BallEstimate e = CI.estimateBall(320, 320, 240, 240, 0.001, cam);
+        VisionConfig.Mount cam = mount(30, 90, 0);
+        Raytracer.Estimate e = CI.estimate(320, 320, 240, 240, 0.001, cam);
         assertEquals(519.6, e.robotPos.getX(), 0.1);
         assertEquals(0.0, e.robotPos.getY(), 1e-3);
     }
 
     @Test
     public void cvToRobotIsRotationNotMirror() {
-        Matrix m = CameraPose.CV_TO_ROBOT;
+        Matrix m = Raytracer.CV_TO_ROBOT;
         double det = m.get(0, 0) * (m.get(1, 1) * m.get(2, 2) - m.get(1, 2) * m.get(2, 1))
                 - m.get(0, 1) * (m.get(1, 0) * m.get(2, 2) - m.get(1, 2) * m.get(2, 0))
                 + m.get(0, 2) * (m.get(1, 0) * m.get(2, 1) - m.get(1, 1) * m.get(2, 0));
@@ -117,48 +126,49 @@ public class CameraIntrinsicsTest {
     public void beyondFieldRange_isNull() {
         // Level camera 300mm up, ball r=35.6: vB row for a ball ~6000mm out is ~1.5px below cy.
         double v = 240 + 500.0 * (300 - R_NECTAR) / 6000.0;
-        assertNull(CI.estimateBall(318, 322, v - 0.3, v + 0.3, R_NECTAR, level()));
+        assertNull(CI.estimate(318, 322, v - 0.3, v + 0.3, R_NECTAR, level()));
     }
 
     @Test
     public void flatOrUpwardRay_isNull() {
-        assertNull(CI.estimateBall(300, 340, 200, 200, R_NECTAR, level()));
+        assertNull(CI.estimate(300, 340, 200, 200, R_NECTAR, level()));
     }
 
     @Test
     public void borderClippedBbox_isNull() {
         DetectedBlob clipped = new DetectedBlob(new Rect(0, 300, 60, 60), 2000, 0.9, "x", 71.2);
-        assertNull(CI.estimateBall(clipped, level()));
+        assertNull(CI.estimate(clipped, 0));
         DetectedBlob ok = new DetectedBlob(new Rect(300, 300, 60, 60), 2000, 0.9, "x", 71.2);
-        assertNotNull(CI.estimateBall(ok, CameraPose.fromAngles(Math.toRadians(30), 0, 0, LENS)));
+        assertNotNull(new Raytracer(cam(mount(30, 0, 0))).estimate(ok, 0));
     }
 
     @Test
     public void unknownDiameter_isNull() {
         DetectedBlob none = new DetectedBlob(new Rect(300, 300, 60, 60), 2000, 0.9, "Yellow");
-        assertNull(CI.estimateBall(none, CameraPose.fromAngles(Math.toRadians(30), 0, 0, LENS)));
+        assertNull(new Raytracer(cam(mount(30, 0, 0))).estimate(none, 0));
     }
 
     @Test
     public void wrongRadius_isFlaggedInconsistent() {
-        BallEstimate e = CI.estimateBall(360.18, 405.06, 382.12, 429.04, 2 * R_NECTAR, level());
+        Raytracer.Estimate e = CI.estimate(360.18, 405.06, 382.12, 429.04, 2 * R_NECTAR, level());
         assertNotNull(e);
         assertFalse(e.isConsistent());
     }
 
     @Test
     public void undistortInvertsDistort_andFlagOffIsPlainPinhole() {
-        CameraIntrinsics ci = CameraIntrinsics.ARDUCAM;
+        Raytracer ci = new Raytracer(VisionConfig.ARDUCAM);
+        VisionConfig.Camera lens = VisionConfig.ARDUCAM;
         Random rnd = new Random(7);
         for (int i = 0; i < 20; i++) {
             double x = (rnd.nextDouble() - 0.5) * 1.6, y = (rnd.nextDouble() - 0.5) * 1.6;
             double[] d = ci.distort(x, y);
-            double[] back = ci.undistort(ci.getCx() + ci.getFx() * d[0], ci.getCy() + ci.getFy() * d[1]);
+            double[] back = ci.undistort(lens.cx + lens.fx * d[0], lens.cy + lens.fy * d[1]);
             assertEquals(x, back[0], 1e-6);
             assertEquals(y, back[1], 1e-6);
         }
         // Flag off (default): estimateBall must equal the pinhole result exactly.
-        BallEstimate off = CI.estimateBall(360.18, 405.06, 382.12, 429.04, R_NECTAR, level());
+        Raytracer.Estimate off = CI.estimate(360.18, 405.06, 382.12, 429.04, R_NECTAR, level());
         assertEquals(800.0, off.robotPos.getY(), 0.1);
     }
 
@@ -168,13 +178,16 @@ public class CameraIntrinsicsTest {
         double f = 500, cx = 320, cy = 240;
         int checked = 0;
         for (int i = 0; i < 500; i++) {
-            double pitch = Math.toRadians(rnd.nextDouble() * 45);
-            double yaw = Math.toRadians((rnd.nextDouble() - 0.5) * 80);
-            double roll = Math.toRadians((rnd.nextDouble() - 0.5) * 30);
+            double pitchDeg = rnd.nextDouble() * 45;
+            double yawDeg = (rnd.nextDouble() - 0.5) * 80;
+            double rollDeg = (rnd.nextDouble() - 0.5) * 30;
+            double yaw = Math.toRadians(yawDeg);
             Vector3d pos = new Vector3d((rnd.nextDouble() - 0.5) * 400,
                     150 + rnd.nextDouble() * 250, (rnd.nextDouble() - 0.5) * 400);
             double r = rnd.nextBoolean() ? 35.6 : 63.5;
-            CameraPose cam = CameraPose.fromAngles(pitch, yaw, roll, pos);
+            VisionConfig.Mount cam = new VisionConfig.Mount(pitchDeg, yawDeg, rollDeg,
+                    pos.getX(), pos.getY(), pos.getZ());
+            Matrix camToRobot = Raytracer.camToRobot(cam);
 
             // Ball centre on the plane y = r, ahead of the camera along its yawed heading.
             double ahead = 300 + rnd.nextDouble() * 1700, side = (rnd.nextDouble() - 0.5) * 800;
@@ -188,8 +201,8 @@ public class CameraIntrinsicsTest {
                     centre.getZ() - pos.getZ());
             double[] c = new double[3];
             for (int k = 0; k < 3; k++) {
-                c[k] = cam.camToRobot.get(0, k) * d.getX() + cam.camToRobot.get(1, k) * d.getY()
-                        + cam.camToRobot.get(2, k) * d.getZ();
+                c[k] = camToRobot.get(0, k) * d.getX() + camToRobot.get(1, k) * d.getY()
+                        + camToRobot.get(2, k) * d.getZ();
             }
             if (c[2] < 3 * r) continue;
 
@@ -199,7 +212,7 @@ public class CameraIntrinsicsTest {
             double vT = cy + f * Math.tan(th0 - dy), vB = cy + f * Math.tan(th0 + dy);
             if (uL < 0 || uR > 640 || vT < 0 || vB > 480 || uL > uR || vT > vB) continue;
 
-            BallEstimate e = CI.estimateBall(uL, uR, vT, vB, r, cam);
+            Raytracer.Estimate e = CI.estimate(uL, uR, vT, vB, r, cam);
             assertNotNull("draw " + i, e);
             assertEquals("x, draw " + i, bx, e.robotPos.getX(), 1e-6);
             assertEquals("z, draw " + i, bz, e.robotPos.getY(), 1e-6);

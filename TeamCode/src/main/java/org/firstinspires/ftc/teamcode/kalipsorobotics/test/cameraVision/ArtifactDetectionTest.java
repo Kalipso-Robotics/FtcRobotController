@@ -64,7 +64,7 @@ import java.util.Locale;
  *
  * READ THE ASPECT COLUMN - it is a free intrinsics check:
  *   A sphere projects to fx*a wide by fy*a tall, so bbox w/h should read fx/fy = 0.835.
- *   If real balls read ~1.00 instead, the 1280x800 -> 640x480 rescale in CameraIntrinsics
+ *   If real balls read ~1.00 instead, the old 1280x800 -> 640x480 lens rescale
  *   is wrong and fy is off by ~19%. Carry that straight into fit_intrinsics.py.
  *
  * Gamepad:

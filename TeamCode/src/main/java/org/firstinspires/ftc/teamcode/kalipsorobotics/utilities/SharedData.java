@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
@@ -187,5 +188,27 @@ public class SharedData {
     public static void resetPollenNectarDetections() {
         pollenNectarDetections = new ArrayList<>();
         pollenNectarDetectionsTimeMs = 0;
+    }
+
+    private static volatile List<BallInformation> ballInformation = new ArrayList<>();
+    private static volatile long ballInformationTimeMs = 0;
+
+    /** Balls from the latest raytraced frame, field frame in mm. Published every frame, empty included. */
+    public static void setBallInformation(List<BallInformation> balls) {
+        SharedData.ballInformation = new ArrayList<>(balls);
+        ballInformationTimeMs = System.currentTimeMillis();
+    }
+
+    public static List<BallInformation> getBallInformation() {
+        return new ArrayList<>(ballInformation);
+    }
+
+    public static long getBallInformationTimeMs() {
+        return ballInformationTimeMs;
+    }
+
+    public static void resetBallInformation() {
+        ballInformation = new ArrayList<>();
+        ballInformationTimeMs = 0;
     }
 }

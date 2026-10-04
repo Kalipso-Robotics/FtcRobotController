@@ -55,6 +55,8 @@ public abstract class KVisionProcessor<T> implements VisionProcessor {
     // Thread-safe result storage
     // -------------------------------------------------------------------------
     private volatile Frame<T> latest;
+    private volatile ResultListener<T> listener;
+    private volatile int frameWidth, frameHeight;
     private int frameCounter = 0; // camera thread only
 
     /** A detection result with the camera's capture timestamp (nanos, VisionPortal timebase). */
@@ -67,6 +69,17 @@ public abstract class KVisionProcessor<T> implements VisionProcessor {
             this.captureTimeNanos = captureTimeNanos;
         }
     }
+
+    /** Runs on the camera thread right after each frame's detect(). */
+    public interface ResultListener<T> {
+        void onResult(T result, long captureTimeNanos);
+    }
+
+    /**
+     * Registers the one consumer that runs on the camera thread straight after detect(), with
+     * the frame's capture time. Keep it fast. Exceptions are logged, never propagated.
+     */
+    public void setResultListener(ResultListener<T> listener) { this.listener = listener; }
 
     // -------------------------------------------------------------------------
     // Abstract contract — subclasses implement these
@@ -98,13 +111,27 @@ public abstract class KVisionProcessor<T> implements VisionProcessor {
 
     @Override
     public final void init(int width, int height, CameraCalibration calibration) {
+        frameWidth = width;
+        frameHeight = height;
         onInit(width, height);
     }
+
+    /** Stream size from init(); 0 until the portal has built. Lets a Raytracer catch a wrong resolution. */
+    public int getFrameWidth() { return frameWidth; }
+    public int getFrameHeight() { return frameHeight; }
 
     @Override
     public final Object processFrame(Mat frame, long captureTimeNanos) {
         T result = detect(frame);
         latest = new Frame<>(result, captureTimeNanos);
+        ResultListener<T> l = listener;
+        if (l != null) {
+            try {
+                l.onResult(result, captureTimeNanos);
+            } catch (RuntimeException e) {
+                KLog.e("VisionListener", "Result listener threw", e);
+            }
+        }
         // Timebase check: expect a steady 10-150 ms. Zero/negative/huge means the SDK is not
         // stamping with System.nanoTime(); then stamp nanoTime() here instead (misses exposure
         // and transfer time, but still beats pose-at-use-time).

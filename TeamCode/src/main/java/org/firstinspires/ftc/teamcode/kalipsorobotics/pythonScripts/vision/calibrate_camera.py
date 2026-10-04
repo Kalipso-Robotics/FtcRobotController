@@ -24,9 +24,9 @@ CHECKERBOARD = (9, 6)       # inner corners (cols, rows) — adjust to your boar
 SQUARE_SIZE  = 22.6         # physical square size in mm (or any unit you want)
 CAMERA_ID    = 0            # change if OV9782 is not /dev/video0
 MIN_SAMPLES  = 25           # minimum captures before calibration is allowed
-# Must match what the robot pipeline runs: VisionManager / CameraIntrinsics.CAM_WIDTH x CAM_HEIGHT, MJPEG.
+# Must match what the robot pipeline runs (TFLite ball pipeline: 1280x720 -> VisionConfig.ARDUCAM), MJPEG.
 # Intrinsics are only valid at the resolution they were calibrated at -- never rescale them.
-WIDTH, HEIGHT = 640, 480
+WIDTH, HEIGHT = 1280, 720
 # Repo root, independent of the directory you run this from.
 SAVE_PATH    = Path(__file__).resolve().parents[11] / "camera_intrinsics.json"
 
