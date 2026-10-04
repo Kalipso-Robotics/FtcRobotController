@@ -29,12 +29,12 @@ public class RedSecondAuto extends KOpMode {
     KActionSet autoSecond;
 
     private DriveTrain driveTrain;
-    Shooter shooter = null;
-    Intake intake = null;
-    Stopper stopper = null;
-    Turret turret = null;
+//    Shooter shooter = null;
+//    Intake intake = null;
+//    Stopper stopper = null;
+//    Turret turret = null;
 
-    TurretAutoAlign turretAutoAlign = null;
+//    TurretAutoAlign turretAutoAlign = null;
 
     @Override
     protected void initializeRobotConfig() {
@@ -61,16 +61,16 @@ public class RedSecondAuto extends KOpMode {
         autoSecond = new KActionSet();
         KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");
         KLog.d("RedAutoDepot-Init", () -> "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
-        intake = new Intake(opModeUtilities);
-        shooter = new Shooter(opModeUtilities);
-        stopper = new Stopper(opModeUtilities);
-        shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
-        shooterRun.setShooterRunMode(ShooterRunMode.STOP);
-        KLog.d("RedAutoDepot-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
-
-        Turret.setInstanceNull();
-        turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+//        intake = new Intake(opModeUtilities);
+//        shooter = new Shooter(opModeUtilities);
+//        stopper = new Stopper(opModeUtilities);
+//        shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
+//        shooterRun.setShooterRunMode(ShooterRunMode.STOP);
+//        KLog.d("RedAutoDepot-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
+//
+//        Turret.setInstanceNull();
+//        turret = Turret.getInstance(opModeUtilities);
+//        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class RedSecondAuto extends KOpMode {
         initializeRobot();
 
         // B shoot, go to A flower
-        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
         trip1.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
         trip1.getMoveToBalls().addPoint(930, FieldConfig.bLaunchPoint.getY(), 90);
 //        trip1.getMoveToBalls().addPoint(-930, FieldConfig.aFlowerPoint.getY(), -90);
@@ -90,7 +90,7 @@ public class RedSecondAuto extends KOpMode {
         autoSecond.addAction(trip1);
 
         // A shoot, go B flower
-        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
         trip2.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
         trip2.getMoveToBalls().addPoint(1650, 3657.6-1300, -90);
         trip2.getMoveToBalls().addPoint(1650, 3657.6-3000, -90);
@@ -102,7 +102,7 @@ public class RedSecondAuto extends KOpMode {
 
         // todo switch to VisionSweepRoundTripAction when fin
         // B shoot, go to A side
-        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */  allianceColor, true);
         trip3.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
         trip3.getMoveToBalls().addPoint(950, FieldConfig.bLaunchPoint.getY(), 90);
         trip3.getMoveToBalls().addPoint(950, 3657.6-1200, 90);
@@ -114,7 +114,7 @@ public class RedSecondAuto extends KOpMode {
 
         // todo switch to VisionSweepRoundTripAction when fin
         //A shoot, go to B side
-        RoundTripAction trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        RoundTripAction trip4 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */  allianceColor, true);
         trip4.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
         trip4.getMoveToBalls().addPoint(1650, 3657.6-1300, -90);
         trip4.getMoveToBalls().addPoint(1650, 3657.6-3000, -90);
@@ -126,7 +126,7 @@ public class RedSecondAuto extends KOpMode {
 
         // todo switch to VisionSweepRoundTripAction when fin
         // B shoot, go to A side
-        RoundTripAction trip5 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, allianceColor, true);
+        RoundTripAction trip5 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */  allianceColor, true);
         trip5.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
         trip5.setName("trip5");
         trip5.setDependentActions(trip4);

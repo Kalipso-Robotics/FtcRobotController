@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.test.navigation;
 
 import android.util.Log;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
@@ -35,20 +36,20 @@ public class TestPP extends KOpMode {
         IMUModule.setInstanceNull();
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        OctoQuadOdo.setInstanceNull();
+        OctoQuadOdo octoQuadOdo = OctoQuadOdo.getInstance(opModeUtilities);
 
         ElapsedTime timer = new ElapsedTime();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-        IPurePursuitAction test = new PurePursuitAction(driveTrain);
+        IPurePursuitAction test = new AdaptivePurePursuitAction(driveTrain);
         test.addPoint(0,0,0);
 //        test.addPoint(609.6,0,0);
 //        test.addPoint(0,0,0);
         test.addPoint(609.6,0,90);
-        test.addPoint(609.6,0,180);
-        test.addPoint(0,0,0);
+//        test.addPoint(609.6,0,180);
+//        test.addPoint(0,0,0);
 //        test.addPoint(400,800,180);
 //        test.addPoint(0,800,0);
 
@@ -69,7 +70,7 @@ public class TestPP extends KOpMode {
 
         odoExecutorService = Executors.newSingleThreadExecutor();
 
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(executorService, octoQuadOdo);
 
         while (opModeIsActive()) {
 

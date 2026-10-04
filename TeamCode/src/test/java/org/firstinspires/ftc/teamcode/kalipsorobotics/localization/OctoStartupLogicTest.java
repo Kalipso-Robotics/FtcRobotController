@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision.OctoStartup;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.test.octoquad.OctoStartup;
 import org.junit.Test;
 
 /** Locks the OctoStartup gesture decisions against the 2026-09-22 bring-up record. */

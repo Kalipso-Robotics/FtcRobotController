@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.navigation;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
@@ -40,6 +41,9 @@ public class AdaptivePurePursuitRobotData extends KOpMode {
         Odometry.setInstanceNull();
         Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
+        OctoQuadOdo.setInstanceNull();
+        OctoQuadOdo octo = OctoQuadOdo.getInstance(opModeUtilities);
+
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         ElapsedTime elapsedTime = new ElapsedTime();
@@ -68,7 +72,7 @@ public class AdaptivePurePursuitRobotData extends KOpMode {
 
         odoExecutorService = Executors.newSingleThreadExecutor();
 
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.runOdometryExecutorService(executorService, octo);
 
         while (opModeIsActive()) {
 

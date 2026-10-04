@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
+import android.util.Log;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
@@ -102,20 +104,35 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private int lookaheadBarrierIndex = -1;
     private boolean barrierSatisfied = false;
 
-    //TUNING NUMBERS: USE DATA ABOUT ROBOT 1500
-    private final double PATH_MAX_VELOCITY = 2100; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
+//    //TUNING NUMBERS: USE DATA ABOUT ROBOT old
+//    private final double PATH_MAX_VELOCITY = 2100; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
+//    // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
+//    private final double MAX_ACCELERATION = 4750; // mm/s^2, maximum acceleration of the robot, 6000
+//    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
+//    // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
+//    private final double MAX_ANGULAR_VELOCITY = 10.0; //rad/s, maximum turning velocity of the robot 5.5
+//
+//    private final double WHEELBASE_LENGTH = 9.125*25.4; //front wheel to back wheel
+//    private final double TRACK_WIDTH = 12.5*25.4; //side to side
+//    private final double K_p = 0.000022; // 0.00002
+//    private final double K_a = 0.000012; // 0.001
+//    private final double K_v = 0.00045; // 0.00036 0.00225
+//    private final double K = 3.0; //based on how slow you want the robot to go around turns, 1000
+
+    //TUNING NUMBERS: USE DATA ABOUT ROBOT new
+    private final double PATH_MAX_VELOCITY = 2200; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private final double MAX_ACCELERATION = 4750; // mm/s^2, maximum acceleration of the robot, 6000
+    private final double MAX_ACCELERATION = 6220; // mm/s^2, maximum acceleration of the robot, 6000
     private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
-    private final double MAX_ANGULAR_VELOCITY = 10.0; //rad/s, maximum turning velocity of the robot 5.5
+    private final double MAX_ANGULAR_VELOCITY = 12.8; //rad/s, maximum turning velocity of the robot 5.5
 
-    private final double WHEELBASE_LENGTH = 9.125*25.4; //front wheel to back wheel
-    private final double TRACK_WIDTH = 12.5*25.4; //side to side
-    private final double K_p = 0.000022; // 0.00002
-    private final double K_a = 0.000012; // 0.001
-    private final double K_v = 0.00045; // 0.00036 0.00225
-    private final double K = 3.0; //based on how slow you want the robot to go around turns, 1000
+    private final double WHEELBASE_LENGTH = 232.414; //front wheel to back wheel
+    private final double TRACK_WIDTH = 276.58; //side to side
+    private final double K_p = 0.000021; // 0.00002
+    private final double K_a = 0.00001; // 0.001
+    private final double K_v = 0.00036; // 0.00036 0.00225
+    private final double K = 2.5; //based on how slow you want the robot to go around turns, 1000
 
     /*
     * ↑ Raising K_p
@@ -1340,13 +1357,13 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private int updateProgressIndex(Path path, Position robot) {
 
         int best = progressIndex;
-        double bestDist = dist(robot, path.getPoint(progressIndex));
+        double bestDist = Vector.between(robot, path.getPoint(progressIndex)).getLength();
 
         // Only look a few points ahead
         int end = Math.min(progressIndex + 5, path.numPoints() - 1);
 
         for (int i = progressIndex + 1; i <= end; i++) {
-            double d = dist(robot, path.getPoint(i));
+            double d = Vector.between(robot, path.getPoint(i)).getLength();
 
             if (d < bestDist) {
                 bestDist = d;
@@ -1362,12 +1379,6 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
         progressIndex = best;
         return progressIndex;
-    }
-
-    private double dist(Position a, Position b) {
-        double dx = a.getX() - b.getX();
-        double dy = a.getY() - b.getY();
-        return Math.sqrt(dx * dx + dy * dy);
     }
 
     private double calculateMotorOutput(double wheelVelocity, double acceleration) {

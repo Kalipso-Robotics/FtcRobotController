@@ -29,8 +29,8 @@ public class RoundTripAction extends KActionSet {
     double intakeTimeMS = 1000;
 
 
-    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, AllianceColor allianceColor, boolean useAdaptivePP) {
-        turretAutoAlign.setToleranceDeg(1.5);
+    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, /* TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, */ AllianceColor allianceColor, boolean useAdaptivePP) {
+        //turretAutoAlign.setToleranceDeg(1.5);
 
         if (!useAdaptivePP) {
             moveToShoot = new PurePursuitAction(drivetrain);
@@ -53,10 +53,10 @@ public class RoundTripAction extends KActionSet {
         moveToBalls.setDependentActions(moveToShoot);
         this.addAction(moveToBalls);
 
-        intakeBalls = new IntakeFullAction(stopper, intake, intakeTimeMS, 1);
-        intakeBalls.setName("intakeBalls");
-        intakeBalls.setDependentActions(moveToBalls);
-        this.addAction(intakeBalls);
+//        intakeBalls = new IntakeFullAction(stopper, intake, intakeTimeMS, 1);
+//        intakeBalls.setName("intakeBalls");
+//        intakeBalls.setDependentActions(moveToBalls);
+//        this.addAction(intakeBalls);
     }
 
     public IPurePursuitAction getMoveToShoot() {return moveToShoot;}
