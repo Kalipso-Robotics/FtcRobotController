@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobUtils;
 
@@ -110,8 +110,8 @@ public class RaytracingDataCollector extends LinearOpMode {
             if (gamepad1.dpadLeftWasPressed()) knownDistanceMM -= 100;
             knownDistanceMM = Math.max(0, knownDistanceMM);
 
-            List<VisionRecognition> recognitions = artifacts.getLatestResult();
-            VisionRecognition largest = BlobUtils.findLargestByArea(recognitions);
+            List<BallDetection> recognitions = artifacts.getLatestResult();
+            BallDetection largest = BlobUtils.findLargestByArea(recognitions);
 
             double raytracedDistanceMM = Double.NaN;
             Point pixel = null;

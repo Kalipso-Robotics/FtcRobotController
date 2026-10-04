@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobUtils;
 
@@ -19,7 +19,7 @@ import java.util.List;
 public class MoveToBallAction extends Action {
 
     private final DriveTrain driveTrain;
-    private final KVisionProcessor<List<VisionRecognition>> artifactProcessor;
+    private final KVisionProcessor<List<BallDetection>> artifactProcessor;
     private final CameraIntrinsics cameraIntrinsics;
     private final String targetColor;
     private final BlobSelectionStrategy selectionStrategy;
@@ -28,7 +28,7 @@ public class MoveToBallAction extends Action {
     private Point detectedBallWorldPos;
 
     public MoveToBallAction(DriveTrain driveTrain,
-                            KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+                            KVisionProcessor<List<BallDetection>> artifactProcessor,
                             CameraIntrinsics cameraIntrinsics,
                             String targetColor,
                             BlobSelectionStrategy selectionStrategy) {
@@ -40,7 +40,7 @@ public class MoveToBallAction extends Action {
     }
 
     public MoveToBallAction(DriveTrain driveTrain,
-                            KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+                            KVisionProcessor<List<BallDetection>> artifactProcessor,
                             CameraIntrinsics cameraIntrinsics,
                             String targetColor) {
         this(driveTrain, artifactProcessor, cameraIntrinsics, targetColor,
@@ -48,7 +48,7 @@ public class MoveToBallAction extends Action {
     }
 
     public MoveToBallAction(DriveTrain driveTrain,
-                            KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+                            KVisionProcessor<List<BallDetection>> artifactProcessor,
                             CameraIntrinsics cameraIntrinsics) {
         this(driveTrain, artifactProcessor, cameraIntrinsics, null,
                 BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
@@ -58,7 +58,7 @@ public class MoveToBallAction extends Action {
     protected void update() {
         if (isDone) return;
 
-        VisionRecognition target = selectRecognition();
+        BallDetection target = selectRecognition();
         if (target == null) {
             String colorFilter = targetColor != null ? targetColor + " " : "";
             KLog.d("MoveToBall", () -> String.format("No %sball detected", colorFilter));
@@ -84,11 +84,11 @@ public class MoveToBallAction extends Action {
         isDone = true;
     }
 
-    private VisionRecognition selectRecognition() {
-        List<VisionRecognition> all = artifactProcessor.getLatestResult();
+    private BallDetection selectRecognition() {
+        List<BallDetection> all = artifactProcessor.getLatestResult();
         if (all == null || all.isEmpty()) return null;
 
-        List<VisionRecognition> candidates = filterByLabel(all, targetColor);
+        List<BallDetection> candidates = filterByLabel(all, targetColor);
         if (candidates.isEmpty()) return null;
 
         switch (selectionStrategy) {
@@ -112,11 +112,11 @@ public class MoveToBallAction extends Action {
         }
     }
 
-    private List<VisionRecognition> filterByLabel(List<VisionRecognition> recognitions, String label) {
+    private List<BallDetection> filterByLabel(List<BallDetection> recognitions, String label) {
         if (label == null) return recognitions;
 
-        List<VisionRecognition> filtered = new ArrayList<>();
-        for (VisionRecognition recognition : recognitions) {
+        List<BallDetection> filtered = new ArrayList<>();
+        for (BallDetection recognition : recognitions) {
             if (label.equals(recognition.label)) filtered.add(recognition);
         }
         return filtered;

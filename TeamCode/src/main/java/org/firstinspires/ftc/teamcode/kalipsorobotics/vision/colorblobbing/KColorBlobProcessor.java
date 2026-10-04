@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -65,7 +65,7 @@ import java.util.Locale;
  *   Purple   ~ 117-155
  *   Always set S_min > 50 and V_min > 40 to reject grey/black/white noise.
  */
-public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRecognition>> {
+public abstract class KColorBlobProcessor extends KVisionProcessor<List<BallDetection>> {
 
     public static class ColorChannel {
         public final Scalar hsvLowerBound;
@@ -168,7 +168,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
     }
 
     @Override
-    protected List<VisionRecognition> detect(Mat frame) {
+    protected List<BallDetection> detect(Mat frame) {
         diagFrameCount++;
         diagRawContours = 0;
         diagAreaRejected = 0;
@@ -181,7 +181,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
                 new Size(gaussianKernelSize, gaussianKernelSize), 0);
         Imgproc.cvtColor(blurredFrame, hsvFrame, Imgproc.COLOR_RGB2HSV);
 
-        List<VisionRecognition> allBlobs = new ArrayList<>();
+        List<BallDetection> allBlobs = new ArrayList<>();
         for (ColorChannel channel : channels) {
             Core.inRange(hsvFrame, channel.hsvLowerBound, channel.hsvUpperBound, channel.mask);
             allBlobs.addAll(extractBlobsFromMask(channel.mask, channel.label));
@@ -205,11 +205,11 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
      * Tag: KColorBlobProcessor (separate from VisionRoundTrip). Filter with:
      *   adb logcat | grep KColorBlobProcessor
      */
-    private void logDetectionStream(List<VisionRecognition> blobs) {
+    private void logDetectionStream(List<BallDetection> blobs) {
         if (!blobs.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             sb.append(String.format(Locale.US, "f%d SAW %d:", diagFrameCount, blobs.size()));
-            for (VisionRecognition r : blobs) {
+            for (BallDetection r : blobs) {
                 if (!(r instanceof DetectedBlob)) continue;
                 DetectedBlob b = (DetectedBlob) r;
                 sb.append(String.format(Locale.US, " [%s a=%.0f c=%.2f px=(%.0f,%.0f)]",
@@ -281,7 +281,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
                 Imgproc.FONT_HERSHEY_SIMPLEX, 0.4, white, 1);
     }
 
-    private void maybeSaveSnapshot(Mat rgbFrame, List<VisionRecognition> blobs) {
+    private void maybeSaveSnapshot(Mat rgbFrame, List<BallDetection> blobs) {
         int n = snapshotEveryNFrames;
         if (n <= 0 || snapshotDir == null) return;
         if (diagFrameCount % n != 0) return;
@@ -292,7 +292,7 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
             Imgproc.cvtColor(rgbFrame, snapshotBgrBuffer, Imgproc.COLOR_RGB2BGR);
 
             // Accepted blobs: purple/green boxes.
-            for (VisionRecognition r : blobs) {
+            for (BallDetection r : blobs) {
                 if (!(r instanceof DetectedBlob)) continue;
                 DetectedBlob b = (DetectedBlob) r;
                 Scalar color = "Purple".equals(b.label)
@@ -349,8 +349,8 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
     }
 
     @Override
-    protected void annotate(Canvas canvas, List<VisionRecognition> blobs, DrawContext drawContext) {
-        for (VisionRecognition recognition : blobs) {
+    protected void annotate(Canvas canvas, List<BallDetection> blobs, DrawContext drawContext) {
+        for (BallDetection recognition : blobs) {
             if (!(recognition instanceof DetectedBlob)) continue;
             DetectedBlob blob = (DetectedBlob) recognition;
 
@@ -379,17 +379,17 @@ public abstract class KColorBlobProcessor extends KVisionProcessor<List<VisionRe
 
     /** Largest blob across all channels. Null if nothing detected. */
     public DetectedBlob getLargestBlob() {
-        List<VisionRecognition> snapshot = getLatestResult();
+        List<BallDetection> snapshot = getLatestResult();
         if (snapshot == null || snapshot.isEmpty()) return null;
-        VisionRecognition first = snapshot.get(0);
+        BallDetection first = snapshot.get(0);
         return (first instanceof DetectedBlob) ? (DetectedBlob) first : null;
     }
 
     /** Largest blob matching the given channel label. Null if not detected. */
     public DetectedBlob getLargestBlobByLabel(String colorLabel) {
-        List<VisionRecognition> snapshot = getLatestResult();
+        List<BallDetection> snapshot = getLatestResult();
         if (snapshot == null) return null;
-        for (VisionRecognition recognition : snapshot) {
+        for (BallDetection recognition : snapshot) {
             if (colorLabel.equals(recognition.label) && recognition instanceof DetectedBlob) {
                 return (DetectedBlob) recognition;
             }

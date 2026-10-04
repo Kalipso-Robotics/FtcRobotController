@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -9,13 +8,12 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.KVisionProcessor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobUtils;
 
@@ -25,7 +23,7 @@ import java.util.Locale;
 
 public class VisionRoundTripAction extends RoundTripAction {
     private final boolean useVision;
-    private final KVisionProcessor<List<VisionRecognition>> artifactProcessor;
+    private final KVisionProcessor<List<BallDetection>> artifactProcessor;
     private final CameraIntrinsics cameraIntrinsics;
     private final String targetBallColor;
     private final BlobSelectionStrategy selectionStrategy;
@@ -71,7 +69,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         private boolean shouldDependOnFlywheel = false;
 
         private boolean useVision = false;
-        private KVisionProcessor<List<VisionRecognition>> artifactProcessor;
+        private KVisionProcessor<List<BallDetection>> artifactProcessor;
         private CameraIntrinsics cameraIntrinsics;
         private String targetBallColor;
         private BlobSelectionStrategy selectionStrategy = BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER;
@@ -113,7 +111,7 @@ public class VisionRoundTripAction extends RoundTripAction {
             return this;
         }
 
-        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+        public Builder enableVision(KVisionProcessor<List<BallDetection>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics,
                                     String targetBallColor,
                                     BlobSelectionStrategy selectionStrategy) {
@@ -125,17 +123,17 @@ public class VisionRoundTripAction extends RoundTripAction {
             return this;
         }
 
-        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+        public Builder enableVision(KVisionProcessor<List<BallDetection>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics, String targetBallColor) {
             return enableVision(artifactProcessor, cameraIntrinsics, targetBallColor, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
-        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+        public Builder enableVision(KVisionProcessor<List<BallDetection>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics) {
             return enableVision(artifactProcessor, cameraIntrinsics, null, BlobSelectionStrategy.CLOSEST_TO_CAMERA_CENTER);
         }
 
-        public Builder enableVision(KVisionProcessor<List<VisionRecognition>> artifactProcessor,
+        public Builder enableVision(KVisionProcessor<List<BallDetection>> artifactProcessor,
                                     CameraIntrinsics cameraIntrinsics, BlobSelectionStrategy selectionStrategy) {
             return enableVision(artifactProcessor, cameraIntrinsics, null, selectionStrategy);
         }
@@ -189,7 +187,7 @@ public class VisionRoundTripAction extends RoundTripAction {
                         getName(), robotPos.getX(), robotPos.getY(), Math.toDegrees(robotPos.getTheta()),
                         launchPoint.getX(), launchPoint.getY(), launchHeading, polarity));
 
-        VisionRecognition target = getTargetRecognition();
+        BallDetection target = getTargetRecognition();
         if (target == null) {
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
                             "[%s] NO BALL DETECTED - keeping fallback path. cam=%s",
@@ -293,22 +291,22 @@ public class VisionRoundTripAction extends RoundTripAction {
         KLog.d("VisionRoundTrip", () -> msg);
     }
 
-    private VisionRecognition getTargetRecognition() {
-        List<VisionRecognition> all = artifactProcessor.getLatestResult();
+    private BallDetection getTargetRecognition() {
+        List<BallDetection> all = artifactProcessor.getLatestResult();
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US, "[%s] Vision: %s | %s",
                 getName(),
                 all == null ? "NULL" : "count=" + all.size(),
                 artifactProcessor.getDiagnosticSummary()));
         if (all == null || all.isEmpty()) return null;
 
-        List<VisionRecognition> candidates = filterByLabel(all, targetBallColor);
+        List<BallDetection> candidates = filterByLabel(all, targetBallColor);
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
                 "[%s] After label filter (%s): %d candidates",
                 getName(), targetBallColor == null ? "ANY" : targetBallColor, candidates.size()));
         logCandidatesWithWorld(candidates);
         if (candidates.isEmpty()) return null;
 
-        VisionRecognition chosen;
+        BallDetection chosen;
         switch (selectionStrategy) {
             case LARGEST_AREA:
                 chosen = BlobUtils.findLargestByArea(candidates);
@@ -326,7 +324,7 @@ public class VisionRoundTripAction extends RoundTripAction {
             default:
                 chosen = candidates.get(0);
         }
-        final VisionRecognition c = chosen;
+        final BallDetection c = chosen;
         KLog.d("VisionRoundTrip", () -> String.format(Locale.US,
                 "[%s] Strategy=%s chose %s conf=%.2f area=%.0f pixel=(%.1f,%.1f)",
                 getName(), selectionStrategy,
@@ -338,10 +336,10 @@ public class VisionRoundTripAction extends RoundTripAction {
         return chosen;
     }
 
-    private void logCandidatesWithWorld(List<VisionRecognition> candidates) {
+    private void logCandidatesWithWorld(List<BallDetection> candidates) {
         Position robotPos = new Position(SharedData.getOdometryWheelIMUPosition());
         for (int i = 0; i < candidates.size(); i++) {
-            VisionRecognition r = candidates.get(i);
+            BallDetection r = candidates.get(i);
             Point px = r.getBottomMiddlePixel();
             Point world = cameraIntrinsics.calculateWorldPos(px.getX(), px.getY(), robotPos);
             final int idx = i;
@@ -355,10 +353,10 @@ public class VisionRoundTripAction extends RoundTripAction {
         }
     }
 
-    private List<VisionRecognition> filterByLabel(List<VisionRecognition> recognitions, String label) {
+    private List<BallDetection> filterByLabel(List<BallDetection> recognitions, String label) {
         if (label == null) return recognitions;
-        List<VisionRecognition> filtered = new ArrayList<>();
-        for (VisionRecognition r : recognitions) {
+        List<BallDetection> filtered = new ArrayList<>();
+        for (BallDetection r : recognitions) {
             if (label.equals(r.label)) filtered.add(r);
         }
         return filtered;

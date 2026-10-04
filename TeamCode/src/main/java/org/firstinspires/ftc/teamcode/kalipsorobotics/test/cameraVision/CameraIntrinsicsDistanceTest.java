@@ -18,9 +18,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Vector3d;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.CameraIntrinsics;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLiteArtifactDetector;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallDetection;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 
 /**
@@ -137,13 +136,13 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
 
             // ─── B. TFLite detections (end-to-end check) ────────────────────
             telemetry.addLine("─── TFLITE DETECTIONS ───");
-            List<VisionRecognition> recognitions = artifacts.getLatestResult();
+            List<BallDetection> recognitions = artifacts.getLatestResult();
             if (recognitions == null || recognitions.isEmpty()) {
                 telemetry.addLine("No artifacts detected.");
             } else {
                 telemetry.addData("Detection count", recognitions.size());
-                VisionRecognition largest = recognitions.get(0);
-                for (VisionRecognition r : recognitions) {
+                BallDetection largest = recognitions.get(0);
+                for (BallDetection r : recognitions) {
                     if (r.getArea() > largest.getArea()) largest = r;
                 }
                 reportRecognitionWithDump("LARGEST", largest, intrinsics, robotPos);
@@ -157,7 +156,7 @@ public class CameraIntrinsicsDistanceTest extends LinearOpMode {
         visionManager.close();
     }
 
-    private void reportRecognitionWithDump(String name, VisionRecognition r,
+    private void reportRecognitionWithDump(String name, BallDetection r,
                                            CameraIntrinsics intrinsics, Position robotPos) {
         if (r == null) {
             telemetry.addData(name, "no detection");

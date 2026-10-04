@@ -13,7 +13,7 @@ import java.util.Locale;
  * Subclass this when a processor produces detection-specific extras
  * (e.g. DetectedBlob adds contour area and circularity).
  */
-public class VisionRecognition {
+public class BallDetection {
 
     /** Label identifying what was detected (e.g. "Purple", "Green", "Artifact"). */
     public final String label;
@@ -33,8 +33,8 @@ public class VisionRecognition {
     /** Pre-formatted label string ready for telemetry, e.g. "Purple 87%". */
     public final String formattedLabel;
 
-    public VisionRecognition(String label, float confidence,
-                             float left, float top, float right, float bottom) {
+    public BallDetection(String label, float confidence,
+                         float left, float top, float right, float bottom) {
         this.label      = label;
         this.confidence = confidence;
         this.left       = left;
