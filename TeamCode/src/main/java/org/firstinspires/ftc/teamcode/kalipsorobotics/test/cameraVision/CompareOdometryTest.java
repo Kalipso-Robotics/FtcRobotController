@@ -36,6 +36,9 @@ import java.util.Locale;
  * works at any time and always re-zeros, so press it again if a lap goes wrong. Drive a lap with
  * gamepad1, put the robot back on the mark, press A to log one TRIAL row and stop. Repeat ~10
  * times with different laps (straight, strafe, spin), all in one CSV.
+ * Optional: press X when passing a second taped mark (CHECK_X/Y_MM from the start mark) to log a
+ * CHECK row -- return-to-start can't see a uniform scale error, this can. Trials where the hub IMU
+ * froze are flagged legacy_valid=false on the TRIAL row; discard them for the legacy comparison.
  *
  * Filter the CSV for lines starting with "TRIAL" and compare octo_closure_mm vs
  * old_closure_mm across trials (mean, and mm of error per metre driven).
@@ -45,12 +48,24 @@ import java.util.Locale;
 @TeleOp
 public class CompareOdometryTest extends LinearOpMode {
 
-    /** Perpendicular pod (port 1) forward of robot centre; negative = behind. Solved from the
-     *  2026-09-26 OctoTune spins (backMM / theta over 10 turns: -95.57 CW, -95.18 CCW), same
-     *  measurement as OctoConfig.TCP_OFFSET_MM_X with the board's sign convention removed. */
-    private static final double PERP_POD_FWD_MM = -95.4;
+    // Pod geometry comes from OctoConfig so legacy tracks the SAME point and track width as the
+    // board. OctoConfig documents offset = -(pod position) in the board frame (x fwd, y LEFT):
+    //   perpendicular pod forward of the TCP = -TCP_OFFSET_MM_X (x axis is shared by both frames)
+    //   right parallel pod's distance right of the TCP = -MIRROR * TCP_OFFSET_MM_Y
+    /** Perpendicular pod (port 1) forward of the tracking centre; negative = behind. */
+    private static double perpPodFwdMM() { return -OctoConfig.TCP_OFFSET_MM_X; }
 
-    private final OctoQuad.LocalizerDataBlock loc = new OctoQuad.LocalizerDataBlock();
+    /** Right parallel pod (port 0) distance to the RIGHT of the tracking centre. */
+    private static double rightPodMM() {
+        double mirror = OctoConfig.MIRROR_BOARD_FRAME ? -1.0 : 1.0;
+        return -mirror * OctoConfig.TCP_OFFSET_MM_Y;
+    }
+
+    /** Hub IMU over-reads rotation by 3.2%: hub yaw / octo heading fit 1.0321 and 1.0317 in the
+     *  2026-10-03 laps (pods agree with octo within 0.3%). Re-fit from the logged hub_yaw_deg. */
+    private static final double HUB_IMU_HEADING_SCALAR = 1.032;
+
+    private final OctoQuad.LocalizerDataBlock loc =new OctoQuad.LocalizerDataBlock();
     private final OctoQuad.EncoderDataBlock enc = new OctoQuad.EncoderDataBlock();
     private final OctoConfig.Pose octoPose = new OctoConfig.Pose();
     private final OctoConfig.Pose legacyPose = new OctoConfig.Pose();
@@ -75,10 +90,27 @@ public class CompareOdometryTest extends LinearOpMode {
     /** Hub IMU, read once per loop (and in zero()) so every consumer sees the same sample. */
     private YawPitchRollAngles ypr;
     private double hubYawZeroDeg;
+    /** Hub heading, CW-positive, accumulated from SCALED deltas. Scaling the absolute wrapped yaw
+     *  instead injects ~11 deg of error at every +-180 crossing (360 * (1 - 1/scalar)). */
+    private double imuAccumRad, prevRawYawRad;
+    /** Hub IMU freeze detector: identical yaw/pitch/roll for many loops while the pods keep turning. */
+    private double lastYaw, lastPitch, lastRoll, frozenStartPodDeg;
+    private int sameLoops;
+    private boolean hubFrozen;
+    /** Per-lap health, reset in zero(): a lap with any frozen loop is not a valid legacy sample. */
+    private int lapLoops, lapFrozenLoops, lapWheelLoops;
+
+    /** Second taped mark for the CHECK row (X button), measured with a tape measure from the
+     *  start mark, in the robot's start frame (x fwd, y LEFT). Catches scale error that
+     *  return-to-start can't. Set both to the real measurement before running. */
+    private static final double CHECK_X_MM = 2438;  // 4 tiles forward
+    private static final double CHECK_Y_MM = 0;
 
     // Raw pod counts are zeroed in SOFTWARE, same trick as OctoTune: setLocalizerPose() resets
     // the board's pose accumulator, not the raw encoder count registers.
     private int rawXOffset, rawX2Offset, rawYOffset;
+    /** Zeroed counts from the last VALID read, so CRC-bad reads never reach the CSV. */
+    private int lastRawX, lastRawX2, lastRawY;
 
     @Override
     public void runOpMode() {
@@ -92,20 +124,25 @@ public class CompareOdometryTest extends LinearOpMode {
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         IMUModule.setInstanceNull();
         imuModule = IMUModule.getInstance(opModeUtilities);
-        // This robot's Control Hub is logo-UP, not the comp robot's DrivetrainConfig mount (logo
-        // BACKWARD): the 2026-10-01 logs read pitch -91.5 deg while flat, which gimbal-locks yaw.
-        // USB direction only shifts the yaw zero, which zero() re-seeds, so any horizontal one works.
+        // This robot's Control Hub stands on edge, logo LEFT, USB UP (2026-10-03: logo-UP/USB-RIGHT
+        // read roll -88 deg while flat). If init telemetry pitch/roll aren't ~0, try USB FORWARD/BACKWARD.
         boolean hubImuOk = imuModule.getIMU().initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT)));
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP)));
 
         csv = new KFileWriter("CompareOdometry", opModeUtilities);
         csv.writeLine("# old = LegacyOdometry (Odometry.java WHEEL_IMU math) on OctoQuad pod counts + hub IMU");
-        csv.writeLine("# hub imu mount: logo UP, usb RIGHT" + (hubImuOk ? "" : " -- hub imu reinit failed"));
+        csv.writeLine("# hub imu mount: logo LEFT, usb UP" + (hubImuOk ? "" : " -- hub imu reinit failed"));
+        csv.writeLine(String.format(Locale.US,
+                "# legacy geometry (from OctoConfig): track %.2f mm, right pod %.2f mm right of TCP, "
+                        + "perp pod %.2f mm fwd of TCP", OctoConfig.TRACK_WIDTH_MM, rightPodMM(), perpPodFwdMM()));
         csv.writeLine("type,t_s,trial,octo_x,octo_y,octo_hdg_deg,old_x,old_y,old_hdg_deg,"
                 + "path_mm,turned_deg,octo_closure_mm,octo_hdg_err_deg,old_closure_mm,old_hdg_err_deg,crcOk,loop_ms");
         csv.writeLine("# LOOP rows (every loop): LOOP,t_s,running,octo_x,octo_y,octo_hdg_deg,old_x,old_y,old_hdg_deg,"
-                + "pod_hdg_deg,hub_yaw_deg,hub_pitch_deg,hub_roll_deg,old_src,intake_pwr,loop_ms");
+                + "pod_hdg_deg,hub_yaw_deg,hub_pitch_deg,hub_roll_deg,old_src,hub_frozen,loop_ms,"
+                + "raw_x,raw_x2,raw_y,hub_yaw_raw_deg  (raw_* are zeroed counts: replay any legacy variant offline)");
+        csv.writeLine("# TRIAL rows end with hub_frozen_loops,wheel_pct,legacy_valid. "
+                + "CHECK rows (X button): CHECK,t_s,trial,octo_x,octo_y,old_x,old_y,err_octo_mm,err_old_mm vs CHECK_X/Y_MM");
 
         telemetry.addLine("COMPARE ODOMETRY");
         telemetry.addLine("After START: B = zero + start lap (any time). A on the mark = log + stop.");
@@ -141,11 +178,20 @@ public class CompareOdometryTest extends LinearOpMode {
 
                 ypr = imuModule.getIMU().getRobotYawPitchRollAngles();
                 q.readLocalizerDataAndAllEncoderData(loc, enc);
+                updateHubFrozen();
                 if (loc.isDataValid() && enc.isDataValid()) {
                     OctoConfig.toRobotFrame(loc, octoPose);
                     if (running) updateOdometer(loc.heading_rad);
+                    lastRawX  = enc.positions[OctoConfig.CH_X]  - rawXOffset;
+                    lastRawX2 = enc.positions[OctoConfig.CH_X2] - rawX2Offset;
+                    lastRawY  = enc.positions[OctoConfig.CH_Y]  - rawYOffset;
                     legacy.update(rightMM(), leftMM(), backMM(), getImuHeadingRad());
                     legacy.toPose(legacyPose);
+                    if (running) {
+                        lapLoops++;
+                        if (hubFrozen) lapFrozenLoops++;
+                        if (legacy.usedWheel) lapWheelLoops++;
+                    }
                 }
 
                 drive.move(gamepad1);
@@ -157,6 +203,8 @@ public class CompareOdometryTest extends LinearOpMode {
                     }
                     zero();
                     running = true;
+                } else if (gamepad1.xWasPressed()) {
+                    if (running) logCheck();
                 } else if (gamepad1.aWasPressed()) {
                     if (running) {
                         logTrial(loopMs);
@@ -201,6 +249,7 @@ public class CompareOdometryTest extends LinearOpMode {
         telemetry.addData("x / y / h", "%8.1f / %8.1f mm / %7.2f deg",
                 legacyPose.x, legacyPose.y, legacyPose.headingDeg);
         telemetry.addLine("--- heading sources ---");
+        if (hubFrozen) telemetry.addLine("!!! HUB IMU FROZEN -- legacy is wheel-heading only, lap invalid");
         telemetry.addData("hub pitch / roll (want ~0 flat)", "%.1f / %.1f deg",
                 ypr.getPitch(), ypr.getRoll());
         telemetry.addData("octo - pod hdg", "%.2f deg", MathFunctions.angleWrapDeg(
@@ -212,22 +261,23 @@ public class CompareOdometryTest extends LinearOpMode {
         telemetry.addLine(running
                 ? ">>> LAP RUNNING <<<  back on the mark -> A = log + stop.  B = restart (re-zero)."
                 : "IDLE. Robot on the mark -> B = zero + start.");
+        telemetry.addLine("X at 2nd mark = CHECK row (scale). A on start mark = TRIAL.");
     }
 
     private double podHeadingDeg() {
-        return OctoConfig.monitorHeadingDeg(enc.positions[OctoConfig.CH_X] - rawXOffset,
-                enc.positions[OctoConfig.CH_X2] - rawX2Offset);
+        return OctoConfig.monitorHeadingDeg(lastRawX, lastRawX2);
     }
 
     /** One LOOP row per loop, idle or not, so stationary drift is captured too. */
     private void logLoop(double loopMs) {
         csv.writeLine(String.format(Locale.US,
-                "LOOP,%.3f,%b,%.2f,%.2f,%.3f,%.2f,%.2f,%.3f,%.3f,%.3f,%.2f,%.2f,%s,%.2f,%.2f",
+                "LOOP,%.3f,%b,%.2f,%.2f,%.3f,%.2f,%.2f,%.3f,%.3f,%.3f,%.2f,%.2f,%s,%.2f,%.2f,%d,%d,%d,%.3f",
                 runtime.seconds(), running,
                 octoPose.x, octoPose.y, octoPose.headingDeg,
                 legacyPose.x, legacyPose.y, legacyPose.headingDeg,
                 podHeadingDeg(), ypr.getYaw() - hubYawZeroDeg, ypr.getPitch(), ypr.getRoll(),
-                legacy.usedWheel ? "WHEEL" : "IMU", -1.0, loopMs));
+                legacy.usedWheel ? "WHEEL" : "IMU", hubFrozen ? 1.0 : 0.0, loopMs,
+                lastRawX, lastRawX2, lastRawY, ypr.getYaw()));
     }
 
     /** One TRIAL summary row: each algorithm's return-to-start error for this lap. */
@@ -239,18 +289,30 @@ public class CompareOdometryTest extends LinearOpMode {
         double oldHdgErr = Math.abs(MathFunctions.angleWrapDeg(legacyPose.headingDeg));
 
         csv.writeLine(String.format(Locale.US,
-                "TRIAL,%.3f,%d,%.2f,%.2f,%.4f,%.2f,%.2f,%.4f,%.1f,%.2f,%.2f,%.4f,%.2f,%.4f,%b,%.2f",
+                "TRIAL,%.3f,%d,%.2f,%.2f,%.4f,%.2f,%.2f,%.4f,%.1f,%.2f,%.2f,%.4f,%.2f,%.4f,%b,%.2f,%d,%.1f,%b",
                 runtime.seconds(), trialNum,
                 octoPose.x, octoPose.y, octoPose.headingDeg,
                 legacyPose.x, legacyPose.y, legacyPose.headingDeg,
                 pathMm, turnedDeg,
                 octoClosure, octoHdgErr, oldClosure, oldHdgErr,
-                loc.crcOk, loopMs));
+                loc.crcOk, loopMs,
+                lapFrozenLoops, 100.0 * lapWheelLoops / Math.max(1, lapLoops), lapFrozenLoops == 0));
+        if (lapFrozenLoops > 0) {
+            telemetry.addLine("!!! LEGACY LAP INVALID: hub IMU froze " + lapFrozenLoops + " loops");
+        }
         try {
             csv.flush();
         } catch (java.io.IOException e) {
             telemetry.addLine("CSV flush failed: " + e.getMessage());
         }
+    }
+
+    /** Pose at the second taped mark; compare to the tape-measured CHECK_X/Y_MM. Mid-lap, no stop. */
+    private void logCheck() {
+        csv.writeLine(String.format(Locale.US, "CHECK,%.3f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f",
+                runtime.seconds(), trialNum + 1, octoPose.x, octoPose.y, legacyPose.x, legacyPose.y,
+                Math.hypot(octoPose.x - CHECK_X_MM, octoPose.y - CHECK_Y_MM),
+                Math.hypot(legacyPose.x - CHECK_X_MM, legacyPose.y - CHECK_Y_MM)));
     }
 
     /** Path length and total angle turned this lap, from the octo pose (same as OctoTest). */
@@ -272,9 +334,27 @@ public class CompareOdometryTest extends LinearOpMode {
         turnedDeg += Math.abs(Math.toDegrees(d));
     }
 
+    /** Same convention as Odometry.getIMUHeading() (negated so CW is positive). Stateful: call once
+     *  per loop, after ypr is read. */
     private double getImuHeadingRad() {
-        // Same convention as Odometry.getIMUHeading(): negated so CW is positive.
-        return -Math.toRadians(ypr.getYaw());
+        double raw = -Math.toRadians(ypr.getYaw());
+        imuAccumRad += MathFunctions.angleWrapRad(raw - prevRawYawRad) / HUB_IMU_HEADING_SCALAR;
+        prevRawYawRad = raw;
+        return imuAccumRad;
+    }
+
+    /** True once yaw/pitch/roll have been bit-identical for 60 loops while the pod heading moved
+     *  more than 5 deg: a stationary robot can repeat a value, a spinning one cannot. */
+    private void updateHubFrozen() {
+        double y = ypr.getYaw(), p = ypr.getPitch(), r = ypr.getRoll();
+        if (y == lastYaw && p == lastPitch && r == lastRoll) {
+            sameLoops++;
+        } else {
+            sameLoops = 0;
+            frozenStartPodDeg = podHeadingDeg();
+        }
+        lastYaw = y; lastPitch = p; lastRoll = r;
+        hubFrozen = sameLoops > 60 && Math.abs(podHeadingDeg() - frozenStartPodDeg) > 5;
     }
 
     /** Right parallel pod (port 0), forward-positive, same frame as Odometry's right encoder. */
@@ -287,8 +367,8 @@ public class CompareOdometryTest extends LinearOpMode {
         return (enc.positions[OctoConfig.CH_X2] - rawX2Offset) / OctoConfig.COUNTS_PER_MM_X2;
     }
 
-    /** Perpendicular pod (port 1), converted to +Y-right to match the project frame -- same
-     *  sign flip as OctoConfig.toRobotFrame applies to the board's posY_mm. */
+    /** Perpendicular pod (port 1): raw counts go UP moving LEFT (board +y), converted to
+     *  +Y-right to match the project frame -- same sign flip as OctoConfig.toRobotFrame. */
     private double backMM() {
         double sign = OctoConfig.MIRROR_BOARD_FRAME ? -1.0 : 1.0;
         return sign * (enc.positions[OctoConfig.CH_Y] - rawYOffset) / OctoConfig.COUNTS_PER_MM_Y;
@@ -313,15 +393,19 @@ public class CompareOdometryTest extends LinearOpMode {
         prevSeeded = false;
         headingSeeded = false;
         pathMm = turnedDeg = 0;
+        lapLoops = lapFrozenLoops = lapWheelLoops = 0;
 
         if (enc.isDataValid()) {
             rawXOffset  = enc.positions[OctoConfig.CH_X];
             rawX2Offset = enc.positions[OctoConfig.CH_X2];
             rawYOffset  = enc.positions[OctoConfig.CH_Y];
+            lastRawX = lastRawX2 = lastRawY = 0;
         }
         ypr = imuModule.getIMU().getRobotYawPitchRollAngles();
         hubYawZeroDeg = ypr.getYaw();
-        legacy.reset(getImuHeadingRad());
+        imuAccumRad = 0;
+        prevRawYawRad = -Math.toRadians(ypr.getYaw());
+        legacy.reset(0);
         legacyPose.x = legacyPose.y = legacyPose.headingDeg = 0;
 
         csv.writeLine(String.format(Locale.US, "# --- lap %d started at %.1f s", trialNum + 1, runtime.seconds()));
@@ -373,8 +457,13 @@ public class CompareOdometryTest extends LinearOpMode {
             usedWheel = isUnhealthy(imuDeltaTheta, wheelDeltaTheta);
             double deltaTheta = usedWheel ? wheelDeltaTheta : imuDeltaTheta;
 
-            double deltaX = (deltaLeft + deltaRight) / 2;
-            double deltaY = deltaBack - PERP_POD_FWD_MM * deltaTheta;
+            // Forward motion of the tracking centre, not the pod midpoint: weight each pod by its
+            // distance from the other. Equals (left+right)/2 when the centre is mid-track
+            // (rightPod == T/2), which is the original Odometry math.
+            double track = OctoConfig.TRACK_WIDTH_MM;
+            double rightPod = rightPodMM();
+            double deltaX = ((track - rightPod) * deltaRight + rightPod * deltaLeft) / track;
+            double deltaY = deltaBack - perpPodFwdMM() * deltaTheta;
 
             // linearToArcDelta: a chord over this loop's rotation instead of the linear
             // approximation, same correction Odometry applies. No-op below ~0.006 deg/loop.

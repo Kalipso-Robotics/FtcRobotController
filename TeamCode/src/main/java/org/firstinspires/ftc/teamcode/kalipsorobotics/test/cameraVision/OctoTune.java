@@ -258,8 +258,9 @@ public class OctoTune extends LinearOpMode {
         float measuredX2 = isX ? (float) (rawX2() / actualMm) : 0f;
 
         // Same quantity via the board's reported pose. Equal to `measured` on a clean push;
-        // any gap is twist (or a TCP offset) leaking into the field-frame pose.
-        double reported = isX ? bx : by;
+        // any gap is twist (or a TCP offset) leaking into the field-frame pose. Board frame
+        // (y-LEFT), like the raw counts, so the two have the same sign.
+        double reported = isX ? bx : MIRROR * by;
         float  viaPose  = (float) ((isX ? cpmX : cpmY) * (reported / actualMm));
 
         double deviation = Math.abs(measured - OctoConfig.CPM_THEORETICAL)
@@ -297,12 +298,12 @@ public class OctoTune extends LinearOpMode {
         }
 
         telemetry.addLine(isX ? "1/2 PUSH X -- push the robot FORWARD"
-                              : "2/2 PUSH Y -- push the robot RIGHT");
+                              : "2/2 PUSH Y -- push the robot LEFT");
         telemetry.addLine("1. set the robot against the START stop");
         telemetry.addLine("2. press B to zero");
         telemetry.addLine("3. push slowly to the FAR stop, do not twist or lift");
         telemetry.addLine("4. press A to record");
-        if (!isX) telemetry.addLine("RIGHT, not left: +Y is out the robot's right side.");
+        if (!isX) telemetry.addLine("LEFT, not right: raw counts are in the board's y-LEFT frame.");
         telemetry.addLine();
         telemetry.addData("tape distance", "%8.1f in  (%.1f mm)", actualIn, actualMm);
         telemetry.addData("raw counts",    "%8d   <- THE measurement", raw);

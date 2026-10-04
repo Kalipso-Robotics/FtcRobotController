@@ -60,7 +60,7 @@ public final class OctoConfig {
     //   check 1 forward push: ch0 +8321, ch2 +8247, pose x +620mm
     //   check 2 sideways:     SKIPPED (still trusted from 2026-09-21, port 1 untouched)
     public static final boolean INVERT_X  = false;  // [2026-09-22] OctoStartup check 1
-    public static final boolean INVERT_Y  = true;   // [2026-09-22] OctoStartup check 3
+    public static final boolean INVERT_Y  = false;   // [2026-09-22] OctoStartup check 3
     public static final boolean INVERT_X2 = false;   // [2026-09-22] OctoStartup check 1
 
     /**
@@ -138,15 +138,20 @@ public final class OctoConfig {
     // reproduced to 1 mm only if it places each pod at MINUS these offsets (the javadoc's
     // centre-minus-offset reading); the other sign misses by 400 mm. So offset = -(pod position).
     // The old 2026-09-22 tape values (63.5, -152.4) had X short and Y's sign backwards.
-    public static final float TCP_OFFSET_MM_X   = 0f;  // SEED, new drivetrain: replace via OctoTune HEADING spin
-    public static final float TCP_OFFSET_MM_Y   = 0f;  // SEED, new drivetrain: replace via OctoTune HEADING spin
+    // [2026-10-03] new drivetrain, 2 OctoTune HEADING spins (CW 11:31, CCW 11:32) re-run through
+    // the fixed spinGeometry signs. Y pod 28.3 / 27.8 mm IN FRONT -> X = -28.0. Right pod radius
+    // 72.8 / 83.5 is pivot-dependent (hand wander), so Y = track/2, assuming centred X pods.
+    // [TAPE-VERIFY both] If a spin-in-place wanders MORE than with 0/0, negate both.
+    public static final float TCP_OFFSET_MM_X   = -28.0f;  // [2026-10-03] OctoTune HEADING spins
+    public static final float TCP_OFFSET_MM_Y   = 77.3f;   // [2026-10-03] track/2, tape-verify
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the
      * heading monitor, which is never fused into the pose. The board never sees this value.
      * Solved by OctoTune's HEADING spin (see spinGeometry), not tape.
      */
-    public static final float TRACK_WIDTH_MM = 300f;  // SEED, new drivetrain: replace via OctoTune HEADING spin
+    // [2026-10-03] 3 OctoTune HEADING spins: 154.66 (10/02 CCW), 154.27 (CW), 154.85 (CCW).
+    public static final float TRACK_WIDTH_MM = 154.6f;  // [2026-10-03] OctoTune HEADING spins
 
     public static final int VELOCITY_INTERVAL_MS = 25;
 
@@ -159,7 +164,8 @@ public final class OctoConfig {
     //
     // ONE 48 in lane along a field wall, used for both axes. The wall is the straightedge, so
     // twist error is ~0. X push: robot facing down the lane. Y push: set the robot down turned
-    // 90 so its RIGHT side faces down the lane and push it RIGHT. Needs ~66 in of wall
+    // 90 so its LEFT side faces down the lane and push it LEFT (ch1 counts up moving left,
+    // the board's +y). Needs ~66 in of wall
     // (48 in travel + 18 in robot), under 3 tiles.
     //
     // PUSH_*_IN is the robot's TRAVEL, not the tape stop-to-stop: put a start stop behind the
@@ -264,15 +270,22 @@ public final class OctoConfig {
      * along its own axis it sits, and nothing here uses those numbers.
      * Raw counts are in the BOARD's sign, so netDeg's sign picks the turn direction.
      *
+     * Derived, not fitted. Board frame is x fwd / y LEFT / CCW+. A point at (px, py) moves at
+     * w * (-py, px), so over theta: X pods roll -py*theta, the Y pod (counts up moving left)
+     * rolls +px*theta. A CCW spin drives the right pod forward and the left pod back.
+     * [2026-10-03] Signs were previously fitted to the 2026-09-26 logs, whose counts all had the
+     * opposite sign to netDeg (pod/heading mismatch on the old build); that gave -81.5/-73.2/
+     * -24.3/-154.66 on the 2026-10-02 spin instead of +81.5/+73.2/+24.3/+154.66.
+     *
      * If the spin centre drifts in the body frame, the individual radii shift (one pod's radius
      * grows by what the other's shrinks), but xPodRight + x2PodLeft does NOT: track width is
      * robust to where you pivot, the two TCP offsets are not.
      */
     public static double[] spinGeometry(int rawX, int rawX2, int rawY, double netDeg, int turns) {
         double rad = Math.signum(netDeg) * turns * 2 * Math.PI;
-        double right = -(rawX  / COUNTS_PER_MM_X)  / rad;
-        double left  =  (rawX2 / COUNTS_PER_MM_X2) / rad;
-        return new double[] { (rawY / COUNTS_PER_MM_Y) / rad, right, left, right + left };
+        double right =  (rawX  / COUNTS_PER_MM_X)  / rad;
+        double left  = -(rawX2 / COUNTS_PER_MM_X2) / rad;
+        return new double[] { -(rawY / COUNTS_PER_MM_Y) / rad, right, left, right + left };
     }
 
     /**
