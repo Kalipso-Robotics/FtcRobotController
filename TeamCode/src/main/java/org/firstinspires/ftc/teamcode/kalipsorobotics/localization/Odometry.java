@@ -24,7 +24,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import java.util.HashMap;
 
 
-
 public class Odometry {
 
     private long unhealthyCounter = 0;
@@ -69,6 +68,7 @@ public class Odometry {
     double backDistanceMM;
 
     long currentTime = SystemClock.elapsedRealtime();
+    long currentSampleNanos = System.nanoTime();
     double timeElapsedMS = (currentTime - prevTime);
 
 
@@ -374,6 +374,7 @@ public class Odometry {
         KLog.d("Odometry_IMU_Heading", () -> "Heading (rad): " + currentImuHeading + " (deg): " + Math.toDegrees(currentImuHeading));
         KLog.d("Odometry_IMU_Prev_Heading", () -> "PrevHeading (rad): " + prevImuHeading + " (deg): " + Math.toDegrees(prevImuHeading));
         currentTime = SystemClock.elapsedRealtime();
+        currentSampleNanos = System.nanoTime(); // same instant, in the camera's timebase
         timeElapsedMS = (currentTime - prevTime);
         prevPositionWheel = SharedData.getOdometryWheelPosition();
         prevPositionWheelIMU = SharedData.getOdometryWheelIMUPosition();
@@ -392,7 +393,7 @@ public class Odometry {
         KLog.d("Odometry_IMU_Position", () -> wheelIMUPosition.toString() + " UnhealthyCounter " + unhealthyCounter);
         KLog.d("Odometry_Wheel_Position", () -> wheelPosition.toString() + " UnhealthyCounter " + unhealthyCounter);
         prevImuHeading = currentImuHeading;
-        SharedData.setOdometryWheelIMUPosition(wheelIMUPosition);
+        SharedData.setOdometryWheelIMUPosition(wheelIMUPosition, currentSampleNanos);
         SharedData.setOdometryWheelPosition(wheelPosition);
 
         SharedData.setOdometryPositionMap(odometryPositionHistoryHashMap);

@@ -11,6 +11,7 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,32 +30,83 @@ import java.util.concurrent.TimeUnit;
  *   independently — one team member's auto code can read artifact blobs while
  *   another reads AprilTags from the same camera without any conflicts.
  *
- * USAGE:
- *   ArtifactDetectionProcessor artifacts = new ArtifactDetectionProcessor();
- *   AprilTagProcessor aprilTags = AprilTagProcessor.easyCreateWithDefaults();
+ * THE CAMERA IS AN ENTRY POINT:
+ *   Build it once, then hand each consumer the processor it needs. Nothing downstream
+ *   needs to know a camera exists — an action takes a processor, not a VisionManager.
  *
- *   VisionManager visionManager = new VisionManager.Builder(hardwareMap)
+ * USAGE:
+ *   ArtifactColorBlobDetectionProcessor artifacts = new ArtifactColorBlobDetectionProcessor();
+ *   KAprilTagProcessor aprilTags = new KAprilTagProcessor.Builder().build();
+ *
+ *   VisionManager camera = new VisionManager.Builder(hardwareMap)
  *       .addProcessor(artifacts)
  *       .addProcessor(aprilTags)
+ *       .streamImmediately()
  *       .build();
  *
+ *   // Relocalize off whatever tag is in view — the action owns the transform chain.
+ *   AprilTagDetectionAction relocalize =
+ *       new AprilTagDetectionAction(opModeUtilities, turret, tagId, alliance, aprilTags);
+ *
+ *   // Same frame, different question.
+ *   DetectedBlob ball = artifacts.getLargestPurpleBlob();
+ *
+ *   // Or look a processor up by type when you didn't keep the reference around:
+ *   KAprilTagProcessor tags = camera.get(KAprilTagProcessor.class);
+ *
  *   // Enable / disable at runtime — disabled processors cost zero CPU
- *   visionManager.enable(artifacts);
- *   visionManager.disable(artifacts);
+ *   camera.enable(artifacts);
+ *   camera.disable(artifacts);
  *
  *   // Pause / resume the entire camera (saves battery mid-auto)
- *   visionManager.pauseCamera();
- *   visionManager.resumeCamera();
+ *   camera.pauseCamera();
+ *   camera.resumeCamera();
  *
  *   // In OpMode.stop()
- *   visionManager.close();
+ *   camera.close();
  */
 public class VisionManager {
 
     private final VisionPortal portal;
+    private final List<VisionProcessor> processors;
 
-    private VisionManager(VisionPortal portal) {
+    private VisionManager(VisionPortal portal, List<VisionProcessor> processors) {
         this.portal = portal;
+        this.processors = processors;
+    }
+
+    // -------------------------------------------------------------------------
+    // Lookup — so one camera can hand its data to many consumers
+    // -------------------------------------------------------------------------
+
+    /**
+     * The registered processor of the given type, or null if none was added.
+     *
+     * Lets a subsystem ask the camera for what it needs instead of every OpMode
+     * threading processor references through its constructors:
+     *   KAprilTagProcessor tags = camera.get(KAprilTagProcessor.class);
+     *
+     * Throws if two processors of the same type are registered — that is a wiring
+     * mistake, and silently returning the first one would hide it.
+     */
+    public <T extends VisionProcessor> T get(Class<T> processorType) {
+        T found = null;
+        for (VisionProcessor processor : processors) {
+            if (processorType.isInstance(processor)) {
+                if (found != null) {
+                    throw new IllegalStateException(
+                            "More than one " + processorType.getSimpleName()
+                                    + " is registered — keep direct references instead of get()");
+                }
+                found = processorType.cast(processor);
+            }
+        }
+        return found;
+    }
+
+    /** Every processor on this camera, in registration order. */
+    public List<VisionProcessor> getProcessors() {
+        return Collections.unmodifiableList(processors);
     }
 
     // -------------------------------------------------------------------------
@@ -200,7 +252,7 @@ public class VisionManager {
                 portalBuilder.addProcessor(processor);
             }
 
-            return new VisionManager(portalBuilder.build());
+            return new VisionManager(portalBuilder.build(), new ArrayList<>(processors));
         }
     }
 }

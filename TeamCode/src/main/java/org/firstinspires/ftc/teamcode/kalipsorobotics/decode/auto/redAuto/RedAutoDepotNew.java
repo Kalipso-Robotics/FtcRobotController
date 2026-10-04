@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.DepotRoundTrip;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.RoundTripAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.DepotRoundTrip;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.RoundTripAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -123,9 +123,12 @@ public class RedAutoDepotNew extends KOpMode {
         //trip1.setDependentActions(trip0);
 //        trip1.getTrip().getPushBall().getRunUntilFullSpeed().setFullSpeedDurationMs(500);
         addPointsToTrip1SpikeMark();
+        KLog.d("ppDebugFollow", "added 3 points to trip1 move to depot"); //todo why is this not logging
+
         KLog.d("ppDebugFollow", "Added points to trip 1");
         trip1.getMoveToShoot().setShouldShooterStop(false);
         autoDepot.addAction(trip1);
+        lastTrip = trip1;
 
         // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
 
@@ -193,7 +196,14 @@ public class RedAutoDepotNew extends KOpMode {
         tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
         tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-        waitForStart();
+        // Custom wait-for-start: same idle-until-pressed behavior as waitForStart(), but also
+        // drives trip1's moveToDepot precompute (path injection/smoothing) each spin so that
+        // work is already done by the time the match starts, instead of stalling the robot's
+        // first move for however many ticks precompute needs after START is pressed.
+        while (!isStarted() && !isStopRequested()) {
+            trip1.getMoveToDepot().runPrecomputeStep();
+            idle();
+        }
         KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
@@ -253,6 +263,7 @@ public class RedAutoDepotNew extends KOpMode {
         trip1.getMoveToDepot().addPoint(650, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         trip1.getMoveToDepot().addPoint(500, 1050 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
 //        trip1.getMoveToDepot().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        KLog.d("ppdebug", "added 3 points to trip1 move to depot"); //todo why is this not logging
     }
 
     public DepotRoundTrip generateRetryTrip(DepotRoundTrip lastTrip, DepotTrips trip) {

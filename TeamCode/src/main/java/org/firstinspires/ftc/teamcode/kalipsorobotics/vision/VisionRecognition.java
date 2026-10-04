@@ -33,8 +33,21 @@ public class VisionRecognition {
     /** Pre-formatted label string ready for telemetry, e.g. "Purple 87%". */
     public final String formattedLabel;
 
+    /**
+     * Real-world diameter (mm) of the object this detection is, e.g. a game ball's known
+     * diameter. 0 = unknown/unset. Used by CameraIntrinsics.estimateBall to
+     * intersect the centre ray with the plane at the ball's own radius instead of the floor.
+     */
+    public final double objectDiameterMM;
+
     public VisionRecognition(String label, float confidence,
                              float left, float top, float right, float bottom) {
+        this(label, confidence, left, top, right, bottom, 0);
+    }
+
+    public VisionRecognition(String label, float confidence,
+                             float left, float top, float right, float bottom,
+                             double objectDiameterMM) {
         this.label      = label;
         this.confidence = confidence;
         this.left       = left;
@@ -43,10 +56,14 @@ public class VisionRecognition {
         this.bottom     = bottom;
         this.center     = new Point((left + right) / 2.0, (top + bottom) / 2.0);
         this.formattedLabel = String.format(Locale.US, "%s %.0f%%", label, confidence * 100);
+        this.objectDiameterMM = objectDiameterMM;
     }
 
     public float getWidth()  { return right - left; }
     public float getHeight() { return bottom - top; }
+
+    /** Half of objectDiameterMM, i.e. the ball's radius above the floor. 0 = unknown. */
+    public double getRadiusMM() { return objectDiameterMM / 2.0; }
 
     /** Bottom-middle pixel of the bounding box — used by CameraIntrinsics for floor projection. */
     public Point getBottomMiddlePixel() {

@@ -24,7 +24,11 @@ CHECKERBOARD = (9, 6)       # inner corners (cols, rows) — adjust to your boar
 SQUARE_SIZE  = 22.6         # physical square size in mm (or any unit you want)
 CAMERA_ID    = 0            # change if OV9782 is not /dev/video0
 MIN_SAMPLES  = 25           # minimum captures before calibration is allowed
-SAVE_PATH    = "../../../../../../../../../../../camera_intrinsics.json"
+# Must match what the robot pipeline runs: VisionManager / CameraIntrinsics.CAM_WIDTH x CAM_HEIGHT, MJPEG.
+# Intrinsics are only valid at the resolution they were calibrated at -- never rescale them.
+WIDTH, HEIGHT = 640, 480
+# Repo root, independent of the directory you run this from.
+SAVE_PATH    = Path(__file__).resolve().parents[11] / "camera_intrinsics.json"
 
 
 def build_object_points():
@@ -39,13 +43,14 @@ def draw_overlay(frame, msg, color=(0, 255, 0)):
     cv2.putText(frame, msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 
 
-def save_results(mtx, dist, img_size):
+def save_results(mtx, dist, img_size, rms):
     fx, fy = float(mtx[0, 0]), float(mtx[1, 1])
     cx, cy = float(mtx[0, 2]), float(mtx[1, 2])
     k1, k2, p1, p2, k3 = [float(v) for v in dist[0]]
 
     result = {
         "image_size": {"width": img_size[0], "height": img_size[1]},
+        "rms_reprojection_px": float(rms),
         "camera_matrix": {
             "fx": fx, "fy": fy,
             "cx": cx, "cy": cy,
@@ -74,10 +79,6 @@ def calibrate(obj_pts, img_pts, img_size):
     print(f"\nRunning calibration on {len(img_pts)} samples...")
     objp_template = build_object_points()
     obj_pts_full  = [objp_template] * len(img_pts)
-
-    flags = (
-        cv2.CALIB_RATIONAL_MODEL   # fit k1-k6 + tangential; drop if you want simple
-    )
 
     rms, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
         obj_pts_full, img_pts, img_size, None, None
@@ -125,9 +126,11 @@ def main():
     if not cap.isOpened():
         raise RuntimeError(f"Cannot open camera {CAMERA_ID}")
 
-    # OV9782 native resolution — change if you use a different mode
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 800)
+    # Same mode the robot streams. FOURCC first: some backends reset size on format change,
+    # and the same size in a different format can be a different sensor crop.
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  WIDTH)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT)
 
     objp      = build_object_points()
     img_pts   = []
@@ -153,6 +156,10 @@ def main():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         if img_size is None:
             img_size = (gray.shape[1], gray.shape[0])
+            if img_size != (WIDTH, HEIGHT):
+                raise RuntimeError(f"Camera delivered {img_size[0]}x{img_size[1]}, "
+                                   f"expected {WIDTH}x{HEIGHT} -- calibration would not match the robot")
+            print(f"  Frame size : {img_size[0]} x {img_size[1]} (MJPEG requested)")
 
         found, corners, src_used = find_board(gray)
 
@@ -203,7 +210,7 @@ def main():
                 print(f"  Need at least {MIN_SAMPLES} samples (have {len(img_pts)}).")
             else:
                 mtx, dist, rms = calibrate(None, img_pts, img_size)
-                save_results(mtx, dist, img_size)
+                save_results(mtx, dist, img_size, rms)
 
         elif key == ord('r'):  # reset
             img_pts.clear()

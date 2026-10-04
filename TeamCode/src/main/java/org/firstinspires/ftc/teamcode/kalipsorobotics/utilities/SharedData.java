@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.PoseHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
@@ -26,8 +27,25 @@ public class SharedData {
     public static Position peekOdometryWheelIMUPosition() {
         return odometryWheelIMUPosition;
     }
+    /** Records the pose as of now. Resets and externally-set poses enter the history as a jump. */
     public static void setOdometryWheelIMUPosition(Position position) {
+        setOdometryWheelIMUPosition(position, System.nanoTime());
+    }
+
+    /** sampleNanos is when the sensors behind this pose were read (System.nanoTime()). */
+    public static void setOdometryWheelIMUPosition(Position position, long sampleNanos) {
         odometryWheelIMUPosition.reset(position);
+        odometryWheelIMUPoseHistory.record(sampleNanos, position);
+    }
+
+    private static final PoseHistory odometryWheelIMUPoseHistory = new PoseHistory(128);
+
+    /**
+     * Pose at a past time, e.g. a camera frame's captureTimeNanos. Null if that is older than the
+     * history; callers should then fall back to the latest pose and log it.
+     */
+    public static Position getOdometryWheelIMUPositionAt(long nanos) {
+        return odometryWheelIMUPoseHistory.at(nanos);
     }
     public static void resetOdometryWheelIMUPosition() {
         odometryWheelIMUPosition.reset(new Position(0, 0, 0));

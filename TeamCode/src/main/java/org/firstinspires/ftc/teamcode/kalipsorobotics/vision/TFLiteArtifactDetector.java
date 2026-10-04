@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -47,8 +48,7 @@ import java.util.List;
  *     channels 4..end — per-class confidence scores [0, 1]
  *   For yolo11n at 640x640 with 1 class: shape is [1, 5, 8400].
  */
-public class
-TFLiteArtifactDetector extends KVisionProcessor<List<VisionRecognition>> {
+public class TFLiteArtifactDetector extends KVisionProcessor<List<VisionRecognition>> {
 
     private static final String MODEL_FILE = "best_float32.tflite";
     private static final String LABEL      = "Artifact";
@@ -148,7 +148,8 @@ TFLiteArtifactDetector extends KVisionProcessor<List<VisionRecognition>> {
             float right  = (centerX + width  / 2f) * frameWidth;
             float bottom = (centerY + height / 2f) * frameHeight;
 
-            candidates.add(new VisionRecognition(LABEL, bestScore, left, top, right, bottom));
+            candidates.add(new VisionRecognition(LABEL, bestScore, left, top, right, bottom,
+                    ArtifactColorBlobDetectionProcessor.ARTIFACT_DIAMETER_MM));
         }
 
         candidates.sort((first, second) -> Float.compare(second.confidence, first.confidence));

@@ -36,6 +36,24 @@ public class AprilTagConfig {
     /**
      * Builds the field's known tag layout from the current (dashboard-tunable) constants
      * above. Called fresh rather than cached statically so live tuning still takes effect.
+     *
+     * THIS LIST IS THE ROBOT'S PER-TAG TRANSFORM TABLE.
+     *   AprilTagDetectionAction relocalizes off ANY tag listed here, choosing the nearest
+     *   one it can see. Both goal tags are listed, so a red robot that can only see the
+     *   blue goal tag still knows where it is.
+     *
+     * ADDING A TAG (e.g. the DECODE obelisk, or a tag taped to a practice-field wall):
+     *   Measure the tag's field pose, then add one line:
+     *
+     *       .put(22, new Position(xMM, yMM, headingRad))
+     *
+     *   x/y are the tag centre in field coordinates (+X forward from init, +Y right) and
+     *   heading is the direction its printed face looks along, CCW radians. Nothing else
+     *   changes - the action picks it up automatically.
+     *
+     *   Leave a tag OUT until it is actually measured. An unlisted tag is detected and
+     *   ignored, which is safe; a tag listed at a guessed pose confidently relocalizes the
+     *   robot to the wrong place, which is not.
      */
     public static AprilTagFieldLayout buildFieldLayout() {
         return new AprilTagFieldLayout()

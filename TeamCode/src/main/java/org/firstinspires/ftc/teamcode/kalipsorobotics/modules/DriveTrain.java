@@ -72,7 +72,7 @@ public class DriveTrain {
 
         driveTrain.fLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         driveTrain.fRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        driveTrain.bLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        driveTrain.bLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         driveTrain.bRight.setDirection(DcMotorSimple.Direction.FORWARD);
 
         driveTrain.fLeft.setZeroPowerBehavior(DrivetrainConfig.zeroPowerBehavior);

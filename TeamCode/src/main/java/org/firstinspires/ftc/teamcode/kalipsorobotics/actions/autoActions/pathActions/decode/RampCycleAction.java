@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig.intakeFromRampTime;
 
