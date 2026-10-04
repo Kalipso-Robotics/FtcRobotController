@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.localization;
 
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -102,15 +102,15 @@ public final class OctoConfig {
     // [2026-09-22] re-measured via OctoTune after the INVERT_X/INVERT_X2 fix (see the booleans
     // above): raw 24408 / 1828.8mm, 0.6% off theoretical. COUNTS_PER_MM_X2 now tracks it
     // closely (13.344 vs 13.346), confirming port 2 is alive again -- it read ~0 before the fix.
-    public static final float COUNTS_PER_MM_X   = CPM_THEORETICAL;  // SEED, new drivetrain: replace via OctoTune
-    public static final float COUNTS_PER_MM_X2  = CPM_THEORETICAL;  // SEED, new drivetrain: replace via OctoTune
+    public static final float COUNTS_PER_MM_X   = 19.911f;  // [2026-10-03] OctoTune pushes, see note above
+    public static final float COUNTS_PER_MM_X2  = 19.911f;  // [2026-10-03] OctoTune pushes, see note above
     // [2026-09-22] Y re-measured after the L-test redo confirmed MIRROR_BOARD_FRAME/INVERT_Y
     // unchanged (still self-consistent, y-LEFT/CCW+): raw 16110 / 1219.2mm, 0.4% off theoretical.
-    public static final float COUNTS_PER_MM_Y   = CPM_THEORETICAL;  // SEED, new drivetrain: replace via OctoTune
+    public static final float COUNTS_PER_MM_Y   = 19.911f;  // [2026-10-03] OctoTune pushes, see note above
     // [2026-09-26] HEADING re-measured with the net-signed OctoTune fix, 10 turns each way:
     // CW netDeg 3586.1 -> 1.0203, CCW netDeg -3587.7 -> 1.0199, averaged. (The 2026-09-22
     // value 1.0164 came from the old abs-sum measurement, which counted wobble as rotation.)
-    public static final float IMU_HEADING_SCALAR = 1.0201f;      // [2026-09-26] OctoTune HEADING CW+CCW avg
+    public static final float IMU_HEADING_SCALAR = 1.0206f;      // [2026-10-03] 3 spins (CCW,CW,CCW) 1.02050/1.02073/1.02051, seed was 1.0201
     /**
      * Tracking-centre offsets, BOARD frame (y-LEFT while MIRROR_BOARD_FRAME is true).
      *
@@ -142,7 +142,7 @@ public final class OctoConfig {
     // the fixed spinGeometry signs. Y pod 28.3 / 27.8 mm IN FRONT -> X = -28.0. Right pod radius
     // 72.8 / 83.5 is pivot-dependent (hand wander), so Y = track/2, assuming centred X pods.
     // [TAPE-VERIFY both] If a spin-in-place wanders MORE than with 0/0, negate both.
-    public static final float TCP_OFFSET_MM_X   = -28.0f;  // [2026-10-03] OctoTune HEADING spins
+    public static final float TCP_OFFSET_MM_X   = -29.2f;  // [2026-10-03] mean of 5 spins (-28.3,-27.8,-31.3,-31.0,-27.7)
     public static final float TCP_OFFSET_MM_Y   = 77.3f;   // [2026-10-03] track/2, tape-verify
 
     /**
@@ -151,7 +151,7 @@ public final class OctoConfig {
      * Solved by OctoTune's HEADING spin (see spinGeometry), not tape.
      */
     // [2026-10-03] 3 OctoTune HEADING spins: 154.66 (10/02 CCW), 154.27 (CW), 154.85 (CCW).
-    public static final float TRACK_WIDTH_MM = 154.6f;  // [2026-10-03] OctoTune HEADING spins
+    public static final float TRACK_WIDTH_MM = 154.5f;  // [2026-10-03] mean of 6 spins (154.66,154.27,154.85,154.37,154.61,154.51)
 
     public static final int VELOCITY_INTERVAL_MS = 25;
 
@@ -189,21 +189,6 @@ public final class OctoConfig {
     public static final double TOL_SPIN_DEG    = 2.0;
     /** IMU vs pod-differential heading. Wider than TOL_SPIN_DEG: the monitor is itself noisy. */
     public static final double TOL_DISAGREE_DEG = 4.0;
-
-    // --------------------------------------------------------------- OctoTest tolerances
-    //
-    // Closure after a free drive. Deliberately loose: OctoTest is an open-ended drive and the
-    // error it accumulates scales with how far and how much you turned, not with a fixed budget.
-
-    public static final double TOL_TEST_CLOSURE_MM  = 50.0;
-    public static final double TOL_TEST_HEADING_DEG = 3.0;
-
-    /**
-     * A sample period above this means the loop stalled (GC, I2C retry, telemetry flush).
-     * The heading unwrapper assumes it sees every half-turn; a long gap breaks that
-     * assumption, so stalls are flagged rather than silently trusted.
-     */
-    public static final double LOOP_STALL_MS = 100.0;
 
     /** Hard ceiling on IMU calibration. Past this something is wrong; say so, do not hang. */
     public static final double IMU_CALIBRATE_TIMEOUT_S = 15.0;
@@ -288,19 +273,6 @@ public final class OctoConfig {
         return new double[] { -(rawY / COUNTS_PER_MM_Y) / rad, right, left, right + left };
     }
 
-    /**
-     * One loop's worth of heading change, wrapped to [-pi, pi]. Shared by OctoTune and OctoTest,
-     * which both sum this to track total rotation: whether the board's heading_rad accumulates
-     * or wraps at +/-pi is undocumented, and summing bounded deltas is correct either way,
-     * provided no single loop iteration crosses whichever wrap point is real.
-     */
-    public static double wrapDeltaRad(double rawHeadingRad, double lastRawHeadingRad) {
-        double d = rawHeadingRad - lastRawHeadingRad;
-        while (d >  Math.PI) d -= 2 * Math.PI;
-        while (d < -Math.PI) d += 2 * Math.PI;
-        return d;
-    }
-
     // ----------------------------------------------------------------------- board setup
 
     /**
@@ -369,6 +341,28 @@ public final class OctoConfig {
      *    several consecutive polls.
      */
     public static boolean calibrateImu(OctoQuad q, LinearOpMode op) {
+        String error = calibrateImu(q, op::isStopRequested, (status, elapsedS) -> {
+            op.telemetry.addLine("*** DO NOT TOUCH THE ROBOT -- calibrating IMU ***");
+            op.telemetry.addData("elapsed", "%.1f s", elapsedS);
+            op.telemetry.addData("status",  status);
+            op.telemetry.addData("axis",    q.getLocalizerHeadingAxisChoice());
+            op.telemetry.update();
+        });
+        if (error == null) {
+            op.telemetry.addLine("IMU calibrated, localizer RUNNING.");
+        } else {
+            op.telemetry.addLine("*** " + error + " ***");
+        }
+        op.telemetry.update();
+        return error == null;
+    }
+
+    /**
+     * calibrateImu without an OpMode, for OctoQuadOdo. Returns null on success, else why it failed.
+     * onPoll runs once per poll (status, seconds elapsed) for telemetry; may be null.
+     */
+    public static String calibrateImu(OctoQuad q, java.util.function.BooleanSupplier stopRequested,
+                                      java.util.function.BiConsumer<OctoQuad.LocalizerStatus, Double> onPoll) {
         final double SETTLE_DWELL_S = 0.25;
         final int    CONSECUTIVE_RUNNING = 3;
 
@@ -377,15 +371,11 @@ public final class OctoConfig {
         boolean sawBusy = false;
         int runningStreak = 0;
 
-        while (!op.isStopRequested()) {
+        while (!stopRequested.getAsBoolean()) {
             OctoQuad.LocalizerStatus status = q.getLocalizerStatus();
 
             if (status == OctoQuad.LocalizerStatus.FAULT_NO_IMU) {
-                op.telemetry.addLine("*** FAULT_NO_IMU -- the board cannot see its IMU. ***");
-                op.telemetry.addLine("Nothing downstream of this is meaningful. Stop and");
-                op.telemetry.addLine("check the board before running any other Octo OpMode.");
-                op.telemetry.update();
-                return false;
+                return "FAULT_NO_IMU -- the board cannot see its IMU. Check the board before running any Octo OpMode.";
             }
 
             if (status != OctoQuad.LocalizerStatus.RUNNING) {
@@ -393,29 +383,23 @@ public final class OctoConfig {
                 runningStreak = 0;
             } else if (sawBusy || t.seconds() > SETTLE_DWELL_S) {
                 runningStreak++;
-                if (runningStreak >= CONSECUTIVE_RUNNING) {
-                    op.telemetry.addLine("IMU calibrated, localizer RUNNING.");
-                    op.telemetry.update();
-                    return true;
-                }
+                if (runningStreak >= CONSECUTIVE_RUNNING) return null;
             }
 
             if (t.seconds() > IMU_CALIBRATE_TIMEOUT_S) {
-                op.telemetry.addLine("*** IMU calibration TIMED OUT ***");
-                op.telemetry.addData("last status", status);
-                op.telemetry.addLine("Was the robot moved? Recalibration needs it dead still.");
-                op.telemetry.update();
-                return false;
+                return "IMU calibration TIMED OUT (last status " + status
+                        + "). Was the robot moved? Recalibration needs it dead still.";
             }
 
-            op.telemetry.addLine("*** DO NOT TOUCH THE ROBOT -- calibrating IMU ***");
-            op.telemetry.addData("elapsed", "%.1f s", t.seconds());
-            op.telemetry.addData("status",  status);
-            op.telemetry.addData("axis",    q.getLocalizerHeadingAxisChoice());
-            op.telemetry.update();
-            op.sleep(20);
+            if (onPoll != null) onPoll.accept(status, t.seconds());
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return "interrupted while calibrating";
+            }
         }
-        return false;
+        return "stop requested while calibrating";
     }
 
     // ------------------------------------------------------------- shared OpMode UI/autosave

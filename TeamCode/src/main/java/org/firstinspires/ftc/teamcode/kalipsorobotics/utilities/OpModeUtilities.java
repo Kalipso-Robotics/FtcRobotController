@@ -4,7 +4,9 @@ import android.os.Process;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryLogger;
+
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -107,6 +109,34 @@ public class OpModeUtilities {
                 KLog.d("ExecutorService_Run", () -> "Finally. Closing odometry logger");
                 odometryLogger.close();
                 KLog.d("ExecutorService_Run", () -> "Odometry logger closed successfully");
+            }
+        });
+    }
+
+    /**
+     * Runs OctoQuad odometry in a separate thread, the same way as the Odometry overload. <p>
+     * No clearBulkCache: the OctoQuad is read over its own I2C, not the hub's bulk cache.
+     * No OdometryLogger: it needs a WHEEL history OctoQuadOdo doesn't have, so it skipped every
+     * tick and only spammed KLog. Use OctoQuadOdo.getLastTick() for per-tick diagnostics.
+     */
+    public static void runOdometryExecutorService(ExecutorService executorService, OctoQuadOdo octoQuadOdo) {
+        KLog.d("ExecutorService_Run", () -> "runOdometryExecutorService(OctoQuadOdo) called");
+
+        executorService.submit(() -> {
+            try {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        if (octoQuadOdo.getOpModeUtilities().getOpMode().opModeIsActive()) {
+                            octoQuadOdo.updateAll();
+                        }
+                    } catch (Exception e) {
+                        KLog.e("ExecutorService_Run", "Exception in octoquad update loop", e);
+                        // Continue running despite errors in individual updates
+                    }
+                }
+            } finally {
+                KLog.d("ExecutorService_Run", () -> "Octoquad executor finished");
             }
         });
     }

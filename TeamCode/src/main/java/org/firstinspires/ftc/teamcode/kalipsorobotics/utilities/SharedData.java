@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
-import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
@@ -14,35 +13,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 import java.util.HashMap;
 
 public class SharedData {
-
-    private static final Position octoquadPosition = new Position(0,0,0);
-
-    public static Position getOctoquadPosition() {
-        return new Position(octoquadPosition);
-    }
-
-    public static Position peekOctoquadPosition() {
-        return octoquadPosition;
-    }
-
-    public static void setOctoquadPosition(Position position) {
-        setOctoquadPosition(position, System.nanoTime());
-    }
-
-    public static void setOctoquadPosition(Position position, long sampleNanos) {
-        octoquadPosition.reset(position);
-        octoquadPoseHistory.record(sampleNanos, position);
-    }
-
-    private static final PoseHistory octoquadPoseHistory = new PoseHistory(128);
-
-    public static Position getOctoquadPoseAt(long nanos) {
-        return odometryWheelIMUPoseHistory.at(nanos);
-    }
-
-    public static void resetOctoquadPosition() {
-        odometryWheelIMUPosition.reset(new Position(0, 0, 0));
-    }
 
     private static final Position odometryWheelIMUPosition = new Position(0, 0, 0);
 

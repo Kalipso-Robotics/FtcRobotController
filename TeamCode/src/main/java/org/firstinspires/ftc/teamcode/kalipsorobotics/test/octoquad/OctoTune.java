@@ -1,5 +1,7 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.test.octoquad;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -25,7 +27,7 @@ import java.util.Locale;
  * WHAT THIS DELIBERATELY DOES NOT DO, and where those numbers come from instead:
  *
  *   static drift, L-loop these measured nothing that gets pasted anywhere. Drift is a mounting
- *                        problem you see in OctoTest, and out-and-back CANCELS scale error, so
+ *                        problem you see in a free drive, and out-and-back CANCELS scale error, so
  *                        the loop was never a scale check to begin with.
  *
  * The board consumes exactly five floats (OctoConfig.apply -> setAllLocalizerParameters).
@@ -79,7 +81,7 @@ import java.util.Locale;
  * Every accepted OR skipped stage overwrites OctoTune_LATEST.txt, next to the timestamped CSV,
  * with the current results and paste block -- autosaved, no need to copy anything off the
  * screen by hand. Nothing here is written to the board or to flash; that file is the output,
- * source is the only source of truth. Paste, rebuild, then run OctoTest.
+ * source is the only source of truth. Paste, rebuild, then run CompareOdometryTest.
  *   adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs ~/
  */
 @TeleOp(name = "Octo 2 Tune", group = "Calibration")
@@ -458,7 +460,7 @@ public class OctoTune extends LinearOpMode {
         for (String s : pasteBlock()) telemetry.addLine(s);
         telemetry.addLine();
         telemetry.addLine("Paste into OctoConfig. Offsets are from the LAST spin: do one CW and");
-        telemetry.addLine("one CCW and average them. Then rebuild and run OctoTest.");
+        telemetry.addLine("one CCW and average them. Then rebuild and run CompareOdometryTest.");
         telemetry.addData("bad reads", "%d", badReads);
         telemetry.addLine("CSV: " + csv.getPath());
         telemetry.addLine("Autosaved: OctoTune_LATEST.txt (same folder)");
@@ -529,7 +531,7 @@ public class OctoTune extends LinearOpMode {
     }
 
     /**
-     * Unwraps heading the same way OctoTest does, via OctoConfig.wrapDeltaRad. Whether the
+     * Unwraps heading the same way CompareOdometryTest does, via MathFunctions.angleWrapRad. Whether the
      * board's heading_rad wraps at +/-pi or at its own +/-6.5535 rad wire range (int16 / 5000)
      * is undocumented, so summing bounded per-loop deltas is correct either way -- provided no
      * single loop iteration crosses whichever wrap point is real. maxAbsHeadingRad exists to
@@ -546,7 +548,7 @@ public class OctoTune extends LinearOpMode {
             headingUnwrapSeeded = true;
             return;
         }
-        double d = OctoConfig.wrapDeltaRad(rawHeadingRad, lastRawHeadingRad);
+        double d = MathFunctions.angleWrapRad(rawHeadingRad - lastRawHeadingRad);
         lastRawHeadingRad = rawHeadingRad;
         netDeg += Math.toDegrees(d);
         turnedDeg += Math.abs(Math.toDegrees(d));

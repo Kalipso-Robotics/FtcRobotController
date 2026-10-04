@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.test.octoquad;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoConfig;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

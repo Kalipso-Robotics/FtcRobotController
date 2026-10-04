@@ -24,7 +24,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import java.util.HashMap;
 
 
-
 public class Odometry {
 
     private long unhealthyCounter = 0;

@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.test.cameraVision;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.test.octoquad;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoConfig;
 import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -315,7 +316,7 @@ public class CompareOdometryTest extends LinearOpMode {
                 Math.hypot(legacyPose.x - CHECK_X_MM, legacyPose.y - CHECK_Y_MM)));
     }
 
-    /** Path length and total angle turned this lap, from the octo pose (same as OctoTest). */
+    /** Path length and total angle turned this lap, from the octo pose (same as OctoQuadOdo). */
     private void updateOdometer(double rawHeadingRad) {
         if (prevSeeded) {
             pathMm += Math.hypot(octoPose.x - prevX, octoPose.y - prevY);
@@ -329,7 +330,7 @@ public class CompareOdometryTest extends LinearOpMode {
             headingSeeded = true;
             return;
         }
-        double d = OctoConfig.wrapDeltaRad(rawHeadingRad, lastRawHeadingRad);
+        double d = MathFunctions.angleWrapRad(rawHeadingRad - lastRawHeadingRad);
         lastRawHeadingRad = rawHeadingRad;
         turnedDeg += Math.abs(Math.toDegrees(d));
     }
