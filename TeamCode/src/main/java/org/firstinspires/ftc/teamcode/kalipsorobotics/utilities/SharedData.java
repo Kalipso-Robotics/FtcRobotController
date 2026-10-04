@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
-
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
@@ -10,7 +10,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class SharedData {
 
@@ -160,5 +162,30 @@ public class SharedData {
         } else {
             unfilteredLimelightGlobalPos.reset(new Position(0,0,0));
         }
+    }
+
+    private static volatile List<VisionRecognition> pollenNectarDetections = new ArrayList<>();
+    private static volatile long pollenNectarDetectionsTimeMs = 0;
+
+
+    public static void setPollenNectarDetections(List<VisionRecognition> pollenNectarDetections) {
+        SharedData.pollenNectarDetections = new ArrayList<>(pollenNectarDetections);
+        pollenNectarDetectionsTimeMs = System.currentTimeMillis();
+    }
+
+
+    public static List<VisionRecognition> getPollenNectarDetections() {
+        return new ArrayList<>(pollenNectarDetections);
+    }
+
+
+    public static long getPollenNectarDetectionsTimeMs() {
+        return pollenNectarDetectionsTimeMs;
+    }
+
+
+    public static void resetPollenNectarDetections() {
+        pollenNectarDetections = new ArrayList<>();
+        pollenNectarDetectionsTimeMs = 0;
     }
 }
