@@ -69,6 +69,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private double filteredVelocityMmPerS = 0;
     private final double FILTER_SMOOTHING_FACTOR = 0.8; // A value between 0.0 and 1.0
     private static final double VELOCITY_DEADBAND = 5.0;
+    // Don't declare done while still moving faster than this, otherwise setPower(0) at the
+    // end point leaves the robot coasting/skidding past it.
+    private static final double FINISH_MAX_VELOCITY_MM_PER_S = 150.0;
 
     List<Position> injectedPathPoints = new ArrayList<>();
     private Path injectSourcePath = null; // robot start + pathPoints, captured when injection begins
@@ -123,13 +126,13 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private final double PATH_MAX_VELOCITY = 2200; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
     private final double MAX_ACCELERATION = 6220; // mm/s^2, maximum acceleration of the robot, 6000
-    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 3; // mm/s^2
+    private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 1.5; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
     private final double MAX_ANGULAR_VELOCITY = 12.8; //rad/s, maximum turning velocity of the robot 5.5
 
     private final double WHEELBASE_LENGTH = 232.414; //front wheel to back wheel
     private final double TRACK_WIDTH = 276.58; //side to side
-    private final double K_p = 0.000021; // 0.00002
+    private final double K_p = 0.00007; // 0.000021, 0.00002
     private final double K_a = 0.00001; // 0.001
     private final double K_v = 0.00036; // 0.00036 0.00225
     private final double K = 2.5; //based on how slow you want the robot to go around turns, 1000
@@ -644,7 +647,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             KLog.e("ppDebug", "at final angle " + atFinalAngle);
 
 
-            if (hasReachedEndOfPath && atFinalPosition && atFinalAngle) {
+            boolean slowEnough = Math.abs(filteredVelocityMmPerS) < FINISH_MAX_VELOCITY_MM_PER_S;
+            if (hasReachedEndOfPath && atFinalPosition && atFinalAngle && slowEnough) {
                 finishedMoving();
                 return;
             }
@@ -715,7 +719,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                         distanceToEnd, lastSearchRadius));
 
                     if (Math.abs(angleError) <= Math.toRadians(finalAngleLockingThreshholdDeg) &&
-                            distanceToEnd < lastSearchRadius) {
+                            distanceToEnd < lastSearchRadius
+                            && Math.abs(filteredVelocityMmPerS) < FINISH_MAX_VELOCITY_MM_PER_S) {
                         KLog.d("ppDebugFollow", "FINISHING MOVEMENT - within thresholds");
                         finishedMoving();
                     } else {
@@ -1305,7 +1310,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         double d = path.getPoint(positionIndex + 1).getDistanceAlongPath() - path.getPoint(positionIndex).getDistanceAlongPath();
 
         // calculate max velocity (v_f) at the current point to be able to decelerate to v_next over the distance d
-        double v_f = Math.sqrt(MathFunctions.square(v_next) + (2 * MAX_ACCELERATION * d));
+        double v_f = Math.sqrt(MathFunctions.square(v_next) + (2 * MAX_ACCELERATION_FINAL * d));
 
         KLog.d("ppDebug", () -> "velocity of " + positionIndex + " set to " + (Math.min(v_f, calculateVelocity(path, positionIndex)) == v_f ? "v_f" : "calculated vel"));
         //robot velocity at the current point is the minimum of max velocity allowed by the path's curvature, and max velocity allowed by deceleration to the next point.
@@ -1385,7 +1390,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         // Give filteredVelocityMmPerS the same sign as wheelVelocity so the K_p error
         // reflects speed difference rather than doubling when direction is reversed.
         double signedFiltered = Math.copySign(filteredVelocityMmPerS, wheelVelocity);
-        return (K_p * (wheelVelocity - signedFiltered) + K_v * wheelVelocity + K_a * Math.signum(wheelVelocity) * Math.abs(acceleration));
+        return (K_p * (wheelVelocity - signedFiltered) + K_v * wheelVelocity + K_a * Math.signum(wheelVelocity) * acceleration);
     }
 
     public boolean isWithinDistancePoint(int index, double distanceThreshold) {

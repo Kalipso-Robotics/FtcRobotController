@@ -47,7 +47,7 @@ public class TestPP extends KOpMode {
         test.addPoint(0,0,0);
 //        test.addPoint(609.6,0,0);
 //        test.addPoint(0,0,0);
-        test.addPoint(609.6,0,90);
+        test.addPoint(609.6,0,0);
 //        test.addPoint(609.6,0,180);
 //        test.addPoint(0,0,0);
 //        test.addPoint(400,800,180);
