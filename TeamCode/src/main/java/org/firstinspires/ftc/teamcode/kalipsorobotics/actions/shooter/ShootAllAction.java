@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
@@ -163,7 +164,7 @@ public class ShootAllAction extends KActionSet {
                 (turretAutoAlignTeleop.isWithinRange()),
                 (shooterRun.getTargetRPS() - shooter.getRPS())));
         if (pushBall.getOpenStopper().getIsDone()) {
-            if (!TurretConfig.shouldShootOnTheMoveTurret) {
+            if (!SOTM.isActive()) {
                 turretAutoAlignTeleop.stop();
             }
         }

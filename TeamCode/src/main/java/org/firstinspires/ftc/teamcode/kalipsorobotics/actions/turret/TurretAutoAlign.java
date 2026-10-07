@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -91,6 +92,10 @@ public class TurretAutoAlign extends Action {
         updateAngularVelocity();
 
         targetTicks = calculateTargetTicks(targetPoint, SharedData.getOdometryWheelIMUPosition());
+        SOTM.Solution sotm = SOTM.usableSolution();
+        if (sotm != null) {
+            targetTicks = calculateTargetTicks(sotm.aimHeadingRad, sotm.releaseHeadingRad, 0);
+        }
         KLog.d("turret", () -> "turret offset value " + TurretConfig.TICKS_INIT_OFFSET);
 
 
@@ -113,31 +118,16 @@ public class TurretAutoAlign extends Action {
 
 
     public static double calculateTargetTicks(Point targetPoint, Position currentPosition, int ticksOffset) {
-
-        double currentX = currentPosition.getX();
-        double currentY = currentPosition.getY();
-
-        double yTargetGoal = targetPoint.getY() - currentY;
-        double xTargetGoal = targetPoint.getX() - currentX;
         KLog.d("turret_angle_target", () -> "target point " + targetPoint);
+        double angleTargetRadian = Math.atan2(targetPoint.getY() - currentPosition.getY(), targetPoint.getX() - currentPosition.getX());
+        return calculateTargetTicks(angleTargetRadian, currentPosition.getTheta(), ticksOffset);
+    }
 
-        double angleTargetRadian;
-
-        angleTargetRadian = Math.atan2(yTargetGoal, xTargetGoal);
-
-        double currentRobotAngleRadian = currentPosition.getTheta();
-        double reverseTurretAngleRadian = -currentRobotAngleRadian;
-
-        double totalTurretAngle = angleTargetRadian + reverseTurretAngleRadian;
-
-        double ticksOffsetRad = ticksOffset / TurretConfig.TICKS_PER_RADIAN;
-        totalTurretAngle += ticksOffsetRad;
-
+    /** Field aim angle and robot heading to turret ticks: (aim - heading + offset), wrapped. */
+    public static double calculateTargetTicks(double aimRad, double headingRad, int ticksOffset) {
+        double totalTurretAngle = aimRad - headingRad + ticksOffset / TurretConfig.TICKS_PER_RADIAN;
         double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
-
-        double finalTotalTurretAngle = totalTurretAngle;
-        KLog.d("turret_angle", () -> "total turret angle " + finalTotalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
-
+        KLog.d("turret_angle", () -> "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
         return computeTicksFromAngleRad(totalTurretAngleWrap);
     }
 

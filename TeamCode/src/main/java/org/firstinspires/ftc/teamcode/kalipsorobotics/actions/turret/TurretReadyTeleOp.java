@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
@@ -41,13 +42,13 @@ public class TurretReadyTeleOp extends Action {
 
         if (turretAutoAlignTeleop.isWithinRange()) {
             isDone = true;
-            if (!TurretConfig.shouldShootOnTheMoveTurret) {
+            if (!SOTM.isActive()) {
                 turretAutoAlignTeleop.stop();
             }
             KLog.d(this.getName(), () -> "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
                     "Target Ticks: " + turretAutoAlignTeleop.getTargetTicks());
             KLog.d("ActionTime", () -> this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
-        } else if (TurretConfig.shouldShootOnTheMoveTurret) {
+        } else if (SOTM.isActive()) {
             isDone = true;
         }
     }

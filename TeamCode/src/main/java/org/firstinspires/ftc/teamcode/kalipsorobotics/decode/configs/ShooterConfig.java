@@ -18,9 +18,7 @@ public class ShooterConfig {
 
     public static double accelBoostDeltaRPSThreshold = 3;
     public static double decelBoostDeltaRPSThreshold = -3;
-    public static double SHOOTER_LOOKUP_TIME = 50;
     public static boolean hoodFlipDirection = true;
-    public static boolean shouldShootOnTheMoveRPS = false;
 
     public static double AUTO_SHOOTER_READY_TIMEOUT_MS = 3500;
 }

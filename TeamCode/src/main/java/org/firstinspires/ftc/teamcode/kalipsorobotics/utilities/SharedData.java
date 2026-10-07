@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +49,32 @@ public class SharedData {
     public static Position getOdometryWheelIMUPositionAt(long nanos) {
         return odometryWheelIMUPoseHistory.at(nanos);
     }
+    /** Fitted v/a over the last windowMs of odometry. Null if no samples yet. */
+    public static PoseHistory.Motion getOdometryWheelIMUMotion(long windowMs) {
+        return odometryWheelIMUPoseHistory.fit(windowMs * 1_000_000L);
+    }
+
+    /** Blocks until odometry records a sample newer than afterNanos, or timeoutMs passes. */
+    public static boolean awaitOdometrySampleAfter(long afterNanos, long timeoutMs) throws InterruptedException {
+        return odometryWheelIMUPoseHistory.awaitNewer(afterNanos, timeoutMs);
+    }
+
+    private static volatile SOTM.Solution sotmSolution = null;
+    private static volatile int sotmActiveGoal = 0;
+
+    public static SOTM.Solution getSOTMSolution() {
+        return sotmSolution;
+    }
+    public static void setSOTMSolution(SOTM.Solution solution) {
+        sotmSolution = solution;
+    }
+    public static int getSOTMActiveGoal() {
+        return sotmActiveGoal;
+    }
+    public static void setSOTMActiveGoal(int goalIndex) {
+        sotmActiveGoal = goalIndex;
+    }
+
     public static void resetOdometryWheelIMUPosition() {
         odometryWheelIMUPosition.reset(new Position(0, 0, 0));
     }

@@ -24,6 +24,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometry
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
@@ -31,6 +32,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -58,6 +60,7 @@ public class TeleOp extends KOpMode {
     private Stopper stopper = null;
     private Tilter tilter = null;
     private Odometry odometry = null;
+    private SOTM sotm = null;
 
     ShootAllAction shootAllAction = null;
 
@@ -105,7 +108,6 @@ public class TeleOp extends KOpMode {
     private boolean tiltDownPressed;
     private boolean tiltUpPressed;
     private boolean enableLimelightZeroing = true;
-    private boolean toggleSOTM = true;
 
     private int shootCount = 0;
     private double lastLoopTime = 0;
@@ -119,8 +121,6 @@ public class TeleOp extends KOpMode {
         TurretConfig.kD = TurretConfig.kD_teleop;
         TurretConfig.kF = TurretConfig.kF_teleop;
         TurretConfig.kS = TurretConfig.kS_teleop;
-        shouldShootOnTheMoveRPS = true;
-        shouldShootOnTheMoveTurret = true;
     }
 
     @Override
@@ -154,6 +154,8 @@ public class TeleOp extends KOpMode {
 
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
         OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
+        sotm = new SOTM(opModeUtilities);
+        if (SOTMConfig.enabled) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
         driveAction = USE_FIELD_ORIENTED_DRIVE
                 ? new FieldOrientedDriveAction(driveTrain, imuModule)
                 : new DriveAction(driveTrain);
@@ -197,6 +199,8 @@ public class TeleOp extends KOpMode {
         KLog.d("TeleOp-Run", "closeStopper created successfully");
 
         while (opModeIsActive()) {
+            // Dashboard may flip SOTM on mid-match; the thread exits itself when it's turned off.
+            if (SOTMConfig.enabled && !sotm.isRunning()) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
             opModeUtilities.clearBulkCache();
             lastLoopTime = loopTimer.milliseconds();
             loopTimer.reset();
@@ -250,8 +254,6 @@ public class TeleOp extends KOpMode {
             KLog.d("TeleOp_Button", () -> "enableLimelightAlignTurret: " + enableLimelightAlignTurret);
             enableOdometryAlignTurret = !kGamePad2.isToggleB();
             KLog.d("TeleOp_Button", () -> "enableOdometryAlignTurret: " + enableOdometryAlignTurret);
-            toggleSOTM = kGamePad2.isLeftBumperPressed() && kGamePad2.isRightBumperFirstPressed();
-            KLog.d("TeleOp_Button", () -> "toggleSOTM: " + toggleSOTM);
 
 
 
@@ -473,12 +475,6 @@ public class TeleOp extends KOpMode {
             hoodPosition = KServo.clampServoPos(shooter.getHoodPosition() - 0.02);
             shooter.getHood().setPosition(hoodPosition);
             KLog.d("TeleOp_Shooting_Hood_offset", () -> "Decrement Shooter hood offset: " + ShooterInterpolationConfig.hoodOffset);
-        }
-
-        if (toggleSOTM) {
-            shouldShootOnTheMoveRPS = !shouldShootOnTheMoveRPS;
-            shouldShootOnTheMoveTurret = ! shouldShootOnTheMoveTurret;
-
         }
 
         // Priority 1- Stop shooter

@@ -75,4 +75,21 @@ public class PoseHistoryTest {
         assertEquals(1, h.at(100).getX(), TOL);
         assertNotSame(h.at(100), h.at(100));
     }
+
+    @Test
+    public void fit_recoversVelocityAndAcceleration() {
+        PoseHistory h = new PoseHistory(32);
+        double v0 = 0.5, a = 0.002; // mm/ms, mm/ms^2
+        for (int k = 0; k <= 8; k++) {
+            double tMs = k * 8;
+            h.record(1_000_000_000L + (long) (tMs * 1e6),
+                    new Position(100 + v0 * tMs + 0.5 * a * tMs * tMs, -50 + 2 * v0 * tMs, 0.1 + 0.001 * tMs));
+        }
+        PoseHistory.Motion m = h.fit(60_000_000L);
+        double sMs = 64; // newest time
+        assertEquals(v0 + a * sMs, m.vx, 1e-6);
+        assertEquals(a, m.ax, 1e-6);
+        assertEquals(2 * v0, m.vy, 1e-6);
+        assertEquals(0.001, m.omega, 1e-9);
+    }
 }

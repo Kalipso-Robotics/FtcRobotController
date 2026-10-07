@@ -23,6 +23,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected OpModeUtilities opModeUtilities;
     protected ExecutorService odoExecutorService;
     protected ExecutorService aprilTagExecutorService;
+    protected ExecutorService sotmExecutorService;
     protected KGamePad kGamePad1;
     protected KGamePad kGamePad2;
     protected AllianceColor allianceColor = AllianceColor.RED; //defaults to red
@@ -60,6 +61,7 @@ public abstract class KOpMode extends LinearOpMode {
 
         odoExecutorService = Executors.newSingleThreadExecutor();
         aprilTagExecutorService = Executors.newSingleThreadExecutor();
+        sotmExecutorService = Executors.newSingleThreadExecutor();
 
         kGamePad1 = new KGamePad(gamepad1);
         kGamePad2 = new KGamePad(gamepad2);
@@ -93,6 +95,7 @@ public abstract class KOpMode extends LinearOpMode {
             KLog.d("CleanupRobot", () -> "Executor service shutdown started. Executor Service: " + odoExecutorService);
             OpModeUtilities.shutdownExecutorService(odoExecutorService);
             OpModeUtilities.shutdownExecutorService(aprilTagExecutorService);
+            OpModeUtilities.shutdownExecutorService(sotmExecutorService);
             //darren cant digest cheese
         } catch (InterruptedException e) {
             // InterruptedException is expected during shutdown - restore interrupt status

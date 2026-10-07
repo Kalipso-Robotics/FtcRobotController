@@ -6,6 +6,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.April
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryLogger;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -137,6 +139,38 @@ public class OpModeUtilities {
                 }
             } finally {
                 KLog.d("ExecutorService_Run", () -> "Octoquad executor finished");
+            }
+        });
+    }
+
+    /**
+     * Runs SOTM on its own thread, one solve per new odometry sample (blocks on the sample, no sleeps).
+     * The thread exits when SOTMConfig.enabled goes false; the caller restarts it (see SOTM.isRunning).
+     */
+    public static void runSOTMExecutorService(ExecutorService executorService, SOTM sotm) {
+        sotm.setRunning(true);
+        executorService.submit(() -> {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+            long lastSample = 0;
+            try {
+                while (!Thread.currentThread().isInterrupted() && SOTMConfig.enabled) {
+                    try {
+                        if (SharedData.awaitOdometrySampleAfter(lastSample, 50)) {
+                            if (sotm.getOpModeUtilities().getOpMode().opModeIsActive()) {
+                                sotm.update();
+                                lastSample = sotm.getLastSampleNanos();
+                            } else {
+                                lastSample = System.nanoTime(); // idle: don't spin on old samples
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } catch (Exception e) {
+                        KLog.e("ExecutorService_Run", "Exception in SOTM update loop", e);
+                    }
+                }
+            } finally {
+                sotm.setRunning(false);
             }
         });
     }

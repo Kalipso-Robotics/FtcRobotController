@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign.computeTicksFromAngleRad;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig.LOOK_AHEAD_TIME_MS;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.DoneStateAction;
@@ -14,7 +13,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTMCompensation;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -136,9 +135,9 @@ public class TurretAutoAlignTeleOp extends Action {
 
         if (turretRunMode == TurretRunMode.RUN_USING_ODOMETRY) {
             targetTicks = odoTargetTicks;
-            if (TurretConfig.shouldShootOnTheMoveTurret) {
-                double compensatedTargetHeading = computeCompensatedTargetHeading(targetPoint, currentPos, LOOK_AHEAD_TIME_MS);
-                targetTicks = calculateTargetTicks(compensatedTargetHeading, currentPos.getTheta());
+            SOTM.Solution sotm = SOTM.usableSolution();
+            if (sotm != null) {
+                targetTicks = calculateTargetTicks(sotm.aimHeadingRad, sotm.releaseHeadingRad);
             }
             KLog.d("TurretAutoAlignTeleOp_Odometry_Align", () -> "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
         } else if (turretRunMode == TurretRunMode.RUN_USING_LIMELIGHT) {
@@ -190,14 +189,7 @@ public class TurretAutoAlignTeleOp extends Action {
     }
 
     public double calculateTargetTicks(double targetAngleRad, double robotHeadingRad) {
-
-        double totalTurretAngle = targetAngleRad - robotHeadingRad + (ticksOffset / TurretConfig.TICKS_PER_RADIAN);
-
-        double totalTurretAngleWrap = MathFunctions.angleWrapRad(totalTurretAngle);
-
-        KLog.d("turret_angle", () -> "total turret angle " + totalTurretAngle + " total turret angle wrap " + totalTurretAngleWrap);
-
-        return computeTicksFromAngleRad(totalTurretAngleWrap);
+        return TurretAutoAlign.calculateTargetTicks(targetAngleRad, robotHeadingRad, ticksOffset);
     }
 
     private void moveToTargetTicks() {
@@ -296,25 +288,5 @@ public class TurretAutoAlignTeleOp extends Action {
 
     public double getDeltaAngleDeg() {
         return deltaAngleDeg;
-    }
-
-    public static double computeCompensatedTargetHeading(Point targetPoint, Position currentPos, double lookAheadTimeMS) {
-        double distanceToGoal = currentPos.toPoint().distanceTo(targetPoint);
-        double targetHeadingRad = Math.atan2(targetPoint.getY() - currentPos.getY(), targetPoint.getX() - currentPos.getX());
-        double rawTargetHeadingRad = targetHeadingRad;
-        if (TurretConfig.shouldShootOnTheMoveTurret) {
-            Velocity currentVelocity = SharedData.peekOdometryWheelIMUVelocity();
-            Position predictedPos = currentPos.predictPos(currentVelocity, lookAheadTimeMS);
-            //SOTMCompensation.SOTMResult result = SOTMCompensation.calculateCompensation(targetPoint, predictedPos, currentVelocity);
-            targetHeadingRad = Math.atan2(targetPoint.getY() - predictedPos.getY(), targetPoint.getX() - predictedPos.getX());
-            double finalTargetHeadingRad = targetHeadingRad;
-            KLog.d("SOTM_Turret", () -> "Look Ahead Time MS: " + lookAheadTimeMS +
-                    " CurrentVelocity: " + currentVelocity +
-                    " Delta Pos: " + predictedPos.minus(currentPos) +
-                    " Delta Dist. to goal: " + (predictedPos.toPoint().distanceTo(targetPoint) - distanceToGoal) +
-                    " Delta Heading: " + Math.toDegrees(finalTargetHeadingRad - rawTargetHeadingRad)
-            );
-        }
-        return targetHeadingRad;
     }
 }

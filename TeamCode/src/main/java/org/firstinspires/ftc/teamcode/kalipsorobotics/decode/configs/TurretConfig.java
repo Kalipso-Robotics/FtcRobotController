@@ -15,7 +15,6 @@ public class TurretConfig {
     public static double X_INIT_SETUP_MM = 3419.5 - 152.2; //3400      3,619.5 mm - 200m = 3,419.5       142.5 - 8
     public static double Y_INIT_SETUP_MM = 1400 - 175; // 1400 - 177.8
     public static int TICKS_INIT_OFFSET = 0;
-    public static double LOOK_AHEAD_TIME_MS = 50;
     public static double DEFAULT_TOLERANCE_TICKS = (TICKS_PER_DEGREE) * 1.5;
     public static double kP = 0.006;   // faster response
     public static double kI = 0;       // keep at 0
@@ -27,5 +26,4 @@ public class TurretConfig {
     public static double kD_teleop = 0.0004;  // reduces overshoot (main time saver) 0.0002
     public static double kS_teleop = 0.01;   //0.025 faster final approach
     public static double kF_teleop = 0;     // 375 // for tracking moving targets
-    public static boolean shouldShootOnTheMoveTurret = false;
 }

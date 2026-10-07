@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.SHOOTER_LOOKUP_TIME;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.shouldBangBangCompensate;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
@@ -12,7 +11,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTMCompensation;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
@@ -320,21 +319,11 @@ public class ShooterRun extends Action {
     }
 
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
-        Position currentPos = SharedData.peekOdometryWheelIMUPosition();
-        Velocity currentVelocity = SharedData.peekOdometryWheelIMUVelocity();
-        double distance = currentPos.toPoint().distanceTo(targetPoint);
-        //Near shooting better without position prediction because of higher velocity travel
-        if (ShooterConfig.shouldShootOnTheMoveRPS && distance > BETWEEN_FAR_NEAR_TIP) {
-            Position predictedPos = currentPos.predictPos(currentVelocity, ShooterConfig.SHOOTER_LOOKUP_TIME);
-            double compensatedDistance = MathFunctions.distance(predictedPos.toPoint(), targetPoint);
-            KLog.d("ShooterRun_SOTMDistance", () -> "Current Velocity: " + currentVelocity +
-                    " Delta Distance: " + (compensatedDistance - distance) +
-                    " Compensated Distance: " + compensatedDistance
-            );
-            return compensatedDistance;
+        SOTM.Solution sotm = SOTM.usableSolution();
+        if (sotm != null) {
+            return sotm.shotDistanceMM;
         }
-
-        return distance;
+        return SharedData.peekOdometryWheelIMUPosition().toPoint().distanceTo(targetPoint);
     }
 
     public void setUseOdometry(boolean useOdometry) {
