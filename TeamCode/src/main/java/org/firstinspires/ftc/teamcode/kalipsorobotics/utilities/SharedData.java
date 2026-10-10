@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInte
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.PoseHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
@@ -237,5 +238,15 @@ public class SharedData {
     public static void resetBallInformation() {
         ballInformation = new ArrayList<>();
         ballInformationTimeMs = 0;
+    }
+
+    private static Point targetClusterXY = null;
+
+    public static Point getTargetClusterXY() {
+        return targetClusterXY;
+    }
+
+    public static void setTargetClusterXY(Point xy) {
+        targetClusterXY = xy;
     }
 }
