@@ -42,24 +42,58 @@ public class PathPlanning {
         this(bufferMM, new double[]{minX, minY, maxX, maxY});
     }
 
-    /** The Hive and both flowers from FieldConfig. */
+    /**
+     * The two Hive legs (the robot can drive between them) and both flowers from FieldConfig.
+     * Crossing to the opposing alliance's side is allowed (use this one in TELEOP).
+     */
     public static PathPlanning forField(double bufferMM) {
+        return new PathPlanning(fieldBoxes(bufferMM));
+    }
+
+    /**
+     * Same as forField, plus the whole opposing half of the field as an obstacle (manual G402, AUTO).
+     * The robot is planned in the blue frame, so the blocked half is x > FieldConfig.MIDLINE_X.
+     * @param sideBufferMM how far the robot center must stay from the midline. Use the robot's
+     *                     half-width to keep the whole body on its own side.
+     */
+    public static PathPlanning forFieldAuto(double bufferMM, double sideBufferMM) {
+        List<double[]> boxes = fieldBoxes(bufferMM);
+        boxes.add(grown(new double[]{FieldConfig.MIDLINE_X, 0, FIELD_SIZE_MM, FIELD_SIZE_MM}, sideBufferMM));
+        return new PathPlanning(boxes);
+    }
+
+    /** Buffered Hive legs and flowers. */
+    private static List<double[]> fieldBoxes(double bufferMM) {
         double half = FieldConfig.FLOWER_SIZE_MM / 2;
         Point a = FieldConfig.aFlowerPoint;
         Point b = FieldConfig.bFlowerPoint;
-        return new PathPlanning(bufferMM,
-                new double[]{FieldConfig.HIVE_MIN_X, FieldConfig.HIVE_MIN_Y,
-                        FieldConfig.HIVE_MAX_X, FieldConfig.HIVE_MAX_Y},
+        return buffered(bufferMM,
+                FieldConfig.HIVE_LEG_LOW_X,
+                FieldConfig.HIVE_LEG_HIGH_X,
                 new double[]{a.getX() - half, a.getY() - half, a.getX() + half, a.getY() + half},
                 new double[]{b.getX() - half, b.getY() - half, b.getX() + half, b.getY() + half});
     }
 
+    private static double[] grown(double[] box, double bufferMM) {
+        return new double[]{box[0] - bufferMM, box[1] - bufferMM, box[2] + bufferMM, box[3] + bufferMM};
+    }
+
+    private static List<double[]> buffered(double bufferMM, double[]... rawBoxes) {
+        List<double[]> result = new ArrayList<>();
+        for (double[] box : rawBoxes) {
+            result.add(grown(box, bufferMM));
+        }
+        return result;
+    }
+
     /** @param rawBoxes un-buffered boxes, each {minX, minY, maxX, maxY} */
     public PathPlanning(double bufferMM, double[]... rawBoxes) {
-        for (double[] box : rawBoxes) {
-            boxes.add(new double[]{box[0] - bufferMM, box[1] - bufferMM,
-                    box[2] + bufferMM, box[3] + bufferMM});
-        }
+        this(buffered(bufferMM, rawBoxes));
+    }
+
+    /** @param bufferedBoxes boxes that are already grown by their buffer, each {minX, minY, maxX, maxY} */
+    private PathPlanning(List<double[]> bufferedBoxes) {
+        boxes.addAll(bufferedBoxes);
 
         for (double[] box : boxes) {
             addCorner(box[0] - CORNER_OFFSET_MM, box[1] - CORNER_OFFSET_MM);

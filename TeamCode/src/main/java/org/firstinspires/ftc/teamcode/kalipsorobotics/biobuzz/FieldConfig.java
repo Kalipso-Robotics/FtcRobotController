@@ -33,6 +33,13 @@ public class FieldConfig {
     // PLACEHOLDER: measure the real flower (plus anything that sticks out) and update.
     public final static double FLOWER_SIZE_MM = 200;
 
+    // Manual G402: during AUTO, columns A-C are the red side and D-F the blue side, split at the line
+    // between columns C and D. This frame is the BLUE frame (blue garden at x~220), so the blue side
+    // is x < MIDLINE_X and the opposing (red) side is x > MIDLINE_X. Red must convert its points into
+    // this frame first. The field is rotationally symmetric (flowers and gardens), so that conversion
+    // is a 180 degree rotation: (x, y) -> (3657.6 - x, 3657.6 - y), not just an x mirror.
+    public final static double MIDLINE_X = 3657.6 / 2;
+
     // Hive frame footprint (axis-aligned, un-inflated), centered on the field.
     // Game manual 9.6.1: frame is 49.46 in wide (along X) by 38.95 in deep (along Y) at its base.
     // Orientation from Figure 9-4. NOMINAL: confirm with a tape measure on the real field, and note
@@ -42,8 +49,24 @@ public class FieldConfig {
     private final static double HIVE_HALF_DEPTH_Y = 38.95 * 25.4 / 2;
     public final static double HIVE_MIN_X = HIVE_CENTER - HIVE_HALF_WIDTH_X;
     public final static double HIVE_MIN_Y = HIVE_CENTER - HIVE_HALF_DEPTH_Y;
-    public final static double HIVE_MAX_X = HIVE_CENTER + HIVE_HALF_WIDTH_X;
+    public final static double HIVE_MAX_X = HIVE_CENTER + ok HIVE_HALF_WIDTH_X;
     public final static double HIVE_MAX_Y = HIVE_CENTER + HIVE_HALF_DEPTH_Y;
+
+    // The frame is two legs at the X ends, joined by a crossbar well above the robot, so the robot can
+    // drive between them along Y. Only the legs are floor-level obstacles; the hive cells hang about
+    // 31 in above the floor (Onshape CAD views), so they are not obstacles for a robot of 18 in or
+    // less. The legs lean inward with height, so the thickness covers the tube plus the lean at robot
+    // height.
+    // PLACEHOLDER: about 1.5 in tube + about 4 in lean. Measure on the real frame or with Onshape.
+    public final static double HIVE_LEG_THICKNESS_MM = 140;
+
+    /** Leg at the low-X end of the frame, {minX, minY, maxX, maxY}, un-inflated. */
+    public final static double[] HIVE_LEG_LOW_X = {
+            HIVE_MIN_X, HIVE_MIN_Y, HIVE_MIN_X + HIVE_LEG_THICKNESS_MM, HIVE_MAX_Y};
+
+    /** Leg at the high-X end of the frame, {minX, minY, maxX, maxY}, un-inflated. */
+    public final static double[] HIVE_LEG_HIGH_X = {
+            HIVE_MAX_X - HIVE_LEG_THICKNESS_MM, HIVE_MIN_Y, HIVE_MAX_X, HIVE_MAX_Y};
 
     public final static double GARDEN_X = 220;
     private final static double GARDEN_Y = 3657.6-75;
