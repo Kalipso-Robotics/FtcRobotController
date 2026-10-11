@@ -89,7 +89,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private final double SMOOTHER_A = 0.75; // 0.25
     private final double SMOOTHER_B = 1 - SMOOTHER_A;
     private final double SMOOTHER_CORNER_PULL = 5.0;
-    private final double SMOOTHER_TOLERANCE = 5.0; // 0.025
+    private final double SMOOTHER_TOLERANCE = 5.0; // 0.025 (only seeds `change` so the first pass runs)
+    private final double SMOOTHER_PER_POINT_TOLERANCE = 0.5; // mm of movement per point per pass
     private double change = SMOOTHER_TOLERANCE;
     private int smootherI = 1;
     private int smootherJ = 0;
@@ -166,6 +167,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     ElapsedTime actionTimer;
     ElapsedTime timer;
+
+    double loops = 0;
+    double smootherLoops = 0;
 
     public AdaptivePurePursuitAction(DriveTrain driveTrain) {
         this.driveTrain = driveTrain;
@@ -448,6 +452,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     @Override
     protected void precomputeWhileBlocked() {
 
+        loops++;
+
         if(!hasStartedPrecompute) {
             reset();
             hasStartedPrecompute = true;
@@ -456,18 +462,18 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         if (!injectDone) {
             injectPoints();
             return;
-        } else {
-            path = new Path (injectedPathPoints);
-            KLog.d("ppDebug", "inject done");
         }
 
-        if (injectDone && !smootherDone) {
+        // Build the injected path once (reset() nulls it) instead of every call.
+        if (path == null) {
+            path = new Path(injectedPathPoints);
+        }
+
+        if (!smootherDone) {
             smoother(path);
             return;
-        } else {
-            path = newPath;
-            KLog.d("ppDebug", "smoother done");
         }
+        path = newPath;
 
         if (injectDone && smootherDone && !calcDistanceDone) {
             calculateDistanceAlongPath(path);
@@ -495,6 +501,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                         lookaheadBarrierIndex = i;
                         KLog.d("ppDebug", "calc velo accel done");
                         KLog.d("PPTest", "pp calc done at " + timer.milliseconds());
+                        KLog.d("PPTest", "pp calc done at loop # " + loops);
                         break;
                     }
                 }
@@ -905,7 +912,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     private double getSpacingForDistance(double distanceAlongSegment, double segmentLength, int segInject, int totalSegments) {
         double smallSpacing = 50.0;
-        double largeSpacing = 100.0;
+        double largeSpacing = 125.0;
 
         double distToEnd = segmentLength - distanceAlongSegment;
 
@@ -939,9 +946,15 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             return;
         }
 
-        if (injectDone && (!finishedCurrentLoop || change >= SMOOTHER_TOLERANCE)) {
+        smootherLoops++;
 
-            if (finishedCurrentLoop && change >= SMOOTHER_TOLERANCE) {
+        // Scale the stop threshold with the number of smoothed points: done once the points are
+        // moving less than SMOOTHER_PER_POINT_TOLERANCE mm each (on average) in a full pass.
+        double tolerance = SMOOTHER_PER_POINT_TOLERANCE * (path.numPoints() - 2);
+
+        if (injectDone && (!finishedCurrentLoop || change >= tolerance)) {
+
+            if (finishedCurrentLoop && change >= tolerance) {
                 smootherI = 1; //skip 0 don't smooth first point
                 change = 0.0;
                 finishedCurrentLoop = false;
@@ -971,25 +984,22 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                 double localA = getOriginalPullWeight(path, smootherI);
                 double localB = getNeighborPullWeight(path, smootherI);
 
-                if (smootherJ <= 1) {
-                    if (smootherJ == 0) {
-                        double aux = newPath.getPoint(smootherI).getX();
-                        newPath.getPoint(smootherI).addX(localA * (path.getPoint(smootherI).getX() - newPath.getPoint(smootherI).getX())
-                                + localB * (newPath.getPoint(smootherI-1).getX() + newPath.getPoint(smootherI+1).getX() - (2.0 * newPath.getPoint(smootherI).getX()))
-                        + SMOOTHER_CORNER_PULL * cornerWeight * cornerBias.getX());
-                        change += Math.abs(aux - newPath.getPoint(smootherI).getX());
-                    } else {
-                        double aux = newPath.getPoint(smootherI).getY();
-                        newPath.getPoint(smootherI).addY(localA * (path.getPoint(smootherI).getY() - newPath.getPoint(smootherI).getY())
-                                + localB * (newPath.getPoint(smootherI-1).getY() + newPath.getPoint(smootherI+1).getY() - (2.0 * newPath.getPoint(smootherI).getY()))
-                        + SMOOTHER_CORNER_PULL * cornerWeight * cornerBias.getY());
-                        change += Math.abs(aux - newPath.getPoint(smootherI).getY());
-                    }
-                    smootherJ++;
-                } else {
-                    smootherJ = 0;
-                    smootherI++;
-                }
+                // x and y updates are independent (weights come from the immutable path), so do
+                // both for this point in one call and advance, instead of 3 calls per point.
+                double auxX = newPath.getPoint(smootherI).getX();
+                newPath.getPoint(smootherI).addX(localA * (path.getPoint(smootherI).getX() - newPath.getPoint(smootherI).getX())
+                        + localB * (newPath.getPoint(smootherI-1).getX() + newPath.getPoint(smootherI+1).getX() - (2.0 * newPath.getPoint(smootherI).getX()))
+                + SMOOTHER_CORNER_PULL * cornerWeight * cornerBias.getX());
+                change += Math.abs(auxX - newPath.getPoint(smootherI).getX());
+
+                double auxY = newPath.getPoint(smootherI).getY();
+                newPath.getPoint(smootherI).addY(localA * (path.getPoint(smootherI).getY() - newPath.getPoint(smootherI).getY())
+                        + localB * (newPath.getPoint(smootherI-1).getY() + newPath.getPoint(smootherI+1).getY() - (2.0 * newPath.getPoint(smootherI).getY()))
+                + SMOOTHER_CORNER_PULL * cornerWeight * cornerBias.getY());
+                change += Math.abs(auxY - newPath.getPoint(smootherI).getY());
+
+                smootherJ = 0;
+                smootherI++;
             }
 
             if (smootherI == path.numPoints()-1) {
@@ -997,6 +1007,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             }
 
         } else {
+            KLog.d("PPTest", "smoother loops" + smootherLoops);
             smootherDone = true;
         }
     }

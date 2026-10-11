@@ -45,13 +45,13 @@ public class TestPP extends KOpMode {
 
         IPurePursuitAction test = new AdaptivePurePursuitAction(driveTrain);
         test.addPoint(0,0,0);
-//        test.addPoint(609.6,0,0);
-//        test.addPoint(0,0,0);
         test.addPoint(609.6,0,0);
-//        test.addPoint(609.6,0,180);
-//        test.addPoint(0,0,0);
-//        test.addPoint(400,800,180);
-//        test.addPoint(0,800,0);
+        test.addPoint(0,0,0);
+        test.addPoint(609.6,0,0);
+        test.addPoint(609.6,0,180);
+        test.addPoint(0,0,0);
+        test.addPoint(400,800,180);
+        test.addPoint(0,800,0);
 
         // Same idle-until-START behavior as waitForStart(), but any AdaptivePurePursuitAction
         // built above gets its path planning done during init instead of on match time.
