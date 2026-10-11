@@ -77,6 +77,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private Path injectSourcePath = null; // robot start + pathPoints, captured when injection begins
     private IPurePursuitAction planStartFrom = null; // if set, plan from this action's last point
     private boolean startChecked = false; // whether the robot was checked to be at the planned start
+    private boolean skipStartCheck = false; // set after a replan: the start is stale by design, don't replan again
     private int pointInject = 0;
     private double injectDistance = 0;
     private int segInject = 0;
@@ -90,10 +91,11 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private final double SMOOTHER_B = 1 - SMOOTHER_A;
     private final double SMOOTHER_CORNER_PULL = 5.0;
     private final double SMOOTHER_TOLERANCE = 5.0; // 0.025 (only seeds `change` so the first pass runs)
-    private final double SMOOTHER_PER_POINT_TOLERANCE = 0.5; // mm of movement per point per pass
+    private final double SMOOTHER_PER_POINT_TOLERANCE = 1; // mm of movement per point per pass
     private double change = SMOOTHER_TOLERANCE;
     private int smootherI = 1;
     private int smootherJ = 0;
+    private int smootherPasses = 0;
     private boolean smootherDone = false;
 
     private int calcDistanceIndex = 0;
@@ -282,6 +284,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         change = SMOOTHER_TOLERANCE;
         smootherI = 1;
         smootherJ = 0;
+        smootherPasses = 0;
         calcDistanceIndex = 0;
         calcVAIndex = -1;
         lastMilli = 0;
@@ -531,10 +534,11 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             // otherwise replan from where the robot is now.
             if (!startChecked) {
                 startChecked = true;
-                if (Vector.between(new Position(SharedData.getOdometryWheelIMUPosition()),
+                if (!skipStartCheck && Vector.between(new Position(SharedData.getOdometryWheelIMUPosition()),
                         injectSourcePath.getPoint(0)).getLength() > REPLAN_DISTANCE_MM) {
                     KLog.d("ppDebug", () -> getName() + " robot not at planned start, replanning");
                     planStartFrom = null;
+                    skipStartCheck = true; // only replan once, the new start is stale by the time it's done
                     reset();
                     return;
                 }
@@ -754,7 +758,10 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             lastMilli = elapsedTime;
             lastPosition = currentPosition;
         } else {
-            precomputeWhileBlocked(); //finish precompute
+            // Wait for points (e.g. after replan() but before addPoint()) before precomputing.
+            if (!getPathPoints().isEmpty()) {
+                precomputeWhileBlocked(); //finish precompute
+            }
         }
 
     }
@@ -1004,6 +1011,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
             if (smootherI == path.numPoints()-1) {
                 finishedCurrentLoop = true;
+                smootherPasses++;
+                int pass = smootherPasses;
+                double passChange = change;
+                int smoothedPoints = path.numPoints() - 2;
+                KLog.d("PPTest", () -> String.format("smoother pass %d: change=%.2f mm total, %.3f mm/point (stop below %.2f)",
+                        pass, passChange, passChange / smoothedPoints, tolerance));
             }
 
         } else {
@@ -1432,6 +1445,19 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
      * turns out to be more than REPLAN_DISTANCE_MM from that point when this path is about to be
      * driven, it replans from where it is.
      */
+    /**
+     * Discards the current path (even mid-follow) so new points can be added with addPoint() and
+     * planned/followed from the robot's live position. Does not touch the motors, so the robot
+     * keeps its last commanded power while the new path precomputes. Call addPoint() for the new
+     * path in the same loop iteration.
+     */
+    public void replan() {
+        clearPoints();
+        planStartFrom = null;   // plan from the live position, not a previous action's end
+        skipStartCheck = true;  // the start is stale by the time precompute finishes; don't replan again
+        reset();
+    }
+
     public void setPlanStartFrom(IPurePursuitAction previousMove) {
         this.planStartFrom = previousMove;
     }
