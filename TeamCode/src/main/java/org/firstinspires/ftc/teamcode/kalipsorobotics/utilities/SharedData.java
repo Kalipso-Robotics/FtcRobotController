@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 
 import java.util.ArrayList;
@@ -238,6 +239,35 @@ public class SharedData {
     public static void resetBallInformation() {
         ballInformation = new ArrayList<>();
         ballInformationTimeMs = 0;
+    }
+
+    private static volatile BeamBreakData beamBreakData = BeamBreakData.UNKNOWN;
+
+    /**
+     * How many balls the robot is holding, per the beam breaks. Published by BeamBreakArray every
+     * time it is updated, which BeamBreakCountAction does once per loop.
+     *
+     * The snapshot is immutable and swapped in with one volatile write, so a subscriber on any
+     * thread always reads a count and an occupancy pattern that came from the same sensor pass.
+     * Never BeamBreakData.UNKNOWN once something has polled; check hasData() or isFresh() before
+     * acting on it, since statics outlive an OpMode and the first reader of a new match could
+     * otherwise see the last match's count.
+     */
+    public static BeamBreakData getBeamBreakData() {
+        return beamBreakData;
+    }
+
+    public static void setBeamBreakData(BeamBreakData data) {
+        beamBreakData = data == null ? BeamBreakData.UNKNOWN : data;
+    }
+
+    /** Shortcut for the common case. Returns 0 when nothing has been published yet. */
+    public static int getBallCount() {
+        return beamBreakData.getCount();
+    }
+
+    public static void resetBeamBreakData() {
+        beamBreakData = BeamBreakData.UNKNOWN;
     }
 
     private static Point targetClusterXY = null;
