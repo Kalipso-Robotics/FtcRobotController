@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Plans detour waypoints around axis-aligned boxes (the Hive and the flowers).
@@ -31,6 +32,24 @@ public class PathPlanning {
     /** Buffered boxes, each {minX, minY, maxX, maxY}. */
     private final List<double[]> boxes = new ArrayList<>();
 
+    /** The real obstacles (not grown), used to check the robot body when picking up a ball. */
+    private final List<double[]> hardBoxes = new ArrayList<>();
+
+    /** A ball inside one of these cannot be picked up. Also checked against the robot body. */
+    private final List<double[]> deadzones = new ArrayList<>();
+
+    /** AUTO: the robot body must stay on its own side of the midline (manual G402). */
+    private final boolean autoSide;
+
+    /** Directions the robot may face when it picks up a ball, evenly spaced around the circle. */
+    private static final int APPROACH_DIRECTIONS = 24;
+
+    /** Extra room around real obstacles when the robot body is checked, for tracking error. */
+    public static double PICKUP_MARGIN_MM = 20;
+
+    private static final double RING_STEP_MM = 10;
+    private static final double MAX_RING_STRETCH_MM = 600;
+
     /** Detour corners that are on the field and not inside any buffered box. */
     private final List<Point> corners = new ArrayList<>();
 
@@ -47,31 +66,40 @@ public class PathPlanning {
      * Crossing to the opposing alliance's side is allowed (use this one in TELEOP).
      */
     public static PathPlanning forField(double bufferMM) {
-        return new PathPlanning(fieldBoxes(bufferMM));
+        return new PathPlanning(fieldBoxes(bufferMM), Arrays.asList(fieldRaw()),
+                Arrays.asList(FieldConfig.HIVE_DEADZONES), false);
     }
 
     /**
      * Same as forField, plus the whole opposing half of the field as an obstacle (manual G402, AUTO).
-     * The robot is planned in the blue frame, so the blocked half is x > FieldConfig.MIDLINE_X.
+     * The robot is planned in its own alliance's frame, so the blocked half is x > FieldConfig.MIDLINE_X.
      * @param sideBufferMM how far the robot center must stay from the midline. Use the robot's
      *                     half-width to keep the whole body on its own side.
      */
     public static PathPlanning forFieldAuto(double bufferMM, double sideBufferMM) {
         List<double[]> boxes = fieldBoxes(bufferMM);
         boxes.add(grown(new double[]{FieldConfig.MIDLINE_X, 0, FIELD_SIZE_MM, FIELD_SIZE_MM}, sideBufferMM));
-        return new PathPlanning(boxes);
+        return new PathPlanning(boxes, Arrays.asList(fieldRaw()), Arrays.asList(FieldConfig.HIVE_DEADZONES), true);
+    }
+
+    /** Real Hive legs and flowers, not grown. */
+    private static double[][] fieldRaw() {
+        double half = FieldConfig.FLOWER_SIZE_MM / 2;
+        Point[] flowers = {FieldConfig.aFlowerPoint, FieldConfig.bFlowerPoint,
+                FieldConfig.cFlowerPoint, FieldConfig.dFlowerPoint};
+        double[][] result = new double[2 + flowers.length][];
+        result[0] = FieldConfig.HIVE_LEG_LOW_X;
+        result[1] = FieldConfig.HIVE_LEG_HIGH_X;
+        for (int i = 0; i < flowers.length; i++) {
+            Point f = flowers[i];
+            result[2 + i] = new double[]{f.getX() - half, f.getY() - half, f.getX() + half, f.getY() + half};
+        }
+        return result;
     }
 
     /** Buffered Hive legs and flowers. */
     private static List<double[]> fieldBoxes(double bufferMM) {
-        double half = FieldConfig.FLOWER_SIZE_MM / 2;
-        Point a = FieldConfig.aFlowerPoint;
-        Point b = FieldConfig.bFlowerPoint;
-        return buffered(bufferMM,
-                FieldConfig.HIVE_LEG_LOW_X,
-                FieldConfig.HIVE_LEG_HIGH_X,
-                new double[]{a.getX() - half, a.getY() - half, a.getX() + half, a.getY() + half},
-                new double[]{b.getX() - half, b.getY() - half, b.getX() + half, b.getY() + half});
+        return buffered(bufferMM, fieldRaw());
     }
 
     private static double[] grown(double[] box, double bufferMM) {
@@ -88,12 +116,21 @@ public class PathPlanning {
 
     /** @param rawBoxes un-buffered boxes, each {minX, minY, maxX, maxY} */
     public PathPlanning(double bufferMM, double[]... rawBoxes) {
-        this(buffered(bufferMM, rawBoxes));
+        this(buffered(bufferMM, rawBoxes), Arrays.asList(rawBoxes), new ArrayList<double[]>(), false);
     }
 
-    /** @param bufferedBoxes boxes that are already grown by their buffer, each {minX, minY, maxX, maxY} */
-    private PathPlanning(List<double[]> bufferedBoxes) {
+    /**
+     * @param bufferedBoxes boxes already grown by their buffer, each {minX, minY, maxX, maxY}
+     * @param hardBoxes     the real obstacles, not grown
+     * @param deadzones     balls inside these cannot be picked up
+     * @param autoSide      true to keep the robot body on its own side of the midline
+     */
+    private PathPlanning(List<double[]> bufferedBoxes, List<double[]> hardBoxes, List<double[]> deadzones,
+                         boolean autoSide) {
         boxes.addAll(bufferedBoxes);
+        this.hardBoxes.addAll(hardBoxes);
+        this.deadzones.addAll(deadzones);
+        this.autoSide = autoSide;
 
         for (double[] box : boxes) {
             addCorner(box[0] - CORNER_OFFSET_MM, box[1] - CORNER_OFFSET_MM);
@@ -132,6 +169,152 @@ public class PathPlanning {
             return null;
         }
         return plan(robot, target);
+    }
+
+    /**
+     * Plans how to pick up a ball. The intake grabs the ball in front of the robot center, so the
+     * center only has to get to a stand-off point GRAB_MM short of the ball (or pullInMm() short, with
+     * the front touching the ball, when the ball is too close to an obstacle for that). For each of
+     * APPROACH_DIRECTIONS facing directions, the stand-off is checked: the rectangular robot body must
+     * not touch a real obstacle (or a deadzone, or in AUTO the opposing side). First choice is a
+     * stand-off outside every buffer ring, planned with plan(). If none works, the stand-off may be
+     * inside a ring: the path goes to the ring edge with plan() and then drives straight in, with the
+     * body checked every RING_STEP_MM. The shortest path wins.
+     */
+    public PickupPlan planPickup(Point robot, Point ball) {
+        double x = ball.getX();
+        double y = ball.getY();
+        if (x < 0 || x > FIELD_SIZE_MM || y < 0 || y > FIELD_SIZE_MM) {
+            return PickupPlan.fail(PickupPlan.Reason.OFF_FIELD, "ball " + ball + " is off the field");
+        }
+        if (autoSide && x > FieldConfig.MIDLINE_X) {
+            return PickupPlan.fail(PickupPlan.Reason.OPPOSING_SIDE, "ball " + ball + " is on the opposing side");
+        }
+        if (inside(ball, deadzones)) {
+            return PickupPlan.fail(PickupPlan.Reason.IN_DEADZONE, "ball " + ball + " is in a deadzone");
+        }
+        if (inside(ball, hardBoxes)) {
+            return PickupPlan.fail(PickupPlan.Reason.INSIDE_OBSTACLE, "ball " + ball + " is inside an obstacle");
+        }
+        if (insideBuffer(robot)) {
+            return PickupPlan.fail(PickupPlan.Reason.NO_PATH, "robot " + robot + " is inside a buffered obstacle");
+        }
+
+        boolean anyApproach = false;
+        PickupPlan best = null;
+        double bestLength = Double.MAX_VALUE;
+        // Prefer the ball ending up inside the intake mouth (mode 0). Only if that finds nothing, stop
+        // with the front touching the ball and let the intake pull it in (mode 1, the ball may be
+        // against a leg). Within a mode, prefer a stand-off outside every ring (pass 0) over one
+        // inside a ring (pass 1).
+        for (int mode = 0; mode < 2 && best == null; mode++) {
+            boolean pullIn = mode == 1;
+            double distance = pullIn ? RobotFootprint.pullInMm() : RobotFootprint.GRAB_MM;
+            for (int pass = 0; pass < 2 && best == null; pass++) {
+                for (int i = 0; i < APPROACH_DIRECTIONS; i++) {
+                    double heading = 2 * Math.PI * i / APPROACH_DIRECTIONS;
+                    double cos = Math.cos(heading);
+                    double sin = Math.sin(heading);
+                    Point standOff = new Point(x - distance * cos, y - distance * sin);
+                    if (bodyBlocked(standOff, heading)) {
+                        continue;
+                    }
+                    anyApproach = true;
+
+                    boolean inRing = insideBuffer(standOff);
+                    if (inRing != (pass == 1)) {
+                        continue;
+                    }
+                    List<Point> path;
+                    if (!inRing) {
+                        path = plan(robot, standOff);
+                        if (path == null) {
+                            continue;
+                        }
+                    } else {
+                        Point entry = ringEntry(standOff, heading);
+                        if (entry == null) {
+                            continue;
+                        }
+                        List<Point> toEntry = plan(robot, entry);
+                        if (toEntry == null) {
+                            continue;
+                        }
+                        path = new ArrayList<>(toEntry);
+                        path.add(standOff);
+                    }
+
+                    double length = pathLength(robot, path);
+                    if (length < bestLength) {
+                        bestLength = length;
+                        String why = String.format(Locale.US, "stand-off %s facing %.0f deg, %s, %s, path %.0f mm",
+                                standOff, Math.toDegrees(heading), pullIn ? "front touches the ball (pull in)" : "ball in the mouth",
+                                inRing ? "drives into the ring" : "outside the ring", length);
+                        best = PickupPlan.ok(path, standOff, heading, inRing, pullIn, why);
+                    }
+                }
+            }
+        }
+
+        if (best != null) {
+            return best;
+        }
+        if (anyApproach) {
+            return PickupPlan.fail(PickupPlan.Reason.NO_PATH, "no route to any stand-off for ball " + ball);
+        }
+        return PickupPlan.fail(PickupPlan.Reason.NO_APPROACH, "the robot body hits an obstacle at every angle for ball " + ball);
+    }
+
+    /**
+     * Walks back from the stand-off, against the facing direction, to the first point outside every
+     * buffer ring. Null if the body hits something on the way or the walk leaves the field.
+     */
+    private Point ringEntry(Point standOff, double heading) {
+        double cos = Math.cos(heading);
+        double sin = Math.sin(heading);
+        for (double t = 0; t <= MAX_RING_STRETCH_MM; t += RING_STEP_MM) {
+            Point p = new Point(standOff.getX() - t * cos, standOff.getY() - t * sin);
+            if (bodyBlocked(p, heading)) {
+                return null;
+            }
+            if (!insideBuffer(p)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /** True if the robot body, centered at c and facing heading, hits something it must not. */
+    private boolean bodyBlocked(Point c, double heading) {
+        for (double[] corner : RobotFootprint.corners(c, heading)) {
+            if (corner[0] < 0 || corner[0] > FIELD_SIZE_MM || corner[1] < 0 || corner[1] > FIELD_SIZE_MM) {
+                return true;
+            }
+            if (autoSide && corner[0] > FieldConfig.MIDLINE_X + EDGE_TOLERANCE_MM) {
+                return true;
+            }
+        }
+        for (double[] box : hardBoxes) {
+            if (RobotFootprint.overlaps(c, heading, box, PICKUP_MARGIN_MM)) {
+                return true;
+            }
+        }
+        for (double[] box : deadzones) {
+            if (RobotFootprint.overlaps(c, heading, box, PICKUP_MARGIN_MM)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static double pathLength(Point start, List<Point> path) {
+        double length = 0;
+        Point previous = start;
+        for (Point next : path) {
+            length += Point.distance(previous, next);
+            previous = next;
+        }
+        return length;
     }
 
     /**
@@ -197,12 +380,30 @@ public class PathPlanning {
             path.add(corners.get(i));
         }
         Collections.reverse(path);
+
+        // Drop detour points the straight line can skip, for example a corner in the middle of a
+        // straight run. This never makes the path longer.
+        Point from = robot;
+        int i = 0;
+        while (i < path.size() - 1) {
+            if (clear(from, path.get(i + 1))) {
+                path.remove(i);
+            } else {
+                from = path.get(i);
+                i++;
+            }
+        }
         return path;
     }
 
     /** True if the point is strictly inside any buffered box. */
     private boolean insideBuffer(Point p) {
-        for (double[] box : boxes) {
+        return inside(p, boxes);
+    }
+
+    /** True if the point is strictly inside any of the boxes. */
+    private static boolean inside(Point p, List<double[]> list) {
+        for (double[] box : list) {
             if (p.getX() > box[0] + EDGE_TOLERANCE_MM && p.getX() < box[2] - EDGE_TOLERANCE_MM
                     && p.getY() > box[1] + EDGE_TOLERANCE_MM && p.getY() < box[3] - EDGE_TOLERANCE_MM) {
                 return true;

@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PickupPlan;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 import java.util.List;
@@ -27,6 +28,14 @@ public class PathPlanningLogTest extends LinearOpMode {
     // TODO: tune. Half the robot's diagonal plus a margin.
     public static double BUFFER_MM = 350;
 
+    // Ball pickup: the robot goes to ROBOT_X/ROBOT_Y and picks up the ball at BALL_X/BALL_Y.
+    // AUTO true keeps the robot on its own side (manual G402).
+    public static double BALL_X = 1100;
+    public static double BALL_Y = 1800;
+    public static boolean AUTO = false;
+    // Half the robot's width, used as the midline buffer in AUTO.
+    public static double ROBOT_HALF_MM = 229;
+
     @Override
     public void runOpMode() {
         telemetry.setAutoClear(false);
@@ -36,7 +45,7 @@ public class PathPlanningLogTest extends LinearOpMode {
 
         double[] last = null;
         while (opModeIsActive()) {
-            double[] now = {ROBOT_X, ROBOT_Y, GOAL_X, GOAL_Y, BUFFER_MM};
+            double[] now = {ROBOT_X, ROBOT_Y, GOAL_X, GOAL_Y, BUFFER_MM, BALL_X, BALL_Y, AUTO ? 1 : 0, ROBOT_HALF_MM};
             if (!java.util.Arrays.equals(now, last)) {
                 last = now;
                 planAndLog(now);
@@ -56,6 +65,13 @@ public class PathPlanningLogTest extends LinearOpMode {
         telemetry.addData("robot", robot);
         telemetry.addData("goal", goal);
         telemetry.addData("path", result);
+
+        PathPlanning pickupPlanner = in[7] == 1 ? PathPlanning.forFieldAuto(in[4], in[8]) : PathPlanning.forField(in[4]);
+        Point ball = new Point(in[5], in[6]);
+        PickupPlan pickup = pickupPlanner.planPickup(robot, ball);
+        KLog.d(TAG, () -> "pickup ball " + ball + (in[7] == 1 ? " (AUTO)" : "") + " -> " + pickup
+                + (pickup.isOk() ? " waypoints " + pickup.waypoints : ""));
+        telemetry.addData("pickup", pickup.toString());
         telemetry.update();
     }
 }
