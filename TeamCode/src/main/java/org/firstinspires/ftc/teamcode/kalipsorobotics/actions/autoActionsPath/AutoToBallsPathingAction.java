@@ -20,8 +20,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  *   2. Asks the path planner for a route that goes around the Hive legs and the flowers.
  *      In AUTO the route also stays on our own side of the field (manual rule G402).
  *   3. Hands that route to the path follower, which actually drives the wheels.
- *   4. Turns the right intake on when we are close to the ball. The robot has an intake at each end,
- *      and the planner decides which end picks up this ball (the plan says useBackIntake).
+ *   4. Turns the intake on when we are close to the ball. Both ends run together, so the action does not
+ *      pick one. The planner still decides which end leads into the ball, to set the robot's heading.
  *   5. Finishes when the robot has arrived.
  *
  * If there is no ball to go to, or the planner says the ball cannot be picked up, the action
@@ -59,14 +59,8 @@ public class AutoToBallsPathingAction extends Action {
     /** True in AUTO, when we must stay on our own side of the field. False in TELEOP. */
     private final boolean auto;
 
-    /** The front intake. An action that runs its motor, or null if we only want to drive. */
-    private final Action frontIntake;
-
-    /** The back intake. An action that runs its motor, or null if we only want to drive. */
-    private final Action backIntake;
-
-    /** The one intake we will run: the front or the back one, whichever the plan picked. */
-    private Action chosenIntake;
+    /** The intake action (front and back run together), or null if we only want to drive. */
+    private final Action intake;
 
     /** Where the ball is. If the constructor was not given one, we read it from SharedData at the start. */
     private Point target;
@@ -80,7 +74,7 @@ public class AutoToBallsPathingAction extends Action {
     /** True if we ended without driving because there was no ball or the ball cannot be picked up. */
     private boolean failed = false;
 
-    /** True once the chosen intake has been turned on. After that we keep it running until the end. */
+    /** True once the intake has been turned on. After that we keep it running until the end. */
     private boolean intakeOn = false;
 
     // ------------------------------------------------------------------------------------------
@@ -94,12 +88,11 @@ public class AutoToBallsPathingAction extends Action {
      *
      * @param driveTrain the wheels
      * @param auto        true in AUTO (stay on our side), false in TELEOP
-     * @param frontIntake the front intake action (for example a RunIntake), or null to only drive
-     * @param backIntake  the back intake action, or null to only drive
+     * @param intake      the intake action (for example a RunIntake), or null to only drive
      */
-    public AutoToBallsPathingAction(DriveTrain driveTrain, boolean auto, Action frontIntake, Action backIntake) {
+    public AutoToBallsPathingAction(DriveTrain driveTrain, boolean auto, Action intake) {
         // Same as the other constructor, with "no ball yet" (null) as the target.
-        this(driveTrain, null, auto, frontIntake, backIntake);
+        this(driveTrain, null, auto, intake);
     }
 
     /**
@@ -108,17 +101,14 @@ public class AutoToBallsPathingAction extends Action {
      * @param driveTrain the wheels
      * @param target      the ball (or cluster center) position, in mm
      * @param auto        true in AUTO (stay on our side), false in TELEOP
-     * @param frontIntake the front intake action, or null to only drive
-     * @param backIntake  the back intake action, or null to only drive
+     * @param intake      the intake action, or null to only drive
      */
-    public AutoToBallsPathingAction(DriveTrain driveTrain, Point target, boolean auto, Action frontIntake,
-                                    Action backIntake) {
+    public AutoToBallsPathingAction(DriveTrain driveTrain, Point target, boolean auto, Action intake) {
         // Keep our own copy of each thing, because update() runs later and needs them.
         this.driveTrain = driveTrain;
         this.target = target;
         this.auto = auto;
-        this.frontIntake = frontIntake;
-        this.backIntake = backIntake;
+        this.intake = intake;
     }
 
     // ------------------------------------------------------------------------------------------
@@ -148,11 +138,10 @@ public class AutoToBallsPathingAction extends Action {
             }
         }
 
-        // Turn the chosen intake on when we are close enough to the ball, then keep it going.
-        // The other intake stays off, so it cannot pick up balls we only drive past.
-        if (chosenIntake != null && (intakeOn || closeEnoughToStartIntake())) {
+        // Turn the intake on when we are close enough to the ball, then keep it going.
+        if (intake != null && (intakeOn || closeEnoughToStartIntake())) {
             intakeOn = true;
-            chosenIntake.updateCheckDone();
+            intake.updateCheckDone();
         }
 
         // Keep driving the route. When the follower says it has arrived, we are done too.
@@ -205,9 +194,6 @@ public class AutoToBallsPathingAction extends Action {
             fail(plan.why);
             return;
         }
-
-        // Remember which intake to run. The other one is never started.
-        chosenIntake = plan.useBackIntake ? backIntake : frontIntake;
 
         // Step 5: give the route to the path follower, one point at a time.
         movement = new AdaptivePurePursuitAction(driveTrain);

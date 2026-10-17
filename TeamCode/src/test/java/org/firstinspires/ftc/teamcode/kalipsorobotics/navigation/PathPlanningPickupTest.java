@@ -137,7 +137,7 @@ public class PathPlanningPickupTest {
     private static AutoToBallsPathingAction actionFor(Point robot, Point target, boolean auto) {
         SharedData.setOdometryWheelIMUPosition(new Position(robot.getX(), robot.getY(), 0));
         SharedData.setTargetClusterXY(target);
-        return new AutoToBallsPathingAction(null, auto, null, null);
+        return new AutoToBallsPathingAction(null, auto, null);
     }
 
     @Test
@@ -180,7 +180,7 @@ public class PathPlanningPickupTest {
     public void action_withATargetGivenToTheConstructor_usesIt() {
         SharedData.setOdometryWheelIMUPosition(new Position(500, 1800, 0));
         SharedData.setTargetClusterXY(null);
-        AutoToBallsPathingAction action = new AutoToBallsPathingAction(null, new Point(1100, 1800), false, null, null);
+        AutoToBallsPathingAction action = new AutoToBallsPathingAction(null, new Point(1100, 1800), false, null);
         action.updateCheckDone();
         assertFalse(action.getFailed());
         assertTrue(action.getPlan().isOk());
