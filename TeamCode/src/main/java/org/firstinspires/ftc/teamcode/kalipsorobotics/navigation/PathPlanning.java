@@ -50,6 +50,9 @@ public class PathPlanning {
     private static final double RING_STEP_MM = 10;
     private static final double MAX_RING_STRETCH_MM = 600;
 
+    /** How far the robot may drive to get out of a buffer ring it starts inside. */
+    private static final double MAX_ESCAPE_MM = 800;
+
     /** Detour corners that are on the field and not inside any buffered box. */
     private final List<Point> corners = new ArrayList<>();
 
@@ -196,9 +199,6 @@ public class PathPlanning {
         if (inside(ball, hardBoxes)) {
             return PickupPlan.fail(PickupPlan.Reason.INSIDE_OBSTACLE, "ball " + ball + " is inside an obstacle");
         }
-        if (insideBuffer(robot)) {
-            return PickupPlan.fail(PickupPlan.Reason.NO_PATH, "robot " + robot + " is inside a buffered obstacle");
-        }
 
         boolean anyApproach = false;
         PickupPlan best = null;
@@ -319,11 +319,27 @@ public class PathPlanning {
 
     /**
      * @return waypoints after the robot, ending at the goal (a single point means drive direct),
-     * or null if there is no path (robot or goal inside a buffered box, or every route blocked).
+     * or null if there is no path (goal inside a buffered box, robot inside a real obstacle, or every
+     * route blocked). A robot that starts inside a buffer ring first gets a waypoint straight out to
+     * open floor, then the route from there.
      */
     public List<Point> plan(Point robot, Point goal) {
-        if (insideBuffer(robot) || insideBuffer(goal)) {
+        if (insideBuffer(goal)) {
             return null;
+        }
+        if (insideBuffer(robot)) {
+            Point out = escapePoint(robot);
+            if (out == null) {
+                return null;
+            }
+            List<Point> rest = plan(out, goal);
+            if (rest == null) {
+                return null;
+            }
+            List<Point> path = new ArrayList<>();
+            path.add(out);
+            path.addAll(rest);
+            return path;
         }
         if (clear(robot, goal)) {
             return Collections.singletonList(goal);
@@ -396,8 +412,40 @@ public class PathPlanning {
         return path;
     }
 
+    /**
+     * The nearest open-floor point for a robot that is inside a buffer ring: outside every buffer, on
+     * the field, and reachable in a straight line without touching a real obstacle. Null if the robot is
+     * inside a real obstacle or nothing within MAX_ESCAPE_MM works.
+     */
+    private Point escapePoint(Point robot) {
+        if (inside(robot, hardBoxes)) {
+            return null;
+        }
+        for (double t = RING_STEP_MM; t <= MAX_ESCAPE_MM; t += RING_STEP_MM) {
+            for (int i = 0; i < APPROACH_DIRECTIONS; i++) {
+                double angle = 2 * Math.PI * i / APPROACH_DIRECTIONS;
+                Point p = new Point(robot.getX() + t * Math.cos(angle), robot.getY() + t * Math.sin(angle));
+                if (p.getX() < 0 || p.getX() > FIELD_SIZE_MM || p.getY() < 0 || p.getY() > FIELD_SIZE_MM
+                        || insideBuffer(p)) {
+                    continue;
+                }
+                boolean clearOfObstacles = true;
+                for (double[] box : hardBoxes) {
+                    if (!clear(robot, p, box)) {
+                        clearOfObstacles = false;
+                        break;
+                    }
+                }
+                if (clearOfObstacles) {
+                    return p;
+                }
+            }
+        }
+        return null;
+    }
+
     /** True if the point is strictly inside any buffered box. */
-    private boolean insideBuffer(Point p) {
+    boolean insideBuffer(Point p) {
         return inside(p, boxes);
     }
 

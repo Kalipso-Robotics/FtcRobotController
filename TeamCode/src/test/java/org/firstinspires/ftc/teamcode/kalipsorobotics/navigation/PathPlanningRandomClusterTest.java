@@ -49,8 +49,13 @@ public class PathPlanningRandomClusterTest {
 
             double length = 0;
             Point previous = robot;
+            boolean first = true;
             for (Point next : path) {
-                assertTrue("trial " + i + " blocked " + previous + " -> " + next, planner.clear(previous, next));
+                // a robot that starts inside a ring first drives straight out of it
+                if (!(first && planner.insideBuffer(robot))) {
+                    assertTrue("trial " + i + " blocked " + previous + " -> " + next, planner.clear(previous, next));
+                }
+                first = false;
                 length += Point.distance(previous, next);
                 previous = next;
             }

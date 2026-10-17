@@ -136,8 +136,19 @@ public class PathPlanningPickupTest {
     }
 
     @Test
-    public void robotInsideABuffer_hasNoPath() {
-        PickupPlan plan = teleop.planPickup(new Point(1000, 1800), new Point(500, 500));
+    public void robotInsideARing_drivesOutFirst() {
+        // x = 1000 is 200 mm from the low leg: inside its ring, but not touching it
+        Point robot = new Point(1000, 1800);
+        assertTrue(teleop.insideBuffer(robot));
+        PickupPlan plan = teleop.planPickup(robot, new Point(500, 500));
+        assertTrue(plan.toString(), plan.isOk());
+        assertFalse("first waypoint must be open floor", teleop.insideBuffer(plan.waypoints.get(0)));
+    }
+
+    @Test
+    public void robotInsideALeg_hasNoPath() {
+        PickupPlan plan = teleop.planPickup(new Point(1270, 1800), new Point(500, 500));
+        assertFalse(plan.isOk());
         assertEquals(PickupPlan.Reason.NO_PATH, plan.reason);
     }
 
@@ -169,7 +180,8 @@ public class PathPlanningPickupTest {
                 Point previous = robot;
                 for (int i = 0; i < path.size(); i++) {
                     boolean lastStretch = plan.enteredRing && i == path.size() - 1;
-                    if (!lastStretch) {
+                    boolean escape = i == 0 && planner.insideBuffer(robot);
+                    if (!lastStretch && !escape) {
                         assertTrue("blocked " + previous + " -> " + path.get(i), planner.clear(previous, path.get(i)));
                     }
                     previous = path.get(i);
