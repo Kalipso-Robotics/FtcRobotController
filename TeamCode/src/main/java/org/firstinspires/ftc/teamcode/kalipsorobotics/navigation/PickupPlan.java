@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -66,6 +67,42 @@ public class PickupPlan {
 
     public boolean isOk() {
         return reason == Reason.OK;
+    }
+
+    /**
+     * The points for the path follower, one {x, y, headingDeg} row per waypoint. Each waypoint faces the
+     * direction of travel, and the last one faces finalHeadingRad so the intake points at the ball.
+     * Headings are in degrees, between -180 and 180. Empty if the ball cannot be picked up.
+     */
+    public List<double[]> followerPoints(Point robot) {
+        List<double[]> rows = new ArrayList<>();
+        if (waypoints == null) {
+            return rows;
+        }
+        Point previous = robot;
+        double headingDeg = Math.toDegrees(finalHeadingRad);
+        for (int i = 0; i < waypoints.size(); i++) {
+            Point p = waypoints.get(i);
+            if (i == waypoints.size() - 1) {
+                headingDeg = Math.toDegrees(finalHeadingRad);
+            } else if (Point.distance(previous, p) > 1e-6) {
+                headingDeg = Math.toDegrees(Math.atan2(p.getY() - previous.getY(), p.getX() - previous.getX()));
+            }
+            rows.add(new double[]{p.getX(), p.getY(), normalizeDeg(headingDeg)});
+            previous = p;
+        }
+        return rows;
+    }
+
+    /** Wraps an angle in degrees into (-180, 180]. */
+    private static double normalizeDeg(double deg) {
+        double d = deg % 360;
+        if (d > 180) {
+            d -= 360;
+        } else if (d <= -180) {
+            d += 360;
+        }
+        return d;
     }
 
     @Override

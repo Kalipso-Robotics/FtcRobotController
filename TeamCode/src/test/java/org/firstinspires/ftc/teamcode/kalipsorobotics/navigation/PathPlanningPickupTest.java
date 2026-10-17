@@ -98,6 +98,38 @@ public class PathPlanningPickupTest {
     }
 
     @Test
+    public void followerPoints_faceTheTravelDirectionAndEndFacingTheBall() {
+        // two detour corners, then the stand-off
+        Point robot = new Point(500, 1828.8);
+        PickupPlan plan = teleop.planPickup(robot, new Point(3100, 1828.8));
+        assertTrue(plan.toString(), plan.isOk());
+        java.util.List<double[]> rows = plan.followerPoints(robot);
+        assertEquals(plan.waypoints.size(), rows.size());
+
+        // the first waypoint faces the way the robot travels to reach it
+        Point first = plan.waypoints.get(0);
+        double travel = Math.toDegrees(Math.atan2(first.getY() - robot.getY(), first.getX() - robot.getX()));
+        assertEquals(travel, rows.get(0)[2], 1e-6);
+
+        // the last one faces the ball, wrapped into (-180, 180]
+        double end = Math.toDegrees(plan.finalHeadingRad);
+        end = ((end % 360) + 360) % 360;
+        if (end > 180) {
+            end -= 360;
+        }
+        assertEquals(end, rows.get(rows.size() - 1)[2], 1e-6);
+        for (double[] row : rows) {
+            assertTrue(row[2] > -180 - 1e-9 && row[2] <= 180 + 1e-9);
+        }
+    }
+
+    @Test
+    public void followerPoints_isEmptyWhenThereIsNoPlan() {
+        PickupPlan plan = teleop.planPickup(new Point(500, 1800), new Point(1270, 1800));
+        assertTrue(plan.followerPoints(new Point(500, 1800)).isEmpty());
+    }
+
+    @Test
     public void ballOffTheField_isRejected() {
         assertEquals(PickupPlan.Reason.OFF_FIELD,
                 teleop.planPickup(new Point(500, 1800), new Point(-10, 1800)).reason);
