@@ -36,6 +36,13 @@ android {
     }
 
     namespace = 'org.firstinspires.ftc.teamcode'
+
+    // Laptop unit tests only: lets code that logs with android.util.Log (KLog) run in a test instead of
+    // throwing "Method d in android.util.Log not mocked". Does not change the robot build.
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
     androidResources {
         noCompress 'tflite'
     }

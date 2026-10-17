@@ -5,8 +5,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.AutoToBallsPathingAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -127,6 +130,60 @@ public class PathPlanningPickupTest {
     public void followerPoints_isEmptyWhenThereIsNoPlan() {
         PickupPlan plan = teleop.planPickup(new Point(500, 1800), new Point(1270, 1800));
         assertTrue(plan.followerPoints(new Point(500, 1800)).isEmpty());
+    }
+
+    // ---- the drive action (no robot: the wheels are not touched before the follower is unblocked) ----
+
+    private static AutoToBallsPathingAction actionFor(Point robot, Point target, boolean auto) {
+        SharedData.setOdometryWheelIMUPosition(new Position(robot.getX(), robot.getY(), 0));
+        SharedData.setTargetClusterXY(target);
+        return new AutoToBallsPathingAction(null, auto, null);
+    }
+
+    @Test
+    public void action_withNoTarget_failsWithoutDriving() {
+        AutoToBallsPathingAction action = actionFor(new Point(500, 1800), null, true);
+        action.updateCheckDone();
+        assertTrue(action.getIsDone());
+        assertTrue(action.getFailed());
+    }
+
+    @Test
+    public void action_withBallInADeadzone_failsAndSaysWhy() {
+        AutoToBallsPathingAction action = actionFor(new Point(500, 1800), new Point(1400, 1380), true);
+        try {
+            action.updateCheckDone();
+            assertTrue(action.getIsDone());
+            assertTrue(action.getFailed());
+            assertEquals(PickupPlan.Reason.IN_DEADZONE, action.getPlan().reason);
+        } finally {
+            SharedData.setTargetClusterXY(null);
+        }
+    }
+
+    @Test
+    public void action_withReachableBall_readsTheTargetFromSharedDataAndStartsDriving() {
+        AutoToBallsPathingAction action = actionFor(new Point(500, 1800), new Point(1100, 1800), true);
+        try {
+            action.updateCheckDone();
+            assertFalse("must not be done yet, it is driving", action.getIsDone());
+            assertFalse(action.getFailed());
+            assertTrue(action.getPlan().toString(), action.getPlan().isOk());
+            assertEquals(840, action.getPlan().standOff.getX(), 1e-6);
+            assertEquals(1800, action.getPlan().standOff.getY(), 1e-6);
+        } finally {
+            SharedData.setTargetClusterXY(null);
+        }
+    }
+
+    @Test
+    public void action_withATargetGivenToTheConstructor_usesIt() {
+        SharedData.setOdometryWheelIMUPosition(new Position(500, 1800, 0));
+        SharedData.setTargetClusterXY(null);
+        AutoToBallsPathingAction action = new AutoToBallsPathingAction(null, new Point(1100, 1800), false, null);
+        action.updateCheckDone();
+        assertFalse(action.getFailed());
+        assertTrue(action.getPlan().isOk());
     }
 
     @Test
