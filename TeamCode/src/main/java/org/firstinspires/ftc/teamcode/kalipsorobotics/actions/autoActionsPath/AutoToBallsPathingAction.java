@@ -12,10 +12,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Drives to a target point (e.g. a ball cluster centroid) by routing through a loop of waypoints.
- * The path is built when the action starts, since that's when the robot's position is known:
- * enter the loop at the waypoint closest to the robot, leave it at the waypoint closest to the
- * target, and go around whichever direction is shorter.
+ * Drives the robot to a ball (or the middle of a cluster of balls) and stops facing it, so the
+ * intake can pick it up.
+ *
+ * What this action does, in order:
+ *   1. Works out where the ball is (from the constructor, or from SharedData).
+ *   2. Asks the path planner for a route that goes around the Hive legs and the flowers.
+ *      In AUTO the route also stays on our own side of the field (manual rule G402).
+ *   3. Hands that route to the path follower, which actually drives the wheels.
+ *   4. Turns the intake on when we are close to the ball.
+ *   5. Finishes when the robot has arrived.
+ *
+ * If there is no ball to go to, or the planner says the ball cannot be picked up, the action
+ * finishes straight away without driving. Then getFailed() is true and getPlan() says why,
+ * so the autonomous program does not get stuck waiting for it.
+ *
+ * All positions are in millimeters, in our own alliance's field frame (the same frame the
+ * odometry uses).
  */
 public class AutoToBallsPathingAction extends Action {
 
