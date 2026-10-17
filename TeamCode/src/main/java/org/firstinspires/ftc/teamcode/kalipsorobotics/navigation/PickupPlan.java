@@ -32,7 +32,10 @@ public class PickupPlan {
     public final List<Point> waypoints;
     /** Where the robot center ends up. */
     public final Point standOff;
-    /** The way the robot faces at standOff, radians in the FieldConfig frame. */
+    /**
+     * The way the robot's FRONT points at standOff, radians in the FieldConfig frame. When the back
+     * intake picks up the ball, the front points away from the ball.
+     */
     public final double finalHeadingRad;
     /** True if the last straight stretch goes into the buffer ring around an obstacle. */
     public final boolean enteredRing;
@@ -41,28 +44,33 @@ public class PickupPlan {
      * be against an obstacle. False if the ball ends up inside the intake mouth.
      */
     public final boolean pullIn;
+    /** True if the BACK intake picks up the ball, false if the front one does. */
+    public final boolean useBackIntake;
     public final Reason reason;
     /** One line for the log. */
     public final String why;
 
     private PickupPlan(List<Point> waypoints, Point standOff, double finalHeadingRad,
-                       boolean enteredRing, boolean pullIn, Reason reason, String why) {
+                       boolean enteredRing, boolean pullIn, boolean useBackIntake, Reason reason,
+                       String why) {
         this.waypoints = waypoints == null ? null : Collections.unmodifiableList(waypoints);
         this.standOff = standOff;
         this.finalHeadingRad = finalHeadingRad;
         this.enteredRing = enteredRing;
         this.pullIn = pullIn;
+        this.useBackIntake = useBackIntake;
         this.reason = reason;
         this.why = why;
     }
 
     static PickupPlan ok(List<Point> waypoints, Point standOff, double headingRad, boolean enteredRing,
-                         boolean pullIn, String why) {
-        return new PickupPlan(waypoints, standOff, headingRad, enteredRing, pullIn, Reason.OK, why);
+                         boolean pullIn, boolean useBackIntake, String why) {
+        return new PickupPlan(waypoints, standOff, headingRad, enteredRing, pullIn, useBackIntake, Reason.OK,
+                why);
     }
 
     static PickupPlan fail(Reason reason, String why) {
-        return new PickupPlan(null, null, 0, false, false, reason, why);
+        return new PickupPlan(null, null, 0, false, false, false, reason, why);
     }
 
     public boolean isOk() {

@@ -45,8 +45,8 @@ public class PathPlanningPickupTest {
         assertTrue(plan.enteredRing);
         assertEquals(870, plan.standOff.getX(), 1e-6);
         assertEquals(0, plan.finalHeadingRad, 1e-9);
-        // the intake grabs the ball: stand-off + GRAB_MM ahead = the ball
-        assertEquals(1130, plan.standOff.getX() + RobotFootprint.GRAB_MM * Math.cos(plan.finalHeadingRad), 1e-6);
+        // the intake grabs the ball: stand-off + FRONT_GRAB_MM ahead = the ball
+        assertEquals(1130, plan.standOff.getX() + RobotFootprint.FRONT_GRAB_MM * Math.cos(plan.finalHeadingRad), 1e-6);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class PathPlanningPickupTest {
         PickupPlan plan = teleop.planPickup(new Point(500, 1800), new Point(1150, 1800));
         assertTrue(plan.toString(), plan.isOk());
         assertTrue(plan.pullIn);
-        assertEquals(1150 - RobotFootprint.pullInMm(), plan.standOff.getX(), 1e-6);
+        assertEquals(1150 - RobotFootprint.pullInMm(false), plan.standOff.getX(), 1e-6);
         assertEquals(0, plan.finalHeadingRad, 1e-9);
     }
 
@@ -137,7 +137,7 @@ public class PathPlanningPickupTest {
     private static AutoToBallsPathingAction actionFor(Point robot, Point target, boolean auto) {
         SharedData.setOdometryWheelIMUPosition(new Position(robot.getX(), robot.getY(), 0));
         SharedData.setTargetClusterXY(target);
-        return new AutoToBallsPathingAction(null, auto, null);
+        return new AutoToBallsPathingAction(null, auto, null, null);
     }
 
     @Test
@@ -180,10 +180,66 @@ public class PathPlanningPickupTest {
     public void action_withATargetGivenToTheConstructor_usesIt() {
         SharedData.setOdometryWheelIMUPosition(new Position(500, 1800, 0));
         SharedData.setTargetClusterXY(null);
-        AutoToBallsPathingAction action = new AutoToBallsPathingAction(null, new Point(1100, 1800), false, null);
+        AutoToBallsPathingAction action = new AutoToBallsPathingAction(null, new Point(1100, 1800), false, null, null);
         action.updateCheckDone();
         assertFalse(action.getFailed());
         assertTrue(action.getPlan().isOk());
+    }
+
+    // ---- double intake: an intake at each end, both feeding one shared pool of balls ----
+
+    @Test
+    public void robotFacingAwayFromTheBall_usesTheBackIntake() {
+        // the ball is at +x, but the robot's front points toward -x, so its back already faces the ball
+        Point robot = new Point(300, 1800);
+        PickupPlan plan = teleop.planPickup(robot, Math.PI, new Point(800, 1800));
+        assertTrue(plan.toString(), plan.isOk());
+        assertTrue(plan.useBackIntake);
+        // the front points away from the ball, and the back intake holds the ball at BACK_GRAB_MM
+        assertEquals(800 - RobotFootprint.BACK_GRAB_MM, plan.standOff.getX(), 1e-6);
+        assertEquals(-1.0, Math.cos(plan.finalHeadingRad), 1e-6);
+    }
+
+    @Test
+    public void robotFacingTheBall_usesTheFrontIntake() {
+        Point robot = new Point(300, 1800);
+        PickupPlan plan = teleop.planPickup(robot, 0, new Point(800, 1800));
+        assertTrue(plan.toString(), plan.isOk());
+        assertFalse(plan.useBackIntake);
+        assertEquals(800 - RobotFootprint.FRONT_GRAB_MM, plan.standOff.getX(), 1e-6);
+        assertEquals(1.0, Math.cos(plan.finalHeadingRad), 1e-6);
+    }
+
+    @Test
+    public void unknownHeading_prefersTheFrontIntake() {
+        PickupPlan plan = teleop.planPickup(new Point(300, 1800), new Point(800, 1800));
+        assertTrue(plan.isOk());
+        assertFalse(plan.useBackIntake);
+    }
+
+    @Test
+    public void backIntake_canPickUpABallInTheRing() {
+        // 84 mm from the leg face. Both ends would stop inside the ring, so the turn decides:
+        // the robot's back already faces the ball (the front points toward -x)
+        PickupPlan plan = teleop.planPickup(new Point(500, 1800), Math.PI, new Point(1116, 1800));
+        assertTrue(plan.toString(), plan.isOk());
+        assertTrue(plan.useBackIntake);
+        assertTrue(plan.enteredRing);
+        // the back tip stays clear of the leg face (x = 1200.6)
+        double backTipX = plan.standOff.getX() + RobotFootprint.BACK_MM;
+        assertTrue(backTipX < FieldConfig.HIVE_LEG_LOW_X[0] - PathPlanning.PICKUP_MARGIN_MM);
+    }
+
+    @Test
+    public void stopOutsideTheRing_beatsAvoidingATurn() {
+        // a ball touching the leg: the front's stop point is outside the ring and the back's is inside,
+        // so the front wins even though the robot's back faces the ball (safer near the leg)
+        double ballX = FieldConfig.HIVE_LEG_LOW_X[0] - RobotFootprint.BALL_RADIUS_MM;
+        PickupPlan plan = teleop.planPickup(new Point(500, 1800), Math.PI, new Point(ballX, 1800));
+        assertTrue(plan.toString(), plan.isOk());
+        assertTrue(plan.pullIn);
+        assertFalse(plan.useBackIntake);
+        assertFalse(plan.enteredRing);
     }
 
     @Test
@@ -247,19 +303,25 @@ public class PathPlanningPickupTest {
             boolean isAuto = planner == auto;
             Random random = new Random(7);
             int checked = 0;
+            int backUsed = 0;
             for (int trial = 0; trial < 4000; trial++) {
                 Point robot = new Point(100 + random.nextDouble() * 1400, 100 + random.nextDouble() * 3400);
                 Point ball = new Point(50 + random.nextDouble() * 3550, 50 + random.nextDouble() * 3550);
-                PickupPlan plan = planner.planPickup(robot, ball);
+                // a random facing, so both the front and the back intake get used
+                PickupPlan plan = planner.planPickup(robot, random.nextDouble() * 2 * Math.PI, ball);
                 if (!plan.isOk()) {
                     continue;
                 }
                 checked++;
+                if (plan.useBackIntake) {
+                    backUsed++;
+                }
 
                 // the intake grabs the ball
-                double reach = plan.pullIn ? RobotFootprint.pullInMm() : RobotFootprint.GRAB_MM;
-                double grabX = plan.standOff.getX() + reach * Math.cos(plan.finalHeadingRad);
-                double grabY = plan.standOff.getY() + reach * Math.sin(plan.finalHeadingRad);
+                double reach = plan.pullIn ? RobotFootprint.pullInMm(plan.useBackIntake) : RobotFootprint.grabMm(plan.useBackIntake);
+                double lead = plan.finalHeadingRad + (plan.useBackIntake ? Math.PI : 0);
+                double grabX = plan.standOff.getX() + reach * Math.cos(lead);
+                double grabY = plan.standOff.getY() + reach * Math.sin(lead);
                 assertEquals(ball.getX(), grabX, 1e-6);
                 assertEquals(ball.getY(), grabY, 1e-6);
 
@@ -288,6 +350,7 @@ public class PathPlanningPickupTest {
                 }
             }
             assertTrue("only " + checked + " plans were checked", checked > 200);
+            assertTrue("the back intake was used only " + backUsed + " times", backUsed > 50);
         }
     }
 

@@ -4,7 +4,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 
 /**
  * The robot's body as a rectangle on the floor, for checking whether it would touch an obstacle.
- * The robot center is the origin and the body's +x is the direction it faces (the intake side).
+ * The robot center is the origin and the body's +x is the direction its FRONT faces. Both ends have
+ * an intake (front and back), and both share one pool of at most 4 balls.
  * All units are mm in the FieldConfig frame.
  *
  * PLACEHOLDER numbers (18 in square robot). Measure the real robot and update.
@@ -16,17 +17,24 @@ public class RobotFootprint {
     public static double FRONT_MM = 300;
     /** Center to the back. */
     public static double BACK_MM = 229;
-    /** Center to the point where the intake picks up a ball. Must be at most FRONT_MM. */
-    public static double GRAB_MM = 260;
+    /** Front intake: center to where the ball sits when it is held. Must be at most FRONT_MM. */
+    public static double FRONT_GRAB_MM = 260;
+    /** Back intake: center to where the ball sits when it is held. Must be at most BACK_MM. PLACEHOLDER. */
+    public static double BACK_GRAB_MM = 189;
     /** A ball is 71 mm across (game manual). */
     public static final double BALL_RADIUS_MM = 35.5;
 
+    /** Center to the held ball for the front intake (back = false) or the back intake (back = true). */
+    public static double grabMm(boolean back) {
+        return back ? BACK_GRAB_MM : FRONT_GRAB_MM;
+    }
+
     /**
-     * Center to the ball center when the front tip just touches the ball. The intake can then pull the
-     * ball in, so the ball may sit right against a Hive leg.
+     * Center to the ball center when the leading tip just touches the ball. The intake can then pull
+     * the ball in, so the ball may sit right against a Hive leg.
      */
-    public static double pullInMm() {
-        return FRONT_MM + BALL_RADIUS_MM;
+    public static double pullInMm(boolean back) {
+        return (back ? BACK_MM : FRONT_MM) + BALL_RADIUS_MM;
     }
 
     /** The four body corners for a robot centered at c facing headingRad, as {x, y} pairs. */

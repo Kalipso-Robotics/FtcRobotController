@@ -20,7 +20,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  *   2. Asks the path planner for a route that goes around the Hive legs and the flowers.
  *      In AUTO the route also stays on our own side of the field (manual rule G402).
  *   3. Hands that route to the path follower, which actually drives the wheels.
- *   4. Turns the intake on when we are close to the ball.
+ *   4. Turns the right intake on when we are close to the ball. The robot has an intake at each end,
+ *      and the planner decides which end picks up this ball (the plan says useBackIntake).
  *   5. Finishes when the robot has arrived.
  *
  * If there is no ball to go to, or the planner says the ball cannot be picked up, the action
@@ -58,8 +59,14 @@ public class AutoToBallsPathingAction extends Action {
     /** True in AUTO, when we must stay on our own side of the field. False in TELEOP. */
     private final boolean auto;
 
-    /** An action that runs the intake motor, or null if we only want to drive. */
-    private final Action intake;
+    /** The front intake. An action that runs its motor, or null if we only want to drive. */
+    private final Action frontIntake;
+
+    /** The back intake. An action that runs its motor, or null if we only want to drive. */
+    private final Action backIntake;
+
+    /** The one intake we will run: the front or the back one, whichever the plan picked. */
+    private Action chosenIntake;
 
     /** Where the ball is. If the constructor was not given one, we read it from SharedData at the start. */
     private Point target;
@@ -73,7 +80,7 @@ public class AutoToBallsPathingAction extends Action {
     /** True if we ended without driving because there was no ball or the ball cannot be picked up. */
     private boolean failed = false;
 
-    /** True once the intake has been turned on. After that we keep it running until the end. */
+    /** True once the chosen intake has been turned on. After that we keep it running until the end. */
     private boolean intakeOn = false;
 
     // ------------------------------------------------------------------------------------------
@@ -86,28 +93,32 @@ public class AutoToBallsPathingAction extends Action {
      * reads it when it starts. That way this action does not need to know how the ball was chosen.
      *
      * @param driveTrain the wheels
-     * @param auto       true in AUTO (stay on our side), false in TELEOP
-     * @param intake     the intake action to run near the end, or null to only drive
+     * @param auto        true in AUTO (stay on our side), false in TELEOP
+     * @param frontIntake the front intake action (for example a RunIntake), or null to only drive
+     * @param backIntake  the back intake action, or null to only drive
      */
-    public AutoToBallsPathingAction(DriveTrain driveTrain, boolean auto, Action intake) {
+    public AutoToBallsPathingAction(DriveTrain driveTrain, boolean auto, Action frontIntake, Action backIntake) {
         // Same as the other constructor, with "no ball yet" (null) as the target.
-        this(driveTrain, null, auto, intake);
+        this(driveTrain, null, auto, frontIntake, backIntake);
     }
 
     /**
      * Use this one when you already know where the ball is.
      *
      * @param driveTrain the wheels
-     * @param target     the ball (or cluster center) position, in mm
-     * @param auto       true in AUTO (stay on our side), false in TELEOP
-     * @param intake     the intake action to run near the end, or null to only drive
+     * @param target      the ball (or cluster center) position, in mm
+     * @param auto        true in AUTO (stay on our side), false in TELEOP
+     * @param frontIntake the front intake action, or null to only drive
+     * @param backIntake  the back intake action, or null to only drive
      */
-    public AutoToBallsPathingAction(DriveTrain driveTrain, Point target, boolean auto, Action intake) {
+    public AutoToBallsPathingAction(DriveTrain driveTrain, Point target, boolean auto, Action frontIntake,
+                                    Action backIntake) {
         // Keep our own copy of each thing, because update() runs later and needs them.
         this.driveTrain = driveTrain;
         this.target = target;
         this.auto = auto;
-        this.intake = intake;
+        this.frontIntake = frontIntake;
+        this.backIntake = backIntake;
     }
 
     // ------------------------------------------------------------------------------------------
@@ -137,10 +148,11 @@ public class AutoToBallsPathingAction extends Action {
             }
         }
 
-        // Turn the intake on when we are close enough to the ball, then keep it going.
-        if (intake != null && (intakeOn || closeEnoughToStartIntake())) {
+        // Turn the chosen intake on when we are close enough to the ball, then keep it going.
+        // The other intake stays off, so it cannot pick up balls we only drive past.
+        if (chosenIntake != null && (intakeOn || closeEnoughToStartIntake())) {
             intakeOn = true;
-            intake.updateCheckDone();
+            chosenIntake.updateCheckDone();
         }
 
         // Keep driving the route. When the follower says it has arrived, we are done too.
@@ -165,8 +177,9 @@ public class AutoToBallsPathingAction extends Action {
             return;
         }
 
-        // Step 2: where is the robot right now?
-        Point robot = currentRobotPoint();
+        // Step 2: where is the robot right now, and which way does its front point?
+        Position pose = new Position(SharedData.getOdometryWheelIMUPosition());
+        Point robot = pose.toPoint();
 
         // Step 3: make a planner for the field.
         // In AUTO it also treats the other alliance's half of the field as blocked. The second
@@ -179,9 +192,11 @@ public class AutoToBallsPathingAction extends Action {
             planner = PathPlanning.forField(BUFFER_MM);
         }
 
-        // Step 4: ask the planner how to pick up this ball.
-        // It gives back a route, where the robot should stop, and which way it should face there.
-        plan = planner.planPickup(robot, target);
+        // Step 4: ask the planner how to pick up this ball. We tell it which way the robot faces now,
+        // so it can prefer the intake end that needs the smaller turn.
+        // It gives back a route, where the robot should stop, which way its front should point there,
+        // and which intake (front or back) picks the ball up.
+        plan = planner.planPickup(robot, pose.getTheta(), target);
         KLog.d("AutoToBalls", () -> "robot " + robot + " target " + target
                 + (auto ? " (AUTO)" : "") + " -> " + plan);
 
@@ -191,6 +206,9 @@ public class AutoToBallsPathingAction extends Action {
             return;
         }
 
+        // Remember which intake to run. The other one is never started.
+        chosenIntake = plan.useBackIntake ? backIntake : frontIntake;
+
         // Step 5: give the route to the path follower, one point at a time.
         movement = new AdaptivePurePursuitAction(driveTrain);
         movement.setName(getName() + "_move");
@@ -198,8 +216,9 @@ public class AutoToBallsPathingAction extends Action {
         // Plan the move from where the robot is NOW, not from the end of whatever move came before.
         movement.setPlanStartFrom(null);
 
-        // Each row is {x, y, heading in degrees}. The heading is the way the robot should face at
-        // that point: along the direction it is travelling, and at the last point toward the ball.
+        // Each row is {x, y, heading in degrees}. The heading is the way the robot's FRONT should point
+        // at that point: along the direction it is travelling, and at the last point whatever the plan
+        // says (toward the ball if the front picks it up, away from it if the back does).
         for (double[] point : plan.followerPoints(robot)) {
             double x = point[0];
             double y = point[1];
@@ -216,7 +235,7 @@ public class AutoToBallsPathingAction extends Action {
 
     /**
      * True when it is time to turn the intake on:
-     *   - at once, if the robot will stop with its front touching the ball (the intake has to be
+     *   - at once, if the robot will stop with its tip touching the ball (the intake has to be
      *     running to pull the ball in), or
      *   - once the robot is within INTAKE_START_DISTANCE_MM of its stopping point.
      */

@@ -34,7 +34,7 @@ public class PathPlanningPickupDemoTest {
     public void printCases() {
         Point robot = new Point(500, 1800);
         System.out.println("robot starts at " + robot + ", buffer " + BUFFER_MM + ", grab point "
-                + RobotFootprint.GRAB_MM + " mm ahead of the robot center");
+                + RobotFootprint.FRONT_GRAB_MM + " mm ahead of the robot center");
 
         System.out.println("--- deadzones (inside corners of the legs) ---");
         show("deadzone: low leg, low-Y corner", teleop, robot, new Point(1400, 1380), PickupPlan.Reason.IN_DEADZONE);

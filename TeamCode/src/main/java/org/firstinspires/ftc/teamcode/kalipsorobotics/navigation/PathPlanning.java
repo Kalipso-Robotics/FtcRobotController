@@ -50,6 +50,13 @@ public class PathPlanning {
     private static final double RING_STEP_MM = 10;
     private static final double MAX_RING_STRETCH_MM = 600;
 
+    /**
+     * What turning the robot costs when choosing between the front and the back intake: this many mm of
+     * driving per radian turned (180 degrees = about 3.14 radians). PLACEHOLDER, small because mecanum
+     * can turn while it drives.
+     */
+    public static double TURN_COST_MM_PER_RAD = 150;
+
     /** How far the robot may drive to get out of a buffer ring it starts inside. */
     private static final double MAX_ESCAPE_MM = 800;
 
@@ -174,23 +181,57 @@ public class PathPlanning {
         return plan(robot, target);
     }
 
-    /**
-     * Plans how to pick up a ball. The intake grabs the ball in front of the robot center, so the
-     * center only has to get to a stand-off point GRAB_MM short of the ball (or pullInMm() short, with
-     * the front touching the ball, when the ball is too close to an obstacle for that). For each of
-     * APPROACH_DIRECTIONS facing directions, the stand-off is checked: the rectangular robot body must
-     * not touch a real obstacle (or a deadzone, or in AUTO the opposing side). First choice is a
-     * stand-off outside every buffer ring, planned with plan(). If none works, the stand-off may be
-     * inside a ring: the path goes to the ring edge with plan() and then drives straight in, with the
-     * body checked every RING_STEP_MM. The shortest path wins.
-     */
+    /** Same as the next method, when the robot's current facing is not known. */
     public PickupPlan planPickup(Point robot, Point ball) {
-        double x = ball.getX();
-        double y = ball.getY();
-        if (x < 0 || x > FIELD_SIZE_MM || y < 0 || y > FIELD_SIZE_MM) {
+        return planPickup(robot, Double.NaN, ball);
+    }
+
+    /**
+     * Plans how to pick up a ball with whichever intake works best, the front or the back.
+     *
+     * The intake picks the ball up in front of (or behind) the robot center, so the center only has to
+     * reach a stand-off point a little short of the ball. We try 24 directions to drive in from, and for
+     * each one both ends: the front leading, or the back leading. The robot body (a rectangle) must not
+     * touch a real obstacle, a deadzone, a wall, or in AUTO the other side.
+     *
+     * Order of preference:
+     *   1. The ball ends up inside the intake mouth. If that is impossible (the ball is too close to a
+     *      leg), the front or back tip only touches the ball and the intake pulls it in.
+     *   2. A stand-off outside every buffer ring. Only if that fails, one inside a ring: drive to the
+     *      ring's edge, then straight in.
+     *   3. The cheapest route: its length plus a small cost for turning the robot.
+     *
+     * @param robotHeadingRad which way the robot's front points now, or NaN if unknown (no turning cost)
+     */
+    public PickupPlan planPickup(Point robot, double robotHeadingRad, Point ball) {
+        PickupPlan rejected = rejectBall(ball);
+        if (rejected != null) {
+            return rejected;
+        }
+
+        for (boolean pullIn : new boolean[]{false, true}) {
+            for (boolean intoRing : new boolean[]{false, true}) {
+                PickupPlan best = bestApproach(robot, robotHeadingRad, ball, pullIn, intoRing);
+                if (best != null) {
+                    return best;
+                }
+            }
+        }
+
+        // Nothing worked. Was it the robot's body (it never fits), or the route (it cannot get there)?
+        if (bodyFitsAtAnyAngle(ball)) {
+            return PickupPlan.fail(PickupPlan.Reason.NO_PATH, "no route to any stand-off for ball " + ball);
+        }
+        return PickupPlan.fail(PickupPlan.Reason.NO_APPROACH,
+                "the robot body hits an obstacle at every angle for ball " + ball);
+    }
+
+    /** A plan that says "cannot pick up" for balls that are never reachable, or null if the ball is fine. */
+    private PickupPlan rejectBall(Point ball) {
+        if (ball.getX() < 0 || ball.getX() > FIELD_SIZE_MM || ball.getY() < 0 || ball.getY() > FIELD_SIZE_MM) {
             return PickupPlan.fail(PickupPlan.Reason.OFF_FIELD, "ball " + ball + " is off the field");
         }
-        if (autoSide && x > FieldConfig.MIDLINE_X) {
+        if (autoSide && ball.getX() > FieldConfig.MIDLINE_X) {
             return PickupPlan.fail(PickupPlan.Reason.OPPOSING_SIDE, "ball " + ball + " is on the opposing side");
         }
         if (inside(ball, deadzones)) {
@@ -199,82 +240,121 @@ public class PathPlanning {
         if (inside(ball, hardBoxes)) {
             return PickupPlan.fail(PickupPlan.Reason.INSIDE_OBSTACLE, "ball " + ball + " is inside an obstacle");
         }
+        return null;
+    }
 
-        boolean anyApproach = false;
+    /**
+     * The cheapest way to pick up the ball for one kind of pickup (mouth or pull in) and one kind of
+     * stand-off (outside the ring, or inside it). Null if there is none.
+     */
+    private PickupPlan bestApproach(Point robot, double robotHeadingRad, Point ball, boolean pullIn,
+                                    boolean intoRing) {
         PickupPlan best = null;
-        double bestLength = Double.MAX_VALUE;
-        // Prefer the ball ending up inside the intake mouth (mode 0). Only if that finds nothing, stop
-        // with the front touching the ball and let the intake pull it in (mode 1, the ball may be
-        // against a leg). Within a mode, prefer a stand-off outside every ring (pass 0) over one
-        // inside a ring (pass 1).
-        for (int mode = 0; mode < 2 && best == null; mode++) {
-            boolean pullIn = mode == 1;
-            double distance = pullIn ? RobotFootprint.pullInMm() : RobotFootprint.GRAB_MM;
-            for (int pass = 0; pass < 2 && best == null; pass++) {
-                for (int i = 0; i < APPROACH_DIRECTIONS; i++) {
-                    double heading = 2 * Math.PI * i / APPROACH_DIRECTIONS;
-                    double cos = Math.cos(heading);
-                    double sin = Math.sin(heading);
-                    Point standOff = new Point(x - distance * cos, y - distance * sin);
-                    if (bodyBlocked(standOff, heading)) {
-                        continue;
-                    }
-                    anyApproach = true;
+        double bestCost = Double.MAX_VALUE;
+        for (int i = 0; i < APPROACH_DIRECTIONS; i++) {
+            double aimRad = 2 * Math.PI * i / APPROACH_DIRECTIONS;
+            // Front first, so when two ends cost the same the front wins.
+            for (boolean back : new boolean[]{false, true}) {
+                PickupPlan candidate = approachFrom(robot, ball, aimRad, back, pullIn, intoRing);
+                if (candidate == null) {
+                    continue;
+                }
+                double cost = pathLength(robot, candidate.waypoints)
+                        + turnCostMm(robotHeadingRad, candidate.finalHeadingRad);
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    best = candidate;
+                }
+            }
+        }
+        return best;
+    }
 
-                    boolean inRing = insideBuffer(standOff);
-                    if (inRing != (pass == 1)) {
-                        continue;
-                    }
-                    List<Point> path;
-                    if (!inRing) {
-                        path = plan(robot, standOff);
-                        if (path == null) {
-                            continue;
-                        }
-                    } else {
-                        Point entry = ringEntry(standOff, heading);
-                        if (entry == null) {
-                            continue;
-                        }
-                        List<Point> toEntry = plan(robot, entry);
-                        if (toEntry == null) {
-                            continue;
-                        }
-                        path = new ArrayList<>(toEntry);
-                        path.add(standOff);
-                    }
+    /**
+     * One way to pick up the ball: drive toward it along aimRad, with the front or the back leading.
+     * Null if the robot body would hit something there, or the robot cannot get to the stand-off.
+     */
+    private PickupPlan approachFrom(Point robot, Point ball, double aimRad, boolean back, boolean pullIn,
+                                    boolean intoRing) {
+        Point standOff = standOffFor(ball, aimRad, back, pullIn);
+        double bodyHeading = bodyHeadingFor(aimRad, back);
+        if (bodyBlocked(standOff, bodyHeading)) {
+            return null;
+        }
 
-                    double length = pathLength(robot, path);
-                    if (length < bestLength) {
-                        bestLength = length;
-                        String why = String.format(Locale.US, "stand-off %s facing %.0f deg, %s, %s, path %.0f mm",
-                                standOff, Math.toDegrees(heading), pullIn ? "front touches the ball (pull in)" : "ball in the mouth",
-                                inRing ? "drives into the ring" : "outside the ring", length);
-                        best = PickupPlan.ok(path, standOff, heading, inRing, pullIn, why);
+        // Does this stand-off sit inside a buffer ring? We only want the kind this pass asks for.
+        boolean inRing = insideBuffer(standOff);
+        if (inRing != intoRing) {
+            return null;
+        }
+
+        List<Point> path;
+        if (!inRing) {
+            path = plan(robot, standOff);
+            if (path == null) {
+                return null;
+            }
+        } else {
+            // Route to the ring's edge, then drive straight in to the stand-off.
+            Point entry = ringEntry(standOff, aimRad, bodyHeading);
+            List<Point> toEntry = entry == null ? null : plan(robot, entry);
+            if (toEntry == null) {
+                return null;
+            }
+            path = new ArrayList<>(toEntry);
+            path.add(standOff);
+        }
+
+        String why = String.format(Locale.US, "%s intake, stand-off %s, front points %.0f deg, %s, %s, path %.0f mm",
+                back ? "back" : "front", standOff, Math.toDegrees(bodyHeading),
+                pullIn ? "tip touches the ball (pull in)" : "ball in the mouth",
+                inRing ? "drives into the ring" : "outside the ring", pathLength(robot, path));
+        return PickupPlan.ok(path, standOff, bodyHeading, inRing, pullIn, back, why);
+    }
+
+    /** Where the robot center stops: short of the ball by the reach of the leading intake. */
+    private static Point standOffFor(Point ball, double aimRad, boolean back, boolean pullIn) {
+        double reach = pullIn ? RobotFootprint.pullInMm(back) : RobotFootprint.grabMm(back);
+        return new Point(ball.getX() - reach * Math.cos(aimRad), ball.getY() - reach * Math.sin(aimRad));
+    }
+
+    /** Which way the robot's FRONT points. With the back leading, the front points away from the ball. */
+    private static double bodyHeadingFor(double aimRad, boolean back) {
+        return back ? aimRad + Math.PI : aimRad;
+    }
+
+    /** True if the robot body fits somewhere around the ball, with either end leading. */
+    private boolean bodyFitsAtAnyAngle(Point ball) {
+        for (boolean pullIn : new boolean[]{false, true}) {
+            for (int i = 0; i < APPROACH_DIRECTIONS; i++) {
+                double aimRad = 2 * Math.PI * i / APPROACH_DIRECTIONS;
+                for (boolean back : new boolean[]{false, true}) {
+                    if (!bodyBlocked(standOffFor(ball, aimRad, back, pullIn), bodyHeadingFor(aimRad, back))) {
+                        return true;
                     }
                 }
             }
         }
+        return false;
+    }
 
-        if (best != null) {
-            return best;
+    /** Extra cost, in mm of driving, for turning the robot from one facing to another. 0 if unknown. */
+    private static double turnCostMm(double fromRad, double toRad) {
+        if (Double.isNaN(fromRad)) {
+            return 0;
         }
-        if (anyApproach) {
-            return PickupPlan.fail(PickupPlan.Reason.NO_PATH, "no route to any stand-off for ball " + ball);
-        }
-        return PickupPlan.fail(PickupPlan.Reason.NO_APPROACH, "the robot body hits an obstacle at every angle for ball " + ball);
+        double turn = Math.abs(Math.atan2(Math.sin(toRad - fromRad), Math.cos(toRad - fromRad)));
+        return TURN_COST_MM_PER_RAD * turn;
     }
 
     /**
-     * Walks back from the stand-off, against the facing direction, to the first point outside every
-     * buffer ring. Null if the body hits something on the way or the walk leaves the field.
+     * Walks back from the stand-off, away from the ball, to the first point outside every buffer ring.
+     * Null if the body hits something on the way or the walk leaves the field.
      */
-    private Point ringEntry(Point standOff, double heading) {
-        double cos = Math.cos(heading);
-        double sin = Math.sin(heading);
+    private Point ringEntry(Point standOff, double aimRad, double bodyHeading) {
         for (double t = 0; t <= MAX_RING_STRETCH_MM; t += RING_STEP_MM) {
-            Point p = new Point(standOff.getX() - t * cos, standOff.getY() - t * sin);
-            if (bodyBlocked(p, heading)) {
+            Point p = new Point(standOff.getX() - t * Math.cos(aimRad), standOff.getY() - t * Math.sin(aimRad));
+            if (bodyBlocked(p, bodyHeading)) {
                 return null;
             }
             if (!insideBuffer(p)) {
@@ -284,7 +364,7 @@ public class PathPlanning {
         return null;
     }
 
-    /** True if the robot body, centered at c and facing heading, hits something it must not. */
+    /** True if the robot body, centered at c with its front pointing along heading, hits something it must not. */
     private boolean bodyBlocked(Point c, double heading) {
         for (double[] corner : RobotFootprint.corners(c, heading)) {
             if (corner[0] < 0 || corner[0] > FIELD_SIZE_MM || corner[1] < 0 || corner[1] > FIELD_SIZE_MM) {
