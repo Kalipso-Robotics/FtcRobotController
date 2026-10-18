@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PickupPlan;
@@ -60,7 +63,7 @@ public class AutoToBallsPathingAction extends Action {
     private final boolean auto;
 
     /** The intake action (front and back run together), or null if we only want to drive. */
-    private final Action intake;
+    private IntakeFullAction intakeFullAction;
 
     /** Where the ball is. If the constructor was not given one, we read it from SharedData at the start. */
     private Point target;
@@ -90,9 +93,9 @@ public class AutoToBallsPathingAction extends Action {
      * @param auto        true in AUTO (stay on our side), false in TELEOP
      * @param intake      the intake action (for example a RunIntake), or null to only drive
      */
-    public AutoToBallsPathingAction(DriveTrain driveTrain, boolean auto, Action intake) {
+    public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, boolean auto) {
         // Same as the other constructor, with "no ball yet" (null) as the target.
-        this(driveTrain, null, auto, intake);
+        this(driveTrain, stopper, intake, null, auto);
     }
 
     /**
@@ -101,14 +104,14 @@ public class AutoToBallsPathingAction extends Action {
      * @param driveTrain the wheels
      * @param target      the ball (or cluster center) position, in mm
      * @param auto        true in AUTO (stay on our side), false in TELEOP
-     * @param intake      the intake action, or null to only drive
      */
-    public AutoToBallsPathingAction(DriveTrain driveTrain, Point target, boolean auto, Action intake) {
+
+    public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, boolean auto) {
         // Keep our own copy of each thing, because update() runs later and needs them.
         this.driveTrain = driveTrain;
         this.target = target;
         this.auto = auto;
-        this.intake = intake;
+        intakeFullAction = new IntakeFullAction(stopper, intake, 3000, 1);
     }
 
     // ------------------------------------------------------------------------------------------
@@ -139,9 +142,9 @@ public class AutoToBallsPathingAction extends Action {
         }
 
         // Turn the intake on when we are close enough to the ball, then keep it going.
-        if (intake != null && (intakeOn || closeEnoughToStartIntake())) {
+        if (intakeFullAction != null && (intakeOn || closeEnoughToStartIntake())) {
             intakeOn = true;
-            intake.updateCheckDone();
+            intakeFullAction.updateCheckDone();
         }
 
         // Keep driving the route. When the follower says it has arrived, we are done too.
