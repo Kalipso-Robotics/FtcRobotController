@@ -7,9 +7,12 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cel
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.PartnerMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 public class RedTippingAutoDecideTest {
@@ -171,5 +174,58 @@ public class RedTippingAutoDecideTest {
         assertEquals(true, RedTippingAuto.isOnOurSide(FieldConfig.bFlowerPoint.getX()));
         assertEquals(true, RedTippingAuto.isOnOurSide(FieldConfig.aLaunchPoint.getX()));
         assertEquals(true, RedTippingAuto.isOnOurSide(FieldConfig.bLaunchPoint.getX()));
+    }
+
+    // ---- never cross to the Blue side ----
+
+    @Test
+    public void keepOnOurSide_pullsBackPointsPastTheLimit_andLeavesTheRestAlone() {
+        List<Position> path = new ArrayList<>();
+        path.add(new Position(500, 1000, 0));
+        path.add(new Position(RedTippingAuto.OUR_SIDE_LIMIT_X, 2000, 0)); // exactly on the limit: fine
+        path.add(new Position(2500, 3000, 0));                            // on the Blue side
+        path.add(new Position(FieldConfig.MIDLINE_X + 1, 400, 0));        // one mm over the midline
+
+        int moved = RedTippingAuto.keepOnOurSide(path);
+
+        assertEquals(2, moved);
+        assertEquals(500, path.get(0).getX(), 1e-9);
+        assertEquals(RedTippingAuto.OUR_SIDE_LIMIT_X, path.get(2).getX(), 1e-9);
+        assertEquals(3000, path.get(2).getY(), 1e-9); // y is untouched
+        assertEquals(RedTippingAuto.OUR_SIDE_LIMIT_X, path.get(3).getX(), 1e-9);
+        assertEquals(0, RedTippingAuto.keepOnOurSide(path)); // second pass: nothing left to move
+    }
+
+    @Test
+    public void ourSideLimit_keepsTheWholeRobotBodyOnOurSide() {
+        double bodyEdge = RedTippingAuto.OUR_SIDE_LIMIT_X
+                + org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint.WIDTH_MM / 2;
+        assertEquals(true, bodyEdge <= FieldConfig.MIDLINE_X);
+        // The launch points are real places we drive to, so the limit must not push them.
+        assertEquals(true, FieldConfig.aLaunchPoint.getX() <= RedTippingAuto.OUR_SIDE_LIMIT_X);
+        assertEquals(true, FieldConfig.bLaunchPoint.getX() <= RedTippingAuto.OUR_SIDE_LIMIT_X);
+    }
+
+    @Test
+    public void keepOnOurSide_emptyPath_movesNothing() {
+        assertEquals(0, RedTippingAuto.keepOnOurSide(new ArrayList<Position>()));
+    }
+
+    @Test
+    public void keepOnOurSide_keepsYAndHeading() {
+        List<Position> path = new ArrayList<>();
+        path.add(new Position(3000, 1234, 1.5));
+        RedTippingAuto.keepOnOurSide(path);
+        assertEquals(1234, path.get(0).getY(), 1e-9);
+        assertEquals(1.5, path.get(0).getTheta(), 1e-9);
+    }
+
+    @Test
+    public void keepOnOurSide_launchPointsAndStartAreNotMoved() {
+        List<Position> path = new ArrayList<>();
+        path.add(new Position(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), 0));
+        path.add(new Position(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 0));
+        path.add(new Position(1500, 3658 - 600, 0));
+        assertEquals(0, RedTippingAuto.keepOnOurSide(path));
     }
 }

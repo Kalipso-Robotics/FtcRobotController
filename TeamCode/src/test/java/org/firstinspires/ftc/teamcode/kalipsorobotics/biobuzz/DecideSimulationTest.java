@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.DecideSimulation.HiveState;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.AutoDecider.HiveState;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.PartnerMode;
@@ -26,7 +26,7 @@ public class DecideSimulationTest {
 
     /** Asks decide() with plenty of time: every job fits. Cell A up, Hive still, not at a launch point. */
     private static Move ask(PartnerMode mode, int ballsHeld, Cell upCell, Set<Pile> piles, int looseBallsSeen) {
-        return DecideSimulation.decide(mode, 25, 1, 5, 10, ballsHeld, false, upCell, false, 3, 0, piles,
+        return AutoDecider.decide(mode, 25, 1, 5, 10, ballsHeld, false, upCell, false, 3, 0, piles,
                 looseBallsSeen);
     }
 
@@ -57,9 +57,9 @@ public class DecideSimulationTest {
 
     @Test
     public void hiveTipping_holdingBallsWaits_butEmptyJustGoesForBalls() {
-        assertEquals(Move.WAIT, DecideSimulation.decide(PartnerMode.NOT_SOLO, 25, 1, 5, 10, 4, false, Cell.A,
+        assertEquals(Move.WAIT, AutoDecider.decide(PartnerMode.NOT_SOLO, 25, 1, 5, 10, 4, false, Cell.A,
                 true, 3, 0, ALL_PILES, 0));
-        assertEquals(Move.GET_GARDEN, DecideSimulation.decide(PartnerMode.NOT_SOLO, 25, 1, 5, 10, 0, false,
+        assertEquals(Move.GET_GARDEN, AutoDecider.decide(PartnerMode.NOT_SOLO, 25, 1, 5, 10, 0, false,
                 Cell.A, true, 3, 0, ALL_PILES, 0));
     }
 
@@ -68,38 +68,38 @@ public class DecideSimulationTest {
     @Test
     public void farFromTheLoadingZone_parksEarly() {
         // 3.9 s left but the drive to the Loading Zone takes 3.5 s.
-        assertEquals(Move.PARK, DecideSimulation.decide(PartnerMode.NOT_SOLO, 3.9, 3.5, 6, 10, 4, false,
+        assertEquals(Move.PARK, AutoDecider.decide(PartnerMode.NOT_SOLO, 3.9, 3.5, 6, 10, 4, false,
                 Cell.A, false, 3, 0, ALL_PILES, 0));
     }
 
     @Test
     public void closeToTheLoadingZone_stillHasTimeForAQuickShot() {
-        assertEquals(Move.SHOOT_A, DecideSimulation.decide(PartnerMode.NOT_SOLO, 3.9, 0.4, 2, 10, 4, false,
+        assertEquals(Move.SHOOT_A, AutoDecider.decide(PartnerMode.NOT_SOLO, 3.9, 0.4, 2, 10, 4, false,
                 Cell.A, false, 3, 0, ALL_PILES, 0));
     }
 
     @Test
     public void aShotOrTripThatWouldCostThePark_isNotTaken() {
         // shot: 5 s left, drive + shot + park from the launch point needs 6 s
-        assertEquals(Move.PARK, DecideSimulation.decide(PartnerMode.NOT_SOLO, 5, 2, 6, 10, 4, false,
+        assertEquals(Move.PARK, AutoDecider.decide(PartnerMode.NOT_SOLO, 5, 2, 6, 10, 4, false,
                 Cell.A, false, 3, 0, ALL_PILES, 0));
         // trip: 9 s left needs 10 s, but 11 s is enough
-        assertEquals(Move.PARK, DecideSimulation.decide(PartnerMode.NOT_SOLO, 9, 2, 5, 10, 0, false,
+        assertEquals(Move.PARK, AutoDecider.decide(PartnerMode.NOT_SOLO, 9, 2, 5, 10, 0, false,
                 Cell.A, false, 3, 0, ALL_PILES, 0));
-        assertEquals(Move.GET_GARDEN, DecideSimulation.decide(PartnerMode.NOT_SOLO, 11, 2, 5, 10, 0, false,
+        assertEquals(Move.GET_GARDEN, AutoDecider.decide(PartnerMode.NOT_SOLO, 11, 2, 5, 10, 0, false,
                 Cell.A, false, 3, 0, ALL_PILES, 0));
     }
 
     @Test
     public void lastShot_onlyIfItIsSureToTip() {
         // at the launch point, Cell A has its 3 nectar, we hold 4: 7 tips it
-        assertEquals(Move.SHOOT_A, DecideSimulation.decide(PartnerMode.NOT_SOLO, 2, 2, 5, 10, 4, true,
+        assertEquals(Move.SHOOT_A, AutoDecider.decide(PartnerMode.NOT_SOLO, 2, 2, 5, 10, 4, true,
                 Cell.A, false, 3, 0, ALL_PILES, 0));
         // holding only 3: 6 does not tip it, so park
-        assertEquals(Move.PARK, DecideSimulation.decide(PartnerMode.NOT_SOLO, 2, 2, 5, 10, 3, true,
+        assertEquals(Move.PARK, AutoDecider.decide(PartnerMode.NOT_SOLO, 2, 2, 5, 10, 3, true,
                 Cell.A, false, 3, 0, ALL_PILES, 0));
         // sure tip but the Hive is moving: do not shoot
-        assertEquals(Move.PARK, DecideSimulation.decide(PartnerMode.NOT_SOLO, 2, 2, 5, 10, 4, true,
+        assertEquals(Move.PARK, AutoDecider.decide(PartnerMode.NOT_SOLO, 2, 2, 5, 10, 4, true,
                 Cell.A, true, 3, 0, ALL_PILES, 0));
     }
 
@@ -107,10 +107,10 @@ public class DecideSimulationTest {
 
     @Test
     public void camera_beatsOurGuess_andUnknownFallsBackToIt() {
-        assertEquals(Cell.B, DecideSimulation.resolveUpCell(HiveState.B_UP, Cell.A));
-        assertEquals(Cell.A, DecideSimulation.resolveUpCell(HiveState.A_UP, Cell.B));
-        assertEquals(Cell.B, DecideSimulation.resolveUpCell(HiveState.UNKNOWN, Cell.B));
-        assertEquals(Cell.A, DecideSimulation.resolveUpCell(HiveState.TIPPING, Cell.A));
+        assertEquals(Cell.B, AutoDecider.resolveUpCell(HiveState.B_UP, Cell.A));
+        assertEquals(Cell.A, AutoDecider.resolveUpCell(HiveState.A_UP, Cell.B));
+        assertEquals(Cell.B, AutoDecider.resolveUpCell(HiveState.UNKNOWN, Cell.B));
+        assertEquals(Cell.A, AutoDecider.resolveUpCell(HiveState.TIPPING, Cell.A));
     }
 
     @Test
