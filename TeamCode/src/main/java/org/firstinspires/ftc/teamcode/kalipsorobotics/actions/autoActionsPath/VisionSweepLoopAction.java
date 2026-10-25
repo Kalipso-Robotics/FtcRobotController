@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.VisionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -13,9 +15,13 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
-public class VisionSweepAction extends KActionSet {
+public class VisionSweepLoopAction extends KActionSet {
 
-    public VisionSweepAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, AllianceColor allianceColor, boolean useAdaptivePP) {
+    ElapsedTime autoTimer;
+
+    public VisionSweepLoopAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, ElapsedTime autoTimer, AllianceColor allianceColor, boolean useAdaptivePP) {
+        this.autoTimer = autoTimer;
+
         VisionAction vision = new VisionAction(() -> SharedData.getBallInformation(), 1);
         vision.setName("vision");
         this.addAction(vision);
@@ -29,6 +35,23 @@ public class VisionSweepAction extends KActionSet {
         autoToBallsPathingAction.setDependentActions(clusterDetectionAction);
         autoToBallsPathingAction.setName("autoToBallsPathingAction");
         this.addAction(autoToBallsPathingAction);
+    }
+
+    @Override
+    public void update() {
+        super.update();
+
+        double timeToPark = 0; //todo calculation
+
+        if (timeToPark >= 30000-autoTimer.milliseconds()) {
+            isDone = true;
+        } else {
+            isDone = false;
+        }
+
+        // decision will update and return a ???
+
+        // then need to readjust plan based on decision
     }
 
 
