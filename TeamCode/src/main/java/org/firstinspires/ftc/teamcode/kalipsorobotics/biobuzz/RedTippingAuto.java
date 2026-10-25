@@ -319,18 +319,20 @@ public class RedTippingAuto extends KOpMode {
     KActionSet autoTipping;
 
     private DriveTrain driveTrain;
-//    Shooter shooter = null;
-//    Intake intake = null;
-//    Stopper stopper = null;
-//    Turret turret = null;
-//
-//    TurretAutoAlign turretAutoAlign = null;
+    Shooter shooter = null;
+    Intake intake = null;
+    Stopper stopper = null;
+    Turret turret = null;
+
+    TurretAutoAlign turretAutoAlign = null;
 
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.X_INIT_SETUP_MM = FieldConfig.aTargetPoint.getX(); // the turret starts aimed at the first Cell
+        TurretConfig.Y_INIT_SETUP_MM = FieldConfig.aTargetPoint.getY();
     }
 
     @Override
@@ -351,16 +353,14 @@ public class RedTippingAuto extends KOpMode {
         autoTipping = new KActionSet();
         KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");
         KLog.d("RedAutoDepot-Init", () -> "opModeUtilities is: " + (opModeUtilities != null ? "NOT NULL" : "NULL"));
-//        intake = new Intake(opModeUtilities);
-//        shooter = new Shooter(opModeUtilities);
-//        stopper = new Stopper(opModeUtilities);
-//        shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
-//        shooterRun.setShooterRunMode(ShooterRunMode.STOP);
-//        KLog.d("RedAutoDepot-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
-//
-//        Turret.setInstanceNull();
-//        turret = Turret.getInstance(opModeUtilities);
-//        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        intake = new Intake(opModeUtilities);
+        shooter = new Shooter(opModeUtilities);
+        stopper = new Stopper(opModeUtilities);
+
+        Turret.setInstanceNull();
+        turret = Turret.getInstance(opModeUtilities);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        turretAutoAlign.setToleranceDeg(5);
     }
 
     @Override
@@ -368,7 +368,7 @@ public class RedTippingAuto extends KOpMode {
         initializeRobot();
 
         // A shoot, go to garden
-        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
+        RoundTripAction trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, FieldConfig.aTargetPoint, FieldConfig.aLaunchPoint, allianceColor, true);
         trip1.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
         trip1.getMoveToBalls().addPoint(FieldConfig.aLaunchPoint.getX(),FieldConfig.aLaunchPoint.getY(),-180);
         trip1.getMoveToBalls().addPoint(600,FieldConfig.aLaunchPoint.getY(),-180);
@@ -379,7 +379,7 @@ public class RedTippingAuto extends KOpMode {
         autoTipping.addAction(trip1);
 
         // B shoot, go to B flower
-        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
+        RoundTripAction trip2 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, FieldConfig.bTargetPoint, FieldConfig.bLaunchPoint, allianceColor, true);
         trip2.getMoveToShoot().addPoint(600, 3658-600, 0);
         trip2.getMoveToShoot().addPoint(1500, 3658-600, 90);
 //        trip2.getMoveToShoot().addPoint(1300, 600, -90);
@@ -392,7 +392,7 @@ public class RedTippingAuto extends KOpMode {
         autoTipping.addAction(trip2);
 
         // A shoot, go to A flower
-        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
+        RoundTripAction trip3 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, FieldConfig.aTargetPoint, FieldConfig.aLaunchPoint, allianceColor, true);
         trip3.getMoveToShoot().addPoint(900, 600, -90);
         trip3.getMoveToShoot().addPoint(900, 2700, -90);
         trip3.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
@@ -402,7 +402,7 @@ public class RedTippingAuto extends KOpMode {
         autoTipping.addAction(trip3);
 
         // B shoot, stay B side
-        RoundTripAction trip4 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
+        RoundTripAction trip4 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, FieldConfig.bTargetPoint, FieldConfig.bLaunchPoint, allianceColor, true);
         trip4.getMoveToShoot().addPoint(600, 3658-600, 0);
         trip4.getMoveToShoot().addPoint(1500, 3658-600, 90);
         trip4.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
@@ -412,7 +412,7 @@ public class RedTippingAuto extends KOpMode {
         autoTipping.addAction(trip4);
 
         // A shoot, go to A side
-        RoundTripAction trip5 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
+        RoundTripAction trip5 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, FieldConfig.aTargetPoint, FieldConfig.aLaunchPoint, allianceColor, true);
         trip5.getMoveToShoot().addPoint(900, 600, -90);
         trip5.getMoveToShoot().addPoint(900, 2700, -90);
         trip5.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), -90);
@@ -422,7 +422,7 @@ public class RedTippingAuto extends KOpMode {
         autoTipping.addAction(trip5);
 
         // B shoot
-        RoundTripAction trip6 = new RoundTripAction(opModeUtilities, driveTrain, /* turretAutoAlign, shooter, stopper, intake, */ allianceColor, true);
+        RoundTripAction trip6 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, FieldConfig.bTargetPoint, FieldConfig.bLaunchPoint, allianceColor, true);
         trip6.getMoveToShoot().addPoint(FieldConfig.aLaunchPoint.getX(), FieldConfig.aLaunchPoint.getY(), 90);
         trip6.getMoveToShoot().addPoint(FieldConfig.bLaunchPoint.getX(), FieldConfig.bLaunchPoint.getY(), 90);
         trip6.setName("trip6");

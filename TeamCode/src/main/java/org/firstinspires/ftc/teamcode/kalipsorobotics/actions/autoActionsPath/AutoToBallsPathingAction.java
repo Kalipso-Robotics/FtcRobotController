@@ -177,11 +177,13 @@ public class AutoToBallsPathingAction extends Action {
         // In AUTO it also treats the other alliance's half of the field as blocked. The second
         // number is how far the robot's center must stay from the middle line: half the robot's
         // width, so the whole body stays on our side.
+        // While the Hive is tipping, nothing may drive under it, so that space is blocked too.
+        boolean hiveTipping = SharedData.isHiveTipping();
         PathPlanning planner;
         if (auto) {
-            planner = PathPlanning.forFieldAuto(BUFFER_MM, RobotFootprint.WIDTH_MM / 2);
+            planner = PathPlanning.forFieldAuto(BUFFER_MM, RobotFootprint.WIDTH_MM / 2, hiveTipping);
         } else {
-            planner = PathPlanning.forField(BUFFER_MM);
+            planner = PathPlanning.forField(BUFFER_MM, hiveTipping);
         }
 
         // Step 4: ask the planner how to pick up this ball. We tell it which way the robot faces now,
