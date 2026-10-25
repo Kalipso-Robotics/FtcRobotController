@@ -71,6 +71,62 @@ public class PathPlanningAutoSideTest {
         assertTrue("only " + plans + " plans were checked", plans > 1000);
     }
 
+    // ---- detours next to the Hive, with the AUTO block on ----
+
+    @Test
+    public void hiveEdge_launchPointToLaunchPoint_goesAroundTheOutside() {
+        List<Point> path = auto.plan(FieldConfig.aLaunchPoint, FieldConfig.bLaunchPoint);
+        assertNotNull(path);
+        Point previous = FieldConfig.aLaunchPoint;
+        for (Point next : path) {
+            assertStaysOnOwnSide(previous, next);
+            previous = next;
+        }
+        // the gap between the legs is closed, so the route must bend out past the low leg's buffer
+        double legBufferLeftX = FieldConfig.HIVE_LEG_LOW_X[0] - BUFFER_MM;
+        assertTrue(path.get(0).getX() <= legBufferLeftX);
+    }
+
+    @Test
+    public void hiveEdge_launchPointsCanLeaveToTheGardenAndComeBack() {
+        assertNotNull(auto.plan(FieldConfig.aLaunchPoint, FieldConfig.gardenPoint));
+        assertNotNull(auto.plan(FieldConfig.gardenPoint, FieldConfig.aLaunchPoint));
+        assertNotNull(auto.plan(FieldConfig.bLaunchPoint, 
+                new Point(FieldConfig.bFlowerPoint.getX(), FieldConfig.bFlowerPoint.getY() + 500)));
+    }
+
+    @Test
+    public void hiveEdge_goalJustOutsideTheLegBuffer_isReachable() {
+        Point goal = new Point(FieldConfig.HIVE_LEG_LOW_X[0] - BUFFER_MM - 5, FieldConfig.MIDLINE_X);
+        assertNotNull(auto.plan(FieldConfig.bLaunchPoint, goal));
+    }
+
+    @Test
+    public void hiveEdge_goalJustInsideTheLegBuffer_isRefusedNotCrashed() {
+        Point goal = new Point(FieldConfig.HIVE_LEG_LOW_X[0] - BUFFER_MM + 5, FieldConfig.MIDLINE_X);
+        assertNull(auto.plan(FieldConfig.bLaunchPoint, goal));
+    }
+
+    @Test
+    public void hiveEdge_everyPlanBetweenRealPlacesStaysOnOurSide() {
+        Point[] places = {
+                new Point(1389.5, 3486.5), FieldConfig.aLaunchPoint, FieldConfig.bLaunchPoint, FieldConfig.gardenPoint,
+                new Point(FieldConfig.aFlowerPoint.getX() + 500, FieldConfig.aFlowerPoint.getY()),
+                new Point(FieldConfig.bFlowerPoint.getX(), FieldConfig.bFlowerPoint.getY() + 500),
+                new Point(100, 107.6)};
+        for (Point from : places) {
+            for (Point to : places) {
+                List<Point> path = auto.plan(from, to);
+                assertNotNull(from + " -> " + to, path);
+                Point previous = from;
+                for (Point next : path) {
+                    assertStaysOnOwnSide(previous, next);
+                    previous = next;
+                }
+            }
+        }
+    }
+
     /** Samples the segment every 10 mm so a path that clips across the midline is caught. */
     private static void assertStaysOnOwnSide(Point a, Point b) {
         double length = Point.distance(a, b);

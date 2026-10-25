@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInte
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -21,6 +22,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -28,6 +30,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 @Autonomous
@@ -116,6 +119,30 @@ public class RedTippingAuto extends KOpMode {
      */
     public static boolean isOnOurSide(double ballXmm) {
         return ballXmm < FieldConfig.MIDLINE_X;
+    }
+
+    /**
+     * The furthest x (mm) the robot's CENTER may ever be sent to in AUTO. Red's own side is x < MIDLINE_X,
+     * and we stay half a robot-width back from that line so the whole body stays on our side.
+     */
+    public static final double OUR_SIDE_LIMIT_X = FieldConfig.MIDLINE_X - RobotFootprint.WIDTH_MM / 2;
+
+    /**
+     * Pulls every point of a path back onto our side of the field. A point with x past the limit is
+     * moved to the limit (its y and heading stay the same). Smoothing only ever bends the path inside
+     * the points we give it, so if no point is past the limit, the driven path is not either.
+     * Returns how many points had to be moved (0 means the path was already fine).
+     */
+    public static int keepOnOurSide(List<Position> pathPoints) {
+        int pointsMoved = 0;
+        for (Position point : pathPoints) {
+            boolean pastTheLimit = (point.getX() > OUR_SIDE_LIMIT_X);
+            if (pastTheLimit) {
+                point.addX(OUR_SIDE_LIMIT_X - point.getX());
+                pointsMoved++;
+            }
+        }
+        return pointsMoved;
     }
 
     /** The order we visit the piles in. The partner mode decides it. */
@@ -407,6 +434,21 @@ public class RedTippingAuto extends KOpMode {
         park.setName("park");
         park.setDependentActions(trip6);
         autoTipping.addAction(park);
+
+        // Hard rule: the robot never crosses to the Blue side (x past the midline). Every point of every
+        // path is pulled back before the paths are built. A moved point means a waypoint above is wrong.
+        int pointsMoved = 0;
+        for (RoundTripAction trip : new RoundTripAction[]{trip1, trip2, trip3, trip4, trip5, trip6}) {
+            pointsMoved += keepOnOurSide(trip.getMoveToShoot().getPathPoints());
+            pointsMoved += keepOnOurSide(trip.getMoveToBalls().getPathPoints());
+        }
+        pointsMoved += keepOnOurSide(park.getPathPoints());
+        if (pointsMoved > 0) {
+            final int moved = pointsMoved;
+            KLog.d("OurSide", () -> "WARNING: " + moved + " waypoint(s) were past the midline and were pulled back");
+            telemetry.addData("WARNING", moved + " waypoint(s) crossed to the Blue side and were pulled back");
+            telemetry.update();
+        }
 
         waitForStartPrecomputingPaths();
 
