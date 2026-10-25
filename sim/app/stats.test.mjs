@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { analyse, THRESHOLDS } from './web/stats.js';
+import { analyse, rectGap, THRESHOLDS, eventText, fmtLen, SCORING, score, diffRuns, estimatedChecks, placeName, problems, nextProblem } from './web/stats.js';
 
 /** A made-up run with known numbers: 1 s driving at 1000 mm/s along x, then standing still until 5 s. */
 function run({ odoOffset = 0, events = [], warnings = [], error = null, finished = true, startX = 100, heading = 0, telemetry = [] } = {}) {
@@ -99,4 +99,109 @@ test('a run with balls but nothing happening to them has no ball checks', () => 
   const a = analyse(base);
   assert.equal(a.hasBalls, false);
   assert.equal(a.checks.find((c) => c.id === 'shots'), undefined);
+});
+
+test('diff: a new contact is a new problem, fewer shots in is worse', () => {
+  const prev = analyse(run()), cur = analyse(run({ events: [{ t: 12.4, text: 'robot touched wall-yMin' }] }));
+  const d = diffRuns(prev, cur);
+  assert.equal(d[0].kind, 'new'); assert.equal(d[0].id, 'contacts'); assert.equal(d[0].seek, 12.4);
+  assert.equal(d[0].label, 'New: touched the top wall');
+  assert.deepEqual(diffRuns(null, cur), []);
+});
+
+test('diff: a problem that went away is fixed, and a number that moved says better or worse', () => {
+  const prev = analyse(run({ odoOffset: 50 })), cur = analyse(run({ odoOffset: 10 }));
+  const d = diffRuns(prev, cur);
+  assert.equal(d[0].kind, 'fixed'); assert.equal(d[0].label, 'Fixed: Odometry tracks the robot');
+  const odo = d.find((x) => x.id === 'odoMax');
+  assert.equal(odo.kind, 'changed'); assert.equal(odo.better, true); assert.equal(odo.from, 50); assert.equal(odo.to, 10);
+});
+
+test('score: leave + one red tip, tip is an estimate', () => {
+  const r = run({ events: [{ t: 9.8, text: 'red-hive tipped' }] }); r.alliance = 'red';
+  const s = score(r, analyse(r));
+  assert.equal(s.final, SCORING.leave + SCORING.tip); assert.equal(s.est, true);
+  assert.equal(s.at(5), SCORING.leave); assert.equal(s.at(10), SCORING.leave + SCORING.tip);
+  assert.equal(s.items.find((i) => i.kind === 'leave').est, false);
+});
+
+test('score: a blue tip does not count for red, and a robot that never left scores nothing', () => {
+  const r = run({ events: [{ t: 9.8, text: 'blue-hive tipped' }] }); r.alliance = 'red';
+  assert.equal(score(r, analyse(r)).final, SCORING.leave);
+  const still = run(); still.alliance = 'red'; still.frames.forEach((f) => { f[1] = 100; f[4] = 100; });
+  assert.equal(score(still, analyse(still)).final, 0);
+});
+
+test('score: parking counts only when decide() ended on PARK and the robot is standing still', () => {
+  const r = run({ telemetry: [{ t: 0, items: { 'decide says': 'GET_GARDEN' } }, { t: 2, items: { 'decide says': 'PARK' } }] }); r.alliance = 'red';
+  const park = score(r, analyse(r)).items.find((i) => i.kind === 'park');
+  assert.equal(park.points, SCORING.park); assert.equal(park.est, true);
+  const moving = run({ telemetry: [{ t: 0, items: { 'decide says': 'PARK' } }] }); moving.alliance = 'red';
+  moving.frames.forEach((f, i) => { f[1] = 100 + i * 20; });
+  assert.equal(score(moving, analyse(moving)).items.some((i) => i.kind === 'park'), false);
+});
+
+test('nextProblem wraps from the last problem to the first', () => {
+  const a = { checks: [{ id: 'x', status: 'warn', seek: 4 }, { id: 'y', status: 'pass', seek: 3 }, { id: 'z', status: 'warn', seek: 2 }] };
+  assert.deepEqual(problems(a).map((c) => c.id), ['z', 'x']);
+  assert.equal(nextProblem(a, 4.5, 1).seek, 2);
+  assert.equal(nextProblem(a, 2.5, 1).seek, 4);
+  assert.equal(nextProblem(a, 1, -1).seek, 4);
+  assert.equal(nextProblem({ checks: [] }, 0, 1), null);
+});
+
+test('estimatedChecks follows affects of unmeasured params only', () => {
+  assert.deepEqual([...estimatedChecks([{ id: 'a', unmeasured: true, affects: ['tips', 'score'] }, { id: 'b', affects: ['shots'] }])].sort(), ['score', 'tips']);
+});
+
+test('placeName turns wall and Flower ids into words', () => {
+  assert.equal(placeName('wall-yMin'), 'the top wall');
+  assert.equal(placeName('flower-C'), 'Flower C');
+  assert.equal(placeName('hive-leg-low'), "the Hive's low leg");
+  assert.equal(placeName('partner'), 'R2');
+  assert.equal(placeName('mystery'), 'mystery');
+});
+
+test('eventText says what happened in plain words', () => {
+  assert.equal(eventText('robot touched wall-yMin'), 'Touched the top wall');
+  assert.equal(eventText('picked up a pollen ball (1 held)'), 'Picked up pollen (1 held)');
+  assert.equal(eventText('red-hive tipped'), 'Red Hive tipped');
+  assert.equal(eventText('something else'), 'something else');
+});
+
+test('lengths read in feet and inches', () => {
+  assert.equal(fmtLen(10363), '34 ft');
+  assert.equal(fmtLen(228.6), '9 in');
+  assert.equal(fmtLen(1463), '4.8 ft');
+});
+
+/** R2 parked at (x, y) for the whole run, 400 mm wide and 400 mm long. */
+const withPartner = (r, x, y) => ({ ...r, partner: { name: 'p', robot: { front: 200, back: 200, width: 400 }, frames: r.frames.map((f) => [f[0], x, y, 0]) } });
+
+test('rectGap is 0 when overlapping and the edge distance when apart', () => {
+  const sq = (x) => [[x, 0], [x + 100, 0], [x + 100, 100], [x, 100]];
+  assert.equal(rectGap(sq(0), sq(50)), 0);
+  assert.equal(rectGap(sq(0), sq(250)), 150);
+});
+
+test('touching the partner fails Avoids partner', () => {
+  const a = analyse(withPartner(run({ events: [{ t: 18.1, text: 'robot touched partner' }] }), 3000, 3000));
+  const c = a.checks.find((x) => x.id === 'partner');
+  assert.equal(c.status, 'fail');
+  assert.equal(c.seek, 18.1);
+});
+
+test('a close pass warns and reports the closest gap', () => {
+  const a = analyse(withPartner(run(), 1100, 1028.5));
+  const c = a.checks.find((x) => x.id === 'partner');
+  assert.equal(c.status, 'warn');
+  assert.ok(Math.abs(a.numbers.partnerClosest - 100) < 1, `closest ${a.numbers.partnerClosest}`);
+});
+
+test('a far partner passes', () => {
+  assert.equal(analyse(withPartner(run(), 3000, 3000)).checks.find((x) => x.id === 'partner').status, 'pass');
+});
+
+test('no partner, no check', () => {
+  assert.equal(analyse(run()).checks.some((c) => c.id === 'partner'), false);
 });

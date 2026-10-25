@@ -12,6 +12,7 @@ export const THRESHOLDS = {
   idleTailWarn: 3,                     // seconds standing still at the end of the match
   standingMmPerS: 20, standingRadPerS: 0.05, // slower than this counts as standing still
   minIdleStretch: 0.5,                 // shortest standing-still stretch worth reporting, seconds
+  partnerWarnMm: 150,                  // R1 closer than this to the partner R2 is worth a look
 };
 
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -37,6 +38,22 @@ function corners(frame, robot) {
   const c = Math.cos(theta), s = Math.sin(theta), h = robot.width / 2;
   return [[robot.front, h], [robot.front, -h], [-robot.back, -h], [-robot.back, h]]
     .map(([lx, ly]) => [x + lx * c - ly * s, y + lx * s + ly * c]);
+}
+
+/** Shortest distance between two convex quads given as corner lists (mm). 0 when they overlap. */
+export function rectGap(a, b) {
+  const axes = (q) => q.map((p, i) => { const n = q[(i + 1) % q.length]; return [-(n[1] - p[1]), n[0] - p[0]]; });
+  const span = (q, [ax, ay]) => { const v = q.map(([x, y]) => x * ax + y * ay); return [Math.min(...v), Math.max(...v)]; };
+  const apart = [...axes(a), ...axes(b)].some((ax) => { const p = span(a, ax), r = span(b, ax); return p[1] < r[0] || r[1] < p[0]; });
+  if (!apart) return 0;
+  const toSegment = ([px, py], [x1, y1], [x2, y2]) => {
+    const dx = x2 - x1, dy = y2 - y1;
+    const f = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(px - (x1 + f * dx), py - (y1 + f * dy));
+  };
+  let best = Infinity;
+  for (const [from, to] of [[a, b], [b, a]]) for (const p of from) for (let i = 0; i < to.length; i++) best = Math.min(best, toSegment(p, to[i], to[(i + 1) % to.length]));
+  return best;
 }
 
 export function analyse(run) {
@@ -107,6 +124,17 @@ export function analyse(run) {
   const contactsByName = {};
   for (const c of contacts) contactsByName[c.name] = (contactsByName[c.name] || 0) + 1;
 
+  // ---- partner R2: closest approach (frames and partner frames share one cadence) ----
+  let partnerClosest = Infinity, partnerClosestAt = 0;
+  if (run.partner) {
+    const pf = run.partner.frames;
+    for (let i = 0, j = 0; i < frames.length && pf.length; i++) {
+      while (j + 1 < pf.length && Math.abs(pf[j + 1][0] - frames[i][0]) <= Math.abs(pf[j][0] - frames[i][0])) j++;
+      const gap = rectGap(corners(frames[i], run.field.robot), corners(pf[j], run.partner.robot));
+      if (gap < partnerClosest) { partnerClosest = gap; partnerClosestAt = frames[i][0]; }
+    }
+  }
+
   // ---- balls (only runs that have balls, and only when something happened to them) ----
   const hasBalls = Boolean(run.balls && run.balls.info.length);
   const eventTimes = (test) => run.events.filter((e) => e.t >= 0 && test(e.text)).map((e) => e.t);
@@ -160,6 +188,13 @@ export function analyse(run) {
   if (maxX > midline) add('side', 'Stays on its own side', 'fail', `The robot body reached ${(maxX - midline).toFixed(0)} mm past the midline at ${maxXAt.toFixed(1)} s.`, maxXAt);
   else add('side', 'Stays on its own side', 'pass', `The body got within ${(midline - maxX).toFixed(0)} mm of the midline at most.`, maxXAt);
 
+  if (run.partner) {
+    const touch = run.events.find((e) => e.t >= 0 && e.text === 'robot touched partner');
+    const closest = `Closest ${fmtLen(partnerClosest)} at ${partnerClosestAt.toFixed(1)} s.`;
+    if (touch) add('partner', 'Avoids partner', 'fail', `The robot touched the partner R2 at ${touch.t.toFixed(2)} s. ${closest}`, touch.t);
+    else add('partner', 'Avoids partner', partnerClosest < THRESHOLDS.partnerWarnMm ? 'warn' : 'pass', closest, partnerClosestAt);
+  }
+
   if (idleTail > THRESHOLDS.idleTailWarn) add('idle', 'Uses the whole match', 'warn',
     `The robot stood still for the last ${idleTail.toFixed(1)} s (from ${tail.from.toFixed(1)} s).`, tail.from);
   else add('idle', 'Uses the whole match', 'pass', idleTail > 0 ? `It stood still for the last ${idleTail.toFixed(1)} s.` : 'It was still moving at the end.');
@@ -179,7 +214,7 @@ export function analyse(run) {
   const crashed = checks.find((c) => c.id === 'ran').status === 'fail';
   const verdictText = verdict === 'clean' ? 'Clean run' : verdict === 'attention' ? 'Needs a look' : crashed ? 'Run failed' : 'Problems found';
 
-  return {
+  const result = {
     verdict, verdictText, needLook, checks,
     numbers: {
       used: run.used, distance, rotationDeg: deg(rotation), peakSpeed, peakSpeedAt, peakAccel, peakAccelAt,
@@ -188,6 +223,7 @@ export function analyse(run) {
       contacts: contacts.length, setupContacts: setupContacts.length,
       odoMax, odoMaxAt, odoMean: odoCount ? odoSum / odoCount : NaN, odoFinal, headingMax, headingMaxAt, headingFinal,
       maxX, midline, frames: frames.length,
+      partnerClosest: run.partner ? partnerClosest : null, partnerClosestAt: run.partner ? partnerClosestAt : null,
       pickups: pickups.length, shots: shots.length, shotsIn: shotsIn.length, hiveTips: tips.length, heldAtEnd,
       simMs: run.meta ? run.meta.simMs : null,
       speedup: run.meta && run.meta.simMs ? (t1 - t0) / (run.meta.simMs / 1000) : null,
@@ -197,4 +233,120 @@ export function analyse(run) {
     contacts, setupContacts, contactsByName, idle, decisions, decisionTime,
     duration: t1,
   };
+  result.score = score(run, result);
+  return result;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Score, run-to-run diff and problem navigation
+// ---------------------------------------------------------------------------------------------
+
+/** Design values for the auto score. TODO(Darren): confirm against the BIOBUZZ manual. */
+export const SCORING = { leave: 3, tip: 20, park: 5, leaveMm: 300 };
+
+/**
+ * The auto score as the sim can see it. LEAVE is measured (the true pose moved leaveMm from the start); TIP and PARK
+ * are estimates (they rest on unmeasured tip mass, and there is no park zone in the field model yet).
+ * at(t) is the total at match time t.
+ */
+export function score(run, a) {
+  const items = [];
+  const f0 = run.frames[0];
+  const gone = run.frames.find((f) => Math.hypot(f[1] - f0[1], f[2] - f0[2]) >= SCORING.leaveMm);
+  if (gone) items.push({ t: gone[0], label: 'Left the start', points: SCORING.leave, kind: 'leave', est: false });
+  if (run.alliance) {
+    for (const e of run.events) {
+      if (e.t >= 0 && e.text === `${run.alliance}-hive tipped`) items.push({ t: e.t, label: 'Tipped our Hive', points: SCORING.tip, kind: 'tip', est: true });
+    }
+  }
+  const lastMove = a.decisions[a.decisions.length - 1];
+  const tail = a.idle.length && a.idle[a.idle.length - 1].to >= a.duration - 0.1 ? a.idle[a.idle.length - 1] : null;
+  if (lastMove && lastMove.move === 'PARK' && tail) {
+    items.push({ t: tail.from, label: 'Parked (no park zone in the field model yet)', points: SCORING.park, kind: 'park', est: true });
+  }
+  items.sort((x, y) => x.t - y.t);
+  const total = (items_) => items_.reduce((sum, i) => sum + i.points, 0);
+  return { items, final: total(items), total: total(items), est: items.some((i) => i.est), at: (t) => total(items.filter((i) => i.t <= t)) };
+}
+
+/** Check ids (and 'score') that depend on a value nobody has measured yet. */
+export function estimatedChecks(paramDefs) {
+  const ids = new Set();
+  for (const def of paramDefs) if (def.unmeasured) for (const id of def.affects || []) ids.add(id);
+  return ids;
+}
+
+const WALLS = { 'wall-yMin': 'the top wall', 'wall-yMax': 'the bottom wall', 'wall-xMin': 'the left wall', 'wall-xMax': 'the right wall' };
+/** A name from the recorded events in words a person would say. */
+export function placeName(name) {
+  if (WALLS[name]) return WALLS[name];
+  const flower = /^flower-([A-D])$/.exec(name);
+  if (flower) return `Flower ${flower[1]}`;
+  if (name === 'hive-leg-low' || name === 'hive-leg-high') return `the Hive's ${name.slice(9)} leg`;
+  if (name === 'partner') return 'R2';
+  return name;
+}
+
+const CHANGED = [  // [id, label, read from analysis, higher is better, where to look]
+  ['shotsIn', 'Shots in', (a) => a.numbers.shotsIn, true, (a) => a.checks.find((c) => c.id === 'shots')?.seek ?? null],
+  ['odoMax', 'Odometry error (mm)', (a) => Math.round(a.numbers.odoMax), false, (a) => a.numbers.odoMaxAt],
+  ['pickups', 'Balls picked up', (a) => a.numbers.pickups, true, () => null],
+  ['contacts', 'Contacts', (a) => a.numbers.contacts, false, (a) => a.checks.find((c) => c.id === 'contacts')?.seek ?? null],
+  ['score', 'Auto score', (a) => a.score.final, true, () => null],
+];
+
+/** What changed from the previous run to this one, as rows for the rail: new problems, fixed ones, then moved numbers. */
+export function diffRuns(prev, cur) {
+  if (!prev) return [];
+  const rows = [];
+  const was = new Map(prev.checks.map((c) => [c.id, c.status]));
+  for (const c of cur.checks) {
+    const before = was.get(c.id);
+    if (before === undefined) continue;
+    if (before === 'pass' && c.status !== 'pass') {
+      const label = c.id === 'contacts' && cur.contacts.length ? `New: touched ${placeName(cur.contacts[0].name)}`
+        : `New: ${c.label} ${c.status === 'fail' ? 'fails' : 'needs a look'}`;
+      rows.push({ kind: 'new', id: c.id, label, seek: c.seek });
+    }
+  }
+  for (const c of cur.checks) if (was.get(c.id) && was.get(c.id) !== 'pass' && c.status === 'pass') rows.push({ kind: 'fixed', id: c.id, label: `Fixed: ${c.label}`, seek: null });
+  for (const [id, label, read, higherBetter, where] of CHANGED) {
+    const from = read(prev), to = read(cur);
+    if (!Number.isFinite(from) || !Number.isFinite(to) || from === to) continue;
+    rows.push({ kind: 'changed', id, label, from, to, better: higherBetter ? to > from : to < from, seek: where(cur) });
+  }
+  return rows;
+}
+
+/** The checks that are not passing, in the order they happen. Checks with no moment in the run go last. */
+export function problems(a) {
+  return a.checks.filter((c) => c.status !== 'pass').sort((x, y) => (x.seek ?? Infinity) - (y.seek ?? Infinity));
+}
+
+/** The next (dir 1) or previous (dir -1) problem from time t, wrapping around. Null when everything passes. */
+export function nextProblem(a, t, dir) {
+  const all = problems(a);
+  const list = all.filter((c) => c.seek !== null).length ? all.filter((c) => c.seek !== null) : all;
+  if (!list.length) return null;
+  const eps = 1e-3;
+  if (dir >= 0) return list.find((c) => (c.seek ?? -Infinity) > t + eps) || list[0];
+  return [...list].reverse().find((c) => (c.seek ?? Infinity) < t - eps) || list[list.length - 1];
+}
+
+/** A recorded event's text in the words the rail and drawer show. */
+export function eventText(text) {
+  const touched = /^robot touched (.+)$/.exec(text);
+  if (touched) return `Touched ${placeName(touched[1])}`;
+  const picked = /^picked up a pollen ball(.*)$/.exec(text);
+  if (picked) return `Picked up pollen${picked[1]}`;
+  const tipped = /^(red|blue)-hive tipped$/.exec(text);
+  if (tipped) return `${tipped[1] === 'red' ? 'Red' : 'Blue'} Hive tipped`;
+  return text;
+}
+
+/** A distance for people: inches when short, feet otherwise (the Kit's units table). Inputs are mm. */
+export function fmtLen(mm) {
+  const ft = mm / 304.8;
+  if (ft < 1) return `${Math.round(mm / 25.4)} in`;
+  return `${ft < 10 ? ft.toFixed(1) : Math.round(ft)} ft`;
 }

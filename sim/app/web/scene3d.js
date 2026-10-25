@@ -106,7 +106,7 @@ export function build3D(run, colors, canvas) {
   // robot (a box) and the odometry ghost (its outline)
   const r = run.field.robot;
   const boxGeo = new THREE.BoxGeometry(r.front + r.back, r.width, ROBOT_HEIGHT_MM);
-  const robotMesh = new THREE.Mesh(boxGeo, material(colors.accent, 0.38));
+  const robotMesh = new THREE.Mesh(boxGeo, material(colors.accent, 0.62));
   const robot = new THREE.Group();
   robotMesh.position.set((r.front - r.back) / 2, 0, ROBOT_HEIGHT_MM / 2);
   const nose = new THREE.Mesh(new THREE.ConeGeometry(40, 90, 4), material(colors.accent, 1));
@@ -114,7 +114,24 @@ export function build3D(run, colors, canvas) {
   robot.add(robotMesh, nose, new THREE.LineSegments(new THREE.EdgesGeometry(boxGeo), new THREE.LineBasicMaterial({ color: colors.accent })));
   robot.children[2].position.copy(robotMesh.position);
   scene.add(robot);
-  const ghost = new THREE.LineSegments(new THREE.EdgesGeometry(boxGeo), new THREE.LineBasicMaterial({ color: colors.ghost, transparent: true, opacity: 0.8 }));
+  // the partner R2: a solid box in a darker shade of the alliance colour
+  let partnerGroup = null;
+  if (run.partner) {
+    const pr = run.partner.robot;
+    const pColor = new THREE.Color(run.alliance === 'blue' ? colors.blue : colors.red).multiplyScalar(0.55);
+    const pGeo = new THREE.BoxGeometry(pr.front + pr.back, pr.width, ROBOT_HEIGHT_MM);
+    const pMesh = new THREE.Mesh(pGeo, material(pColor, 0.85));
+    const pEdges = new THREE.LineSegments(new THREE.EdgesGeometry(pGeo), new THREE.LineBasicMaterial({ color: run.alliance === 'blue' ? colors.blue : colors.red }));
+    pMesh.position.set((pr.front - pr.back) / 2, 0, ROBOT_HEIGHT_MM / 2);
+    pEdges.position.copy(pMesh.position);
+    partnerGroup = new THREE.Group();
+    partnerGroup.add(pMesh, pEdges);
+    scene.add(partnerGroup);
+  }
+  // odometry is a dashed outline drawn on top (no depth test) so it stays visible where it overlaps the true body
+  const ghost = new THREE.LineSegments(new THREE.EdgesGeometry(boxGeo), new THREE.LineDashedMaterial({ color: colors.ghost, dashSize: 40, gapSize: 30, transparent: true, opacity: 0.95, depthTest: false }));
+  ghost.computeLineDistances();
+  ghost.renderOrder = 10;
   const ghostGroup = new THREE.Group();
   ghost.position.set((r.front - r.back) / 2, 0, ROBOT_HEIGHT_MM / 2);
   ghostGroup.add(ghost);
@@ -147,16 +164,26 @@ export function build3D(run, colors, canvas) {
   controls.maxDistance = 9000;
   controls.update();
   controls.enabled = false;           // only while the 3D view is showing
+  let following = false;              // F: keep the camera's target on the robot
 
   return {
     scene, camera, controls,
     resize(w, h) { camera.aspect = w / h; camera.updateProjectionMatrix(); },
     setCamera(px, py, pz, tx, ty, tz) { camera.position.set(px, py, pz); controls.target.set(tx, ty, tz); controls.update(); },
     resetCamera() { camera.position.copy(home.position); controls.target.copy(home.target); controls.update(); },
+    /** [px, py, pz, tx, ty, tz] so a rebuilt scene can keep where the camera was. */
+    getCamera() { return [camera.position.x, camera.position.y, camera.position.z, controls.target.x, controls.target.y, controls.target.z]; },
+    follow(on) { following = on; },
+    isFollowing() { return following; },
     /** pose: the robot at this moment; balls: [[x, y, z] per ball]; tilts: [red, blue] in radians; index: frame index for the trails. */
-    update(pose, balls, tilts, index) {
+    update(pose, balls, tilts, index, partnerPose) {
       robot.position.set(pose.x, -pose.y, 0);
       robot.rotation.z = -pose.theta;
+      if (following) {               // slide the camera and its target together so the view keeps its angle
+        const dx = pose.x - controls.target.x, dy = -pose.y - controls.target.y;
+        camera.position.x += dx; camera.position.y += dy; controls.target.x += dx; controls.target.y += dy;
+      }
+      if (partnerGroup && partnerPose) { partnerGroup.position.set(partnerPose.x, -partnerPose.y, 0); partnerGroup.rotation.z = -partnerPose.theta; }
       ghostGroup.visible = Number.isFinite(pose.ox);
       if (ghostGroup.visible) { ghostGroup.position.set(pose.ox, -pose.oy, 0); ghostGroup.rotation.z = -pose.otheta; }
       balls.forEach((p, i) => ballMeshes[i].position.set(p[0], -p[1], p[2]));

@@ -10,9 +10,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The real sim world: the robot and the field in Rapier, which runs in a Node process
@@ -51,6 +55,8 @@ public final class RapierWorld implements SimWorld {
     private final List<String> events = new ArrayList<>();
     private final List<double[]> ballInfo = new ArrayList<>();
     private final List<String> warnings = new ArrayList<>();
+    private String partnerInfo;   // "name front back width", null when there is no partner
+    private double[] partnerPose; // x, y, theta from the last step reply
 
     public RapierWorld() throws IOException {
         File nodeBinary = new File("../sim/.node/bin/node").getAbsoluteFile();
@@ -239,7 +245,115 @@ public final class RapierWorld implements SimWorld {
                 events.add(String.format(Locale.ROOT, "%.3f|%s", Long.parseLong(event.substring(at + 1)) / 1e9, text));
             }
         }
+        if (partnerInfo != null && v.length >= 13) {
+            partnerPose = new double[]{Double.parseDouble(v[10]), Double.parseDouble(v[11]), Double.parseDouble(v[12])};
+        }
         syncedNanos = targetNanos;
+    }
+
+    @Override
+    public synchronized void partnerStart(long nanos) {
+        if (partnerInfo == null) {
+            return;
+        }
+        syncToNow();
+        request("partner-start " + nanos);
+    }
+
+    @Override
+    public synchronized double[] partnerPose() {
+        syncToNow();
+        return partnerPose == null ? null : partnerPose.clone();
+    }
+
+    @Override
+    public synchronized String partnerInfo() {
+        syncToNow();
+        return partnerInfo;
+    }
+
+    private static final String NUM = "(-?\\d+(?:\\.\\d+)?)";
+
+    /**
+     * Reads -Dsim.partnerPath (a path file, see sim/README.md) and -Dsim.partnerSpeed (0.25 to 1.5) into the physics' partner JSON.
+     * A path that cannot be read is a warning, not an error: the run goes ahead without a partner.
+     * ponytail: regex, not a JSON parser, because the path format is fixed and the test classpath has no JSON library.
+     */
+    private String partnerJson(List<String> names, List<double[]> bounds) {
+        partnerInfo = null;
+        partnerPose = null;
+        String path = System.getProperty("sim.partnerPath");
+        if (path == null || path.isEmpty()) {
+            return "null";
+        }
+        File file = new File(path);
+        try {
+            String text = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+            Matcher nameMatch = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]*)\"").matcher(text);
+            String name = nameMatch.find() ? nameMatch.group(1) : file.getName();
+            double[] size = new double[3];
+            String[] keys = {"front", "back", "width"};
+            for (int i = 0; i < 3; i++) {
+                Matcher m = Pattern.compile("\"" + keys[i] + "\"\\s*:\\s*" + NUM).matcher(text);
+                if (!m.find()) {
+                    throw new IllegalArgumentException("robot." + keys[i] + " is missing");
+                }
+                size[i] = Double.parseDouble(m.group(1));
+            }
+            int poseStart = text.indexOf("\"poses\"");
+            if (poseStart < 0) {
+                throw new IllegalArgumentException("poses is missing");
+            }
+            Matcher pm = Pattern.compile("\\[\\s*" + NUM + "\\s*,\\s*" + NUM + "\\s*,\\s*" + NUM + "\\s*,\\s*" + NUM + "\\s*\\]").matcher(text.substring(poseStart));
+            StringBuilder poses = new StringBuilder();
+            double lastT = -1;
+            double[] first = null;
+            while (pm.find()) {
+                double t = Double.parseDouble(pm.group(1));
+                if (t <= lastT) {
+                    throw new IllegalArgumentException("pose times must go up (" + t + " s after " + lastT + " s)");
+                }
+                lastT = t;
+                double[] p = {Double.parseDouble(pm.group(2)), Double.parseDouble(pm.group(3)), Math.toRadians(Double.parseDouble(pm.group(4)))};
+                first = first == null ? p : first;
+                poses.append(poses.length() == 0 ? "" : ",").append(String.format(Locale.ROOT, "[%s,%s,%s,%s]", t, p[0], p[1], p[2]));
+            }
+            if (first == null) {
+                throw new IllegalArgumentException("poses has no [seconds, x, y, heading] rows");
+            }
+            double speed = Math.max(0.25, Math.min(1.5, Double.parseDouble(System.getProperty("sim.partnerSpeed", "1"))));
+            warnPartnerStart(name, size, first, names, bounds);
+            partnerInfo = String.format(Locale.ROOT, "%s %s %s %s", name, size[0], size[1], size[2]);
+            partnerPose = first;
+            return String.format(Locale.ROOT, "{\"name\":\"%s\",\"front\":%s,\"back\":%s,\"width\":%s,\"speed\":%s,\"poses\":[%s]}",
+                    name.replace("\\", "").replace("\"", ""), size[0], size[1], size[2], speed, poses);
+        } catch (IOException | RuntimeException e) {
+            warnings.add("Partner path " + file.getName() + " could not be read: " + e.getMessage());
+            return "null";
+        }
+    }
+
+    /** The same start-pose rules as R1's, for R2's body. ponytail: the body's bounding box, so a turned R2 is checked a little loosely. */
+    private void warnPartnerStart(String name, double[] size, double[] pose, List<String> names, List<double[]> bounds) {
+        double c = Math.cos(pose[2]), s = Math.sin(pose[2]);
+        double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE, maxX = -Double.MAX_VALUE, maxY = -Double.MAX_VALUE;
+        for (double[] corner : new double[][]{{size[0], size[2] / 2}, {size[0], -size[2] / 2}, {-size[1], size[2] / 2}, {-size[1], -size[2] / 2}}) {
+            double cx = pose[0] + corner[0] * c - corner[1] * s, cy = pose[1] + corner[0] * s + corner[1] * c;
+            minX = Math.min(minX, cx);
+            maxX = Math.max(maxX, cx);
+            minY = Math.min(minY, cy);
+            maxY = Math.max(maxY, cy);
+        }
+        double outside = Math.max(Math.max(-minX, maxX - FIELD_SIZE_MM), Math.max(-minY, maxY - FIELD_SIZE_MM));
+        if (outside > 0.5) {
+            warnings.add(String.format(Locale.ROOT, "The partner %s starts %.0f mm outside the field wall.", name, outside));
+        }
+        for (int i = 0; i < names.size(); i++) {
+            double[] b = bounds.get(i);
+            if (minX < b[2] && maxX > b[0] && minY < b[3] && maxY > b[1]) {
+                warnings.add("The partner " + name + " starts inside " + names.get(i) + ".");
+            }
+        }
     }
 
     private void sendInit() {
@@ -261,13 +375,13 @@ public final class RapierWorld implements SimWorld {
                         + "\"field\":{\"sizeMm\":%s,\"boxes\":[%s]},"
                         + "\"drive\":{\"kV\":%s,\"kOmegaMmPerRad\":%s,\"responseSeconds\":%s,\"brakeResponseSeconds\":%s,"
                         + "\"trackWidthMm\":%s,\"backDistanceMm\":%s},"
-                        + "\"balls\":%s}",
+                        + "\"balls\":%s,\"partner\":%s}",
                 x, y, theta,
                 RobotFootprint.FRONT_MM, RobotFootprint.BACK_MM, RobotFootprint.WIDTH_MM, ROBOT_MASS_KG,
                 FIELD_SIZE_MM, boxJson,
                 KinematicWorld.K_V, KinematicWorld.K_OMEGA_MM_PER_RAD, KinematicWorld.WHEEL_RESPONSE_SECONDS,
                 KinematicWorld.WHEEL_BRAKE_RESPONSE_SECONDS, KinematicWorld.TRUE_TRACK_WIDTH_MM, KinematicWorld.TRUE_BACK_DISTANCE_MM,
-                ballsJson());
+                ballsJson(), partnerJson(names, bounds));
         String reply = request("init " + json);
         if (!reply.startsWith("ok")) {
             throw new IllegalStateException("physics server did not start: " + reply);

@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,10 @@ public final class SimRunner {
         public final List<String> events = new ArrayList<>();
         /** Problems with the setup that make this run less trustworthy. */
         public final List<String> warnings = new ArrayList<>();
+        /** The partner robot R2's pose at each frame: {seconds, x, y, theta}. Empty when there is no partner. */
+        public final List<double[]> partnerFrames = new ArrayList<>();
+        /** "name front back width" of the partner, or null. */
+        public String partnerInfo;
         public double matchStartSeconds;
         /** The stack trace if the OpMode threw, otherwise null. */
         public String error;
@@ -90,6 +95,7 @@ public final class SimRunner {
             if (toNanos >= nextFrame[0]) {
                 result.frames.add(frame(toNanos, world));
                 recordBalls(result, world, toNanos);
+                recordPartner(result, world, toNanos);
                 nextFrame[0] = toNanos - toNanos % FRAME_NANOS + FRAME_NANOS;
             }
         }, BACKGROUND_LOOP_NANOS, YIELD_NANOS);
@@ -124,11 +130,13 @@ public final class SimRunner {
                     setFlag(opMode, "isStarted", true);
                     opMode.resetRuntime();
                     long startedAt = SimClock.elapsedNanos();
+                    world.partnerStart(startedAt);
                     result.matchStartSeconds = startedAt / 1e9;
                     SimClock.sleep((long) (AUTO_SECONDS * 1000));
                     matchEndNanos[0] = SimClock.elapsedNanos();
                     result.frames.add(frame(matchEndNanos[0], world));
                     recordBalls(result, world, matchEndNanos[0]);
+                    recordPartner(result, world, matchEndNanos[0]);
                     setFlag(opMode, "stopRequested", true);
                     opModeThread.interrupt(); // the field stops a LinearOpMode by interrupting its thread
                     result.virtualSecondsUsed = (SimClock.elapsedNanos() - startedAt) / 1e9;
@@ -151,6 +159,8 @@ public final class SimRunner {
             result.ballMoves.removeIf(m -> m[0] > matchEndNanos[0] / 1e9);
             result.hiveFrames.removeIf(m -> m[0] > matchEndNanos[0] / 1e9);
             result.heldFrames.removeIf(m -> m[0] > matchEndNanos[0] / 1e9);
+            result.partnerFrames.removeIf(m -> m[0] > matchEndNanos[0] / 1e9);
+            result.partnerInfo = world.partnerInfo();
             result.assumed.addAll(SimHardware.assumedCalls());
             for (String event : world.drainEvents()) {
                 if (Double.parseDouble(event.substring(0, event.indexOf('|'))) <= matchEndNanos[0] / 1e9) {
@@ -174,16 +184,17 @@ public final class SimRunner {
         return runInNewJvm(opModeClassName, startX, startY, startTheta, RAPIER);
     }
 
-    public static Result runInNewJvm(String opModeClassName, double startX, double startY, double startTheta, String worldKind) throws Exception {
+    public static Result runInNewJvm(String opModeClassName, double startX, double startY, double startTheta, String worldKind, String... jvmArgs) throws Exception {
         File outFile = new File("build/sim-runs/" + opModeClassName.substring(opModeClassName.lastIndexOf('.') + 1) + "-" + System.nanoTime() + ".csv");
         outFile.getParentFile().mkdirs();
         File logFile = new File(outFile.getPath() + ".log");
 
         String java = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        Process process = new ProcessBuilder(java, "-Djdk.attach.allowAttachSelf=true",
-                "-cp", System.getProperty("sim.classpath"), SimMain.class.getName(),
-                opModeClassName, String.valueOf(startX), String.valueOf(startY), String.valueOf(startTheta), outFile.getPath(), worldKind)
-                .redirectErrorStream(true).redirectOutput(logFile).start();
+        List<String> command = new ArrayList<>(Arrays.asList(java, "-Djdk.attach.allowAttachSelf=true"));
+        command.addAll(Arrays.asList(jvmArgs));
+        command.addAll(Arrays.asList("-cp", System.getProperty("sim.classpath"), SimMain.class.getName(),
+                opModeClassName, String.valueOf(startX), String.valueOf(startY), String.valueOf(startTheta), outFile.getPath(), worldKind));
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).redirectOutput(logFile).start();
         if (!process.waitFor(REAL_TIMEOUT_MS + 30_000, TimeUnit.MILLISECONDS)) {
             process.destroyForcibly();
             throw new IllegalStateException("the sim JVM did not finish; see " + logFile);
@@ -209,6 +220,14 @@ public final class SimRunner {
         double[] hive = world.hiveAngles();
         result.hiveFrames.add(new double[]{seconds, hive[0], hive[1]});
         result.heldFrames.add(new double[]{seconds, world.heldBalls()});
+    }
+
+    /** R2's pose at this frame. A world with no partner records nothing. */
+    private static void recordPartner(Result result, SimWorld world, long nanos) {
+        double[] pose = world.partnerPose();
+        if (pose != null) {
+            result.partnerFrames.add(new double[]{nanos / 1e9, pose[0], pose[1], pose[2]});
+        }
     }
 
     static String stackTrace(Throwable t) {

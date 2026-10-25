@@ -4,141 +4,61 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Auto Sim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }</script>
 </head>
-<body>
-  <div id="stage">
-    <canvas id="view"></canvas>
-    <div id="labels"></div>
-  </div>
-
+<body data-view="home" data-mode="3d" data-details="closed">
   <header id="bar">
-    <a class="brand" href="#/" aria-label="Home"><span class="mark"></span><span class="name">Auto Sim</span></a>
-    <nav id="tabs" class="when-run" aria-label="Views">
-      <i id="tabIndicator"></i>
-      <a href="#/stats" data-tab="stats">Stats</a>
-      <a href="#/replay" data-tab="replay">Replay</a>
-    </nav>
-    <select id="opmode" class="when-run" aria-label="OpMode"></select>
-    <button id="run" class="primary when-run">Run</button>
-    <label class="switch when-run" title="Run again whenever a .java file is saved">
+    <a class="logo" href="#/" aria-label="Home"><span class="mark"></span>KALIPSO AUTO SIM</a>
+    <label class="autosel when-auto" title="Which autonomous to run">
+      <span id="autoName" class="m">RedCloseAuto</span><span id="autoTag" class="tag"></span>
+      <svg class="chev" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
+      <select id="opmode" aria-label="Autonomous"></select>
+    </label>
+    <div id="runChip" class="chips when-auto" role="status" aria-live="polite"></div>
+    <button id="scoreChip" class="scorechip when-run" aria-label="Score details" aria-expanded="false" hidden></button>
+    <div id="scorePop" class="popover" hidden></div>
+    <span class="spacer"></span>
+    <label class="switch when-auto" title="Run again whenever a .java file is saved">
       <input type="checkbox" id="watch" checked><span class="track"></span><span class="text">Run on save</span>
     </label>
-    <span class="spacer"></span>
-    <span id="status" class="chip" data-phase="idle"><span class="dot"></span><span id="statusText">Starting</span></span>
-    <button id="togglePanel" class="ghost only-replay" aria-label="Show or hide the side panel" title="Panel (P)">Panel</button>
+    <a id="paramsBtn" class="btn when-auto" href="#/params"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h7M12 4h2M2 12h3M8 12h6M9 2.5v3M5 10.5v3"/></svg>Parameters <span id="changedPill" class="pill" hidden></span></a>
+    <button id="run" class="btn btn-p when-auto">Run <span class="kbd">R</span></button>
   </header>
-  <div id="progress" aria-hidden="true"></div>
 
-  <main id="landing" class="view" aria-label="Start">
-    <div class="bgGrid" aria-hidden="true"></div>
-    <div class="hero">
-      <p class="eyebrow rise" style="--d:0ms">FTC autonomous simulator</p>
-      <h1 class="rise" style="--d:80ms">Test your auto<br>before the robot does.</h1>
-      <p class="sub rise" style="--d:160ms">Runs your real code on a simulated field, then tells you whether the run was clean.</p>
-      <div id="opmodeCards" class="cards rise" style="--d:240ms" role="radiogroup" aria-label="Autonomous"></div>
-      <div class="launchRow rise" style="--d:320ms">
-        <button id="landingPlay" class="primary big"><svg class="playIcon" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9.5-5.5z"/></svg><span class="label">Play</span></button>
-        <button id="openLast" class="ghost" hidden>Open last results</button>
-      </div>
-      <div class="fine rise" style="--d:400ms">
-        <label class="switch" title="Run again whenever a .java file is saved">
-          <input type="checkbox" id="watchLanding" checked><span class="track"></span><span class="text">Run on save</span>
-        </label>
-        <span id="lastRun" class="dim"></span>
-      </div>
-    </div>
+  <main id="home" class="view" aria-label="Start">
+    <section id="homePanel"></section>
+    <div id="homeStage" class="stagehost"></div>
   </main>
 
-  <main id="setup" class="view" aria-label="Set up the run">
-    <div class="page setupPage">
-      <header class="setupHead rise" style="--d:0ms">
-        <p class="eyebrow" id="setupEyebrow">Set up</p>
-        <h1>Set up your run</h1>
-        <p class="dim">Change what you want to test, then start. Nothing here touches the real robot.</p>
-      </header>
-      <div class="setupGrid">
-        <section class="card rise" style="--d:80ms">
-          <div id="paramList"></div>
-          <p id="paramWait" class="dim" hidden>Waiting for the first build…</p>
-        </section>
-        <section class="card previewCard rise" style="--d:160ms">
-          <div class="cardHead"><h3>Preview</h3><span class="dim">Top view, front is up</span></div>
-          <svg id="robotPreview" viewBox="0 0 440 330" role="img" aria-label="The robot's size"></svg>
-          <ul id="previewChecks" class="miniChecks"></ul>
-        </section>
+  <div id="work" class="view" aria-label="Run workspace">
+    <aside id="rail" aria-label="Summary"></aside>
+    <main id="fieldArea">
+      <div id="stage" class="stagehost-inner">
+        <canvas id="view"></canvas>
+        <div id="labels"></div>
       </div>
-      <div class="setupActions rise" style="--d:240ms">
-        <button id="setupBack" class="ghost">Back</button>
-        <span class="spacer"></span>
-        <button id="setupReset">Reset to defaults</button>
-        <button id="start" class="primary big"><span class="label">Start simulation</span></button>
+      <div id="legend" class="legend"></div>
+      <div id="viewTools" class="viewtools">
+        <div id="viewMode" class="segmented" role="group" aria-label="View">
+          <button data-mode="2d" aria-pressed="false" title="Top view (V)">2D</button><button data-mode="3d" aria-pressed="true" title="3D view (V)">3D</button>
+        </div>
+        <button id="resetCamera" class="btn only-3d" title="Reset the 3D camera">Reset view</button>
       </div>
-      <div class="pipelineWrap">
-        <ol id="pipeline" class="pipeline" aria-live="polite">
-        <li data-step="build"><i></i><span>Compile</span></li>
-        <li data-step="sim"><i></i><span>Simulate</span></li>
-        <li data-step="analyse"><i></i><span>Analyse</span></li>
-      </ol>
-      </div>
-    </div>
-  </main>
+      <div id="fieldNote" class="fieldnote" hidden></div>
+      <div id="camHint" class="camhint only-3d">Drag to orbit · scroll to zoom · F follow robot</div>
+      <button id="momentChip" class="moment" aria-label="Open details"></button>
+    </main>
+    <aside id="details" aria-label="Details" aria-hidden="true"></aside>
+    <footer id="timeline"></footer>
+  </div>
 
-  <main id="stats" class="view" aria-label="Run statistics"><div id="statsBody" class="page"></div></main>
-
-  <aside id="panel">
-    <section>
-      <h2>Robot now</h2>
-      <dl class="grid" id="readout"></dl>
-    </section>
-    <section id="ballsSection" hidden>
-      <h2>Balls</h2>
-      <dl class="grid" id="ballCounts"></dl>
-    </section>
-    <section id="warningsSection" hidden>
-      <h2>Warnings</h2>
-      <ul id="warnings"></ul>
-    </section>
-    <section>
-      <h2>Events <span class="count" id="eventCount"></span></h2>
-      <ul id="events" class="events"></ul>
-    </section>
-    <section>
-      <h2>Telemetry</h2>
-      <dl class="grid" id="telemetry"></dl>
-    </section>
-    <section>
-      <h2>Not measured yet</h2>
-      <ul class="plain small" id="unmeasured"></ul>
-    </section>
-  </aside>
-
-  <footer id="transport">
-    <button id="play" class="icon" aria-label="Play or pause" title="Play / pause (Space)"></button>
-    <button id="back" class="icon" aria-label="Step back" title="Step back (←)">‹</button>
-    <button id="forward" class="icon" aria-label="Step forward" title="Step forward (→)">›</button>
-    <span id="time" class="time">0.00 s</span>
-    <div class="scrub">
-      <div id="markers"></div>
-      <input id="scrubber" type="range" min="0" max="30" step="0.001" value="0" aria-label="Match time">
-    </div>
-    <span id="duration" class="time dim">30.00 s</span>
-    <div id="viewMode" class="segmented" role="group" aria-label="View">
-      <button data-mode="2d" aria-pressed="true" title="Top view (V)">2D</button><button data-mode="3d" aria-pressed="false" title="3D view (V)">3D</button>
-    </div>
-    <button id="resetCamera" class="ghost only-3d" title="Reset the 3D camera">Reset view</button>
-    <select id="speed" aria-label="Speed">
-      <option value="0.25">0.25×</option><option value="0.5">0.5×</option>
-      <option value="1" selected>1×</option><option value="2">2×</option>
-      <option value="4">4×</option><option value="8">8×</option>
-    </select>
-  </footer>
+  <main id="params" class="view" aria-label="Parameters"></main>
 
   <div id="toast" role="status" aria-live="polite"></div>
-
-  <div id="overlay" hidden><div class="dialog"><h3 id="overlayTitle"></h3><pre id="overlayBody"></pre></div></div>
-
   <script type="module" src="app.js"></script>
 </body>
 </html>

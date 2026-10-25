@@ -7,7 +7,12 @@
     "min": 100,
     "max": 600,
     "step": 1,
-    "description": "From the centre of the robot (the point odometry tracks) to the front tip, intake included."
+    "description": "From the centre of the robot (the point odometry tracks) to the front tip, intake included.",
+    "source": "RobotFootprint.java",
+    "affects": [
+      "contacts",
+      "side"
+    ]
   },
   {
     "id": "robotBack",
@@ -17,7 +22,12 @@
     "min": 100,
     "max": 600,
     "step": 1,
-    "description": "From the centre of the robot to the back."
+    "description": "From the centre of the robot to the back.",
+    "source": "RobotFootprint.java",
+    "affects": [
+      "contacts",
+      "side"
+    ]
   },
   {
     "id": "robotWidth",
@@ -27,11 +37,16 @@
     "min": 150,
     "max": 600,
     "step": 1,
-    "description": "Side to side."
+    "description": "Side to side.",
+    "source": "RobotFootprint.java",
+    "affects": [
+      "contacts",
+      "side"
+    ]
   },
   {
     "id": "shotMode",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "How a shot leaves",
     "unit": "",
     "min": 0,
@@ -53,75 +68,111 @@
   },
   {
     "id": "shotSpeedPerRps",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "Ball speed per flywheel RPS",
     "unit": "m/s",
     "min": 0.05,
     "max": 0.25,
     "step": 0.001,
     "description": "How fast a ball leaves for each RPS of the flywheel. Unmeasured. The default makes your table value for launch point A land in the up Cell.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "hoodMinAngleDeg",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "Launch angle, hood at its minimum",
-    "unit": "\u00b0",
+    "unit": "°",
     "min": 20,
     "max": 85,
     "step": 0.5,
     "description": "The hood servo at ShooterInterpolationConfig.MIN_HOOD. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "hoodMaxAngleDeg",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "Launch angle, hood at its maximum",
-    "unit": "\u00b0",
+    "unit": "°",
     "min": 10,
     "max": 80,
     "step": 0.5,
     "description": "The hood servo at MAX_HOOD. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "exitHeightMm",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "Ball exit height",
     "unit": "mm",
     "min": 480,
     "max": 900,
     "step": 5,
     "description": "Where the ball leaves, above the floor. It has to clear the top of the robot (457 mm). Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "minFlywheelRps",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "Slowest flywheel that shoots",
     "unit": "RPS",
     "min": 5,
     "max": 60,
     "step": 1,
     "description": "Below this speed a ball just drops out. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "shotIntervalMs",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "Time between shots",
     "unit": "ms",
     "min": 50,
     "max": 400,
     "step": 5,
     "description": "Your PushBall runs the intake for 500 ms. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "autoAimAngleDeg",
-    "group": "Shooting",
+    "group": "Shooter",
     "label": "Auto-aimed launch angle",
-    "unit": "\u00b0",
+    "unit": "°",
     "min": 35,
     "max": 85,
     "step": 0.5,
@@ -138,7 +189,13 @@
     "step": 0.5,
     "description": "The manual gives no mass. Unmeasured.",
     "target": "physics",
-    "scale": 0.001
+    "scale": 0.001,
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "nectarMassKg",
@@ -150,7 +207,13 @@
     "step": 0.5,
     "description": "The manual gives no mass. 1.33 times the pollen mass is what the team's two tip tests imply. Unmeasured.",
     "target": "physics",
-    "scale": 0.001
+    "scale": 0.001,
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "ballFriction",
@@ -161,7 +224,13 @@
     "max": 1.0,
     "step": 0.05,
     "description": "Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "ballBounce",
@@ -172,7 +241,13 @@
     "max": 0.9,
     "step": 0.05,
     "description": "Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "ballRollingDamping",
@@ -183,7 +258,13 @@
     "max": 3,
     "step": 0.05,
     "description": "How quickly a rolling ball slows down. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "preload",
@@ -205,7 +286,12 @@
     "max": 20,
     "step": 0.5,
     "description": "The team's test: 3 nectar + 4 pollen, or 8 pollen, tips it. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "hiveDamping",
@@ -216,17 +302,22 @@
     "max": 3,
     "step": 0.05,
     "description": "How fast the Hive swings. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "tips",
+      "score"
+    ]
   },
   {
     "id": "hiveTiltDeg",
     "group": "Hive",
     "label": "Hive tilt",
-    "unit": "\u00b0",
+    "unit": "°",
     "min": 15,
     "max": 45,
     "step": 0.5,
-    "description": "The manual's Figure 9-10 shows 30\u00b0.",
+    "description": "The manual's Figure 9-10 shows 30°.",
     "target": "physics"
   },
   {
@@ -238,7 +329,12 @@
     "max": 300,
     "step": 5,
     "description": "How far past the front tip the intake can pull in a ball from the floor. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "score"
+    ]
   },
   {
     "id": "intakeBackReachMm",
@@ -249,6 +345,11 @@
     "max": 300,
     "step": 5,
     "description": "The same for the back. Unmeasured.",
-    "target": "physics"
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "score"
+    ]
   }
 ]

@@ -4,7 +4,9 @@
 //   step <toNanos> <p0> <p1> <p2> <p3> <b0> <b1> <b2> <b3> [<intakePower> <stopper> <flywheelRps> <hood> <turretRad>]
 //                                                -> "x y theta leftPodMm rightPodMm backPodMm fLeftWheelMm held slots events"
 //                                                   events is "-" or "name@nanos;name@nanos" (contacts that began)
+//   partner-start <nanos>                        -> "ok" (R2's path clock starts; only meaningful when init had a partner)
 //   quit
+//   When init had a partner, each step reply ends with " px py ptheta" (mm, mm, rad). Without one the reply is unchanged.
 // One reply per request, in order. Java waits for each reply, so the two stay in lockstep.
 
 import readline from 'node:readline';
@@ -41,7 +43,10 @@ async function handle(line) {
     const s = world.advanceTo(v[0], v.slice(1, 5), v.slice(5, 9).map((b) => b !== 0), actuators);
     // spaces in an event name become ~ so the reply stays one token per field
     const events = s.events.length ? s.events.map((e) => `${e.name.replace(/ /g, '~')}@${e.nanos}`).join(';') : '-';
-    process.stdout.write(`${s.x} ${s.y} ${s.theta} ${s.leftPodMm} ${s.rightPodMm} ${s.backPodMm} ${s.fLeftWheelMm} ${s.held} ${s.slots} ${events}\n`);
+    process.stdout.write(`${s.x} ${s.y} ${s.theta} ${s.leftPodMm} ${s.rightPodMm} ${s.backPodMm} ${s.fLeftWheelMm} ${s.held} ${s.slots} ${events}${s.partner ? ` ${s.partner.join(' ')}` : ''}\n`);
+  } else if (command === 'partner-start') {
+    world.partnerStart(Number(rest));
+    process.stdout.write('ok\n');
   } else if (command === 'quit') {
     process.exit(0);
   } else {

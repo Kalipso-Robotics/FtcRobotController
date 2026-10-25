@@ -9,6 +9,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { cleanBuildOutput, parseCompileError } from './buildError.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const WEB = path.join(import.meta.dirname, 'web');
@@ -23,11 +24,32 @@ const OPMODES = JSON.parse(fs.readFileSync(path.join(ROOT, 'sim', 'opmodes.json'
 // owns the default values and applies them to the code.
 const PARAM_DEFS = JSON.parse(fs.readFileSync(path.join(ROOT, 'sim', 'params.json'), 'utf8'));
 const PARAMS_FILE = path.join(ROOT, 'sim', '.last-params.json');
+const PATHS_DIR = path.join(ROOT, 'sim', 'paths');           // partner R2 path files, see sim/README.md
+const PARTNER_FILE = path.join(ROOT, 'sim', '.last-partner.json');
+/** The path files the page may pick from. Only these names are ever passed to Java, never a path from the browser. */
+function listPartners() {
+  let names = [];
+  try { names = fs.readdirSync(PATHS_DIR).filter((f) => f.endsWith('.json')).sort(); } catch { /* no folder, no partners */ }
+  const out = [];
+  for (const file of names) {
+    try {
+      const j = JSON.parse(fs.readFileSync(path.join(PATHS_DIR, file), 'utf8'));
+      const p = j.poses;
+      out.push({ file, name: j.name || file, duration: p[p.length - 1][0], start: [p[0][1], p[0][2], p[0][3]] });
+    } catch { /* an unreadable file is left out; the runner warns if it is picked */ }
+  }
+  return out;
+}
 let paramDefaults = null;     // { id: value } the robot-size defaults come from Java (known after the first build); the physics ones from ball-defaults.json
 const PHYSICS_DEFAULT = { preload: 4 };
 const physicsDefault = (def) => ((PHYSICS_DEFAULT[def.id] ?? BALL_DEFAULTS[def.id]) / (def.scale || 1));
 let paramValues = {};         // what the user last chose; used by every run, including run-on-save
 try { paramValues = JSON.parse(fs.readFileSync(PARAMS_FILE, 'utf8')); } catch { /* none saved yet */ }
+let partner = { file: null, speedPct: 100 };   // chosen on Home / Parameters, used by every run
+try {
+  const saved = JSON.parse(fs.readFileSync(PARTNER_FILE, 'utf8'));
+  if (saved.file === null || listPartners().some((p) => p.file === saved.file)) partner = { file: saved.file, speedPct: saved.speedPct };
+} catch { /* none saved yet */ }
 
 const state = {
   phase: 'idle',        // idle | building | running | done | compile-error | run-error
@@ -36,8 +58,13 @@ const state = {
   opMode: OPMODES[0].name,
   watching: true,
   lastRunMs: 0,
+  since: Date.now(),    // when the phase last changed (ms epoch)
+  error: null,          // the structured compile error, only in the compile-error phase
+  lastSaveAt: 0,        // last .java save seen, even while Run on save is off
+  partner,              // { file | null, speedPct }
 };
 let latestRun = null;
+let previousRun = null;   // the run before latestRun, for the page's "changed since" list
 let queued = false;
 let busy = false;
 
@@ -53,9 +80,11 @@ function broadcast() {
   const data = `data: ${JSON.stringify(publicState())}\n\n`;
   for (const res of listeners) res.write(data);
 }
-function setPhase(phase, message = '') {
+function setPhase(phase, message = '', error = null) {
   state.phase = phase;
   state.message = message;
+  state.since = Date.now();
+  state.error = phase === 'compile-error' ? error : null;
   broadcast();
 }
 
@@ -90,14 +119,14 @@ async function buildAndRun() {
       const build = await run(path.join(ROOT, 'gradlew'), [':TeamCode:simClasspath', '--offline', '-q'],
         { cwd: ROOT, env: { ...process.env, JAVA_HOME } });
       if (build.code !== 0) {
-        setPhase('compile-error', cleanBuildOutput(build.output));
+        setPhase('compile-error', cleanBuildOutput(build.output, ROOT), parseCompileError(build.output, ROOT, (p) => fs.readFileSync(p, 'utf8')));
         continue;
       }
 
       const simStarted = Date.now();
       const classpath = fs.readFileSync(path.join(ROOT, 'TeamCode', 'build', 'sim-classpath.txt'), 'utf8');
       if (!paramDefaults) paramDefaults = await readParamDefaults(classpath);
-      const paramArgs = paramOptions();
+      const paramArgs = [...paramOptions(), ...(state.partner.file ? [`-Dsim.partnerPath=${path.join(PATHS_DIR, state.partner.file)}`, `-Dsim.partnerSpeed=${state.partner.speedPct / 100}`] : [])];
 
       setPhase('running', `Running ${opMode.name}`);
       const runId = state.runId + 1;
@@ -115,6 +144,7 @@ async function buildAndRun() {
         setPhase('run-error', sim.output.split('\n').filter((l) => !l.startsWith('WARNING')).join('\n').trim());
         continue;
       }
+      previousRun = latestRun;
       latestRun = parseRun(fs.readFileSync(outFile, 'utf8'), opMode);
       addPhysicsParams(latestRun);
       state.runId = runId;
@@ -173,25 +203,6 @@ function validateParams(values) {
   return null;
 }
 
-/**
- * Gradle prints each compiler error twice, plus a lot of boilerplate. Keep each error once:
- * "file:line: error: message", the source line and the caret, with the path shortened to the repo.
- */
-function cleanBuildOutput(output) {
-  const lines = output.split('\n');
-  const seen = new Set();
-  const blocks = [];
-  for (let i = 0; i < lines.length; i++) {
-    if (!/: error:/.test(lines[i])) continue;
-    const head = lines[i].trim().replace(ROOT + path.sep, '');
-    if (seen.has(head)) continue;
-    seen.add(head);
-    blocks.push([head, lines[i + 1], lines[i + 2]].filter((l) => l !== undefined).map((l, k) => (k === 0 ? l : l.replace(/^\s{0,2}/, ''))).join('\n'));
-  }
-  if (blocks.length) return blocks.join('\n\n');
-  return lines.filter((l) => l.trim() && !/^(warning:|Note:|\d+ warnings?)/.test(l.trim())).slice(0, 40).join('\n');
-}
-
 /** The physics parameters of a run, as run.params entries (what was used and the default), and the ball parameters the 3D view needs. */
 function addPhysicsParams(run) {
   const defaults = allDefaults() || {};
@@ -222,6 +233,7 @@ function parseRun(text, opMode) {
   const rawBalls = [];
   const rawHive = [];
   const rawHeld = [];
+  const rawPartner = [];
   const rawEvents = [];
   const errorLines = [];
   for (const line of text.split('\n')) {
@@ -251,6 +263,8 @@ function parseRun(text, opMode) {
       case 'hivetilt': rawHive.push([+n[0], +n[1], +n[2]]); break;
       case 'held': rawHeld.push([+n[0], +n[1]]); break;
       case 'assumed': run.assumed.push(rest); break;
+      case 'partnerinfo': run.partner = { name: n[0], robot: { front: +n[1], back: +n[2], width: +n[3] }, frames: [] }; break;
+      case 'partner': rawPartner.push([+n[0], +n[1], +n[2], +n[3]]); break;
       case 'field': run.field.size = Number(rest); break;
       case 'robot': run.field.robot = { front: Number(n[0]), back: Number(n[1]), width: Number(n[2]) }; break;
       case 'obstacle': run.field.obstacles.push({ name: n[0], minX: +n[1], minY: +n[2], maxX: +n[3], maxY: +n[4] }); break;
@@ -283,6 +297,15 @@ function parseRun(text, opMode) {
       run.frames.push([0, r1(before[1]), r1(before[2]), r4(before[3]), r1(before[4]), r1(before[5]), r4(before[6])]);
     }
     run.frames.push([r4(f[0] - start), r1(f[1]), r1(f[2]), r4(f[3]), r1(f[4]), r1(f[5]), r4(f[6])]);
+  }
+  // The partner R2: same shift as the frames, and the last frame before START is kept at t = 0.
+  if (run.partner) {
+    let pBefore = null;
+    for (const f of rawPartner) {
+      if (f[0] < start) { pBefore = f; continue; }
+      if (pBefore && run.partner.frames.length === 0 && f[0] > start) run.partner.frames.push([0, r1(pBefore[1]), r1(pBefore[2]), r4(pBefore[3])]);
+      run.partner.frames.push([r4(f[0] - start), r1(f[1]), r1(f[2]), r4(f[3])]);
+    }
   }
   // Balls: one track per ball, [t, x, y, z] only when it moved. Moves before START collapse into where it sat at t = 0.
   const tracks = run.balls.info.map(() => []);
@@ -360,7 +383,11 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname === '/api/opmodes') return json(OPMODES.map(({ name, alliance, start, note }) => ({ name, alliance, start, note })));
   if (url.pathname === '/api/state') return json(publicState());
-  if (url.pathname === '/api/run' && req.method === 'GET') return latestRun ? json(latestRun) : json({ error: 'no run yet' }, 404);
+  if (url.pathname === '/api/partners') return json(listPartners());
+  if (url.pathname === '/api/run' && req.method === 'GET') {
+    const wanted = url.searchParams.get('prev') ? previousRun : latestRun;
+    return wanted ? json(wanted) : json({ error: 'no run yet' }, 404);
+  }
   if (url.pathname === '/api/params') return json({ defs: PARAM_DEFS, defaults: allDefaults(), values: { ...allDefaults(), ...paramValues } });
   if (url.pathname === '/api/run' && req.method === 'POST') {
     const body = await readBody(req);
@@ -369,6 +396,14 @@ const server = http.createServer(async (req, res) => {
       if (problem) return json({ error: problem }, 400);
       paramValues = { ...body.params };
       try { fs.writeFileSync(PARAMS_FILE, JSON.stringify(paramValues, null, 2)); } catch { /* not saving is fine */ }
+    }
+    if (body.partner) {
+      const { file, speedPct } = body.partner;
+      if (file !== null && !listPartners().some((p) => p.file === file)) return json({ error: `Unknown partner path file: ${file}` }, 400);
+      if (!(Number(speedPct) >= 25 && Number(speedPct) <= 150)) return json({ error: 'Partner speed must be 25 to 150 percent.' }, 400);
+      state.partner = { file, speedPct: Number(speedPct) };
+      try { fs.writeFileSync(PARTNER_FILE, JSON.stringify(state.partner)); } catch { /* not saving is fine */ }
+      broadcast();
     }
     if (body.opMode && OPMODES.some((o) => o.name === body.opMode)) state.opMode = body.opMode;
     buildAndRun();
@@ -397,7 +432,9 @@ setInterval(() => { for (const res of listeners) res.write(': keep-alive\n\n'); 
 let debounce = null;
 for (const dir of WATCHED) {
   fs.watch(dir, { recursive: true }, (event, name) => {
-    if (!state.watching || !name || !name.endsWith('.java')) return;
+    if (!name || !name.endsWith('.java')) return;
+    state.lastSaveAt = Date.now();
+    if (!state.watching) { broadcast(); return; }
     clearTimeout(debounce);
     debounce = setTimeout(() => buildAndRun(), 800);
   });

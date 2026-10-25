@@ -26,12 +26,13 @@ const TOUCH_DISTANCE_M = 0.002;       // closer than 2 mm counts as touching
 const ROBOT_HEIGHT_M = 0.457;         // UNMEASURED: 18 in tall, the start-size limit
 
 // Who touches whom. A pair collides when each one's membership is in the other's filter.
-const G_STATIC = 1, G_ROBOT = 2, G_BALL = 4, G_ROBOT_ONLY = 8, G_BALL_ONLY = 16;
+const G_STATIC = 1, G_ROBOT = 2, G_BALL = 4, G_ROBOT_ONLY = 8, G_BALL_ONLY = 16, G_PARTNER = 32;
 const groups = (membership, filter) => (membership << 16) | filter;
 const GROUPS = {
   floor: groups(G_STATIC, 0xffff),
-  robot: groups(G_ROBOT, G_STATIC | G_BALL | G_ROBOT_ONLY),
-  ball: groups(G_BALL, G_STATIC | G_ROBOT | G_BALL | G_BALL_ONLY),
+  robot: groups(G_ROBOT, G_STATIC | G_BALL | G_ROBOT_ONLY | G_PARTNER),
+  ball: groups(G_BALL, G_STATIC | G_ROBOT | G_BALL | G_BALL_ONLY | G_PARTNER),
+  partner: groups(G_PARTNER, G_ROBOT | G_BALL),  // R2: kinematic, follows its path file, solid to R1 and the balls
   robotOnly: groups(G_ROBOT_ONLY, G_ROBOT),     // Flower bases and Hive legs: the robot cannot pass, balls fly through
   ballOnly: groups(G_BALL_ONLY, G_BALL),        // Flower pipes and Hive Cell panels: balls cannot pass, the robot is not stopped
 };
@@ -39,6 +40,18 @@ const GROUPS = {
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 const angleOf = (q) => 2 * Math.atan2(q.z, q.w);          // rotation about z
 const aboutX = (q) => 2 * Math.atan2(q.x, q.w);           // rotation about x
+
+/** Where the partner is at tSec on its path: [xMm, yMm, thetaRad]. Linear, theta the short way round, ends held. */
+export function partnerPoseAt(poses, tSec) {
+  if (tSec <= poses[0][0]) return poses[0].slice(1);
+  const last = poses[poses.length - 1];
+  if (tSec >= last[0]) return last.slice(1);
+  let i = 1;
+  while (poses[i][0] < tSec) i++;
+  const [t0, x0, y0, th0] = poses[i - 1], [t1, x1, y1, th1] = poses[i];
+  const f = (tSec - t0) / (t1 - t0);
+  return [x0 + (x1 - x0) * f, y0 + (y1 - y0) * f, th0 + wrap(th1 - th0) * f];
+}
 
 let rapierReady = false;
 async function ensureRapier() {
@@ -127,6 +140,33 @@ export async function createWorld(init) {
       .setRestitution(0.1)
       .setCollisionGroups(GROUPS.robot),
     body);
+
+  // The partner R2: a kinematic body that follows its path file. R1 and the balls bump into it; it never moves for them.
+  const partner = init.partner || null;
+  let partnerStartNanos = null;
+  let partnerPose = partner ? partner.poses[0].slice(1) : null;
+  let partnerBody = null;
+  if (partner) {
+    const pLen = (partner.front + partner.back) * MM, pCentre = (partner.front - partner.back) / 2 * MM;
+    partnerBody = world.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased()
+      .setTranslation(partnerPose[0] * MM, partnerPose[1] * MM, ROBOT_HEIGHT_M / 2)
+      .setRotation({ x: 0, y: 0, z: Math.sin(partnerPose[2] / 2), w: Math.cos(partnerPose[2] / 2) }));
+    const partnerCollider = world.createCollider(
+      RAPIER.ColliderDesc.cuboid(pLen / 2, partner.width * MM / 2, ROBOT_HEIGHT_M / 2)
+        .setTranslation(pCentre, 0, 0).setFriction(0.3).setCollisionGroups(GROUPS.partner), partnerBody);
+    obstacles.push({ name: 'partner', collider: partnerCollider });
+  }
+  function setPartnerTo(pose, next) {
+    partnerPose = pose;
+    const t = { x: pose[0] * MM, y: pose[1] * MM, z: ROBOT_HEIGHT_M / 2 };
+    const q = { x: 0, y: 0, z: Math.sin(pose[2] / 2), w: Math.cos(pose[2] / 2) };
+    if (next) { partnerBody.setNextKinematicTranslation(t); partnerBody.setNextKinematicRotation(q); }
+    else { partnerBody.setTranslation(t, true); partnerBody.setRotation(q, true); }
+  }
+  function movePartner(toNanos) {
+    if (!partner || partnerStartNanos === null) return;
+    setPartnerTo(partnerPoseAt(partner.poses, (toNanos - partnerStartNanos) / 1e9 * partner.speed), true);
+  }
 
   // ---- balls, Flowers, Gardens, Hives ----
   const P = { ...BALL_DEFAULTS, ...((init.balls && init.balls.params) || {}) };
@@ -430,6 +470,7 @@ export async function createWorld(init) {
     const before = body.translation();
     world.timestep = dt;
     pushHives();
+    movePartner(simNanos + Math.round(dt * 1e9));
     world.step();
     const after = body.translation();
 
@@ -477,6 +518,7 @@ export async function createWorld(init) {
     body.setLinvel({ x: 0, y: 0, z: 0 }, true);
     body.setAngvel({ x: 0, y: 0, z: 0 }, true);
     lastRotation = angleOf(body.rotation());
+    if (partner) setPartnerTo(partner.poses[0].slice(1), false);
   }
 
   return {
@@ -490,13 +532,17 @@ export async function createWorld(init) {
       }
       return this.state();
     },
+    /** The partner's clock starts here (the match START). Before this it holds the first pose of its path. */
+    partnerStart(startNanos) { partnerStartNanos = startNanos; },
+    /** The partner's pose now: [xMm, yMm, thetaRad], or null when there is none. */
+    partnerPose() { return partnerPose; },
     /** The state now, plus the contacts and Hive tips that began since the last call. */
     state() {
       const p = body.translation();
       const events = touchEvents.concat(worldEvents);
       touchEvents = [];
       worldEvents.length = 0;
-      return { x: p.x / MM, y: p.y / MM, theta, leftPodMm, rightPodMm, backPodMm, fLeftWheelMm, events, held: heldCount(), slots: slots.map((b) => (b ? 1 : 0)).join('') };
+      return { x: p.x / MM, y: p.y / MM, theta, leftPodMm, rightPodMm, backPodMm, fLeftWheelMm, events, held: heldCount(), slots: slots.map((b) => (b ? 1 : 0)).join(''), ...(partner ? { partner: partnerPose } : {}) };
     },
     /** What each ball is: [id, type, radiusMm]. Sent once. */
     ballInfo() {

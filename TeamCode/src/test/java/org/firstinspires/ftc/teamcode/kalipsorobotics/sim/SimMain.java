@@ -62,11 +62,17 @@ public final class SimMain {
                 out.println("#warning " + warning);
             }
             writeGeometry(out);
+            if (result.partnerInfo != null) {
+                out.println("#partnerinfo " + result.partnerInfo);
+            }
             for (double[] info : result.ballInfo) {
                 out.println("#balltype " + (int) info[0] + " " + (int) info[1] + " " + info[2]);
             }
             for (double[] move : result.ballMoves) {
                 out.println("#ball " + move[0] + " " + (int) move[1] + " " + (int) move[2] + " " + (int) move[3] + " " + (int) move[4]);
+            }
+            for (double[] p : result.partnerFrames) {
+                out.println("#partner " + p[0] + " " + p[1] + " " + p[2] + " " + p[3]);
             }
             for (double[] held : result.heldFrames) {
                 out.println("#held " + held[0] + " " + (int) held[1]);
@@ -159,6 +165,11 @@ public final class SimMain {
                 } else if (line.startsWith("#held ")) {
                     String[] v = line.substring(6).split(" ");
                     result.heldFrames.add(new double[]{Double.parseDouble(v[0]), Double.parseDouble(v[1])});
+                } else if (line.startsWith("#partnerinfo ")) {
+                    result.partnerInfo = line.substring(13);
+                } else if (line.startsWith("#partner ")) {
+                    String[] v = line.substring(9).split(" ");
+                    result.partnerFrames.add(new double[]{Double.parseDouble(v[0]), Double.parseDouble(v[1]), Double.parseDouble(v[2]), Double.parseDouble(v[3])});
                 } else if (line.startsWith("#assumed ")) {
                     result.assumed.add(line.substring(9));
                 } else if (line.startsWith("#")) {

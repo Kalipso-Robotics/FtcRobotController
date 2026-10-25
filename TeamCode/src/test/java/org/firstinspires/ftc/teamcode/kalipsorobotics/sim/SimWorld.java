@@ -65,6 +65,20 @@ public interface SimWorld extends SimClock.TimeListener, AutoCloseable {
         return new double[]{0, 0};
     }
 
+    /** Tells the world the match has started, so the partner robot's path clock starts. */
+    default void partnerStart(long nanos) {
+    }
+
+    /** The partner robot R2's pose now as {x, y, theta}, or null when there is none. */
+    default double[] partnerPose() {
+        return null;
+    }
+
+    /** The partner's geometry as "name front back width", or null when there is none. */
+    default String partnerInfo() {
+        return null;
+    }
+
     /** Things that happened since the last call, as "seconds|text" (virtual seconds), e.g. "7.412|robot touched hive-leg-low". */
     default List<String> drainEvents() {
         return new ArrayList<>();
