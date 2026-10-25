@@ -1,0 +1,13 @@
+{
+  "name": "auto-sim-app",
+  "private": true,
+  "type": "module",
+  "description": "Browser app for the auto simulator: serves the page, runs the build and the sim, watches your files.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  }
+}

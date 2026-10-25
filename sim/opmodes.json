@@ -1,0 +1,24 @@
+[
+  {
+    "name": "RedTippingAuto",
+    "className": "org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto",
+    "alliance": "red",
+    "start": {
+      "x": 1389.5,
+      "y": 3486.5,
+      "headingDeg": -90
+    },
+    "note": "start must equal the pose RedTippingAuto.initializeRobot gives Odometry: (171.5 + 1218, 3658 - 171.5, -90 deg)"
+  },
+  {
+    "name": "BallShowcaseAuto",
+    "className": "org.firstinspires.ftc.teamcode.kalipsorobotics.simdemo.BallShowcaseAuto",
+    "alliance": "red",
+    "start": {
+      "x": 1389.5,
+      "y": 3425.6,
+      "headingDeg": -90
+    },
+    "note": "sim-only: the real shooter, intake, stopper and turret code drives, picks up and shoots. Start must equal the pose it gives Odometry."
+  }
+]
