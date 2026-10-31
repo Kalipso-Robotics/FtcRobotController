@@ -561,6 +561,13 @@ export async function createWorld(init) {
       }
       return moved;
     },
+    /** Every ball right now: [id, type, xMm, yMm, zMm, held (1 or 0)]. For the sim's fake camera. */
+    ballPositions() {
+      return balls.map((b) => {
+        const p = b.held ? heldPosition(b) : b.body.translation();
+        return [b.id, b.type, Math.round(p.x / MM), Math.round(p.y / MM), Math.round(p.z / MM), b.held ? 1 : 0];
+      });
+    },
     /** Each Hive's tilt about its pivot, in radians: positive lifts the +y Cell. */
     hiveAngles() {
       return hives.map((h) => aboutX(h.body.rotation()));

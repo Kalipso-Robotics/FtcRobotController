@@ -45,6 +45,101 @@
     ]
   },
   {
+    "id": "cameraOn",
+    "group": "Camera",
+    "label": "Fake camera",
+    "unit": "",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "description": "On: the sim reports loose balls the camera could see, to the same SharedData list your vision fills. Off: the auto never sees a loose ball.",
+    "unmeasured": false,
+    "affects": [
+      "balls seen"
+    ],
+    "type": "choice",
+    "options": [
+      {
+        "value": 1,
+        "label": "On"
+      },
+      {
+        "value": 0,
+        "label": "Off"
+      }
+    ]
+  },
+  {
+    "id": "cameraFovDiagonalDeg",
+    "group": "Camera",
+    "label": "Field of view (diagonal)",
+    "unit": "°",
+    "min": 40,
+    "max": 170,
+    "step": 1,
+    "description": "Diagonal angle of the 16:9 image. The sim turns it into a left-right view angle.",
+    "unmeasured": true,
+    "affects": [
+      "balls seen"
+    ]
+  },
+  {
+    "id": "cameraMaxRangeMm",
+    "group": "Camera",
+    "label": "Farthest ball seen",
+    "unit": "mm",
+    "min": 500,
+    "max": 5000,
+    "step": 50,
+    "description": "A ball farther than this from the robot's centre is not seen.",
+    "unmeasured": true,
+    "affects": [
+      "balls seen"
+    ]
+  },
+  {
+    "id": "cameraMinRangeMm",
+    "group": "Camera",
+    "label": "Nearest ball seen",
+    "unit": "mm",
+    "min": 0,
+    "max": 1000,
+    "step": 10,
+    "description": "The floor just in front of the robot is below the lens view.",
+    "unmeasured": true,
+    "affects": [
+      "balls seen"
+    ]
+  },
+  {
+    "id": "cameraMissPercent",
+    "group": "Camera",
+    "label": "Chance to miss a ball",
+    "unit": "%",
+    "min": 0,
+    "max": 50,
+    "step": 0.5,
+    "description": "Per ball, per camera frame (30 per second).",
+    "unmeasured": true,
+    "affects": [
+      "balls seen"
+    ]
+  },
+  {
+    "id": "cameraErrorMm",
+    "group": "Camera",
+    "label": "Position error",
+    "unit": "mm",
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "description": "A seen ball is reported off by up to this much in x and in y.",
+    "unmeasured": true,
+    "affects": [
+      "balls seen"
+    ]
+  },
+  {
     "id": "shotMode",
     "group": "Shooter",
     "label": "How a shot leaves",

@@ -60,6 +60,11 @@ public interface SimWorld extends SimClock.TimeListener, AutoCloseable {
         return new ArrayList<>();
     }
 
+    /** Every ball right now, as {id, type, x, y, z, held (1 or 0)} in mm. Empty if the world has no balls. */
+    default List<double[]> ballPositions() {
+        return new ArrayList<>();
+    }
+
     /** The red and blue Hive tilt in radians (positive lifts the +y Cell). */
     default double[] hiveAngles() {
         return new double[]{0, 0};

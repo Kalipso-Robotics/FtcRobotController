@@ -183,3 +183,13 @@ test('Mode A shots follow the turret: aimed the other way they miss', async () =
   for (let i = 0; i < 20; i++) events.push(...w.debugStep(0.1, [0, 0, 0, 0], { ...OPEN, turret: Math.PI }).events);
   assert.equal(events.filter((e) => e.name.includes('went into')).length, 0);
 });
+
+test('ballPositions lists every ball with its type, place and whether it is held', async () => {
+  const w = await createWorld(init());
+  await w.debugStep(1);
+  const all = w.ballPositions();
+  assert.equal(all.length, w.ballInfo().length);
+  const gardenBall = all.find(([, type, x, y, z]) => type === 0 && z < 40 && y > SIZE - 100 && x < 300);
+  assert.ok(gardenBall, 'a pollen ball lies on the floor in the red Garden');
+  assert.ok(all.every(([, , , , , held]) => held === 0), 'nothing is held at the start');
+});

@@ -181,6 +181,24 @@ public final class RapierWorld implements SimWorld {
     }
 
     @Override
+    public synchronized List<double[]> ballPositions() {
+        syncToNow();
+        List<double[]> all = new ArrayList<>();
+        String reply = request("ballpos");
+        if (!reply.equals("-")) {
+            for (String ball : reply.split(";")) {
+                String[] v = ball.split(",");
+                double[] row = new double[v.length];
+                for (int i = 0; i < v.length; i++) {
+                    row[i] = Double.parseDouble(v[i]);
+                }
+                all.add(row);
+            }
+        }
+        return all;
+    }
+
+    @Override
     public synchronized double[] hiveAngles() {
         return hiveAngles.clone();
     }

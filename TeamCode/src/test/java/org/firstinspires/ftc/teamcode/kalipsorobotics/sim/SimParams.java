@@ -28,6 +28,12 @@ final class SimParams {
         values.put("robotFront", RobotFootprint.FRONT_MM);
         values.put("robotBack", RobotFootprint.BACK_MM);
         values.put("robotWidth", RobotFootprint.WIDTH_MM);
+        values.put("cameraOn", SimCamera.on ? 1.0 : 0.0);
+        values.put("cameraFovDiagonalDeg", SimCamera.fovDiagonalDeg);
+        values.put("cameraMaxRangeMm", SimCamera.maxRangeMm);
+        values.put("cameraMinRangeMm", SimCamera.minRangeMm);
+        values.put("cameraMissPercent", SimCamera.missPercent);
+        values.put("cameraErrorMm", SimCamera.errorMm);
         return values;
     }
 
@@ -62,6 +68,24 @@ final class SimParams {
                 break;
             case "robotWidth":
                 RobotFootprint.WIDTH_MM = value;
+                break;
+            case "cameraOn":
+                SimCamera.on = value != 0;
+                break;
+            case "cameraFovDiagonalDeg":
+                SimCamera.fovDiagonalDeg = value;
+                break;
+            case "cameraMaxRangeMm":
+                SimCamera.maxRangeMm = value;
+                break;
+            case "cameraMinRangeMm":
+                SimCamera.minRangeMm = value;
+                break;
+            case "cameraMissPercent":
+                SimCamera.missPercent = value;
+                break;
+            case "cameraErrorMm":
+                SimCamera.errorMm = value;
                 break;
             default:
                 throw new IllegalArgumentException("No setter for simulator parameter " + id);

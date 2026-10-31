@@ -1,5 +1,6 @@
 // Physics server. The Java runner starts this and talks to it one line at a time over stdin/stdout:
 //   init <json>                                  -> "ok" and, when the field has balls, " id,type,radiusMm;id,type,radiusMm"
+//   ballpos                                      -> "id,type,xMm,yMm,zMm,held;..." every ball right now, "-" if none
 //   balls                                        -> "angleRed angleBlue id,xMm,yMm,zMm;..." the balls that moved since the last call, "-" if none
 //   step <toNanos> <p0> <p1> <p2> <p3> <b0> <b1> <b2> <b3> [<intakePower> <stopper> <flywheelRps> <hood> <turretRad>]
 //                                                -> "x y theta leftPodMm rightPodMm backPodMm fLeftWheelMm held slots events"
@@ -37,6 +38,8 @@ async function handle(line) {
     const angles = world.hiveAngles();
     const moved = world.ballsMoved().map((b) => b.join(',')).join(';');
     process.stdout.write(`${(angles[0] ?? 0).toFixed(5)} ${(angles[1] ?? 0).toFixed(5)} ${moved || '-'}\n`);
+  } else if (command === 'ballpos') {
+    process.stdout.write(`${world.ballPositions().map((b) => b.join(',')).join(';') || '-'}\n`);
   } else if (command === 'step') {
     const v = rest.split(' ').map(Number);
     const actuators = v.length >= 14 ? { intake: v[9], stopper: v[10], rps: v[11], hood: v[12], turret: v[13] } : undefined;

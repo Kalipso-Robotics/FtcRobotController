@@ -828,7 +828,8 @@ public final class SimHardware {
 
         @Override
         public double getAnalogInputVoltage(int channel) {
-            return world.beamBlocked(channel) ? 0.0 : 3.3;
+            // Healthy sensors stay inside BeamBreakConfig's valid window (MIN_VALID_V to MAX_VALID_V); exactly 0.0 or 3.3 would be reported as a fault.
+            return world.beamBlocked(channel) ? 0.3 : 3.0;
         }
 
         @Override

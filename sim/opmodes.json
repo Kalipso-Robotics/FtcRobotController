@@ -11,6 +11,17 @@
     "note": "start must equal the pose RedTippingAuto.initializeRobot gives Odometry: (171.5 + 1218, 3658 - 171.5, -90 deg)"
   },
   {
+    "name": "RedDecideAuto",
+    "className": "org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedDecideAuto",
+    "alliance": "red",
+    "start": {
+      "x": 1389.5,
+      "y": 3486.5,
+      "headingDeg": -90
+    },
+    "note": "start must equal the pose RedDecideAuto.initializeRobot gives Odometry (same as RedTippingAuto). decide() picks every move after the preload."
+  },
+  {
     "name": "BallShowcaseAuto",
     "className": "org.firstinspires.ftc.teamcode.kalipsorobotics.simdemo.BallShowcaseAuto",
     "alliance": "red",

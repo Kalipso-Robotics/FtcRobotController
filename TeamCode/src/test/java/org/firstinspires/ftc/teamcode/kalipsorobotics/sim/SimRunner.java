@@ -89,9 +89,15 @@ public final class SimRunner {
         world.setPose(startX, startY, startTheta);
 
         long[] nextFrame = {0};
+        long[] nextCameraFrame = {0};
         long[] matchEndNanos = {Long.MAX_VALUE};
+        SimCamera camera = new SimCamera();
         SimClock.start(toNanos -> {
             world.advanceTo(toNanos);
+            if (SimCamera.on && toNanos >= nextCameraFrame[0]) {
+                camera.publish(world); // a world with no balls publishes an empty list, like a camera that sees nothing
+                nextCameraFrame[0] = toNanos - toNanos % SimCamera.FRAME_NANOS + SimCamera.FRAME_NANOS;
+            }
             if (toNanos >= nextFrame[0]) {
                 result.frames.add(frame(toNanos, world));
                 recordBalls(result, world, toNanos);
