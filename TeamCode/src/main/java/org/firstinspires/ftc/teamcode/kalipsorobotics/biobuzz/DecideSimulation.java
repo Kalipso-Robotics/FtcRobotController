@@ -80,8 +80,16 @@ public class DecideSimulation extends LinearOpMode {
 
     // The path planner. forFieldAuto = also treats the opponent's half of the field as blocked.
     private static final double OBSTACLE_BUFFER_MM = 350;
-    private final PathPlanning pathPlanner =
-            PathPlanning.forFieldAuto(OBSTACLE_BUFFER_MM, RobotFootprint.WIDTH_MM / 2);
+    // One planner for a still Hive and one for a tipping Hive (the space under it is blocked).
+    private final PathPlanning plannerHiveStill =
+            PathPlanning.forFieldAuto(OBSTACLE_BUFFER_MM, RobotFootprint.WIDTH_MM / 2, false);
+    private final PathPlanning plannerHiveTipping =
+            PathPlanning.forFieldAuto(OBSTACLE_BUFFER_MM, RobotFootprint.WIDTH_MM / 2, true);
+
+    /** The planner that matches the Hive right now. */
+    private PathPlanning pathPlanner() {
+        return tippedDuringLastMove ? plannerHiveTipping : plannerHiveStill;
+    }
 
     // ----- The edge-case scenarios -----
 
@@ -320,7 +328,7 @@ public class DecideSimulation extends LinearOpMode {
         if (alreadyThere) {
             say("   PATH: already there, no driving");
         } else {
-            List<Point> waypoints = pathPlanner.plan(robotPosition, target);
+            List<Point> waypoints = pathPlanner().plan(robotPosition, target);
             if (waypoints == null) {
                 say("   PATH: NO PATH from " + show(robotPosition) + " to " + show(target) + ". Match over.");
                 matchIsOver = true;
@@ -443,7 +451,7 @@ public class DecideSimulation extends LinearOpMode {
         if (Point.distance(from, to) < 1) {
             return 0;
         }
-        List<Point> waypoints = pathPlanner.plan(from, to);
+        List<Point> waypoints = pathPlanner().plan(from, to);
         if (waypoints == null) {
             return 999;
         }

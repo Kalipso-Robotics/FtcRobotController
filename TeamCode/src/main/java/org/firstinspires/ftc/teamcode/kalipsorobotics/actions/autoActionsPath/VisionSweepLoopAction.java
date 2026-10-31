@@ -44,6 +44,7 @@ public class VisionSweepLoopAction extends KActionSet {
     public void update() {
         super.update();
 
+        //todo replace with park
         double timeToPark = autoToBallsPathingAction.getMovement().getEstimatedPathTimeMS(); //todo calculation
 
         if (timeToPark >= 30000-autoTimer.milliseconds()) {

@@ -58,7 +58,7 @@ public class Raytracer {
     /** Result of one ball's raytrace. Immutable. Lengths in mm. */
     public static final class Estimate {
         /** Ball centre in the robot frame: x = left, y = forward. */
-        public final Point robotPos;
+    public final Point robotPos;
         /** Camera-frame depth from the ray/plane intersection (the ray parameter t). */
         public final double rayDepthMM;
         /** Depth implied by the ball's vertical angular size (uses fy). */

@@ -41,6 +41,14 @@ android {
     // throwing "Method d in android.util.Log not mocked". Does not change the robot build.
     testOptions {
         unitTests.returnDefaultValues = true
+        // Simulator only: lets the test JVM attach its own clock-rewriting agent (sim/ClockRewriter).
+        unitTests.all {
+            jvmArgs '-Djdk.attach.allowAttachSelf=true'
+            // The sim runs each match in its own JVM (the code keeps static state), so tests need the classpath.
+            doFirst {
+                systemProperty 'sim.classpath', classpath.asPath
+            }
+        }
     }
 
     androidResources {
@@ -74,6 +82,9 @@ dependencies {
     implementation project(':FtcRobotController')
 
     testImplementation 'junit:junit:4.12'
+    // Simulator only (laptop tests): rewrites time calls so the auto runs on a virtual clock.
+    testImplementation 'org.ow2.asm:asm:9.7'
+    testImplementation 'net.bytebuddy:byte-buddy-agent:1.14.18'
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 
 //    implementation "com.kuriosityrobotics.shuttle:shuttle-core:1.0"
@@ -91,4 +102,16 @@ dependencies {
 // Fix for Sloth remove task issue
 tasks.matching { it.name == 'removeSlothRemote' }.configureEach {
     enabled = false
+}
+
+// Simulator only: writes the laptop-test classpath to build/sim-classpath.txt, so sim/server can
+// start a run (java -cp ... SimMain) without going through the test runner.
+afterEvaluate {
+    def unitTest = tasks.named('testDebugUnitTest')
+    tasks.register('simClasspath') {
+        dependsOn unitTest.get().classpath
+        doLast {
+            file("$buildDir/sim-classpath.txt").text = unitTest.get().classpath.asPath
+        }
+    }
 }

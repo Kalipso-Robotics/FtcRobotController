@@ -76,7 +76,16 @@ public class PathPlanning {
      * Crossing to the opposing alliance's side is allowed (use this one in TELEOP).
      */
     public static PathPlanning forField(double bufferMM) {
-        return new PathPlanning(fieldBoxes(bufferMM), Arrays.asList(fieldRaw()),
+        return forField(bufferMM, false);
+    }
+
+    /**
+     * Same as forField(bufferMM). While the Hive is TIPPING the whole space under it is blocked too,
+     * so the robot cannot drive between the legs. Build a planner with true while the Hive moves
+     * and one with false when it stands still.
+     */
+    public static PathPlanning forField(double bufferMM, boolean hiveTipping) {
+        return new PathPlanning(fieldBoxes(bufferMM, hiveTipping), Arrays.asList(fieldRaw(hiveTipping)),
                 Arrays.asList(FieldConfig.HIVE_DEADZONES), false);
     }
 
@@ -87,29 +96,42 @@ public class PathPlanning {
      *                     half-width to keep the whole body on its own side.
      */
     public static PathPlanning forFieldAuto(double bufferMM, double sideBufferMM) {
-        List<double[]> boxes = fieldBoxes(bufferMM);
-        boxes.add(grown(new double[]{FieldConfig.MIDLINE_X, 0, FIELD_SIZE_MM, FIELD_SIZE_MM}, sideBufferMM));
-        return new PathPlanning(boxes, Arrays.asList(fieldRaw()), Arrays.asList(FieldConfig.HIVE_DEADZONES), true);
+        return forFieldAuto(bufferMM, sideBufferMM, false);
     }
 
-    /** Real Hive legs and flowers, not grown. */
-    private static double[][] fieldRaw() {
+    /** Same as forFieldAuto(bufferMM, sideBufferMM), and while the Hive is TIPPING the space under it is blocked too. */
+    public static PathPlanning forFieldAuto(double bufferMM, double sideBufferMM, boolean hiveTipping) {
+        List<double[]> boxes = fieldBoxes(bufferMM, hiveTipping);
+        boxes.add(grown(new double[]{FieldConfig.MIDLINE_X, 0, FIELD_SIZE_MM, FIELD_SIZE_MM}, sideBufferMM));
+        return new PathPlanning(boxes, Arrays.asList(fieldRaw(hiveTipping)), Arrays.asList(FieldConfig.HIVE_DEADZONES), true);
+    }
+
+    /**
+     * Real Hive legs and flowers, not grown. While the Hive is tipping, one more box covers the whole
+     * Hive footprint (legs and the gap between them), because nothing may drive under a moving Hive.
+     */
+    private static double[][] fieldRaw(boolean hiveTipping) {
         double half = FieldConfig.FLOWER_SIZE_MM / 2;
         Point[] flowers = {FieldConfig.aFlowerPoint, FieldConfig.bFlowerPoint,
                 FieldConfig.cFlowerPoint, FieldConfig.dFlowerPoint};
-        double[][] result = new double[2 + flowers.length][];
+        int extraBoxes = hiveTipping ? 1 : 0;
+        double[][] result = new double[2 + flowers.length + extraBoxes][];
         result[0] = FieldConfig.HIVE_LEG_LOW_X;
         result[1] = FieldConfig.HIVE_LEG_HIGH_X;
         for (int i = 0; i < flowers.length; i++) {
             Point f = flowers[i];
             result[2 + i] = new double[]{f.getX() - half, f.getY() - half, f.getX() + half, f.getY() + half};
         }
+        if (hiveTipping) {
+            result[result.length - 1] = new double[]{
+                    FieldConfig.HIVE_MIN_X, FieldConfig.HIVE_MIN_Y, FieldConfig.HIVE_MAX_X, FieldConfig.HIVE_MAX_Y};
+        }
         return result;
     }
 
     /** Buffered Hive legs and flowers. */
-    private static List<double[]> fieldBoxes(double bufferMM) {
-        return buffered(bufferMM, fieldRaw());
+    private static List<double[]> fieldBoxes(double bufferMM, boolean hiveTipping) {
+        return buffered(bufferMM, fieldRaw(hiveTipping));
     }
 
     private static double[] grown(double[] box, double bufferMM) {

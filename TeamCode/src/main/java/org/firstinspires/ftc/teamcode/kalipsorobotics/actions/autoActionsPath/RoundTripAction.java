@@ -6,6 +6,13 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyAuto;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -57,6 +64,59 @@ public class RoundTripAction extends KActionSet {
 //        intakeBalls.setName("intakeBalls");
 //        intakeBalls.setDependentActions(moveToBalls);
 //        this.addAction(intakeBalls);
+    }
+
+    /**
+     * Same trip as above, with the shooting and intake switched on: drive to the shoot point, shoot at the target Cell, then drive
+     * to the balls with the intake running (a Garden or a Flower is picked up by driving into it). The intake stops when the
+     * drive to the balls ends.
+     */
+    public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake,
+                           Point targetPoint, Point launchPoint, AllianceColor allianceColor, boolean useAdaptivePP) {
+        this(opModeUtilities, drivetrain, allianceColor, useAdaptivePP);
+
+        // the flywheel warms up while the robot drives to the shoot point
+        ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, targetPoint, launchPoint);
+        shooterRun.setName("shooterRun");
+        this.addAction(shooterRun);
+
+        ShooterReady shooterReady = new ShooterReady(shooterRun);
+        shooterReady.setName("shooterReady");
+        shooterReady.setDependentActions(moveToShoot);
+        this.addAction(shooterReady);
+
+        TurretReadyAuto turretReady = new TurretReadyAuto(turretAutoAlign);
+        turretReady.setName("turretReady");
+        turretReady.setDependentActions(moveToShoot);
+        this.addAction(turretReady);
+
+        TurretStop turretStop = new TurretStop(turretAutoAlign);
+        turretStop.setName("turretStop");
+        turretStop.setDependentActions(turretReady);
+        this.addAction(turretStop);
+
+        PushBall pushBall = new PushBall(stopper, intake);
+        pushBall.setName("shoot");
+        pushBall.setDependentActions(moveToShoot, turretReady);
+        this.addAction(pushBall);
+
+        ShooterStop shooterStop = new ShooterStop(shooterRun);
+        shooterStop.setName("shooterStop");
+        shooterStop.setDependentActions(pushBall);
+        this.addAction(shooterStop);
+
+        // after the shot: drive to the balls and intake on the way
+        moveToBalls.setDependentActions(moveToShoot, pushBall);
+
+        intakeBalls = new IntakeFullAction(stopper, intake, 10000, IntakeConfig.intakePower);
+        intakeBalls.setName("intakeBalls");
+        intakeBalls.setDependentActions(pushBall);
+        this.addAction(intakeBalls);
+
+        IntakeStop intakeStop = new IntakeStop(intakeBalls);
+        intakeStop.setName("intakeStop");
+        intakeStop.setDependentActions(moveToBalls);
+        this.addAction(intakeStop);
     }
 
     public IPurePursuitAction getMoveToShoot() {return moveToShoot;}

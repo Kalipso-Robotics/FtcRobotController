@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Auto Sim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">{ "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }</script>
+</head>
+<body data-view="home" data-mode="3d" data-details="closed">
+  <header id="bar">
+    <a class="logo" href="#/" aria-label="Home"><span class="mark"></span>KALIPSO AUTO SIM</a>
+    <label class="autosel when-auto" title="Which autonomous to run">
+      <span id="autoName" class="m">RedCloseAuto</span><span id="autoTag" class="tag"></span>
+      <svg class="chev" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 L5 6.5 L8 3.5"/></svg>
+      <select id="opmode" aria-label="Autonomous"></select>
+    </label>
+    <div id="runChip" class="chips when-auto" role="status" aria-live="polite"></div>
+    <button id="scoreChip" class="scorechip when-run" aria-label="Score details" aria-expanded="false" hidden></button>
+    <div id="scorePop" class="popover" hidden></div>
+    <span class="spacer"></span>
+    <label class="switch when-auto" title="Run again whenever a .java file is saved">
+      <input type="checkbox" id="watch" checked><span class="track"></span><span class="text">Run on save</span>
+    </label>
+    <a id="paramsBtn" class="btn when-auto" href="#/params"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h7M12 4h2M2 12h3M8 12h6M9 2.5v3M5 10.5v3"/></svg>Parameters <span id="changedPill" class="pill" hidden></span></a>
+    <button id="run" class="btn btn-p when-auto">Run <span class="kbd">R</span></button>
+  </header>
+
+  <main id="home" class="view" aria-label="Start">
+    <section id="homePanel"></section>
+    <div id="homeStage" class="stagehost"></div>
+  </main>
+
+  <div id="work" class="view" aria-label="Run workspace">
+    <aside id="rail" aria-label="Summary"></aside>
+    <main id="fieldArea">
+      <div id="stage" class="stagehost-inner">
+        <canvas id="view"></canvas>
+        <div id="labels"></div>
+      </div>
+      <div id="legend" class="legend"></div>
+      <div id="viewTools" class="viewtools">
+        <div id="viewMode" class="segmented" role="group" aria-label="View">
+          <button data-mode="2d" aria-pressed="false" title="Top view (V)">2D</button><button data-mode="3d" aria-pressed="true" title="3D view (V)">3D</button>
+        </div>
+        <button id="resetCamera" class="btn only-3d" title="Reset the 3D camera">Reset view</button>
+      </div>
+      <div id="fieldNote" class="fieldnote" hidden></div>
+      <div id="camHint" class="camhint only-3d">Drag to orbit · scroll to zoom · F follow robot</div>
+      <button id="momentChip" class="moment" aria-label="Open details"></button>
+    </main>
+    <aside id="details" aria-label="Details" aria-hidden="true"></aside>
+    <footer id="timeline"></footer>
+  </div>
+
+  <main id="params" class="view" aria-label="Parameters"></main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

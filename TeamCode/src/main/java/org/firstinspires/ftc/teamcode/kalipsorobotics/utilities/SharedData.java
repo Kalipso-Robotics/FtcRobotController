@@ -219,6 +219,17 @@ public class SharedData {
         pollenNectarDetectionsTimeMs = 0;
     }
 
+    /** True while the Hive is moving (tipping). Path planning blocks the space under the Hive while it is true. */
+    private static volatile boolean hiveTipping = false;
+
+    public static void setHiveTipping(boolean tipping) {
+        SharedData.hiveTipping = tipping;
+    }
+
+    public static boolean isHiveTipping() {
+        return hiveTipping;
+    }
+
     private static volatile List<BallInformation> ballInformation = new ArrayList<>();
     private static volatile long ballInformationTimeMs = 0;
 

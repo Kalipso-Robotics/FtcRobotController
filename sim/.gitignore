@@ -1,0 +1,6 @@
+# local Node install and packages (see sim/README.md)
+.node/
+node_modules/
+# the values last used on the Setup screen
+.last-params.json
+.last-partner.json

@@ -1,0 +1,13 @@
+{
+  "name": "auto-sim-physics",
+  "private": true,
+  "type": "module",
+  "description": "Rapier physics for the auto simulator. The Java runner talks to server.mjs over stdin/stdout.",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@dimforge/rapier2d-compat": "0.19.3",
+    "@dimforge/rapier3d-compat": "^0.19.3"
+  }
+}
