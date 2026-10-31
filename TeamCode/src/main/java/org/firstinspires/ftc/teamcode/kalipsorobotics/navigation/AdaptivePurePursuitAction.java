@@ -103,7 +103,11 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     private int calcVAIndex = -1;
     private boolean calcVelocityAccelDone = false;
-    private double estimatedPathTimeMS = -1; // set once the velocity profile is done, -1 until then
+    private int calcTimeIndex = 0;
+    private boolean calcTimeDone = false;
+    private double calcTimePrevVelocity = 0;  // mm/s, accel-capped velocity at calcTimeIndex - 1
+    private double calcTimeTotalSec = 0;
+    private double estimatedPathTimeMS = -1; // set once calcTimeDone, -1 until then
     private double lastUpdateTime;
     private final double lastHeadingError = 0;
 
@@ -243,7 +247,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     }
 
     public boolean isPrecomputeDone() {
-        return injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone;
+        return injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone && calcTimeDone;
     }
 
     @Override
@@ -267,6 +271,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         smootherDone = false;
         calcDistanceDone = false;
         calcVelocityAccelDone = false;
+        calcTimeDone = false;
         estimatedPathTimeMS = -1;
 
         // Clear and reset data structures
@@ -289,6 +294,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         smootherPasses = 0;
         calcDistanceIndex = 0;
         calcVAIndex = -1;
+        calcTimeIndex = 0;
+        calcTimePrevVelocity = 0;
+        calcTimeTotalSec = 0;
         lastMilli = 0;
         lastPosition = null; // or new Position(...)
         lookaheadBarrierIndex = -1;
@@ -488,10 +496,6 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
         if (injectDone && smootherDone && calcDistanceDone && !calcVelocityAccelDone) {
             calculateVelocityAcceleration(path);
-            if (calcVelocityAccelDone && estimatedPathTimeMS < 0) {
-                estimatedPathTimeMS = calculatePathTimeMS(path);
-                KLog.d("ppDebug", () -> "estimated path time " + estimatedPathTimeMS + " ms");
-            }
             if (calcVelocityAccelDone && lookaheadBarrierIndex == -1) {
                 for (int i = 1; i < path.numPoints() - 1; i++) {
                     if (path.getPoint(i).getVelocity() < 1.0) {
@@ -517,6 +521,10 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             }
             return;
         }
+
+        if (calcVelocityAccelDone && !calcTimeDone) {
+            calculatePathTime(path);
+        }
     }
 
     @Override
@@ -534,6 +542,12 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
 
         if (injectDone && smootherDone && calcDistanceDone && calcVelocityAccelDone) {
+
+            // The time estimate doesn't affect driving, so finish it here (one point per loop)
+            // if the path was planned too late for it to be done before this move started.
+            if (!calcTimeDone) {
+                calculatePathTime(path);
+            }
 
             // The path may have been planned from a predicted start (the previous move's end,
             // or the init pose). Before driving it, make sure the robot is actually there;
@@ -792,46 +806,51 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     }
 
     /**
-     * Estimated time to drive this action's path, in milliseconds. Calculated once when the
-     * path precompute finishes (see runPrecomputeStepForAll / waitForStartPrecomputingPaths),
-     * so this is free to call every loop. Returns -1 until the path has been planned.
+     * Estimated time to drive this action's path, in milliseconds. Built up one point per
+     * precompute step (see calculatePathTime), so this is free to call every loop.
+     * Returns -1 until the estimate is finished.
      */
     public double getEstimatedPathTimeMS() {
         return estimatedPathTimeMS;
     }
 
     /**
-     * Integrates time over the profiled path points. The velocity profile only limits
-     * deceleration (it starts at 0 and jumps straight to cruise speed), so a forward pass
-     * caps each point's speed by how fast the robot can accelerate to it. In-place turns
+     * Adds one segment's time to the path time estimate per call (like calculateDistanceAlongPath).
+     * Runs after the velocity profile, going forward: the profile only limits deceleration
+     * (it starts at 0 and jumps straight to cruise speed), so each point's speed is also capped
+     * by how fast the robot can accelerate to it from the point before. In-place turns
      * (no distance between points) are timed by heading change at max angular velocity.
      * Ignores the final settle/angle-lock time, so the real run will be slightly longer.
      */
-    private double calculatePathTimeMS(Path path) {
-        if (path == null || path.numPoints() < 2) {
-            return 0;
+    private void calculatePathTime(Path path) {
+        if (calcTimeIndex == 0) {
+            calcTimePrevVelocity = 0;  // robot starts at rest
+            calcTimeTotalSec = 0;
+            calcTimeIndex = 1;
         }
 
-        double totalTimeSec = 0;
-        double prevVelocity = 0;  // robot starts at rest
-        for (int i = 1; i < path.numPoints(); i++) {
-            Position prev = path.getPoint(i - 1);
-            Position curr = path.getPoint(i);
+        if (calcTimeIndex <= path.numPoints() - 1) {
+            Position prev = path.getPoint(calcTimeIndex - 1);
+            Position curr = path.getPoint(calcTimeIndex);
             double distance = prev.distanceTo(curr);
 
-            double reachableVelocity = Math.sqrt(prevVelocity * prevVelocity + 2 * MAX_ACCELERATION * distance);
+            double reachableVelocity = Math.sqrt(calcTimePrevVelocity * calcTimePrevVelocity + 2 * MAX_ACCELERATION * distance);
             double velocity = Math.min(curr.getVelocity(), reachableVelocity);
 
-            double avgVelocity = (prevVelocity + velocity) / 2;
+            double avgVelocity = (calcTimePrevVelocity + velocity) / 2;
             double driveTimeSec = avgVelocity > 1e-6 ? distance / avgVelocity : 0;
             double turnTimeSec = Math.abs(MathFunctions.angleWrapRad(curr.getTheta() - prev.getTheta()))
                     / MAX_ANGULAR_VELOCITY;
 
             // Heading changes while driving, so the segment takes whichever is slower
-            totalTimeSec += Math.max(driveTimeSec, turnTimeSec);
-            prevVelocity = velocity;
+            calcTimeTotalSec += Math.max(driveTimeSec, turnTimeSec);
+            calcTimePrevVelocity = velocity;
+            calcTimeIndex++;
+        } else {
+            estimatedPathTimeMS = calcTimeTotalSec * 1000;
+            calcTimeDone = true;
+            KLog.d("ppDebug", () -> "estimated path time " + estimatedPathTimeMS + " ms");
         }
-        return totalTimeSec * 1000;
     }
 
     public Optional<Position> getCurrentFollowPoint() {
