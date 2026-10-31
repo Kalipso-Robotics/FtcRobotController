@@ -32,6 +32,7 @@ public class AdaptivePurePursuitTest extends KOpMode {
     private double finalPositionError = 0;    // Final endpoint error (mm)
     private int sampleCount = 0;
     private int logCounter = 0;               // Counter for periodic logging
+    private double estimatedTimeMS = -1;      // Predicted path time from the velocity profile (ms)
 
     // Performance target
     private static final double TARGET_TIME_SEC = 3.5;  // Target time to complete path
@@ -88,12 +89,14 @@ public class AdaptivePurePursuitTest extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        waitForStart();
+        waitForStartPrecomputingPaths();
+        estimatedTimeMS = adaptivePP.getEstimatedPathTimeMS();
 
         ElapsedTime timer = new ElapsedTime();
         double errorSum = 0;
 
         KLog.d("AdaptivePPTest", "========== PATH EXECUTION START ==========");
+        KLog.d("AdaptivePPTest", String.format("Estimated Time: %.0f ms", estimatedTimeMS));
         KLog.d("AdaptivePPTest", String.format("Target: (%.1f, %.1f, %.1f°)",
             targetPosition.getX(), targetPosition.getY(), Math.toDegrees(targetPosition.getTheta())));
 
@@ -178,7 +181,8 @@ public class AdaptivePurePursuitTest extends KOpMode {
         KLog.d("AdaptivePPTest", String.format("Avg Error During Run: %.1f mm (%.2f in)",
             avgPositionError, avgPositionError / 25.4));
         KLog.d("AdaptivePPTest", "---");
-        KLog.d("AdaptivePPTest", String.format("Time: %.2f sec (Target: %.1f sec)", finalTime, TARGET_TIME_SEC));
+        KLog.d("AdaptivePPTest", String.format("Time: %.2f sec (Target: %.1f sec, Estimated: %.2f sec)",
+            finalTime, TARGET_TIME_SEC, estimatedTimeMS / 1000.0));
         KLog.d("AdaptivePPTest", String.format("Sample Count: %d", sampleCount));
         KLog.d("AdaptivePPTest", String.format("Avg Loop Time: %.2f ms", (finalTime * 1000.0) / sampleCount));
 

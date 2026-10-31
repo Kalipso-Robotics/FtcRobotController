@@ -11,6 +11,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.test.AdaptivePurePursuitTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
@@ -18,6 +20,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 public class VisionSweepLoopAction extends KActionSet {
 
     ElapsedTime autoTimer;
+    AutoToBallsPathingAction autoToBallsPathingAction;
 
     public VisionSweepLoopAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter, Stopper stopper, Intake intake, ElapsedTime autoTimer, AllianceColor allianceColor, boolean useAdaptivePP) {
         this.autoTimer = autoTimer;
@@ -31,7 +34,7 @@ public class VisionSweepLoopAction extends KActionSet {
         clusterDetectionAction.setName("clusterDetectionAction");
         this.addAction(clusterDetectionAction);
 
-        AutoToBallsPathingAction autoToBallsPathingAction = new AutoToBallsPathingAction(drivetrain, stopper, intake, true);
+        autoToBallsPathingAction = new AutoToBallsPathingAction(drivetrain, stopper, intake, true);
         autoToBallsPathingAction.setDependentActions(clusterDetectionAction);
         autoToBallsPathingAction.setName("autoToBallsPathingAction");
         this.addAction(autoToBallsPathingAction);
@@ -41,7 +44,7 @@ public class VisionSweepLoopAction extends KActionSet {
     public void update() {
         super.update();
 
-        double timeToPark = 0; //todo calculation
+        double timeToPark = autoToBallsPathingAction.getMovement().getEstimatedPathTimeMS(); //todo calculation
 
         if (timeToPark >= 30000-autoTimer.milliseconds()) {
             isDone = true;

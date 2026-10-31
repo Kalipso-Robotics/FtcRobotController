@@ -259,4 +259,8 @@ public class AutoToBallsPathingAction extends Action {
     public PickupPlan getPlan() {
         return plan;
     }
+
+    public AdaptivePurePursuitAction getMovement() {
+        return movement;
+    }
 }
