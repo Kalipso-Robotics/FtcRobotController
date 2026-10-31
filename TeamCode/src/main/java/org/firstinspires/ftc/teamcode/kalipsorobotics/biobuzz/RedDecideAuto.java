@@ -82,7 +82,6 @@ public class RedDecideAuto extends KOpMode {
     private static final double OBSTACLE_BUFFER_MM = 350;          // same as DecideSimulation / AutoToBallsPathingAction
     private static final double AT_SHOOT_POINT_MM = 150;           // closer than this to the launch point = "at the shoot point"
     private static final double PARK_WALL_GAP_MM = 15;             // GUESS: room left between the body and the walls at the park spot
-    private static final double WATCH_MS = 250;                    // nothing in view and time left: stand still this long, then look again
     // Where to stand to look at the balls a tipped Cell dumped. A tipped = its balls are on the +y wall side, B tipped = the -y wall side.
     // Both on our half, about 1150-1200 mm from the wall, facing the wall (the view is about 2.4 m wide there). GUESS: tune from the sim.
     private static final int BIG_CLUSTER_BALLS = 3;   // a seen cluster this big is taken before the next pile
@@ -90,7 +89,7 @@ public class RedDecideAuto extends KOpMode {
     private static final double VIEW_PLUS_Y_HEADING_DEG = 90;
     private static final Point VIEW_MINUS_Y = new Point(700, 1100);
     private static final double VIEW_MINUS_Y_HEADING_DEG = -90;
-    private static final double LOOK_SETTLE_MS = 1500;             // after arriving, let the rolling balls settle and the camera look
+    private static final double LOOK_SETTLE_MS = 700;           // after arriving, let the rolling balls settle and the camera look
     private static final double COUNT_SETTLE_SECONDS = 0.4;        // after a pickup the beam-break count lags a moment: wait before deciding
     private static final double BALL_NEAR_CENTER_MM = 100;        // a cluster's middle counts as "on a ball" when one is this close
     private static final long SIGHTING_MAX_AGE_MS = 500;           // a camera list older than this is ignored
@@ -190,6 +189,11 @@ public class RedDecideAuto extends KOpMode {
             if (currentAction != null && currentAction.updateCheckDone()) {
                 finishMove();
             }
+            // A pickup builds its drive on its first update, after startNextMove(). Finish that path's precompute now,
+            // or the robot stands still while it plans one small step per loop.
+            if (!AdaptivePurePursuitAction.allPrecomputeDone()) {
+                precomputePathsNow();
+            }
             if (currentAction == null && !parked && getRuntime() >= decideNotBeforeSeconds) {
                 startNextMove();
             }
@@ -228,52 +232,44 @@ public class RedDecideAuto extends KOpMode {
         int ballsInUpCell = (upCell == Cell.A) ? ballsInCellA : ballsInCellB;
         boolean hiveIsTipping = SharedData.isHiveTipping();
 
-        Move move = AutoDecider.decide(PARTNER_MODE, secondsLeft, secondsToPark, secondsForShotThenPark,
-                secondsForTripThenPark, ballsHeld, atShootPoint, upCell, hiveIsTipping, ballsInUpCell,
+        // No "does the trip fit" check: 0 here means decide() never turns a shot or a trip down for time. Only rule 1 is left
+        // (time left <= the drive to park + margin -> park).
+        Move move = AutoDecider.decide(PARTNER_MODE, secondsLeft, secondsToPark, 0,
+                0, ballsHeld, atShootPoint, upCell, hiveIsTipping, ballsInUpCell,
                 tipsDone, pilesLeft, looseBallsSeen);
 
         // A tip needs 8 pollen and we hold at most 4, so every trip should be a full 4. If decide() wants to shoot 1-3 balls and
         // there is time to get more (a cluster in view, or a tipped Cell's spill we have not looked at), collect first.
         String changed = null;
         Cell lookCell = null;
-        boolean shootingFew = (move == Move.SHOOT_A || move == Move.SHOOT_B) && ballsHeld > 0 && ballsHeld < MOST_BALLS_WE_CAN_HOLD;
+        // Collect until the balls we hold plus the balls already in the up Cell reach the tip count, so one shot finishes the tip.
+        // The count is a hint (the real weight changes a little), so when we already reach it, shoot now instead of going for more.
+        boolean shotWillTip = ballsInUpCell + ballsHeld >= RedTippingAuto.ballsNeededToTip(tipsDone);
+        boolean shootingFew = (move == Move.SHOOT_A || move == Move.SHOOT_B) && ballsHeld > 0 && ballsHeld < MOST_BALLS_WE_CAN_HOLD && !shotWillTip;
         if (shootingFew) {
-            if (seenCluster != null && secondsLeft > secondsForClusterTrip(robot, aimPointOf(seenCluster), upLaunch) + AutoDecider.PARK_MARGIN_SECONDS) {
+            if (seenCluster != null) {
                 move = Move.GET_SEEN_BALLS;
                 changed = "COLLECT first: holding " + ballsHeld + " of " + MOST_BALLS_WE_CAN_HOLD + ", a cluster is in view";
             } else {
-                Cell spill = nearestPendingSpill(robot);
-                if (spill != null && secondsLeft > secondsForLookTrip(robot, spill, upLaunch) + AutoDecider.PARK_MARGIN_SECONDS) {
+                Cell spill = newestPendingSpill();
+                if (spill != null) {
                     lookCell = spill;
                     changed = "COLLECT first: holding " + ballsHeld + " of " + MOST_BALLS_WE_CAN_HOLD + ", go look at the " + spill + " spill";
                 }
             }
         }
 
-        // A Cell that just tipped dumped a lot of balls on its own side, and they roll away fast. Empty-handed, look there before going
-        // to a pile (the piles stay where they are).
-        boolean goingToPile = move == Move.GET_GARDEN || move == Move.GET_FLOWER_A || move == Move.GET_FLOWER_B;
-        if (goingToPile && ballsHeld == 0 && seenCluster != null && seenCluster.size() >= BIG_CLUSTER_BALLS
-                && secondsLeft > secondsForClusterTrip(robot, aimPointOf(seenCluster), upLaunch) + AutoDecider.PARK_MARGIN_SECONDS) {
-            changed = move + " -> GET_SEEN_BALLS (a cluster of " + seenCluster.size() + " is in view, as good as a pile)";
-            move = Move.GET_SEEN_BALLS;
-            goingToPile = false;
-        }
-        if (goingToPile && ballsHeld == 0 && lookCell == null) {
-            Cell spill = nearestPendingSpill(robot);
-            if (spill != null && secondsLeft > secondsForLookTrip(robot, spill, upLaunch) + AutoDecider.PARK_MARGIN_SECONDS) {
-                lookCell = spill;
-                changed = move + " -> LOOK at the " + spill + " spill first (fresh spill, empty)";
-            }
-        }
+        // The piles come first. Seen balls and a tipped Cell's spill only happen after them, when decide() has no pile left.
 
-        // decide() says PARK when nothing is left to do, but parking early wastes the match. Park only when it is time (decide() rule 1,
-        // the time left is no more than the drive to the park spot plus a margin). Until then look at a tipped Cell's spill if we have not,
-        // otherwise stand still and keep watching the camera.
-        boolean watchInstead = (move == Move.PARK) && (secondsLeft > secondsToPark + AutoDecider.PARK_MARGIN_SECONDS);
+        // decide() says PARK when nothing is left to do. If there is time left AND one more trip could still finish a tip (a full load
+        // of 4 on top of what the up Cell and we hold reaches the tip count), look at a tipped Cell's spill. The tip count is a rough
+        // guess (where a ball lands changes the weight), so this is only a hint, with no margin cut. Otherwise park now: standing
+        // still scores nothing.
+        boolean couldStillTip = ballsInUpCell + ballsHeld + MOST_BALLS_WE_CAN_HOLD >= RedTippingAuto.ballsNeededToTip(tipsDone);
+        boolean watchInstead = (move == Move.PARK) && couldStillTip && (secondsLeft > secondsToPark + AutoDecider.PARK_MARGIN_SECONDS);
         if (watchInstead && ballsHeld == 0) {
-            Cell spill = nearestPendingSpill(robot);
-            if (spill != null && secondsLeft > secondsForLookTrip(robot, spill, upLaunch) + AutoDecider.PARK_MARGIN_SECONDS) {
+            Cell spill = newestPendingSpill();
+            if (spill != null) {
                 lookCell = spill;
                 changed = "PARK -> LOOK at the " + spill + " spill (time left, empty)";
             }
@@ -283,14 +279,13 @@ public class RedDecideAuto extends KOpMode {
         if (changed == null && watchInstead && ballsHeld == 0 && tipsDone > 0) {
             Cell down = (upCell == Cell.A) ? Cell.B : Cell.A;
             Point view = viewpointOf(down);
-            if (Point.distance(robot, view) > AT_SHOOT_POINT_MM * 2
-                    && secondsLeft > driveSeconds(robot, view) + driveSeconds(view, parkPoint()) + AutoDecider.PARK_MARGIN_SECONDS) {
+            if (Point.distance(robot, view) > AT_SHOOT_POINT_MM * 2) {
                 lookCell = down;
                 changed = "PARK -> go wait at the " + down + " (down) side, where the balls are";
             }
         }
-        if (changed == null && watchInstead) {
-            changed = "PARK -> WATCH (time left, wait for a cluster in view)";
+        if (lookCell == null) {
+            watchInstead = false; // nothing worth looking at: park now instead of standing still
         }
 
         String inputs = "secondsLeft=" + round(secondsLeft) + " secondsToPark=" + round(secondsToPark)
@@ -315,11 +310,6 @@ public class RedDecideAuto extends KOpMode {
             lookingAt = lookCell;
             currentAction = lookMove(lookCell);
             precomputePathsNow();
-            return;
-        }
-        if (watchInstead) {
-            currentMove = Move.WAIT;
-            currentAction = new WaitAction(WATCH_MS);
             return;
         }
         switch (move) {
@@ -570,18 +560,9 @@ public class RedDecideAuto extends KOpMode {
         return (tipped == Cell.A) ? VIEW_PLUS_Y_HEADING_DEG : VIEW_MINUS_Y_HEADING_DEG;
     }
 
-    /** The spill whose viewpoint is the shortest drive from here, or null if there is none left to look at. */
-    private Cell nearestPendingSpill(Point robot) {
-        Cell nearest = null;
-        double nearestSeconds = Double.MAX_VALUE;
-        for (Cell tipped : pendingSpills) {
-            double seconds = driveSeconds(robot, viewpointOf(tipped));
-            if (seconds < nearestSeconds) {
-                nearest = tipped;
-                nearestSeconds = seconds;
-            }
-        }
-        return nearest;
+    /** The spill that tipped most recently, or null if there is none left to look at. Older spills have mostly rolled away or across the midline. */
+    private Cell newestPendingSpill() {
+        return pendingSpills.isEmpty() ? null : pendingSpills.get(pendingSpills.size() - 1);
     }
 
     /** Drive to the viewpoint facing the wall, then stand still a moment so the rolling balls settle and the camera looks. */
