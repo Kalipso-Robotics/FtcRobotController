@@ -44,7 +44,7 @@ public class AutoToBallsPathingAction extends Action {
      * How much empty space the planner keeps around every obstacle, in mm. It stands in for the
      * size of the robot. PLACEHOLDER: set it from the real robot (see RobotFootprint).
      */
-    public static double BUFFER_MM = 350;
+    public static double BUFFER_MM = 262.5;
 
     /**
      * When the robot is this close to its stopping point, in mm, the intake turns on.
@@ -177,8 +177,9 @@ public class AutoToBallsPathingAction extends Action {
         // In AUTO it also treats the other alliance's half of the field as blocked. The second
         // number is how far the robot's center must stay from the middle line: half the robot's
         // width, so the whole body stays on our side.
-        // While the Hive is tipping, nothing may drive under it, so that space is blocked too.
-        boolean hiveTipping = SharedData.isHiveTipping();
+        // In TELEOP, while the Hive is tipping, nothing may drive under it, so that space is blocked too.
+        // In AUTO the space under the Hive stays open, so the robot may drive under it even while it tips.
+        boolean hiveTipping = !auto && SharedData.isHiveTipping();
         PathPlanning planner;
         if (auto) {
             planner = PathPlanning.forFieldAuto(BUFFER_MM, RobotFootprint.WIDTH_MM / 2, hiveTipping);

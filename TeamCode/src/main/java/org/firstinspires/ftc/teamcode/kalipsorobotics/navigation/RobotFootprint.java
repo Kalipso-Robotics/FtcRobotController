@@ -8,19 +8,19 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
  * an intake (front and back), and both share one pool of at most 4 balls.
  * All units are mm in the FieldConfig frame.
  *
- * PLACEHOLDER numbers (18 in square robot). Measure the real robot and update.
+ * Numbers from the team's measurement of the robot (the intake grab points keep the old 40 mm gap to the tips; PLACEHOLDER).
  */
 public class RobotFootprint {
     /** Full width, side to side. */
-    public static double WIDTH_MM = 457;
+    public static double WIDTH_MM = 337;
     /** Center to the front tip, including the intake. */
-    public static double FRONT_MM = 300;
+    public static double FRONT_MM = 252;
     /** Center to the back. */
-    public static double BACK_MM = 229;
+    public static double BACK_MM = 252;
     /** Front intake: center to where the ball sits when it is held. Must be at most FRONT_MM. */
-    public static double FRONT_GRAB_MM = 260;
+    public static double FRONT_GRAB_MM = 212;
     /** Back intake: center to where the ball sits when it is held. Must be at most BACK_MM. PLACEHOLDER. */
-    public static double BACK_GRAB_MM = 189;
+    public static double BACK_GRAB_MM = 212;
     /** A ball is 71 mm across (game manual). */
     public static final double BALL_RADIUS_MM = 35.5;
 
