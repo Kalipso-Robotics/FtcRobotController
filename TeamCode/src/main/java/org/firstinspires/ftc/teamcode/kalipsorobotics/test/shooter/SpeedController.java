@@ -20,7 +20,7 @@ public class SpeedController extends LinearOpMode {
         DcMotor motor1 = hardwareMap.dcMotor.get("motor1");
         DcMotor motor2 = hardwareMap.dcMotor.get("motor2");
 
-//        Servo servo0 = hardwareMap.servo.get("servo0");
+        Servo servo0 = hardwareMap.servo.get("servo0");
 
         double position = 0.5;
 
@@ -48,13 +48,13 @@ public class SpeedController extends LinearOpMode {
             motor2.setPower(-power);
 
 
-//            if (gamepad1.dpad_up) {
-//                position += 0.0005;
-//                servo0.setPosition(position);
-//            } else if (gamepad1.dpad_down) {
-//                position -= 0.0005;
-//                servo0.setPosition(position);
-//            }
+            if (gamepad1.dpad_up) {
+                position += 0.0005;
+                servo0.setPosition(position);
+            } else if (gamepad1.dpad_down) {
+                position -= 0.0005;
+                servo0.setPosition(position);
+            }
 
             telemetry.addData("Power 0: ", power0); //-0.47
             telemetry.addData("Power 1: ", power);
