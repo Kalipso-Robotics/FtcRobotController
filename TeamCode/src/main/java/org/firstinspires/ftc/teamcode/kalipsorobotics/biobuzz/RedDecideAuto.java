@@ -75,6 +75,7 @@ public class RedDecideAuto extends KOpMode {
 
     // ----- How long things take -----
     private static final double SPEED_MM_PER_SECOND = 1000;        // GUESS: how fast the robot drives
+    private static final double PARK_WHEN_SECONDS_LEFT = 2.5;     // we drive to the park spot when this much time is left, however far it is
     private static final double SECONDS_TO_SHOOT = 2;              // GUESS
     private static final double HIVE_TIP_SECONDS = 3.3;            // GUESS from the sim: a Hive finishes tipping this long after the shot that tips it
     private static final double WAIT_MS = 500;                     // how long one WAIT lasts
@@ -105,6 +106,18 @@ public class RedDecideAuto extends KOpMode {
     private static final double COMMIT_MAX_SECONDS = 8;            // a chosen group is kept this long (the target does not change every decision)
     private static final double COMMIT_REACHED_MM = 250;           // within this of the chosen group = we are there
     private static final double COMMIT_SWITCH_SCORE = 1.2;         // a new load must score this many times the chosen one to replace it
+
+    // ----- The viewpoint: from the third tip on, we stand here to look at every ball on the up Cell's end, then pick them up -----
+    // We stand at the middle edge of our half, next to the Hive, and face the MIDDLE of the up end's area (our half, from the Hive's
+    // middle to the wall), so the camera sees both sides of it. GUESSES: tune from the sim.
+    private static final Point VIEWPOINT_HIGH_Y_END = new Point(800, 2000);
+    private static final Point VIEW_TOWARD_HIGH_Y_END = new Point(915, 2750);  // the middle of the high-y end's area
+    private static final Point VIEWPOINT_LOW_Y_END = new Point(800, 1658);
+    private static final Point VIEW_TOWARD_LOW_Y_END = new Point(915, 908);    // the middle of the low-y end's area
+    private static final double VIEWPOINT_REACHED_MM = 250;        // within this of the viewpoint = we are there
+    private static final double LOOK_SETTLE_SECONDS = 0.7;         // after arriving, let the camera look before deciding
+
+    private static final boolean SWEEP_ENABLED = false;            // false = never drive the sweep loop (the code stays, it is just never chosen)
 
     // ----- The sweep: a rectangle loop along the wall where a tipped Cell dumped its balls -----
     // Out along one lane, back along another, with the intake running. All GUESSES: tune from the sim.
@@ -151,6 +164,10 @@ public class RedDecideAuto extends KOpMode {
     private TurretAutoAlign currentAim = null;            // for SHOOT_*: updated every loop, because the turret only moves when updated
     private double moveStartedAtSeconds = 0;
     private boolean parked = false;
+
+    // ----- The viewpoint (while we drive to it, currentMove is WAIT) -----
+    private boolean goingToViewpoint = false;             // the running move is the drive to the viewpoint
+    private int viewedAtTipsDone = -1;                    // tipsDone when we last went to the viewpoint: only once per tip
 
     // ----- The sweep (while a sweep is running, currentMove is WAIT) -----
     private Cell sweepRunningFor = null;                  // the spill the running sweep leg is for (null = no sweep leg is running)
@@ -203,9 +220,42 @@ public class RedDecideAuto extends KOpMode {
         return true;
     }
 
-    /** Is this loose ball ours to pick up? Normally every ball on our side of the field. */
+    /**
+     * Is this loose ball ours to pick up? Every ball on our side of the field. While we work toward the third tip (tipsDone is 2),
+     * only balls on the same end of the Hive as the up Cell (the end we shoot from), so we do not drive to the far end and back.
+     */
     boolean wantsBall(BallInformation ball) {
-        return RedTippingAuto.isOnOurSide(ball.x);
+        if (!RedTippingAuto.isOnOurSide(ball.x)) {
+            return false;
+        }
+        if (!staysOnUpSide()) {
+            return true;
+        }
+        boolean ballIsOnHighYEnd = ball.y > FieldConfig.MIDLINE_X; // the field is square, so its middle is y = MIDLINE_X too
+        return upCellIsOnHighYEnd() == ballIsOnHighYEnd;
+    }
+
+    /**
+     * While we work toward the third tip (tipsDone is exactly 2) we stay on the end of the Hive where the up Cell is, so we do not
+     * drive to the far end and back. Once the third tip is done we may cross sides again.
+     */
+    private boolean staysOnUpSide() {
+        return tipsDone == 2;
+    }
+
+    /** True when the up Cell is on the high-y end of the field, false when it is on the low-y end. */
+    private boolean upCellIsOnHighYEnd() {
+        return launchPointOf(upCell).getY() > FieldConfig.MIDLINE_X;
+    }
+
+    /** Where to stand to see every ball on the up Cell's end. */
+    private Point viewpointOfUpEnd() {
+        return upCellIsOnHighYEnd() ? VIEWPOINT_HIGH_Y_END : VIEWPOINT_LOW_Y_END;
+    }
+
+    /** The middle of the up end's area: at the viewpoint the front (and the camera) faces it. */
+    private Point lookTowardOfUpEnd() {
+        return upCellIsOnHighYEnd() ? VIEW_TOWARD_HIGH_Y_END : VIEW_TOWARD_LOW_Y_END;
     }
 
     // =============================================================================================
@@ -313,9 +363,8 @@ public class RedDecideAuto extends KOpMode {
         moveStartedAtSeconds = getRuntime();
         Point robot = robotPoint();
         double secondsLeft = AUTO_SECONDS - getRuntime();
-        double secondsToPark = driveSeconds(robot, parkPoint());
 
-        Move move = chooseMove(robot, secondsLeft, secondsToPark);
+        Move move = chooseMove(robot, secondsLeft);
 
         telemetry.addData("decide says", move);
         telemetry.update();
@@ -330,7 +379,7 @@ public class RedDecideAuto extends KOpMode {
      * A tip needs several balls and we hold at most 4, so every trip should be a full load. If decide() wants to shoot 1-3 balls that
      * cannot finish the tip, collect more first (a group the camera saw, or a tipped Cell's spill), or park if there is nothing to collect.
      */
-    private Move chooseMove(Point robot, double secondsLeft, double secondsToPark) {
+    private Move chooseMove(Point robot, double secondsLeft) {
         seenCluster = chooseLoad(robot);
         int looseBallsSeen = (seenCluster == null) ? 0 : seenCluster.size();
         boolean atShootPoint = Point.distance(robot, launchPointOf(upCell)) < AT_SHOOT_POINT_MM;
@@ -338,8 +387,10 @@ public class RedDecideAuto extends KOpMode {
         int ballsNeeded = RedTippingAuto.ballsNeededToTip(tipsDone);
 
         // The two "does the trip fit" times are 0: decide() never turns a shot or a trip down for time.
-        // Only its rule 1 is left (time left <= the drive to park + margin -> park).
-        Move move = AutoDecider.decide(PARTNER_MODE, secondsLeft, secondsToPark, 0, 0, ballsHeld, atShootPoint, upCell,
+        // Only its rule 1 is left (time left <= "drive to park" + margin -> park). We give it a "drive to park" that makes it
+        // park at PARK_WHEN_SECONDS_LEFT.
+        double secondsToParkForDecide = PARK_WHEN_SECONDS_LEFT - AutoDecider.PARK_MARGIN_SECONDS;
+        Move move = AutoDecider.decide(PARTNER_MODE, secondsLeft, secondsToParkForDecide, 0, 0, ballsHeld, atShootPoint, upCell,
                 SharedData.isHiveTipping(), ballsInUpCell, tipsDone, pilesLeft, looseBallsSeen);
         move = limitMove(move);
 
@@ -359,30 +410,46 @@ public class RedDecideAuto extends KOpMode {
         // decide() says PARK when nothing is left to do. If there is time AND one more full load could still finish a tip,
         // sweep the spill instead. Standing still scores nothing, so with no spill we park now.
         boolean couldStillTip = ballsInUpCell + ballsHeld + MOST_BALLS_WE_CAN_HOLD >= ballsNeeded;
-        boolean hasTimeToSweep = secondsLeft > secondsToPark + AutoDecider.PARK_MARGIN_SECONDS;
+        boolean hasTimeToSweep = secondsLeft > PARK_WHEN_SECONDS_LEFT;
         if (move == Move.PARK && couldStillTip && hasTimeToSweep && ballsHeld == 0) {
             spillToSweep = newestPendingSpill();
         }
 
-        boolean tooLateToSweep = sweepGivenUp || secondsLeft < SWEEP_MIN_SECONDS_LEFT;
+        boolean tooLateToSweep = !SWEEP_ENABLED || sweepGivenUp || secondsLeft < SWEEP_MIN_SECONDS_LEFT;
         if (tooLateToSweep) {
             spillToSweep = null;
         }
 
-        if (loadTooSmall && spillToSweep == null && isShoot(move)) {
-            move = Move.PARK; // nothing left to collect and this load cannot tip: shooting it scores nothing
-        }
-
-        KLog.d("Decide", () -> "secondsLeft=" + round(secondsLeft) + " secondsToPark=" + round(secondsToPark)
+        KLog.d("Decide", () -> "secondsLeft=" + round(secondsLeft)
                 + " ballsHeld=" + ballsHeld + " atShootPoint=" + atShootPoint + " upCell=" + upCell
                 + " ballsInUpCell=" + ballsInUpCell + " tipsDone=" + tipsDone + " pilesLeft=" + pilesLeft
                 + " spills=" + pendingSpills + " seen=" + looseBallsSeen);
+
+        // From the third tip on (even after it is done), with no balls known to collect: stand where the camera sees the whole up end and keep looking.
+        // We never park before PARK_WHEN_SECONDS_LEFT, so when decide() has nothing to do we go there (or stay there) and look again.
+        goingToViewpoint = false;
+        sweepRunningFor = null;
+        boolean nothingToDo = (move == Move.PARK);
+        boolean notLookedYetThisTip = viewedAtTipsDone != tipsDone;
+        boolean loadTooSmallToShoot = (loadTooSmall || spillToSweep != null) && notLookedYetThisTip; // look once before shooting a small load
+        boolean wantToLook = tipsDone >= 2 && seenCluster == null && ballsHeld < MOST_BALLS_WE_CAN_HOLD
+                && secondsLeft > PARK_WHEN_SECONDS_LEFT && (nothingToDo || loadTooSmallToShoot);
+        if (wantToLook) {
+            boolean atViewpoint = Point.distance(robot, viewpointOfUpEnd()) < VIEWPOINT_REACHED_MM;
+            boolean hasTimeToDrive = secondsLeft > driveSeconds(robot, viewpointOfUpEnd()) + LOOK_SETTLE_SECONDS + PARK_WHEN_SECONDS_LEFT;
+            if (!atViewpoint && hasTimeToDrive) {
+                goingToViewpoint = true;
+                return Move.WAIT;
+            }
+            if (nothingToDo) {
+                return Move.WAIT; // already there (or no time to drive there): stay and keep looking until it is time to park
+            }
+        }
 
         if (spillToSweep != null) {
             sweepRunningFor = spillToSweep;
             return Move.WAIT;
         }
-        sweepRunningFor = null;
         return move;
     }
 
@@ -391,7 +458,10 @@ public class RedDecideAuto extends KOpMode {
         currentMove = move;
         currentPile = pileOf(move);
 
-        if (sweepRunningFor != null) {
+        if (goingToViewpoint) {
+            viewedAtTipsDone = tipsDone;
+            currentAction = driveTo(viewpointOfUpEnd(), lookTowardOfUpEnd(), "viewpoint"); // currentMove is WAIT, but it is really a drive to the viewpoint
+        } else if (sweepRunningFor != null) {
             currentAction = sweepMove(sweepRunningFor); // currentMove is WAIT, but it is really a sweep
         } else if (currentPile != null) {
             currentAction = pickupMove(pilePointOf(currentPile), "pickup" + currentPile);
@@ -440,7 +510,14 @@ public class RedDecideAuto extends KOpMode {
 
     /** The spill that tipped most recently, or null if there is none. Older spills have mostly rolled away or across the midline. */
     private Cell newestPendingSpill() {
-        return pendingSpills.isEmpty() ? null : pendingSpills.get(pendingSpills.size() - 1);
+        for (int i = pendingSpills.size() - 1; i >= 0; i--) {
+            Cell spill = pendingSpills.get(i);
+            boolean spillIsOnHighYEnd = (spill == Cell.A); // A tipped = its balls are on the +y wall, B tipped = the -y wall
+            if (!staysOnUpSide() || spillIsOnHighYEnd == upCellIsOnHighYEnd()) {
+                return spill;
+            }
+        }
+        return null;
     }
 
     // =============================================================================================
@@ -449,6 +526,10 @@ public class RedDecideAuto extends KOpMode {
 
     /** Called once when the running move is done. */
     private void finishMove() {
+        if (goingToViewpoint) {
+            goingToViewpoint = false;
+            decideNotBeforeSeconds = getRuntime() + LOOK_SETTLE_SECONDS; // we are at the viewpoint: let the camera look, then decide
+        }
         if (sweepRunningFor != null) {
             stopSweepIntake();
             pendingSpills.remove(sweepRunningFor); // the whole loop is driven: never go back for the same spill
@@ -867,6 +948,10 @@ public class RedDecideAuto extends KOpMode {
         double farY = plusY ? PathPlanning.FIELD_SIZE_MM - SWEEP_FAR_WALL_GAP_MM : SWEEP_FAR_WALL_GAP_MM;
         double launchY = (plusY ? launchPointOf(Cell.B) : launchPointOf(Cell.A)).getY(); // the up Cell is the other one
         double nearY = plusY ? launchY + SWEEP_NEAR_INSET_MM : launchY - SWEEP_NEAR_INSET_MM;
+        if (staysOnUpSide()) {
+            // the loop's near end must not cross the middle of the Hive: keep the whole loop on the up Cell's end
+            nearY = plusY ? Math.max(nearY, FieldConfig.MIDLINE_X) : Math.min(nearY, FieldConfig.MIDLINE_X);
+        }
 
         List<Point> corners = new ArrayList<>();
         corners.add(new Point(SWEEP_OUT_X_MM, nearY));
@@ -958,7 +1043,7 @@ public class RedDecideAuto extends KOpMode {
         }
         lastParkCheckMs = now;
         double secondsLeft = AUTO_SECONDS - getRuntime();
-        boolean almostOutOfTime = secondsLeft <= driveSeconds(robotPoint(), parkPoint()) + AutoDecider.PARK_MARGIN_SECONDS + 1.0;
+        boolean almostOutOfTime = secondsLeft <= PARK_WHEN_SECONDS_LEFT;
         if (almostOutOfTime) {
             if (sweepRunningFor != null) {
                 sweepGivenUp = true; // out of time for sweeping: park, do not start the same loop again
@@ -993,6 +1078,7 @@ public class RedDecideAuto extends KOpMode {
         driveTrain.setPower(0);
         currentAction = null;
         currentAim = null;
+        goingToViewpoint = false;
         sweepRunningFor = null; // a dropped sweep leg is NOT counted as done: the sweep can go on from the same corner
     }
 
