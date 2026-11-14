@@ -26,12 +26,12 @@ public class FieldConfig {
     private final static double SHOOT_TARGET_B_Y = 3657.6-2135;
     public static Point bTargetPoint =  new Point(SHOOT_TARGET_B_X, SHOOT_TARGET_B_Y);
 
-    public final static double FLOWER_A_X = 225;
+    public final static double FLOWER_A_X = 100;   // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
     private final static double FLOWER_A_Y = 2500;
     public static Point aFlowerPoint =  new Point(FLOWER_A_X, FLOWER_A_Y);
 
     public final static double FLOWER_B_X = 1219;
-    private final static double FLOWER_B_Y = 3657.6-3500;
+    private final static double FLOWER_B_Y = 100;   // same as FLOWER_A_X
     public static Point bFlowerPoint =  new Point(FLOWER_B_X, FLOWER_B_Y);
 
     // The other two flowers. The manual's top view (Figure 9-4) puts each flower 48 in from a corner,

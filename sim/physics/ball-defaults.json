@@ -28,6 +28,7 @@
   "shotIntervalMs": 110,
   "stopperOpenBelow": 0.39,
   "autoAimAngleDeg": 62,
+  "shotAimErrorDeg": 5,
   "intakeFrontReachMm": 140,
   "intakeBackReachMm": 140,
   "_notes": {
@@ -60,6 +61,7 @@
     "shotIntervalMs": "UNMEASURED: PushBall runs the intake 500 ms, so 4 balls leave about 110 ms apart",
     "stopperOpenBelow": "the stopper servo is open at 0.31 and closed at 0.47 (ModuleConfig); half way counts as open",
     "autoAimAngleDeg": "Mode B launch angle",
+    "shotAimErrorDeg": "UNMEASURED: each shot leaves off-line by a random angle up to this much either side (turret and aim error), so runs differ; 0 = perfect",
     "intakeFrontReachMm": "UNMEASURED: how far past the front tip the intake can pull a floor ball in",
     "intakeBackReachMm": "UNMEASURED: same for the back"
   }

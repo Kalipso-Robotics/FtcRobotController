@@ -275,6 +275,23 @@
     "target": "physics"
   },
   {
+    "id": "shotAimErrorDeg",
+    "group": "Shooter",
+    "label": "Aim inaccuracy",
+    "unit": "°",
+    "min": 0,
+    "max": 15,
+    "step": 0.5,
+    "description": "Every shot leaves off-line by a random angle, up to this much to either side, so each run is a little different. 0 = perfect aim.",
+    "target": "physics",
+    "unmeasured": true,
+    "affects": [
+      "shots",
+      "tips",
+      "score"
+    ]
+  },
+  {
     "id": "pollenMassKg",
     "group": "Balls",
     "label": "Pollen mass",

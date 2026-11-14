@@ -26,6 +26,9 @@ public final class KinematicWorld implements SimWorld {
     // The same numbers as AdaptivePurePursuitAction.java (K_v at :140, wheelbase and track at :136-137).
     // The code's own feedforward says wheel speed (mm/s) = power / K_v.
     static final double K_V = 0.00036;
+    // The fastest a wheel can go in the sim (mm/s), the same as the robot's top speed driving straight. 1800 = 1.8 m/s.
+    // K_V alone would allow 1 / K_V = 2.78 m/s, so this cap is what actually limits the sim robot.
+    static final double MAX_WHEEL_MM_PER_S = 1800;
     private static final double WHEELBASE_MM = 232.414;
     private static final double TRACK_MM = 276.58;
     static final double K_OMEGA_MM_PER_RAD = Math.sqrt(WHEELBASE_MM * WHEELBASE_MM + TRACK_MM * TRACK_MM) / 2;
@@ -124,7 +127,7 @@ public final class KinematicWorld implements SimWorld {
     }
 
     private void step(double dt) {
-        double maxWheelMmPerS = 1.0 / K_V;
+        double maxWheelMmPerS = Math.min(1.0 / K_V, MAX_WHEEL_MM_PER_S);
         for (int i = 0; i < 4; i++) {
             double p = Math.max(-1, Math.min(1, power[i]));
             double responseSeconds = (p == 0 && brakeWhenZero[i]) ? WHEEL_BRAKE_RESPONSE_SECONDS : WHEEL_RESPONSE_SECONDS;

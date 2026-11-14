@@ -340,11 +340,21 @@ public final class RapierWorld implements SimWorld {
                 throw new IllegalArgumentException("poses has no [seconds, x, y, heading] rows");
             }
             double speed = Math.max(0.25, Math.min(1.5, Double.parseDouble(System.getProperty("sim.partnerSpeed", "1"))));
+            // optional: "shots": one block or a list of blocks { "from": seconds, "count": n, "everyMs": ms } = R2 shoots n pollen at the up Cell
+            // optional: "pickups": [ { "at": seconds, "x": mm, "y": mm, "count": n } ] = R2 takes n loose pollen near (x, y) into itself
+            // Both are passed to the physics as they are written; the physics reads the numbers.
+            String shotsJson = "";
+            for (String key : new String[]{"shots", "pickups"}) {
+                Matcher block = Pattern.compile("\"" + key + "\"\\s*:\\s*(\\{[^}]*\\}|\\[[^\\]]*\\])").matcher(text);
+                if (block.find()) {
+                    shotsJson += ",\"" + key + "\":" + block.group(1).replaceAll("\\s+", " ");   // one line: the physics reads one JSON message per line
+                }
+            }
             warnPartnerStart(name, size, first, names, bounds);
             partnerInfo = String.format(Locale.ROOT, "%s %s %s %s", name, size[0], size[1], size[2]);
             partnerPose = first;
-            return String.format(Locale.ROOT, "{\"name\":\"%s\",\"front\":%s,\"back\":%s,\"width\":%s,\"speed\":%s,\"poses\":[%s]}",
-                    name.replace("\\", "").replace("\"", ""), size[0], size[1], size[2], speed, poses);
+            return String.format(Locale.ROOT, "{\"name\":\"%s\",\"front\":%s,\"back\":%s,\"width\":%s,\"speed\":%s,\"poses\":[%s]%s}",
+                    name.replace("\\", "").replace("\"", ""), size[0], size[1], size[2], speed, poses, shotsJson);
         } catch (IOException | RuntimeException e) {
             warnings.add("Partner path " + file.getName() + " could not be read: " + e.getMessage());
             return "null";
@@ -391,13 +401,13 @@ public final class RapierWorld implements SimWorld {
                 "{\"pose\":[%s,%s,%s],"
                         + "\"robot\":{\"frontMm\":%s,\"backMm\":%s,\"widthMm\":%s,\"massKg\":%s},"
                         + "\"field\":{\"sizeMm\":%s,\"boxes\":[%s]},"
-                        + "\"drive\":{\"kV\":%s,\"kOmegaMmPerRad\":%s,\"responseSeconds\":%s,\"brakeResponseSeconds\":%s,"
+                        + "\"drive\":{\"maxWheelMmPerS\":%s,\"kV\":%s,\"kOmegaMmPerRad\":%s,\"responseSeconds\":%s,\"brakeResponseSeconds\":%s,"
                         + "\"trackWidthMm\":%s,\"backDistanceMm\":%s},"
                         + "\"balls\":%s,\"partner\":%s}",
                 x, y, theta,
                 RobotFootprint.FRONT_MM, RobotFootprint.BACK_MM, RobotFootprint.WIDTH_MM, ROBOT_MASS_KG,
                 FIELD_SIZE_MM, boxJson,
-                KinematicWorld.K_V, KinematicWorld.K_OMEGA_MM_PER_RAD, KinematicWorld.WHEEL_RESPONSE_SECONDS,
+                KinematicWorld.MAX_WHEEL_MM_PER_S, KinematicWorld.K_V, KinematicWorld.K_OMEGA_MM_PER_RAD, KinematicWorld.WHEEL_RESPONSE_SECONDS,
                 KinematicWorld.WHEEL_BRAKE_RESPONSE_SECONDS, KinematicWorld.TRUE_TRACK_WIDTH_MM, KinematicWorld.TRUE_BACK_DISTANCE_MM,
                 ballsJson(), partnerJson(names, bounds));
         String reply = request("init " + json);

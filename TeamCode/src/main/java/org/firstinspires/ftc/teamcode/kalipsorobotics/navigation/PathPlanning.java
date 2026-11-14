@@ -129,9 +129,22 @@ public class PathPlanning {
         return result;
     }
 
-    /** Buffered Hive legs and flowers. */
+    /**
+     * How far the robot center must stay from a Hive LEG. Smaller than the buffer of the flowers on purpose: the gap between the legs is
+     * only about 1000 mm wide, and with the full flower buffer (262.5 mm each side) and the midline rule almost no path was left, so every
+     * route went around the Hive. This is the robot's half-width (168.5) plus about 30 mm. GUESS: tune on the real field.
+     */
+    public static double HIVE_LEG_BUFFER_MM = 200;
+
+    /** Buffered Hive legs and flowers. The two legs (the first two boxes of fieldRaw) get the smaller leg buffer. */
     private static List<double[]> fieldBoxes(double bufferMM, boolean hiveTipping) {
-        return buffered(bufferMM, fieldRaw(hiveTipping));
+        double[][] raw = fieldRaw(hiveTipping);
+        List<double[]> result = new ArrayList<>();
+        for (int i = 0; i < raw.length; i++) {
+            boolean isALeg = (i < 2);
+            result.add(grown(raw[i], isALeg ? Math.min(HIVE_LEG_BUFFER_MM, bufferMM) : bufferMM));
+        }
+        return result;
     }
 
     private static double[] grown(double[] box, double bufferMM) {

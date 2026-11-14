@@ -4,10 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.beambreak.BeamBreakCountAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.AutoToBallsPathingAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.beambreak.BeamBreakCountAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
@@ -40,31 +40,32 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
 /**
- * The AUTO where decide() really drives the robot (the 10-18 plan, stage 2).
+ * The AUTO where AutoDecider.decide() really drives the robot.
  *
- * How it works:
+ * The idea, in four steps that repeat until time runs out:
  *   1. We start holding the 4 preload balls, so the first answer is "shoot the up Cell".
- *   2. Every time the current move is DONE, we update what we know (balls held, balls in the Cell,
- *      tips, piles left) and ask AutoDecider.decide() for the NEXT move.
- *   3. Driving goes through the path planner (PathPlanning): it routes around the Hive legs and the
- *      flowers and keeps us on our own side. Pile pickups use AutoToBallsPathingAction.
+ *   2. When the current move is DONE we update what we know (balls held, balls in each Cell, tips, piles left).
+ *   3. We ask decide() for the NEXT move. A few small rules in chooseMove() then adjust the answer.
+ *   4. We start that move. A move is one of: SHOOT a Cell, GET a pile, GET balls the camera saw, SWEEP a spill, PARK.
  *
- * Shooting: the flywheel warms up while the robot drives. The ball is pushed only when the robot has
- * arrived AND the flywheel is ready AND the turret is aimed at the Cell we shoot (a fresh
- * TurretAutoAlign per shot, because a TurretAutoAlign never changes the point it aims at).
+ * Driving goes through the path planner (PathPlanning): it goes around the Hive legs and the flowers and stays on our side.
  *
- * Every number marked GUESS is unmeasured. The balls we hold are COUNTED by this class (a pile gives
- * 4, a shot empties the robot); reading the beam breaks is a later step.
+ * Every number marked GUESS is unmeasured.
  */
 @Autonomous(name = "Red Decide Auto", group = "biobuzz")
 public class RedDecideAuto extends KOpMode {
 
-    // ----- Settings -----------------------------------------------------------------------------
+    // =============================================================================================
+    // Settings
+    // =============================================================================================
+
+    // ----- Rules of the game -----
     private static final double AUTO_SECONDS = 30;                 // manual 10.4
     private static final PartnerMode PARTNER_MODE = PartnerMode.SOLO_NOTHING;
     private static final int PRELOAD_BALLS = 4;                    // manual G304
@@ -72,83 +73,95 @@ public class RedDecideAuto extends KOpMode {
     private static final int MOST_BALLS_WE_CAN_HOLD = 4;           // manual G407
     private static final int NECTAR_IN_CELL_A_AT_START = 3;        // manual 10.3.1
 
+    // ----- How long things take -----
     private static final double SPEED_MM_PER_SECOND = 1000;        // GUESS: how fast the robot drives
-    private static final double SECONDS_TO_PICK_UP = 2;            // GUESS
     private static final double SECONDS_TO_SHOOT = 2;              // GUESS
+    private static final double HIVE_TIP_SECONDS = 3.3;            // GUESS from the sim: a Hive finishes tipping this long after the shot that tips it
     private static final double WAIT_MS = 500;                     // how long one WAIT lasts
+    private static final double COUNT_SETTLE_SECONDS = 0.4;        // after a pickup the beam-break count lags a moment: wait before deciding
+    private static final double PICKUP_GIVE_UP_SECONDS = 6;        // a pickup not finished after this long is stuck (for example against a Flower)
 
-    private static final double FLOWER_BALL_OFFSET_MM = 150;       // GUESS: the pickup target is this far from the Flower's center
-                                                                   // (the center itself is inside the Flower, so the planner refuses it)
+    // ----- Where things are -----
+    private static final double FLOWER_BALL_OFFSET_MM = 150;       // GUESS: the pickup target is this far from the Flower's center (the center is inside the Flower)
     private static final double GARDEN_BALLS_CENTER_X_MM = 142;    // GUESS from the sim field: the 4 Garden balls sit at x = 36 to 249
-    private static final double OBSTACLE_BUFFER_MM = 262.5;          // same as DecideSimulation / AutoToBallsPathingAction
-    private static final double AT_SHOOT_POINT_MM = 150;           // closer than this to the launch point = "at the shoot point"
+    private static final double OBSTACLE_BUFFER_MM = 262.5;        // same as DecideSimulation / AutoToBallsPathingAction
     private static final double PARK_WALL_GAP_MM = 15;             // GUESS: room left between the body and the walls at the park spot
-    // Where to stand to look at the balls a tipped Cell dumped. A tipped = its balls are on the +y wall side, B tipped = the -y wall side.
-    // Both on our half, about 1150-1200 mm from the wall, facing the wall (the view is about 2.4 m wide there). GUESS: tune from the sim.
-    private static final int BIG_CLUSTER_BALLS = 3;   // a seen cluster this big is taken before the next pile
-    private static final Point VIEW_PLUS_Y = new Point(700, 2500);
-    private static final double VIEW_PLUS_Y_HEADING_DEG = 90;
-    private static final Point VIEW_MINUS_Y = new Point(700, 1100);
-    private static final double VIEW_MINUS_Y_HEADING_DEG = -90;
-    // The sweep after the piles: a rectangle loop to the wall where a Cell dumped its balls. Out along one lane, back along another, with the
-    // intake running, so there is no standing still to look. All GUESSES: tune from the sim.
+
+    // ----- Shooting -----
+    private static final double SHOOT_ZONE_MM = 250;               // GUESS: we shoot once the robot is this close to the launch point, even while still driving
+    private static final double AT_SHOOT_POINT_MM = 150;           // closer than this to the launch point = "at the shoot point"
+
+    // ----- Seeing and remembering balls -----
+    private static final long BALL_MEMORY_MS = 3000;               // a ball seen while driving is remembered this long (spilled balls roll away). Was 5000.
+    private static final double BALL_MERGE_MM = 100;               // a new sighting this close to a remembered ball is the same ball
+    private static final double BALL_FORGET_NEAR_ROBOT_MM = 250;   // we drove over this spot: the ball was picked up (or the camera cannot see it)
+    private static final double BALL_NEAR_CENTER_MM = 100;         // a cluster's middle counts as "on a ball" when one is this close
+    private static final double LOAD_GROUP_MM = 250;               // remembered balls closer than this chain into one group
+    private static final double VISITED_REPEAT_MM = 300;           // balls this close to a place we already went to are ignored
+
+    // ----- Choosing which group of balls to go for -----
+    private static final double LOAD_STOP_SECONDS = 1.0;           // GUESS: slowing down, picking up and speeding up again at one stop
+    private static final double LOAD_PARTIAL_VALUE = 0.4;          // a load that does not finish the tip is worth this fraction of its progress
+    private static final double COMMIT_MAX_SECONDS = 8;            // a chosen group is kept this long (the target does not change every decision)
+    private static final double COMMIT_REACHED_MM = 250;           // within this of the chosen group = we are there
+    private static final double COMMIT_SWITCH_SCORE = 1.2;         // a new load must score this many times the chosen one to replace it
+
+    // ----- The sweep: a rectangle loop along the wall where a tipped Cell dumped its balls -----
+    // Out along one lane, back along another, with the intake running. All GUESSES: tune from the sim.
     private static final double SWEEP_OUT_X_MM = 750;              // out lane, along the Hive's side of the corridor
-    private static final double SWEEP_BACK_X_MM = 300;             // back lane, along the wall
+    private static final double SWEEP_BACK_X_MM = 400;             // back lane, along the wall, just outside the flower buffer (127 + 262.5)
     private static final double SWEEP_FAR_WALL_GAP_MM = 450;       // the far end of the loop stops this far from the spill wall
     private static final double SWEEP_NEAR_INSET_MM = 450;         // the near end is this far inward from the up Cell's launch point
-    private static final double SWEEP_DETOUR_MM = 400;             // a seen cluster this close to the leg we are driving is worth a detour
-    private static final long SWEEP_CHECK_MS = 250;                // how often the sweep looks for a cluster beside the lane
-    private static final double LOOK_SETTLE_MS = 700;           // after arriving, let the rolling balls settle and the camera look
-    private static final double COUNT_SETTLE_SECONDS = 0.4;        // after a pickup the beam-break count lags a moment: wait before deciding
-    private static final double BALL_NEAR_CENTER_MM = 100;        // a cluster's middle counts as "on a ball" when one is this close
-    private static final long SIGHTING_MAX_AGE_MS = 500;           // a camera list older than this is ignored
-    private static final long BALL_MEMORY_MS = 5000;               // a ball seen while driving is remembered this long (spilled balls roll away)
-    private static final double COMMIT_MAX_SECONDS = 8;             // a chosen cluster is kept this long (the target does not change every decision)
-    private static final double COMMIT_REACHED_MM = 250;            // within this of the chosen cluster = we are there
-    private static final int COMMIT_SWITCH_EXTRA_BALLS = 2;         // a new cluster must have this many more balls to replace the chosen one...
-    private static final double COMMIT_SWITCH_CLOSER = 0.6;         // ...or be this fraction of its distance
-    private static final double LONE_BALL_MAX_MM = 1500;            // a single ball is only worth a trip when it is this close
-    private static final double SWEEP_MIN_SECONDS_LEFT = 5;         // with less time than this left, no new sweep: park
-    private static final double SWEEP_CORNER_REACHED_MM = 300;      // passing this close to a corner counts the corner as done
-    private static final double NEAR_FIRST_MM = 1200;              // seen balls this close are taken before any farther ones
-    private static final double BALL_MERGE_MM = 100;               // a new sighting this close to a remembered ball is the same ball
-    private static final double BALL_FORGET_NEAR_ROBOT_MM = 250;   // we drove over this spot: it was picked up (or the camera cannot see it)
-    private static final double SEEN_CLUSTER_REPEAT_MM = 300;      // balls this close to a cluster we already visited are ignored
+    private static final double SWEEP_DETOUR_MM = 400;             // a seen group this close to the leg we are driving is worth a detour
+    private static final double SWEEP_CORNER_REACHED_MM = 300;     // passing this close to a corner counts the corner as done
+    private static final double SWEEP_MIN_SECONDS_LEFT = 5;        // with less time than this left, no new sweep: park
+    private static final long CHECK_EVERY_MS = 250;                // how often the sweep and the park-time check look around
 
-    // ----- What we know -------------------------------------------------------------------------
+    // =============================================================================================
+    // What we know
+    // =============================================================================================
+
     private int ballsHeld = PRELOAD_BALLS;
-    private Cell upCell = Cell.A;
-    private int ballsInCellA = NECTAR_IN_CELL_A_AT_START;
-    private int ballsInCellB = 0;
-    private int tipsDone = 0;
-    private final Set<Pile> pilesLeft = EnumSet.allOf(Pile.class);
+    Cell upCell = Cell.A;                                 // (no 'private' on the next few: RedDecideAutoPartnerFirst/NotSolo, in this package, change the starting state)
+    int ballsInCellA = NECTAR_IN_CELL_A_AT_START;
+    int ballsInCellB = 0;
+    int tipsDone = 0;
+    final Set<Pile> pilesLeft = EnumSet.allOf(Pile.class);
+    final List<Cell> pendingSpills = new ArrayList<>();   // Cells that tipped and whose spilled balls we have not swept yet
+    double hiveSettledAtSeconds = 0;                      // we never fire before this run time: a Hive that is still tipping would send the balls into the wrong Cell
+    double decideNotBeforeSeconds = 0;                    // do not ask decide() before this run time (the ball count is still settling)
 
-    // ----- The move that is running -------------------------------------------------------------
-    private Move currentMove = null;
-    private Action currentAction = null;
-    private Pile currentPile = null;                    // for GET_* moves
-    private TurretAutoAlign currentAim = null;          // for SHOOT_* moves; updated every loop
-    private boolean parked = false;
-    private double decideNotBeforeSeconds = 0;          // do not ask decide() before this run time (the ball count is still settling)
-    private Point currentSeenCenter = null;             // where the running GET_SEEN_BALLS move is going
-    private int currentSeenSize = 0;
-    private BallCluster seenCluster = null;             // the cluster the camera sees right now that we would go for
-    private final List<Cell> pendingSpills = new ArrayList<>();   // Cells that tipped and whose spilled balls we have not looked at yet
-    private Cell lookingAt = null;                      // the spill the running LOOK move is going to
-    private Point committedCenter = null;               // the cluster we chose and keep until picked up, gone or clearly beaten
+    // ----- Balls the camera saw -----
+    // Two lists that go together: rememberedBalls.get(i) was last seen at rememberedAtMs.get(i).
+    private final List<BallInformation> rememberedBalls = new ArrayList<>();
+    private final List<Long> rememberedAtMs = new ArrayList<>();
+    private long lastSightingListMs = 0;                  // the camera list we already read
+    private final List<Point> visitedPlaces = new ArrayList<>(); // where we already went for seen balls (worked or not): never go back
+    private BallCluster seenCluster = null;               // the first stop of the best load the camera knows about right now (null = none)
+    private Point committedCenter = null;                 // the group we chose and keep until picked up, gone or clearly beaten
     private List<BallInformation> committedBalls = new ArrayList<>();
     private double committedAtSeconds = 0;
-    private boolean sweepGivenUp = false;               // a sweep was dropped for time: never start another
-    private Cell sweepCell = null;                      // the spill the sweep loop is for (null = no sweep started)
-    private int sweepLeg = 0;                           // the next corner of the loop to drive to (0-3)
-    private IntakeFullAction sweepIntake = null;        // runs while a sweep leg drives
-    private long lastSweepCheckMs = 0;
-    private final List<BallInformation> rememberedBalls = new ArrayList<>(); // balls seen in the last BALL_MEMORY_MS, even if the camera looks away now
-    private final List<Long> rememberedAtMs = new ArrayList<>();            // when each remembered ball was last seen (same order)
-    private long lastSightingListMs = 0;
-    private final List<Point> visitedSeenClusters = new ArrayList<>(); // where we already went for seen balls (success or not)
 
-    // ----- Robot --------------------------------------------------------------------------------
+    // ----- The move that is running -----
+    private Move currentMove = null;
+    private Action currentAction = null;                  // null = nothing is running, so it is time to decide
+    private Pile currentPile = null;                      // for GET_GARDEN / GET_FLOWER_*
+    private Point currentSeenCenter = null;               // for GET_SEEN_BALLS: where it goes
+    private int currentSeenSize = 0;                      //                     and how many balls it expects
+    private TurretAutoAlign currentAim = null;            // for SHOOT_*: updated every loop, because the turret only moves when updated
+    private double moveStartedAtSeconds = 0;
+    private boolean parked = false;
+
+    // ----- The sweep (while a sweep is running, currentMove is WAIT) -----
+    private Cell sweepRunningFor = null;                  // the spill the running sweep leg is for (null = no sweep leg is running)
+    private Cell sweepCell = null;                        // the spill the whole loop is for (null = no loop started)
+    private int sweepLeg = 0;                             // the next corner of the loop to drive to (0-3)
+    private IntakeFullAction sweepIntake = null;          // runs while a sweep leg drives
+    private boolean sweepGivenUp = false;                 // a sweep was dropped for time: never start another
+    private long lastSweepCheckMs = 0;                   // when the sweep last looked for a group beside the lane
+    private long lastParkCheckMs = 0;                     // when we last checked if it is time to park
+
+    // ----- Robot -----
     private DriveTrain driveTrain;
     private Shooter shooter;
     private Intake intake;
@@ -157,13 +170,55 @@ public class RedDecideAuto extends KOpMode {
     private BeamBreakCountAction beamBreaks;
     private PathPlanning planner;
 
+    // =============================================================================================
+    // Hooks: RedDecideAutoPartnerFirst and RedDecideAutoNotSolo override these and nothing else
+    // =============================================================================================
+
+    /** Where the robot starts (the middle of the robot, mm). */
+    Point startPoint() {
+        return new Point(171.5 + 1218, 3658 - RobotFootprint.BACK_MM); // the back touches the wall
+    }
+
+    /** Which way the front points at the start, in radians. */
+    double startHeadingRad() {
+        return Math.toRadians(-90);
+    }
+
+    /** The point the turret is aimed at before the first shot. */
+    Point firstTurretTarget() {
+        return FieldConfig.aTargetPoint;
+    }
+
+    /** Called once, right after START. Here a subclass can change what we believe about the Hive. */
+    void afterStart() {
+    }
+
+    /** Lets a subclass change decide()'s answer (for example: never shoot into the partner's Cell). Normally it changes nothing. */
+    Move limitMove(Move move) {
+        return move;
+    }
+
+    /** Do we sweep the balls a tipped Cell dumped? A subclass says no when the partner works that end. */
+    boolean ownsSpillOf(Cell tipped) {
+        return true;
+    }
+
+    /** Is this loose ball ours to pick up? Normally every ball on our side of the field. */
+    boolean wantsBall(BallInformation ball) {
+        return RedTippingAuto.isOnOurSide(ball.x);
+    }
+
+    // =============================================================================================
+    // Setup and the main loop
+    // =============================================================================================
+
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TICKS_INIT_OFFSET = 0;
-        TurretConfig.X_INIT_SETUP_MM = FieldConfig.aTargetPoint.getX(); // the turret starts aimed at the first Cell
-        TurretConfig.Y_INIT_SETUP_MM = FieldConfig.aTargetPoint.getY();
+        TurretConfig.X_INIT_SETUP_MM = firstTurretTarget().getX(); // the turret starts aimed at the first Cell
+        TurretConfig.Y_INIT_SETUP_MM = firstTurretTarget().getY();
     }
 
     @Override
@@ -178,7 +233,7 @@ public class RedDecideAuto extends KOpMode {
         sleep(1000); // let hardware initialize
 
         Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 171.5 + 1218, 3658 - RobotFootprint.BACK_MM, Math.toRadians(-90)); // the back touches the wall
+        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, startPoint().getX(), startPoint().getY(), startHeadingRad());
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         intake = new Intake(opModeUtilities);
@@ -199,36 +254,31 @@ public class RedDecideAuto extends KOpMode {
         initializeRobot();
 
         waitForStartPrecomputingPaths();
+        afterStart();
 
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
 
-            // Keep the ball count fresh. While we shoot the count falls, so it is not read then: we need the count
-            // from just BEFORE the shot to know how many balls went into the Cell.
-            beamBreaks.updateCheckDone();
-            boolean shooting = (currentMove == Move.SHOOT_A || currentMove == Move.SHOOT_B) && currentAction != null;
-            BeamBreakData balls = SharedData.getBeamBreakData();
-            if (!shooting && balls.hasData() && balls.isFresh(250) && balls.isReliable()) {
-                ballsHeld = balls.getCount();
-            }
-
-            // The turret only moves when its action is updated.
+            readBallCount();
             if (currentAim != null) {
-                currentAim.updateCheckDone();
+                currentAim.updateCheckDone(); // the turret only moves when its action is updated
             }
 
             rememberSightings();
-            checkParkTime();
-            checkPickupJam();
+            parkIfOutOfTime();
+            giveUpIfPickupStuck();
             checkSweep();
+
             if (currentAction != null && currentAction.updateCheckDone()) {
                 finishMove();
             }
-            // A pickup builds its drive on its first update, after startNextMove(). Finish that path's precompute now,
-            // or the robot stands still while it plans one small step per loop.
+
+            // A pickup builds its drive on its first update. Finish that path's precompute now, or the robot
+            // stands still while it plans one small step per loop.
             if (!AdaptivePurePursuitAction.allPrecomputeDone()) {
                 precomputePathsNow();
             }
+
             if (currentAction == null && !parked && getRuntime() >= decideNotBeforeSeconds) {
                 startNextMove();
             }
@@ -238,168 +288,173 @@ public class RedDecideAuto extends KOpMode {
         cleanupRobot();
     }
 
+    /**
+     * Keeps the ball count fresh from the beam breaks. While we shoot the count falls, so it is not read then:
+     * we need the count from just BEFORE the shot to know how many balls went into the Cell.
+     */
+    private void readBallCount() {
+        beamBreaks.updateCheckDone();
+        boolean shooting = isShoot(currentMove) && currentAction != null;
+        if (!shooting && beamBreakIsTrustworthy()) {
+            ballsHeld = SharedData.getBeamBreakData().getCount();
+        }
+    }
+
+    private static boolean beamBreakIsTrustworthy() {
+        BeamBreakData beam = SharedData.getBeamBreakData();
+        return beam.hasData() && beam.isFresh(250) && beam.isReliable();
+    }
+
     // =============================================================================================
-    // Asking decide() and starting the answer
+    // Choosing the next move
     // =============================================================================================
 
     private void startNextMove() {
         moveStartedAtSeconds = getRuntime();
         Point robot = robotPoint();
         double secondsLeft = AUTO_SECONDS - getRuntime();
-        Point upLaunch = launchPointOf(upCell);
-        Pile nextPile = AutoDecider.nextPile(PARTNER_MODE, pilesLeft);
-
         double secondsToPark = driveSeconds(robot, parkPoint());
-        double secondsForShotThenPark = driveSeconds(robot, upLaunch) + SECONDS_TO_SHOOT + driveSeconds(upLaunch, parkPoint());
-        double secondsForTripThenPark = secondsForShotThenPark;
-        seenCluster = applyCommitment(bestSeenCluster(robot), robot);
-        int looseBallsSeen = (seenCluster == null) ? 0 : seenCluster.size();
-        if (nextPile == null && seenCluster != null) {
-            Point cluster = aimPointOf(seenCluster);
-            secondsForTripThenPark = driveSeconds(robot, cluster) + SECONDS_TO_PICK_UP
-                    + driveSeconds(cluster, upLaunch) + SECONDS_TO_SHOOT + driveSeconds(upLaunch, parkPoint());
-        }
-        if (nextPile != null) {
-            Point pile = pilePointOf(nextPile);
-            secondsForTripThenPark = driveSeconds(robot, pile) + SECONDS_TO_PICK_UP
-                    + driveSeconds(pile, upLaunch) + SECONDS_TO_SHOOT + driveSeconds(upLaunch, parkPoint());
-        }
-        boolean atShootPoint = Point.distance(robot, upLaunch) < AT_SHOOT_POINT_MM;
-        int ballsInUpCell = (upCell == Cell.A) ? ballsInCellA : ballsInCellB;
-        boolean hiveIsTipping = SharedData.isHiveTipping();
 
-        // No "does the trip fit" check: 0 here means decide() never turns a shot or a trip down for time. Only rule 1 is left
-        // (time left <= the drive to park + margin -> park).
-        Move move = AutoDecider.decide(PARTNER_MODE, secondsLeft, secondsToPark, 0,
-                0, ballsHeld, atShootPoint, upCell, hiveIsTipping, ballsInUpCell,
-                tipsDone, pilesLeft, looseBallsSeen);
+        Move move = chooseMove(robot, secondsLeft, secondsToPark);
 
-        // A tip needs 8 pollen and we hold at most 4, so every trip should be a full 4. If decide() wants to shoot 1-3 balls and
-        // there is time to get more (a cluster in view, or a tipped Cell's spill we have not looked at), collect first.
-        String changed = null;
-        Cell lookCell = null;
-        // Collect until the balls we hold plus the balls already in the up Cell reach the tip count, so one shot finishes the tip.
-        // The count is a hint (the real weight changes a little), so when we already reach it, shoot now instead of going for more.
-        boolean shotWillTip = ballsInUpCell + ballsHeld >= RedTippingAuto.ballsNeededToTip(tipsDone);
-        boolean shootingFew = (move == Move.SHOOT_A || move == Move.SHOOT_B) && ballsHeld > 0 && ballsHeld < MOST_BALLS_WE_CAN_HOLD && !shotWillTip;
-        if (shootingFew) {
-            // A lone ball is not worth a trip: take a cluster only if it has 2+ balls or it finishes the tip.
-            boolean clusterFinishesTip = seenCluster != null
-                    && ballsInUpCell + ballsHeld + Math.min(seenCluster.size(), MOST_BALLS_WE_CAN_HOLD - ballsHeld) >= RedTippingAuto.ballsNeededToTip(tipsDone);
-            boolean loneBallTooFar = seenCluster != null && seenCluster.size() == 1
-                    && Point.distance(robot, aimPointOf(seenCluster)) > LONE_BALL_MAX_MM;
-            if (seenCluster != null && !loneBallTooFar && (seenCluster.size() >= 2 || clusterFinishesTip)) {
-                move = Move.GET_SEEN_BALLS;
-                changed = "COLLECT first: holding " + ballsHeld + " of " + MOST_BALLS_WE_CAN_HOLD + ", a cluster of " + seenCluster.size() + " is in view";
-            } else {
-                Cell spill = newestPendingSpill();
-                if (spill != null) {
-                    lookCell = spill;
-                    changed = "COLLECT first: holding " + ballsHeld + " of " + MOST_BALLS_WE_CAN_HOLD + ", go look at the " + spill + " spill";
-                }
-            }
-        }
-
-        // The piles come first. Seen balls and a tipped Cell's spill only happen after them, when decide() has no pile left.
-
-        // decide() says PARK when nothing is left to do. If there is time left AND one more trip could still finish a tip (a full load
-        // of 4 on top of what the up Cell and we hold reaches the tip count), look at a tipped Cell's spill. The tip count is a rough
-        // guess (where a ball lands changes the weight), so this is only a hint, with no margin cut. Otherwise park now: standing
-        // still scores nothing.
-        boolean couldStillTip = ballsInUpCell + ballsHeld + MOST_BALLS_WE_CAN_HOLD >= RedTippingAuto.ballsNeededToTip(tipsDone);
-        boolean watchInstead = (move == Move.PARK) && couldStillTip && (secondsLeft > secondsToPark + AutoDecider.PARK_MARGIN_SECONDS);
-        if (watchInstead && ballsHeld == 0) {
-            Cell spill = newestPendingSpill();
-            if (spill != null) {
-                lookCell = spill;
-                changed = "PARK -> LOOK at the " + spill + " spill (time left, empty)";
-            }
-        }
-        if (lookCell != null && (sweepGivenUp || secondsLeft < SWEEP_MIN_SECONDS_LEFT)) {
-            lookCell = null; // too late for a new sweep (or one was already dropped for time): shoot what we hold, or park
-            changed = null;
-        }
-        if (lookCell == null) {
-            watchInstead = false; // nothing worth looking at: park now instead of standing still
-        }
-
-        String inputs = "secondsLeft=" + round(secondsLeft) + " secondsToPark=" + round(secondsToPark)
-                + " shotThenPark=" + round(secondsForShotThenPark) + " tripThenPark=" + round(secondsForTripThenPark)
-                + " ballsHeld=" + ballsHeld + " atShootPoint=" + atShootPoint + " upCell=" + upCell
-                + " ballsInUpCell=" + ballsInUpCell + " tipsDone=" + tipsDone + " pilesLeft=" + pilesLeft
-                + " spills=" + pendingSpills
-                + " beam=" + SharedData.getBeamBreakData().getCount() + (SharedData.getBeamBreakData().isFresh(250) ? "" : "(stale)")
-                + (SharedData.getBeamBreakData().isReliable() ? "" : "(unreliable)")
-                + " seen=" + looseBallsSeen + (seenCluster == null ? "" : " at " + aimPointOf(seenCluster));
-        final Move finalMove = move;
-        final String finalChanged = changed;
-        KLog.d("Decide", () -> inputs + " -> " + finalMove + (finalChanged == null ? "" : " (" + finalChanged + ")"));
-        telemetry.addData("decide says", changed == null ? move : changed);
-        telemetry.addData("inputs", inputs);
+        telemetry.addData("decide says", move);
         telemetry.update();
 
-        currentMove = move;
-        currentPile = null;
-        if (lookCell != null) {
-            currentMove = Move.WAIT;
-            lookingAt = lookCell;
-            currentAction = sweepLegMove(lookCell);
-            precomputePathsNow();
-            return;
-        }
-        switch (move) {
-            case SHOOT_A:
-                currentAction = shootMove(Cell.A);
-                break;
-            case SHOOT_B:
-                currentAction = shootMove(Cell.B);
-                break;
-            case GET_GARDEN:
-                currentPile = Pile.GARDEN;
-                currentAction = pickupMove(Pile.GARDEN);
-                break;
-            case GET_FLOWER_A:
-                currentPile = Pile.FLOWER_A;
-                currentAction = pickupMove(Pile.FLOWER_A);
-                break;
-            case GET_FLOWER_B:
-                currentPile = Pile.FLOWER_B;
-                currentAction = pickupMove(Pile.FLOWER_B);
-                break;
-            case WAIT:
-                currentAction = new WaitAction(WAIT_MS);
-                break;
-            case GET_SEEN_BALLS:
-                if (seenCluster != null) {
-                    currentSeenCenter = aimPointOf(seenCluster);
-                    committedCenter = currentSeenCenter;
-                    committedBalls = new ArrayList<>(seenCluster.getBalls());
-                    committedAtSeconds = getRuntime();
-                    currentSeenSize = seenCluster.size();
-                    currentAction = pickupMove(currentSeenCenter, "pickupSeen");
-                    break;
-                }
-                // decide() only answers this when it was told about seen balls, so this cannot happen; park to be safe
-                currentMove = Move.PARK;
-                currentAction = driveTo(parkPoint(), null, null, "park");
-                break;
-            case PARK:
-            default:
-                currentMove = Move.PARK;
-                currentAction = driveTo(parkPoint(), null, null, "park");
-                break;
-        }
+        startMove(move);
         precomputePathsNow();
     }
 
-    /** Called once when the running move is done: update what we know. */
+    /**
+     * Asks decide(), then adjusts its answer with the "full load" rules. Sets sweepRunningFor when the answer is "sweep a spill".
+     *
+     * A tip needs several balls and we hold at most 4, so every trip should be a full load. If decide() wants to shoot 1-3 balls that
+     * cannot finish the tip, collect more first (a group the camera saw, or a tipped Cell's spill), or park if there is nothing to collect.
+     */
+    private Move chooseMove(Point robot, double secondsLeft, double secondsToPark) {
+        seenCluster = chooseLoad(robot);
+        int looseBallsSeen = (seenCluster == null) ? 0 : seenCluster.size();
+        boolean atShootPoint = Point.distance(robot, launchPointOf(upCell)) < AT_SHOOT_POINT_MM;
+        int ballsInUpCell = ballsIn(upCell);
+        int ballsNeeded = RedTippingAuto.ballsNeededToTip(tipsDone);
+
+        // The two "does the trip fit" times are 0: decide() never turns a shot or a trip down for time.
+        // Only its rule 1 is left (time left <= the drive to park + margin -> park).
+        Move move = AutoDecider.decide(PARTNER_MODE, secondsLeft, secondsToPark, 0, 0, ballsHeld, atShootPoint, upCell,
+                SharedData.isHiveTipping(), ballsInUpCell, tipsDone, pilesLeft, looseBallsSeen);
+        move = limitMove(move);
+
+        // The count is only a hint (where a ball lands changes the weight), so when we already reach the tip count, shoot now.
+        boolean shotWillTip = ballsInUpCell + ballsHeld >= ballsNeeded;
+        boolean loadTooSmall = isShoot(move) && ballsHeld > 0 && ballsHeld < MOST_BALLS_WE_CAN_HOLD && !shotWillTip;
+
+        Cell spillToSweep = null;
+        if (loadTooSmall) {
+            if (seenCluster != null) {
+                move = Move.GET_SEEN_BALLS;
+            } else {
+                spillToSweep = newestPendingSpill();
+            }
+        }
+
+        // decide() says PARK when nothing is left to do. If there is time AND one more full load could still finish a tip,
+        // sweep the spill instead. Standing still scores nothing, so with no spill we park now.
+        boolean couldStillTip = ballsInUpCell + ballsHeld + MOST_BALLS_WE_CAN_HOLD >= ballsNeeded;
+        boolean hasTimeToSweep = secondsLeft > secondsToPark + AutoDecider.PARK_MARGIN_SECONDS;
+        if (move == Move.PARK && couldStillTip && hasTimeToSweep && ballsHeld == 0) {
+            spillToSweep = newestPendingSpill();
+        }
+
+        boolean tooLateToSweep = sweepGivenUp || secondsLeft < SWEEP_MIN_SECONDS_LEFT;
+        if (tooLateToSweep) {
+            spillToSweep = null;
+        }
+
+        if (loadTooSmall && spillToSweep == null && isShoot(move)) {
+            move = Move.PARK; // nothing left to collect and this load cannot tip: shooting it scores nothing
+        }
+
+        KLog.d("Decide", () -> "secondsLeft=" + round(secondsLeft) + " secondsToPark=" + round(secondsToPark)
+                + " ballsHeld=" + ballsHeld + " atShootPoint=" + atShootPoint + " upCell=" + upCell
+                + " ballsInUpCell=" + ballsInUpCell + " tipsDone=" + tipsDone + " pilesLeft=" + pilesLeft
+                + " spills=" + pendingSpills + " seen=" + looseBallsSeen);
+
+        if (spillToSweep != null) {
+            sweepRunningFor = spillToSweep;
+            return Move.WAIT;
+        }
+        sweepRunningFor = null;
+        return move;
+    }
+
+    /** Builds the action for the chosen move and remembers what is running. */
+    private void startMove(Move move) {
+        currentMove = move;
+        currentPile = pileOf(move);
+
+        if (sweepRunningFor != null) {
+            currentAction = sweepMove(sweepRunningFor); // currentMove is WAIT, but it is really a sweep
+        } else if (currentPile != null) {
+            currentAction = pickupMove(pilePointOf(currentPile), "pickup" + currentPile);
+        } else if (move == Move.SHOOT_A) {
+            currentAction = shootMove(Cell.A);
+        } else if (move == Move.SHOOT_B) {
+            currentAction = shootMove(Cell.B);
+        } else if (move == Move.WAIT) {
+            currentAction = new WaitAction(WAIT_MS);
+        } else if (move == Move.GET_SEEN_BALLS && seenCluster != null) {
+            currentSeenCenter = aimPointOf(seenCluster);
+            currentSeenSize = seenCluster.size();
+            committedCenter = currentSeenCenter;
+            committedBalls = new ArrayList<>(seenCluster.getBalls());
+            committedAtSeconds = getRuntime();
+            currentAction = pickupMove(currentSeenCenter, "pickupSeen");
+        } else {
+            currentMove = Move.PARK; // PARK, or GET_SEEN_BALLS with nothing seen (decide() cannot do that, but park to be safe)
+            currentAction = driveTo(parkPoint(), null, "park");
+        }
+    }
+
+    private static Pile pileOf(Move move) {
+        if (move == null) {
+            return null; // nothing has started yet
+        }
+        switch (move) {
+            case GET_GARDEN:
+                return Pile.GARDEN;
+            case GET_FLOWER_A:
+                return Pile.FLOWER_A;
+            case GET_FLOWER_B:
+                return Pile.FLOWER_B;
+            default:
+                return null;
+        }
+    }
+
+    private static boolean isShoot(Move move) {
+        return move == Move.SHOOT_A || move == Move.SHOOT_B;
+    }
+
+    private boolean isPickup(Move move) {
+        return pileOf(move) != null || move == Move.GET_SEEN_BALLS;
+    }
+
+    /** The spill that tipped most recently, or null if there is none. Older spills have mostly rolled away or across the midline. */
+    private Cell newestPendingSpill() {
+        return pendingSpills.isEmpty() ? null : pendingSpills.get(pendingSpills.size() - 1);
+    }
+
+    // =============================================================================================
+    // After a move: update what we know
+    // =============================================================================================
+
+    /** Called once when the running move is done. */
     private void finishMove() {
-        if (lookingAt != null) {
+        if (sweepRunningFor != null) {
             stopSweepIntake();
-            pendingSpills.remove(lookingAt); // the whole loop is driven: never go back for the same spill
+            pendingSpills.remove(sweepRunningFor); // the whole loop is driven: never go back for the same spill
             sweepCell = null;
             sweepLeg = 0;
-            lookingAt = null;
+            sweepRunningFor = null;
         }
         switch (currentMove) {
             case SHOOT_A:
@@ -409,12 +464,11 @@ public class RedDecideAuto extends KOpMode {
             case GET_GARDEN:
             case GET_FLOWER_A:
             case GET_FLOWER_B:
-                decideNotBeforeSeconds = getRuntime() + COUNT_SETTLE_SECONDS;
-                afterPickup();
+                afterPileTrip();
                 break;
             case GET_SEEN_BALLS:
                 decideNotBeforeSeconds = getRuntime() + COUNT_SETTLE_SECONDS;
-                afterSeenPickup();
+                afterSeenBallsTrip();
                 break;
             case PARK:
                 parked = true;
@@ -430,146 +484,79 @@ public class RedDecideAuto extends KOpMode {
 
     private void afterShot() {
         Cell shotAt = (currentMove == Move.SHOOT_A) ? Cell.A : Cell.B;
-        int balls = (shotAt == Cell.A) ? ballsInCellA : ballsInCellB;
-        balls += ballsHeld;
+        int ballsNowInCell = ballsIn(shotAt) + ballsHeld;
         ballsHeld = 0;
-        if (balls >= RedTippingAuto.ballsNeededToTip(tipsDone)) {
+        if (ballsNowInCell >= RedTippingAuto.ballsNeededToTip(tipsDone)) {
             // The Cell tips down and the other Cell stands up.
-            balls = 0;
+            ballsNowInCell = 0;
             tipsDone++;
             upCell = (shotAt == Cell.A) ? Cell.B : Cell.A;
-            pendingSpills.add(shotAt); // the Cell that tipped down dumped its balls on its own side of the field
+            hiveSettledAtSeconds = getRuntime() + HIVE_TIP_SECONDS; // the Hive swings for a few seconds: do not shoot until it is still
+            if (ownsSpillOf(shotAt)) {
+                pendingSpills.add(shotAt); // the Cell that tipped down dumped its balls on its own side of the field
+            }
         }
-        if (shotAt == Cell.A) {
+        setBallsIn(shotAt, ballsNowInCell);
+    }
+
+    private void afterPileTrip() {
+        pilesLeft.remove(currentPile); // whether or not the pickup worked, this pile is visited: never go back
+        if (pickupFailed(currentPile.toString())) {
+            return;
+        }
+        // The beam-break count lags just after a pickup, and a pile is always full, so we trust our own count.
+        ballsHeld = Math.min(MOST_BALLS_WE_CAN_HOLD, ballsHeld + BALLS_PER_PILE);
+    }
+
+    private void afterSeenBallsTrip() {
+        committedCenter = null;
+        committedBalls = new ArrayList<>();
+        visitedPlaces.add(currentSeenCenter); // whether or not it worked: a group that is not there any more must not loop
+        if (pickupFailed("seen balls")) {
+            return;
+        }
+        // the camera also sees the balls of a pile: if the pickup was at a pile, that pile is taken
+        for (Pile pile : new ArrayList<>(pilesLeft)) {
+            if (Point.distance(currentSeenCenter, pilePointOf(pile)) < VISITED_REPEAT_MM) {
+                pilesLeft.remove(pile);
+            }
+        }
+        int ourCount = Math.min(MOST_BALLS_WE_CAN_HOLD, ballsHeld + currentSeenSize);
+        ballsHeld = beamBreakIsTrustworthy() ? SharedData.getBeamBreakData().getCount() : ourCount;
+    }
+
+    /** True (and reported) when the pickup that just finished could not plan a route. */
+    private boolean pickupFailed(String what) {
+        AutoToBallsPathingAction pickup = (AutoToBallsPathingAction) currentAction;
+        if (!pickup.getFailed()) {
+            return false;
+        }
+        String why = (pickup.getPlan() == null) ? "no plan" : pickup.getPlan().why;
+        KLog.d("Decide", () -> "pickup of " + what + " failed: " + why);
+        telemetry.addData("pickup failed", what + ": " + why);
+        telemetry.update();
+        return true;
+    }
+
+    private int ballsIn(Cell cell) {
+        return (cell == Cell.A) ? ballsInCellA : ballsInCellB;
+    }
+
+    private void setBallsIn(Cell cell, int balls) {
+        if (cell == Cell.A) {
             ballsInCellA = balls;
         } else {
             ballsInCellB = balls;
         }
     }
 
-    private void afterPickup() {
-        // Whether or not the pickup worked, this pile is visited: never go back to it.
-        pilesLeft.remove(currentPile);
-        AutoToBallsPathingAction pickup = (AutoToBallsPathingAction) currentAction;
-        if (pickup.getFailed()) {
-            String why = (pickup.getPlan() == null) ? "no plan" : pickup.getPlan().why;
-            KLog.d("Decide", () -> "pickup of " + currentPile + " failed: " + why);
-            telemetry.addData("pickup failed", currentPile + ": " + why);
-            telemetry.update();
-            return;
-        }
-        ballsHeld = ballsInRobot(Math.min(MOST_BALLS_WE_CAN_HOLD, ballsHeld + BALLS_PER_PILE));
-    }
-
-    /** Whether or not it worked, never go back to this place: a cluster that is not there any more must not loop. */
-    private void afterSeenPickup() {
-        committedCenter = null;
-        committedBalls = new ArrayList<>();
-        visitedSeenClusters.add(currentSeenCenter);
-        AutoToBallsPathingAction pickup = (AutoToBallsPathingAction) currentAction;
-        if (pickup.getFailed()) {
-            String why = (pickup.getPlan() == null) ? "no plan" : pickup.getPlan().why;
-            KLog.d("Decide", () -> "pickup of seen balls at " + currentSeenCenter + " failed: " + why);
-            telemetry.addData("pickup failed", "seen balls: " + why);
-            telemetry.update();
-            return;
-        }
-        // the camera also sees the balls of a pile: if the pickup was at a pile, that pile is taken
-        for (Pile pile : new ArrayList<>(pilesLeft)) {
-            if (Point.distance(currentSeenCenter, pilePointOf(pile)) < SEEN_CLUSTER_REPEAT_MM) {
-                pilesLeft.remove(pile);
-            }
-        }
-        ballsHeld = ballsInRobot(Math.min(MOST_BALLS_WE_CAN_HOLD, ballsHeld + currentSeenSize));
-    }
-
     // =============================================================================================
-    // Seeing balls (the camera)
+    // Remembering the balls the camera saw
     // =============================================================================================
 
     /**
-     * The best cluster of loose balls the camera sees right now, or null. Uses the team's own chooser (ClusterDetectionAction groups
-     * the balls into tiles and BallCluster scores them). "If and only if it sees them": nothing is remembered, so no sighting = null.
-     */
-    /**
-     * Keeps the cluster we chose until it is picked up, gone, or clearly beaten (2+ more balls, or 40 % closer). Without this the best
-     * cluster changed with every camera list and the robot drove across the field after a different one each decision.
-     */
-    private BallCluster applyCommitment(BallCluster candidate, Point robot) {
-        if (committedCenter == null) {
-            return candidate;
-        }
-        boolean expired = getRuntime() - committedAtSeconds > COMMIT_MAX_SECONDS
-                || nearAVisitedCluster(committedCenter)
-                || Point.distance(robot, committedCenter) < COMMIT_REACHED_MM;
-        if (expired) {
-            committedCenter = null;
-            return candidate;
-        }
-        List<BallInformation> around = new ArrayList<>(committedBalls);
-        for (BallInformation ball : rememberedBalls) {
-            if (Point.distance(ball.toPoint(), committedCenter) < SEEN_CLUSTER_REPEAT_MM) {
-                around.add(ball);
-            }
-        }
-        BallCluster committed = bestClusterOf(around, robot);
-        if (committed == null) {
-            committedCenter = null;
-            return candidate;
-        }
-        if (candidate == null || Point.distance(aimPointOf(candidate), committedCenter) < SEEN_CLUSTER_REPEAT_MM) {
-            return committed;
-        }
-        boolean muchBigger = candidate.size() >= committed.size() + COMMIT_SWITCH_EXTRA_BALLS;
-        boolean muchCloser = Point.distance(robot, aimPointOf(candidate)) < COMMIT_SWITCH_CLOSER * Point.distance(robot, committedCenter);
-        if (muchBigger || muchCloser) {
-            KLog.d("Decide", () -> "switching target: a cluster of " + candidate.size() + " beats the chosen " + committed.size());
-            committedCenter = null;
-            return candidate;
-        }
-        return committed;
-    }
-
-    private BallCluster bestSeenCluster(Point robot) {
-        List<BallInformation> usable = new ArrayList<>();
-        for (BallInformation ball : rememberedBalls) {
-            if (!RedTippingAuto.isOnOurSide(ball.x) || nearAVisitedCluster(ball.toPoint())) {
-                continue;
-            }
-            usable.add(ball);
-        }
-        // The chooser takes the highest score first and the distance only breaks ties, so a far cluster of 4 would beat a near one of 3.
-        // Look near first: balls close to the robot are a short trip. Only when nothing is near, look at all of them.
-        List<BallInformation> near = new ArrayList<>();
-        for (BallInformation ball : usable) {
-            if (Point.distance(ball.toPoint(), robot) <= NEAR_FIRST_MM) {
-                near.add(ball);
-            }
-        }
-        // A near cluster of 2+ balls wins. A lone near ball does not beat a bigger cluster farther away (it cost a stop and a detour for 1 ball).
-        BallCluster bestNear = bestClusterOf(near, robot);
-        if (bestNear != null && bestNear.size() >= 2) {
-            return bestNear;
-        }
-        BallCluster bestAll = bestClusterOf(usable, robot);
-        if (bestAll != null && bestAll.size() >= 2) {
-            return bestAll;
-        }
-        return (bestNear != null) ? bestNear : bestAll;
-    }
-
-    private BallCluster bestClusterOf(List<BallInformation> balls, Point robot) {
-        ClusterDetectionAction chooser = new ClusterDetectionAction(balls, robot, allianceColor);
-        int steps = 0;
-        while (!chooser.isFinished() && steps++ < 100000) {
-            chooser.updateCheckDone();
-        }
-        return chooser.getBestCluster();
-    }
-
-    /**
-     * Keeps every ball the camera sees for a few seconds, so a ball seen while driving (for example the leftovers by the launch point
-     * on the way back) is still known after the robot has turned away. A ball is forgotten when it is old, or when we drove over its spot.
+     * Keeps every ball the camera sees for a few seconds, so a ball seen while driving is still known after the robot has turned away.
+     * A ball is forgotten when it is old, or when we drove over its spot.
      */
     private void rememberSightings() {
         long now = System.currentTimeMillis();
@@ -577,16 +564,10 @@ public class RedDecideAuto extends KOpMode {
         if (listMs != 0 && listMs != lastSightingListMs) {
             lastSightingListMs = listMs;
             for (BallInformation seen : SharedData.getBallInformation()) {
-                int same = -1;
-                for (int i = 0; i < rememberedBalls.size(); i++) {
-                    if (Point.distance(rememberedBalls.get(i).toPoint(), seen.toPoint()) < BALL_MERGE_MM) {
-                        same = i;
-                        break;
-                    }
-                }
-                if (same >= 0) {
-                    rememberedBalls.set(same, seen);
-                    rememberedAtMs.set(same, now);
+                int sameBall = indexOfRememberedBallNear(seen.toPoint());
+                if (sameBall >= 0) {
+                    rememberedBalls.set(sameBall, seen);
+                    rememberedAtMs.set(sameBall, now);
                 } else {
                     rememberedBalls.add(seen);
                     rememberedAtMs.add(now);
@@ -595,18 +576,27 @@ public class RedDecideAuto extends KOpMode {
         }
         Point robot = robotPoint();
         for (int i = rememberedBalls.size() - 1; i >= 0; i--) {
-            boolean old = now - rememberedAtMs.get(i) > BALL_MEMORY_MS;
-            boolean passed = Point.distance(rememberedBalls.get(i).toPoint(), robot) < BALL_FORGET_NEAR_ROBOT_MM;
-            if (old || passed) {
+            boolean tooOld = now - rememberedAtMs.get(i) > BALL_MEMORY_MS;
+            boolean weDroveOverIt = Point.distance(rememberedBalls.get(i).toPoint(), robot) < BALL_FORGET_NEAR_ROBOT_MM;
+            if (tooOld || weDroveOverIt) {
                 rememberedBalls.remove(i);
                 rememberedAtMs.remove(i);
             }
         }
     }
 
-    private boolean nearAVisitedCluster(Point ball) {
-        for (Point visited : visitedSeenClusters) {
-            if (Point.distance(ball, visited) < SEEN_CLUSTER_REPEAT_MM) {
+    private int indexOfRememberedBallNear(Point point) {
+        for (int i = 0; i < rememberedBalls.size(); i++) {
+            if (Point.distance(rememberedBalls.get(i).toPoint(), point) < BALL_MERGE_MM) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private boolean nearAVisitedPlace(Point point) {
+        for (Point visited : visitedPlaces) {
+            if (Point.distance(point, visited) < VISITED_REPEAT_MM) {
                 return true;
             }
         }
@@ -614,56 +604,156 @@ public class RedDecideAuto extends KOpMode {
     }
 
     // =============================================================================================
-    // The moves
+    // Choosing which balls to go for
     // =============================================================================================
 
     /**
-     * Drive to the launch point of the Cell, warm the flywheel on the way, and shoot when the robot is there,
-     * the flywheel is ready and the turret is aimed at THIS Cell.
+     * Picks the first stop of the best load. A load is one group of remembered balls, or two groups when the first does not fill the intake.
+     * The chosen first group is kept until it is picked up, reached or expired, and replaced only by a load that scores
+     * COMMIT_SWITCH_SCORE times better. Returns null when there is nothing worth going for.
      */
-    private KActionSet shootMove(Cell cell) {
-        Point launch = launchPointOf(cell);
-        Point target = (cell == Cell.A) ? FieldConfig.aTargetPoint : FieldConfig.bTargetPoint;
+    private BallCluster chooseLoad(Point robot) {
+        int room = MOST_BALLS_WE_CAN_HOLD - ballsHeld;
+        dropCommitmentIfDone(robot);
+        List<BallCluster> groups = groupBalls(usableBalls());
+        if (groups.isEmpty() || room <= 0) {
+            committedCenter = null;
+            return null;
+        }
 
-        // TurretAutoAlign reads its target point when it is built, so set the target first.
-        TurretConfig.X_INIT_SETUP_MM = target.getX();
-        TurretConfig.Y_INIT_SETUP_MM = target.getY();
-        TurretAutoAlign aim = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
-        aim.setToleranceDeg(5);
-        currentAim = aim;
+        // score[i] = the best load that STARTS with group i
+        double[] score = new double[groups.size()];
+        int best = 0;
+        for (int i = 0; i < groups.size(); i++) {
+            score[i] = bestScoreStartingWith(robot, groups, i, room);
+            if (score[i] > score[best]) {
+                best = i;
+            }
+        }
 
-        AdaptivePurePursuitAction drive = driveTo(launch, null, target, "driveToLaunch" + cell); // end with the front (and the camera) facing the Cell
+        // Keep the group we already chose, unless the best one is clearly better.
+        int chosen = best;
+        int committed = indexOfGroupAtCommittedCenter(groups);
+        if (committed >= 0 && score[best] < COMMIT_SWITCH_SCORE * score[committed]) {
+            chosen = committed;
+        }
+        return groups.get(chosen);
+    }
 
-        ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, target, launch); // warms up while we drive
-        shooterRun.setName("shooterRun");
+    private void dropCommitmentIfDone(Point robot) {
+        if (committedCenter == null) {
+            return;
+        }
+        boolean tooOld = getRuntime() - committedAtSeconds > COMMIT_MAX_SECONDS;
+        boolean alreadyVisited = nearAVisitedPlace(committedCenter);
+        boolean weAreThere = Point.distance(robot, committedCenter) < COMMIT_REACHED_MM;
+        if (tooOld || alreadyVisited || weAreThere) {
+            committedCenter = null;
+        }
+    }
 
-        ShooterReady shooterReady = new ShooterReady(shooterRun);
-        shooterReady.setName("shooterReady");
-        shooterReady.setDependentActions(drive);
+    /** The remembered balls that are ours and not near a place we already went to, plus the balls of the chosen group even if the memory just dropped them. */
+    private List<BallInformation> usableBalls() {
+        List<BallInformation> usable = new ArrayList<>();
+        for (BallInformation ball : rememberedBalls) {
+            if (wantsBall(ball) && !nearAVisitedPlace(ball.toPoint())) {
+                usable.add(ball);
+            }
+        }
+        if (committedCenter != null) {
+            for (BallInformation old : committedBalls) {
+                boolean alreadyInList = false;
+                for (BallInformation ball : usable) {
+                    if (Point.distance(ball.toPoint(), old.toPoint()) < BALL_MERGE_MM) {
+                        alreadyInList = true;
+                        break;
+                    }
+                }
+                if (!alreadyInList && !nearAVisitedPlace(old.toPoint())) {
+                    usable.add(old);
+                }
+            }
+        }
+        return usable;
+    }
 
-        TurretReadyAuto turretReady = new TurretReadyAuto(aim);
-        turretReady.setName("turretReady");
+    private int indexOfGroupAtCommittedCenter(List<BallCluster> groups) {
+        if (committedCenter == null) {
+            return -1;
+        }
+        for (int i = 0; i < groups.size(); i++) {
+            if (Point.distance(aimPointOf(groups.get(i)), committedCenter) < VISITED_REPEAT_MM) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
-        PushBall pushBall = new PushBall(stopper, intake);
-        pushBall.setName("shoot");
-        pushBall.setDependentActions(drive, turretReady);
-
-        TurretStop turretStop = new TurretStop(aim);
-        turretStop.setName("turretStop");
-        turretStop.setDependentActions(pushBall);
-
-        ShooterStop shooterStop = new ShooterStop(shooterRun);
-        shooterStop.setName("shooterStop");
-        shooterStop.setDependentActions(pushBall);
-
-        KActionSet set = new KActionSet();
-        set.setName("shoot" + cell);
-        set.addAction(drive, shooterRun, shooterReady, turretReady, pushBall, turretStop, shooterStop);
-        return set;
+    /** The best score of a load that starts with groups[first]: alone, or followed by one other group when the first does not fill the intake. */
+    private double bestScoreStartingWith(Point robot, List<BallCluster> groups, int first, int room) {
+        double best = loadScore(robot, groups.get(first), null, room);
+        if (groups.get(first).size() < room) {
+            for (int second = 0; second < groups.size(); second++) {
+                if (second != first) {
+                    best = Math.max(best, loadScore(robot, groups.get(first), groups.get(second), room));
+                }
+            }
+        }
+        return best;
     }
 
     /**
-     * Where to drive for a cluster. The middle of a cluster is only worth driving to when a ball is actually near it; for scattered balls
+     * Tip progress per second of a load: first group, then optionally a second, then the up Cell's launch point, then the shot.
+     * A load that finishes the tip is worth 1, otherwise a fraction of its progress.
+     */
+    private double loadScore(Point robot, BallCluster first, BallCluster second, int room) {
+        int balls = Math.min(first.size() + (second == null ? 0 : second.size()), room);
+        Point firstPoint = aimPointOf(first);
+        Point lastPoint = (second == null) ? firstPoint : aimPointOf(second);
+
+        double seconds = driveSeconds(robot, firstPoint) + LOAD_STOP_SECONDS;
+        if (second != null) {
+            seconds += driveSeconds(firstPoint, lastPoint) + LOAD_STOP_SECONDS;
+        }
+        seconds += driveSeconds(lastPoint, launchPointOf(upCell)) + SECONDS_TO_SHOOT;
+
+        int needed = RedTippingAuto.ballsNeededToTip(tipsDone);
+        int total = ballsIn(upCell) + ballsHeld + balls;
+        double value = (total >= needed) ? 1.0 : LOAD_PARTIAL_VALUE * total / needed;
+        return value / seconds;
+    }
+
+    /** Remembered balls chained into groups: a ball closer than LOAD_GROUP_MM to a ball of the group joins it. Groups with opponent balls are dropped. */
+    private List<BallCluster> groupBalls(List<BallInformation> balls) {
+        List<BallCluster> groups = new ArrayList<>();
+        boolean[] used = new boolean[balls.size()];
+        for (int start = 0; start < balls.size(); start++) {
+            if (used[start]) {
+                continue;
+            }
+            BallCluster group = new BallCluster(BallCluster.tileColumnOf(balls.get(start).x), BallCluster.tileRowOf(balls.get(start).y));
+            List<Integer> queue = new ArrayList<>(); // balls of this group whose neighbours we still have to look at
+            queue.add(start);
+            used[start] = true;
+            for (int q = 0; q < queue.size(); q++) {
+                BallInformation ball = balls.get(queue.get(q));
+                group.addBall(ball);
+                for (int other = 0; other < balls.size(); other++) {
+                    if (!used[other] && Point.distance(ball.toPoint(), balls.get(other).toPoint()) < LOAD_GROUP_MM) {
+                        used[other] = true;
+                        queue.add(other);
+                    }
+                }
+            }
+            if (!group.isEliminated(allianceColor)) {
+                groups.add(group);
+            }
+        }
+        return groups;
+    }
+
+    /**
+     * Where to drive for a group. The middle of a group is only worth driving to when a ball is actually near it; for scattered balls
      * (a nectar and a pollen 400 mm apart) the middle is empty floor, so aim at the ball closest to the middle instead.
      */
     private static Point aimPointOf(BallCluster cluster) {
@@ -680,33 +770,104 @@ public class RedDecideAuto extends KOpMode {
         return (nearestDistance <= BALL_NEAR_CENTER_MM) ? center : nearest;
     }
 
-    /** The balls in the robot: the beam breaks when they can be trusted, otherwise our own count. */
-    private int ballsInRobot(int ourCount) {
-        BeamBreakData beam = SharedData.getBeamBreakData();
-        return (beam.hasData() && beam.isFresh(250) && beam.isReliable()) ? beam.getCount() : ourCount;
+    // =============================================================================================
+    // The moves
+    // =============================================================================================
+
+    /**
+     * Drive to the launch point of the Cell, warm the flywheel on the way, and shoot when the robot is close enough,
+     * the flywheel is ready and the turret is aimed at THIS Cell.
+     */
+    private KActionSet shootMove(Cell cell) {
+        Point launch = launchPointOf(cell);
+        Point target = (cell == Cell.A) ? FieldConfig.aTargetPoint : FieldConfig.bTargetPoint;
+
+        // TurretAutoAlign reads its target point when it is built (and never changes it), so set the target first: a fresh one per shot.
+        TurretConfig.X_INIT_SETUP_MM = target.getX();
+        TurretConfig.Y_INIT_SETUP_MM = target.getY();
+        TurretAutoAlign aim = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        aim.setToleranceDeg(5);
+        currentAim = aim;
+
+        AdaptivePurePursuitAction drive = driveTo(launch, target, "driveToLaunch" + cell); // end with the front (and the camera) facing the Cell
+
+        // The shot distance changes while we drive, so the flywheel follows the CURRENT distance to the Cell (not a fixed launch point).
+        ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, target); // warms up while we drive
+        shooterRun.setName("shooterRun");
+
+        ShooterReady shooterReady = new ShooterReady(shooterRun);
+        shooterReady.setName("shooterReady");
+
+        TurretReadyAuto turretReady = new TurretReadyAuto(aim);
+        turretReady.setName("turretReady");
+
+        // The turret tracks the Cell, so we do not need to stop at the launch point: shoot as soon as we are close enough and the Hive is still.
+        Action closeEnough = new Action() {
+            @Override
+            protected void update() {
+                if (Point.distance(robotPoint(), launch) < SHOOT_ZONE_MM && getRuntime() >= hiveSettledAtSeconds) {
+                    isDone = true;
+                }
+            }
+        };
+        closeEnough.setName("closeEnoughToShoot");
+
+        PushBall pushBall = new PushBall(stopper, intake);
+        pushBall.setName("shoot");
+        pushBall.setDependentActions(closeEnough, turretReady);
+
+        // The balls are gone: stop driving to the launch point. The next move starts from wherever we are.
+        Action endDrive = new Action() {
+            @Override
+            protected void update() {
+                drive.setIsDone(true);
+                isDone = true;
+            }
+        };
+        endDrive.setName("endDriveToLaunch");
+        endDrive.setDependentActions(pushBall);
+
+        TurretStop turretStop = new TurretStop(aim);
+        turretStop.setName("turretStop");
+        turretStop.setDependentActions(pushBall);
+
+        ShooterStop shooterStop = new ShooterStop(shooterRun);
+        shooterStop.setName("shooterStop");
+        shooterStop.setDependentActions(pushBall);
+
+        KActionSet set = new KActionSet();
+        set.setName("shoot" + cell);
+        set.addAction(drive, shooterRun, shooterReady, turretReady, closeEnough, pushBall, endDrive, turretStop, shooterStop);
+        return set;
     }
 
-    // ----- Looking at a tipped Cell's spill -----
-
-    private static Point viewpointOf(Cell tipped) {
-        return (tipped == Cell.A) ? VIEW_PLUS_Y : VIEW_MINUS_Y;
+    /** Plan a route to the balls with the path planner, drive it and run the intake. */
+    private Action pickupMove(Point ball, String name) {
+        AutoToBallsPathingAction pickup = new AutoToBallsPathingAction(driveTrain, stopper, intake, ball, true);
+        pickup.setName(name);
+        return pickup;
     }
 
-    private static double viewHeadingOf(Cell tipped) {
-        return (tipped == Cell.A) ? VIEW_PLUS_Y_HEADING_DEG : VIEW_MINUS_Y_HEADING_DEG;
+    /**
+     * Where the robot center parks: in the corner, but far enough from both walls that the whole body fits at any heading
+     * (the circle that holds the body: the longer end and half the width).
+     */
+    private static Point parkPoint() {
+        double reach = Math.hypot(Math.max(RobotFootprint.FRONT_MM, RobotFootprint.BACK_MM), RobotFootprint.WIDTH_MM / 2) + PARK_WALL_GAP_MM;
+        return new Point(reach, reach);
     }
 
-    /** The spill that tipped most recently, or null if there is none left to look at. Older spills have mostly rolled away or across the midline. */
-    private Cell newestPendingSpill() {
-        return pendingSpills.isEmpty() ? null : pendingSpills.get(pendingSpills.size() - 1);
-    }
+    // =============================================================================================
+    // The sweep
+    // =============================================================================================
 
-    /** The 4 corners of the rectangle loop for a Cell's spill: out lane down, across the far end, back lane up. */
+    /** The 4 corners of the rectangle loop for a Cell's spill: out lane, across the far end, back lane. */
     private List<Point> sweepCorners(Cell tipped) {
-        boolean plusY = (tipped == Cell.A); // A tipped = its balls are on the +y wall
+        boolean plusY = (tipped == Cell.A); // A tipped = its balls are on the +y wall, B tipped = the -y wall
         double farY = plusY ? PathPlanning.FIELD_SIZE_MM - SWEEP_FAR_WALL_GAP_MM : SWEEP_FAR_WALL_GAP_MM;
-        double launchY = plusY ? launchPointOf(Cell.B).getY() : launchPointOf(Cell.A).getY(); // the up Cell is the other one
+        double launchY = (plusY ? launchPointOf(Cell.B) : launchPointOf(Cell.A)).getY(); // the up Cell is the other one
         double nearY = plusY ? launchY + SWEEP_NEAR_INSET_MM : launchY - SWEEP_NEAR_INSET_MM;
+
         List<Point> corners = new ArrayList<>();
         corners.add(new Point(SWEEP_OUT_X_MM, nearY));
         corners.add(new Point(SWEEP_OUT_X_MM, farY));
@@ -716,7 +877,7 @@ public class RedDecideAuto extends KOpMode {
     }
 
     /** The rest of the loop as ONE path through all the corners left, so the robot does not stop at each corner. */
-    private KActionSet sweepLegMove(Cell tipped) {
+    private Action sweepMove(Cell tipped) {
         List<Point> corners = sweepCorners(tipped);
         if (sweepCell != tipped) {
             // A new loop starts at the corner nearest to us: from the far end, drive only the way back, not up to the near end and down again.
@@ -731,35 +892,37 @@ public class RedDecideAuto extends KOpMode {
                 }
             }
         }
-        AdaptivePurePursuitAction drive = new AdaptivePurePursuitAction(driveTrain);
-        drive.setName("sweep" + tipped);
-        drive.setPlanStartFrom(null);
-        drive.setFinalAngleLockingThresholdDeg(30);
-        drive.setLookAheadRadius(125);
-        drive.setFinalSearchRadiusMM(150);
-        drive.setMaxTimeOutMS(12000);
-        Point previous = robotPoint();
-        double heading = Math.toDegrees(new Position(SharedData.getOdometryWheelIMUPosition()).getTheta());
-        for (int i = sweepLeg; i < corners.size(); i++) {
-            List<Point> route = planner.plan(previous, corners.get(i));
-            if (route == null || route.isEmpty()) {
-                route = new ArrayList<>();
-                route.add(corners.get(i));
-            }
-            for (Point p : route) {
-                if (Point.distance(previous, p) > 1e-6) {
-                    heading = Math.toDegrees(Math.atan2(p.getY() - previous.getY(), p.getX() - previous.getX()));
-                }
-                drive.addPoint(p.getX(), p.getY(), heading);
-                previous = p;
-            }
-        }
         sweepIntake = new IntakeFullAction(stopper, intake, 12000, 1);
         sweepIntake.setName("sweepIntake");
-        KActionSet set = new KActionSet();
-        set.setName("sweep" + tipped);
-        set.addAction(drive);
-        return set;
+        return driveThrough(corners.subList(sweepLeg, corners.size()), null, "sweep" + tipped, 12000);
+    }
+
+    /** While a sweep leg drives: stop when the intake is full, or when a group lies close beside the lane. */
+    private void checkSweep() {
+        if (sweepRunningFor == null || currentAction == null) {
+            return;
+        }
+        if (sweepIntake != null) {
+            sweepIntake.updateCheckDone();
+        }
+        List<Point> corners = sweepCorners(sweepCell);
+        while (sweepLeg < corners.size() - 1 && Point.distance(robotPoint(), corners.get(sweepLeg)) < SWEEP_CORNER_REACHED_MM) {
+            sweepLeg++; // passed this corner: a broken-off sweep restarts from the next one
+        }
+        if (ballsHeld >= MOST_BALLS_WE_CAN_HOLD) {
+            dropRunningMove("sweep: holding " + ballsHeld + ", go shoot");
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (now - lastSweepCheckMs < CHECK_EVERY_MS) {
+            return;
+        }
+        lastSweepCheckMs = now;
+        Point robot = robotPoint();
+        BallCluster cluster = chooseLoad(robot);
+        if (cluster != null && distanceToSegment(aimPointOf(cluster), robot, corners.get(sweepLeg)) <= SWEEP_DETOUR_MM) {
+            dropRunningMove("sweep: a group of " + cluster.size() + " lies beside the lane"); // the sweep goes on from the same corner later
+        }
     }
 
     private void stopSweepIntake() {
@@ -767,16 +930,6 @@ public class RedDecideAuto extends KOpMode {
             sweepIntake.stopAndSetDone();
             sweepIntake = null;
         }
-    }
-
-    /** Stop the leg we are driving, so the main loop can decide again (a cluster beside the lane, or the intake is full). */
-    private void breakOffSweepLeg(String why) {
-        KLog.d("Decide", () -> "sweep leg broken off: " + why);
-        stopSweepIntake();
-        driveTrain.setPower(0);
-        currentAction = null;
-        currentAim = null;
-        lookingAt = null; // the leg is NOT counted as done: the sweep goes on from the same corner later
     }
 
     /** Distance from a point to the straight segment a-b. */
@@ -789,166 +942,110 @@ public class RedDecideAuto extends KOpMode {
         return Point.distance(p, new Point(a.getX() + t * dx, a.getY() + t * dy));
     }
 
+    // =============================================================================================
+    // Safety checks: run out of time, or get stuck
+    // =============================================================================================
+
     /**
-     * decide() only runs between moves, so a long pickup or sweep leg can run past the time to park. Every 250 ms: if the time left is
-     * about the drive to the park spot, drop the running pickup/sweep so the next decide() parks (rule 1).
+     * decide() only runs between moves, so a long pickup or sweep can run past the time to park. Every 250 ms: if the time left is
+     * about the drive to the park spot, drop the running pickup or sweep so the next decide() parks.
      */
-    private long lastParkCheckMs = 0;
-    private double moveStartedAtSeconds = 0;
-
-    /** A pickup that has not finished after this long is stuck (for example against a Flower): give up and decide again. */
-    private static final double PICKUP_GIVE_UP_SECONDS = 6;
-
-    private void checkPickupJam() {
-        boolean pickup = currentMove == Move.GET_GARDEN || currentMove == Move.GET_FLOWER_A
-                || currentMove == Move.GET_FLOWER_B || currentMove == Move.GET_SEEN_BALLS;
-        if (!pickup || currentAction == null || getRuntime() - moveStartedAtSeconds < PICKUP_GIVE_UP_SECONDS) {
+    private void parkIfOutOfTime() {
+        boolean canBeDropped = currentAction != null && currentMove != Move.PARK && !isShoot(currentMove);
+        long now = System.currentTimeMillis();
+        if (!canBeDropped || now - lastParkCheckMs < CHECK_EVERY_MS) {
             return;
         }
-        KLog.d("Decide", () -> "pickup stuck for " + PICKUP_GIVE_UP_SECONDS + " s, giving up: " + currentMove);
-        if (currentAction instanceof AutoToBallsPathingAction) {
-            ((AutoToBallsPathingAction) currentAction).setIsDone(true);
+        lastParkCheckMs = now;
+        double secondsLeft = AUTO_SECONDS - getRuntime();
+        boolean almostOutOfTime = secondsLeft <= driveSeconds(robotPoint(), parkPoint()) + AutoDecider.PARK_MARGIN_SECONDS + 1.0;
+        if (almostOutOfTime) {
+            if (sweepRunningFor != null) {
+                sweepGivenUp = true; // out of time for sweeping: park, do not start the same loop again
+            }
+            dropRunningMove("time to park");
         }
-        driveTrain.setPower(0);
-        currentAction = null;
-        currentAim = null;
+    }
+
+    /** A pickup that has not finished after PICKUP_GIVE_UP_SECONDS is stuck (for example against a Flower): give up and decide again. */
+    private void giveUpIfPickupStuck() {
+        boolean stuck = isPickup(currentMove) && currentAction != null && getRuntime() - moveStartedAtSeconds >= PICKUP_GIVE_UP_SECONDS;
+        if (!stuck) {
+            return;
+        }
+        dropRunningMove("pickup stuck for " + PICKUP_GIVE_UP_SECONDS + " s");
         decideNotBeforeSeconds = getRuntime() + COUNT_SETTLE_SECONDS;
         if (currentPile != null) {
             pilesLeft.remove(currentPile); // never go back to a pile that jammed us
         }
         if (currentSeenCenter != null) {
-            visitedSeenClusters.add(currentSeenCenter);
+            visitedPlaces.add(currentSeenCenter);
         }
     }
 
-    private void checkParkTime() {
-        boolean droppable = currentAction != null && currentMove != Move.PARK && currentMove != Move.SHOOT_A && currentMove != Move.SHOOT_B;
-        long now = System.currentTimeMillis();
-        if (!droppable || now - lastParkCheckMs < SWEEP_CHECK_MS) {
-            return;
+    /** Stops the running pickup or sweep leg right now, so the main loop decides again. */
+    private void dropRunningMove(String why) {
+        KLog.d("Decide", () -> "dropping " + currentMove + ": " + why);
+        if (currentAction instanceof AutoToBallsPathingAction) {
+            ((AutoToBallsPathingAction) currentAction).setIsDone(true);
         }
-        lastParkCheckMs = now;
-        double secondsLeft = AUTO_SECONDS - getRuntime();
-        if (secondsLeft <= driveSeconds(robotPoint(), parkPoint()) + AutoDecider.PARK_MARGIN_SECONDS + 1.0) {
-            KLog.d("Decide", () -> "time to park: dropping " + currentMove);
-            if (currentAction instanceof AutoToBallsPathingAction) {
-                ((AutoToBallsPathingAction) currentAction).setIsDone(true);
-            }
-            if (lookingAt != null) {
-                sweepGivenUp = true; // out of time for sweeping: park, do not start the same loop again
-            }
-            stopSweepIntake();
-            driveTrain.setPower(0);
-            currentAction = null;
-            currentAim = null;
-            lookingAt = null;
-        }
+        stopSweepIntake();
+        driveTrain.setPower(0);
+        currentAction = null;
+        currentAim = null;
+        sweepRunningFor = null; // a dropped sweep leg is NOT counted as done: the sweep can go on from the same corner
     }
 
-    /** While a sweep leg drives: stop when the intake is full, or when a cluster lies close beside the lane. */
-    private void checkSweep() {
-        if (lookingAt == null || currentAction == null) {
-            return;
-        }
-        if (sweepIntake != null) {
-            sweepIntake.updateCheckDone();
-        }
-        List<Point> corners = sweepCorners(sweepCell);
-        while (sweepLeg < corners.size() - 1 && Point.distance(robotPoint(), corners.get(sweepLeg)) < SWEEP_CORNER_REACHED_MM) {
-            sweepLeg++; // passed this corner: a broken-off sweep restarts from the next one
-        }
-        if (ballsHeld >= MOST_BALLS_WE_CAN_HOLD) {
-            breakOffSweepLeg("holding " + ballsHeld + ", go shoot");
-            return;
-        }
-        long now = System.currentTimeMillis();
-        if (now - lastSweepCheckMs < SWEEP_CHECK_MS) {
-            return;
-        }
-        lastSweepCheckMs = now;
-        Point robot = robotPoint();
-        BallCluster cluster = bestSeenCluster(robot);
-        if (cluster != null) {
-            Point corner = sweepCorners(sweepCell).get(sweepLeg);
-            if (distanceToSegment(aimPointOf(cluster), robot, corner) <= SWEEP_DETOUR_MM) {
-                breakOffSweepLeg("a cluster of " + cluster.size() + " lies beside the lane");
-            }
-        }
-    }
-
-    /** Drive to a cluster, pick it up, drive to the up Cell's launch point, shoot, drive to park. */
-    private double secondsForClusterTrip(Point robot, Point cluster, Point upLaunch) {
-        return driveSeconds(robot, cluster) + SECONDS_TO_PICK_UP + driveSeconds(cluster, upLaunch)
-                + SECONDS_TO_SHOOT + driveSeconds(upLaunch, parkPoint());
-    }
-
-    /** Drive to the viewpoint, look, pick up (guessing the balls are near the viewpoint), shoot, park. */
-    private double secondsForLookTrip(Point robot, Cell tipped, Point upLaunch) {
-        Point view = viewpointOf(tipped);
-        return driveSeconds(robot, view) + LOOK_SETTLE_MS / 1000.0 + SECONDS_TO_PICK_UP + driveSeconds(view, upLaunch)
-                + SECONDS_TO_SHOOT + driveSeconds(upLaunch, parkPoint());
-    }
+    // =============================================================================================
+    // Driving
+    // =============================================================================================
 
     /**
-     * Where the robot center parks: in the corner, but far enough from both walls that the whole body fits at any heading
-     * (the circle that holds the body: the longer end and half the width). The old fixed point was inside the wall clearance, so the
-     * robot ended wedged against the wall.
+     * Drive to a point along the planner's route (around the Hive legs and flowers, on our side).
+     *
+     * @param faceToward end with the front facing this point. null = keep the way we travel.
      */
-    private static Point parkPoint() {
-        double reach = Math.hypot(Math.max(RobotFootprint.FRONT_MM, RobotFootprint.BACK_MM), RobotFootprint.WIDTH_MM / 2) + PARK_WALL_GAP_MM;
-        return new Point(reach, reach);
+    private AdaptivePurePursuitAction driveTo(Point goal, Point faceToward, String name) {
+        return driveThrough(Collections.singletonList(goal), faceToward, name, 8000);
     }
 
-    /** Plan a route to the pile with the path planner, drive it and run the intake. */
-    private Action pickupMove(Pile pile) {
-        return pickupMove(pilePointOf(pile), "pickup" + pile);
-    }
-
-    private Action pickupMove(Point ball, String name) {
-        AutoToBallsPathingAction pickup = new AutoToBallsPathingAction(driveTrain, stopper, intake, ball, true);
-        pickup.setName(name);
-        return pickup;
-    }
-
-    /** Drive to a point along the planner's route (around the Hive legs and flowers, on our side). */
-    /**
-     * @param finalHeadingDeg the heading to end with, or null
-     * @param faceToward      when finalHeadingDeg is null: end with the front facing this point. null = just keep the way we travel.
-     */
-    private AdaptivePurePursuitAction driveTo(Point goal, Double finalHeadingDeg, Point faceToward, String name) {
-        Point robot = robotPoint();
-        List<Point> route = planner.plan(robot, goal);
-        if (route == null || route.isEmpty()) {
-            KLog.d("Decide", () -> "no planned route from " + robot + " to " + goal + ", driving straight");
-            route = new ArrayList<>();
-            route.add(goal);
+    /** One path that goes through every goal in order, each one reached by the planner's route from the one before. */
+    private AdaptivePurePursuitAction driveThrough(List<Point> goals, Point faceToward, String name, long timeoutMs) {
+        // 1. The planner's route to every goal, joined into one list of points.
+        List<Point> points = new ArrayList<>();
+        Point previous = robotPoint();
+        for (Point goal : goals) {
+            List<Point> route = planner.plan(previous, goal);
+            if (route == null || route.isEmpty()) {
+                KLog.d("Decide", () -> "no planned route to " + goal + ", driving straight");
+                route = Collections.singletonList(goal);
+            }
+            points.addAll(route);
+            previous = goal;
         }
 
-        AdaptivePurePursuitAction move = new AdaptivePurePursuitAction(driveTrain);
-        move.setName(name);
-        move.setPlanStartFrom(null); // plan from where the robot is NOW
-        move.setFinalAngleLockingThresholdDeg(30);
-        move.setLookAheadRadius(125);
-        move.setFinalSearchRadiusMM(150);
-        move.setMaxTimeOutMS(8000);
+        // 2. Drive it. At every point the robot faces the way it travels.
+        AdaptivePurePursuitAction drive = new AdaptivePurePursuitAction(driveTrain);
+        drive.setName(name);
+        drive.setPlanStartFrom(null); // plan from where the robot is NOW
+        drive.setFinalAngleLockingThresholdDeg(30);
+        drive.setLookAheadRadius(125);
+        drive.setFinalSearchRadiusMM(150);
+        drive.setMaxTimeOutMS(timeoutMs);
 
-        Point previous = robot;
+        Point from = robotPoint();
         double heading = Math.toDegrees(new Position(SharedData.getOdometryWheelIMUPosition()).getTheta());
-        for (int i = 0; i < route.size(); i++) {
-            Point p = route.get(i);
-            boolean last = (i == route.size() - 1);
-            if (Point.distance(previous, p) > 1e-6) {
-                heading = Math.toDegrees(Math.atan2(p.getY() - previous.getY(), p.getX() - previous.getX()));
+        for (int i = 0; i < points.size(); i++) {
+            Point p = points.get(i);
+            boolean last = (i == points.size() - 1);
+            if (Point.distance(from, p) > 1e-6) {
+                heading = Math.toDegrees(Math.atan2(p.getY() - from.getY(), p.getX() - from.getX()));
             }
-            if (last && finalHeadingDeg != null) {
-                heading = finalHeadingDeg;
-            } else if (last && faceToward != null) {
-                heading = frontToward(p, faceToward);
-            }
-            move.addPoint(p.getX(), p.getY(), heading);
-            previous = p;
+            double headingHere = (last && faceToward != null) ? frontToward(p, faceToward) : heading;
+            drive.addPoint(p.getX(), p.getY(), headingHere);
+            from = p;
         }
-        return move;
+        return drive;
     }
 
     /**
@@ -960,8 +1057,6 @@ public class RedDecideAuto extends KOpMode {
         while (!AdaptivePurePursuitAction.allPrecomputeDone() && steps++ < 10000) {
             AdaptivePurePursuitAction.runPrecomputeStepForAll();
         }
-        final int done = steps;
-        KLog.d("Decide", () -> "path precompute took " + done + " steps");
     }
 
     /**
@@ -969,28 +1064,24 @@ public class RedDecideAuto extends KOpMode {
      * it the best view of the field (and the turret then sits near 0 degrees, nowhere near its +-180 wrap).
      */
     private static double frontToward(Point from, Point toward) {
-        return normalizeDeg(Math.toDegrees(Math.atan2(toward.getY() - from.getY(), toward.getX() - from.getX())));
-    }
-
-    private static double normalizeDeg(double deg) {
-        double d = deg % 360;
-        if (d > 180) {
-            d -= 360;
-        } else if (d <= -180) {
-            d += 360;
+        double deg = Math.toDegrees(Math.atan2(toward.getY() - from.getY(), toward.getX() - from.getX())) % 360;
+        if (deg > 180) {
+            deg -= 360;
+        } else if (deg <= -180) {
+            deg += 360;
         }
-        return d;
+        return deg;
     }
 
     // =============================================================================================
     // Small helpers
     // =============================================================================================
 
-    private Point robotPoint() {
+    Point robotPoint() {
         return new Position(SharedData.getOdometryWheelIMUPosition()).toPoint();
     }
 
-    private static Point launchPointOf(Cell cell) {
+    static Point launchPointOf(Cell cell) {
         return (cell == Cell.A) ? FieldConfig.aLaunchPoint : FieldConfig.bLaunchPoint;
     }
 
@@ -1006,7 +1097,7 @@ public class RedDecideAuto extends KOpMode {
     }
 
     /** Seconds to drive from one point to another along the planner's route (a straight line if there is none). */
-    private double driveSeconds(Point from, Point to) {
+    double driveSeconds(Point from, Point to) {
         List<Point> route = planner.plan(from, to);
         double length = 0;
         Point previous = from;

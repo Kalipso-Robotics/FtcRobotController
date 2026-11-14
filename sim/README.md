@@ -47,6 +47,11 @@ Each pose is `[seconds from START, x mm, y mm, heading in degrees]`, in the same
 first pose until START and its last pose after the end. The runner checks R2's start the same way as R1's (inside the wall, inside an obstacle)
 and says so in the run's warnings. A touch between R1 and R2 is the event `robot touched partner` and fails the "Avoids partner" check;
 closer than 150 mm is a warning. The run records `#partnerinfo` and `#partner t x y theta` lines next to the frames.
+Optional `"shots": { "from": 5.5, "count": 4, "everyMs": 110 }` makes R2 carry `count` pollen (inside R2, so R1's camera cannot see
+them) and shoot them one by one from its pose at the nearest up Cell, with the same aim error as R1; if no Cell is up it waits.
+`red_partner_solo_preload.json` is the SOLO-PRELOAD partner: leaves the B end, shoots its 4 preload from (900, 650), parks at (330, 1000).
+
+`shots` can also be a list of blocks (fired one after another), each with an optional `"side": "A"` or `"B"` (only shoot into the Cell on that end of the Hive). `"pickups": [{"at": s, "x": mm, "y": mm, "count": n}]` makes R2 take the nearest n loose pollen within 350 mm of (x, y) into itself at that time (no real intake is modelled), so a later shot block can fire them. `red_partner_strong.json` is the NOT SOLO partner: shoots its preload into A, takes Flower A, the Garden and the A spill, and shoots them into A once it is up (the A half is its half; our auto stays on the B half). Pair it with `RedDecideAutoNotSolo`.Every position and time in it is a guess.
 `red_partner_far.json` stays clear of both `RedTippingAuto` and `BallShowcaseAuto` (closest about 9 in).
 
 ## Tests

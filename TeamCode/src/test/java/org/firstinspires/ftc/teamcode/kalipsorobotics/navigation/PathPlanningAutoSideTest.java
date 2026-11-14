@@ -74,17 +74,19 @@ public class PathPlanningAutoSideTest {
     // ---- detours next to the Hive, with the AUTO block on ----
 
     @Test
-    public void hiveEdge_launchPointToLaunchPoint_goesAroundTheOutside() {
+    public void hiveEdge_launchPointToLaunchPoint_goesUnderTheHive() {
         List<Point> path = auto.plan(FieldConfig.aLaunchPoint, FieldConfig.bLaunchPoint);
         assertNotNull(path);
         Point previous = FieldConfig.aLaunchPoint;
+        double length = 0;
         for (Point next : path) {
             assertStaysOnOwnSide(previous, next);
+            length += Point.distance(previous, next);
             previous = next;
         }
-        // the gap between the legs is closed, so the route must bend out past the low leg's buffer
-        double legBufferLeftX = FieldConfig.HIVE_LEG_LOW_X[0] - BUFFER_MM;
-        assertTrue(path.get(0).getX() <= legBufferLeftX);
+        // the gap between the legs is open (small leg buffer), so the route is nearly the straight line, not a detour around the Hive
+        double straight = Point.distance(FieldConfig.aLaunchPoint, FieldConfig.bLaunchPoint);
+        assertTrue("path " + length + " mm vs straight " + straight + " mm", length < straight * 1.1);
     }
 
     @Test
@@ -103,7 +105,7 @@ public class PathPlanningAutoSideTest {
 
     @Test
     public void hiveEdge_goalJustInsideTheLegBuffer_isRefusedNotCrashed() {
-        Point goal = new Point(FieldConfig.HIVE_LEG_LOW_X[0] - BUFFER_MM + 5, FieldConfig.MIDLINE_X);
+        Point goal = new Point(FieldConfig.HIVE_LEG_LOW_X[0] - PathPlanning.HIVE_LEG_BUFFER_MM + 5, FieldConfig.MIDLINE_X);
         assertNull(auto.plan(FieldConfig.bLaunchPoint, goal));
     }
 
