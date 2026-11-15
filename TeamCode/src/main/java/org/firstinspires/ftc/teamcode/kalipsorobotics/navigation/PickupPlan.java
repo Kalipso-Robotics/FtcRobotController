@@ -50,9 +50,12 @@ public class PickupPlan {
     /** One line for the log. */
     public final String why;
 
+    /** How many of the LAST waypoints face finalHeadingRad (the rest face the way we travel). 1 for a normal pickup, 2 for a pass through a cluster. */
+    public final int alignedLast;
+
     private PickupPlan(List<Point> waypoints, Point standOff, double finalHeadingRad,
                        boolean enteredRing, boolean pullIn, boolean useBackIntake, Reason reason,
-                       String why) {
+                       String why, int alignedLast) {
         this.waypoints = waypoints == null ? null : Collections.unmodifiableList(waypoints);
         this.standOff = standOff;
         this.finalHeadingRad = finalHeadingRad;
@@ -61,16 +64,22 @@ public class PickupPlan {
         this.useBackIntake = useBackIntake;
         this.reason = reason;
         this.why = why;
+        this.alignedLast = alignedLast;
     }
 
     static PickupPlan ok(List<Point> waypoints, Point standOff, double headingRad, boolean enteredRing,
                          boolean pullIn, boolean useBackIntake, String why) {
         return new PickupPlan(waypoints, standOff, headingRad, enteredRing, pullIn, useBackIntake, Reason.OK,
-                why);
+                why, 1);
+    }
+
+    /** Like ok(), but the last TWO waypoints (the run-up and the stand-off) face headingRad: the robot is lined up before it drives in. */
+    static PickupPlan okAligned(List<Point> waypoints, Point standOff, double headingRad, boolean useBackIntake, String why) {
+        return new PickupPlan(waypoints, standOff, headingRad, false, false, useBackIntake, Reason.OK, why, 2);
     }
 
     static PickupPlan fail(Reason reason, String why) {
-        return new PickupPlan(null, null, 0, false, false, false, reason, why);
+        return new PickupPlan(null, null, 0, false, false, false, reason, why, 1);
     }
 
     public boolean isOk() {
@@ -91,7 +100,7 @@ public class PickupPlan {
         double headingDeg = Math.toDegrees(finalHeadingRad);
         for (int i = 0; i < waypoints.size(); i++) {
             Point p = waypoints.get(i);
-            if (i == waypoints.size() - 1) {
+            if (i >= waypoints.size() - alignedLast) {
                 headingDeg = Math.toDegrees(finalHeadingRad);
             } else if (Point.distance(previous, p) > 1e-6) {
                 headingDeg = Math.toDegrees(Math.atan2(p.getY() - previous.getY(), p.getX() - previous.getX()));

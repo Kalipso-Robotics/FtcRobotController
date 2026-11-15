@@ -230,6 +230,20 @@ public class SharedData {
         return hiveTipping;
     }
 
+    /**
+     * Which Cell of OUR Hive is up, as the Limelight AprilTag detector sees it (the sim sets it from the Hive tilt).
+     * true = the +y Cell (Cell A), false = the -y Cell (Cell B), null = not known (nothing senses it, or the Hive is moving).
+     */
+    private static volatile Boolean hivePlusYCellUp = null;
+
+    public static void setHivePlusYCellUp(Boolean plusYCellUp) {
+        SharedData.hivePlusYCellUp = plusYCellUp;
+    }
+
+    public static Boolean getHivePlusYCellUp() {
+        return hivePlusYCellUp;
+    }
+
     private static volatile List<BallInformation> ballInformation = new ArrayList<>();
     private static volatile long ballInformationTimeMs = 0;
 

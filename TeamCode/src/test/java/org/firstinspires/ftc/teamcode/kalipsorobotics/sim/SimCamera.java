@@ -94,6 +94,21 @@ final class SimCamera {
     void publish(SimWorld world) {
         List<BallInformation> seen = see(world.ballPositions(), world.getX(), world.getY(), world.getTheta());
         SharedData.setBallInformation(seen);
+        publishHive(world);
+    }
+
+    /** Tilt (radians) below which the Hive counts as moving. A Hive that stands still is tilted 30 degrees = 0.5236. */
+    static final double HIVE_SETTLED_RAD = 0.45;
+
+    /**
+     * What the Limelight AprilTag detector would tell the robot about OUR (red) Hive: which Cell is up (unknown while it moves).
+     * It does NOT set SharedData.setHiveTipping: with it, decide() makes the robot wait while the Hive swings, which cost about 2 s in the rigid part.
+     * The red Hive tilt is positive when the +y Cell (Cell A) is lifted.
+     */
+    private static void publishHive(SimWorld world) {
+        double redTilt = world.hiveAngles()[0];
+        boolean moving = Math.abs(redTilt) < HIVE_SETTLED_RAD;
+        SharedData.setHivePlusYCellUp(moving ? null : (Boolean) (redTilt > 0));
     }
 
     private static BallInformation.Type typeOf(int type) {

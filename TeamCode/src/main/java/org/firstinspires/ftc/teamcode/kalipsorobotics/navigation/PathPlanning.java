@@ -270,6 +270,84 @@ public class PathPlanning {
                 "the robot body hits an obstacle at every angle for ball " + ball);
     }
 
+    /** A cluster shorter than this is treated as one ball. */
+    private static final double MIN_CLUSTER_LENGTH_MM = 80;
+
+    /** How far before the first ball the robot is already lined up with the cluster (the run-up), in mm. We try the longest that fits. */
+    private static final double[] RUN_UP_MM = {400, 250, 100, 0};
+
+    /**
+     * Plans a pass THROUGH a cluster of balls. The robot lines up with the cluster first (front or back toward it, whichever is cheaper)
+     * and then drives straight in, so the balls come into the intake one after another instead of being pushed aside.
+     *
+     * @param nearBall the ball of the cluster closest to the robot (where we go in)
+     * @param farBall  the ball farthest from nearBall (where we come out): the line near -> far is the direction of the pass
+     * A single ball (near and far the same) is planned like planPickup(). If no straight pass fits, planPickup(farBall) is the fallback.
+     */
+    public PickupPlan planPickupThrough(Point robot, double robotHeadingRad, Point nearBall, Point farBall) {
+        if (Point.distance(nearBall, farBall) < MIN_CLUSTER_LENGTH_MM) {
+            return planPickup(robot, robotHeadingRad, nearBall);
+        }
+        PickupPlan rejectedNear = rejectBall(nearBall);
+        PickupPlan rejectedFar = rejectBall(farBall);
+        if (rejectedNear != null || rejectedFar != null) {
+            return planPickup(robot, robotHeadingRad, rejectedNear == null ? nearBall : farBall);
+        }
+
+        PickupPlan best = null;
+        double bestCost = Double.MAX_VALUE;
+        // Try going in at the near ball and out at the far one, AND the other way round: near a wall only one of the two has room for the run-up.
+        Point[][] directions = {{nearBall, farBall}, {farBall, nearBall}};
+        for (Point[] direction : directions) {
+            Point first = direction[0];
+            Point second = direction[1];
+            double aimRad = Math.atan2(second.getY() - first.getY(), second.getX() - first.getX());
+            for (boolean back : new boolean[]{false, true}) {
+                double bodyHeading = bodyHeadingFor(aimRad, back);
+                Point enter = standOffFor(first, aimRad, back, false);
+                Point leave = standOffFor(second, aimRad, back, false);
+                if (bodyBlocked(enter, bodyHeading) || bodyBlocked(leave, bodyHeading) || !straightPassIsClear(enter, leave, bodyHeading)) {
+                    continue;
+                }
+                for (double runUpMm : RUN_UP_MM) {
+                    Point runUp = new Point(enter.getX() - runUpMm * Math.cos(aimRad), enter.getY() - runUpMm * Math.sin(aimRad));
+                    if (bodyBlocked(runUp, bodyHeading) || insideBuffer(runUp)) {
+                        continue;
+                    }
+                    List<Point> toRunUp = plan(robot, runUp);
+                    if (toRunUp == null) {
+                        continue;
+                    }
+                    List<Point> path = new ArrayList<>(toRunUp);
+                    path.add(leave);
+                    double cost = pathLength(robot, path) + turnCostMm(robotHeadingRad, bodyHeading);
+                    if (cost < bestCost) {
+                        bestCost = cost;
+                        String why = String.format(Locale.US, "%s intake leads through a cluster %.0f mm long, run-up %.0f mm, front points %.0f deg, path %.0f mm",
+                                back ? "back" : "front", Point.distance(nearBall, farBall), runUpMm, Math.toDegrees(bodyHeading), pathLength(robot, path));
+                        best = PickupPlan.okAligned(path, leave, bodyHeading, back, why);
+                    }
+                    break; // the longest run-up that fits is the best one for this end
+                }
+            }
+        }
+        // No straight pass fits: go for the NEAREST ball alone (the next decision takes the others), not the far one.
+        return best != null ? best : planPickup(robot, robotHeadingRad, nearBall);
+    }
+
+    /** True if the robot body, driving straight from a to b with the given heading, never hits anything (checked every 50 mm). */
+    private boolean straightPassIsClear(Point a, Point b, double heading) {
+        double length = Point.distance(a, b);
+        for (double t = 0; t <= length; t += 50) {
+            double f = length < 1e-6 ? 0 : t / length;
+            Point p = new Point(a.getX() + f * (b.getX() - a.getX()), a.getY() + f * (b.getY() - a.getY()));
+            if (bodyBlocked(p, heading)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** A plan that says "cannot pick up" for balls that are never reachable, or null if the ball is fine. */
     private PickupPlan rejectBall(Point ball) {
         if (ball.getX() < 0 || ball.getX() > FIELD_SIZE_MM || ball.getY() < 0 || ball.getY() > FIELD_SIZE_MM) {

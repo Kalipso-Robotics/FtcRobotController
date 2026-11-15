@@ -71,6 +71,9 @@ public class AutoToBallsPathingAction extends Action {
     /** How long the chosen side may run before arrival (a pull-in pickup turns it on at the start of the drive). */
     public static double INTAKE_RUN_MS = 3000; // TODO-measure
 
+    /** For a pass through a cluster: the intake also covers this much of the run-up before the first ball, in mm. */
+    public static double INTAKE_RUN_UP_MM = 400;
+
     // ------------------------------------------------------------------------------------------
     // Things we are given or remember
     // ------------------------------------------------------------------------------------------
@@ -103,6 +106,9 @@ public class AutoToBallsPathingAction extends Action {
 
     /** Where the ball is. If the constructor was not given one, we read it from SharedData at the start. */
     private Point target;
+
+    /** For a cluster: the ball farthest from target. When set, we drive THROUGH the cluster from target to here. null = one ball. */
+    private Point farTarget = null;
 
     /** The part that actually drives the wheels along the route. Made once the route is known. */
     private AdaptivePurePursuitAction movement;
@@ -144,6 +150,15 @@ public class AutoToBallsPathingAction extends Action {
      * @param target      the ball (or cluster center) position, in mm
      * @param auto        true in AUTO (stay on our side), false in TELEOP
      */
+
+    /**
+     * Use this one for a cluster: drive through it from the ball nearest to us (target) to the ball farthest from it (farTarget),
+     * with the front or the back toward the cluster and the intake already running.
+     */
+    public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, Point farTarget, boolean auto) {
+        this(driveTrain, stopper, intake, target, auto);
+        this.farTarget = farTarget;
+    }
 
     public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, boolean auto) {
         this(driveTrain, stopper, intake, target, auto, null);
@@ -315,7 +330,9 @@ public class AutoToBallsPathingAction extends Action {
         // and which intake (front or back) picks the ball up.
         // A Flower pile can only be picked up by the side the Flower arm is on.
         Boolean forceBack = useFlower ? ModuleConfig.FLOWER_SIDE == BeamBreakPosition.IntakeSide.B : null;
-        plan = planner.planPickup(robot, pose.getTheta(), target, forceBack);
+        plan = (farTarget == null)
+                ? planner.planPickup(robot, pose.getTheta(), target, forceBack)
+                : planner.planPickupThrough(robot, pose.getTheta(), target, farTarget);
         if (forceBack != null && !plan.isOk()) {
             // The flower's side cannot reach this pile: pick it up with whichever side can, without the arm.
             String forcedWhy = plan.why;
@@ -371,7 +388,12 @@ public class AutoToBallsPathingAction extends Action {
      *   - once the robot is within INTAKE_START_DISTANCE_MM of its stopping point.
      */
     private boolean closeEnoughToStartIntake() {
-        return plan.pullIn || distanceToStop() <= INTAKE_START_DISTANCE_MM;
+        if (plan.pullIn) {
+            return true;
+        }
+        // for a pass through a cluster the intake runs from the run-up on: before the first ball, and along the whole pass
+        double passMm = (farTarget == null || plan.alignedLast < 2) ? 0 : Point.distance(target, farTarget) + INTAKE_RUN_UP_MM;
+        return distanceToStop() <= INTAKE_START_DISTANCE_MM + passMm;
     }
 
     /** Straight-line distance from the robot to its stopping point, mm. */
