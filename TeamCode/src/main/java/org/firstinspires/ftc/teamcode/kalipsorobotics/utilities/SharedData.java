@@ -230,18 +230,18 @@ public class SharedData {
         return hiveTipping;
     }
 
-    /**
-     * Which Cell of OUR Hive is up, as the Limelight AprilTag detector sees it (the sim sets it from the Hive tilt).
-     * true = the +y Cell (Cell A), false = the -y Cell (Cell B), null = not known (nothing senses it, or the Hive is moving).
-     */
-    private static volatile Boolean hivePlusYCellUp = null;
+    /** What one Cell of OUR Hive is doing: standing up, down, or swinging between the two. */
+    public enum CellState { UP, DOWN, TIPPING }
 
-    public static void setHivePlusYCellUp(Boolean plusYCellUp) {
-        SharedData.hivePlusYCellUp = plusYCellUp;
+    /** State of Cell A (the +y Cell), as the Limelight would sense it. null = nothing senses it. Cell B is the opposite (TIPPING stays TIPPING). */
+    private static volatile CellState cellAState = null;
+
+    public static void setCellAState(CellState state) {
+        SharedData.cellAState = state;
     }
 
-    public static Boolean getHivePlusYCellUp() {
-        return hivePlusYCellUp;
+    public static CellState getCellAState() {
+        return cellAState;
     }
 
     private static volatile List<BallInformation> ballInformation = new ArrayList<>();

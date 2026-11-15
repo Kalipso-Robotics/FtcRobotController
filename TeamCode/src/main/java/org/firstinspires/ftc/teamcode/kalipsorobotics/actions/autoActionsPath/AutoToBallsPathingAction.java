@@ -71,9 +71,6 @@ public class AutoToBallsPathingAction extends Action {
     /** How long the chosen side may run before arrival (a pull-in pickup turns it on at the start of the drive). */
     public static double INTAKE_RUN_MS = 3000; // TODO-measure
 
-    /** For a pass through a cluster: the intake also covers this much of the run-up before the first ball, in mm. */
-    public static double INTAKE_RUN_UP_MM = 400;
-
     // ------------------------------------------------------------------------------------------
     // Things we are given or remember
     // ------------------------------------------------------------------------------------------
@@ -106,9 +103,6 @@ public class AutoToBallsPathingAction extends Action {
 
     /** Where the ball is. If the constructor was not given one, we read it from SharedData at the start. */
     private Point target;
-
-    /** For a cluster: the ball farthest from target. When set, we drive THROUGH the cluster from target to here. null = one ball. */
-    private Point farTarget = null;
 
     /** The part that actually drives the wheels along the route. Made once the route is known. */
     private AdaptivePurePursuitAction movement;
@@ -150,15 +144,6 @@ public class AutoToBallsPathingAction extends Action {
      * @param target      the ball (or cluster center) position, in mm
      * @param auto        true in AUTO (stay on our side), false in TELEOP
      */
-
-    /**
-     * Use this one for a cluster: drive through it from the ball nearest to us (target) to the ball farthest from it (farTarget),
-     * with the front or the back toward the cluster and the intake already running.
-     */
-    public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, Point farTarget, boolean auto) {
-        this(driveTrain, stopper, intake, target, auto);
-        this.farTarget = farTarget;
-    }
 
     public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, boolean auto) {
         this(driveTrain, stopper, intake, target, auto, null);
