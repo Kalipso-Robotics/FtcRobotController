@@ -41,7 +41,7 @@ public class SOTM {
                     && (System.nanoTime() - sampleNanos) / 1e6 <= SOTMConfig.MAX_SOLUTION_AGE_MS;
         }
 
-        /** Turret angle relative to the robot at release (before any ticks offset). */
+        /** Turret angle relative to the robot at release (before the driver trim). */
         public double turretAngleRad() {
             return MathFunctions.angleWrapRad(aimHeadingRad - releaseHeadingRad);
         }

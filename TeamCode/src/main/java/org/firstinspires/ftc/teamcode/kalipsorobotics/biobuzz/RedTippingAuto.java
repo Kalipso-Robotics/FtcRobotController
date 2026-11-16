@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
@@ -330,7 +329,7 @@ public class RedTippingAuto extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.TRIM_DEG = 0;
         TurretConfig.X_INIT_SETUP_MM = FieldConfig.aTargetPoint.getX(); // the turret starts aimed at the first Cell
         TurretConfig.Y_INIT_SETUP_MM = FieldConfig.aTargetPoint.getY();
     }

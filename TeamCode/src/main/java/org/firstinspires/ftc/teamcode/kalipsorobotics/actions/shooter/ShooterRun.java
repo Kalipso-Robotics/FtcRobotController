@@ -25,6 +25,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterRun extends Action {
+    public static final String TAG = "Shooting_ShooterRun";
 
     public static final double FAR_TOLERANCE = 0.75;
     public static final double MIDDLE_TOLERANCE = 0.75;
@@ -88,30 +89,31 @@ public class ShooterRun extends Action {
     }
 
     public boolean isWithinRange() {
-        KLog.d("ShooterRun", () -> "isWithinRange called. Power: " + shooter.getShooter1().getPower() + " Current RPS: " + currentRPS +
-                ", Target RPS: " + targetRPS + ", At Within Range: " + isWithinRange);
+        if (KLog.isDebug()) {
+            KLog.d(TAG, () -> "event=isWithinRange power=" + shooter.getShooterMotor().getPower() + " currentRps=" + currentRPS +
+                    " targetRps=" + targetRPS + " withinRange=" + isWithinRange);
+        }
         return isWithinRange;
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void update() {
-        KLog.d("ShooterRun", () -> "update() called - hasStarted: " + hasStarted + ", Current RPS: " + currentRPS);
         currentRPS = shooter.getRPS();
         if (!hasStarted) {
-            shooter.getShooter1().resetPID();
-            shooter.getShooter2().resetPID();
+            shooter.getShooterMotor().resetPID();
 
             rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
-            KLog.d("ShooterRun", "*** SHOOTER RUN STARTED ***");
-            KLog.d("ShooterRun", () -> "Target RPS: " + targetRPS + ", Target Hood: " + targetHoodPosition + ", Distance: " + distanceMM);
-            KLog.d("ShooterRun", () -> "PIDF: " + shooter.getShooter1().getPIDFController());
+            KLog.d(TAG, () -> "event=start targetRps=" + targetRPS + " targetHood=" + targetHoodPosition + " distanceMm=" + distanceMM
+                    + " pidf=" + shooter.getShooterMotor().getPIDFController());
             elapsedTime.reset();
         }
 
-        KLog.d("ShooterRun", () -> "update() called - hasStarted: " + hasStarted + ", isDone: " + isDone);
+        if (KLog.isDebug()) {
+            KLog.d(TAG, () -> "currentRps=" + currentRPS + " isDone=" + isDone);
+        }
 
         IShooterPredictor.ShooterParams params;
 
@@ -182,8 +184,7 @@ public class ShooterRun extends Action {
         if (deltaRPS > ShooterConfig.accelBoostDeltaRPSThreshold && shouldBangBangCompensate) {
             // Need to ACCELERATE - current RPS too low
             if (prevMode != DcMotor.ZeroPowerBehavior.FLOAT) {
-                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                shooter.getShooterMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 prevMode = DcMotor.ZeroPowerBehavior.FLOAT;
             }
             shooter.setPower(calculateEffectiveCompensationPower());
@@ -191,8 +192,7 @@ public class ShooterRun extends Action {
         } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold && shouldBangBangCompensate) {
             // Need to DECELERATE - current RPS too high
             if (prevMode != DcMotor.ZeroPowerBehavior.BRAKE) {
-                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                shooter.getShooterMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 prevMode = DcMotor.ZeroPowerBehavior.BRAKE;
             }
             shooter.setPower(0);
@@ -200,8 +200,7 @@ public class ShooterRun extends Action {
         } else {
             // Within threshold - use PID control for fine adjustment
             if (prevMode != DcMotor.ZeroPowerBehavior.FLOAT) {
-                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                shooter.getShooterMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 prevMode = DcMotor.ZeroPowerBehavior.FLOAT;
             }
             shooter.goToRPS(targetRPS);
@@ -328,7 +327,7 @@ public class ShooterRun extends Action {
 
     public void setUseOdometry(boolean useOdometry) {
         this.useOdometry = useOdometry;
-        KLog.d("ShooterRun", () -> "Odometry was set to: " + useOdometry);
+        KLog.d(TAG, () -> "event=setUseOdometry useOdometry=" + useOdometry);
     }
 
 
@@ -375,23 +374,22 @@ public class ShooterRun extends Action {
             return;
         }
 
-        double power1 = shooter.getShooter1().getPower();
-        double power2 = shooter.getShooter2().getPower();
+        double power = shooter.getShooterMotor().getPower();
 
-        boolean powerIsZero = Math.abs(power1) < 1e-9 || Math.abs(power2) < 1e-9;
+        boolean powerIsZero = Math.abs(power) < 1e-9;
         if (!powerIsZero) {
             return;
         }
 
         // Power 0 while target is 0 (STOP / park) is expected - just note it, no stack trace.
         if (Math.abs(targetRPS) < 1e-9) {
-            KLog.d("ShooterRun_PowerZero", () -> "Power 0.0 with target 0 (expected stop) -> shooter1: " +
-                    power1 + " shooter2: " + power2 + " | mode: " + shooterRunMode);
+            KLog.d("ShooterRun_PowerZero", () -> "Power 0.0 with target 0 (expected stop) -> shooter: " +
+                    power + " | mode: " + shooterRunMode);
             return;
         }
 
         // Power 0 while we still want a non-zero RPS is the bug we are hunting - dump the trace.
-        KLog.d("ShooterRun_PowerZero", () -> "UNEXPECTED POWER 0.0 -> shooter1: " + power1 + " shooter2: " + power2 +
+        KLog.d("ShooterRun_PowerZero", () -> "UNEXPECTED POWER 0.0 -> shooter: " + power +
                 " | mode: " + shooterRunMode + " targetRPS: " + targetRPS + " currentRPS: " + currentRPS);
 
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();

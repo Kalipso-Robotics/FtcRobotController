@@ -14,25 +14,6 @@ import java.util.HashMap;
 
 public class SensorData {
 
-    private static int intakeMotorTicks = 0;
-
-    public static int getIntakeMotorTicks() {
-        return intakeMotorTicks;
-    }
-
-    public static void setIntakeMotorTicks(int intakeMotorTicks) {
-        SensorData.intakeMotorTicks = intakeMotorTicks;
-    }
-
-    private static int turretMotorTicks = 0;
-
-    public static int getTurretMotorTicks() {
-        return turretMotorTicks;
-    }
-    public static void setTurretMotorTicks(int turretMotorTicks) {
-        SensorData.turretMotorTicks = turretMotorTicks;
-    }
-
     private static int shooterMotorTicks = 0;
 
     public static int getShooterMotorTicks() {

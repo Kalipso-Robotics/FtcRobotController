@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 public class IntakeStop extends Action {
+    public static final String TAG = "Intaking_IntakeStop";
 
     Intake intake;
 
@@ -24,14 +26,13 @@ public class IntakeStop extends Action {
             return;
         }
         if (intake != null) {
-            intake.getIntakeMotor().setPower(0);
+            intake.stop();
         }
         if (intakeFullAction != null) {
             intakeFullAction.stopAndSetDone();
         }
 
         isDone = true;
-
-
+        KLog.d(TAG, () -> "name=" + getName() + " event=stop");
     }
 }

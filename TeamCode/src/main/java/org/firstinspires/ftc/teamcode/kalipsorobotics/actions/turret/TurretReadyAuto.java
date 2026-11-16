@@ -2,10 +2,11 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class TurretReadyAuto extends Action {
+    public static final String TAG = "Shooting_TurretReady";
+
     private final double maxTimeoutMS;
     private final ElapsedTime timeoutTimer;
     private static final double DEFAULT_MAX_TIMEOUT_MS = 3000;
@@ -25,22 +26,20 @@ public class TurretReadyAuto extends Action {
         if (!hasStarted) {
             timeoutTimer.reset();
             hasStarted = true;
-            KLog.d(this.getName(), () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d(TAG, () -> "event=start name=" + getName());
         }
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {
-            KLog.d(this.getName(), () -> "Turret TIMEOUT in " + maxTimeoutMS + " ms");
-            KLog.d("ActionTime", () -> this.getName() + " timeout in " + timeoutTimer.milliseconds() + " ms");
+            KLog.d(TAG, () -> String.format("event=timeout name=%s timeMs=%.0f deltaDeg=%.1f",
+                    getName(), timeoutTimer.milliseconds(), turretAutoAlign.getDeltaAngleDeg()));
             isDone = true;
             return;
         }
 
         if (turretAutoAlign.isWithinRange()) {
             isDone = true;
-            KLog.d("ActionTime", () -> this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
-            KLog.d(this.getName(), () -> "Turret took " + timeoutTimer.milliseconds() + " milliseconds");
-            KLog.d(this.getName(), () -> "TurretReady is done, turret is within range " + turretAutoAlign.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
-                    "Target Ticks: " + turretAutoAlign.getTargetTicks());
+            KLog.d(TAG, () -> String.format("event=done name=%s timeMs=%.0f targetDeg=%.1f",
+                    getName(), timeoutTimer.milliseconds(), Math.toDegrees(turretAutoAlign.getTargetAngleRad())));
         }
     }
 }

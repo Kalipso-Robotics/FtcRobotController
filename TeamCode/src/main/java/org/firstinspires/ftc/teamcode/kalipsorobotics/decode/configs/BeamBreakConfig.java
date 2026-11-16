@@ -2,34 +2,45 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
 import com.acmerobotics.dashboard.config.Config;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Tuning for the analog beam break sensors that count balls held in the robot.
  *
- * Fields are intentionally non-final so they can be tuned live from the FTC Dashboard while
- * BeamBreakTest is running - that OpMode prints the observed voltage window per sensor, which is
- * what you set the thresholds from.
+ * The sensor list and polarity are measured facts, so they are final; the filter and correction
+ * timings are Dashboard-tunable while BeamBreakTest is running. That OpMode prints the observed
+ * voltage window per sensor, which is what you set each threshold from.
  */
 @Config
 public class BeamBreakConfig {
 
-    //========POLARITY========
+    //========SENSORS========
+    /** Balls the robot can hold. */
+    public static final int CAPACITY = 4;
+
+    /**
+     * Every beam break, ordered from the A end to the B end (BeamBreakArray's plausibility pass
+     * depends on that order). Threshold = switching voltage, roughly the midpoint of the blocked
+     * and clear voltages BeamBreakTest reports for that sensor.
+     */
+    // TODO-measure: device names, sides, count, order and thresholds are placeholders until the array is built.
+    public static final List<BeamBreakPosition> SENSORS = Collections.unmodifiableList(Arrays.asList(
+            new BeamBreakPosition("beamBreak0", BeamBreakPosition.IntakeSide.A, 1.6),
+            new BeamBreakPosition("beamBreak1", BeamBreakPosition.IntakeSide.A, 1.6),
+            new BeamBreakPosition("beamBreak2", BeamBreakPosition.IntakeSide.A, 1.6),
+            new BeamBreakPosition("beamBreak3", BeamBreakPosition.IntakeSide.B, 1.6),
+            new BeamBreakPosition("beamBreak4", BeamBreakPosition.IntakeSide.B, 1.6),
+            new BeamBreakPosition("beamBreak5", BeamBreakPosition.IntakeSide.B, 1.6)));
+
     /**
      * True when an interrupted beam pulls the analog output LOW (the common case: output is near
      * the supply rail while the beam is intact, and collapses toward 0V when a ball blocks it).
-     * Flip to false if your sensors read high when blocked.
      */
-    public static boolean BLOCKED_IS_LOW_VOLTAGE = true;
-
-    //========THRESHOLDS========
-    /**
-     * Per-sensor switching voltage, in volts, in BeamBreakPosition order
-     * (A_OUTER, A_INNER, B_INNER, B_OUTER). Set each one to roughly the midpoint between the
-     * blocked and clear voltages that BeamBreakTest reports for that sensor.
-     */
-    public static double THRESHOLD_V_A_OUTER = 1.6;
-    public static double THRESHOLD_V_A_INNER = 1.6;
-    public static double THRESHOLD_V_B_INNER = 1.6;
-    public static double THRESHOLD_V_B_OUTER = 1.6;
+    public static final boolean BLOCKED_IS_LOW_VOLTAGE = true; // TODO-measure: confirm on the new sensors
 
     /**
      * Total width of the Schmitt-trigger band around the threshold, in volts. The raw reading has

@@ -1,136 +1,118 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
+import static org.junit.Assert.assertEquals;
+
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
- * Test for ShooterManualDataLookup with linear interpolation.
+ * Pins down ShooterInterpolationDataLookup: safe on an empty or one-row table, exact rows,
+ * linear interpolation between rows, clamping to the first/last row outside the table,
+ * and no duplicated rows when the lookup is constructed more than once.
  */
 public class ShooterInterpolationDataLookupTest {
+    private static final double TOL = 1e-9;
+    // Hood values inside [MIN_HOOD, MAX_HOOD] so clampHood does not change them.
+    private static final double HOOD_A = 0.15;
+    private static final double HOOD_B = 0.20;
+    private static final double HOOD_C = 0.25;
 
-    private static final double HOOD_OFFSET = 0.25; // Must match ShooterManualDataLookup.HOOD_OFFSET
-    private ShooterInterpolationDataLookup lookup;
+    private double[] savedData;
+    private double savedRpsOffset;
+    private double savedHoodOffset;
 
     @Before
-    public void setUp() {
-        // Data is now static, no need to load from file
-        lookup = new ShooterInterpolationDataLookup();
+    public void saveConfig() {
+        savedData = ShooterInterpolationConfig.shooterData;
+        savedRpsOffset = ShooterInterpolationConfig.rpsOffset;
+        savedHoodOffset = ShooterInterpolationConfig.hoodOffset;
+        ShooterInterpolationConfig.rpsOffset = 0;
+        ShooterInterpolationConfig.hoodOffset = 0;
+    }
+
+    @After
+    public void restoreConfig() {
+        ShooterInterpolationConfig.shooterData = savedData;
+        ShooterInterpolationConfig.rpsOffset = savedRpsOffset;
+        ShooterInterpolationConfig.hoodOffset = savedHoodOffset;
+    }
+
+    private static ShooterInterpolationDataLookup lookupFor(double... rows) {
+        ShooterInterpolationConfig.shooterData = rows;
+        return new ShooterInterpolationDataLookup();
+    }
+
+    private static void assertParams(double rps, double hood, IShooterPredictor.ShooterParams p) {
+        assertEquals("rps", rps, p.rps, TOL);
+        assertEquals("hood", hood, p.hoodPosition, TOL);
     }
 
     @Test
-    public void testDataLoaded() {
-        assertTrue("Should have loaded data points", lookup.getDataPointCount() > 0);
-        assertEquals("Should have 20 data points", 20, lookup.getDataPointCount());
-        System.out.println("Loaded " + lookup.getDataPointCount() + " data points");
-        System.out.println("Distance range: " + lookup.getMinDistance() + "mm to " + lookup.getMaxDistance() + "mm");
-    }
-
-    @Test
-    public void testExactDataPoints() {
-        // Test exact matches from the CSV (with HOOD_OFFSET applied)
-        // First point: 540,34,0.1 -> Hood = 0.1 + 0.25 = 0.35
-        IShooterPredictor.ShooterParams params1 = lookup.predict(540);
-        assertEquals("RPS at 540mm should be 34", 34.0, params1.rps, 0.01);
-        assertEquals("Hood at 540mm should be 0.1 + offset", 0.1 + HOOD_OFFSET, params1.hoodPosition, 0.01);
-
-        // Middle point: 1955,41,0.55 -> Hood = 0.55 + 0.25 = 0.8
-        IShooterPredictor.ShooterParams params2 = lookup.predict(1955);
-        assertEquals("RPS at 1955mm should be 41", 41.0, params2.rps, 0.01);
-        assertEquals("Hood at 1955mm should be 0.55 + offset", 0.55 + HOOD_OFFSET, params2.hoodPosition, 0.01);
-
-        // Last point: 3547,52,0.55 -> Hood = 0.55 + 0.25 = 0.8
-        IShooterPredictor.ShooterParams params3 = lookup.predict(3547);
-        assertEquals("RPS at 3547mm should be 52", 52.0, params3.rps, 0.01);
-        assertEquals("Hood at 3547mm should be 0.55 + offset", 0.55 + HOOD_OFFSET, params3.hoodPosition, 0.01);
-    }
-
-    @Test
-    public void testLinearInterpolation() {
-        // Test interpolation between two points
-        // Between 540 (RPS=34, Hood=0.1) and 682 (RPS=34, Hood=0.31)
-        // Distance = 540 + (682-540)/2 = 611
-        IShooterPredictor.ShooterParams params = lookup.predict(611);
-
-        // t = (611 - 540) / (682 - 540) = 71/142 = 0.5
-        // RPS = 34 + 0.5 * (34 - 34) = 34
-        // Hood = 0.1 + 0.5 * (0.31 - 0.1) = 0.205, then + 0.25 offset = 0.455
-        assertEquals("RPS at 611mm should be 34", 34.0, params.rps, 0.01);
-        assertEquals("Hood at 611mm should be ~0.205 + offset", 0.205 + HOOD_OFFSET, params.hoodPosition, 0.01);
-
-        System.out.println("Interpolated at 611mm: " + params);
-    }
-
-    @Test
-    public void testEdgeCases() {
-        // Test below minimum distance (should return first point with offset)
-        // First point: 540mm, RPS=34, Hood=0.1 -> 0.1 + 0.25 = 0.35
-        IShooterPredictor.ShooterParams params1 = lookup.predict(100);
-        assertEquals("RPS below min should be 34", 34.0, params1.rps, 0.01);
-        assertEquals("Hood below min should be 0.1 + offset", 0.1 + HOOD_OFFSET, params1.hoodPosition, 0.01);
-
-        // Test above maximum distance (should return last point with offset)
-        // Last point: 3547mm, RPS=52, Hood=0.55 -> 0.55 + 0.25 = 0.8
-        IShooterPredictor.ShooterParams params2 = lookup.predict(5000);
-        assertEquals("RPS above max should be 52", 52.0, params2.rps, 0.01);
-        assertEquals("Hood above max should be 0.55 + offset", 0.55 + HOOD_OFFSET, params2.hoodPosition, 0.01);
-
-        System.out.println("Below min (100mm): " + params1);
-        System.out.println("Above max (5000mm): " + params2);
-    }
-
-    @Test
-    public void testMultipleDistances() {
-        // Test a range of distances to demonstrate the lookup
-        double[] testDistances = {540, 700, 1000, 1500, 2000, 2500, 3000, 3547};
-
-        System.out.println("\n╔════════════════════════════════════════════════════════════╗");
-        System.out.println("║        Shooter Manual Data Lookup - Test Results          ║");
-        System.out.println("║                  (with 0.25 hood offset)                   ║");
-        System.out.println("╠══════════════╦═════════════╦══════════════════════════════╣");
-        System.out.println("║ Distance (mm)║     RPS     ║      Hood Position           ║");
-        System.out.println("╠══════════════╬═════════════╬══════════════════════════════╣");
-
-        for (double distance : testDistances) {
-            IShooterPredictor.ShooterParams params = lookup.predict(distance);
-            System.out.printf("║ %12.0f ║ %11.2f ║ %28.4f ║%n",
-                    distance, params.rps, params.hoodPosition);
-
-            // Verify results are reasonable (with offset applied)
-            assertTrue("RPS should be positive", params.rps > 0);
-            assertTrue("Hood should be in valid range with offset",
-                    params.hoodPosition >= (0.1 + HOOD_OFFSET) && params.hoodPosition <= (0.55 + HOOD_OFFSET));
+    public void emptyTable_returnsSafeDefault() {
+        ShooterInterpolationDataLookup lookup = lookupFor();
+        assertEquals(0, lookup.getDataPointCount());
+        for (double d : new double[]{0, 1500, 10000}) {
+            assertParams(ShooterInterpolationConfig.DEFAULT_RPS, ShooterInterpolationConfig.MIN_HOOD, lookup.predict(d));
         }
-
-        System.out.println("╚══════════════╩═════════════╩══════════════════════════════╝\n");
     }
 
     @Test
-    public void testInterpolationAccuracy() {
-        // Test that interpolation is truly linear
-        // Between 1580 (RPS=38, Hood=0.55) and 1698 (RPS=39, Hood=0.55)
+    public void emptyTable_appliesDriverOffsets() {
+        ShooterInterpolationConfig.rpsOffset = 2;
+        ShooterInterpolationConfig.hoodOffset = 0.01;
+        ShooterInterpolationDataLookup lookup = lookupFor();
+        assertParams(ShooterInterpolationConfig.DEFAULT_RPS + 2,
+                ShooterInterpolationConfig.MIN_HOOD + ShooterInterpolationConfig.HOOD_INIT_OFFSET + 0.01, lookup.predict(1500));
+    }
 
-        double d1 = 1580, rps1 = 38, hood1 = 0.55;
-        double d2 = 1698, rps2 = 39, hood2 = 0.55;
-
-        // Test at 25%, 50%, 75% between the points
-        double[] percentages = {0.25, 0.5, 0.75};
-
-        for (double pct : percentages) {
-            double testDistance = d1 + pct * (d2 - d1);
-            double expectedRPS = rps1 + pct * (rps2 - rps1);
-            double expectedHood = hood1 + pct * (hood2 - hood1) + HOOD_OFFSET; // Add offset
-
-            IShooterPredictor.ShooterParams params = lookup.predict(testDistance);
-
-            assertEquals("RPS should match linear interpolation at " + (pct*100) + "%",
-                    expectedRPS, params.rps, 0.001);
-            assertEquals("Hood should match linear interpolation at " + (pct*100) + "% (with offset)",
-                    expectedHood, params.hoodPosition, 0.001);
-
-            System.out.printf("At %.0f%% between points (%.0fmm): RPS=%.2f, Hood=%.4f%n",
-                    pct * 100, testDistance, params.rps, params.hoodPosition);
+    @Test
+    public void oneRow_returnsThatRowForAnyDistance() {
+        ShooterInterpolationDataLookup lookup = lookupFor(1500, 40, HOOD_A);
+        for (double d : new double[]{0, 1500, 10000}) {
+            assertParams(40, HOOD_A, lookup.predict(d));
         }
+    }
+
+    @Test
+    public void exactRows_returnThoseRows() {
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        assertParams(40, HOOD_A, lookup.predict(1000));
+        assertParams(50, HOOD_B, lookup.predict(2000));
+        assertParams(60, HOOD_C, lookup.predict(3000));
+    }
+
+    @Test
+    public void twoRows_interpolateLinearly() {
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B);
+        assertParams(42.5, HOOD_A + 0.25 * (HOOD_B - HOOD_A), lookup.predict(1250));
+        assertParams(45, (HOOD_A + HOOD_B) / 2, lookup.predict(1500));
+    }
+
+    @Test
+    public void threeRows_interpolateWithinTheRightSegment() {
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        assertParams(45, (HOOD_A + HOOD_B) / 2, lookup.predict(1500));
+        assertParams(57.5, HOOD_B + 0.75 * (HOOD_C - HOOD_B), lookup.predict(2750));
+    }
+
+    @Test
+    public void aboveMaximum_returnsLastRow() {
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        assertParams(60, HOOD_C, lookup.predict(5000));
+    }
+
+    @Test
+    public void belowMinimum_returnsFirstRow() {
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        assertParams(40, HOOD_A, lookup.predict(100));
+    }
+
+    @Test
+    public void constructingTwice_doesNotDuplicateRows() {
+        lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B);
+        ShooterInterpolationDataLookup second = new ShooterInterpolationDataLookup();
+        assertEquals(2, second.getDataPointCount());
     }
 }

@@ -153,10 +153,10 @@
 ////            }
 //
 //            if (gamepad1.right_stick_y != 0) {
-//                intake.getIntakeMotor().setPower(-gamepad1.right_stick_y);
+//                intake.run(-gamepad1.right_stick_y);
 //                stopper.getStopper().setPosition(0.55);
 //            } else if (gamepad1.right_stick_button) {
-//                intake.getIntakeMotor().setPower(0);
+//                intake.stop();
 //            }
 //
 //            if (gamepad1.a) {

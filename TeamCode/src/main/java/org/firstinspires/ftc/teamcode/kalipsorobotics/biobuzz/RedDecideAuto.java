@@ -266,7 +266,7 @@ public class RedDecideAuto extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.TRIM_DEG = 0;
         TurretConfig.X_INIT_SETUP_MM = firstTurretTarget().getX(); // the turret starts aimed at the first Cell
         TurretConfig.Y_INIT_SETUP_MM = firstTurretTarget().getY();
     }

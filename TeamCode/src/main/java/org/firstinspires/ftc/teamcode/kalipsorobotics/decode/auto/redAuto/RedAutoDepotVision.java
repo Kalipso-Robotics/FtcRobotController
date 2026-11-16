@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.DepotRoundTrip;
@@ -19,7 +20,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
@@ -35,6 +35,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionManager;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
 
+@Disabled
 @Autonomous
 public class RedAutoDepotVision extends KOpMode {
 
@@ -50,7 +51,6 @@ public class RedAutoDepotVision extends KOpMode {
     private Shooter shooter;
     private Intake intake;
     private Stopper stopper;
-    private Tilter tilter;
     private Turret turret;
     private TurretAutoAlign turretAutoAlign;
     private ShooterRun shooterRun;
@@ -65,7 +65,7 @@ public class RedAutoDepotVision extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.TRIM_DEG = 0;
     }
 
     @Override
@@ -87,7 +87,6 @@ public class RedAutoDepotVision extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        tilter = new Tilter(opModeUtilities);
         shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
         shooterRun.setShooterRunMode(ShooterRunMode.STOP);
 
@@ -213,8 +212,6 @@ public class RedAutoDepotVision extends KOpMode {
         autoDepot.addAction(park);
 
         KLog.d("auto", "-------------DEPOT AUTO VISION STARTED-------------");
-        tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
-        tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
 
         waitForStart();

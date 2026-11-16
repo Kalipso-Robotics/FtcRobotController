@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -89,11 +88,7 @@ public class ShootAllAction extends KActionSet {
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
 
-//        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
-//        activateBraking.setName("ActivateBraking");
-//        this.addAction(activateBraking);
-
-        intake.getIntakeMotor().setPower(0.2);
+        intake.run(0.2);
 
 
         shooterReady = new ShooterReady(shooterRun);
@@ -124,12 +119,6 @@ public class ShootAllAction extends KActionSet {
         resetOdometryToPosition.setName("resetOdometryToPosition");
         resetOdometryToPosition.setDependentActions(pushBall);
         this.addAction(resetOdometryToPosition);
-
-
-//        ReleaseBraking releaseBraking = new ReleaseBraking(driveBrake);
-//        releaseBraking.setName("ReleaseBraking");
-//        releaseBraking.setDependentActions(pushBall);
-//        this.addAction(releaseBraking);
 
     }
 

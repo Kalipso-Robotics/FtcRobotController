@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -24,7 +23,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+@Disabled
 @Autonomous
 public class RedAutoNearRampThirdSpike extends KOpMode {
 //    public static final int WAIT_AT_GATE_TIME_MS = 500;
@@ -53,7 +54,6 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     Intake intake = null;
     Stopper stopper = null;
     Turret turret = null;
-    Tilter tilter = null;
     TurretAutoAlign turretAutoAlign = null;
     RoundTripAction trip0 = null;
     RoundTripAction trip1 = null;
@@ -70,7 +70,6 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = (int) -Math.round((TurretConfig.TICKS_PER_ROTATION * TurretConfig.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
 
     }
 
@@ -95,7 +94,6 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        tilter = new Tilter(opModeUtilities);
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
@@ -172,8 +170,6 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
             setAutoDelayAction.updateCheckDone();
         }
         KLog.d("auto", "--------------NEAR AUTO STARTED-------------");
-        tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
-        tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         waitForStart();
         while (opModeIsActive()) {

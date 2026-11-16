@@ -48,7 +48,7 @@ import java.util.function.DoubleSupplier;
  *
  * // Turret: wraps the shortest way around, static friction breaks stiction near the target.
  * PIDFController turret = PIDFController.turret("turret", kP, kI, kD, kS)
- *         .continuousInput(-TICKS_PER_ROTATION / 2, TICKS_PER_ROTATION / 2)
+ *         .continuousInput(-ticksPerRotation / 2, ticksPerRotation / 2)
  *         .build();
  *
  * // Drivetrain heading in radians.

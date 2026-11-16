@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.BeamBreakConfig;
+
 /**
  * An immutable snapshot of what the beam breaks saw on one update, published to SharedData so
  * anything that cares about the ball count can subscribe without holding the sensors.
@@ -10,7 +12,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak;
  * another thread. Occupancy is packed into bitmasks so a snapshot costs one small allocation per
  * loop and the accessors allocate nothing.
  *
- * Instances come from {@link BeamBreakArray#snapshot()}; the rest of the robot only reads them.
+ * Instances come from {@link BeamBreakArray#getSnapshot()}; the rest of the robot only reads them.
+ * Positions are indices into the array's sensor list, 0 at the A end.
  */
 public final class BeamBreakData {
 
@@ -20,10 +23,12 @@ public final class BeamBreakData {
      * mistake "we have not looked yet" for "there are no balls".
      */
     public static final BeamBreakData UNKNOWN =
-            new BeamBreakData(0, 0, 0, 0, 0, true, false, false, 0);
+            new BeamBreakData(0, 0, BeamBreakConfig.CAPACITY, 0, 0, 0, 0, true, false, false, 0);
 
     private final int count;
     private final int measuredCount;
+    private final int capacity;
+    private final int sensorCount;
     private final int blockedMask;
     private final int measuredMask;
     private final int correctionCount;
@@ -32,11 +37,13 @@ public final class BeamBreakData {
     private final boolean reliable;
     private final long timestampMs;
 
-    BeamBreakData(int count, int measuredCount, int blockedMask, int measuredMask,
+    BeamBreakData(int count, int measuredCount, int capacity, int sensorCount, int blockedMask, int measuredMask,
                   int correctionCount, boolean patternPlausible, boolean settling,
                   boolean reliable, long timestampMs) {
         this.count = count;
         this.measuredCount = measuredCount;
+        this.capacity = capacity;
+        this.sensorCount = sensorCount;
         this.blockedMask = blockedMask;
         this.measuredMask = measuredMask;
         this.correctionCount = correctionCount;
@@ -57,26 +64,30 @@ public final class BeamBreakData {
     }
 
     public int getCapacity() {
-        return BeamBreakPosition.COUNT;
+        return capacity;
+    }
+
+    public int getSensorCount() {
+        return sensorCount;
     }
 
     /** Occupancy at one position, after the plausibility pass. */
-    public boolean isBlocked(BeamBreakPosition position) {
-        return (blockedMask & (1 << position.index())) != 0;
+    public boolean isBlocked(int index) {
+        return (blockedMask & (1 << index)) != 0;
     }
 
     /** Occupancy at one position straight from its debounced sensor, uncorrected. */
-    public boolean isMeasuredBlocked(BeamBreakPosition position) {
-        return (measuredMask & (1 << position.index())) != 0;
+    public boolean isMeasuredBlocked(int index) {
+        return (measuredMask & (1 << index)) != 0;
     }
 
     /** True when this position read clear but was counted as a ball by the plausibility pass. */
-    public boolean isInferredBlocked(BeamBreakPosition position) {
-        return isBlocked(position) && !isMeasuredBlocked(position);
+    public boolean isInferredBlocked(int index) {
+        return isBlocked(index) && !isMeasuredBlocked(index);
     }
 
     public boolean isFull() {
-        return count >= BeamBreakPosition.COUNT;
+        return count >= capacity;
     }
 
     public boolean isEmpty() {
@@ -135,12 +146,12 @@ public final class BeamBreakData {
      * by the plausibility pass, {@code .} clear.
      */
     public String getOccupancyString() {
-        StringBuilder builder = new StringBuilder(BeamBreakPosition.COUNT + 2);
+        StringBuilder builder = new StringBuilder(sensorCount + 2);
         builder.append('[');
-        for (BeamBreakPosition position : BeamBreakPosition.values()) {
-            if (isMeasuredBlocked(position)) {
+        for (int index = 0; index < sensorCount; index++) {
+            if (isMeasuredBlocked(index)) {
                 builder.append('X');
-            } else if (isBlocked(position)) {
+            } else if (isBlocked(index)) {
                 builder.append('+');
             } else {
                 builder.append('.');

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
 public class StopperCalibration extends KOpMode {
+    public static final String TAG = "Calibration_Stopper";
 
     private static final double POSITION_INCREMENT = 0.01;
 
@@ -43,13 +44,16 @@ public class StopperCalibration extends KOpMode {
             }
 
             if (kGamePad2.isRightTriggerPressed()) {
-                intake.getIntakeMotor().setPower(1);
+                intake.run(1);
             }  else {
-                intake.getIntakeMotor().setPower(0);
+                intake.stop();
             }
 
 
-            KLog.d("stopperPosition", "stopperPosition" + stopperPosition);
+            if (KLog.isDebug()) {
+                double loggedPosition = stopperPosition;
+                KLog.d(TAG, () -> "stopperPos=" + loggedPosition);
+            }
             telemetry.addData("stopperPosition", stopperPosition); //0.11 0.51 0.91
             telemetry.update();
         }

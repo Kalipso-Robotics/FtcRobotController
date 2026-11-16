@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.DEFAULT_VOLTAGE;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.PID.PIDFController;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.CalculateTickPer;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Provides smart power ramping to achieve target RPS quickly
  */
 public class KMotor {
+    private static final String TAG = "Robot_KMotor";
     private final DcMotorEx motor;
 
     // RPS tracking
@@ -107,25 +109,22 @@ public class KMotor {
         double currentRPS = getRPS();
 
         double rawPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
-        double newPower = rawPower;
         double voltage = SharedData.getVoltage();
-//        if (!(Math.abs(voltage) < 0.000000001)) {
-//            newPower = clampPower(rawPower * (DEFAULT_VOLTAGE / voltage));
-//        }
-
-        KLog.d("VoltageCompensation", () -> "Raw Power: " + rawPower +
-                " Compensated Power: " + newPower +
-                " Current Voltage: " + voltage
-                );
-        // Set new power
+        // Scale power up as the battery sags so the same target RPS gets the same effective power.
+        // Skipped when no voltage has been read yet (near zero) to avoid dividing by zero.
+        double newPower = rawPower;
+        if (ShooterConfig.USE_VOLTAGE_COMPENSATION && !(Math.abs(voltage) < 0.000000001)) {
+            newPower = clampPower(rawPower * (DEFAULT_VOLTAGE / voltage));
+        }
         motor.setPower(newPower);
-        KLog.d("Shooter_Power", () -> "Power" + newPower);
 
-        // Log for debugging
-        KLog.d("KMotor", () -> String.format(
-            "Target: %.2f RPS, Current: %.2f RPS, Error: %.2f, Power: %.3f, MinPower: %.3f, MaxPower: %.3f",
-            targetRPS, currentRPS, (targetRPS - currentRPS), newPower, 0.0, MAX_POWER
-        ));
+        if (KLog.isDebug()) {
+            double power = newPower;
+            KLog.d(TAG, () -> String.format(
+                    "event=goToRps motor=%s targetRps=%.2f currentRps=%.2f error=%.2f rawPower=%.3f power=%.3f voltage=%.2f compensation=%b",
+                    motor.getDeviceName(), targetRPS, currentRPS, (targetRPS - currentRPS), rawPower, power, voltage,
+                    ShooterConfig.USE_VOLTAGE_COMPENSATION));
+        }
         return currentRPS;
     }
 

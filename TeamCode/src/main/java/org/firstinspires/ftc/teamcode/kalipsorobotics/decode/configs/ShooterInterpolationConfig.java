@@ -12,7 +12,17 @@ public class ShooterInterpolationConfig {
     public final static double MIN_HOOD = 0.1284; //0.72 old hood
     public final static double MAX_HOOD = 0.3; // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5;
-    public static final double MAX_RPS = 73;
+    // One motor now spins 6 flywheels + 4 weights: the ceiling is about 1/kf (~87 RPS loaded), and the
+    // PIDF needs headroom to recover between balls and under NECTAR voltage sag. Shooter clamps every target to this.
+    public static final double MAX_RPS = 70; // TODO-measure
+    // Used when shooterData is empty so the shooter still spins to something sane.
+    public static final double DEFAULT_RPS = 40; // TODO-measure
+
+    // Per-ball-type offsets. Unused until the robot can tell POLLEN from NECTAR.
+    public static double POLLEN_RPS_OFFSET = 0;
+    public static double POLLEN_HOOD_OFFSET = 0;
+    public static double NECTAR_RPS_OFFSET = 0;
+    public static double NECTAR_HOOD_OFFSET = 0;
 
     public static final double NEAR_SHOOT_RPS = 36.6;
     public static final int FAR_DISTANCE = 2760;
@@ -45,38 +55,9 @@ public class ShooterInterpolationConfig {
     */
 
     static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate; //0.31754;
-    private static final double rpsTune = 0.25;
     public static final int BETWEEN_FAR_NEAR_TIP = 3240;
+    // Rows of: distanceMM, rps, hoodPosition (sorted by distance). Empty until measured on the BIOBUZZ robot;
+    // ShooterInterpolationDataLookup returns DEFAULT_RPS / MIN_HOOD while it is empty.
     public static double[] shooterData = {
-            810, 45.4 + rpsTune, MIN_HOOD,
-            1050, 45.4 + rpsTune, compensatedMaxHood - 0.085,
-            1310, 47.7 + rpsTune, compensatedMaxHood - 0.085, //roughly first shot for near auto
-            1518, 49.6 + rpsTune, compensatedMaxHood - 0.05,
-            1705, 51.6 + rpsTune, compensatedMaxHood - 0.05,
-            1898, 52.8 + rpsTune, compensatedMaxHood - 0.02,
-            2075, 54.7 + rpsTune, compensatedMaxHood,
-            2244, 56.6 + rpsTune, compensatedMaxHood,
-            2417, 57.6 + rpsTune, compensatedMaxHood,
-            2561, 60 + rpsTune, compensatedMaxHood,
-            2769, 61.8 + rpsTune, compensatedMaxHood,
-            2974, 63.7 + rpsTune, compensatedMaxHood,
-            3154, 65 + rpsTune, compensatedMaxHood,
-            BETWEEN_FAR_NEAR_TIP, 66.2 + rpsTune + 0.2, compensatedMaxHood,
-            3460, 67.3 + rpsTune + 0.2, compensatedMaxHood,
-            3700, 70.0 + rpsTune + 0.2, compensatedMaxHood,
-            4202, MAX_RPS + rpsTune + 0.2, compensatedMaxHood,
     };
-
-
-    public static double[] getMinValue() {
-        return new double[] {shooterData[1], shooterData[2]};
-    }
-    public static double[] getFarShoot() {
-        return new double[] {FAR_SHOOT_RPS, MAX_HOOD};
-    }
-    public static double[] getNearValue() {
-        return new double[] {NEAR_SHOOT_RPS, MAX_HOOD};
-    }
-
-
 }

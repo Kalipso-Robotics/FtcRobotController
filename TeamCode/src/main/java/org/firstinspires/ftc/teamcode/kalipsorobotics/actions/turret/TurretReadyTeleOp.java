@@ -2,13 +2,12 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class TurretReadyTeleOp extends Action {
+    public static final String TAG = TurretReadyAuto.TAG;
+
     private final double maxTimeoutMS;
     private final ElapsedTime timeoutTimer;
     private static final double DEFAULT_MAX_TIME_OUT_MS = 4000;
@@ -22,7 +21,6 @@ public class TurretReadyTeleOp extends Action {
     @Override
     protected void update() {
         if (isDone) {
-            KLog.d(this.getName(), () -> "time to done: " + timeoutTimer.milliseconds());
             return;
         }
 
@@ -30,12 +28,12 @@ public class TurretReadyTeleOp extends Action {
             timeoutTimer.reset();
             hasStarted = true;
             turretAutoAlignTeleop.updateCheckDone();
-            KLog.d(this.getName(), () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
+            KLog.d(TAG, () -> "event=start name=" + getName());
         }
 
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {
-            KLog.d(this.getName(), () -> "Turret TIMEOUT in " + maxTimeoutMS + " ms");
-            KLog.d("TurretReady_ActionTime", () -> "ActionTime: " + timeoutTimer.milliseconds() + " ms");
+            KLog.d(TAG, () -> String.format("event=timeout name=%s timeMs=%.0f deltaDeg=%.1f",
+                    getName(), timeoutTimer.milliseconds(), turretAutoAlignTeleop.getDeltaAngleDeg()));
             isDone = true;
             return;
         }
@@ -45,10 +43,10 @@ public class TurretReadyTeleOp extends Action {
             if (!SOTM.isActive()) {
                 turretAutoAlignTeleop.stop();
             }
-            KLog.d(this.getName(), () -> "TurretReady is done, turret is within range " + turretAutoAlignTeleop.getTurret().getTurretMotor().getCurrentPosition() + "ticks, " +
-                    "Target Ticks: " + turretAutoAlignTeleop.getTargetTicks());
-            KLog.d("ActionTime", () -> this.getName() + " done in " + timeoutTimer.milliseconds() + " ms");
+            KLog.d(TAG, () -> String.format("event=done name=%s timeMs=%.0f targetDeg=%.1f",
+                    getName(), timeoutTimer.milliseconds(), Math.toDegrees(turretAutoAlignTeleop.getTargetAngleRad())));
         } else if (SOTM.isActive()) {
+            KLog.d(TAG, () -> "event=done name=" + getName() + " reason=sotmActive");
             isDone = true;
         }
     }

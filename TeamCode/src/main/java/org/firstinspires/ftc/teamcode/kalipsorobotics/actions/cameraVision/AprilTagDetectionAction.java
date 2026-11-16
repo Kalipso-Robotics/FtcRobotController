@@ -215,7 +215,7 @@ public class AprilTagDetectionAction extends Action {
      */
     public Position calculateGlobalPosition(TagObservation observation, Position tagFieldPos) {
         Position robotRelRobotPos = new Position(0, 0, 0);
-        double turretAngle = turret.getCurrentAngleRad();
+        double turretAngle = turret.getAngleRad(); // last commanded angle, no encoder
 
         Position robotRelTurretPos = robotRelRobotPos.toNewFrame(new Position(ROBOT_REL_TURRET_POINT.getX(), ROBOT_REL_TURRET_POINT.getY(), -turretAngle));
         Position robotRelCamPos = robotRelTurretPos.toNewFrame(cameraGimbal.getMountRelCamPos());

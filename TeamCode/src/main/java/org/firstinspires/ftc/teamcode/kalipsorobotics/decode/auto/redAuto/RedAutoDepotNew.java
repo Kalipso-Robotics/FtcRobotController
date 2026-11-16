@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.DepotRoundTrip;
@@ -17,7 +18,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
+@Disabled
 @Autonomous
 public class RedAutoDepotNew extends KOpMode {
     KActionSet autoDepot;
@@ -43,7 +44,6 @@ public class RedAutoDepotNew extends KOpMode {
     Intake intake = null;
     Stopper stopper = null;
     Turret turret = null;
-    Tilter tilter = null;
     DepotRoundTrip trip1 = null;
     RoundTripAction trip0 = null;
     DepotRoundTrip trip2 = null;
@@ -59,7 +59,7 @@ public class RedAutoDepotNew extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.TRIM_DEG = 0;
     }
 
     @Override
@@ -87,7 +87,6 @@ public class RedAutoDepotNew extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        tilter = new Tilter(opModeUtilities);
         shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
         shooterRun.setShooterRunMode(ShooterRunMode.STOP);
         KLog.d("RedAutoDepot-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
@@ -193,8 +192,6 @@ public class RedAutoDepotNew extends KOpMode {
         KLog.d("auto", "-------------" +
                 "-DEPOT AUTO STARTED-------------");
         KLog.d("RedAutoDepot-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
-        tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
-        tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         // Custom wait-for-start: same idle-until-pressed behavior as waitForStart(), but also
         // drives trip1's moveToDepot precompute (path injection/smoothing) each spin so that

@@ -130,18 +130,7 @@ public class BeamBreakSensor {
     }
 
     public double getThresholdVolts() {
-        switch (position) {
-            case A_OUTER:
-                return BeamBreakConfig.THRESHOLD_V_A_OUTER;
-            case A_INNER:
-                return BeamBreakConfig.THRESHOLD_V_A_INNER;
-            case B_INNER:
-                return BeamBreakConfig.THRESHOLD_V_B_INNER;
-            case B_OUTER:
-                return BeamBreakConfig.THRESHOLD_V_B_OUTER;
-            default:
-                throw new IllegalStateException("No threshold configured for " + position);
-        }
+        return position.getThresholdV();
     }
 
     /** Debounced state - the one to use for counting and for any robot logic. */
@@ -228,7 +217,7 @@ public class BeamBreakSensor {
     @Override
     public String toString() {
         return String.format("%s: %.2fV raw=%s filtered=%s%s",
-                position.shortLabel(), lastVoltage, rawBlocked, filteredBlocked,
+                position.getDeviceName(), lastVoltage, rawBlocked, filteredBlocked,
                 isFaulted() ? " FAULT" : "");
     }
 }

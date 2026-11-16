@@ -30,7 +30,6 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastIntakeAction = null;
     protected Action lastMoveAction = null;
     protected Action lastShooterAction = null;
-    protected Action lastTiltAction = null;
     protected Action lastStopperAction = null;
     protected Action lastZeroAction = null;
     protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
@@ -131,9 +130,6 @@ public abstract class KOpMode extends LinearOpMode {
     protected void setLastShooterAction(Action action) {
         lastShooterAction = action;
     }
-    protected void setLastTiltAction(Action action) {
-        lastTiltAction = action;
-    }
     protected void setLastStopperAction(Action action) {
         lastStopperAction = action;
     }
@@ -168,10 +164,6 @@ public abstract class KOpMode extends LinearOpMode {
         if (lastStopperAction != null && lastStopperAction != lastIntakeAction && lastStopperAction != lastMoveAction && lastStopperAction != lastShooterAction) {
             KLog.d("KOpMode", "lastStopperAction updateCheckDone");
             lastStopperAction.updateCheckDone();
-        }
-
-        if (lastTiltAction != null) {
-            lastTiltAction.updateCheckDone();
         }
 
         if (shooterRun != null) {

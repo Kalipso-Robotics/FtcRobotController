@@ -7,26 +7,21 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Stopper {
+    public static final String TAG = "Robot_Stopper";
 
     private final OpModeUtilities opModeUtilities;
 
     private final KServo stopper;
 
     public Stopper(OpModeUtilities opModeUtilities) {
-        KLog.d("Stopper", "Constructor called - starting initialization");
         this.opModeUtilities = opModeUtilities;
-//        CRServo kickerRightHW = opModeUtilities.getHardwareMap().crservo.get("pusherRight");
-//        CRServo kickerLeftHW = opModeUtilities.getHardwareMap().crservo.get("pusherLeft");
         try {
             Servo stopper = opModeUtilities.getHardwareMap().servo.get("stopper");
-            KLog.d("Stopper", () -> "Hardware servo retrieved: " + (stopper != null ? "SUCCESS" : "NULL"));
-//        this.kickerLeft = new KCRServo(kickerLeftHW,false);
-//        this.kickerRight = new KCRServo(kickerRightHW,true);
             this.stopper = new KServo(stopper);
             this.stopper.setTargetPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-            KLog.d("Stopper", "Constructor completed successfully");
+            KLog.d(TAG, "event=init stopper=closed");
         } catch (Exception e) {
-            KLog.e("Stopper", "ERROR in constructor: " + e.getMessage());
+            KLog.e(TAG, "event=initFailed error=" + e.getMessage());
             throw e;
         }
     }
@@ -35,6 +30,21 @@ public class Stopper {
 
     public void setPosition(double target) {
         stopper.setPosition(target);
+    }
+
+    public void open() {
+        moveTo(ModuleConfig.STOPPER_SERVO_OPEN_POS, "open");
+    }
+
+    public void close() {
+        moveTo(ModuleConfig.STOPPER_SERVO_CLOSED_POS, "close");
+    }
+
+    private void moveTo(double position, String event) {
+        if (stopper.getTargetPosition() != position) {
+            KLog.d(TAG, () -> "event=" + event);
+        }
+        stopper.setTargetPosition(position);
     }
 
 }

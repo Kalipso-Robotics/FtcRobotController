@@ -12,8 +12,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.April
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveController;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.FieldOrientedDriveAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltUp;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.TiltDown;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReverse;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
@@ -29,11 +27,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -58,7 +54,6 @@ public class TeleOp extends KOpMode {
     private Intake intake = null;
     private Turret turret = null;
     private Stopper stopper = null;
-    private Tilter tilter = null;
     private Odometry odometry = null;
     private SOTM sotm = null;
 
@@ -67,8 +62,6 @@ public class TeleOp extends KOpMode {
 
     PurePursuitAction parkAction = null;
     PurePursuitAction leverAction = null;
-    TiltUp tiltUp = null;
-    TiltDown tiltDown = null;
 
 
     KServoAutoAction openStopper = null;
@@ -105,8 +98,6 @@ public class TeleOp extends KOpMode {
     private boolean setTurretOffset0Pressed;
     private boolean parkButtonPressed;
     private boolean leverButtonPressed;
-    private boolean tiltDownPressed;
-    private boolean tiltUpPressed;
     private boolean enableLimelightZeroing = true;
 
     private int shootCount = 0;
@@ -116,11 +107,6 @@ public class TeleOp extends KOpMode {
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = SharedData.getAllianceColor();
-        TurretConfig.kP = TurretConfig.kP_teleop;
-        TurretConfig.kI = TurretConfig.kI_teleop;
-        TurretConfig.kD = TurretConfig.kD_teleop;
-        TurretConfig.kF = TurretConfig.kF_teleop;
-        TurretConfig.kS = TurretConfig.kS_teleop;
     }
 
     @Override
@@ -139,7 +125,6 @@ public class TeleOp extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        tilter = new Tilter(opModeUtilities);
 
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         sleep(1000);
@@ -179,8 +164,6 @@ public class TeleOp extends KOpMode {
         KLog.d("teleop", "--------------TELEOP STARTED-------------");
         KLog.d("TeleOp-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
-        tilter.setTilterLeftPosition(ModuleConfig.TILT_LEFT_UP_POS);
-        tilter.setTilterRightPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         waitForStart();
         telemetry.setMsTransmissionInterval(200);
         sleep(50);
@@ -216,9 +199,6 @@ public class TeleOp extends KOpMode {
             leverButtonPressed = kGamePad1.isButtonYFirstPressed();
 
             slowDrivePressed = kGamePad1.isRightBumperPressed();
-
-            tiltUpPressed = kGamePad1.isDpadDownFirstPressed();
-            tiltDownPressed = kGamePad1.isDpadUpFirstPressed();
 
             shootAllActionPressed = kGamePad1.isLeftBumperPressed();
             stopShooterPressed = kGamePad1.isLeftTriggerFirstPressed();
@@ -283,7 +263,7 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());
             telemetry.addData("Rps Offset ", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset ", "%.2f", ShooterInterpolationConfig.hoodOffset);
-            telemetry.addLine("Turret Offset " + turretAutoAlignTeleOp.getTicksOffset());
+            telemetry.addData("Turret Trim Deg ", "%.1f", TurretConfig.TRIM_DEG);
             telemetry.addLine("Turret Mode: " + turretAutoAlignTeleOp.getTurretRunMode());
             telemetry.addData("Delta Heading (Turret)", turretAutoAlignTeleOp.getDeltaAngleDeg());
             telemetry.addData("Delta RPS (Shooter)", shooterRun.getTargetRPS() - shooterRun.getCurrentRPS());
@@ -329,20 +309,6 @@ public class TeleOp extends KOpMode {
         } else if ((parkAction == null || parkAction.getIsDone()) && (leverAction == null || leverAction.getIsDone())) {
             driveTrain.setPower(0);
         }
-
-        if (tiltUpPressed) {
-            if (!isPending(tiltDown)) {
-                tiltUp = null;
-                tiltDown = new TiltDown(tilter);
-                setLastTiltAction(tiltDown);
-            }
-        } else if (tiltDownPressed) {
-            if (!isPending(tiltUp)) {
-                tiltDown = null;
-                tiltUp = new TiltUp(tilter);
-                setLastTiltAction(tiltUp);
-            }
-        }
     }
     private void handleTurret() {
         if (isPending(shootAllAction)) {
@@ -361,17 +327,19 @@ public class TeleOp extends KOpMode {
 
         //Manual
         if (kGamepad2IsDpadLeftFirstPressed) {
-            turretAutoAlignTeleOp.incrementTicksOffset(-(int) TurretConfig.TICKS_PER_DEGREE * 2);
+            TurretConfig.TRIM_DEG -= 2;
         } else if (kGamepad2IsDpadRightFirstPressed) {
-            turretAutoAlignTeleOp.incrementTicksOffset((int) TurretConfig.TICKS_PER_DEGREE * 2);
+            TurretConfig.TRIM_DEG += 2;
         }
 
         if (setTurretOffset0Pressed) {
-            turretAutoAlignTeleOp.setTicksOffset(0);
+            TurretConfig.TRIM_DEG = 0;
         }
 
 
-        KLog.d("TeleOp_Turret", () -> "Turret Power" + turret.turretMotor.getPower());
+        if (KLog.isDebug()) {
+            KLog.d("TeleOp_Turret", () -> "angleDeg=" + turret.getAngleDeg() + " trimDeg=" + TurretConfig.TRIM_DEG);
+        }
     }
 
     private void turnOnTurret() {

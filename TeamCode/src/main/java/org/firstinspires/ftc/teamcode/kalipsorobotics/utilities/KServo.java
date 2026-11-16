@@ -47,11 +47,16 @@ public class KServo {
         //0.5 * 300deg * 0.25sec/60deg
     }
 
+    /** Travel time estimate with the same safety margin setTargetPosition uses for isDone(). */
+    public double estimateFinishTimeMs(double currentPosition, double targetPosition) {
+        return estimateTimeMs(currentPosition, targetPosition) * 1.25;
+    }
+
     public void setTargetPosition(double position) {
         lastPosition = servo.getPosition();
         targetPosition = position;
         if (Math.abs(lastPosition - targetPosition) > 0.000001) {
-            estimatedFinishTime = estimateTimeMs(lastPosition, targetPosition) * 1.25;
+            estimatedFinishTime = estimateFinishTimeMs(lastPosition, targetPosition);
             startTime = System.currentTimeMillis();
             servo.setPosition(targetPosition);
         }

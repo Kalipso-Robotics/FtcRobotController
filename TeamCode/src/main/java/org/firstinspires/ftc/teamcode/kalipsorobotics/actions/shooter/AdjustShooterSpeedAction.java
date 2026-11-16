@@ -28,7 +28,7 @@ public class AdjustShooterSpeedAction extends Action {
         this.shooter = shooter;
         this.timeoutMS = timeoutMS;
         this.dropBelowThreshold = dropBelowThresholdPercent;
-        double currentPower = shooter.getShooter1().getPower();
+        double currentPower = shooter.getShooterMotor().getPower();
         this.motorDirection = (currentPower < 0) ? -1 : 1;
     }
 

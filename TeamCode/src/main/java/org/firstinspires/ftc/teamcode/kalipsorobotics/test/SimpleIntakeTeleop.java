@@ -48,10 +48,10 @@
 //
 //            // Intake control: run if either trigger is pressed
 //            if (rightTriggerPressed || leftTriggerPressed) {
-//                intake.getIntakeMotor().setPower(1.0);
+//                intake.run(1.0);
 //            } else {
 //                // Stop intake only when both triggers are released
-//                intake.getIntakeMotor().setPower(0.0);
+//                intake.stop();
 //            }
 //
 //            // Shooter control
@@ -72,7 +72,7 @@
 //            // Telemetry
 //            telemetry.addData("Right Trigger", rightTriggerPressed ? "PRESSED" : "Released");
 //            telemetry.addData("Left Trigger", leftTriggerPressed ? "PRESSED" : "Released");
-//            telemetry.addData("Intake Power", intake.getIntakeMotor().getPower());
+//            telemetry.addData("Intake Power", intake.getSide(BeamBreakPosition.IntakeSide.A).getPower());
 //            telemetry.addData("Shooter RPS", String.format("%.1f / %.1f", shooter.getRPS(), SHOOTER_RPS));
 //            telemetry.addData("Shooter Ready", shooter.isAtTargetRPS() ? "YES" : "Spinning up...");
 //            telemetry.addData("Stopper Position", stopper.getStopper().getPosition());
@@ -80,7 +80,7 @@
 //        }
 //
 //        // Stop motors when op mode ends
-//        intake.getIntakeMotor().setPower(0);
+//        intake.stop();
 //        shooter.stop();
 //    }
 //}

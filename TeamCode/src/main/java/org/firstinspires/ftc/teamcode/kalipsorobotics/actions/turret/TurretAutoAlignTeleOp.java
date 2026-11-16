@@ -1,87 +1,44 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign.computeTicksFromAngleRad;
-
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 public class TurretAutoAlignTeleOp extends Action {
+    public static final String TAG = TurretAutoAlign.TAG;
+
     OpModeUtilities opModeUtilities;
     Turret turret;
-    KMotor turretMotor;
     private TurretRunMode turretRunMode;
-    private double targetTicks;
-    private final double targetPower;
-    private final double DEFAULT_TOLERANCE_TICKS = (TurretConfig.TICKS_PER_DEGREE) * 2;
-    private double toleranceTicks = DEFAULT_TOLERANCE_TICKS;
+    private double targetAngleRad;
+    private double toleranceDeg = 2;
     private boolean isWithinRange = false;
-    private boolean aprilTagSeen = false;
 
-    private final double searchAngleDeg = 180;
-    private final boolean hasSearched = false;
-    double totalAngleWrap;
-    double lastLimit;
     Point targetPoint;
-    private boolean useOdometryAlign;
-    private double previousTotalAngle;
-    private double currentAngularVelocity;
-    private final ElapsedTime velocityTimer;
-    private boolean isFirstVelocityUpdate;
-    private final Position lastOdometryPos;
-    private int ticksOffset = 0;
-    private double prevTargetTicks;
-    private boolean shouldReadLimelight = false;
     private double deltaAngleDeg;
 
 
     public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
-        this.turretMotor = turret.getTurretMotor();
         this.dependentActions.add(new DoneStateAction());
         this.turretRunMode = TurretRunMode.STOP; // initial mode
-        this.targetTicks = 0;
-        this.targetPower = 0;
-        lastOdometryPos = new Position(0,0,0);
-        lastOdometryPos.reset(SharedData.getOdometryWheelIMUPosition());
+        this.targetAngleRad = 0;
         targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
-        this.velocityTimer = new ElapsedTime();
-        this.previousTotalAngle = 0;
-        this.currentAngularVelocity = 0;
-        this.isFirstVelocityUpdate = true;
-        this.shouldReadLimelight = true;
     }
 
+    /** STOP: always true. RUN_USING_ODOMETRY: servo finished its estimated travel last loop, and the new target is within tolerance of where it is. */
     public boolean isWithinRange() {
         return isWithinRange;
-    }
-
-    public void initBlocking() {
-        ElapsedTime timer = new ElapsedTime();
-        int count = 0;
-
-        while (timer.milliseconds() < 3000) {
-            count++;
-            if (timer.milliseconds() > 1000) {
-                this.updateCheckDone();
-            }
-        }
     }
 
     public Turret getTurret() {
@@ -97,8 +54,7 @@ public class TurretAutoAlignTeleOp extends Action {
 
         if (!hasStarted) {
             hasStarted = true;
-            velocityTimer.reset();
-            KLog.d("Turret_PID", () -> "PIDF constants " + turretMotor.getPIDFController());
+            KLog.d(TAG, () -> "event=start mode=" + turretRunMode);
         }
 
         switch (turretRunMode) {
@@ -106,119 +62,35 @@ public class TurretAutoAlignTeleOp extends Action {
                 turret.stop();
                 isWithinRange = true;
                 break;
-            case RUN_WITH_POWER:
-                turretMotor.setPower(targetPower);
-                isWithinRange = true;
-                break;
-            case RUN_USING_LIMELIGHT:
-                isWithinRange = false;
-                updateAlignToTarget();
-                break;
             case RUN_USING_ODOMETRY:
-                isWithinRange = false;
                 updateAlignToTarget();
                 break;
         }
-        KLog.d("Turret_MODE", () -> "CURRENT RUNNING MODE " + turretRunMode);
     }
 
     private void updateAlignToTarget() {
-        updateAngularVelocity();
-        aprilTagSeen = !SharedData.getLimelightRawPosition().isEmpty();
-
-        double currentAngleRad = turret.getCurrentAngleRad();
-//        double robotAngleRad = SharedData.getOdometryWheelIMUPosition().getTheta();
-//        double odoDesiredTurretAngle = MathFunctions.angleWrapRad(defaultBiasAngle -   robotAngleRad);
         Position currentPos = SharedData.peekOdometryWheelIMUPosition();
 
-        double odoTargetTicks = TurretAutoAlign.calculateTargetTicks(targetPoint, currentPos, ticksOffset);
-
-        if (turretRunMode == TurretRunMode.RUN_USING_ODOMETRY) {
-            targetTicks = odoTargetTicks;
-            SOTM.Solution sotm = SOTM.usableSolution();
-            if (sotm != null) {
-                targetTicks = calculateTargetTicks(sotm.aimHeadingRad, sotm.releaseHeadingRad);
-            }
-            KLog.d("TurretAutoAlignTeleOp_Odometry_Align", () -> "Target Ticks " + targetTicks + " Current Pos: " + currentPos);
-        } else if (turretRunMode == TurretRunMode.RUN_USING_LIMELIGHT) {
-            lastOdometryPos.reset(currentPos);
-            double limelightAngleRad;
-            if (aprilTagSeen) {
-                limelightAngleRad = SharedData.getLimelightRawPosition().getGoalAngleToCamRad();
-
-                double totalTurretAngle = currentAngleRad + limelightAngleRad;
-
-                double ticksOffsetRad = ticksOffset / TurretConfig.TICKS_PER_RADIAN;
-                totalTurretAngle += ticksOffsetRad;
-
-
-                totalAngleWrap = MathFunctions.angleWrapRadHysteresis(totalTurretAngle);
-                double currentTargetTicks = computeTicksFromAngleRad(totalAngleWrap);
-
-                if (shouldReadLimelight) {
-                    targetTicks = currentTargetTicks;
-                    prevTargetTicks = targetTicks;
-                    shouldReadLimelight = false;
-                }
-
-
-                double finalTotalTurretAngle = totalTurretAngle;
-                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", () ->
-                        "currentAngleRad: " + currentAngleRad +
-                                " totalTurretAngle " + finalTotalTurretAngle +
-                                " totalAngleWrap " + totalAngleWrap +
-                                " targetTicks " + targetTicks +
-                                " limelightAngle " + limelightAngleRad);
-
-// already gives reverse sign from LL bc your on the left side of april tag
-            } else {
-                KLog.d("TurretAutoAlignTeleOp_Limelight_Align", () -> "No April Tag Detected. Using Previous Ticks: " + prevTargetTicks);
-                targetTicks = prevTargetTicks;
-            }
-
-
-
-        } else {
-            KLog.d("TurretAutoAlign_AlignToTarget", () -> "isWithingRange: " + isWithinRange + " aprilTagSeen: " + aprilTagSeen + " useOdometryAlign " + useOdometryAlign);
-            turretMotor.setPower(0);
-            isWithinRange = true;
-            return;
+        targetAngleRad = TurretAutoAlign.calculateTargetAngleRad(targetPoint, currentPos, TurretConfig.TRIM_DEG);
+        SOTM.Solution sotm = SOTM.usableSolution();
+        if (sotm != null) {
+            targetAngleRad = TurretAutoAlign.calculateTargetAngleRad(sotm.aimHeadingRad, sotm.releaseHeadingRad, TurretConfig.TRIM_DEG);
         }
 
-        moveToTargetTicks();
-    }
+        // No encoder: the turret is where we last commanded it once its estimated travel is over.
+        boolean wasMoving = turret.isMoving();
+        deltaAngleDeg = Math.toDegrees(targetAngleRad) - turret.getAngleDeg();
+        turret.setAngleRad(targetAngleRad);
 
-    public double calculateTargetTicks(double targetAngleRad, double robotHeadingRad) {
-        return TurretAutoAlign.calculateTargetTicks(targetAngleRad, robotHeadingRad, ticksOffset);
-    }
-
-    private void moveToTargetTicks() {
-        int currentTicks = turretMotor.getCurrentPosition();
-        int error = (int) targetTicks - currentTicks;
-
-        deltaAngleDeg = error / TurretConfig.TICKS_PER_DEGREE;
-
-        if (Math.abs(error) < Math.abs(toleranceTicks)) {
-            isWithinRange = true;
-            shouldReadLimelight = true;
-            turret.stop();
-            KLog.d("Turret_PID", () -> String.format("IN_RANGE | Curr=%d Target=%d Err=%d", currentTicks, (int) targetTicks, error));
-        } else {
-            isWithinRange = false;
-            double pidOutput = turretMotor.getPIDFController().calculateFromError(error);
-            double feedforward = TurretConfig.kF * currentAngularVelocity;
-            double totalPower = Math.max(-1.0, Math.min(1.0, pidOutput + feedforward));
-
-            KLog.d("Turret_PID", () -> String.format("MOVING | Curr=%d Target=%d Err=%d | PID=%.3f FF=%.3f Power=%.3f",
-                    currentTicks, (int) targetTicks, error, pidOutput, feedforward, totalPower));
-
-            turretMotor.setPower(totalPower);
+        boolean wasWithinRange = isWithinRange;
+        isWithinRange = !wasMoving && Math.abs(deltaAngleDeg) < Math.abs(toleranceDeg);
+        if (isWithinRange != wasWithinRange) {
+            KLog.d(TAG, () -> String.format("event=%s targetDeg=%.1f deltaDeg=%.1f",
+                    isWithinRange ? "aligned" : "notAligned", Math.toDegrees(targetAngleRad), deltaAngleDeg));
         }
-        KLog.d("Turret_PID", () -> "Turret Delta Angle: " + deltaAngleDeg);
     }
 
     public void stop() {
-        KLog.d("Turret_STOP", "Teleop turret stop called");
         setTurretRunMode(TurretRunMode.STOP);
     }
 
@@ -227,6 +99,7 @@ public class TurretAutoAlignTeleOp extends Action {
         this.turretRunMode = turretRunMode;
 
         if (prevMode != turretRunMode) {
+            KLog.d(TAG, () -> "event=mode from=" + prevMode + " to=" + turretRunMode);
             update();
         }
 
@@ -236,56 +109,15 @@ public class TurretAutoAlignTeleOp extends Action {
         return this.turretRunMode;
     }
 
-    public double getTargetTicks() {
-        return targetTicks;
+    public double getTargetAngleRad() {
+        return targetAngleRad;
     }
 
     public void setToleranceDeg(double newToleranceDeg) {
-        toleranceTicks = newToleranceDeg * TurretConfig.TICKS_PER_DEGREE;
+        toleranceDeg = newToleranceDeg;
     }
 
-    private void updateAngularVelocity() {
-        Position currentPosition = SharedData.peekOdometryWheelIMUPosition();
-        double xToGoal = targetPoint.getX() - currentPosition.getX();
-        double yToGoal = targetPoint.getY() - currentPosition.getY();
-        double angleToGoal = Math.atan2(yToGoal, xToGoal);
-        double totalAngleToGoal = MathFunctions.angleWrapRad(angleToGoal - currentPosition.getTheta());
-
-        if (isFirstVelocityUpdate) {
-            previousTotalAngle = totalAngleToGoal;
-            currentAngularVelocity = 0;
-            velocityTimer.reset();
-            isFirstVelocityUpdate = false;
-        } else {
-            double deltaTime = velocityTimer.milliseconds();
-            if (deltaTime > 0) {
-                currentAngularVelocity = (totalAngleToGoal - previousTotalAngle) / deltaTime;
-                previousTotalAngle = totalAngleToGoal;
-                velocityTimer.reset();
-            }
-        }
-    }
-
-    public boolean getAlignWithOdometry() {
-        return useOdometryAlign;
-    }
-
-    public void setUseOdometryAlign(boolean useOdometryAlign) {
-        this.useOdometryAlign = useOdometryAlign;
-    }
-
-    public void incrementTicksOffset(int ticksOffset) {
-        this.ticksOffset += ticksOffset;
-        this.update();
-    }
-
-    public int getTicksOffset() {
-        return ticksOffset;
-    }
-    public void setTicksOffset(int ticksOffset) {
-        this.ticksOffset = ticksOffset;
-    }
-
+    /** Target angle minus where the turret was last commanded (includes any clamp shortfall). */
     public double getDeltaAngleDeg() {
         return deltaAngleDeg;
     }

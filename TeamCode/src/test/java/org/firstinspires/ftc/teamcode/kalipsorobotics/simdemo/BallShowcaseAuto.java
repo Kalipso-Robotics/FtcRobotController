@@ -56,7 +56,6 @@ public class BallShowcaseAuto extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0; // the turret starts facing straight ahead
         TurretConfig.X_INIT_SETUP_MM = FieldConfig.aTargetPoint.getX(); // the turret aims at the first Cell
         TurretConfig.Y_INIT_SETUP_MM = FieldConfig.aTargetPoint.getY();
     }

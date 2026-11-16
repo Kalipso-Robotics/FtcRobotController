@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.beambreak;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakArray;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
@@ -82,10 +81,6 @@ public class BeamBreakCountAction extends Action {
         return array.isEmpty();
     }
 
-    public boolean isBlocked(BeamBreakPosition position) {
-        return array.isBlocked(position);
-    }
-
     /** False when a sensor looks electrically broken - see BeamBreakArray.isCountReliable(). */
     public boolean isCountReliable() {
         return array.isCountReliable();
@@ -113,7 +108,7 @@ public class BeamBreakCountAction extends Action {
 
     /** Clears filter state, e.g. after a jam clear where you want the count reseeded. */
     public void resetFilters() {
-        KLog.d("BeamBreak", "Filters reset");
+        KLog.d(BeamBreakArray.TAG, "filtersReset=true");
         array.reset();
     }
 }

@@ -5,8 +5,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KS
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 public class IntakeFullAction extends KActionSet {
+    public static final String TAG = "Intaking_IntakeFullAction";
 
     private final RunIntakeTime runIntakeTime;
 
@@ -36,7 +38,8 @@ public class IntakeFullAction extends KActionSet {
             return;
         }
         this.setIsDone(true);
-        intake.getIntakeMotor().setPower(0);
+        intake.stop();
+        KLog.d(TAG, () -> "name=" + getName() + " event=stopAndSetDone");
     }
 }
 
