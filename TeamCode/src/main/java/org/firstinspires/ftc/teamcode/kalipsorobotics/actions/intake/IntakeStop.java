@@ -24,7 +24,7 @@ public class IntakeStop extends Action {
             return;
         }
         if (intake != null) {
-            intake.getIntakeMotor().setPower(0);
+            intake.getIntakeMotorFlower().setPower(0);
         }
         if (intakeFullAction != null) {
             intakeFullAction.stopAndSetDone();

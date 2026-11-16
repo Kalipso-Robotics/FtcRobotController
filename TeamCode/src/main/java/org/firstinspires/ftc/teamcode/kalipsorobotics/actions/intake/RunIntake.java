@@ -37,7 +37,7 @@ public class RunIntake extends Action {
     }
 
     public RunIntake(Intake intake) {
-        this(intake.getIntakeMotorEx(), 1);
+        this(intake.getIntakeMotorFlowerEx(), 1);
     }
 
     @Override

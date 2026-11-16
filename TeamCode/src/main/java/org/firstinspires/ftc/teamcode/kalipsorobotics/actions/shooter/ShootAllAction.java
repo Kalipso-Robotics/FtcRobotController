@@ -6,10 +6,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyTeleOp;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveBrake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -93,7 +90,7 @@ public class ShootAllAction extends KActionSet {
 //        activateBraking.setName("ActivateBraking");
 //        this.addAction(activateBraking);
 
-        intake.getIntakeMotor().setPower(0.2);
+        intake.getIntakeMotorFlower().setPower(0.2);
 
 
         shooterReady = new ShooterReady(shooterRun);

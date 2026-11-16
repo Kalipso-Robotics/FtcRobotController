@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -192,12 +192,12 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             // ========== Trigger Controls ==========
             if (gamepad1.right_trigger > 0.1) {
                 // Right trigger: Run intake + Close stopper
-                intake.getIntakeMotor().setPower(1.0);
+                intake.getIntakeMotorFlower().setPower(1.0);
                 stopper.getStopper().setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
             } else if (gamepad1.left_trigger > 0.1) {
                 // Left trigger: Record shoot data
                 stopper.getStopper().setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
-                intake.getIntakeMotor().setPower(1.0);
+                intake.getIntakeMotorFlower().setPower(1.0);
 
                 // Record shoot data when trigger is first pressed (edge detection)
                 if (!wasLeftTriggerPressed) {
@@ -214,7 +214,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                 }
             } else {
                 // No triggers: Stop intake
-                intake.getIntakeMotor().setPower(0);
+                intake.getIntakeMotorFlower().setPower(0);
                 wasLeftTriggerPressed = false;
             }
 
@@ -271,7 +271,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
 
         // Cleanup
         shooter.stop();
-        intake.getIntakeMotor().setPower(0);
+        intake.getIntakeMotorFlower().setPower(0);
         fileWriter.close();
 
         telemetry.addLine("=== DATA COLLECTION COMPLETE ===");

@@ -13,7 +13,7 @@ public class IntakeReverse extends Action {
 
     @Override
     protected void update() {
-        intake.getIntakeMotor().setPower(-1);
+        intake.getIntakeMotorFlower().setPower(-1);
         isDone = true;
     }
 }

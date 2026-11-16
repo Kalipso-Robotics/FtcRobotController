@@ -36,7 +36,7 @@ public class IntakeFullAction extends KActionSet {
             return;
         }
         this.setIsDone(true);
-        intake.getIntakeMotor().setPower(0);
+        intake.getIntakeMotorFlower().setPower(0);
     }
 }
 

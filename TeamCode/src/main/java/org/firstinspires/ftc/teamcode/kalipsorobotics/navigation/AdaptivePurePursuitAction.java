@@ -145,6 +145,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private final double K_v = 0.00036; // 0.00036 0.00225
     private final double K = 2.5; //based on how slow you want the robot to go around turns, 1000
 
+    private final double K_OMEGA = Math.sqrt(MathFunctions.square(WHEELBASE_LENGTH) + MathFunctions.square(TRACK_WIDTH)) / 2; // mm/rad, wheel travel per radian of rotation
+    private final double MAX_WHEEL_VELOCITY = 1 / K_v; // mm/s, wheel velocity where K_v alone reaches full power
+
     /*
     * ↑ Raising K_p
     * Pros: tighter tracking, smaller steady‐state velocity error.
@@ -403,9 +406,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         double omegaAngularVelocity = target.getPidAngleAdaptive().getPower(angleError) * MAX_ANGULAR_VELOCITY; // This is in rad/s
 
         // Convert the desired angular velocity (rad/s) into a linear velocity (mm/s)
-        double K_omega = Math.sqrt(MathFunctions.square(WHEELBASE_LENGTH) + MathFunctions.square(TRACK_WIDTH)) / 2; // This value is in mm/rad
-
-        double omega = omegaAngularVelocity * K_omega; // This is now in mm/s
+        double omega = omegaAngularVelocity * K_OMEGA; // This is now in mm/s
 
         if (!Double.isFinite(omega)) {
             omega = 0.0;
@@ -818,8 +819,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
      * Adds one segment's time to the path time estimate per call (like calculateDistanceAlongPath).
      * Runs after the velocity profile, going forward: the profile only limits deceleration
      * (it starts at 0 and jumps straight to cruise speed), so each point's speed is also capped
-     * by how fast the robot can accelerate to it from the point before. In-place turns
-     * (no distance between points) are timed by heading change at max angular velocity.
+     * by how fast the robot can accelerate to it from the point before. Each segment takes
+     * the slowest of: driving at the profiled speed, turning at max angular velocity, or the
+     * wheels' combined drive + turn travel at max wheel velocity.
      * Ignores the final settle/angle-lock time, so the real run will be slightly longer.
      */
     private void calculatePathTime(Path path) {
@@ -839,11 +841,21 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
             double avgVelocity = (calcTimePrevVelocity + velocity) / 2;
             double driveTimeSec = avgVelocity > 1e-6 ? distance / avgVelocity : 0;
-            double turnTimeSec = Math.abs(MathFunctions.angleWrapRad(curr.getTheta() - prev.getTheta()))
-                    / MAX_ANGULAR_VELOCITY;
+            double turnAngle = Math.abs(MathFunctions.angleWrapRad(curr.getTheta() - prev.getTheta()));
+            double turnTimeSec = turnAngle / MAX_ANGULAR_VELOCITY;
 
-            // Heading changes while driving, so the segment takes whichever is slower
-            calcTimeTotalSec += Math.max(driveTimeSec, turnTimeSec);
+            // Driving and turning share wheel speed (wheel = vx + vy + omega, clipped per wheel),
+            // so together they're slower than either alone. Wheel travel for the segment is
+            // |x_r| + |y_r| (robot frame, so diagonals cost more) plus the rotation's arc.
+            double dx = curr.getX() - prev.getX();
+            double dy = curr.getY() - prev.getY();
+            double heading = prev.getTheta();
+            double x_r =  Math.cos(heading) * dx + Math.sin(heading) * dy;
+            double y_r = -Math.sin(heading) * dx + Math.cos(heading) * dy;
+            double wheelTravel = Math.abs(x_r) + Math.abs(y_r) + K_OMEGA * turnAngle;
+            double wheelLimitedTimeSec = wheelTravel / MAX_WHEEL_VELOCITY;
+
+            calcTimeTotalSec += Math.max(Math.max(driveTimeSec, turnTimeSec), wheelLimitedTimeSec);
             calcTimePrevVelocity = velocity;
             calcTimeIndex++;
         } else {
