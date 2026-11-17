@@ -23,7 +23,7 @@ public class ShooterReady extends Action {
     @Override
     protected void update() {
         if (isDone) {
-            KLog.d(TAG, "Already done, skipping update");
+            KLog.d(TAG, () -> "name=" + getName() + " event=skip reason=alreadyDone");
             return;
         }
 
@@ -33,25 +33,19 @@ public class ShooterReady extends Action {
         }
 
         boolean isWithinRange = shooterRun.isWithinRange();
-        KLog.d(TAG, () -> "Checking if shooter within range: " + isWithinRange);
-        KLog.d(TAG, () -> "ShooterRun isDone: " + shooterRun.getIsDone());
+        KLog.d(TAG, () -> "name=" + getName() + " withinRange=" + isWithinRange + " shooterRunDone=" + shooterRun.getIsDone());
         if (isWithinRange) {
             isDone = true;
             double currentRPS = shooterRun.getShooter().getRPS();
             double targetRPS = shooterRun.getTargetRPS();
-            KLog.d(TAG + "_ShootInfo", () -> "Name: " + this.getName() +
-                    " Shooter is within range. Distance:" + shooterRun.getDistanceMM() +
-                    " Delta RPS: " + (targetRPS - currentRPS) +
-                    " Current RPS: " + currentRPS +
-                    " Target RPS: " + targetRPS);
-            KLog.d(TAG, "*** SHOOTER READY MARKED AS DONE ***");
-            KLog.d(TAG + "_ActionTime", () -> "ActionTime: " + actionTime.milliseconds() + " ms");
-            KLog.d(TAG, "*** SHOOTER READY MARKED AS DONE ***");
+            KLog.d(TAG, () -> "name=" + getName() + " event=ready distanceMm=" + shooterRun.getDistanceMM()
+                    + " deltaRps=" + (targetRPS - currentRPS) + " rps=" + currentRPS + " targetRps=" + targetRPS
+                    + " elapsedMs=" + actionTime.milliseconds());
         } else {
             if (SOTM.isActive()) {
                 isDone = true;
             }
-            KLog.d(TAG, "** Still waiting for shooter to reach target RPS **");
+            KLog.d(TAG, () -> "name=" + getName() + " event=waiting reason=rpsOutOfRange");
         }
 
         if (actionTime.milliseconds() > AUTO_SHOOTER_READY_TIMEOUT_MS) {

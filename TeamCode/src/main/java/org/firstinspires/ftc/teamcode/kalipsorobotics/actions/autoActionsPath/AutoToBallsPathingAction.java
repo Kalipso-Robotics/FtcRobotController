@@ -1,12 +1,17 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PickupPlan;
@@ -23,9 +28,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  *   2. Asks the path planner for a route that goes around the Hive legs and the flowers.
  *      In AUTO the route also stays on our own side of the field (manual rule G402).
  *   3. Hands that route to the path follower, which actually drives the wheels.
- *   4. Turns the intake on when we are close to the ball. Both ends run together, so the action does not
- *      pick one. The planner still decides which end leads into the ball, to set the robot's heading.
- *   5. Finishes when the robot has arrived.
+ *   4. Turns the intake on when we are close to the ball: the end the planner chose leads, so that side
+ *      lowers and runs, and the other side stops and raises. With useFlower, the Flower arm also lowers
+ *      once its side is down (Flower piles; the planner is forced to use the flower's side).
+ *   5. Finishes when the robot has arrived, and stops the intake (and raises the flower) then or when dropped.
  *
  * If there is no ball to go to, or the planner says the ball cannot be picked up, the action
  * finishes straight away without driving. Then getFailed() is true and getPlan() says why,
@@ -35,6 +41,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  * odometry uses).
  */
 public class AutoToBallsPathingAction extends Action {
+    public static final String TAG = "Auto_Path";
 
     // ------------------------------------------------------------------------------------------
     // Settings you can change
@@ -50,7 +57,13 @@ public class AutoToBallsPathingAction extends Action {
      * When the robot is this close to its stopping point, in mm, the intake turns on.
      * (If the front has to touch the ball and pull it in, the intake turns on right away.)
      */
-    public static double INTAKE_START_DISTANCE_MM = 600;
+    public static double INTAKE_START_DISTANCE_MM = 600; // TODO-measure
+
+    /** After arriving, the chosen side keeps running this long so the ball gets pulled through, then the action ends. */
+    public static double POST_ARRIVAL_INTAKE_MS = 500; // TODO-measure
+
+    /** How long the chosen side may run before arrival (a pull-in pickup turns it on at the start of the drive). */
+    public static double INTAKE_RUN_MS = 3000; // TODO-measure
 
     // ------------------------------------------------------------------------------------------
     // Things we are given or remember
@@ -62,8 +75,22 @@ public class AutoToBallsPathingAction extends Action {
     /** True in AUTO, when we must stay on our own side of the field. False in TELEOP. */
     private final boolean auto;
 
-    /** The intake action (front and back run together), or null if we only want to drive. */
+    private final Stopper stopper;
+
+    /** The intake, or null if we only want to drive. */
+    private final Intake intake;
+
+    /** True for a Flower pile: only the flower's side may pick up, and the Flower arm lowers too. */
+    private boolean useFlower; // cleared when the flower's side cannot reach the pile and the other side picks up instead
+
+    /** The side the planner chose. Set once the route is planned. */
+    private IntakeSide pickupSide;
+
+    /** Runs the chosen side. Made once the route is planned, null if we only drive. */
     private IntakeFullAction intakeFullAction;
+
+    /** True once the Flower arm has been lowered (it is raised again when we finish). */
+    private boolean flowerLowered = false;
 
     /** Where the ball is. If the constructor was not given one, we read it from SharedData at the start. */
     private Point target;
@@ -79,6 +106,9 @@ public class AutoToBallsPathingAction extends Action {
 
     /** True once the intake has been turned on. After that we keep it running until the end. */
     private boolean intakeOn = false;
+
+    /** Running since the robot arrived; null until then. */
+    private ElapsedTime arrivedTimer = null;
 
     // ------------------------------------------------------------------------------------------
     // Constructors (they run once, when you write "new AutoToBallsPathingAction(...)")
@@ -107,11 +137,19 @@ public class AutoToBallsPathingAction extends Action {
      */
 
     public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, boolean auto) {
+        this(driveTrain, stopper, intake, target, auto, false);
+    }
+
+    /** @param useFlower true for a Flower pile: pick up with the flower's side and lower the Flower arm */
+    public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, boolean auto,
+                                    boolean useFlower) {
         // Keep our own copy of each thing, because update() runs later and needs them.
         this.driveTrain = driveTrain;
+        this.stopper = stopper;
+        this.intake = intake;
         this.target = target;
         this.auto = auto;
-        intakeFullAction = new IntakeFullAction(stopper, intake, 3000, 1);
+        this.useFlower = useFlower;
     }
 
     // ------------------------------------------------------------------------------------------
@@ -143,14 +181,64 @@ public class AutoToBallsPathingAction extends Action {
 
         // Turn the intake on when we are close enough to the ball, then keep it going.
         if (intakeFullAction != null && (intakeOn || closeEnoughToStartIntake())) {
-            intakeOn = true;
+            if (!intakeOn) {
+                intakeOn = true;
+                startIntake();
+            }
             intakeFullAction.updateCheckDone();
+            // The Flower refuses to lower until its side is down, so wait for that instead of asking every loop.
+            // Only near the stand-off: a pull-in pickup runs the intake for the whole drive, and the arm is not in the footprint.
+            if (useFlower && !flowerLowered && pickupSide.isDown() && distanceToStop() <= INTAKE_START_DISTANCE_MM) {
+                flowerLowered = intake.getFlower().lower();
+                if (flowerLowered) {
+                    KLog.d(TAG, () -> "name=" + getName() + " event=flowerLower reason=pickupFlower");
+                }
+            }
         }
 
-        // Keep driving the route. When the follower says it has arrived, we are done too.
+        // Keep driving the route. When the follower has arrived, keep the intake pulling for a moment, then we are done.
         movement.updateCheckDone();
-        if (movement.getIsDone()) {
-            isDone = true;
+        if (!movement.getIsDone()) {
+            return;
+        }
+        if (intakeFullAction == null) {
+            setIsDone(true);
+            return;
+        }
+        if (arrivedTimer == null) {
+            arrivedTimer = new ElapsedTime();
+            KLog.d(TAG, () -> "name=" + getName() + " event=arrived holdMs=" + POST_ARRIVAL_INTAKE_MS);
+        }
+        pickupSide.run(IntakeConfig.intakePower); // the timed run may have ended on a long pull-in drive
+        if (arrivedTimer.milliseconds() >= POST_ARRIVAL_INTAKE_MS) {
+            setIsDone(true);
+        }
+    }
+
+    /** The chosen side lowers (its run comes from intakeFullAction); the other side stops and raises. */
+    private void startIntake() {
+        pickupSide.lower();
+        BeamBreakPosition.IntakeSide other = pickupSide.getSide() == BeamBreakPosition.IntakeSide.A
+                ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A;
+        intake.getSide(other).stop();
+        intake.getSide(other).raise();
+        KLog.d(TAG, () -> "name=" + getName() + " event=intakeOn side=" + pickupSide.getSide());
+    }
+
+    /** Done, or dropped by the caller: stop the intake and raise the Flower arm. */
+    @Override
+    public void setIsDone(boolean isDone) {
+        super.setIsDone(isDone);
+        if (!isDone) {
+            return;
+        }
+        if (intakeFullAction != null) {
+            intakeFullAction.stopAndSetDone();
+        }
+        if (flowerLowered) {
+            flowerLowered = false;
+            intake.getFlower().raise();
+            KLog.d(TAG, () -> "name=" + getName() + " event=flowerRaise reason=pickupDone");
         }
     }
 
@@ -191,9 +279,19 @@ public class AutoToBallsPathingAction extends Action {
         // so it can prefer the intake end that needs the smaller turn.
         // It gives back a route, where the robot should stop, which way its front should point there,
         // and which intake (front or back) picks the ball up.
-        plan = planner.planPickup(robot, pose.getTheta(), target);
-        KLog.d("AutoToBalls", () -> "robot " + robot + " target " + target
-                + (auto ? " (AUTO)" : "") + " -> " + plan);
+        // A Flower pile can only be picked up by the side the Flower arm is on.
+        Boolean forceBack = useFlower ? ModuleConfig.FLOWER_SIDE == BeamBreakPosition.IntakeSide.B : null;
+        plan = planner.planPickup(robot, pose.getTheta(), target, forceBack);
+        if (forceBack != null && !plan.isOk()) {
+            // The flower's side cannot reach this pile: pick it up with whichever side can, without the arm.
+            String forcedWhy = plan.why;
+            plan = planner.planPickup(robot, pose.getTheta(), target, null);
+            useFlower = plan.isOk() && plan.useBackIntake == forceBack;
+            KLog.d(TAG, () -> "name=" + getName() + " event=flowerFallback forcedSide=" + (forceBack ? "back" : "front")
+                    + " forcedWhy=" + forcedWhy);
+        }
+        KLog.d(TAG, () -> "name=" + getName() + " event=plan robot=" + robot + " target=" + target
+                + " auto=" + auto + " useFlower=" + useFlower + " plan=" + plan);
 
         // The planner can say no (for example: the ball is in a corner we cannot reach).
         if (!plan.isOk()) {
@@ -217,6 +315,13 @@ public class AutoToBallsPathingAction extends Action {
             double headingDegrees = point[2];
             movement.addPoint(x, y, headingDegrees);
         }
+
+        // Step 6: the intake on the end the planner chose (it runs from INTAKE_START_DISTANCE_MM on).
+        if (intake != null) {
+            pickupSide = intake.getSide(plan.useBackIntake ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A);
+            intakeFullAction = new IntakeFullAction(stopper, pickupSide, INTAKE_RUN_MS, IntakeConfig.intakePower);
+            intakeFullAction.setName(getName() + "_intake");
+        }
     }
 
     /** Where the robot is right now, from odometry, as a point on the field (mm). */
@@ -232,18 +337,19 @@ public class AutoToBallsPathingAction extends Action {
      *   - once the robot is within INTAKE_START_DISTANCE_MM of its stopping point.
      */
     private boolean closeEnoughToStartIntake() {
-        if (plan.pullIn) {
-            return true;
-        }
-        double distanceToStop = Point.distance(currentRobotPoint(), plan.standOff);
-        return distanceToStop <= INTAKE_START_DISTANCE_MM;
+        return plan.pullIn || distanceToStop() <= INTAKE_START_DISTANCE_MM;
+    }
+
+    /** Straight-line distance from the robot to its stopping point, mm. */
+    private double distanceToStop() {
+        return Point.distance(currentRobotPoint(), plan.standOff);
     }
 
     /** Ends the action right now without driving, and remembers that it failed (and why). */
     private void fail(String reason) {
         failed = true;
         isDone = true;
-        KLog.d("AutoToBalls", () -> "failed: " + reason);
+        KLog.d(TAG, () -> "name=" + getName() + " event=failed reason=" + reason);
     }
 
     // ------------------------------------------------------------------------------------------

@@ -88,7 +88,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         telemetry.addLine("Press PLAY to start data collection");
         telemetry.update();
 
-        KLog.d(TAG, "Initialization complete. Waiting for start...");
+        KLog.d(TAG, "event=initDone");
 
         waitForStart();
 
@@ -114,7 +114,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
 
             double finalCurrentPower = currentPower;
             int finalTestNumber = testNumber;
-            KLog.d(TAG, () -> String.format("Test %d/%d - Power: %.2f - Stabilizing...",
+            KLog.d(TAG, () -> String.format("event=stabilizing test=%d/%d power=%.2f",
                     finalTestNumber, totalTests, finalCurrentPower));
 
             // Step 2: Wait for stabilization
@@ -152,7 +152,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
             int finalTestNumber1 = testNumber;
             double finalCurrentPower1 = currentPower;
             KLog.d(TAG, () -> String.format(
-                "Test %d/%d Complete - Power: %.2f | Shooter: MAX=%.2f MIN=%.2f AVG=%.2f | kf=%.5f | Battery: %.2fV",
+                "event=testDone test=%d/%d power=%.2f rpsMax=%.2f rpsMin=%.2f rpsAvg=%.2f kf=%.5f batteryV=%.2f",
                     finalTestNumber1, totalTests, finalCurrentPower1, rpsMax, rpsMin, rpsAvg, kf, batteryVoltage));
 
             telemetry.addLine("Status: Data recorded!");
@@ -189,7 +189,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         telemetry.addLine("files/OdometryLog/ ~/Downloads");
         telemetry.update();
 
-        KLog.d(TAG, "Data collection complete. File closed.");
+        KLog.d(TAG, "event=done file=closed");
 
         // Keep telemetry visible
         while (opModeIsActive()) {
@@ -210,7 +210,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         shooter = new KMotor(motor,
             ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
-        KLog.d(TAG, "Motors initialized successfully");
+        KLog.d(TAG, "event=motorsInit");
     }
 
     /**

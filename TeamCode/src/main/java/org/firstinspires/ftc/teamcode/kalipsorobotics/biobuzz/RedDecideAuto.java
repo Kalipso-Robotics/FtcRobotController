@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KA
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.AutoToBallsPathingAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.beambreak.BeamBreakCountAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.DriveDirectionIntakeController;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakData;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
@@ -75,6 +76,8 @@ public class RedDecideAuto extends KOpMode {
 
     // ----- How long things take -----
     private static final double SPEED_MM_PER_SECOND = 1000;        // GUESS: how fast the robot drives
+    public static final String TAG = "Auto_Decider";
+
     private static final double PARK_WHEN_SECONDS_LEFT = 2.5;     // we drive to the park spot when this much time is left, however far it is
     private static final double SECONDS_TO_SHOOT = 2;              // GUESS
     private static final double HIVE_TIP_SECONDS = 3.3;            // GUESS from the sim: a Hive finishes tipping this long after the shot that tips it
@@ -83,7 +86,7 @@ public class RedDecideAuto extends KOpMode {
     private static final double PICKUP_GIVE_UP_SECONDS = 6;        // a pickup not finished after this long is stuck (for example against a Flower)
 
     // ----- Where things are -----
-    private static final double FLOWER_BALL_OFFSET_MM = 150;       // GUESS: the pickup target is this far from the Flower's center (the center is inside the Flower)
+    private static final double FLOWER_BALL_OFFSET_MM = 150;       // TODO-measure: pickup target this far from the Flower's center; the arm knocks balls off by driving in, so likely smaller
     private static final double GARDEN_BALLS_CENTER_X_MM = 142;    // GUESS from the sim field: the 4 Garden balls sit at x = 36 to 249
     private static final double OBSTACLE_BUFFER_MM = 262.5;        // same as DecideSimulation / AutoToBallsPathingAction
     private static final double PARK_WALL_GAP_MM = 15;             // GUESS: room left between the body and the walls at the park spot
@@ -173,7 +176,7 @@ public class RedDecideAuto extends KOpMode {
     private Cell sweepRunningFor = null;                  // the spill the running sweep leg is for (null = no sweep leg is running)
     private Cell sweepCell = null;                        // the spill the whole loop is for (null = no loop started)
     private int sweepLeg = 0;                             // the next corner of the loop to drive to (0-3)
-    private IntakeFullAction sweepIntake = null;          // runs while a sweep leg drives
+    private DriveDirectionIntakeController sweepIntake = null; // runs the side facing the drive while a sweep leg drives
     private boolean sweepGivenUp = false;                 // a sweep was dropped for time: never start another
     private long lastSweepCheckMs = 0;                   // when the sweep last looked for a group beside the lane
     private long lastParkCheckMs = 0;                     // when we last checked if it is time to park
@@ -333,8 +336,11 @@ public class RedDecideAuto extends KOpMode {
                 startNextMove();
             }
 
+            intake.update(); // finishes side raises that waited for the Flower arm
+
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
+        stowIntake("autoEnd");
         cleanupRobot();
     }
 
@@ -420,7 +426,7 @@ public class RedDecideAuto extends KOpMode {
             spillToSweep = null;
         }
 
-        KLog.d("Decide", () -> "secondsLeft=" + round(secondsLeft)
+        KLog.d(TAG, () -> "secondsLeft=" + round(secondsLeft)
                 + " ballsHeld=" + ballsHeld + " atShootPoint=" + atShootPoint + " upCell=" + upCell
                 + " ballsInUpCell=" + ballsInUpCell + " tipsDone=" + tipsDone + " pilesLeft=" + pilesLeft
                 + " spills=" + pendingSpills + " seen=" + looseBallsSeen);
@@ -464,7 +470,8 @@ public class RedDecideAuto extends KOpMode {
         } else if (sweepRunningFor != null) {
             currentAction = sweepMove(sweepRunningFor); // currentMove is WAIT, but it is really a sweep
         } else if (currentPile != null) {
-            currentAction = pickupMove(pilePointOf(currentPile), "pickup" + currentPile);
+            boolean isFlowerPile = currentPile == Pile.FLOWER_A || currentPile == Pile.FLOWER_B;
+            currentAction = pickupMove(pilePointOf(currentPile), "pickup" + currentPile, isFlowerPile);
         } else if (move == Move.SHOOT_A) {
             currentAction = shootMove(Cell.A);
         } else if (move == Move.SHOOT_B) {
@@ -477,9 +484,10 @@ public class RedDecideAuto extends KOpMode {
             committedCenter = currentSeenCenter;
             committedBalls = new ArrayList<>(seenCluster.getBalls());
             committedAtSeconds = getRuntime();
-            currentAction = pickupMove(currentSeenCenter, "pickupSeen");
+            currentAction = pickupMove(currentSeenCenter, "pickupSeen", false);
         } else {
             currentMove = Move.PARK; // PARK, or GET_SEEN_BALLS with nothing seen (decide() cannot do that, but park to be safe)
+            stowIntake("park");
             currentAction = driveTo(parkPoint(), null, "park");
         }
     }
@@ -557,7 +565,7 @@ public class RedDecideAuto extends KOpMode {
             default:
                 break;
         }
-        KLog.d("Decide", () -> "finished " + currentMove + ": ballsHeld=" + ballsHeld + " tipsDone=" + tipsDone
+        KLog.d(TAG, () -> "finished " + currentMove + ": ballsHeld=" + ballsHeld + " tipsDone=" + tipsDone
                 + " upCell=" + upCell + " pilesLeft=" + pilesLeft);
         currentAction = null;
         currentAim = null;
@@ -613,7 +621,7 @@ public class RedDecideAuto extends KOpMode {
             return false;
         }
         String why = (pickup.getPlan() == null) ? "no plan" : pickup.getPlan().why;
-        KLog.d("Decide", () -> "pickup of " + what + " failed: " + why);
+        KLog.d(TAG, () -> "pickup of " + what + " failed: " + why);
         telemetry.addData("pickup failed", what + ": " + why);
         telemetry.update();
         return true;
@@ -922,9 +930,9 @@ public class RedDecideAuto extends KOpMode {
         return set;
     }
 
-    /** Plan a route to the balls with the path planner, drive it and run the intake. */
-    private Action pickupMove(Point ball, String name) {
-        AutoToBallsPathingAction pickup = new AutoToBallsPathingAction(driveTrain, stopper, intake, ball, true);
+    /** Plan a route to the balls with the path planner, drive it and run the intake (and the Flower arm for a Flower pile). */
+    private Action pickupMove(Point ball, String name, boolean useFlower) {
+        AutoToBallsPathingAction pickup = new AutoToBallsPathingAction(driveTrain, stopper, intake, ball, true, useFlower);
         pickup.setName(name);
         return pickup;
     }
@@ -977,8 +985,7 @@ public class RedDecideAuto extends KOpMode {
                 }
             }
         }
-        sweepIntake = new IntakeFullAction(stopper, intake, 12000, 1);
-        sweepIntake.setName("sweepIntake");
+        sweepIntake = new DriveDirectionIntakeController(intake);
         return driveThrough(corners.subList(sweepLeg, corners.size()), null, "sweep" + tipped, 12000);
     }
 
@@ -988,7 +995,7 @@ public class RedDecideAuto extends KOpMode {
             return;
         }
         if (sweepIntake != null) {
-            sweepIntake.updateCheckDone();
+            sweepIntake.update();
         }
         List<Point> corners = sweepCorners(sweepCell);
         while (sweepLeg < corners.size() - 1 && Point.distance(robotPoint(), corners.get(sweepLeg)) < SWEEP_CORNER_REACHED_MM) {
@@ -1012,9 +1019,18 @@ public class RedDecideAuto extends KOpMode {
 
     private void stopSweepIntake() {
         if (sweepIntake != null) {
-            sweepIntake.stopAndSetDone();
             sweepIntake = null;
+            stowIntake("sweepDone");
         }
+    }
+
+    /** Intake off, Flower arm and both sides up: the robot must end inside its starting size. */
+    private void stowIntake(String reason) {
+        intake.stop();
+        intake.getFlower().raise();
+        intake.getSide(BeamBreakPosition.IntakeSide.A).raise(); // a raise waiting on the flower finishes in intake.update()
+        intake.getSide(BeamBreakPosition.IntakeSide.B).raise();
+        KLog.d(TAG, () -> "event=stowIntake reason=" + reason);
     }
 
     /** Distance from a point to the straight segment a-b. */
@@ -1070,11 +1086,12 @@ public class RedDecideAuto extends KOpMode {
 
     /** Stops the running pickup or sweep leg right now, so the main loop decides again. */
     private void dropRunningMove(String why) {
-        KLog.d("Decide", () -> "dropping " + currentMove + ": " + why);
+        KLog.d(TAG, () -> "event=dropMove move=" + currentMove + " reason=" + why);
         if (currentAction instanceof AutoToBallsPathingAction) {
             ((AutoToBallsPathingAction) currentAction).setIsDone(true);
         }
-        stopSweepIntake();
+        sweepIntake = null;
+        stowIntake("dropMove");
         driveTrain.setPower(0);
         currentAction = null;
         currentAim = null;
@@ -1103,7 +1120,7 @@ public class RedDecideAuto extends KOpMode {
         for (Point goal : goals) {
             List<Point> route = planner.plan(previous, goal);
             if (route == null || route.isEmpty()) {
-                KLog.d("Decide", () -> "no planned route to " + goal + ", driving straight");
+                KLog.d(TAG, () -> "no planned route to " + goal + ", driving straight");
                 route = Collections.singletonList(goal);
             }
             points.addAll(route);

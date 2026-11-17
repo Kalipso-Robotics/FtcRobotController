@@ -51,7 +51,7 @@ public class RunIntakeTime extends Action {
             timer.reset();
             hasStarted = true;
             if (intake != null) {
-                intake.lower(); // interim: the milestone 2 IntakeController replaces this
+                intake.lower(); // both = lower both; per-side runs (PushBall feeds) stay raised
             }
             KLog.d(TAG, () -> "name=" + getName() + " side=" + sideLabel() + " event=start power=" + power + " timeMs=" + timeMS);
         }

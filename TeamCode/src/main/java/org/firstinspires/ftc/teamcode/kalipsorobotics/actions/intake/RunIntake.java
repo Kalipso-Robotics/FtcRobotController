@@ -20,7 +20,7 @@ public class RunIntake extends Action {
     public void update() {
         if (!hasStarted) {
             hasStarted = true;
-            intake.lower(); // interim: the milestone 2 IntakeController replaces this
+            intake.lower(); // both = lower both; per-side runs (PushBall feeds) stay raised
             KLog.d(TAG, () -> "name=" + getName() + " event=start power=" + power);
         }
         intake.run(power);

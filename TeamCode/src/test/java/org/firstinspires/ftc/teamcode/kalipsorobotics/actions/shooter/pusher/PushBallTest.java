@@ -14,12 +14,23 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerInter
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
+import org.junit.After;
 import org.junit.Test;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.A;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.B;
 
 public class PushBallTest {
+    private final double feedAMs = IntakeConfig.FEED_A_MS;
+    private final double waitMs = IntakeConfig.WAIT_BETWEEN_SIDES_MS;
+    private final double feedBMs = IntakeConfig.FEED_B_MS;
+
+    @After
+    public void restoreConfig() {
+        IntakeConfig.FEED_A_MS = feedAMs;
+        IntakeConfig.WAIT_BETWEEN_SIDES_MS = waitMs;
+        IntakeConfig.FEED_B_MS = feedBMs;
+    }
 
     @Test
     public void feedsAThenBWithStopperOpenAndClosesAtEnd() throws Exception {

@@ -239,6 +239,14 @@ public class PathPlanning {
      * @param robotHeadingRad which way the robot's front points now, or NaN if unknown (no turning cost)
      */
     public PickupPlan planPickup(Point robot, double robotHeadingRad, Point ball) {
+        return planPickup(robot, robotHeadingRad, ball, null);
+    }
+
+    /**
+     * Same as above, but only one intake may lead: forceBack true = back only, false = front only,
+     * null = whichever works best. Used when only one side can do the job (the Flower arm is on one side).
+     */
+    public PickupPlan planPickup(Point robot, double robotHeadingRad, Point ball, Boolean forceBack) {
         PickupPlan rejected = rejectBall(ball);
         if (rejected != null) {
             return rejected;
@@ -246,7 +254,7 @@ public class PathPlanning {
 
         for (boolean pullIn : new boolean[]{false, true}) {
             for (boolean intoRing : new boolean[]{false, true}) {
-                PickupPlan best = bestApproach(robot, robotHeadingRad, ball, pullIn, intoRing);
+                PickupPlan best = bestApproach(robot, robotHeadingRad, ball, pullIn, intoRing, forceBack);
                 if (best != null) {
                     return best;
                 }
@@ -283,13 +291,14 @@ public class PathPlanning {
      * stand-off (outside the ring, or inside it). Null if there is none.
      */
     private PickupPlan bestApproach(Point robot, double robotHeadingRad, Point ball, boolean pullIn,
-                                    boolean intoRing) {
+                                    boolean intoRing, Boolean forceBack) {
+        boolean[] ends = forceBack == null ? new boolean[]{false, true} : new boolean[]{forceBack};
         PickupPlan best = null;
         double bestCost = Double.MAX_VALUE;
         for (int i = 0; i < APPROACH_DIRECTIONS; i++) {
             double aimRad = 2 * Math.PI * i / APPROACH_DIRECTIONS;
             // Front first, so when two ends cost the same the front wins.
-            for (boolean back : new boolean[]{false, true}) {
+            for (boolean back : ends) {
                 PickupPlan candidate = approachFrom(robot, ball, aimRad, back, pullIn, intoRing);
                 if (candidate == null) {
                     continue;
