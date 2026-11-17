@@ -22,6 +22,12 @@ public class ShooterConfig {
     public static boolean hoodFlipDirection = true;
 
     public static double AUTO_SHOOTER_READY_TIMEOUT_MS = 3500;
+    // TeleOp never fires on timeout: RPS or turret not ready by then aborts the shot (flywheel keeps spinning).
+    public static double TELEOP_READY_TIMEOUT_MS = 3000;
+
+    // Weak pass shot, GP1 Y. Placeholders below the shortest distance-table shot.
+    public static double PASS_RPS = 25; // TODO-measure
+    public static double PASS_HOOD = 0.2; // TODO-measure
 
     // Scale shooter power by DEFAULT_VOLTAGE / battery voltage in KMotor.goToRPS.
     public static boolean USE_VOLTAGE_COMPENSATION = true;

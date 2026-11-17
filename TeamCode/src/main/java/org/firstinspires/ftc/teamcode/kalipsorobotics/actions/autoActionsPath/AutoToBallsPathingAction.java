@@ -59,6 +59,12 @@ public class AutoToBallsPathingAction extends Action {
      */
     public static double INTAKE_START_DISTANCE_MM = 600; // TODO-measure
 
+    /**
+     * The Flower arm only deploys while the robot's center is at least this far (mm) from the Flower's center,
+     * so it never drops onto the Flower. Must be smaller than INTAKE_START_DISTANCE_MM or the arm never deploys.
+     */
+    public static double FLOWER_DEPLOY_CLEARANCE_MM = 350; // TODO-measure
+
     /** After arriving, the chosen side keeps running this long so the ball gets pulled through, then the action ends. */
     public static double POST_ARRIVAL_INTAKE_MS = 500; // TODO-measure
 
@@ -79,6 +85,9 @@ public class AutoToBallsPathingAction extends Action {
 
     /** The intake, or null if we only want to drive. */
     private final Intake intake;
+
+    /** The Flower being picked up, or null if this is not a Flower pile. */
+    private final Point flower;
 
     /** True for a Flower pile: only the flower's side may pick up, and the Flower arm lowers too. */
     private boolean useFlower; // cleared when the flower's side cannot reach the pile and the other side picks up instead
@@ -137,19 +146,20 @@ public class AutoToBallsPathingAction extends Action {
      */
 
     public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, boolean auto) {
-        this(driveTrain, stopper, intake, target, auto, false);
+        this(driveTrain, stopper, intake, target, auto, null);
     }
 
-    /** @param useFlower true for a Flower pile: pick up with the flower's side and lower the Flower arm */
+    /** @param flower the Flower's center for a Flower pile (pick up with the flower's side and lower the Flower arm), else null */
     public AutoToBallsPathingAction(DriveTrain driveTrain, Stopper stopper, Intake intake, Point target, boolean auto,
-                                    boolean useFlower) {
+                                    Point flower) {
         // Keep our own copy of each thing, because update() runs later and needs them.
         this.driveTrain = driveTrain;
         this.stopper = stopper;
         this.intake = intake;
         this.target = target;
         this.auto = auto;
-        this.useFlower = useFlower;
+        this.flower = flower;
+        this.useFlower = flower != null;
     }
 
     // ------------------------------------------------------------------------------------------
@@ -188,10 +198,16 @@ public class AutoToBallsPathingAction extends Action {
             intakeFullAction.updateCheckDone();
             // The Flower refuses to lower until its side is down, so wait for that instead of asking every loop.
             // Only near the stand-off: a pull-in pickup runs the intake for the whole drive, and the arm is not in the footprint.
-            if (useFlower && !flowerLowered && pickupSide.isDown() && distanceToStop() <= INTAKE_START_DISTANCE_MM) {
-                flowerLowered = intake.getFlower().lower();
-                if (flowerLowered) {
-                    KLog.d(TAG, () -> "name=" + getName() + " event=flowerLower reason=pickupFlower");
+            if (useFlower && !flowerLowered && distanceToStop() <= INTAKE_START_DISTANCE_MM) {
+                double toFlower = Point.distance(currentRobotPoint(), flower);
+                if (shouldLowerFlower(false, pickupSide.isDown(), toFlower)) {
+                    flowerLowered = intake.getFlower().lower();
+                    if (flowerLowered) {
+                        KLog.d(TAG, () -> "name=" + getName() + " event=flowerLower reason=pickupFlower");
+                    }
+                } else if (toFlower < FLOWER_DEPLOY_CLEARANCE_MM) {
+                    useFlower = false; // too close to drop the arm without landing on the Flower
+                    KLog.e(TAG, "name=" + getName() + " event=flowerSkipped reason=tooClose dist=" + toFlower);
                 }
             }
         }
@@ -212,6 +228,19 @@ public class AutoToBallsPathingAction extends Action {
         pickupSide.run(IntakeConfig.intakePower); // the timed run may have ended on a long pull-in drive
         if (arrivedTimer.milliseconds() >= POST_ARRIVAL_INTAKE_MS) {
             setIsDone(true);
+        }
+    }
+
+    /** True when the Flower arm may deploy now: not already down, its side is down, and the robot is clear of the Flower. */
+    public static boolean shouldLowerFlower(boolean flowerDown, boolean sideDown, double distToFlowerMM) {
+        return !flowerDown && sideDown && distToFlowerMM >= FLOWER_DEPLOY_CLEARANCE_MM;
+    }
+
+    /** KLog.e at OpMode init if the clearance would keep the arm from ever deploying. */
+    public static void checkFlowerClearance() {
+        if (FLOWER_DEPLOY_CLEARANCE_MM >= INTAKE_START_DISTANCE_MM) {
+            KLog.e(TAG, "event=badConfig FLOWER_DEPLOY_CLEARANCE_MM=" + FLOWER_DEPLOY_CLEARANCE_MM
+                    + " >= INTAKE_START_DISTANCE_MM=" + INTAKE_START_DISTANCE_MM + " arm will never deploy");
         }
     }
 
@@ -273,6 +302,11 @@ public class AutoToBallsPathingAction extends Action {
             planner = PathPlanning.forFieldAuto(BUFFER_MM, RobotFootprint.WIDTH_MM / 2, hiveTipping);
         } else {
             planner = PathPlanning.forField(BUFFER_MM, hiveTipping);
+        }
+
+        if (flower != null && intake != null && intake.getFlower().isDown()) {
+            flowerLowered = true; // already down: skip the deploy (it is raised again when we finish)
+            KLog.d(TAG, () -> "name=" + getName() + " event=flowerAlreadyDown");
         }
 
         // Step 4: ask the planner how to pick up this ball. We tell it which way the robot faces now,

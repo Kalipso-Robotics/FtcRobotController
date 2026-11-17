@@ -72,7 +72,11 @@ Every subsystem logs through `KLog` with a subsystem tag; new and changed lines 
 - `ShooterInterpolationConfig`: `MAX_RPS` (70), `DEFAULT_RPS` (40); shooter table from `ShooterDataCollector`.
 - `BeamBreakConfig`: device names, sides, count, order, thresholds; `BLOCKED_IS_LOW_VOLTAGE`.
 - `AutoToBallsPathingAction`: `INTAKE_START_DISTANCE_MM` (600), `POST_ARRIVAL_INTAKE_MS` (500), `INTAKE_RUN_MS` (3000).
-- `RedDecideAuto.FLOWER_BALL_OFFSET_MM` (150): pickup target offset from a Flower's center; likely smaller since the arm knocks balls off by driving in.
+- `FieldConfig.FLOWER_BALL_OFFSET_MM` (150): pickup target offset from a Flower's center (moved from `RedDecideAuto`); likely smaller since the arm knocks balls off by driving in. Untracked `DecideParams` duplicates this value: whoever lands that file should read `FieldConfig` instead.
+- `AutoToBallsPathingAction.FLOWER_DEPLOY_CLEARANCE_MM` (350): arm deploys only this far or more from the Flower; must stay below `INTAKE_START_DISTANCE_MM` (600) (KLog.e at init if not).
+- `FieldConfig`: `PASS_X` / `PASS_Y` (1524 / 600) pass target; `CORNER_ZERO_POSE` (230, 230, 0) robot pose when parked in the corner for the GP2 zero.
+- `ShooterConfig`: `PASS_RPS` (25), `PASS_HOOD` (0.2) for the GP1 pass; `TELEOP_READY_TIMEOUT_MS` (3000), after which a TeleOp shot aborts without feeding.
+- `AprilTagConfig`: `CELL_A_TAG_POSES` / `CELL_B_TAG_POSES` (null = unmeasured, tag left out of the layout, Limelight re-zero stays inert until filled). The tags face down on the tipping Cells, so a 2D wall-tag chain may not suffice (see section 6).
 
 ## 6. Ken to confirm
 - Feeding with both pivots raised, including the preload shot (transfer wheels share the side motor).
@@ -81,8 +85,16 @@ Every subsystem logs through `KLog` with a subsystem tag; new and changed lines 
 - Pickup keeps the side running `POST_ARRIVAL_INTAKE_MS` after arrival, then stops it (M3). Tune so a pull-in pickup finishes taking the ball in.
 - In auto the pivots stay as the pickup left them while driving to shoot (not raised at shoot start).
 
+- Limelight pipelines (index 0/1 per alliance, `LimelightAprilTagCamera`) must be reconfigured on the device for 36h11 IDs 30-45 (manual 9.9). Device config, not code.
+- Cell tags face down: a real fix likely needs the camera tilted up plus MegaTag with a `.fmap`, or a 3D chain. Separate on-robot task.
+
+## 6b. TeleOp controls (GP1 / GP2)
+- GP1: X = flower assist (nearest Flower, full pickup; any stick input cancels), Y = pass (weak fixed RPS/hood at the far-half pass point), LB = hive shot (press edge only, gated on RPS + turret ready, never fires on timeout), LT = stop and flywheel off, RB = slow.
+- GP2: left stick button = Limelight re-zero (never snaps to (0,0,0)); right stick button = corner-pose zero (`CORNER_ZERO_POSE`). LB + dpad now trims only the hood; the turret trim is dpad alone.
+- TeleOp Blue exists (`TeleOpBlue`).
+
 ## 7. Known small items (not fixed)
 - `DriveDirectionIntakeController` reads odometry velocity with `peek*`; a read can tear across odometry-thread updates (EMA + threshold keep the effect small).
 - `DriveDirectionIntakeControllerTest` builds `BeamBreakData` by reflection (package-private ctor).
-- `ShooterDataCollector` has no drive code; `intake.lower()` runs in init; holding LB refires; GP2 RT overrides feeds.
+- `ShooterDataCollector` has no drive code; `intake.lower()` runs in init; GP2 RT overrides feeds.
 - Untracked teammate work on master (`biobuzz/DecideParams.java`, `PathFile.java`, `src/main/resources/autoparams/`, `sim/`) is not part of these commits.

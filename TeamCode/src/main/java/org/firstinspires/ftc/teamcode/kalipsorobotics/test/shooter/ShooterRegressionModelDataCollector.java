@@ -50,7 +50,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
         intakeStop = new IntakeStop(intake);
         runUntilFullSpeed = new RunIntake(intake);
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
 //        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kFileWriter.writeLine("distance, rps, hood position");
     }

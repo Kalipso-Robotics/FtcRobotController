@@ -12,10 +12,26 @@ public class TurretReadyTeleOp extends Action {
     private final ElapsedTime timeoutTimer;
     private static final double DEFAULT_MAX_TIME_OUT_MS = 4000;
     private final TurretAutoAlignTeleOp turretAutoAlignTeleop;
+    private final boolean holdOnTimeout;
+    private boolean timedOut = false;
+
     public TurretReadyTeleOp(TurretAutoAlignTeleOp turretAutoAlignTeleop) {
         this.turretAutoAlignTeleop = turretAutoAlignTeleop;
         this.maxTimeoutMS = DEFAULT_MAX_TIME_OUT_MS;
+        this.holdOnTimeout = false;
         timeoutTimer = new ElapsedTime();
+    }
+
+    /** TeleOp gate: on timeout it only sets timedOut() and stays not-done, so ShootAllAction can abort before feeding. */
+    public TurretReadyTeleOp(TurretAutoAlignTeleOp turretAutoAlignTeleop, double timeoutMS) {
+        this.turretAutoAlignTeleop = turretAutoAlignTeleop;
+        this.maxTimeoutMS = timeoutMS;
+        this.holdOnTimeout = true;
+        timeoutTimer = new ElapsedTime();
+    }
+
+    public boolean timedOut() {
+        return timedOut;
     }
 
     @Override
@@ -34,8 +50,11 @@ public class TurretReadyTeleOp extends Action {
         if (timeoutTimer.milliseconds() > maxTimeoutMS) {
             KLog.d(TAG, () -> String.format("event=timeout name=%s timeMs=%.0f deltaDeg=%.1f",
                     getName(), timeoutTimer.milliseconds(), turretAutoAlignTeleop.getDeltaAngleDeg()));
-            isDone = true;
-            return;
+            timedOut = true;
+            if (!holdOnTimeout) {
+                isDone = true;
+                return;
+            }
         }
 
         if (turretAutoAlignTeleop.isWithinRange()) {

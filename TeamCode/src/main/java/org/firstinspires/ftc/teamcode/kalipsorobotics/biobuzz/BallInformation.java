@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 
 import java.util.Locale;
@@ -63,7 +64,7 @@ public class BallInformation {
     }
 
     public double distanceTo(Point point) {
-        return Math.hypot(this.x - point.getX(), this.y - point.getY());
+        return MathFunctions.distance(toPoint(), point);
     }
 
     public double distanceTo(double targetX, double targetY) {

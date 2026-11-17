@@ -28,6 +28,7 @@ Each commit must compile and pass unit tests so reverting to it is safe.
 ## Robot facts
 - Axes: odometry side is the **front**; +X straight ahead, +Y to the right. Intake side A = front (+X), B = back (confirm against `BeamBreakPosition` comments, keep consistent).
 - Drivetrain: 4 mecanum motors, OctoQuad + 3 goBILDA odometry pods (unchanged). No brake servo.
+- `OctoConfig` is tuned (counts/mm, IMU scalar, mirror from 2026-10-03; TCP offsets and track width updated from CAD on 2026-11-16 after the pods moved, pending a spin check). Do not edit it; every value there has a dated measurement behind it.
 - Ports: 7 motors (4 drive, 2 intake, 1 shooter), 6 servos (2 intake pivots, stopper, hood, turret, flower).
 - **Intake** (double sided, independent): each side has its own motor and its own pivot servo. That motor drives the side's intake wheels AND its 2 transfer wheel sets. Spring loaded to ground. Balls stack from the outside in toward the center, then up to the turret.
 - **Stopper**: servo that holds balls just before the shooter. Opening it while feeding shoots. Running intake against a closed stopper is OK briefly; too long stalls the motor.
@@ -136,3 +137,14 @@ Decisions made during execution (owner answers and orchestrator rulings).
 - New `TODO-measure` for the milestone 3 checklist: `IntakeConfig.FEED_A_MS` (400), `FEED_B_MS` (400), `WAIT_BETWEEN_SIDES_MS` (150), `SIDE_SWITCH_VX_MM_PER_S` (100); `ShooterConfig.kf` from `MotorPowerRPSDataCollector` at ~0.8 power on a full battery.
 - Review, milestone 2: the new `PushBall` feed is ~950 ms per shot (was 500 ms), and the per-side `RunIntakeTime` does not lower the pivots, so the autos' preload shot feeds with both sides raised. **Ken: confirm raised-pivot feeding (including the preload shot) on the robot, and re-check `RedDecideAuto` time budgets in sim.** `IntakeConfig.shootTimeMS` no longer has a caller.
 - Review, milestone 2: `MotorPowerRPSDataCollector` computes kf as effective power (after voltage compensation) / RPS, so it matches what `KMotor.goToRPS` applies.
+
+**Orchestrator rulings (field/targeting/TeleOp plan)**
+- Pass polarity: `FieldConfig.passTargetForSide(robotY)` targets the half of the field opposite the robot (y mirrored about `HIVE_CENTER`), no alliance flip, because per-alliance frames already make alliance polarity +1. Veto if alliance polarity was meant.
+- TeleOp shots never fire on timeout: `ShooterReady` / `TurretReadyTeleOp` take a timeout; a timeout aborts `ShootAllAction` without feeding (`event=abort reason=timeout`). Auto constructors keep fire-on-timeout. GP1 LB is a press edge.
+- Flower deploy gate: `AutoToBallsPathingAction.shouldLowerFlower` (arm up, side down, distance >= `FLOWER_DEPLOY_CLEARANCE_MM`). Arm already down at start is not redeployed; too close means skip the arm (`event=flowerSkipped reason=tooClose`). `useFlower` is now a `Point flower` (null = not a Flower pile).
+- `FieldConfig.flowerPilePoint` / `nearestFlower` hold the pile logic shared by auto and TeleOp. GP1: X flower assist (while pending TeleOp skips intake/flower/idle-stop; stick input cancels), Y pass, LB hive shot, LT stop, RB slow.
+- AprilTags: manual IDs per alliance and Cell; a tag joins the layout only when its pose in `CELL_A/B_TAG_POSES` is measured. Limelight pipelines need reconfiguring for 36h11 IDs 30-45.
+- TeleOp now counts balls (`BeamBreakCountAction`), has a Blue variant, and the manual zero cannot snap odometry to (0,0,0).
+- `DecideParams` (untracked teammate file) duplicates `FieldConfig.FLOWER_BALL_OFFSET_MM`; not touched.
+- Cleanup: `PathPlanning.turnCostMm` uses `MathFunctions.angleWrapRad`; `BallInformation.distanceTo(Point)` uses `MathFunctions.distance`; `PickupPlan.normalizeDeg` is kept because it wraps to (-180, 180] while `angleWrapDeg` leaves -180 as -180. Deleted `KPTuning`, `PIDIterativeLearning`, `ShooterRPSTest`, `ShooterMotorTest` (no references).
+- New `TODO-measure` items are listed in section 5 of `teleop-to-sim-handoff.md`.

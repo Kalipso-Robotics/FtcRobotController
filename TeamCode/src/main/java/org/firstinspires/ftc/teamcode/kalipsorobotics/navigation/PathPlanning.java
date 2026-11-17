@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
@@ -387,7 +388,7 @@ public class PathPlanning {
         if (Double.isNaN(fromRad)) {
             return 0;
         }
-        double turn = Math.abs(Math.atan2(Math.sin(toRad - fromRad), Math.cos(toRad - fromRad)));
+        double turn = Math.abs(MathFunctions.angleWrapRad(toRad - fromRad));
         return TURN_COST_MM_PER_RAD * turn;
     }
 

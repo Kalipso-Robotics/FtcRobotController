@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
@@ -23,20 +22,16 @@ public class TurretAutoAlign extends Action {
 
     private double targetAngleRad;
 
-    private final Point targetPoint;
+    private Point targetPoint;
     private double toleranceDeg = 1.5;
     private boolean isWithinRange = false;
     private double deltaAngleDeg;
 
-    private final AllianceColor allianceColor;
-
-    public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
+    public TurretAutoAlign(OpModeUtilities opModeUtilities, Turret turret, Point target) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
         this.dependentActions.add(new DoneStateAction());
-        this.allianceColor = allianceColor;
-
-        targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
+        this.targetPoint = target;
 
         this.targetAngleRad = 0;
     }
@@ -44,6 +39,11 @@ public class TurretAutoAlign extends Action {
     /** Servo finished its estimated travel last loop, and the new target is within tolerance of where it is (so not clamped beyond tolerance). */
     public boolean isWithinRange() {
         return isWithinRange;
+    }
+
+    /** Aim at a different field point from the next update on. */
+    public void setTargetPoint(Point target) {
+        this.targetPoint = target;
     }
 
     public void stop() {

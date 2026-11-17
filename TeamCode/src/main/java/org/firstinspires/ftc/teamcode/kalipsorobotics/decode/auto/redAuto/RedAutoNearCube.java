@@ -85,7 +85,7 @@ public class RedAutoNearCube extends KOpMode {
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, new Point(3419.5 - 152.2, (1400 - 175) * allianceColor.getPolarity())) /* the old TurretConfig default DECODE goal point */;
         turretAutoAlign.setToleranceDeg(5);
 
         turretAutoAlign.setToleranceDeg(3);

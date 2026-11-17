@@ -324,8 +324,8 @@ public class RPSPredictionDataCollector extends LinearOpMode {
 //        double currentX = currentPosition.getX();
 //        double currentY = currentPosition.getY();
 //
-//        double targetX = TurretConfig.X_INIT_SETUP_MM;
-//        double targetY = TurretConfig.Y_INIT_SETUP_MM;
+//        double targetX = Shooter.TARGET_POINT;
+//        double targetY = Shooter.TARGET_POINT;
 //
 //        double dx = targetX - currentX;
 //        double dy = targetY - currentY;

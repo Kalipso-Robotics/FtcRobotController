@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Par
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -86,7 +87,6 @@ public class RedDecideAuto extends KOpMode {
     private static final double PICKUP_GIVE_UP_SECONDS = 6;        // a pickup not finished after this long is stuck (for example against a Flower)
 
     // ----- Where things are -----
-    private static final double FLOWER_BALL_OFFSET_MM = 150;       // TODO-measure: pickup target this far from the Flower's center; the arm knocks balls off by driving in, so likely smaller
     private static final double GARDEN_BALLS_CENTER_X_MM = 142;    // GUESS from the sim field: the 4 Garden balls sit at x = 36 to 249
     private static final double OBSTACLE_BUFFER_MM = 262.5;        // same as DecideSimulation / AutoToBallsPathingAction
     private static final double PARK_WALL_GAP_MM = 15;             // GUESS: room left between the body and the walls at the park spot
@@ -270,8 +270,6 @@ public class RedDecideAuto extends KOpMode {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
         TurretConfig.TRIM_DEG = 0;
-        TurretConfig.X_INIT_SETUP_MM = firstTurretTarget().getX(); // the turret starts aimed at the first Cell
-        TurretConfig.Y_INIT_SETUP_MM = firstTurretTarget().getY();
     }
 
     @Override
@@ -296,6 +294,7 @@ public class RedDecideAuto extends KOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
 
+        AutoToBallsPathingAction.checkFlowerClearance();
         beamBreaks = new BeamBreakCountAction(opModeUtilities); // counts the balls inside the robot
 
         // AUTO: the opponent's half is blocked. Nothing is tipping yet, so the space under the Hive is open.
@@ -470,8 +469,9 @@ public class RedDecideAuto extends KOpMode {
         } else if (sweepRunningFor != null) {
             currentAction = sweepMove(sweepRunningFor); // currentMove is WAIT, but it is really a sweep
         } else if (currentPile != null) {
-            boolean isFlowerPile = currentPile == Pile.FLOWER_A || currentPile == Pile.FLOWER_B;
-            currentAction = pickupMove(pilePointOf(currentPile), "pickup" + currentPile, isFlowerPile);
+            Point flower = currentPile == Pile.FLOWER_A ? FieldConfig.aFlowerPoint
+                    : currentPile == Pile.FLOWER_B ? FieldConfig.bFlowerPoint : null;
+            currentAction = pickupMove(pilePointOf(currentPile), "pickup" + currentPile, flower);
         } else if (move == Move.SHOOT_A) {
             currentAction = shootMove(Cell.A);
         } else if (move == Move.SHOOT_B) {
@@ -484,7 +484,7 @@ public class RedDecideAuto extends KOpMode {
             committedCenter = currentSeenCenter;
             committedBalls = new ArrayList<>(seenCluster.getBalls());
             committedAtSeconds = getRuntime();
-            currentAction = pickupMove(currentSeenCenter, "pickupSeen", false);
+            currentAction = pickupMove(currentSeenCenter, "pickupSeen", null);
         } else {
             currentMove = Move.PARK; // PARK, or GET_SEEN_BALLS with nothing seen (decide() cannot do that, but park to be safe)
             stowIntake("park");
@@ -871,10 +871,8 @@ public class RedDecideAuto extends KOpMode {
         Point launch = launchPointOf(cell);
         Point target = (cell == Cell.A) ? FieldConfig.aTargetPoint : FieldConfig.bTargetPoint;
 
-        // TurretAutoAlign reads its target point when it is built (and never changes it), so set the target first: a fresh one per shot.
-        TurretConfig.X_INIT_SETUP_MM = target.getX();
-        TurretConfig.Y_INIT_SETUP_MM = target.getY();
-        TurretAutoAlign aim = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        // A fresh aim per shot, aimed at THIS Cell.
+        TurretAutoAlign aim = new TurretAutoAlign(opModeUtilities, turret, target);
         aim.setToleranceDeg(5);
         currentAim = aim;
 
@@ -931,8 +929,8 @@ public class RedDecideAuto extends KOpMode {
     }
 
     /** Plan a route to the balls with the path planner, drive it and run the intake (and the Flower arm for a Flower pile). */
-    private Action pickupMove(Point ball, String name, boolean useFlower) {
-        AutoToBallsPathingAction pickup = new AutoToBallsPathingAction(driveTrain, stopper, intake, ball, true, useFlower);
+    private Action pickupMove(Point ball, String name, Point flower) {
+        AutoToBallsPathingAction pickup = new AutoToBallsPathingAction(driveTrain, stopper, intake, ball, true, flower);
         pickup.setName(name);
         return pickup;
     }
@@ -1167,12 +1165,7 @@ public class RedDecideAuto extends KOpMode {
      * it the best view of the field (and the turret then sits near 0 degrees, nowhere near its +-180 wrap).
      */
     private static double frontToward(Point from, Point toward) {
-        double deg = Math.toDegrees(Math.atan2(toward.getY() - from.getY(), toward.getX() - from.getX())) % 360;
-        if (deg > 180) {
-            deg -= 360;
-        } else if (deg <= -180) {
-            deg += 360;
-        }
+        double deg = MathFunctions.angleWrapDeg(Math.toDegrees(Math.atan2(toward.getY() - from.getY(), toward.getX() - from.getX())));
         return deg;
     }
 
@@ -1193,9 +1186,9 @@ public class RedDecideAuto extends KOpMode {
             case GARDEN:   // the middle of its 4 balls, which lie along the wall
                 return new Point(GARDEN_BALLS_CENTER_X_MM, FieldConfig.gardenPoint.getY());
             case FLOWER_A: // the open side of Flower A is +x (away from the wall)
-                return new Point(FieldConfig.aFlowerPoint.getX() + FLOWER_BALL_OFFSET_MM, FieldConfig.aFlowerPoint.getY());
+                return FieldConfig.flowerPilePoint(FieldConfig.aFlowerPoint);
             default:       // the open side of Flower B is +y (away from the wall)
-                return new Point(FieldConfig.bFlowerPoint.getX(), FieldConfig.bFlowerPoint.getY() + FLOWER_BALL_OFFSET_MM);
+                return FieldConfig.flowerPilePoint(FieldConfig.bFlowerPoint);
         }
     }
 

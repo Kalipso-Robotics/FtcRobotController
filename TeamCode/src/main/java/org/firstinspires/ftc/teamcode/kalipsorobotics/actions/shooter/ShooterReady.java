@@ -13,10 +13,27 @@ public class ShooterReady extends Action {
 
     ShooterRun shooterRun;
     ElapsedTime actionTime;
+    private final double timeoutMS;
+    private final boolean holdOnTimeout;
+    private boolean timedOut = false;
 
     public ShooterReady(ShooterRun shooterRun) {
         this.shooterRun = shooterRun;
         this.actionTime = new ElapsedTime();
+        this.timeoutMS = AUTO_SHOOTER_READY_TIMEOUT_MS;
+        this.holdOnTimeout = false;
+    }
+
+    /** TeleOp gate: on timeout it only sets timedOut() and stays not-done, so ShootAllAction can abort before feeding. */
+    public ShooterReady(ShooterRun shooterRun, double timeoutMS) {
+        this.shooterRun = shooterRun;
+        this.actionTime = new ElapsedTime();
+        this.timeoutMS = timeoutMS;
+        this.holdOnTimeout = true;
+    }
+
+    public boolean timedOut() {
+        return timedOut;
     }
 
 
@@ -48,8 +65,11 @@ public class ShooterReady extends Action {
             KLog.d(TAG, () -> "name=" + getName() + " event=waiting reason=rpsOutOfRange");
         }
 
-        if (actionTime.milliseconds() > AUTO_SHOOTER_READY_TIMEOUT_MS) {
-            isDone = true;
+        if (actionTime.milliseconds() > timeoutMS) {
+            timedOut = true;
+            if (!holdOnTimeout) {
+                isDone = true;
+            }
         }
 
     }

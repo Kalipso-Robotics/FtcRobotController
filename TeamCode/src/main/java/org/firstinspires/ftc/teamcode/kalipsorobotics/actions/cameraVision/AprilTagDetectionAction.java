@@ -119,7 +119,7 @@ public class AprilTagDetectionAction extends Action {
      * without touching the detection/filtering logic below.
      */
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, int goalAprilTagId, AllianceColor allianceColor, AprilTagCamera camera, CameraGimbal cameraGimbal) {
-        this(opModeUtilities, turret, goalAprilTagId, allianceColor, camera, cameraGimbal, buildFieldLayout());
+        this(opModeUtilities, turret, goalAprilTagId, allianceColor, camera, cameraGimbal, buildFieldLayout(allianceColor));
     }
 
     /**

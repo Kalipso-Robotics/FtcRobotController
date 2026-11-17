@@ -142,8 +142,13 @@ public final class OctoConfig {
     // the fixed spinGeometry signs. Y pod 28.3 / 27.8 mm IN FRONT -> X = -28.0. Right pod radius
     // 72.8 / 83.5 is pivot-dependent (hand wander), so Y = track/2, assuming centred X pods.
     // [TAPE-VERIFY both] If a spin-in-place wanders MORE than with 0/0, negate both.
-    public static final float TCP_OFFSET_MM_X   = -29.2f;  // [2026-10-03] mean of 5 spins (-28.3,-27.8,-31.3,-31.0,-27.7)
-    public static final float TCP_OFFSET_MM_Y   = 77.3f;   // [2026-10-03] track/2, tape-verify
+    // [2026-11-16] PODS MOVED. Values below from CAD ("26-27 Drivetrain", the three "4 bar odometry"
+    // occurrences; omni-wheel centres vs the mecanum wheelbase centre). Robot frame: right parallel pod
+    // (port 0) 85.6 mm fwd / 76.0 mm right, left parallel pod (port 2) 85.6 fwd / 76.0 left, perpendicular
+    // pod (port 1) 36.1 mm fwd / 0 lateral. offset = -(pod position), board frame y-LEFT, same rule as above.
+    // SPIN-VERIFY with OctoTune HEADING; the 2026-10-03 spin values were 2.5 mm off tape, expect similar.
+    public static final float TCP_OFFSET_MM_X   = -36.1f;  // [2026-11-16] CAD: perpendicular pod 36.1 mm in front (was -29.2, 2026-10-03 spins, old pod position)
+    public static final float TCP_OFFSET_MM_Y   = 76.0f;   // [2026-11-16] CAD: right parallel pod 76.0 mm right (was 77.3, old pod position)
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the
@@ -151,7 +156,7 @@ public final class OctoConfig {
      * Solved by OctoTune's HEADING spin (see spinGeometry), not tape.
      */
     // [2026-10-03] 3 OctoTune HEADING spins: 154.66 (10/02 CCW), 154.27 (CW), 154.85 (CCW).
-    public static final float TRACK_WIDTH_MM = 154.5f;  // [2026-10-03] mean of 6 spins (154.66,154.27,154.85,154.37,154.61,154.51)
+    public static final float TRACK_WIDTH_MM = 152.0f;  // [2026-11-16] CAD: parallel pods 152.0 mm apart (was 154.5, 2026-10-03 spins, old pod position). SPIN-VERIFY
 
     public static final int VELOCITY_INTERVAL_MS = 25;
 

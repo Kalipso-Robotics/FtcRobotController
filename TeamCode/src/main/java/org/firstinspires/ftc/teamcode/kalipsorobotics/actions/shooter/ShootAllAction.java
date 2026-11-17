@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.Pus
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
@@ -45,8 +46,15 @@ public class ShootAllAction extends KActionSet {
     }
 
     private boolean enableLimelightZeroing = true;
+    private final boolean abortOnTimeout;
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos) {
+        this(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleop, targetRPS, targetHoodPos, false);
+    }
+
+    /** abortOnTimeout: TeleOp gate. If RPS or turret is not ready in TELEOP_READY_TIMEOUT_MS, finish without feeding. */
+    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, double targetRPS, double targetHoodPos, boolean abortOnTimeout) {
+        this.abortOnTimeout = abortOnTimeout;
         this.stopper = stopper;
         this.intake = intake;
         this.shooter = shooter;
@@ -64,6 +72,11 @@ public class ShootAllAction extends KActionSet {
     }
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
+        this(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleop, false);
+    }
+
+    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlignTeleOp turretAutoAlignTeleop, boolean abortOnTimeout) {
+        this.abortOnTimeout = abortOnTimeout;
         this.stopper = stopper;
         this.intake = intake;
         this.shooter = shooter;
@@ -89,11 +102,15 @@ public class ShootAllAction extends KActionSet {
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
 
-        shooterReady = new ShooterReady(shooterRun);
+        shooterReady = abortOnTimeout
+                ? new ShooterReady(shooterRun, ShooterConfig.TELEOP_READY_TIMEOUT_MS)
+                : new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 
-        turretReadyTeleOp = new TurretReadyTeleOp(turretAutoAlignTeleop);
+        turretReadyTeleOp = abortOnTimeout
+                ? new TurretReadyTeleOp(turretAutoAlignTeleop, ShooterConfig.TELEOP_READY_TIMEOUT_MS)
+                : new TurretReadyTeleOp(turretAutoAlignTeleop);
         turretReadyTeleOp.setName("turretReady");
         this.addAction(turretReadyTeleOp);
 
@@ -118,6 +135,25 @@ public class ShootAllAction extends KActionSet {
         resetOdometryToPosition.setDependentActions(pushBall);
         this.addAction(resetOdometryToPosition);
 
+    }
+
+    /** Abort only when a gate timed out and the two gates are not both ready (both ready = a legit feed). */
+    public static boolean shouldAbortOnTimeout(boolean abortOnTimeout, boolean shooterTimedOut, boolean turretTimedOut,
+                                               boolean shooterDone, boolean turretDone) {
+        return abortOnTimeout && (shooterTimedOut || turretTimedOut) && !(shooterDone && turretDone);
+    }
+
+    @Override
+    public void update() {
+        // Checked before super.update(): KActionSet runs PushBall in the same pass as beforeUpdate(), so aborting there can leak a feed.
+        if (!isDone && shouldAbortOnTimeout(abortOnTimeout, shooterReady.timedOut(), turretReadyTeleOp.timedOut(),
+                shooterReady.getIsDone(), turretReadyTeleOp.getIsDone())) {
+            KLog.e(TAG, "event=abort reason=timeout name=" + getName() + " shooterTimedOut=" + shooterReady.timedOut()
+                    + " turretTimedOut=" + turretReadyTeleOp.timedOut());
+            setIsDone(true);
+            return;
+        }
+        super.update();
     }
 
     @Override

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
-import android.util.Log;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 

@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 public class FieldConfig {
     // Each alliance has its own frame, with (0,0) at the corner of its own loading zone (field drawing
@@ -42,6 +44,44 @@ public class FieldConfig {
         if (current != null) return current;
         return robotY >= HIVE_CENTER ? aTargetPoint : bTargetPoint;
     }
+
+    // The pickup target is this far from a Flower's center, straight out from its wall (the arm knocks balls off by
+    // driving in, so likely smaller). Measured value, not Dashboard-tuned.
+    public final static double FLOWER_BALL_OFFSET_MM = 150; // TODO-measure
+
+    /** The closest of the four Flowers (A-D) to the robot. */
+    public static Point nearestFlower(Point robot) {
+        Point best = aFlowerPoint;
+        for (Point f : new Point[]{bFlowerPoint, cFlowerPoint, dFlowerPoint}) {
+            if (MathFunctions.distance(robot, f) < MathFunctions.distance(robot, best)) best = f;
+        }
+        return best;
+    }
+
+    /** Where to drive to pick up a Flower's balls: the Flower point moved FLOWER_BALL_OFFSET_MM from its nearest wall into the field. */
+    public static Point flowerPilePoint(Point flower) {
+        double x = flower.getX(), y = flower.getY();
+        double toLowX = x, toHighX = FIELD_MM - x, toLowY = y, toHighY = FIELD_MM - y;
+        double min = Math.min(Math.min(toLowX, toHighX), Math.min(toLowY, toHighY));
+        if (min == toLowX) return new Point(x + FLOWER_BALL_OFFSET_MM, y);
+        if (min == toHighX) return new Point(x - FLOWER_BALL_OFFSET_MM, y);
+        if (min == toLowY) return new Point(x, y + FLOWER_BALL_OFFSET_MM);
+        return new Point(x, y - FLOWER_BALL_OFFSET_MM);
+    }
+
+    // The point a pass aims at, on the low-y half of the field. The high-y half uses its mirror about the field middle.
+    public final static double PASS_X = 1524;  // TODO-measure
+    public final static double PASS_Y = 600;   // TODO-measure
+
+    /** The pass target on the half of the field opposite the robot (no alliance flip: each alliance has its own frame). */
+    public static Point passTargetForSide(double robotY) {
+        return new Point(PASS_X, robotY >= HIVE_CENTER ? PASS_Y : FIELD_MM - PASS_Y);
+    }
+
+    // Where the robot sits when it is zeroed against the loading-zone corner (center of the robot, own frame).
+    public final static Position CORNER_ZERO_POSE = new Position(230, 230, 0); // TODO-measure
+
+    private final static double FIELD_MM = 3657.6;
 
     public final static double FLOWER_A_X = 100;  // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
     private final static double FLOWER_A_Y = 2500;
