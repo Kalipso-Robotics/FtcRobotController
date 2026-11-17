@@ -13,7 +13,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAc
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveController;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.FieldOrientedDriveAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReverse;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.DriveDirectionIntakeController;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeController;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootAllAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Flower;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -67,7 +69,8 @@ public class TeleOp extends KOpMode {
     KServoAutoAction openStopper = null;
     KServoAutoAction closeStopper = null;
 
-    RunIntake intakeRun = null;
+    IntakeController intakeController = null;
+    private boolean flowerWanted = false;
     IntakeStop intakeStop = null;
     IntakeReverse intakeReverse = null;
 
@@ -82,6 +85,7 @@ public class TeleOp extends KOpMode {
     private boolean shootAllActionPressed = false;
     private boolean intakeStopPressed = false;
     private boolean intakeReversePressed = false;
+    private boolean flowerTogglePressed = false;
     private boolean stopShooterPressed = false;
     private boolean zeroLimelightPressed = false;
     private boolean zeroCornerPressed = false;
@@ -123,6 +127,7 @@ public class TeleOp extends KOpMode {
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         turret = Turret.getInstance(opModeUtilities);
         intake = new Intake(opModeUtilities);
+        intakeController = new DriveDirectionIntakeController(intake);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
 
@@ -225,6 +230,7 @@ public class TeleOp extends KOpMode {
             intakeStopPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
 
+            flowerTogglePressed = kGamePad2.isButtonBFirstPressed();
             releaseStopperPressed = kGamePad2.isYPressed();
 
             toggleTurretAlign = !kGamePad2.isToggleX();
@@ -232,7 +238,7 @@ public class TeleOp extends KOpMode {
 //            enableLimelightAlignTurret = kGamePad2.isBackButtonToggle(); TURNED OFF LIMELIGHT
             enableLimelightAlignTurret = false;
             KLog.d("TeleOp_Button", () -> "enableLimelightAlignTurret: " + enableLimelightAlignTurret);
-            enableOdometryAlignTurret = !kGamePad2.isToggleB();
+            enableOdometryAlignTurret = true; // odometry align always on; GP2 B is the flower toggle
             KLog.d("TeleOp_Button", () -> "enableOdometryAlignTurret: " + enableOdometryAlignTurret);
 
 
@@ -247,6 +253,7 @@ public class TeleOp extends KOpMode {
             handleTurret();
             // ========== HANDLE INTAKE (Priority Order: Shoot > Stall > Manual > Idle) ==========
             handleIntake();
+            handleFlower();
 
             // ========== HANDLE STOPPER ==========
             handleStopper();
@@ -258,6 +265,9 @@ public class TeleOp extends KOpMode {
             updateActions();
             telemetry.addData("Odometry: ", SharedData.getOdometryWheelIMUPosition().toCompactString());
             telemetry.addData("Shot: ", shootCount);
+            telemetry.addData("Intake side", intakeController.getSelectedSide());
+            telemetry.addData("Balls", intake.getBallCount());
+            telemetry.addData("Flower wanted/down", flowerWanted + "/" + intake.getFlower().isDown());
             telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Current RPS ", "%.2f", shooterRun.getCurrentRPS());
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());
@@ -376,12 +386,22 @@ public class TeleOp extends KOpMode {
             }
             return;
         }
-        // PRIORITY 3: Manual forward
-        if (!isPending(intakeRun)) {
-            intakeRun = new RunIntake(intake);
-        }
-        setLastIntakeAction(intakeRun);
+        // PRIORITY 3: drive-direction intake policy
+        intakeController.update();
+    }
 
+    /** GP2 B toggles driver intent; the interlock lifts the flower when side A raises, and it re-lowers when A is down. */
+    private void handleFlower() {
+        Flower flower = intake.getFlower();
+        if (flowerTogglePressed) {
+            flowerWanted = !flowerWanted;
+            KLog.d("Intaking_Flower", () -> "event=toggle wanted=" + flowerWanted);
+        }
+        if (flowerWanted && !flower.isDown()) {
+            flower.lower();
+        } else if (!flowerWanted && !flower.isUp()) {
+            flower.raise();
+        }
     }
 
     /**
@@ -404,16 +424,13 @@ public class TeleOp extends KOpMode {
             return;
         }
 
-        // Close when intaking
-        if (intakeStopPressed || isPending(intakeRun)) {
-            KLog.d("TeleOp_Stopper", () -> "Intake Pressed Close Stopper isPending: " + isPending(closeStopper));
-            if (!isPending(closeStopper)) {
-                KLog.d("TeleOp_Stopper", "Close Stopper");
-                closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-                closeStopper.setName("closeStopper");
-                openStopper = null;
-                setLastStopperAction(closeStopper);
-            }
+        // Not shooting and not Y (both returned above): keep the stopper closed
+        if (!isPending(closeStopper)) {
+            KLog.d("TeleOp_Stopper", "Close Stopper");
+            closeStopper = new KServoAutoAction(stopper.getStopper(), ModuleConfig.STOPPER_SERVO_CLOSED_POS);
+            closeStopper.setName("closeStopper");
+            openStopper = null;
+            setLastStopperAction(closeStopper);
         }
     }
 

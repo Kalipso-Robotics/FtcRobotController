@@ -21,8 +21,8 @@ public class Intake {
         flower = new Flower(opModeUtilities, getSide(ModuleConfig.FLOWER_SIDE));
     }
 
-    /** Direct-injection constructor (unit tests). The flower must already be attached to one of the sides. */
-    Intake(IntakeSide sideA, IntakeSide sideB, Flower flower) {
+    /** Direct-injection constructor (unit tests, public so actions tests can build one). The flower must already be attached to one of the sides. */
+    public Intake(IntakeSide sideA, IntakeSide sideB, Flower flower) {
         this.sideA = sideA;
         this.sideB = sideB;
         this.flower = flower;

@@ -123,3 +123,16 @@ Decisions made during execution (owner answers and orchestrator rulings).
 - Review, milestone 1: the turret is not wrapped at ±180 deg, because this handoff says "no wrap logic". A goal directly behind the robot can make it swing a full turn; `Turret.isMoving()` tracks its own busy-until time so a shot does not fire mid-swing.
 - Review, milestone 1: until the milestone 2 `IntakeController` exists, the intake-running actions lower both sides when they start, so live OpModes do not spin rollers in the air.
 - Moved to milestone 2: `IntakeConfig` `@Config` with per-side feed time, wait between sides and side-switch thresholds (they have no caller until the controller and the shoot flow exist). The deferred review minors are listed in `teleop-to-sim-handoff.md`.
+
+**Orchestrator rulings (milestone 2)**
+- `DriveController`'s concrete pattern source is `FieldOrientedDriveAction` (the `FieldOrientedDrive` class is commented out); `DriveDirectionIntakeController` follows it.
+- Odometry velocity is field frame in mm/ms. The controller rotates it by heading into robot-forward mm/s (`vx·cosθ + vy·sinθ`, ×1000) before picking a side.
+- Side selection uses one threshold with keep-last (`> +T` → A, `< −T` → B, otherwise keep the last side, A by default). The keep-last band is the deadband/hysteresis. The unselected side stops and raises; that is the one line to change if both sides should stay down.
+- GP2 B is now the flower toggle. The old GP2-B odometry-turret-align toggle is gone: odometry align is always on, and GP2 X still toggles turret align overall. The driver's flower intent survives side A being raised: the interlock lifts the flower, and TeleOp lowers it again once A is back down.
+- The interim `intake.lower()` in `RunIntake` / `RunIntakeTime(both)` stays for the autos until milestone 3. TeleOp no longer uses `RunIntake`.
+- Shoot flow: no pre-feed. `PushBall` = intake stop → open stopper → feed A → wait → feed B → close stopper. Feeding happens with both sides raised (the controller raises at full); the transfer wheels share the motor, **confirm on robot (Ken)**.
+- `ShooterReady` logs are retagged to `Shooting_ShooterReady`. `ShootAllAction` logs use `Shooting_ShootAction`.
+- `ShooterDataCollector` writes rows ready to paste into `ShooterInterpolationConfig.shooterData` through `KFileWriter` instead of `ShotLogger`, because `ShotLogger` has no hit/miss and a different column set.
+- New `TODO-measure` for the milestone 3 checklist: `IntakeConfig.FEED_A_MS` (400), `FEED_B_MS` (400), `WAIT_BETWEEN_SIDES_MS` (150), `SIDE_SWITCH_VX_MM_PER_S` (100); `ShooterConfig.kf` from `MotorPowerRPSDataCollector` at ~0.8 power on a full battery.
+- Review, milestone 2: the new `PushBall` feed is ~950 ms per shot (was 500 ms), and the per-side `RunIntakeTime` does not lower the pivots, so the autos' preload shot feeds with both sides raised. **Ken: confirm raised-pivot feeding (including the preload shot) on the robot, and re-check `RedDecideAuto` time budgets in sim.** `IntakeConfig.shootTimeMS` no longer has a caller.
+- Review, milestone 2: `MotorPowerRPSDataCollector` computes kf as effective power (after voltage compensation) / RPS, so it matches what `KMotor.goToRPS` applies.

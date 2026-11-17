@@ -26,6 +26,13 @@ public class Stopper {
         }
     }
 
+    /** Direct-injection constructor, for a servo you have already pulled out of the hardware map (unit tests). */
+    public Stopper(KServo stopper) {
+        this.opModeUtilities = null;
+        this.stopper = stopper;
+        stopper.setTargetPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
+    }
+
     public KServo getStopper() {return stopper;}
 
     public void setPosition(double target) {

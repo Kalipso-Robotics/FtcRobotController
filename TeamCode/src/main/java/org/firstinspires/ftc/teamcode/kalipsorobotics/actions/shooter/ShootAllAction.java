@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 
 public class ShootAllAction extends KActionSet {
+    public static final String TAG = "Shooting_ShootAction";
 
     private final Turret turret;
     private final Stopper stopper;
@@ -88,9 +89,6 @@ public class ShootAllAction extends KActionSet {
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlignTeleOp turretAutoAlignTeleop) {
 
-        intake.run(0.2);
-
-
         shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
@@ -136,7 +134,7 @@ public class ShootAllAction extends KActionSet {
             }
         }
 
-        KLog.d("ShootAllAction_Status", () -> "ShooterReady: " + shooterReady.getIsDone() + " TurretReady: " + turretReadyTeleOp.getIsDone() + " PushBall: " + pushBall.getIsDone());
+        KLog.d(TAG, () -> "event=status shooterReady=" + shooterReady.getIsDone() + " turretReady=" + turretReadyTeleOp.getIsDone() + " pushBall=" + pushBall.getIsDone());
     }
 
     @Override
@@ -147,7 +145,7 @@ public class ShootAllAction extends KActionSet {
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
             //KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
         }
-        KLog.d("ShootAllAction", () -> String.format("StopperStatus: %s, Turret Delta Angle: %.2f, Within Range: %s, Delta RPS: %.2f",
+        KLog.d(TAG, () -> String.format("event=update stopperOpen=%s turretDeltaDeg=%.2f turretWithinRange=%s deltaRps=%.2f",
                 (pushBall.getOpenStopper().getIsDone()),
                 (turretAutoAlignTeleop.getDeltaAngleDeg()),
                 (turretAutoAlignTeleop.isWithinRange()),
