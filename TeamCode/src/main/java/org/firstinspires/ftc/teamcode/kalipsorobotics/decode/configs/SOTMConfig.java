@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
 import com.acmerobotics.dashboard.config.Config;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 
 /**
@@ -19,8 +20,8 @@ public class SOTMConfig {
 
     // ---- Measured (physical constants, not Dashboard-tuned) ----
 
-    /** Red-alliance goal points, y mirrored by alliance polarity. Index = goal number. */
-    public static Point[] GOALS = {new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM)};
+    /** Goal points in our alliance's own frame (no mirroring, see FieldConfig). Index 0 = Hive Cell A, 1 = Cell B. */
+    public static Point[] GOALS = {FieldConfig.aTargetPoint, FieldConfig.bTargetPoint};
 
     /** Launcher position relative to the robot centre, robot frame. Measure it. */
     public static double LAUNCHER_OFFSET_X_MM = 0;

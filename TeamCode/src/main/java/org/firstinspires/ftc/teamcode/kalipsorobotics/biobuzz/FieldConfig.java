@@ -26,7 +26,24 @@ public class FieldConfig {
     private final static double SHOOT_TARGET_B_Y = 3657.6-2135;
     public static Point bTargetPoint =  new Point(SHOOT_TARGET_B_X, SHOOT_TARGET_B_Y);
 
-    public final static double FLOWER_A_X = 100;   // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
+    // TeleOp aims at the Cell on the robot's end of the Hive: A is the high-y end, B the low-y end. Inside this
+    // band around the Hive's middle the last choice is kept, so the target does not flicker while the robot
+    // drives under the Hive. PLACEHOLDER, tune on the field.
+    public static double SIDE_SWITCH_DEADBAND_MM = 150;
+
+    /**
+     * The Cell target on the robot's end of the Hive. Same numbers for RED and BLUE: each alliance has its own
+     * frame (see the top of this file), so there is no polarity flip.
+     * @param current the target chosen last loop, or null for the first call
+     */
+    public static Point hiveTargetForSide(double robotY, Point current) {
+        if (robotY > HIVE_CENTER + SIDE_SWITCH_DEADBAND_MM) return aTargetPoint;
+        if (robotY < HIVE_CENTER - SIDE_SWITCH_DEADBAND_MM) return bTargetPoint;
+        if (current != null) return current;
+        return robotY >= HIVE_CENTER ? aTargetPoint : bTargetPoint;
+    }
+
+    public final static double FLOWER_A_X = 100;  // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
     private final static double FLOWER_A_Y = 2500;
     public static Point aFlowerPoint =  new Point(FLOWER_A_X, FLOWER_A_Y);
 

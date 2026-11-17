@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.DoneStateAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
@@ -27,13 +27,18 @@ public class TurretAutoAlignTeleOp extends Action {
     private double deltaAngleDeg;
 
 
-    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
+    public TurretAutoAlignTeleOp(OpModeUtilities opModeUtilities, Turret turret) {
         this.opModeUtilities = opModeUtilities;
         this.turret = turret;
         this.dependentActions.add(new DoneStateAction());
         this.turretRunMode = TurretRunMode.STOP; // initial mode
         this.targetAngleRad = 0;
-        targetPoint = new Point(TurretConfig.X_INIT_SETUP_MM, TurretConfig.Y_INIT_SETUP_MM * allianceColor.getPolarity());
+        targetPoint = FieldConfig.bTargetPoint; // TeleOp replaces this every loop with the Cell on the robot's end of the Hive
+    }
+
+    /** The field point the turret aims at (our alliance's own frame). */
+    public void setTargetPoint(Point targetPoint) {
+        this.targetPoint = targetPoint;
     }
 
     /** STOP: always true. RUN_USING_ODOMETRY: servo finished its estimated travel last loop, and the new target is within tolerance of where it is. */

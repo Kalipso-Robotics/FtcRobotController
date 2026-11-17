@@ -27,6 +27,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
@@ -104,6 +106,7 @@ public class TeleOp extends KOpMode {
     private boolean leverButtonPressed;
     private boolean enableLimelightZeroing = true;
 
+    private Point hiveTarget = null; // the Hive Cell we aim at, see updateHiveTarget()
     private int shootCount = 0;
     private double lastLoopTime = 0;
     private final ElapsedTime loopTimer = new ElapsedTime();
@@ -149,8 +152,12 @@ public class TeleOp extends KOpMode {
         driveAction = USE_FIELD_ORIENTED_DRIVE
                 ? new FieldOrientedDriveAction(driveTrain, imuModule)
                 : new DriveAction(driveTrain);
-        shooterRun = new ShooterRun(opModeUtilities, shooter, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
-        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret, allianceColor);
+        // Both aim at the Hive Cell on the robot's end of the Hive; updateHiveTarget() keeps them on it every loop.
+        hiveTarget = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), null);
+        shooterRun = new ShooterRun(opModeUtilities, shooter, hiveTarget);
+        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret);
+        turretAutoAlignTeleOp.setTargetPoint(hiveTarget);
+        SharedData.setSOTMActiveGoal(hiveTarget == FieldConfig.aTargetPoint ? 0 : 1);
 
         // =========================================
 
@@ -250,6 +257,7 @@ public class TeleOp extends KOpMode {
             handleZeroing();
 
             // ========== HANDLE TURRET ==========
+            updateHiveTarget();
             handleTurret();
             // ========== HANDLE INTAKE (Priority Order: Shoot > Stall > Manual > Idle) ==========
             handleIntake();
@@ -270,6 +278,7 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Flower wanted/down", flowerWanted + "/" + intake.getFlower().isDown());
             telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Current RPS ", "%.2f", shooterRun.getCurrentRPS());
+            telemetry.addData("Hive Cell ", hiveTarget == FieldConfig.aTargetPoint ? "A" : "B");
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());
             telemetry.addData("Rps Offset ", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset ", "%.2f", ShooterInterpolationConfig.hoodOffset);
@@ -350,6 +359,24 @@ public class TeleOp extends KOpMode {
         if (KLog.isDebug()) {
             KLog.d("TeleOp_Turret", () -> "angleDeg=" + turret.getAngleDeg() + " trimDeg=" + TurretConfig.TRIM_DEG);
         }
+    }
+
+    /**
+     * Aim at the Hive Cell on the robot's end of the Hive (A at high y, B at low y). Same numbers for both
+     * alliances: odometry is in our alliance's own frame (FieldConfig). ShooterRun recomputes RPS and hood
+     * from the distance to this point on every update.
+     */
+    private void updateHiveTarget() {
+        Point next = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), hiveTarget);
+        if (next == hiveTarget) {
+            return;
+        }
+        hiveTarget = next;
+        turretAutoAlignTeleOp.setTargetPoint(hiveTarget);
+        shooterRun.setTargetPoint(hiveTarget);
+        SharedData.setSOTMActiveGoal(hiveTarget == FieldConfig.aTargetPoint ? 0 : 1);
+        KLog.d("TeleOp_Target", () -> "event=cellSwitch cell=" + (hiveTarget == FieldConfig.aTargetPoint ? "A" : "B")
+                + " target=" + hiveTarget + " odometry=" + SharedData.getOdometryWheelIMUPosition());
     }
 
     private void turnOnTurret() {

@@ -7,7 +7,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootAllAc
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -58,9 +60,11 @@ public class ShooterDataCollector extends KOpMode {
         OpModeUtilities.runOdometryExecutorService(odoExecutorService,
                 Odometry.getInstance(opModeUtilities, driveTrain, imuModule));
 
-        shooterRun = new ShooterRun(opModeUtilities, shooter,
-                Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
-        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret, allianceColor);
+        // Same goal as TeleOp: the Hive Cell on the robot's end of the Hive, so logged distances match TeleOp's.
+        Point hiveTarget = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), null);
+        shooterRun = new ShooterRun(opModeUtilities, shooter, hiveTarget);
+        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret);
+        turretAutoAlignTeleOp.setTargetPoint(hiveTarget);
         turretAutoAlignTeleOp.setToleranceDeg(2);
         KFileWriter rows = new KFileWriter("ShooterDataRows", opModeUtilities);
 

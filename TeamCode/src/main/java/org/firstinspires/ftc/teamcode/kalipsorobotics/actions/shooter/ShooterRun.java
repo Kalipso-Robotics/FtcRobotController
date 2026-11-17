@@ -33,7 +33,7 @@ public class ShooterRun extends Action {
     private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
     private final Shooter shooter;
-    private final Point targetPoint;
+    private Point targetPoint;
     private Point launchPoint;
     private ElapsedTime rpsInRangeTimer;
     private ElapsedTime rampUpTimeTimer;
@@ -266,6 +266,11 @@ public class ShooterRun extends Action {
         }
         KLog.d("ShooterRun_Distance", () -> "Final Distance " + odometryDistanceMM);
         return odometryDistanceMM;
+    }
+
+    /** The goal used for the distance in SHOOT_USING_CURRENT_POINT; RPS and hood follow it on the next update. */
+    public void setTargetPoint(Point targetPoint) {
+        this.targetPoint = targetPoint;
     }
 
     public void setLaunchPoint(Point launchPoint) {

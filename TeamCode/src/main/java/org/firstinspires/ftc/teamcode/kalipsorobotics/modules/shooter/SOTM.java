@@ -97,10 +97,9 @@ public class SOTM {
                 s.shotDistanceMM, s.flightTimeMS, s.converged, motion.vx, motion.vy, motion.omega));
     }
 
-    /** Field position of the goal, mirrored by the current alliance. */
+    /** Field position of the goal, in our alliance's own frame (same numbers for both alliances). */
     static Point goal(int index) {
-        Point p = SOTMConfig.GOALS[index < SOTMConfig.GOALS.length ? index : 0];
-        return p.multiplyY(SharedData.getAllianceColor().getPolarity());
+        return SOTMConfig.GOALS[index < SOTMConfig.GOALS.length ? index : 0];
     }
 
     private static double flightTimeMS(double distanceMM) {
