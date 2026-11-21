@@ -1,0 +1,2 @@
+{ "name": "red_partner_far", "archetype": "generic", "start": [250, 1400, 0],
+  "steps": [{ "wait": 3 }, { "drive": [250, 800, 0], "speedMmS": 67 }, { "drive": [250, 500, 0], "speedMmS": 37 }] }

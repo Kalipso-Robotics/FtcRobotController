@@ -86,7 +86,7 @@ public class VisionConfig {
 
     public static double POLLEN_DIAMETER_MM = PollenColorBlobDetectionProcessor.POLLEN_DIAMETER_MM;
     // ponytail: assumed equal to pollen. BallCluster assumes 71 mm; put calipers on a nectar ball.
-    public static double NECTAR_DIAMETER_MM = 2.8 * 25.4;
+    public static double NECTAR_DIAMETER_MM = 3.6 * 25.4;
 
     /** Pixels to grow each box edge before raytracing. 0 for TFLite, whose boxes are not eroded. */
     public static double EDGE_GROW_PX = 0;

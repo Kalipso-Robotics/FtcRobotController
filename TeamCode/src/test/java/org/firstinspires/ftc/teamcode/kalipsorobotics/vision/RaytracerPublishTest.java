@@ -115,7 +115,7 @@ public class RaytracerPublishTest {
         SharedData.setOdometryWheelIMUPosition(atCapture, nanos);
         SharedData.setOdometryWheelIMUPosition(new Position(500, 500, 1.0), nanos + 50_000_000L);
 
-        frame(project("nectar_red", 0.8f, 0, 700, 35.56)); // processed "late"; captured at `nanos`
+        frame(project("nectar_red", 0.8f, 0, 700, VisionConfig.NECTAR_DIAMETER_MM / 2)); // processed "late"; captured at `nanos`
 
         BallInformation b = SharedData.getBallInformation().get(0);
         Point want = Raytracer.toField(new Point(0, 700), atCapture);

@@ -56,7 +56,7 @@ public class ShooterRun extends Action {
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD;
         this.shooter = shooter;
         this.targetPoint = null;
-        this.name = "ShooterReady";
+        this.name = "ShooterRun";
         elapsedTime = new ElapsedTime();
         this.distanceMM = -1;
         this.targetRPS = targetRPS;
@@ -68,7 +68,7 @@ public class ShooterRun extends Action {
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_FIXED_POINT;
         this.shooter = shooter;
         this.targetPoint = targetPoint;
-        this.name = "ShooterReady";
+        this.name = "ShooterRun";
         elapsedTime = new ElapsedTime();
         this.launchPoint = launchPoint;
         this.distanceMM = 0;
@@ -81,7 +81,7 @@ public class ShooterRun extends Action {
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
         this.shooter = shooter;
         this.targetPoint = targetPoint;
-        this.name = "ShooterReady";
+        this.name = "ShooterRun";
         elapsedTime = new ElapsedTime();
         this.distanceMM = -1;
     }
