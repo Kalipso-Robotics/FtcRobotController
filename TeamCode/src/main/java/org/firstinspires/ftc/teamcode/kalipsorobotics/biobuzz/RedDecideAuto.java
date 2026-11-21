@@ -415,8 +415,8 @@ public class RedDecideAuto extends KOpMode {
 
         // The two "does the trip fit" times are 0: decide() never turns a shot or a trip down for time.
         // Only its rule 1 is left (time left <= "drive to park" + margin -> park). We give it a "drive to park" that makes it
-        // park at PARK_WHEN_SECONDS_LEFT.
-        double secondsToParkForDecide = PARK_WHEN_SECONDS_LEFT - AutoDecider.PARK_MARGIN_SECONDS;
+        // park at PARK_AT_SECONDS_LEFT.
+        double secondsToParkForDecide = PARK_AT_SECONDS_LEFT - AutoDecider.PARK_MARGIN_SECONDS;
         Move move = AutoDecider.decide(PARTNER_MODE, secondsLeft, secondsToParkForDecide, 0, 0, ballsHeld, atShootPoint, upCell,
                 SharedData.isHiveTipping(), ballsInUpCell, tipsDone, pilesLeft, looseBallsSeen);
         move = limitMove(move);
@@ -437,7 +437,7 @@ public class RedDecideAuto extends KOpMode {
         // decide() says PARK when nothing is left to do. If there is time AND one more full load could still finish a tip,
         // sweep the spill instead. Standing still scores nothing, so with no spill we park now.
         boolean couldStillTip = ballsInUpCell + ballsHeld + MOST_BALLS_WE_CAN_HOLD >= ballsNeeded;
-        boolean hasTimeToSweep = secondsLeft > PARK_WHEN_SECONDS_LEFT;
+        boolean hasTimeToSweep = secondsLeft > PARK_AT_SECONDS_LEFT;
         if (move == Move.PARK && couldStillTip && hasTimeToSweep && ballsHeld == 0) {
             spillToSweep = newestPendingSpill();
         }
@@ -453,18 +453,18 @@ public class RedDecideAuto extends KOpMode {
                 + " spills=" + pendingSpills + " seen=" + looseBallsSeen);
 
         // From the third tip on (even after it is done), with no balls known to collect: stand where the camera sees the whole up end and keep looking.
-        // We never park before PARK_WHEN_SECONDS_LEFT, so when decide() has nothing to do we go there (or stay there) and look again.
+        // We never park before PARK_AT_SECONDS_LEFT, so when decide() has nothing to do we go there (or stay there) and look again.
         goingToViewpoint = false;
         sweepRunningFor = null;
         boolean nothingToDo = (move == Move.PARK);
         boolean notLookedYetThisTip = viewedAtTipsDone != tipsDone;
         boolean loadTooSmallToShoot = (loadTooSmall || spillToSweep != null) && notLookedYetThisTip; // look once before shooting a small load
-        boolean lookFirst = lookFirstAfterShot() && notLookedYetThisTip && ballsHeld == 0 && secondsLeft > PARK_WHEN_SECONDS_LEFT;
+        boolean lookFirst = lookFirstAfterShot() && notLookedYetThisTip && ballsHeld == 0 && secondsLeft > PARK_AT_SECONDS_LEFT;
         boolean wantToLook = lookFirst || (tipsDone >= 2 && seenCluster == null && ballsHeld < MOST_BALLS_WE_CAN_HOLD
-                && secondsLeft > PARK_WHEN_SECONDS_LEFT && (nothingToDo || loadTooSmallToShoot));
+                && secondsLeft > PARK_AT_SECONDS_LEFT && (nothingToDo || loadTooSmallToShoot));
         if (wantToLook) {
             boolean atViewpoint = Point.distance(robot, viewpointOfUpEnd()) < VIEWPOINT_REACHED_MM;
-            boolean hasTimeToDrive = secondsLeft > driveSeconds(robot, viewpointOfUpEnd()) + LOOK_SETTLE_SECONDS + PARK_WHEN_SECONDS_LEFT;
+            boolean hasTimeToDrive = secondsLeft > driveSeconds(robot, viewpointOfUpEnd()) + LOOK_SETTLE_SECONDS + PARK_AT_SECONDS_LEFT;
             if (!atViewpoint && hasTimeToDrive) {
                 goingToViewpoint = true;
                 return Move.WAIT;
@@ -1112,7 +1112,7 @@ public class RedDecideAuto extends KOpMode {
         }
         lastParkCheckMs = now;
         double secondsLeft = AUTO_SECONDS - getRuntime();
-        boolean almostOutOfTime = secondsLeft <= PARK_WHEN_SECONDS_LEFT;
+        boolean almostOutOfTime = secondsLeft <= PARK_AT_SECONDS_LEFT;
         if (almostOutOfTime) {
             if (sweepRunningFor != null) {
                 sweepGivenUp = true; // out of time for sweeping: park, do not start the same loop again
