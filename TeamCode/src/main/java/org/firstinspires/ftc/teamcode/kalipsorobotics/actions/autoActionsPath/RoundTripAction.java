@@ -9,8 +9,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRea
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyAuto;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -33,7 +32,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
  * 1. GATED TRIP (master constructor below, rebuilt from last year's decode/RoundTripAction): drive moveToBall (to the balls, then
  *    on to the launch spot; add the points) with intakeSide running; the intake stops INTAKE_STOP_BEFORE_END_MM before the end
  *    (purePursuitReadyIntakeStop); ShooterRun warms up during the drive; PushBall waits for the drive (purePursuitReadyShooting),
- *    ShooterReady (if shouldDependOnFlywheel) and TurretReadyAuto; then ShooterStop (setShouldShooterStop(false) keeps it spinning).
+ *    ShooterReady (if shouldDependOnFlywheel) and TurretReady; then ShooterStop (setShouldShooterStop(false) keeps it spinning).
  *    Auto: {@code RoundTripAction trip = new RoundTripAction(opModeUtilities, driveTrain, aim, shooter, stopper, intake,
  *          FieldConfig.aTargetPoint, FieldConfig.aLaunchPoint, 0, intake.getSide(BeamBreakPosition.IntakeSide.A));
  *          trip.getMoveToBall().addPoint(...);}
@@ -63,7 +62,7 @@ public class RoundTripAction extends KActionSet {
     private PurePursuitReady purePursuitReadyShooting;
     private PurePursuitReady purePursuitReadyIntakeStop;
     private ShooterStop shooterStop;
-    private TurretReadyAuto turretReadyAuto;
+    private TurretReady turretReadyAuto;
     private boolean shouldShooterStop = true;
     private boolean shooterStopAdded = false;
     private boolean wasShootFired = false;
@@ -123,15 +122,10 @@ public class RoundTripAction extends KActionSet {
         shooterReady.setDependentActions(moveToBall);
         this.addAction(shooterReady);
 
-        turretReadyAuto = new TurretReadyAuto(turretAutoAlign);
+        turretReadyAuto = new TurretReady(turretAutoAlign);
         turretReadyAuto.setName("turretReady");
         turretReadyAuto.setDependentActions(moveToBall);
         this.addAction(turretReadyAuto);
-
-        TurretStop turretStop = new TurretStop(turretAutoAlign);
-        turretStop.setName("turretStop");
-        turretStop.setDependentActions(turretReadyAuto);
-        this.addAction(turretStop);
 
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("shoot");
@@ -213,15 +207,10 @@ public class RoundTripAction extends KActionSet {
         shooterReady.setDependentActions(moveToShoot);
         this.addAction(shooterReady);
 
-        TurretReadyAuto turretReady = new TurretReadyAuto(turretAutoAlign);
+        TurretReady turretReady = new TurretReady(turretAutoAlign);
         turretReady.setName("turretReady");
         turretReady.setDependentActions(moveToShoot);
         this.addAction(turretReady);
-
-        TurretStop turretStop = new TurretStop(turretAutoAlign);
-        turretStop.setName("turretStop");
-        turretStop.setDependentActions(turretReady);
-        this.addAction(turretStop);
 
         PushBall pushBall = new PushBall(stopper, intake);
         pushBall.setName("shoot");

@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
@@ -32,7 +32,7 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastShooterAction = null;
     protected Action lastStopperAction = null;
     protected Action lastZeroAction = null;
-    protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
+    protected TurretAutoAlign turretAutoAlignTeleOp = null;
     protected ShooterRun shooterRun = null;
     protected AprilTagDetectionAction aprilTagDetectionAction = null;
     protected ResetOdometryToLimelight resetOdometryToPosition = null;

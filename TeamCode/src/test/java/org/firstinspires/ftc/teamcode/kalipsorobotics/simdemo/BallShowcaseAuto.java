@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 /**
  * A SIM-ONLY auto that shows the ball handling working end to end. It is not robot code and it does not replace RedTippingAuto
  * (whose shoot and intake lines are all commented out). It is built from the same classes the robot uses: the DECODE-era
- * RoundTripAction (drive and intake along a path, then ShooterRun, ShooterReady, TurretReadyAuto and PushBall), Shooter, Intake,
+ * RoundTripAction (drive and intake along a path, then ShooterRun, ShooterReady, TurretReady and PushBall), Shooter, Intake,
  * Stopper, Turret and TurretAutoAlign. When the team connects those lines in its own auto, that auto behaves the same way here.
  *
  * What it does, in the Red frame:

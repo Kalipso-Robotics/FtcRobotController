@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeContr
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootAllAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
@@ -148,11 +148,12 @@ public class TeleOp extends KOpMode {
                 ? new FieldOrientedDriveAction(driveTrain, imuModule)
                 : new DriveAction(driveTrain);
         // Both aim at the Hive Cell on the robot's end of the Hive; updateHiveTarget() keeps them on it every loop.
-        hiveTarget = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), null);
+        hiveTarget = SharedData.getTargetPoint();
         shooterRun = new ShooterRun(opModeUtilities, shooter, hiveTarget);
-        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret);
+        turretAutoAlignTeleOp = new TurretAutoAlign(opModeUtilities, turret);
+        turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.STOP); // handleTurret() turns it on with the align toggle
         turretAutoAlignTeleOp.setTargetPoint(hiveTarget);
-        SharedData.setSOTMActiveGoal(hiveTarget == FieldConfig.aTargetPoint ? 0 : 1);
+        SharedData.setSOTMActiveGoal(hiveTarget == TARGET_POINT_1 ? 0 : 1);
 
         // =========================================
 
@@ -272,10 +273,7 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Flower wanted/down", flowerWanted + "/" + intake.getFlower().isDown());
             telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Current RPS ", "%.2f", shooterRun.getCurrentRPS());
-            telemetry.addData("Hive Cell ", hiveTarget == FieldConfig.aTargetPoint ? "A" : "B");
-            if (HiveTagLocalizer.IS_PLACEHOLDER) {
-                telemetry.addLine("WARNING: vision placeholder -- no Limelight zeroing, no auto pass (LB always shoots)");
-            }
+            telemetry.addData("Hive Cell ", hiveTarget == TARGET_POINT_1 ? "A" : "B");
             telemetry.addData("Up CELL (seen) ", "%s (%.1fs ago)%s", SharedData.getHiveUpCell(), SharedData.getHiveUpCellAgeMs() / 1000,
                     isOurCellDown() ? " -> LB PASSES" : "");
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());
@@ -372,15 +370,15 @@ public class TeleOp extends KOpMode {
         if (isPending(passAction)) {
             return; // the turret is on the pass point until the pass ends
         }
-        Point next = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), hiveTarget);
+        Point next = SharedData.getTargetPoint();
         if (next == hiveTarget) {
             return;
         }
         hiveTarget = next;
         turretAutoAlignTeleOp.setTargetPoint(hiveTarget);
         shooterRun.setTargetPoint(hiveTarget);
-        SharedData.setSOTMActiveGoal(hiveTarget == FieldConfig.aTargetPoint ? 0 : 1);
-        KLog.d("TeleOp_Target", () -> "event=cellSwitch cell=" + (hiveTarget == FieldConfig.aTargetPoint ? "A" : "B")
+        SharedData.setSOTMActiveGoal(hiveTarget == TARGET_POINT_1 ? 0 : 1);
+        KLog.d("TeleOp_Target", () -> "event=cellSwitch cell=" + (hiveTarget == TARGET_POINT_1 ? "A" : "B")
                 + " target=" + hiveTarget + " odometry=" + SharedData.getOdometryWheelIMUPosition());
     }
 
@@ -558,13 +556,13 @@ public class TeleOp extends KOpMode {
     }
 
     /**
-     * True if vision last saw the CELL on the robot's end of the Hive down (FieldConfig.hiveTargetForSide picks that end).
+     * True if vision last saw the CELL on the robot's end of the Hive down (SharedData.getTargetPoint picks that end).
      * ponytail: trusts the last sighting (a TIP seen from anywhere updates it); a TIP nobody saw leaves it stale until
      * the camera sees a CELL again. Telemetry shows the age; add a freshness limit if that bites.
      */
     private boolean isOurCellDown() {
         HiveTagLocalizer.Cell up = SharedData.getHiveUpCell();
-        HiveTagLocalizer.Cell ours = hiveTarget == FieldConfig.aTargetPoint ? HiveTagLocalizer.Cell.A : HiveTagLocalizer.Cell.B;
+        HiveTagLocalizer.Cell ours = hiveTarget == TARGET_POINT_1 ? HiveTagLocalizer.Cell.A : HiveTagLocalizer.Cell.B;
         return up != null && up != ours;
     }
 

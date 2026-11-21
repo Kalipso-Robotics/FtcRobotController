@@ -60,6 +60,21 @@ public class AprilTagConfig {
     /** A Limelight fix older than this is not used to re-zero odometry. */
     public static double MAX_FIX_AGE_MS = 150;
 
+    // ---- Sliding window over camera frames (AprilTagDetectionAction) ----
+
+    /** How many of the latest camera frames (with our tags in them) are remembered. */
+    public static final int HIVE_WINDOW_FRAMES = 5;
+    /** Frames older than this no longer count (the robot looked away, or the camera was off). */
+    public static double HIVE_WINDOW_MAX_AGE_MS = 300;
+    /** A Limelight result older than this when we read it is thrown away (stale cached frame). */
+    public static double MAX_LIMELIGHT_STALENESS_MS = 100;
+    /** A CELL is published as up once this many frames in the window say so and none say the other CELL. */
+    public static int HIVE_WINDOW_MIN_AGREE = 3;
+    /** Tipping is published once this many frames in the window say tipping. */
+    public static int HIVE_WINDOW_MIN_TIPPING = 2;
+    /** A robot position is published once this many frames in the window have one (their average is published). */
+    public static int HIVE_WINDOW_MIN_FIXES = 2;
+
     /**
      * Tag center in an alliance's own frame, {x, y, z} mm, or null if the ID is not a HIVE tag.
      * Built in the RED frame (manual top view, origin top-left, +x right, +y down = Figure 9-17 as printed);
@@ -81,10 +96,10 @@ public class AprilTagConfig {
         double z = HIVE_PIVOT_Z_MM + (cellUp ? TAG_ALONG_ARM_MM * s : -TAG_ALONG_ARM_MM * s) - TAG_BELOW_PIVOT_MM * c;
         double y = FIELD_MM / 2 + (far ? -out : out);
 
-        if (allianceColor == AllianceColor.BLUE) {
-            x = FIELD_MM - x;
-            y = FIELD_MM - y;
-        }
+        // RED keeps the numbers (polarity +1); BLUE flips them around the field center (polarity -1 = 180 deg turn).
+        int polarity = allianceColor.getPolarity();
+        x = FIELD_MM / 2 + polarity * (x - FIELD_MM / 2);
+        y = FIELD_MM / 2 + polarity * (y - FIELD_MM / 2);
         return new double[]{x, y, z};
     }
 

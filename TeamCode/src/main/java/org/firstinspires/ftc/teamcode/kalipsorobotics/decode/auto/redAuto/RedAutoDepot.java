@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
@@ -12,7 +13,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
@@ -48,7 +48,7 @@ public class RedAutoDepot extends KOpMode {
     Point farLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y);
     Point thirdLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y + 100);
     Point firstShootPoint = new Point(0,0);
-    Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX(), Shooter.TARGET_POINT.getY() + 141.4213562373);
+    Point firstShotTargetPoint = new Point(ShooterConfig.TARGET_POINT.getX(), ShooterConfig.TARGET_POINT.getY() + 141.4213562373);
     private KActionSet lastTrip;
     private DriveTrain driveTrain;
     Shooter shooter = null;
@@ -125,7 +125,7 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
 
-        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip1.setName("trip1");
         trip1.getMoveToShoot().getShooterReady().setName("ShooterReady_trip1");
         trip1.setDependentActions(trip0);
@@ -136,7 +136,7 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
 
-        trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip2.setName("trip2");
         trip2.getMoveToShoot().getShooterReady().setName("ShooterReady_trip2");
         trip2.setDependentActions(trip1);
@@ -258,7 +258,7 @@ public class RedAutoDepot extends KOpMode {
     }
 
     public DepotRoundTrip generateRetryTrip(DepotRoundTrip lastTrip, DepotTrips trip) {
-        DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         retryTrip.getMoveToShoot().getShooterReady().setName("ShooterReady_retryTrip");
         retryTrip.getMoveToDepot().clearPoints();
         // first try

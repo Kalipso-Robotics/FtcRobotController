@@ -17,4 +17,12 @@ public interface AprilTagCamera {
 
     /** Returns all tags visible in the latest frame, or an empty list if none/invalid. */
     List<TagObservation> getLatestObservations();
+
+    /**
+     * A number that changes with every new camera frame, so callers can skip a frame they already handled.
+     * -1 = this camera cannot tell, treat every call as a new frame.
+     */
+    default long getLatestFrameId() {
+        return -1;
+    }
 }

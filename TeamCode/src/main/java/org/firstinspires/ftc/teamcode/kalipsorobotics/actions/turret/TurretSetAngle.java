@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
  * Points the turret at a fixed angle (deg, robot frame, clamped by Turret) and is done when it stops moving.
  * Use it to pre-aim before the start or the park.
  * Auto: {@code new TurretSetAngle(turret, 0)}
- * Pattern source: TurretReadyAuto (done on !turret.isMoving()).
+ * Pattern source: TurretReady (done on !turret.isMoving()).
  */
 public class TurretSetAngle extends Action {
     public static final String TAG = "Shooting_TurretSetAngle";

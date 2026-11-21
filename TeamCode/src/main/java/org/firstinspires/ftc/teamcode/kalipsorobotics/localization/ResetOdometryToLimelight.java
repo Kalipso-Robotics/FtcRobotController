@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
+/** Re-zero odometry x/y to the Limelight fix (the window-averaged one AprilTagDetectionAction publishes). */
 public class ResetOdometryToLimelight extends Action {
     public static final String TAG = "Vision_OdoReset";
 

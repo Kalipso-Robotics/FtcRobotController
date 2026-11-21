@@ -14,8 +14,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyAuto;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.PartnerMode;
@@ -921,7 +920,7 @@ public class RedDecideAuto extends KOpMode {
         ShooterReady shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
 
-        TurretReadyAuto turretReady = new TurretReadyAuto(aim);
+        TurretReady turretReady = new TurretReady(aim);
         turretReady.setName("turretReady");
 
         // The turret tracks the Cell, so we do not need to stop at the launch point: shoot as soon as we are close enough and the Hive is still.
@@ -955,17 +954,13 @@ public class RedDecideAuto extends KOpMode {
         endDrive.setName("endDriveToLaunch");
         endDrive.setDependentActions(pushBall);
 
-        TurretStop turretStop = new TurretStop(aim);
-        turretStop.setName("turretStop");
-        turretStop.setDependentActions(pushBall);
-
         ShooterStop shooterStop = new ShooterStop(shooterRun);
         shooterStop.setName("shooterStop");
         shooterStop.setDependentActions(pushBall);
 
         KActionSet set = new KActionSet();
         set.setName("shoot" + cell);
-        set.addAction(drive, shooterRun, shooterReady, turretReady, closeEnough, pushBall, endDrive, turretStop, shooterStop);
+        set.addAction(drive, shooterRun, shooterReady, turretReady, closeEnough, pushBall, endDrive, shooterStop);
         return set;
     }
 

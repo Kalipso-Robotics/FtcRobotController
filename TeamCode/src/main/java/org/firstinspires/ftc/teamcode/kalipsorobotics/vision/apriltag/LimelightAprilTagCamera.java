@@ -5,6 +5,7 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -53,6 +54,11 @@ public class LimelightAprilTagCamera implements AprilTagCamera {
         if (result == null || !result.isValid()) {
             return Collections.emptyList();
         }
+        // A result that sat around (camera just restarted, or a dropped connection) is from an old viewpoint.
+        boolean stale = result.getStaleness() > AprilTagConfig.MAX_LIMELIGHT_STALENESS_MS;
+        if (stale) {
+            return Collections.emptyList();
+        }
 
         List<TagObservation> observations = new ArrayList<>();
         for (LLResultTypes.FiducialResult fiducialResult : result.getFiducialResults()) {
@@ -76,6 +82,16 @@ public class LimelightAprilTagCamera implements AprilTagCamera {
             ));
         }
         return observations;
+    }
+
+    /**
+     * The Limelight's own capture time of the latest frame: the same number until the camera sends a NEW frame.
+     * (getControlHubTimeStamp changes every time the SDK polls, even for the same frame.)
+     */
+    @Override
+    public long getLatestFrameId() {
+        LLResult result = limelight.getLatestResult();
+        return result == null ? -1 : Double.doubleToLongBits(result.getTimestamp());
     }
 
     private void switchPipeline(int index) {

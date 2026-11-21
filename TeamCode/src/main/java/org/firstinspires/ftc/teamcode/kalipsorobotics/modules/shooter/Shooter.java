@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_X_REL_FIELD_MM;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig.APRILTAG_Y_REL_FIELD_MM;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.OUT_OF_RANGE_THRESHOLD;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.hoodFlipDirection;
 
@@ -18,7 +16,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Shooter {
@@ -29,8 +26,6 @@ public class Shooter {
 
     public static final double GOAL_HEIGHT_MM = 750.0;//838
     public static final double GOAL_HEIGHT_PIXELS = GOAL_HEIGHT_MM * MM_TO_PIXEL_RATIO;
-
-    public static final Point TARGET_POINT = new Point(APRILTAG_X_REL_FIELD_MM, APRILTAG_Y_REL_FIELD_MM); //polarity outside x=3305.2 y=1,289.55
 
     public static final double HOOD_OFFSET = 0; // 0.25
 

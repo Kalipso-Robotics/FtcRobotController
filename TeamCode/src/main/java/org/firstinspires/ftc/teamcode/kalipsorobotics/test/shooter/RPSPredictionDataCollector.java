@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
@@ -22,7 +21,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 /**
  * Open-loop check: what RPS a given motor power gives, at the battery voltage, hood and distance at the time.
  * Output: RobotLogs/RPSPredictionData_*.csv with CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM.
- * Distance is from odometry to the Hive Cell on the robot's end (FieldConfig.hiveTargetForSide, refreshed every loop).
+ * Distance is from odometry to the Hive Cell on the robot's end (SharedData.getTargetPoint).
  * Pattern source: this file's earlier LinearOpMode version, ported to KOpMode + startOdometry.
  *
  * Controls (GP1):
@@ -79,7 +78,7 @@ public class RPSPredictionDataCollector extends KOpMode {
 
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
-            hiveTarget = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), hiveTarget);
+            hiveTarget = SharedData.getTargetPoint();
             double distanceMM = SharedData.getOdometryWheelIMUPosition().toPoint().distanceTo(hiveTarget);
 
             double powerBefore = shooterPower;

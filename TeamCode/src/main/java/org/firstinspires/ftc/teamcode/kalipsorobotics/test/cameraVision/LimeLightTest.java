@@ -61,9 +61,6 @@ public class LimeLightTest extends KOpMode {
                 KLog.d(TAG, () -> "event=reset " + logged);
             }
 
-            if (org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer.IS_PLACEHOLDER) {
-                telemetry.addLine("WARNING: HiveTagLocalizer is a placeholder -- no fix, no Hive state, A does nothing");
-            }
             telemetry.addLine("GP1 A = re-zero odometry to the Limelight fix");
             telemetry.addData("tags seen", observations.size());
             for (TagObservation o : observations) {
@@ -73,6 +70,7 @@ public class LimeLightTest extends KOpMode {
             telemetry.addData("fix age", "%.0f ms", ageMs);
             telemetry.addData("fix", fmt(SharedData.getLimelightGlobalPosition()));
             telemetry.addData("Hive up cell", SharedData.getHiveUpCell() == null ? "not seen" : SharedData.getHiveUpCell());
+            telemetry.addData("Hive tipping", SharedData.isHiveTipping());
             telemetry.addData("odometry", fmt(SharedData.getOdometryWheelIMUPosition()));
             telemetry.addData("last reset", lastReset);
             telemetry.update();

@@ -5,9 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootAllAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
@@ -59,10 +58,10 @@ public class ShooterDataCollector extends KOpMode {
         OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null); // keeps the pose from auto, else (0,0,0)
 
         // Same goal as TeleOp: the Hive Cell on the robot's end of the Hive, so logged distances match TeleOp's.
-        Point hiveTarget = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), null);
+        Point hiveTarget = SharedData.getTargetPoint();
         shooterRun = new ShooterRun(opModeUtilities, shooter, hiveTarget);
-        turretAutoAlignTeleOp = new TurretAutoAlignTeleOp(opModeUtilities, turret);
-        turretAutoAlignTeleOp.setTargetPoint(hiveTarget);
+        turretAutoAlignTeleOp = new TurretAutoAlign(opModeUtilities, turret); // follows SharedData.getTargetPoint()
+        turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.STOP); // turned on when a shot starts
         turretAutoAlignTeleOp.setToleranceDeg(2);
         KFileWriter rows = new KFileWriter("ShooterDataRows", opModeUtilities);
         rows.writeLine("// distanceMM, rps, hood, // hit|miss measuredRps=<flywheel RPS at the shot>   paste only the // hit rows into ShooterInterpolationConfig.shooterData");
@@ -92,9 +91,8 @@ public class ShooterDataCollector extends KOpMode {
             intake.update();
 
             // Same rule as TeleOp: the Cell on the robot's end of the Hive, refreshed as the robot moves.
-            hiveTarget = FieldConfig.hiveTargetForSide(SharedData.getOdometryWheelIMUPosition().getY(), hiveTarget);
+            hiveTarget = SharedData.getTargetPoint();
             shooterRun.setTargetPoint(hiveTarget);
-            turretAutoAlignTeleOp.setTargetPoint(hiveTarget);
             if (isPending(shootAllAction)) {
                 shotMeasuredRps = shooter.getRPS(); // the feed is the end of the action: the last running loop is the shot
             }

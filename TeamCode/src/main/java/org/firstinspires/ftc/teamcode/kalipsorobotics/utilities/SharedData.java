@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.PoseHistory;
@@ -40,6 +41,40 @@ public class SharedData {
     public static void setOdometryWheelIMUPosition(Position position, long sampleNanos) {
         odometryWheelIMUPosition.reset(position);
         odometryWheelIMUPoseHistory.record(sampleNanos, position);
+        targetCheckCounter++;
+        if (targetCheckCounter >= ShooterConfig.TARGET_CHECK_EVERY_N_LOOPS) {
+            targetCheckCounter = 0;
+            targetPoint = pickTargetPoint(position.getY(), targetPoint);
+        }
+    }
+
+    // ---- Hive Cell target: the one place that picks which Cell the shooter and turret aim at ----
+
+    private static volatile Point targetPoint = null;
+    private static int targetCheckCounter = 0;
+
+    /**
+     * The Hive Cell on the robot's end of the Hive: ShooterConfig.TARGET_POINT_1 (Cell A) when robot y is above
+     * ShooterConfig.TARGET_SWITCH_Y_MM, TARGET_POINT_2 (Cell B) below it. Re-checked every ShooterConfig.TARGET_CHECK_EVERY_N_LOOPS odometry updates. Same numbers for
+     * RED and BLUE: each alliance has its own frame (FieldConfig), so there is no polarity flip.
+     */
+    public static Point getTargetPoint() {
+        Point target = targetPoint;
+        if (target == null) { // nothing picked yet this OpMode: pick now from the current pose
+            target = pickTargetPoint(odometryWheelIMUPosition.getY(), null);
+            targetPoint = target;
+        }
+        return target;
+    }
+
+    /** Keeps the current Cell inside the deadband around the switch line. */
+    private static Point pickTargetPoint(double robotY, Point current) {
+        double switchY = ShooterConfig.TARGET_SWITCH_Y_MM;
+        double deadband = ShooterConfig.TARGET_SWITCH_DEADBAND_MM;
+        if (robotY > switchY + deadband) return ShooterConfig.TARGET_POINT_1;
+        if (robotY < switchY - deadband) return ShooterConfig.TARGET_POINT_2;
+        if (current != null) return current;
+        return robotY >= switchY ? ShooterConfig.TARGET_POINT_1 : ShooterConfig.TARGET_POINT_2;
     }
 
     private static final PoseHistory odometryWheelIMUPoseHistory = new PoseHistory(128);
@@ -79,6 +114,7 @@ public class SharedData {
 
     public static void resetOdometryWheelIMUPosition() {
         odometryWheelIMUPosition.reset(new Position(0, 0, 0));
+        targetPoint = null; // re-picked from the new pose on the next getTargetPoint()
     }
 
 
