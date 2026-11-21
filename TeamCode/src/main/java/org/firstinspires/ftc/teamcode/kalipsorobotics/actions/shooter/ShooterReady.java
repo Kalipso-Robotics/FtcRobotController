@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.AUTO_SHOOTER_READY_TIMEOUT_MS;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
@@ -59,9 +58,6 @@ public class ShooterReady extends Action {
                     + " deltaRps=" + (targetRPS - currentRPS) + " rps=" + currentRPS + " targetRps=" + targetRPS
                     + " elapsedMs=" + actionTime.milliseconds());
         } else {
-            if (SOTM.isActive()) {
-                isDone = true;
-            }
             KLog.d(TAG, () -> "name=" + getName() + " event=waiting reason=rpsOutOfRange");
         }
 

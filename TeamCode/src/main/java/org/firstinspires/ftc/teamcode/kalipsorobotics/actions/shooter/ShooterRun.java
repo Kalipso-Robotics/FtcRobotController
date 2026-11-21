@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Shoo
 
 import android.annotation.SuppressLint;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
@@ -44,7 +43,6 @@ public class ShooterRun extends Action {
     private double targetHoodPosition = 0;
     private double distanceMM = -1;
     ElapsedTime elapsedTime;
-    private boolean useLimelight = false;
 
     private boolean useOdometry = true;
     private boolean isWithinRange = false;
@@ -249,23 +247,9 @@ public class ShooterRun extends Action {
         return odometryDistanceMM;
     }
 
-    private double getLimelightDistance() {
-        double limelightDistanceMM = SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM() + AprilTagConfig.GOAL_TO_APRIL_TAG_OFFSET_DISTANCE;
-        KLog.d("ShooterRun_Distance", () -> "Limelight distance: " + limelightDistanceMM + " mm");
-        return limelightDistanceMM;
-    }
-
+    // Distance always comes from odometry (Limelight re-zeros odometry instead of overriding the distance).
     private double getCurrentDistanceMM() {
-        double odometryDistanceMM = getOdometryDistanceMM();
-        KLog.d("ShooterRun_Distance", () -> "ODOMETRY DISTANCE " + odometryDistanceMM + " mm");
-        if (useLimelight && !SharedData.getLimelightRawPosition().isEmpty()) {
-            double limelightDistanceMM = getLimelightDistance();
-            KLog.d("ShooterRun_Distance", () -> "OVERRIDING ODOMETRY DISTANCE WITH LIMELIGHT " + limelightDistanceMM + " mm");
-            KLog.d("ShooterRun_Distance", () -> "Final Distance " + limelightDistanceMM);
-            return limelightDistanceMM;
-        }
-        KLog.d("ShooterRun_Distance", () -> "Final Distance " + odometryDistanceMM);
-        return odometryDistanceMM;
+        return getOdometryDistanceMM();
     }
 
     /** The goal used for the distance in SHOOT_USING_CURRENT_POINT; RPS and hood follow it on the next update. */
@@ -297,10 +281,6 @@ public class ShooterRun extends Action {
         setShooterRunMode(ShooterRunMode.STOP);
         shooter.stop();
         KLog.d("ShooterRun_Stop", "ShooterRun Stop");
-    }
-
-    public void setUseLimelight(boolean useLimelight){
-        this.useLimelight = useLimelight;
     }
 
     public void setTargetHoodPosition(double targetHoodPosition) {

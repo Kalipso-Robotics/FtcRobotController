@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter.TARGET_POINT;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
@@ -116,7 +117,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
         fileWriter = new KFileWriter("RPSPredictionData", opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, AllianceColor.RED);
         turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret);
         turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
         // Write CSV header
@@ -317,7 +318,7 @@ public class RPSPredictionDataCollector extends LinearOpMode {
      * and target position from TurretConfig
      */
     private double calculateDistanceToTarget() {
-        return SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM();
+        return SharedData.getOdometryWheelIMUPosition().toPoint().distanceTo(FieldConfig.aTargetPoint);
 
 //        Position currentPosition = odometry.update();
 //

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+
 import com.acmerobotics.dashboard.config.Config;
 
 
@@ -20,7 +22,10 @@ public class TurretConfig {
     // Reachable turret travel, centered on straight ahead. Capped at one turn: no wrap logic, targets past it are clamped.
     public static final double MAX_TURRET_DEG = Math.min(360, SERVO_RANGE_DEG * TURRET_DEG_PER_SERVO_DEG) / 2;
 
-    // Driver trim added to every aim angle, degrees. TeleOp gamepad 2 dpad left/right changes it.
-    public static double TRIM_DEG = 0;
+    /** Turret pivot in the robot frame (x forward, y right). Also the launcher position SOTM leads from. TODO-measure: DECODE value. */
+    public static final Point ROBOT_REL_TURRET_POINT = new Point(-24.51971493, 2.50233587);
+
+    // Driver turret offset added to every aim angle, degrees. TeleOp gamepad 2 dpad left/right changes it.
+    public static double TURRET_OFFSET_DEG = 0;
 
 }

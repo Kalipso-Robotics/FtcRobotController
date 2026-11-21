@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
  * Shoot-on-the-move tunables. Units: mm, ms, rad.
  *
  * Tuning recipe: (1) recollect flight times from slow-mo video and refit A/B,
- * (2) measure the launcher offset, (3) tune RELEASE_LATENCY_MS until stationary and strafing
+ * (2) measure TurretConfig.ROBOT_REL_TURRET_POINT, (3) tune RELEASE_LATENCY_MS until stationary and strafing
  * shots both land.
  */
 @Config
@@ -23,9 +23,7 @@ public class SOTMConfig {
     /** Goal points in our alliance's own frame (no mirroring, see FieldConfig). Index 0 = Hive Cell A, 1 = Cell B. */
     public static Point[] GOALS = {FieldConfig.aTargetPoint, FieldConfig.bTargetPoint};
 
-    /** Launcher position relative to the robot centre, robot frame. Measure it. */
-    public static double LAUNCHER_OFFSET_X_MM = 0;
-    public static double LAUNCHER_OFFSET_Y_MM = 0;
+    // Launcher position = TurretConfig.ROBOT_REL_TURRET_POINT (the ball leaves from the turret).
 
     // ---- Tuned: shot model ----
 

@@ -69,13 +69,27 @@ public class FieldConfig {
         return new Point(x, y - FLOWER_BALL_OFFSET_MM);
     }
 
-    // The point a pass aims at, on the low-y half of the field. The high-y half uses its mirror about the field middle.
-    public final static double PASS_X = 1524;  // TODO-measure
-    public final static double PASS_Y = 600;   // TODO-measure
+    // Pass: a low, flat shot UNDER the Hive (its lowest CELL edge is ~777 mm up, manual Figure 9-10), between the frame
+    // legs, to the half of the field opposite the robot. The ball may roll on after landing; that is fine.
+    /** Landing point distance from the far wall. Keeps the ball well inside the field. TODO-measure with PASS_RPS. */
+    public final static double PASS_Y_FROM_WALL_MM = 1000;
+    /** The landing point never gets closer than this to the side walls. */
+    public final static double PASS_WALL_MARGIN_MM = 900;
+    /** The pass line crosses the Hive middle at least this far inside each leg. */
+    public final static double PASS_LEG_CLEARANCE_MM = 150;
 
-    /** The pass target on the half of the field opposite the robot (no alliance flip: each alliance has its own frame). */
-    public static Point passTargetForSide(double robotY) {
-        return new Point(PASS_X, robotY >= HIVE_CENTER ? PASS_Y : FIELD_MM - PASS_Y);
+    /**
+     * Where a pass aims from the robot's position: on the half opposite the robot (no alliance flip: each alliance has
+     * its own frame), on the line from the robot through the gap between the Hive legs, clamped inside the walls.
+     * Straight across when the robot is already in line with the gap.
+     */
+    public static Point passTarget(Point robot) {
+        double ty = robot.getY() >= HIVE_CENTER ? PASS_Y_FROM_WALL_MM : FIELD_MM - PASS_Y_FROM_WALL_MM;
+        double crossX = MathFunctions.clamp(robot.getX(), HIVE_LEG_LOW_X[2] + PASS_LEG_CLEARANCE_MM, HIVE_LEG_HIGH_X[0] - PASS_LEG_CLEARANCE_MM);
+        double toMiddle = HIVE_CENTER - robot.getY();
+        double tx = Math.abs(toMiddle) < 1 ? crossX
+                : robot.getX() + (crossX - robot.getX()) * (ty - robot.getY()) / toMiddle;
+        return new Point(MathFunctions.clamp(tx, PASS_WALL_MARGIN_MM, FIELD_MM - PASS_WALL_MARGIN_MM), ty);
     }
 
     // Where the robot sits when it is zeroed against the loading-zone corner (center of the robot, own frame).

@@ -76,10 +76,10 @@ public class TurretAutoAlignTeleOp extends Action {
     private void updateAlignToTarget() {
         Position currentPos = SharedData.peekOdometryWheelIMUPosition();
 
-        targetAngleRad = TurretAutoAlign.calculateTargetAngleRad(targetPoint, currentPos, TurretConfig.TRIM_DEG);
+        targetAngleRad = TurretAutoAlign.calculateTargetAngleRad(targetPoint, currentPos, TurretConfig.TURRET_OFFSET_DEG);
         SOTM.Solution sotm = SOTM.usableSolution();
         if (sotm != null) {
-            targetAngleRad = TurretAutoAlign.calculateTargetAngleRad(sotm.aimHeadingRad, sotm.releaseHeadingRad, TurretConfig.TRIM_DEG);
+            targetAngleRad = TurretAutoAlign.calculateTargetAngleRad(sotm.aimHeadingRad, sotm.releaseHeadingRad, TurretConfig.TURRET_OFFSET_DEG);
         }
 
         // No encoder: the turret is where we last commanded it once its estimated travel is over.

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.PoseHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
@@ -41,7 +42,7 @@ public class SOTM {
                     && (System.nanoTime() - sampleNanos) / 1e6 <= SOTMConfig.MAX_SOLUTION_AGE_MS;
         }
 
-        /** Turret angle relative to the robot at release (before the driver trim). */
+        /** Turret angle relative to the robot at release (before the driver turret offset). */
         public double turretAngleRad() {
             return MathFunctions.angleWrapRad(aimHeadingRad - releaseHeadingRad);
         }
@@ -111,8 +112,15 @@ public class SOTM {
         return p + v * t + 0.5 * a * t * t;
     }
 
-    /** Pure. Goal in field mm; motion in mm, rad, ms. */
+    /** Pure. Goal in field mm; motion in mm, rad, ms. Launches from the turret pivot. */
     public static Solution solve(double gx, double gy, int goalIndex, PoseHistory.Motion m, long nowNanos) {
+        Point launcher = TurretConfig.ROBOT_REL_TURRET_POINT;
+        return solve(gx, gy, goalIndex, m, nowNanos, launcher.getX(), launcher.getY());
+    }
+
+    /** solve() with an explicit launcher offset (robot frame, mm), for tests. */
+    static Solution solve(double gx, double gy, int goalIndex, PoseHistory.Motion m, long nowNanos,
+                          double launcherOffsetXMM, double launcherOffsetYMM) {
         double vx = m.vx, vy = m.vy, w = m.omega, ax = m.ax, ay = m.ay, al = m.alpha;
         double tau = SOTMConfig.RELEASE_LATENCY_MS + (nowNanos - m.sampleNanos) / 1e6;
         if (vx * vx + vy * vy < SOTMConfig.MIN_SPEED_MM_PER_MS * SOTMConfig.MIN_SPEED_MM_PER_MS && Math.abs(w) < SOTMConfig.MIN_OMEGA_RAD_PER_MS) {
@@ -128,8 +136,8 @@ public class SOTM {
 
         // Launcher position and velocity (omega x r)
         double c = Math.cos(th), s = Math.sin(th);
-        double rx = c * SOTMConfig.LAUNCHER_OFFSET_X_MM - s * SOTMConfig.LAUNCHER_OFFSET_Y_MM;
-        double ry = s * SOTMConfig.LAUNCHER_OFFSET_X_MM + c * SOTMConfig.LAUNCHER_OFFSET_Y_MM;
+        double rx = c * launcherOffsetXMM - s * launcherOffsetYMM;
+        double ry = s * launcherOffsetXMM + c * launcherOffsetYMM;
         double lx = px + rx, ly = py + ry;
         double vlx = vrx - wr * ry, vly = vry + wr * rx;
 

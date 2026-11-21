@@ -21,12 +21,12 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToPos;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
@@ -121,7 +121,6 @@ public class TeleOp extends KOpMode {
     protected void initializeRobot() {
         super.initializeRobot();
         KLog.d("TeleOp_Init", "Starting initializeRobot()");
-        int tagId = AprilTagConfig.getGoalAprilTagId(allianceColor);
         // ============== MODULES =================
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         turret = Turret.getInstance(opModeUtilities);
@@ -141,7 +140,7 @@ public class TeleOp extends KOpMode {
 
         odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 //        odometry.setShouldFallbackToWheelTheta(true);
-        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, tagId, allianceColor);
+        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, allianceColor);
 
         OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
         OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
@@ -276,10 +275,12 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Current RPS ", "%.2f", shooterRun.getCurrentRPS());
             telemetry.addData("Hive Cell ", hiveTarget == FieldConfig.aTargetPoint ? "A" : "B");
+            telemetry.addData("Up CELL (seen) ", "%s (%.1fs ago)%s", SharedData.getHiveUpCell(), SharedData.getHiveUpCellAgeMs() / 1000,
+                    isOurCellDown() ? " -> LB PASSES" : "");
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());
             telemetry.addData("Rps Offset ", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset ", "%.2f", ShooterInterpolationConfig.hoodOffset);
-            telemetry.addData("Turret Trim Deg ", "%.1f", TurretConfig.TRIM_DEG);
+            telemetry.addData("Turret Offset Deg ", "%.1f", TurretConfig.TURRET_OFFSET_DEG);
             telemetry.addLine("Turret Mode: " + turretAutoAlignTeleOp.getTurretRunMode());
             telemetry.addData("Delta Heading (Turret)", turretAutoAlignTeleOp.getDeltaAngleDeg());
             telemetry.addData("Delta RPS (Shooter)", shooterRun.getTargetRPS() - shooterRun.getCurrentRPS());
@@ -343,21 +344,21 @@ public class TeleOp extends KOpMode {
         }
 
 
-        //Manual (LB + dpad is the hood, not the trim)
-        boolean trimAllowed = !kGamePad2.isLeftBumperPressed();
-        if (trimAllowed && kGamepad2IsDpadLeftFirstPressed) {
-            TurretConfig.TRIM_DEG -= 2;
-        } else if (trimAllowed && kGamepad2IsDpadRightFirstPressed) {
-            TurretConfig.TRIM_DEG += 2;
+        //Manual (LB + dpad is the hood, not the turret offset)
+        boolean turretOffsetAllowed = !kGamePad2.isLeftBumperPressed();
+        if (turretOffsetAllowed && kGamepad2IsDpadLeftFirstPressed) {
+            TurretConfig.TURRET_OFFSET_DEG -= 2;
+        } else if (turretOffsetAllowed && kGamepad2IsDpadRightFirstPressed) {
+            TurretConfig.TURRET_OFFSET_DEG += 2;
         }
 
         if (setTurretOffset0Pressed) {
-            TurretConfig.TRIM_DEG = 0;
+            TurretConfig.TURRET_OFFSET_DEG = 0;
         }
 
 
         if (KLog.isDebug()) {
-            KLog.d("TeleOp_Turret", () -> "angleDeg=" + turret.getAngleDeg() + " trimDeg=" + TurretConfig.TRIM_DEG);
+            KLog.d("TeleOp_Turret", () -> "angleDeg=" + turret.getAngleDeg() + " offsetDeg=" + TurretConfig.TURRET_OFFSET_DEG);
         }
     }
 
@@ -523,8 +524,11 @@ public class TeleOp extends KOpMode {
             return;
         }
 
-        // Priority 2- Execute shoot sequence
-        if (shootAllActionPressed) {
+        // Priority 2- Execute shoot sequence. Only the up CELL scores: if the CELL on our end was last seen down,
+        // LB passes under the Hive instead of shooting at it.
+        if (shootAllActionPressed && isOurCellDown()) {
+            startPass("ourCellDown");
+        } else if (shootAllActionPressed) {
             if (!isPending(shootAllAction)) {
                 if (toggleTurretAlign) {
                     turnOnTurret();
@@ -546,18 +550,36 @@ public class TeleOp extends KOpMode {
             }
         }
 
-        // Pass: aim at the far-half point, weak fixed RPS/hood (not while a shot or pass is pending, see return above)
+        // Pass (not while a shot or pass is pending, see return above)
         if (passButtonPressed && !shotOrPassPending()) {
-            turretAutoAlignTeleOp.setTargetPoint(FieldConfig.passTargetForSide(SharedData.getOdometryWheelIMUPosition().getY()));
-            if (toggleTurretAlign) {
-                turnOnTurret();
-            }
-            passAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp, PASS_RPS, PASS_HOOD, true);
-            passAction.setName("Pass_" + shootCount);
-            setLastShooterAction(passAction);
-            setLastStopperAction(null);
-            KLog.d("TeleOp_Shooting", () -> "event=pass rps=" + PASS_RPS + " hood=" + PASS_HOOD + " odometry=" + SharedData.getOdometryWheelIMUPosition());
+            startPass("button");
         }
+    }
+
+    /**
+     * True if vision last saw the CELL on the robot's end of the Hive down (FieldConfig.hiveTargetForSide picks that end).
+     * ponytail: trusts the last sighting (a TIP seen from anywhere updates it); a TIP nobody saw leaves it stale until
+     * the camera sees a CELL again. Telemetry shows the age; add a freshness limit if that bites.
+     */
+    private boolean isOurCellDown() {
+        HiveTagLocalizer.Cell up = SharedData.getHiveUpCell();
+        HiveTagLocalizer.Cell ours = hiveTarget == FieldConfig.aTargetPoint ? HiveTagLocalizer.Cell.A : HiveTagLocalizer.Cell.B;
+        return up != null && up != ours;
+    }
+
+    /** Weak fixed RPS/hood shot under the Hive to the far half (FieldConfig.passTarget). */
+    private void startPass(String reason) {
+        Point target = FieldConfig.passTarget(SharedData.getOdometryWheelIMUPosition().toPoint());
+        turretAutoAlignTeleOp.setTargetPoint(target);
+        if (toggleTurretAlign) {
+            turnOnTurret();
+        }
+        passAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp, PASS_RPS, PASS_HOOD, true);
+        passAction.setName("Pass_" + shootCount);
+        setLastShooterAction(passAction);
+        setLastStopperAction(null);
+        KLog.d("TeleOp_Shooting", () -> "event=pass reason=" + reason + " target=" + target + " rps=" + PASS_RPS + " hood=" + PASS_HOOD
+                + " odometry=" + SharedData.getOdometryWheelIMUPosition());
     }
 
     /** Pass over or cancelled: distance-based RPS again and re-aim at the Hive Cell. */

@@ -41,8 +41,7 @@ import java.util.Locale;
  *           .build();
  *
  *   // Relocalization - the action does the transform chain, this just supplies tags.
- *   AprilTagDetectionAction relocalize = new AprilTagDetectionAction(
- *           opModeUtilities, turret, AprilTagConfig.getGoalAprilTagId(alliance), alliance, tags);
+ *   AprilTagDetectionAction relocalize = new AprilTagDetectionAction(opModeUtilities, turret, alliance, tags);
  *
  *   // Anything else that wants blobs reads them straight off the processor.
  *   DetectedBlob ball = artifacts.getLargestPurpleBlob();

@@ -190,11 +190,14 @@ public class OpModeUtilities {
 
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        KLog.d("ExecutorService_Run", () -> "April Tag Thread is running. OpMode.isActive: " + aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive());
                         if (aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive()) {
-                            KLog.d("ExecutorService_Run", () -> "April Tag OpModeIsActive. Running");
                             aprilTagDetectionAction.updateCheckDone();
                         }
+                        // ponytail: fixed nap instead of busy-spinning on the same frame (Limelight <= 90 fps ~ 11 ms);
+                        // it used to burn a core the main loop needs. Wait on the frame timestamp if this ever lags.
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     } catch (Exception e) {
                         KLog.e("ExecutorService_Run", "Exception in AprilTag update loop", e);
                         // Continue running despite errors in individual updates

@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;

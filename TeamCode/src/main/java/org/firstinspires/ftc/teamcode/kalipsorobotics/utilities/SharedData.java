@@ -3,10 +3,10 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.PoseHistory;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
@@ -105,21 +105,33 @@ public class SharedData {
     }
 
 
-    private static final LimelightPos limelightRawPosition = new LimelightPos(0,0,0,0,0);
-    public static void setLimelightRawPosition(LimelightPos position) {
-        limelightRawPosition.setPos(position);
-    }
-    public static LimelightPos getLimelightRawPosition() {
-        return limelightRawPosition;
-    }
-
-
+    // Latest HIVE-tag fix (AprilTagDetectionAction). Written by the vision thread, read by the main loop.
     private static final Position limelightGlobalPosition = new Position(0, 0, 0);
-    public static Position getLimelightGlobalPosition() {
+    private static volatile long limelightFixNanos = 0;
+    public static synchronized Position getLimelightGlobalPosition() {
         return new Position(limelightGlobalPosition);
     }
-    public static void setLimelightGlobalPosition(Position position) {
+    public static synchronized void setLimelightGlobalPosition(Position position) {
         limelightGlobalPosition.reset(position);
+        limelightFixNanos = System.nanoTime();
+    }
+    /** Age of the last HIVE-tag fix in ms, or infinity if there never was one. */
+    public static double getLimelightFixAgeMs() {
+        return limelightFixNanos == 0 ? Double.POSITIVE_INFINITY : (System.nanoTime() - limelightFixNanos) / 1e6;
+    }
+
+    // Goal state: which of our CELLs was last seen up. The HIVE only changes on a TIP, so the last sighting stands.
+    private static volatile HiveTagLocalizer.Cell hiveUpCell = null;
+    private static volatile long hiveUpCellNanos = 0;
+    public static HiveTagLocalizer.Cell getHiveUpCell() {
+        return hiveUpCell;
+    }
+    public static void setHiveUpCell(HiveTagLocalizer.Cell cell) {
+        hiveUpCell = cell;
+        hiveUpCellNanos = System.nanoTime();
+    }
+    public static double getHiveUpCellAgeMs() {
+        return hiveUpCellNanos == 0 ? Double.POSITIVE_INFINITY : (System.nanoTime() - hiveUpCellNanos) / 1e6;
     }
 
 
@@ -181,18 +193,6 @@ public class SharedData {
         voltage = newVoltage;
     }
 
-    private static final Position unfilteredLimelightGlobalPos = new Position(0,0,0);
-    public static Position getUnfilteredLimelightGlobalPos() {
-        return new Position(unfilteredLimelightGlobalPos);
-    }
-
-    public static void setUnfilteredLimelightGlobalPos(Position position) {
-        if (position != null) {
-            unfilteredLimelightGlobalPos.reset(position);
-        } else {
-            unfilteredLimelightGlobalPos.reset(new Position(0,0,0));
-        }
-    }
 
     private static volatile List<VisionRecognition> pollenNectarDetections = new ArrayList<>();
     private static volatile long pollenNectarDetectionsTimeMs = 0;

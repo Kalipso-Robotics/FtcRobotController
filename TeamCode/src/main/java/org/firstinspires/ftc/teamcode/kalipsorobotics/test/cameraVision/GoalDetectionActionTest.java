@@ -18,13 +18,13 @@ public class GoalDetectionActionTest extends LinearOpMode {
         OpModeUtilities opModeUtilities = new OpModeUtilities(this.hardwareMap, this, this.telemetry);
         Turret turret = Turret.getInstance(opModeUtilities);
         // TEST ON RED or change tagId
-        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, AllianceColor.RED);
 
         waitForStart();
 
         while (opModeIsActive()) {
             aprilTagDetectionAction.updateCheckDone();
-            telemetry.addData("current limelight position ", SharedData.getLimelightRawPosition().toString());
+            telemetry.addData("limelight fix ", SharedData.getLimelightGlobalPosition() + " up CELL " + SharedData.getHiveUpCell());
         }
     }
 }

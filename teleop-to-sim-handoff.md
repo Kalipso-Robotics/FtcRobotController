@@ -59,7 +59,7 @@ Every subsystem logs through `KLog` with a subsystem tag; new and changed lines 
 | `Robot_` | `Robot_Intake`, `Robot_Flower`, `Robot_Shooter`, `Robot_Hood`, `Robot_Stopper`, `Robot_Turret`, `Robot_BeamBreak`, `Robot_KMotor` | `event=lower/raise/raiseDeferred/raiseCancelled/run`, `event=blocked reason=intakeUp` (flower), turret out-of-range clamp |
 | `Shooting_` | `Shooting_PushBall`, `Shooting_ShootAction`, `Shooting_ShooterReady`, `Shooting_ShooterRun`, `Shooting_TurretAlign`, `Shooting_TurretReady` | `event=ready/waiting`, feed step progress |
 | `Intaking_` | `Intaking_IntakeController`, `Intaking_Flower` (TeleOp toggle), `Intaking_IntakeFullAction`, `Intaking_RunIntake`, `Intaking_RunIntakeTime`, `Intaking_IntakeStop`, `Intaking_IntakeReverse` | `event=switch from= to= vx= reason=driveDir`, `event=full`, `event=start/done side=` |
-| `Vision_` | `Vision_OdoReset` | odometry re-zero from Limelight |
+| `Vision_` | `Vision_Limelight`, `Vision_OdoReset` | HIVE-tag fix + goal state (`event=goalState upCell=`), odometry re-zero from it |
 | `Auto_` | `Auto_Decider`, `Auto_Path` | `event=dropMove reason=`, `event=stowIntake reason=`, `event=plan ... useFlower=`, `event=intakeOn side=`, `event=flowerLower/flowerRaise`, `event=failed reason=` |
 | `Test_` | `Test_Intake`, `Test_Shooter`, `Test_Turret` | test OpModes |
 
@@ -74,9 +74,10 @@ Every subsystem logs through `KLog` with a subsystem tag; new and changed lines 
 - `AutoToBallsPathingAction`: `INTAKE_START_DISTANCE_MM` (600), `POST_ARRIVAL_INTAKE_MS` (500), `INTAKE_RUN_MS` (3000).
 - `FieldConfig.FLOWER_BALL_OFFSET_MM` (150): pickup target offset from a Flower's center (moved from `RedDecideAuto`); likely smaller since the arm knocks balls off by driving in. Untracked `DecideParams` duplicates this value: whoever lands that file should read `FieldConfig` instead.
 - `AutoToBallsPathingAction.FLOWER_DEPLOY_CLEARANCE_MM` (350): arm deploys only this far or more from the Flower; must stay below `INTAKE_START_DISTANCE_MM` (600) (KLog.e at init if not).
-- `FieldConfig`: `PASS_X` / `PASS_Y` (1524 / 600) pass target; `CORNER_ZERO_POSE` (230, 230, 0) robot pose when parked in the corner for the GP2 zero.
+- `FieldConfig`: `PASS_Y_FROM_WALL_MM` (1000) pass landing distance from the far wall, tune with `ShooterConfig.PASS_RPS` / `PASS_HOOD` so the low pass rolls under the Hive and lands well inside the field; `CORNER_ZERO_POSE` (230, 230, 0) robot pose when parked in the corner for the GP2 zero.
 - `ShooterConfig`: `PASS_RPS` (25), `PASS_HOOD` (0.2) for the GP1 pass; `TELEOP_READY_TIMEOUT_MS` (3000), after which a TeleOp shot aborts without feeding.
-- `AprilTagConfig`: `CELL_A_TAG_POSES` / `CELL_B_TAG_POSES` (null = unmeasured, tag left out of the layout, Limelight re-zero stays inert until filled). The tags face down on the tipping Cells, so a 2D wall-tag chain may not suffice (see section 6).
+- `AprilTagConfig`: `CAM_HEIGHT_MM` (350) and `CAM_PITCH_DEG` (25) Limelight lens height and upward tilt; `TURRET_REL_CAM_POS` (DECODE value). Tag positions come from manual geometry (`tagFieldXYZ`); VERIFY on a real field, especially `TAG_BELOW_PIVOT_MM` (2.2 in, the manual's numbers disagree by ~1.7 in).
+- `TurretConfig.ROBOT_REL_TURRET_POINT` (DECODE value): turret pivot, used by the Limelight chain and as the SOTM launcher position.
 
 ## 6. Ken to confirm
 - Feeding with both pivots raised, including the preload shot (transfer wheels share the side motor).

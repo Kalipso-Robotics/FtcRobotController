@@ -14,8 +14,6 @@ public class SOTMTest {
     @Before
     public void config() {
         SOTMConfig.RELEASE_LATENCY_MS = 0;
-        SOTMConfig.LAUNCHER_OFFSET_X_MM = 0;
-        SOTMConfig.LAUNCHER_OFFSET_Y_MM = 0;
         SOTMConfig.FLIGHT_TIME_A_MS = 344;
         SOTMConfig.FLIGHT_TIME_B_MS_PER_MM = 0.186;
         SOTMConfig.MAX_ITERATIONS = 6;
@@ -27,7 +25,7 @@ public class SOTMTest {
     }
 
     private static SOTM.Solution solve(PoseHistory.Motion m) {
-        return SOTM.solve(GX, GY, 0, m, m.sampleNanos);
+        return SOTM.solve(GX, GY, 0, m, m.sampleNanos, 0, 0);
     }
 
     @Test
@@ -64,12 +62,13 @@ public class SOTMTest {
 
     @Test
     public void spinWithOffset_addsOmegaCrossR() {
-        SOTMConfig.LAUNCHER_OFFSET_X_MM = 100; // r = (100, 0) at heading 0
+        // r = (100, 0) at heading 0
         double w = 0.002; // rad/ms -> v_L = w * (0, 100) = (0, 0.2) mm/ms in +y
-        SOTM.Solution spin = solve(motion(0, 0, 0, 0, 0, w));
+        PoseHistory.Motion spinning = motion(0, 0, 0, 0, 0, w), still = motion(0, 0, 0, 0, 0, 0);
+        SOTM.Solution spin = SOTM.solve(GX, GY, 0, spinning, spinning.sampleNanos, 100, 0);
         // Same translation without spin must aim differently from the spinning case.
-        SOTM.Solution still = solve(motion(0, 0, 0, 0, 0, 0));
-        assertTrue(spin.aimHeadingRad < still.aimHeadingRad);
+        SOTM.Solution stillSolution = SOTM.solve(GX, GY, 0, still, still.sampleNanos, 100, 0);
+        assertTrue(spin.aimHeadingRad < stillSolution.aimHeadingRad);
     }
 
     @Test

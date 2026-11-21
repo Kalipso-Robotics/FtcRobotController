@@ -17,6 +17,6 @@ public class BlueAutoDepotScanning extends RedAutoDepotScanning {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TRIM_DEG = 0;
+        TurretConfig.TURRET_OFFSET_DEG = 0;
     }
 }

@@ -269,7 +269,7 @@ public class RedDecideAuto extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TRIM_DEG = 0;
+        TurretConfig.TURRET_OFFSET_DEG = 0;
     }
 
     @Override

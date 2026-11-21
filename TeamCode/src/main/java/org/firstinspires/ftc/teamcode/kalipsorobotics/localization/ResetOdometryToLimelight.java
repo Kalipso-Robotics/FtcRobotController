@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.localization;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -11,16 +13,15 @@ public class ResetOdometryToLimelight extends Action {
 
     Turret turret;
 
-    private boolean overrideOdometry = false;
-
     public ResetOdometryToLimelight(Turret turret) {
         this.turret = turret;
     }
 
     @Override
     protected void update() {
-        if (SharedData.getLimelightRawPosition().isEmpty()) {
-            KLog.d(TAG, "event=skip reason=noDetection");
+        double fixAgeMs = SharedData.getLimelightFixAgeMs();
+        if (fixAgeMs > AprilTagConfig.MAX_FIX_AGE_MS) {
+            KLog.d(TAG, () -> "event=skip reason=noFreshFix ageMs=" + fixAgeMs);
             isDone = true;
             return;
         }
@@ -30,14 +31,13 @@ public class ResetOdometryToLimelight extends Action {
             isDone = true;
             return;
         }
-        Position limelightGlobalPosition = SharedData.getLimelightGlobalPosition();
+        // Heading stays from the IMU; the fix only corrects x and y.
+        Position odometry = SharedData.getOdometryWheelIMUPosition();
+        Position fix = SharedData.getLimelightGlobalPosition();
+        Position limelightGlobalPosition = new Position(fix.getX(), fix.getY(), odometry.getTheta());
         KLog.d(TAG, () -> "event=reset from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + limelightGlobalPosition);
         SharedData.setOdometryWheelPosition(limelightGlobalPosition);
         SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
         isDone = true;
-    }
-
-    public void setOverrideOdometry(boolean overrideOdometry) {
-        this.overrideOdometry = overrideOdometry;
     }
 }

@@ -17,7 +17,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.KAprilTagProcessor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.TagObservation;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.TagPoseFilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.ArtifactColorBlobDetectionProcessor;
 
 import java.util.List;
@@ -96,14 +95,13 @@ public class MultiProcessorVisionTest extends LinearOpMode {
         FtcDashboard.getInstance().startCameraStream(camera.getPortal(), 30);
 
         // ---- Hand the tag processor to the action that relocalizes off it ----
-        int targetTagId = AprilTagConfig.getGoalAprilTagId(ALLIANCE);
+        int targetTagId = AprilTagConfig.cellATagIds(ALLIANCE)[0];
         AprilTagDetectionAction relocalize = null;
         String relocalizeError = null;
         if (RUN_RELOCALIZATION) {
             try {
                 Turret turret = Turret.getInstance(opModeUtilities);
-                relocalize = new AprilTagDetectionAction(
-                        opModeUtilities, turret, targetTagId, ALLIANCE, aprilTags);
+                relocalize = new AprilTagDetectionAction(opModeUtilities, turret, ALLIANCE, aprilTags);
             } catch (RuntimeException e) {
                 // Bench runs with no turret wired up still get to see raw detections.
                 relocalizeError = e.getMessage();
@@ -176,27 +174,11 @@ public class MultiProcessorVisionTest extends LinearOpMode {
         } else if (relocalize == null) {
             telemetry.addLine("  RUN_RELOCALIZATION is off");
         } else {
-            // Which tag actually produced the pose. With several tags in view the nearest
-            // usable one wins, so this flips as the robot drives around the field.
-            int fixTagId = relocalize.getLastFixTagId();
-            telemetry.addData("Fix from tag",
-                    fixTagId == AprilTagDetectionAction.NO_TAG ? "none" : String.valueOf(fixTagId));
-            telemetry.addData("Field pos", SharedData.getLimelightGlobalPosition());
+            telemetry.addData("Field pos", "%s (%.0f ms old)", SharedData.getLimelightGlobalPosition(), SharedData.getLimelightFixAgeMs());
             telemetry.addData("Odometry", SharedData.getOdometryWheelIMUPosition());
-
-            // Per-tag verdicts. A single tag reading REJECTED while the others are fine is
-            // the signature of a wrong field pose for that tag in AprilTagConfig.
-            for (int knownTagId : relocalize.getFieldLayout().getKnownTagIds()) {
-                TagPoseFilter.Verdict verdict = relocalize.getVerdictFor(knownTagId);
-                telemetry.addLine(String.format(Locale.US, "  tag %d: %s%s",
-                        knownTagId,
-                        verdict == null ? "never seen" : verdict,
-                        knownTagId == targetTagId ? "   <- goal / aim tag" : ""));
-            }
-
-            telemetry.addData("Goal tag", "%d  %s",
+            telemetry.addData("Up CELL", SharedData.getHiveUpCell());
+            telemetry.addData("Cell A tag", "%d  %s",
                     targetTagId, aprilTags.isTagVisible(targetTagId) ? "IN VIEW" : "not seen");
-            telemetry.addData("Raw to goal", SharedData.getLimelightRawPosition());
         }
 
         telemetry.addLine("------- BLOBS -------");

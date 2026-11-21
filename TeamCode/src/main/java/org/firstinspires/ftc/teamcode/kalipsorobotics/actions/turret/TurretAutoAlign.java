@@ -64,13 +64,13 @@ public class TurretAutoAlign extends Action {
         }
         if (!hasStarted) {
             hasStarted = true;
-            KLog.d(TAG, () -> "event=start trimDeg=" + TurretConfig.TRIM_DEG);
+            KLog.d(TAG, () -> "event=start offsetDeg=" + TurretConfig.TURRET_OFFSET_DEG);
         }
 
-        targetAngleRad = calculateTargetAngleRad(targetPoint, SharedData.getOdometryWheelIMUPosition(), TurretConfig.TRIM_DEG);
+        targetAngleRad = calculateTargetAngleRad(targetPoint, SharedData.getOdometryWheelIMUPosition(), TurretConfig.TURRET_OFFSET_DEG);
         SOTM.Solution sotm = SOTM.usableSolution();
         if (sotm != null) {
-            targetAngleRad = calculateTargetAngleRad(sotm.aimHeadingRad, sotm.releaseHeadingRad, TurretConfig.TRIM_DEG);
+            targetAngleRad = calculateTargetAngleRad(sotm.aimHeadingRad, sotm.releaseHeadingRad, TurretConfig.TURRET_OFFSET_DEG);
         }
 
         // No encoder: the turret is where we last commanded it once its estimated travel is over.
@@ -87,14 +87,14 @@ public class TurretAutoAlign extends Action {
     }
 
 
-    public static double calculateTargetAngleRad(Point targetPoint, Position currentPosition, double trimDeg) {
+    public static double calculateTargetAngleRad(Point targetPoint, Position currentPosition, double offsetDeg) {
         double angleTargetRadian = Math.atan2(targetPoint.getY() - currentPosition.getY(), targetPoint.getX() - currentPosition.getX());
-        return calculateTargetAngleRad(angleTargetRadian, currentPosition.getTheta(), trimDeg);
+        return calculateTargetAngleRad(angleTargetRadian, currentPosition.getTheta(), offsetDeg);
     }
 
     /** Field aim angle and robot heading to turret angle: (aim - heading + trim), wrapped. */
-    public static double calculateTargetAngleRad(double aimRad, double headingRad, double trimDeg) {
-        return MathFunctions.angleWrapRad(aimRad - headingRad + Math.toRadians(trimDeg));
+    public static double calculateTargetAngleRad(double aimRad, double headingRad, double offsetDeg) {
+        return MathFunctions.angleWrapRad(aimRad - headingRad + Math.toRadians(offsetDeg));
     }
 
     public double getTargetAngleRad() {

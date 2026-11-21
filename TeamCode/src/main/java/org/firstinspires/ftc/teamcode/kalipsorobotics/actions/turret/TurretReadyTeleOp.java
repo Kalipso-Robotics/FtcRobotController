@@ -64,9 +64,8 @@ public class TurretReadyTeleOp extends Action {
             }
             KLog.d(TAG, () -> String.format("event=done name=%s timeMs=%.0f targetDeg=%.1f",
                     getName(), timeoutTimer.milliseconds(), Math.toDegrees(turretAutoAlignTeleop.getTargetAngleRad())));
-        } else if (SOTM.isActive()) {
-            KLog.d(TAG, () -> "event=done name=" + getName() + " reason=sotmActive");
-            isDone = true;
         }
+        // No SOTM shortcut: a moving shot still waits for the turret to reach the lead angle (it tracks a slowly
+        // moving target, so isWithinRange() still settles; the TeleOp timeout aborts if it never does).
     }
 }

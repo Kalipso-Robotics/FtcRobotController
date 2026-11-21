@@ -113,7 +113,7 @@ Decisions made during execution (owner answers and orchestrator rulings).
 
 **Orchestrator rulings (milestone 1)**
 - `Turret` keeps its `getInstance` / `setInstanceNull` shell so about 20 callers do not change. `getAngleRad()` returns the last commanded angle; `isMoving()` is the `KServo` travel-time estimate.
-- `TurretConfig.TRIM_DEG` is a static Dashboard value, so it persists across OpModes; autos zero it at start.
+- `TurretConfig.TURRET_OFFSET_DEG` is a static Dashboard value, so it persists across OpModes; autos zero it at start.
 - Interlocks live in the hardware layer: `Flower.lower()` refuses unless its side `isDown()`; `IntakeSide.raise()` raises the flower first and holds the pivot until the flower is up. A pending raise completes only when `update()` or `raise()` is called again, so the milestone 2 controller must call `intake.update()` every loop.
 - Each side's pivot is commanded raised at init (the side is spring loaded down and would exceed the starting size).
 - `ShooterInterpolationDataLookup` no longer shares a static list (each `new Shooter` used to append another copy) and returns a safe default for empty and one-row tables.
@@ -143,8 +143,17 @@ Decisions made during execution (owner answers and orchestrator rulings).
 - TeleOp shots never fire on timeout: `ShooterReady` / `TurretReadyTeleOp` take a timeout; a timeout aborts `ShootAllAction` without feeding (`event=abort reason=timeout`). Auto constructors keep fire-on-timeout. GP1 LB is a press edge.
 - Flower deploy gate: `AutoToBallsPathingAction.shouldLowerFlower` (arm up, side down, distance >= `FLOWER_DEPLOY_CLEARANCE_MM`). Arm already down at start is not redeployed; too close means skip the arm (`event=flowerSkipped reason=tooClose`). `useFlower` is now a `Point flower` (null = not a Flower pile).
 - `FieldConfig.flowerPilePoint` / `nearestFlower` hold the pile logic shared by auto and TeleOp. GP1: X flower assist (while pending TeleOp skips intake/flower/idle-stop; stick input cancels), Y pass, LB hive shot, LT stop, RB slow.
-- AprilTags: manual IDs per alliance and Cell; a tag joins the layout only when its pose in `CELL_A/B_TAG_POSES` is measured. Limelight pipelines need reconfiguring for 36h11 IDs 30-45.
+- AprilTags: manual IDs per alliance and Cell. Limelight pipelines need reconfiguring for 36h11 IDs 30-45. (Superseded below: poses now come from manual geometry.)
 - TeleOp now counts balls (`BeamBreakCountAction`), has a Blue variant, and the manual zero cannot snap odometry to (0,0,0).
 - `DecideParams` (untracked teammate file) duplicates `FieldConfig.FLOWER_BALL_OFFSET_MM`; not touched.
 - Cleanup: `PathPlanning.turnCostMm` uses `MathFunctions.angleWrapRad`; `BallInformation.distanceTo(Point)` uses `MathFunctions.distance`; `PickupPlan.normalizeDeg` is kept because it wraps to (-180, 180] while `angleWrapDeg` leaves -180 as -180. Deleted `KPTuning`, `PIDIterativeLearning`, `ShooterRPSTest`, `ShooterMotorTest` (no references).
 - New `TODO-measure` items are listed in section 5 of `teleop-to-sim-handoff.md`.
+
+**Orchestrator rulings (Limelight + SOTM pass, 2026-11-17)**
+- BIOBUZZ tags sit under tipping CELLs, so the DECODE 2D wall-tag chain (tag orientation, `TagPoseFilter`, goal offset) is replaced by `HiveTagLocalizer`: tag position in the camera + odometry heading (MegaTag2 idea). Each tag has a CELL-up and a CELL-down 3D point from manual geometry (`AprilTagConfig.tagFieldXYZ`, VERIFY); the measured tag height picks one, which gives both the robot x/y and the goal state. All 16 tags localize; only our own CELL tags set the goal state. Re-zero keeps the IMU heading and needs a fix under `MAX_FIX_AGE_MS`.
+- Goal state is the last sighting (`SharedData.getHiveUpCell`). Only the up CELL scores: GP1 LB on the end whose CELL is seen down passes instead (`TeleOp.isOurCellDown`). The pass is a low flat shot under the Hive, aimed through the gap between the legs and clamped 1 m inside the walls (`FieldConfig.passTarget`).
+- Removed DECODE goal-aim plumbing: `LimelightPos`, `SharedData` raw/unfiltered Limelight positions, `ShooterRun` limelight distance, `AprilTagConfig` goal offsets/field layout. `TagPoseFilter` / `AprilTagFieldLayout` (Vu's) are left in place, now unused by the action.
+- SOTM: launcher offset = `TurretConfig.ROBOT_REL_TURRET_POINT` (was a second zeroed copy). Removed the SOTM shortcuts that marked `TurretReadyTeleOp` and `ShooterReady` done while unaligned / below RPS. `SOTMClosedLoopTest` flies the ball from the true robot state through the real fit + solve + turret math.
+- Renamed `TurretConfig.TRIM_DEG` to `TURRET_OFFSET_DEG`.
+- The AprilTag thread sleeps 10 ms per pass instead of busy-spinning on the same Limelight frame.
+- Limelight pipeline: 36h11, tag size 82.55 mm. Device config, not code.
