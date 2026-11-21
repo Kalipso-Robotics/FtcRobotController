@@ -15,22 +15,36 @@ public class RunIntakeTime extends Action {
     private double timeMS;
     private final double power;
     private final ElapsedTime timer = new ElapsedTime();
+    private final boolean lowerFirst;
 
     /** Both sides. */
     public RunIntakeTime(Intake intake, double timeMS, double power) {
         this(intake, null, timeMS, power);
     }
 
-    /** One side only, e.g. feeding that side's balls to the shooter. */
+    /** One side only, e.g. feeding that side's balls to the shooter. Does not lower the side (PushBall relies on that). */
     public RunIntakeTime(IntakeSide side, double timeMS, double power) {
-        this(null, side, timeMS, power);
+        this(null, side, timeMS, power, false);
+    }
+
+    /**
+     * One side only; lowerFirst=true lowers that side when it starts (picking up).
+     * Auto: {@code new RunIntakeTime(intake.getSide(BeamBreakPosition.IntakeSide.B), 2000, IntakeConfig.intakePower, true)}
+     */
+    public RunIntakeTime(IntakeSide side, double timeMS, double power, boolean lowerFirst) {
+        this(null, side, timeMS, power, lowerFirst);
     }
 
     private RunIntakeTime(Intake intake, IntakeSide side, double timeMS, double power) {
+        this(intake, side, timeMS, power, intake != null);
+    }
+
+    private RunIntakeTime(Intake intake, IntakeSide side, double timeMS, double power, boolean lowerFirst) {
         this.intake = intake;
         this.side = side;
         this.timeMS = timeMS;
         this.power = power;
+        this.lowerFirst = lowerFirst;
     }
 
     private void setPower(double power) {
@@ -50,8 +64,12 @@ public class RunIntakeTime extends Action {
         if (!hasStarted) {
             timer.reset();
             hasStarted = true;
-            if (intake != null) {
-                intake.lower(); // both = lower both; per-side runs (PushBall feeds) stay raised
+            if (lowerFirst) {
+                if (intake != null) {
+                    intake.lower(); // both = lower both
+                } else {
+                    side.lower();
+                }
             }
             KLog.d(TAG, () -> "name=" + getName() + " side=" + sideLabel() + " event=start power=" + power + " timeMs=" + timeMS);
         }

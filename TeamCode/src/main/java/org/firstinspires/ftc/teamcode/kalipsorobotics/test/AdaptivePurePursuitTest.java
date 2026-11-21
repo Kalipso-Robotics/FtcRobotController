@@ -49,8 +49,7 @@ public class AdaptivePurePursuitTest extends KOpMode {
 
         Odometry.setInstanceNull();
         // Initialize odometry to blue starting position (3060, -712, 2.4049 rad)
-        odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3060, -712, 2.4049);
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(3060, -712, 2.4049));
 
         adaptivePP = new AdaptivePurePursuitAction(driveTrain);
         adaptivePP.setName("AdaptivePP_Test");

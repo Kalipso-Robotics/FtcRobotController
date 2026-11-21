@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 public class Flower {
     public static final String TAG = "Robot_Flower";
 
+    private static final double POSITION_TOLERANCE = 1e-6;
+
     private final KServo servo;
     private final IntakeSide side;
 
@@ -65,6 +67,23 @@ public class Flower {
         isCommandedDown = false;
         servo.setTargetPosition(ModuleConfig.FLOWER_UP_POS);
         KLog.d(TAG, () -> "side=" + side.getSide() + " event=raise");
+    }
+
+    /**
+     * Manual arm control (BasicTeleop). Keeps the interlock: any position other than UP is refused (returns false,
+     * logs event=blocked) unless this arm's intake side is down.
+     */
+    public boolean setPosition(double position) {
+        boolean toUp = Math.abs(position - ModuleConfig.FLOWER_UP_POS) < POSITION_TOLERANCE; // stepped values miss UP by ~1e-16
+        if (!toUp && !side.isDown()) {
+            KLog.e(TAG, "side=" + side.getSide() + " event=blocked reason=intakeUp pos=" + position);
+            return false;
+        }
+        isBlocked = false;
+        isCommandedDown = !toUp;
+        servo.setTargetPosition(position);
+        KLog.d(TAG, () -> "side=" + side.getSide() + " event=setPosition pos=" + position);
+        return true;
     }
 
     /** True once commanded down and the servo has had time to get there. */

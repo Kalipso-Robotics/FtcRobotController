@@ -79,6 +79,7 @@ public class BeamBreakTest extends LinearOpMode {
         telemetry.addLine("Beam break bring-up. Push a ball into each position to sweep voltages.");
         telemetry.update();
 
+        boolean startingPatternCorrection = BeamBreakConfig.ENABLE_PATTERN_CORRECTION; // B toggles it; restored on exit
         waitForStart();
 
         long loopCount = 0;
@@ -152,5 +153,6 @@ public class BeamBreakTest extends LinearOpMode {
             telemetry.addLine("A = reset filters/voltage window   B = toggle correction");
             telemetry.update();
         }
+        BeamBreakConfig.ENABLE_PATTERN_CORRECTION = startingPatternCorrection; // the flag is static: do not leak the test's toggle into TeleOp
     }
 }

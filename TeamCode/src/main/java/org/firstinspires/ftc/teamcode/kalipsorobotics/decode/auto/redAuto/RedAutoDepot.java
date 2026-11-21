@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.DepotRoundTrip;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.RoundTripAction;
@@ -86,9 +88,7 @@ public class RedAutoDepot extends KOpMode {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(0, 0, 0));
 
         autoDepot = new KActionSet();
         KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");

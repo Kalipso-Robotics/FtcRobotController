@@ -342,9 +342,7 @@ public class RedTippingAuto extends KOpMode {
 
         sleep(1000); // Optional: let hardware initialize
 
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 171.5 + 1218, 3658 - 171.5, Math.toRadians(-90));
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(171.5 + 1218, 3658 - 171.5, Math.toRadians(-90)));
 
         autoTipping = new KActionSet();
         KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");

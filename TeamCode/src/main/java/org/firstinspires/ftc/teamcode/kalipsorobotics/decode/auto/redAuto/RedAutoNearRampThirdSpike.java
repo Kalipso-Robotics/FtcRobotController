@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
@@ -85,9 +87,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3060, 712 * allianceColor.getPolarity(), -2.4049 * allianceColor.getPolarity()); //3015.93, 765.86, -2.4030
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(3060, 712 * allianceColor.getPolarity(), -2.4049 * allianceColor.getPolarity()));
 
 
         redAutoNear = new KActionSet();

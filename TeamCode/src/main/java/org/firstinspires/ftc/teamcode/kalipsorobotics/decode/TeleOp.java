@@ -59,7 +59,6 @@ public class TeleOp extends KOpMode {
     private Intake intake = null;
     private Turret turret = null;
     private Stopper stopper = null;
-    private Odometry odometry = null;
     private SOTM sotm = null;
 
     ShootAllAction shootAllAction = null;
@@ -138,11 +137,10 @@ public class TeleOp extends KOpMode {
 
         // ============== LONG RUNNING ACTIONS =================
 
-        odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null);
 //        odometry.setShouldFallbackToWheelTheta(true);
         aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, allianceColor);
 
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
         OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
         sotm = new SOTM(opModeUtilities);
         if (SOTMConfig.enabled) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
@@ -275,6 +273,9 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Current RPS ", "%.2f", shooterRun.getCurrentRPS());
             telemetry.addData("Hive Cell ", hiveTarget == FieldConfig.aTargetPoint ? "A" : "B");
+            if (HiveTagLocalizer.IS_PLACEHOLDER) {
+                telemetry.addLine("WARNING: vision placeholder -- no Limelight zeroing, no auto pass (LB always shoots)");
+            }
             telemetry.addData("Up CELL (seen) ", "%s (%.1fs ago)%s", SharedData.getHiveUpCell(), SharedData.getHiveUpCellAgeMs() / 1000,
                     isOurCellDown() ? " -> LB PASSES" : "");
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());

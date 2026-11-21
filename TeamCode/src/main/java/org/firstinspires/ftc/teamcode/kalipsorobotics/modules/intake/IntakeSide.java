@@ -115,6 +115,28 @@ public class IntakeSide {
         return isCommandedDown && !isRaisePending && pivot.isDone();
     }
 
+    /** True once commanded up, not waiting to raise, and the pivot has had time to get there. */
+    public boolean isUp() {
+        return !isCommandedDown && !isRaisePending && pivot.isDone();
+    }
+
+    /**
+     * Manual pivot control (BasicTeleop). Keeps the Flower interlock: refuses to leave DOWN while this side's
+     * Flower is not up (logs event=blocked, returns false). Any position other than DOWN counts as "not down".
+     */
+    public boolean setPivotPosition(double position) {
+        boolean toDown = Math.abs(position - downPos) < 1e-6; // stepped values miss DOWN by ~1e-16
+        if (isCommandedDown && !toDown && flower != null && !flower.isUp()) {
+            KLog.e(TAG, "side=" + side + " event=blocked reason=flowerNotUp pos=" + position);
+            return false;
+        }
+        isRaisePending = false;
+        isCommandedDown = toDown;
+        pivot.setTargetPosition(position);
+        KLog.d(TAG, () -> "side=" + side + " event=setPivot pos=" + position);
+        return true;
+    }
+
     public BeamBreakPosition.IntakeSide getSide() {
         return side;
     }

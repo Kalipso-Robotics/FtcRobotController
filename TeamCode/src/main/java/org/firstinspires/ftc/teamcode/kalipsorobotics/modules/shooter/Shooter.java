@@ -54,7 +54,7 @@ public class Shooter {
 
         this.opModeUtilities = opModeUtilities;
         DcMotor motor = opModeUtilities.getHardwareMap().dcMotor.get("shooter");
-        motor.setDirection(DcMotorSimple.Direction.REVERSE); // TODO-measure
+        motor.setDirection(ShooterConfig.SHOOTER_MOTOR_DIRECTION);
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 

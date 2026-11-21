@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 
 import java.util.ArrayList;
@@ -86,6 +87,8 @@ import java.util.Locale;
  */
 @TeleOp(name = "Octo 2 Tune", group = "Calibration")
 public class OctoTune extends LinearOpMode {
+
+    public static final String TAG = "Test_Odometry";
 
     private enum Stage { LINEAR_X, LINEAR_Y, HEADING, DONE }
 
@@ -165,7 +168,8 @@ public class OctoTune extends LinearOpMode {
                 OctoConfig.PUSH_Y_IN, OctoConfig.PUSH_Y_MM));
         csv.writeLine("stage,t_s,rawX,rawY,rawX2,x_mm,y_mm,heading_deg,crcOk");
 
-        telemetry.addLine("OCTO TUNE -- counts/mm only. Run OctoStartup first.");
+        telemetry.addLine("OCTO TUNE -- counts/mm (X, X2, Y), IMU heading scalar and pod offsets.");
+        telemetry.addLine("Run OctoStartup first. Steps: 1/3 push X, 2/3 push Y, 3/3 spin.");
         telemetry.addData("Lane X", "%.0f in robot travel, along a wall", OctoConfig.PUSH_X_IN);
         telemetry.addData("Lane Y", "%.0f in robot travel, along a wall", OctoConfig.PUSH_Y_IN);
         telemetry.addLine("Travel = robot's leading face at start -> far stop, by tape. Make");
@@ -228,6 +232,7 @@ public class OctoTune extends LinearOpMode {
 
                 if (gamepad1.bWasPressed()) zero();
 
+                telemetry.addLine("NEXT: " + nextAction());
                 switch (stage) {
                     case LINEAR_X: renderLinear(true);  break;
                     case LINEAR_Y: renderLinear(false); break;
@@ -299,8 +304,10 @@ public class OctoTune extends LinearOpMode {
                     + "inverted backwards; fix it in OctoStartup.";
         }
 
-        telemetry.addLine(isX ? "1/2 PUSH X -- push the robot FORWARD"
-                              : "2/2 PUSH Y -- push the robot LEFT");
+        telemetry.addLine(isX ? "1/3 PUSH X -- push the robot FORWARD"
+                              : "2/3 PUSH Y -- push the robot LEFT");
+        if (!isX) telemetry.addLine("SETUP: turn the robot 90 deg so its LEFT side runs along the same wall lane.");
+        telemetry.addLine("A accept | X skip (keep current) | B zero");
         telemetry.addLine("1. set the robot against the START stop");
         telemetry.addLine("2. press B to zero");
         telemetry.addLine("3. push slowly to the FAR stop, do not twist or lift");
@@ -380,7 +387,7 @@ public class OctoTune extends LinearOpMode {
                 : imuHeadingScalar * targetDeg / measuredNetDeg;
         double wobbleDeg = turnedDeg - measuredNetDeg;
         double[] geo = OctoConfig.spinGeometry(rawX(), rawX2(), rawY(), netDeg,
-                OctoConfig.SPIN_ROTATIONS);
+                OctoConfig.SPIN_ROTATIONS, cpmX, cpmX2, cpmY); // the counts/mm measured in steps 1-2, not the seeds
 
         String reason = null;
         if (measuredNetDeg <= 0) {
@@ -408,6 +415,7 @@ public class OctoTune extends LinearOpMode {
                 + " full turns, same direction, back against the same wall");
         telemetry.addLine("4. press A to record");
         telemetry.addLine("Do one run CW and one CCW; paste the average of the two scalars.");
+        telemetry.addLine("A accept | X skip (keep current) | B zero");
         telemetry.addLine();
         telemetry.addData("net turned", "%8.1f deg  <- THE measurement", netDeg);
         telemetry.addData("expected",   "%8.1f deg  (%d x 360)", targetDeg, OctoConfig.SPIN_ROTATIONS);
@@ -459,8 +467,14 @@ public class OctoTune extends LinearOpMode {
         telemetry.addLine();
         for (String s : pasteBlock()) telemetry.addLine(s);
         telemetry.addLine();
-        telemetry.addLine("Paste into OctoConfig. Offsets are from the LAST spin: do one CW and");
-        telemetry.addLine("one CCW and average them. Then rebuild and run CompareOdometryTest.");
+        telemetry.addLine("pasted value (signed, as in the block above):");
+        telemetry.addData("  TCP_OFFSET_MM_X", "%+.1f", (double) tcpX);
+        telemetry.addData("  TCP_OFFSET_MM_Y", "%+.1f", (double) tcpY);
+        telemetry.addData("  TRACK_WIDTH_MM", "%+.2f", (double) trackWidthMm);
+        telemetry.addLine("Offsets are from the LAST spin: do one CW and one CCW and average them.");
+        telemetry.addLine("DONE: paste into OctoConfig, add the date comment, rebuild,");
+        telemetry.addLine("      run CompareOdometryTest.");
+        telemetry.addLine("B zero (nothing else to press)");
         telemetry.addData("bad reads", "%d", badReads);
         telemetry.addLine("CSV: " + csv.getPath());
         telemetry.addLine("Autosaved: OctoTune_LATEST.txt (same folder)");
@@ -555,6 +569,8 @@ public class OctoTune extends LinearOpMode {
     }
 
     private void enterStage(Stage s) {
+        Stage from = stage;
+        KLog.d(TAG, () -> "tool=OctoTune event=step from=" + from + " to=" + s);
         stage = s;
         zero();
         csv.writeLine("# --- stage " + s);
@@ -565,7 +581,20 @@ public class OctoTune extends LinearOpMode {
      * accepted push, not just at the end: getting stuck on the second one used to mean the
      * first one's number existed only in memory and died with the OpMode.
      */
+    /** One line: what to do now on this step. */
+    private String nextAction() {
+        switch (stage) {
+            case LINEAR_X: return "1/3 robot at the START stop, B zero, push FORWARD to the far stop, A";
+            case LINEAR_Y: return "2/3 turn 90 deg along the wall, B zero, push LEFT to the far stop, A";
+            case HEADING:  return "3/3 against the wall, B zero, spin " + OctoConfig.SPIN_ROTATIONS + " full turns, A";
+            default:       return "paste the block into OctoConfig";
+        }
+    }
+
     private void accept(Stage next) {
+        Stage done = stage;
+        KLog.d(TAG, () -> "tool=OctoTune event=accept step=" + done + " cpmX=" + cpmX + " cpmX2=" + cpmX2
+                + " cpmY=" + cpmY + " scalar=" + imuHeadingScalar);
         for (String s : pasteBlock()) csv.writeLine(s);
         flush();
         writeLatest();

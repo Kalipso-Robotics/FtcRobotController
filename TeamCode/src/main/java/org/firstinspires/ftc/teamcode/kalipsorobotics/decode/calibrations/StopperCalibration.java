@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.calibrations;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -28,10 +29,11 @@ public class StopperCalibration extends KOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double stopperPosition = 0.5;
+        double stopperPosition = ModuleConfig.STOPPER_SERVO_CLOSED_POS;
 
 
         initializeRobot();
+        stopper.getStopper().setPosition(stopperPosition);
         waitForStart();
         while (opModeIsActive()) {
 

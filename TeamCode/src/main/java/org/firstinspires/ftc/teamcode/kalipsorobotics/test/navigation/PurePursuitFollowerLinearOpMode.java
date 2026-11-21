@@ -58,13 +58,11 @@ public class PurePursuitFollowerLinearOpMode extends LinearOpMode {
         GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
 
         //OdometryFileWriter odometryFileWriter = new OdometryFileWriter("PurePursuitRun", opModeUtilities);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, executorService, driveTrain, imuModule, new Position(0, 0, 0));
 
 
 

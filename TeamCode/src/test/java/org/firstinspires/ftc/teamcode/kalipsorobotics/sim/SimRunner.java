@@ -82,6 +82,8 @@ public final class SimRunner {
      */
     public static Result run(String opModeClassName, double startX, double startY, double startTheta, String worldKind) throws Exception {
         ClockRewriter.install();
+        // The sim fakes only the drive-port encoders and the IMU, not the OctoQuad: always use wheel odometry here.
+        org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryConfig.USE_OCTOQUAD = false;
 
         SimHardware.clearAssumed();
         Result result = new Result();

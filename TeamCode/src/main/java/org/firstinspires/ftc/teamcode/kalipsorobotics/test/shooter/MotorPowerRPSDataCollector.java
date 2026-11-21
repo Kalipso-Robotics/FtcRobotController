@@ -27,11 +27,11 @@ import java.util.ArrayList;
  * with a full battery, then paste it into ShooterConfig.kf. kf is a measured value, not Dashboard-tuned.
  *
  * Methodology:
- * 1. Loop through power levels from 0.05 to 1.0 in 0.05 increments
+ * 1. Loop through power levels from POWER_START (0.3) to POWER_END (1.0) in POWER_INCREMENT (0.1) steps
  * 2. For each power level:
  *    - Set power to the shooter motor
- *    - Wait 2 seconds for motors to stabilize
- *    - Collect RPS data for 1 second (sampling every 50ms = 20 samples)
+ *    - Wait STABILIZATION_TIME_MS (6 s) for the flywheel to settle
+ *    - Collect RPS data for DATA_COLLECTION_TIME_MS (1 s), sampling every SAMPLE_INTERVAL_MS (10 ms)
  *    - Record RPS_MAX, RPS_MIN, RPS_avg, and Battery_Voltage
  *
  * Output file columns: Power, RPS_MAX, RPS_MIN, RPS_avg, Battery_Voltage, kf
@@ -44,9 +44,9 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
     private static final double POWER_START = 0.3;
     private static final double POWER_END = 1;
     private static final double POWER_INCREMENT = 0.1;
-    private static final long STABILIZATION_TIME_MS = 6000; // 2 seconds
+    private static final long STABILIZATION_TIME_MS = 6000; // 6 s
     private static final long DATA_COLLECTION_TIME_MS = 1000; // 1 second
-    private static final long SAMPLE_INTERVAL_MS = 10; // Sample every 50ms/
+    private static final long SAMPLE_INTERVAL_MS = 10; // 10 ms
     private static final String TAG = "Test_Shooter";
     private KMotor shooter;
     private KFileWriter fileWriter;
@@ -81,9 +81,9 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         telemetry.addLine("Initialization complete!");
         telemetry.addLine();
         telemetry.addLine("This test will:");
-        telemetry.addLine("- Test power levels: 0.05 to 1.0 (step 0.05)");
-        telemetry.addLine("- Wait 2s for stabilization");
-        telemetry.addLine("- Collect RPS data for 1s");
+        telemetry.addLine(String.format("- Test power levels: %.1f to %.1f (step %.1f)", POWER_START, POWER_END, POWER_INCREMENT));
+        telemetry.addLine("- Wait " + STABILIZATION_TIME_MS / 1000 + " s for stabilization");
+        telemetry.addLine("- Collect RPS data for " + DATA_COLLECTION_TIME_MS / 1000 + " s, every " + SAMPLE_INTERVAL_MS + " ms");
         telemetry.addLine();
         telemetry.addLine("Press PLAY to start data collection");
         telemetry.update();
@@ -181,12 +181,12 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         telemetry.addLine("File saved to:");
         telemetry.addLine("/sdcard/Android/data/");
         telemetry.addLine("com.qualcomm.ftcrobotcontroller/");
-        telemetry.addLine("files/OdometryLog/");
+        telemetry.addLine("files/RobotLogs/");
         telemetry.addLine();
         telemetry.addLine("Pull file using:");
         telemetry.addLine("adb pull /sdcard/Android/data/");
         telemetry.addLine("com.qualcomm.ftcrobotcontroller/");
-        telemetry.addLine("files/OdometryLog/ ~/Downloads");
+        telemetry.addLine("files/RobotLogs/ ~/Downloads");
         telemetry.update();
 
         KLog.d(TAG, "event=done file=closed");
@@ -202,7 +202,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
      */
     private void initializeHardware() {
         DcMotor motor = hardwareMap.dcMotor.get("shooter");
-        motor.setDirection(DcMotorSimple.Direction.REVERSE); // same as Shooter
+        motor.setDirection(ShooterConfig.SHOOTER_MOTOR_DIRECTION); // same constant Shooter uses
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

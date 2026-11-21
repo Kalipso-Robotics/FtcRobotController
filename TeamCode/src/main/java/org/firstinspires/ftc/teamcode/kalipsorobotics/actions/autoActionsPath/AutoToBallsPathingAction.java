@@ -315,9 +315,7 @@ public class AutoToBallsPathingAction extends Action {
         // and which intake (front or back) picks the ball up.
         // A Flower pile can only be picked up by the side the Flower arm is on.
         Boolean forceBack = useFlower ? ModuleConfig.FLOWER_SIDE == BeamBreakPosition.IntakeSide.B : null;
-        plan = (farTarget == null)
-                ? planner.planPickup(robot, pose.getTheta(), target, forceBack)
-                : planner.planPickupThrough(robot, pose.getTheta(), target, farTarget);
+        plan = planner.planPickup(robot, pose.getTheta(), target, forceBack);
         if (forceBack != null && !plan.isOk()) {
             // The flower's side cannot reach this pile: pick it up with whichever side can, without the arm.
             String forcedWhy = plan.why;
@@ -376,9 +374,7 @@ public class AutoToBallsPathingAction extends Action {
         if (plan.pullIn) {
             return true;
         }
-        // for a pass through a cluster the intake runs from the run-up on: before the first ball, and along the whole pass
-        double passMm = (farTarget == null || plan.alignedLast < 2) ? 0 : Point.distance(target, farTarget) + INTAKE_RUN_UP_MM;
-        return distanceToStop() <= INTAKE_START_DISTANCE_MM + passMm;
+        return distanceToStop() <= INTAKE_START_DISTANCE_MM;
     }
 
     /** Straight-line distance from the robot to its stopping point, mm. */

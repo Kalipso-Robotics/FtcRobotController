@@ -99,6 +99,70 @@ public class FlowerInterlockTest {
         assertEquals(0, motorA.getPower(), 1e-9);
     }
 
+    @Test
+    public void isUp_trueAtStart_falseWhenLowered_falseWhileRaisePending() throws InterruptedException {
+        waitUntil(sideA::isUp);
+        sideA.lower();
+        assertFalse(sideA.isUp());
+        waitUntil(sideA::isDown);
+        assertTrue(flower.lower());
+        waitUntil(flower::isDown);
+        sideA.raise(); // deferred: flower is going up first
+        assertFalse(sideA.isUp());
+        waitUntil(() -> {
+            sideA.update();
+            return sideA.isUp();
+        });
+    }
+
+    @Test
+    public void setPivotPosition_refusesToLeaveDown_whileFlowerIsDown() throws InterruptedException {
+        sideA.lower();
+        waitUntil(sideA::isDown);
+        assertTrue(flower.lower());
+        waitUntil(flower::isDown);
+
+        assertFalse(sideA.setPivotPosition(0.5));
+        assertEquals(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS, pivotServoA.getPosition(), 1e-9);
+    }
+
+    @Test
+    public void setPivotPosition_movesAndKeepsDownFlagInSync() throws InterruptedException {
+        assertTrue(sideA.setPivotPosition(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS));
+        waitUntil(sideA::isDown);
+        assertTrue(sideA.setPivotPosition(0.5));
+        assertEquals(0.5, pivotServoA.getPosition(), 1e-9);
+        assertFalse(sideA.isDown());
+    }
+
+    @Test
+    public void flowerSetPosition_refusesNonUp_whileSideIsUp() {
+        assertFalse(flower.setPosition(0.5));
+        assertEquals(ModuleConfig.FLOWER_UP_POS, flowerServo.getPosition(), 1e-9);
+        assertTrue(flower.setPosition(ModuleConfig.FLOWER_UP_POS));
+    }
+
+    @Test
+    public void flowerSetPosition_moves_onceSideIsDown() throws InterruptedException {
+        sideA.lower();
+        waitUntil(sideA::isDown);
+        assertTrue(flower.setPosition(0.5));
+        assertEquals(0.5, flowerServo.getPosition(), 1e-9);
+        assertFalse(flower.isUp());
+    }
+
+    @Test
+    public void flowerSteppedBackToUp_countsAsUp_soPivotCanLeaveDown() throws InterruptedException {
+        sideA.lower();
+        waitUntil(sideA::isDown);
+        double stepped = ModuleConfig.FLOWER_UP_POS + 0.05;
+        assertTrue(flower.setPosition(stepped));
+        for (int i = 0; i < 5; i++) stepped -= 0.01; // 0.19999999999999996: float steps miss UP exactly
+        assertTrue(flower.setPosition(stepped));
+        waitUntil(flower::isUp);
+        assertTrue(sideA.setPivotPosition(0.5));
+    }
+
     private static void waitUntil(BooleanSupplier condition) throws InterruptedException {
         long deadlineMs = System.currentTimeMillis() + 2000;
         while (!condition.getAsBoolean()) {

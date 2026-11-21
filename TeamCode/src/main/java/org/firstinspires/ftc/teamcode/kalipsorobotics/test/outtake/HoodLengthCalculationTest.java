@@ -24,7 +24,6 @@ public class HoodLengthCalculationTest extends LinearOpMode {
         DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule goBildaOdoModule = new GoBildaOdoModule(opModeUtilities);
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         calculateHoodLength = new CalculateHoodLength(new Position(0, 0, 0)); //TODO find actual goal position
         ShooterLUTCornerGrid lut = new ShooterLUTCornerGrid();
 
@@ -33,7 +32,7 @@ public class HoodLengthCalculationTest extends LinearOpMode {
 
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, executorService, driveTrain, imuModule, null);
         waitForStart();
         while(opModeIsActive()) {
             //TODO make into action so it dosnt pause other things

@@ -57,15 +57,17 @@ public final class OctoConfig {
     // bring-up 2026-09-22 via OctoStartup (OctoStartup_LATEST.txt), redone after a 200%+
     // deviation in OctoTune showed X counting backwards -- ch0/ch2 direction changed from the
     // 2026-09-21 bring-up, presumably a re-seated or swapped connector.
+    // (2026-09-22 names: "check 1" = today's FORWARD gesture, "check 2" = PUSH LEFT,
+    //  "check 3" = the CONFIRM L-test; OctoStartup now runs GESTURES then CONFIRM.)
     //   check 1 forward push: ch0 +8321, ch2 +8247, pose x +620mm
     //   check 2 sideways:     SKIPPED (still trusted from 2026-09-21, port 1 untouched)
-    public static final boolean INVERT_X  = false;  // [2026-09-22] OctoStartup check 1
-    public static final boolean INVERT_Y  = false;   // [2026-09-22] OctoStartup check 3
-    public static final boolean INVERT_X2 = false;   // [2026-09-22] OctoStartup check 1
+    public static final boolean INVERT_X  = false;  // [2026-09-22] OctoStartup FORWARD gesture
+    public static final boolean INVERT_Y  = false;   // [2026-09-22] OctoStartup CONFIRM L-test
+    public static final boolean INVERT_X2 = false;   // [2026-09-22] OctoStartup FORWARD gesture
 
     /**
      * True when the board's frame is the mirror of yours and the pose must be flipped.
-     * Determined by the L-test, OctoStartup check 3. Do not guess it.
+     * Determined by OctoStartup's TWIST LEFT gesture and proven by its CONFIRM L-test. Do not guess it.
      *
      * *** NEVER use INVERT_Y to express your axis convention. ***
      * The board integrates field pose as field += R(heading) * body_increment. Flipping one
@@ -272,10 +274,16 @@ public final class OctoConfig {
      * robust to where you pivot, the two TCP offsets are not.
      */
     public static double[] spinGeometry(int rawX, int rawX2, int rawY, double netDeg, int turns) {
+        return spinGeometry(rawX, rawX2, rawY, netDeg, turns, COUNTS_PER_MM_X, COUNTS_PER_MM_X2, COUNTS_PER_MM_Y);
+    }
+
+    /** Same, with the counts/mm to use (OctoTune passes the values it just measured, not the seeds above). */
+    public static double[] spinGeometry(int rawX, int rawX2, int rawY, double netDeg, int turns,
+                                        double cpmX, double cpmX2, double cpmY) {
         double rad = Math.signum(netDeg) * turns * 2 * Math.PI;
-        double right =  (rawX  / COUNTS_PER_MM_X)  / rad;
-        double left  = -(rawX2 / COUNTS_PER_MM_X2) / rad;
-        return new double[] { -(rawY / COUNTS_PER_MM_Y) / rad, right, left, right + left };
+        double right =  (rawX  / cpmX)  / rad;
+        double left  = -(rawX2 / cpmX2) / rad;
+        return new double[] { -(rawY / cpmY) / rad, right, left, right + left };
     }
 
     // ----------------------------------------------------------------------- board setup
@@ -301,8 +309,8 @@ public final class OctoConfig {
      * once, where a clean slate is actually what you want.
      *
      * saveParametersToFlash() from here would burn a flash write on every single init for a
-     * backup that only matters after a brownout. OctoTune saves once, at the end of tuning,
-     * when the numbers have actually changed.
+     * backup that only matters after a brownout. Nothing in this codebase calls it today:
+     * apply() at every init is the only source of the values on the board.
      */
     public static void apply(OctoQuad q) {
         q.setChannelBankConfig(OctoQuad.ChannelBankConfig.ALL_QUADRATURE);

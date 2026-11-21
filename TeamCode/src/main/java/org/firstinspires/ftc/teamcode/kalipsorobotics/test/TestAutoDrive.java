@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
@@ -42,9 +44,7 @@ public class TestAutoDrive extends KOpMode {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(0, 0, 0));
 
         testAutoDrive = new KActionSet();
 

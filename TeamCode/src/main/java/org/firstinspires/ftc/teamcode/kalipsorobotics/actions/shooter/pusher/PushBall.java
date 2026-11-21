@@ -15,7 +15,13 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
-// Pattern: the previous PushBall chain; feed sequence per BIOBUZZ handoff (stopper open, feed A, wait, feed B, close).
+/**
+ * Feeds the held balls into the shooter: stop the intake, open the stopper, run side A and side B AT THE SAME TIME
+ * (each after its own delay, IntakeConfig.FEED_A_DELAY_MS / FEED_B_DELAY_MS, both 0 by default), then close the stopper.
+ * Times: FEED_A_MS / FEED_B_MS. In auto, gate it like last year: pushBall.setDependentActions(driveReady, shooterReady, turretReady).
+ * Note: TeleOp's ShootAllAction uses this too, so the parallel feed changes TeleOp shooting as well.
+ * Pattern source: the previous PushBall chain and decode RoundTripAction gating.
+ */
 public class PushBall extends KActionSet {
     public static final String TAG = "Shooting_PushBall";
 
@@ -38,29 +44,42 @@ public class PushBall extends KActionSet {
         IntakeSide sideA = intake.getSide(BeamBreakPosition.IntakeSide.A);
         IntakeSide sideB = intake.getSide(BeamBreakPosition.IntakeSide.B);
 
+        // A and B feed at the same time; each side waits its own delay first (both 0 = together).
+        WaitAction delayA = new WaitAction(IntakeConfig.FEED_A_DELAY_MS);
+        delayA.setName("feedADelay");
+        delayA.setDependentActions(openStopper);
+        this.addAction(delayA);
+
         feedA = new RunIntakeTime(sideA, IntakeConfig.FEED_A_MS, IntakeConfig.intakePower);
         feedA.setName("feedA");
-        feedA.setDependentActions(openStopper);
+        feedA.setDependentActions(delayA);
         this.addAction(feedA);
 
-        WaitAction waitBetweenSides = new WaitAction(IntakeConfig.WAIT_BETWEEN_SIDES_MS);
-        waitBetweenSides.setName("waitBetweenSides");
-        waitBetweenSides.setDependentActions(feedA);
-        this.addAction(waitBetweenSides);
+        WaitAction delayB = new WaitAction(IntakeConfig.FEED_B_DELAY_MS);
+        delayB.setName("feedBDelay");
+        delayB.setDependentActions(openStopper);
+        this.addAction(delayB);
 
         feedB = new RunIntakeTime(sideB, IntakeConfig.FEED_B_MS, IntakeConfig.intakePower);
         feedB.setName("feedB");
-        feedB.setDependentActions(waitBetweenSides);
+        feedB.setDependentActions(delayB);
         this.addAction(feedB);
 
         closeStopperInstantDone = new CloseStopperInstantDone(stopper);
         closeStopperInstantDone.setName("closeStopperInstantDone");
-        closeStopperInstantDone.setDependentActions(feedB);
+        closeStopperInstantDone.setDependentActions(feedA, feedB);
         this.addAction(closeStopperInstantDone);
     }
 
     public KServoAutoAction getOpenStopper() {
         return openStopper;
+    }
+
+    /** KActionSet never sets hasStarted; RedDecideAuto reads it to drop a shoot only before the feed starts. */
+    @Override
+    protected void beforeUpdate() {
+        super.beforeUpdate();
+        hasStarted = true;
     }
 
     @Override

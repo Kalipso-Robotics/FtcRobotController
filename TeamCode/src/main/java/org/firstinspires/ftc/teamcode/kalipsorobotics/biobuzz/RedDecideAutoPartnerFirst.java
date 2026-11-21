@@ -66,12 +66,19 @@ public class RedDecideAutoPartnerFirst extends RedDecideAuto {
      */
     @Override
     Move limitMove(Move move) {
-        // A has just tipped and its balls are still coming down. Leaving for the first one or two we see loses the big group,
-        // so stay at the viewpoint until the Hive is down and the spill is on the floor (or a group of 3 or more is seen).
-        boolean spillStillComing = tipsDone >= 3 && getRuntime() < hiveSettledAtSeconds + SPILL_WAIT_SECONDS;
-        boolean smallGroup = seenCluster == null || seenCluster.size() < MIN_SPILL_GROUP;
-        if (move == Move.GET_SEEN_BALLS && spillStillComing && smallGroup) {
-            return Move.WAIT;
+        // A Cell has just tipped (tip 2 = B, tip 3 = A) and its balls are still coming down. Stand at the viewpoint beside the spot where they fall,
+        // and do not leave for the first one or two we see: that loses the big group. Go when a group of 3 or more is seen,
+        // or when the spill had time to land and nothing came. While we wait, no pile is worth leaving the viewpoint for.
+        boolean spillPhase = (tipsDone == 2 || tipsDone == 3) && ballsHeld == 0;
+        if (spillPhase) {
+            boolean bigGroupSeen = seenCluster != null && seenCluster.size() >= MIN_SPILL_GROUP;
+            boolean spillStillComing = getRuntime() < hiveSettledAtSeconds + SPILL_WAIT_SECONDS;
+            if (bigGroupSeen) {
+                return Move.GET_SEEN_BALLS;   // run through the balls we see, instead of a pile
+            }
+            if (spillStillComing && move != Move.PARK) {
+                return Move.WAIT;
+            }
         }
         boolean wantsOtherPile = (move == Move.GET_GARDEN || move == Move.GET_FLOWER_A);
         if (wantsOtherPile && pilesLeft.contains(Pile.FLOWER_B)) {
@@ -83,29 +90,41 @@ public class RedDecideAutoPartnerFirst extends RedDecideAuto {
     private static final double SPILL_WAIT_SECONDS = 2.0;   // GUESS: how long after the Hive is down the spill takes to reach the floor
     private static final int MIN_SPILL_GROUP = 3;           // a group this big is the real spill: go
 
-    // From the third tip on, Cell A has just tipped: its balls spill on the +y wall. Stand here and look until they come down.
-    private static final Point VIEWPOINT_A_SPILL = new Point(800, 2000);   // GUESS (same as RedDecideAuto's high-y viewpoint)
-    private static final Point LOOK_TOWARD_A_SPILL = new Point(915, 2750);
+    // After a tip the Cell that went down dumps its balls on its own end of the field, in front of the Cell (x about 1300-1750).
+    // We stand beside that spot, on our half, and look at it. GUESSES: tune from the sim.
+    private static final Point VIEWPOINT_B_SPILL = new Point(950, 1050);     // tip 2: B went down, its balls fall near (1524, 1000), on the -y end
+    private static final Point LOOK_TOWARD_B_SPILL = new Point(1524, 800);
+    private static final Point VIEWPOINT_A_SPILL = new Point(950, 2608);      // tip 3: A went down, the same spot mirrored on the +y end
+    private static final Point LOOK_TOWARD_A_SPILL = new Point(1524, 2857);
 
-    /** After the third tip (A tipped), go and look at A's spill before anything else. */
+    /** After the tip that just happened (tip 2 = B, tip 3 = A), go and look at where its balls fall before anything else. */
     @Override
     boolean lookFirstAfterShot() {
-        return tipsDone == 3;
+        return tipsDone == 2 || tipsDone == 3;
     }
 
     @Override
     Point viewpointOfUpEnd() {
+        if (tipsDone == 2) {
+            return VIEWPOINT_B_SPILL;
+        }
         return (tipsDone >= 3) ? VIEWPOINT_A_SPILL : super.viewpointOfUpEnd();
     }
 
     @Override
     Point lookTowardOfUpEnd() {
+        if (tipsDone == 2) {
+            return LOOK_TOWARD_B_SPILL;
+        }
         return (tipsDone >= 3) ? LOOK_TOWARD_A_SPILL : super.lookTowardOfUpEnd();
     }
 
-    /** From the third tip on we only collect on the side we are looking at: our half, +y of the Hive's middle. Never balls behind us. */
+    /** Tip 2: only balls on the -y half (B's spill). From tip 3 on: only the +y half (A's spill). Never balls behind us. */
     @Override
     boolean wantsBall(BallInformation ball) {
+        if (tipsDone == 2) {
+            return RedTippingAuto.isOnOurSide(ball.x) && ball.y < FieldConfig.MIDLINE_X;
+        }
         if (tipsDone >= 3) {
             return RedTippingAuto.isOnOurSide(ball.x) && ball.y > FieldConfig.MIDLINE_X;
         }

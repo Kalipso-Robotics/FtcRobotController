@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.navigation;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import android.util.Log;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
@@ -36,12 +38,11 @@ public class TestPP extends KOpMode {
         IMUModule.setInstanceNull();
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
 
-        OctoQuadOdo.setInstanceNull();
-        OctoQuadOdo octoQuadOdo = OctoQuadOdo.getInstance(opModeUtilities);
 
         ElapsedTime timer = new ElapsedTime();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
+        OpModeUtilities.startOdometry(opModeUtilities, executorService, driveTrain, imuModule, new Position(0, 0, 0));
 
         IPurePursuitAction test = new AdaptivePurePursuitAction(driveTrain);
         test.addPoint(0,0,0);
@@ -70,7 +71,6 @@ public class TestPP extends KOpMode {
 
         odoExecutorService = Executors.newSingleThreadExecutor();
 
-        OpModeUtilities.runOdometryExecutorService(executorService, octoQuadOdo);
 
         while (opModeIsActive()) {
 

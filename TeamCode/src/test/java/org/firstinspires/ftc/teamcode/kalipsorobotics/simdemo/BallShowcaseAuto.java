@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.simdemo;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.RoundTripAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
@@ -65,9 +67,7 @@ public class BallShowcaseAuto extends KOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         sleep(1000);
 
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, START_X_MM, START_Y_MM, Math.toRadians(-90));
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(START_X_MM, START_Y_MM, Math.toRadians(-90)));
 
         showcase = new KActionSet();
         intake = new Intake(opModeUtilities);

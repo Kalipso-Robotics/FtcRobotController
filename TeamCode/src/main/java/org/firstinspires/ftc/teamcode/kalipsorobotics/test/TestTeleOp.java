@@ -46,10 +46,8 @@ public class TestTeleOp extends KOpMode {
         // Reuse odometry instance from Auto (don't call setInstanceNull!)
         KLog.d("Auto→TeleOp", "=== TELEOP STARTING ===");
         KLog.d("Auto→TeleOp", () -> "Before getInstance: " + SharedData.getOdometryWheelIMUPosition());
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null);
         KLog.d("Auto→TeleOp", () -> "After getInstance: " + SharedData.getOdometryWheelIMUPosition());
-        KLog.d("Auto→TeleOp", () -> "Odometry instance: " + System.identityHashCode(odometry));
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
 
         testAutoDrive = new KActionSet();
 

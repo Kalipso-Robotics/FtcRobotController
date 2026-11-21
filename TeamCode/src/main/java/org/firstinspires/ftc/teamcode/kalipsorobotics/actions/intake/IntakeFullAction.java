@@ -21,9 +21,9 @@ public class IntakeFullAction extends KActionSet {
         this(stopper, intake, null, new RunIntakeTime(intake, timeMS, power));
     }
 
-    /** One side only (pattern: PushBall's per-side feed). Does not lower the side: the caller does. */
+    /** One side only (pattern: PushBall's per-side feed). Lowers that side when it starts. */
     public IntakeFullAction(Stopper stopper, IntakeSide side, double timeMS, double power) {
-        this(stopper, null, side, new RunIntakeTime(side, timeMS, power));
+        this(stopper, null, side, new RunIntakeTime(side, timeMS, power, true));
     }
 
     private IntakeFullAction(Stopper stopper, Intake intake, IntakeSide side, RunIntakeTime runIntakeTime) {

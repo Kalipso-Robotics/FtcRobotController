@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.navigation;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -30,8 +32,6 @@ public class PurePursuitDataCollection extends LinearOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain);
         purePursuitAction.addPoint(0, 0, 0);
         purePursuitAction.addPoint(600, 600, 0);
@@ -45,7 +45,7 @@ public class PurePursuitDataCollection extends LinearOpMode {
         PurePursuitFileWriter purePursuitFileWriter = new PurePursuitFileWriter("datafordabigduong", opModeUtilities);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, executorService, driveTrain, imuModule, new Position(0, 0, 0));
 
         waitForStart();
         while (opModeIsActive()) {

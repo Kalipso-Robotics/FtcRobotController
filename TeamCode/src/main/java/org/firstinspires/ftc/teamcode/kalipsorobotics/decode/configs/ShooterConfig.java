@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Config
 public class ShooterConfig {
@@ -20,6 +21,8 @@ public class ShooterConfig {
     public static double accelBoostDeltaRPSThreshold = 3;
     public static double decelBoostDeltaRPSThreshold = -3;
     public static boolean hoodFlipDirection = true;
+    /** Flywheel motor direction; Shooter and MotorPowerRPSDataCollector both use it. */
+    public static DcMotorSimple.Direction SHOOTER_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE; // TODO-measure
 
     public static double AUTO_SHOOTER_READY_TIMEOUT_MS = 3500;
     // TeleOp never fires on timeout: RPS or turret not ready by then aborts the shot (flywheel keeps spinning).

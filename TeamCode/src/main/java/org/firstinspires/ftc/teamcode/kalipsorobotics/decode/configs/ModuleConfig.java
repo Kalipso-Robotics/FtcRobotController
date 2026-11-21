@@ -29,4 +29,10 @@ public class ModuleConfig {
     public static final double FLOWER_DOWN_POS = 0.8; // TODO-measure
     public static final double FLOWER_UP_POS = 0.2; // TODO-measure
 
+
+    //========BASIC TELEOP (test/BasicTeleop, manual control)========
+    public static double BASIC_SHOOTER_STEP = 0.05; // TODO-measure: shooter power per dpad up/down
+    public static double BASIC_SERVO_STEP = 0.01; // TODO-measure: servo step per dpad right/left
+    public static double BASIC_SERVO_FINE_STEP = 0.001; // TODO-measure: servo step with A held
+    public static double BASIC_DRIVE_SCALE = 1.0; // TODO-measure: drive power scale
 }
