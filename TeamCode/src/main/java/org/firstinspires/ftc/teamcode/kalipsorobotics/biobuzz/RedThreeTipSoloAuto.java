@@ -73,6 +73,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities,turret, ShooterConfig.TARGET_POINT_1);
+        startAprilTagDetection(turret);
     }
 
     @Override

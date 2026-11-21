@@ -19,7 +19,12 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cel
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.PartnerMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallVision;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
@@ -188,6 +193,7 @@ public class RedDecideAuto extends KOpMode {
     private Intake intake;
     private Stopper stopper;
     private Turret turret;
+    private BallVision ballVision;
     private BeamBreakCountAction beamBreaks;
     private PathPlanning planner;
 
@@ -231,6 +237,16 @@ public class RedDecideAuto extends KOpMode {
 
     /** Called before every decision. A subclass can correct what we believe about the Hive. */
     void syncWithHive() {
+        // The Limelight (started in initializeRobot) saw which CELL is up recently enough to trust.
+        HiveTagLocalizer.Cell seen = SharedData.getHiveUpCell();
+        if (seen == null || SharedData.getHiveUpCellAgeMs() > AprilTagConfig.HIVE_STATE_MAX_AGE_MS) {
+            return;
+        }
+        Cell seenUp = Cell.valueOf(seen.name()); // both enums: A = high-y CELL, B = low-y CELL
+        if (seenUp != upCell) {
+            KLog.d("Decide", () -> "Limelight says " + seenUp + " is up (we believed " + upCell + ")");
+            upCell = seenUp;
+        }
     }
 
     // What the last shot did (so a subclass can undo a tip that never really happened)
@@ -320,6 +336,9 @@ public class RedDecideAuto extends KOpMode {
 
         // AUTO: the opponent's half is blocked. Nothing is tipping yet, so the space under the Hive is open.
         planner = PathPlanning.forFieldAuto(OBSTACLE_BUFFER_MM, RobotFootprint.WIDTH_MM / 2, false);
+
+        startAprilTagDetection(turret); // the Limelight: Hive state + position fixes
+        ballVision = BallVision.start(hardwareMap, false); // the Arducam: balls into SharedData (live view off in matches)
     }
 
     @Override
@@ -363,6 +382,9 @@ public class RedDecideAuto extends KOpMode {
         }
         stowIntake("autoEnd");
         shooter.stop();
+        if (ballVision != null) {
+            ballVision.close();
+        }
         cleanupRobot();
     }
 
@@ -958,9 +980,17 @@ public class RedDecideAuto extends KOpMode {
         shooterStop.setName("shooterStop");
         shooterStop.setDependentActions(pushBall);
 
+        // Same as ShootAllAction: once the balls are gone, re-zero x/y to the Limelight (a stale or missing fix just ends it).
+        ResetOdometryToLimelight rezero = new ResetOdometryToLimelight(turret);
+        rezero.setName("resetOdometryToLimelight");
+        rezero.setDependentActions(pushBall);
+
         KActionSet set = new KActionSet();
         set.setName("shoot" + cell);
         set.addAction(drive, shooterRun, shooterReady, turretReady, closeEnough, pushBall, endDrive, shooterStop);
+        if (ShooterConfig.REZERO_AFTER_EACH_SHOT) {
+            set.addAction(rezero);
+        }
         return set;
     }
 

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 public class TurretReady extends Action {
     public static final String TAG = "Shooting_TurretReady";
-    private static final double DEFAULT_TIMEOUT_MS = 3000;
+    private static final double DEFAULT_TIMEOUT_MS = 3000; // TODO-measure
 
     private final TurretAutoAlign turretAutoAlign;
     private final double timeoutMS;

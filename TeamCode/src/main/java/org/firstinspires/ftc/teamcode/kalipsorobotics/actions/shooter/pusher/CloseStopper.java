@@ -4,11 +4,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Ac
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 
 /** Closes the stopper and is done at once (does not wait for the servo). */
-public class CloseStopperInstantDone extends Action {
+public class CloseStopper extends Action {
 
     private final Stopper stopper;
 
-    public CloseStopperInstantDone(Stopper stopper) {
+    public CloseStopper(Stopper stopper) {
         this.stopper = stopper;
     }
 

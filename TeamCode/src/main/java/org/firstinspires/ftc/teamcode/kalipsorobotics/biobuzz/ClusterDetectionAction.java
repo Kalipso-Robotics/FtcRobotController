@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
 import java.util.ArrayList;
@@ -17,8 +18,9 @@ public class ClusterDetectionAction extends Action {
         DONE
     }
 
-    private final List<BallInformation> rawDetections;
-    private final Point robotPosition;
+    // Null until the first update(): then the live SharedData list and robot pose are read (fresh, not from construction time).
+    private List<BallInformation> rawDetections;
+    private Point robotPosition;
     private final AllianceColor allianceColor;
 
     private State currentState = State.PROCESS_DETECTIONS;
@@ -36,6 +38,11 @@ public class ClusterDetectionAction extends Action {
     private int bestScore = 0;
     private double bestDistance = Double.MAX_VALUE;
 
+    /** Reads the balls (SharedData.getBallInformation) and the robot pose on its first update. */
+    public ClusterDetectionAction(AllianceColor allianceColor) {
+        this.allianceColor = allianceColor;
+    }
+
     public ClusterDetectionAction(List<BallInformation> rawDetections, Point robotPosition, AllianceColor allianceColor) {
         this.rawDetections = rawDetections != null ? rawDetections : new ArrayList<>();
         this.robotPosition = robotPosition;
@@ -44,6 +51,12 @@ public class ClusterDetectionAction extends Action {
 
     @Override
     protected void update() {
+        if (rawDetections == null) {
+            rawDetections = SharedData.getBallInformation();
+        }
+        if (robotPosition == null) {
+            robotPosition = SharedData.getOdometryWheelIMUPosition().toPoint();
+        }
         switch (currentState) {
 
             // One duplicate comparison (or one accept) per update() call
@@ -95,6 +108,8 @@ public class ClusterDetectionAction extends Action {
             case EVALUATE_BEST:
                 if (evalIndex >= clusterList.size()) {
                     currentState = State.DONE;
+                    // The pathing action reads this when it starts (null = nothing worth picking up).
+                    SharedData.setTargetClusterXY(bestCluster == null ? null : bestCluster.getCenter());
                     isDone = true;
                     return;
                 }

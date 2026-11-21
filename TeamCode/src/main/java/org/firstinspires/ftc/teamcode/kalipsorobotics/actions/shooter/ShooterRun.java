@@ -26,9 +26,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class ShooterRun extends Action {
     public static final String TAG = "Shooting_ShooterRun";
 
-    public static final double FAR_TOLERANCE = 0.75;
-    public static final double MIDDLE_TOLERANCE = 0.75;
-    public static final double NEAR_TOLERANCE = 0.50;
+    public static final double FAR_TOLERANCE = 0.75; // TODO-measure
+    public static final double MIDDLE_TOLERANCE = 0.75; // TODO-measure
+    public static final double NEAR_TOLERANCE = 0.50; // TODO-measure
     private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
     private final Shooter shooter;
@@ -328,9 +328,9 @@ public class ShooterRun extends Action {
 
     public double calculateEffectiveCompensationPower() {
         if (distanceMM > NEAR_DISTANCE) {
-            return 1;
+            return ShooterConfig.BANG_POWER_FAR;
         } else {
-            return 0.7;
+            return ShooterConfig.BANG_POWER_NEAR;
         }
     }
 

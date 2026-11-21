@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.CloseStopperInstantDone;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.CloseStopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerInterlockTest;
@@ -30,7 +30,7 @@ public class StopperActionsTest {
     @Test
     public void closeInstantDone_keepsKServoTargetInSync() {
         stopper.open();
-        CloseStopperInstantDone close = new CloseStopperInstantDone(stopper);
+        CloseStopper close = new CloseStopper(stopper);
         assertTrue(close.updateCheckDone());
         assertEquals(ModuleConfig.STOPPER_SERVO_CLOSED_POS, stopper.getStopper().getTargetPosition(), 1e-9);
     }

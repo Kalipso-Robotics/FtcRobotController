@@ -28,7 +28,7 @@ public class PushBall extends KActionSet {
     private final KServoAutoAction openStopper;
     private final RunIntakeTime feedA;
     private final RunIntakeTime feedB;
-    private final CloseStopperInstantDone closeStopperInstantDone;
+    private final CloseStopper closeStopper;
     public PushBall(Stopper stopper, Intake intake) {
 
         KLog.d(TAG, () -> "event=create pos=" + SharedData.getOdometryWheelIMUPosition());
@@ -65,10 +65,10 @@ public class PushBall extends KActionSet {
         feedB.setDependentActions(delayB);
         this.addAction(feedB);
 
-        closeStopperInstantDone = new CloseStopperInstantDone(stopper);
-        closeStopperInstantDone.setName("closeStopperInstantDone");
-        closeStopperInstantDone.setDependentActions(feedA, feedB);
-        this.addAction(closeStopperInstantDone);
+        closeStopper = new CloseStopper(stopper);
+        closeStopper.setName("closeStopper");
+        closeStopper.setDependentActions(feedA, feedB);
+        this.addAction(closeStopper);
     }
 
     public KServoAutoAction getOpenStopper() {
@@ -86,7 +86,7 @@ public class PushBall extends KActionSet {
     protected void afterUpdate() {
         if (KLog.isDebug()) {
             KLog.d(TAG, () -> String.format("name=%s openStopperDone=%s feedADone=%s feedBDone=%s closeStopperDone=%s",
-                    getName(), openStopper.getIsDone(), feedA.getIsDone(), feedB.getIsDone(), closeStopperInstantDone.getIsDone()));
+                    getName(), openStopper.getIsDone(), feedA.getIsDone(), feedB.getIsDone(), closeStopper.getIsDone()));
         }
     }
 }

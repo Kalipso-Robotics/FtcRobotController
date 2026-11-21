@@ -25,7 +25,7 @@ public class TurretAutoAlign extends Action {
     private TurretRunMode turretRunMode = TurretRunMode.RUN_USING_ODOMETRY;
     private Point targetPoint; // null = follow SharedData.getTargetPoint()
     private double targetAngleRad = 0;
-    private double toleranceDeg = 1.5;
+    private double toleranceDeg = 1.5; // TODO-measure
     private boolean isWithinRange = false;
     private double deltaAngleDeg;
 

@@ -26,10 +26,6 @@ public class ShootAllAction extends KActionSet {
     private final Shooter shooter;
     private final ShooterRun shooterRun;
     private final TurretAutoAlign turretAutoAlign;
-    private double targetRPS;
-    private double targetHoodPos;
-
-    private final boolean hasTurnedLimelightOn = false;
 
     private ShooterReady shooterReady;
 
@@ -44,7 +40,7 @@ public class ShootAllAction extends KActionSet {
         this.enableLimelightZeroing = enableLimelightZeroing;
     }
 
-    private boolean enableLimelightZeroing = true;
+    private boolean enableLimelightZeroing = ShooterConfig.REZERO_AFTER_EACH_SHOT;
     private final boolean abortOnTimeout;
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlign turretAutoAlign, double targetRPS, double targetHoodPos) {
@@ -59,8 +55,6 @@ public class ShootAllAction extends KActionSet {
         this.shooter = shooter;
         this.shooterRun = shooterRun;
         this.turretAutoAlign = turretAutoAlign;
-        this.targetRPS = targetRPS;
-        this.targetHoodPos = targetHoodPos;
         this.turret = turret;
 
         shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
@@ -168,7 +162,8 @@ public class ShootAllAction extends KActionSet {
 
     @Override
     public void afterUpdate() {
-        if (pushBall.getIsDone()) {
+        // Once only: setShooterRunMode also runs update(), so calling it every loop doubles the shooter update.
+        if (pushBall.getIsDone() && shooterRun.getShooterRunMode() != ShooterRunMode.SHOOT_USING_CURRENT_POINT) {
 //            double maintainRPSValue = shooterRun.getTargetRPS() * 0.925;
 //            shooterRun.setTargetRPS(maintainRPSValue);
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
