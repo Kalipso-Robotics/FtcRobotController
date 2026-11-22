@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Ac
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
@@ -18,6 +19,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PickupPlan;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
+
+import java.util.List;
 
 /**
  * Drives the robot to a ball (or the middle of a cluster of balls) and stops facing it, so the
@@ -67,6 +70,13 @@ public class AutoToBallsPathingAction extends Action {
 
     /** After arriving, the chosen side keeps running this long so the ball gets pulled through, then the action ends. */
     public static double POST_ARRIVAL_INTAKE_MS = 500; // TODO-measure
+
+    /**
+     * AUTO: every corner of the robot body stays at least this far short of the center line (FieldConfig.MIDLINE_X,
+     * 1828.8 mm), for odometry drift and coasting. Planned paths keep this margin, an overshoot that would eat into it
+     * is dropped, and if the robot gets inside it anyway the drive stops at once (G402: never cross in AUTO).
+     */
+    public static double AUTO_MIDLINE_MARGIN_MM = 75; // TODO-measure: how far the robot coasts after the drive is cut
 
     /** How long the chosen side may run before arrival (a pull-in pickup turns it on at the start of the drive). */
     public static double INTAKE_RUN_MS = 3000; // TODO-measure
@@ -119,6 +129,12 @@ public class AutoToBallsPathingAction extends Action {
     /** Running since the robot arrived; null until then. */
     private ElapsedTime arrivedTimer = null;
 
+    /** True: the intake runs for the whole drive (picks up balls on the way), not only near the stop. */
+    private boolean intakeFromStart = false;
+
+    /** How far past the stand-off to drive, mm, so the last ball gets all the way in (0 = stop at the stand-off). */
+    private double overshootMm = 0;
+
     // ------------------------------------------------------------------------------------------
     // Constructors (they run once, when you write "new AutoToBallsPathingAction(...)")
     // ------------------------------------------------------------------------------------------
@@ -162,6 +178,18 @@ public class AutoToBallsPathingAction extends Action {
         this.useFlower = flower != null;
     }
 
+    /** Run the intake for the whole drive, not only from INTAKE_START_DISTANCE_MM. Call before the action starts. */
+    public AutoToBallsPathingAction setIntakeFromStart(boolean intakeFromStart) {
+        this.intakeFromStart = intakeFromStart;
+        return this;
+    }
+
+    /** Drive this far past the stand-off (skipped where the robot would not fit). Call before the action starts. */
+    public AutoToBallsPathingAction setOvershootMm(double overshootMm) {
+        this.overshootMm = overshootMm;
+        return this;
+    }
+
     // ------------------------------------------------------------------------------------------
     // Running the action
     // ------------------------------------------------------------------------------------------
@@ -185,6 +213,15 @@ public class AutoToBallsPathingAction extends Action {
 
             // If planning failed, the action is already marked done, so stop here.
             if (isDone) {
+                return;
+            }
+        }
+
+        if (auto) {
+            Position pose = new Position(SharedData.getOdometryWheelIMUPosition());
+            if (nearMidline(pose.toPoint(), pose.getTheta())) {
+                KLog.e(TAG, "name=" + getName() + " event=midlineStop pose=" + pose + " margin=" + AUTO_MIDLINE_MARGIN_MM);
+                setIsDone(true); // zeroes the wheels and stops the intake
                 return;
             }
         }
@@ -236,6 +273,16 @@ public class AutoToBallsPathingAction extends Action {
         return !flowerDown && sideDown && distToFlowerMM >= FLOWER_DEPLOY_CLEARANCE_MM;
     }
 
+    /** True if any corner of the body (centered at center, front along headingRad) is within AUTO_MIDLINE_MARGIN_MM of the center line or past it. */
+    public static boolean nearMidline(Point center, double headingRad) {
+        for (double[] corner : RobotFootprint.corners(center, headingRad)) {
+            if (corner[0] > FieldConfig.MIDLINE_X - AUTO_MIDLINE_MARGIN_MM) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** KLog.e at OpMode init if the clearance would keep the arm from ever deploying. */
     public static void checkFlowerClearance() {
         if (FLOWER_DEPLOY_CLEARANCE_MM >= INTAKE_START_DISTANCE_MM) {
@@ -260,6 +307,9 @@ public class AutoToBallsPathingAction extends Action {
         super.setIsDone(isDone);
         if (!isDone) {
             return;
+        }
+        if (movement != null && !movement.getIsDone()) {
+            movement.setIsDone(true); // dropped mid-drive: zero the wheels instead of leaving the last power on
         }
         if (intakeFullAction != null) {
             intakeFullAction.stopAndSetDone();
@@ -299,7 +349,7 @@ public class AutoToBallsPathingAction extends Action {
         boolean hiveTipping = !auto && SharedData.isHiveTipping();
         PathPlanning planner;
         if (auto) {
-            planner = PathPlanning.forFieldAuto(BUFFER_MM, RobotFootprint.WIDTH_MM / 2, hiveTipping);
+            planner = PathPlanning.forFieldAuto(BUFFER_MM, RobotFootprint.WIDTH_MM / 2 + AUTO_MIDLINE_MARGIN_MM, hiveTipping);
         } else {
             planner = PathPlanning.forField(BUFFER_MM, hiveTipping);
         }
@@ -343,7 +393,16 @@ public class AutoToBallsPathingAction extends Action {
         // Each row is {x, y, heading in degrees}. The heading is the way the robot's FRONT should point
         // at that point: along the direction it is travelling, and at the last point whatever the plan
         // says (toward the ball if the front picks it up, away from it if the back does).
-        for (double[] point : plan.followerPoints(robot)) {
+        List<double[]> points = plan.followerPoints(robot);
+        if (!points.isEmpty()) {
+            Point end = planner.overshoot(plan, overshootMm); // the stand-off when overshootMm is 0
+            if (auto && nearMidline(end, plan.finalHeadingRad)) {
+                end = plan.standOff; // the overshoot would reach the center line margin
+            }
+            points.get(points.size() - 1)[0] = end.getX();
+            points.get(points.size() - 1)[1] = end.getY();
+        }
+        for (double[] point : points) {
             double x = point[0];
             double y = point[1];
             double headingDegrees = point[2];
@@ -353,7 +412,9 @@ public class AutoToBallsPathingAction extends Action {
         // Step 6: the intake on the end the planner chose (it runs from INTAKE_START_DISTANCE_MM on).
         if (intake != null) {
             pickupSide = intake.getSide(plan.useBackIntake ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A);
-            intakeFullAction = new IntakeFullAction(stopper, pickupSide, INTAKE_RUN_MS, IntakeConfig.intakePower);
+            // From the start, the run must last the whole drive; setIsDone stops it when we finish.
+            double runMs = intakeFromStart ? Double.MAX_VALUE : INTAKE_RUN_MS;
+            intakeFullAction = new IntakeFullAction(stopper, pickupSide, runMs, IntakeConfig.intakePower);
             intakeFullAction.setName(getName() + "_intake");
         }
     }
@@ -371,7 +432,7 @@ public class AutoToBallsPathingAction extends Action {
      *   - once the robot is within INTAKE_START_DISTANCE_MM of its stopping point.
      */
     private boolean closeEnoughToStartIntake() {
-        if (plan.pullIn) {
+        if (plan.pullIn || intakeFromStart) {
             return true;
         }
         return distanceToStop() <= INTAKE_START_DISTANCE_MM;
@@ -404,6 +465,11 @@ public class AutoToBallsPathingAction extends Action {
      */
     public PickupPlan getPlan() {
         return plan;
+    }
+
+    /** The intake side picking up, or null until the route is planned (or if there is no intake). */
+    public IntakeSide getPickupSide() {
+        return pickupSide;
     }
 
     public AdaptivePurePursuitAction getMovement() {

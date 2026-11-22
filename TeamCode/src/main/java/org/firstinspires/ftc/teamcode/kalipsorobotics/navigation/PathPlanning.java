@@ -357,6 +357,21 @@ public class PathPlanning {
         return PickupPlan.ok(path, standOff, bodyHeading, inRing, pullIn, back, why);
     }
 
+    /**
+     * The plan's stand-off moved overshootMm further along the drive-in direction, so the intake drives
+     * through the ball instead of stopping with it at the mouth. The stand-off itself when the body would
+     * not fit there (wall, leg, other side) or the plan failed.
+     */
+    public Point overshoot(PickupPlan plan, double overshootMm) {
+        if (!plan.isOk() || overshootMm <= 0) {
+            return plan.standOff;
+        }
+        double travelRad = plan.useBackIntake ? plan.finalHeadingRad + Math.PI : plan.finalHeadingRad;
+        Point past = new Point(plan.standOff.getX() + overshootMm * Math.cos(travelRad),
+                plan.standOff.getY() + overshootMm * Math.sin(travelRad));
+        return bodyBlocked(past, plan.finalHeadingRad) ? plan.standOff : past;
+    }
+
     /** Where the robot center stops: short of the ball by the reach of the leading intake. */
     private static Point standOffFor(Point ball, double aimRad, boolean back, boolean pullIn) {
         double reach = pullIn ? RobotFootprint.pullInMm(back) : RobotFootprint.grabMm(back);

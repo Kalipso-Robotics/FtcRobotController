@@ -16,7 +16,7 @@ public class PollenNectarLive extends LinearOpMode {
     @Override
     public void runOpMode() {
         BallVision ballVision = BallVision.start(hardwareMap, true);
-        TFLitePollenNectarDetector detector = ballVision.detector;
+        KVisionProcessor<List<VisionRecognition>> detector = ballVision.detector;
         Raytracer raytracer = ballVision.raytracer;
         VisionPortal portal = ballVision.portal;
 

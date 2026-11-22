@@ -22,8 +22,9 @@ public class SpeedController extends LinearOpMode {
 
     // B = push sequence: run intake (stopper closed) for PRE_OPEN_MS, open stopper and keep intaking
     // for SHOOT_MS, then close stopper and stop intake. Both times tunable on the right stick or FTC Dashboard.
-    private static final double STOPPER_OPEN_POS = 0.362;   // same as Y
-    private static final double STOPPER_CLOSED_POS = 0.449; // same as A
+    // Stopper open/closed defaults; adjust live on gamepad2 dpad and copy the telemetry values into ModuleConfig by hand.
+    private static final double STOPPER_OPEN_POS_DEFAULT = 0.362;
+    private static final double STOPPER_CLOSED_POS_DEFAULT = 0.449;
     public static double PRE_OPEN_MS = 300; // intake runs this long before the stopper opens
     public static double SHOOT_MS = 400;    // stopper open + intake running, then close
     private static final double TIME_STEP_MS = 2; // per loop while the right stick is held
@@ -52,6 +53,8 @@ public class SpeedController extends LinearOpMode {
         double turret2Position = 0.5;
 
         double intakePower = 1;
+        double stopperOpenPos = STOPPER_OPEN_POS_DEFAULT;
+        double stopperClosedPos = STOPPER_CLOSED_POS_DEFAULT;
 
         PushState pushState = PushState.IDLE;
         ElapsedTime pushTimer = new ElapsedTime();
@@ -91,21 +94,36 @@ public class SpeedController extends LinearOpMode {
                 SHOOT_MS = Math.max(0, SHOOT_MS - TIME_STEP_MS);
             }
 
+            // Stopper positions (gamepad2 dpad, held): up/down = open +/-, right/left = closed +/-.
+            // The stopper moves to the position being edited. Ignored while a push sequence runs.
+            if (pushState == PushState.IDLE) {
+                if (gamepad2.dpad_up || gamepad2.dpad_down) {
+                    stopperOpenPos = Math.max(0, Math.min(1, stopperOpenPos + (gamepad2.dpad_up ? SERVO_STEP : -SERVO_STEP)));
+                    stopperServo.setPosition(stopperOpenPos);
+                } else if (gamepad2.dpad_right || gamepad2.dpad_left) {
+                    stopperClosedPos = Math.max(0, Math.min(1, stopperClosedPos + (gamepad2.dpad_right ? SERVO_STEP : -SERVO_STEP)));
+                    stopperServo.setPosition(stopperClosedPos);
+                }
+            }
+
+            // 0.404 OPEN
+            // 0.440 CLOSED
+
             // B (first press): push sequence. Ignored while one is already running.
             boolean bPressed = gamepad1.b && !prevB;
             prevB = gamepad1.b;
             if (bPressed && pushState == PushState.IDLE) {
-                stopperServo.setPosition(STOPPER_CLOSED_POS);
+                stopperServo.setPosition(stopperClosedPos);
                 pushTimer.reset();
                 pushState = PushState.PRE_OPEN;
             }
             if (pushState == PushState.PRE_OPEN && pushTimer.milliseconds() >= PRE_OPEN_MS) {
-                stopperServo.setPosition(STOPPER_OPEN_POS);
+                stopperServo.setPosition(stopperOpenPos);
                 pushTimer.reset();
                 pushState = PushState.SHOOTING;
             }
             if (pushState == PushState.SHOOTING && pushTimer.milliseconds() >= SHOOT_MS) {
-                stopperServo.setPosition(STOPPER_CLOSED_POS);
+                stopperServo.setPosition(stopperClosedPos);
                 pushState = PushState.IDLE;
             }
 
@@ -113,7 +131,7 @@ public class SpeedController extends LinearOpMode {
                 intakeMotor1.setPower(intakePower);
                 intakeMotor2.setPower(-intakePower);
             } else if (gamepad1.right_bumper) {
-                stopperServo.setPosition(0.449);
+                stopperServo.setPosition(stopperClosedPos);
                 intakeMotor1.setPower(intakePower);
                 intakeMotor2.setPower(-intakePower);
             } else if (gamepad1.left_bumper) {
@@ -138,10 +156,10 @@ public class SpeedController extends LinearOpMode {
                 // PushBall sequence owns the stopper
             } else if (gamepad1.a) {
                 stopperPosition += SERVO_STEP;
-                stopperServo.setPosition(0.449); //0.449
+                stopperServo.setPosition(stopperClosedPos);
             } else if (gamepad1.y) {
                 stopperPosition -= SERVO_STEP;
-                stopperServo.setPosition(0.362); //0.362
+                stopperServo.setPosition(stopperOpenPos);
             }
 
             // Turret 1 (servo2): dpad right / left
@@ -158,7 +176,10 @@ public class SpeedController extends LinearOpMode {
             telemetry.addLine("Shooter (motor0): left stick Y (up = -, down = +), X = stop");
             telemetry.addLine("Intake: RB = in, LB = out, RT / LT = power up / down");
             telemetry.addLine("Hood (servo0): dpad up / down");
-            telemetry.addLine("Stopper (servo1): A = close " + STOPPER_CLOSED_POS + ", Y = open " + STOPPER_OPEN_POS);
+            telemetry.addLine("Stopper (servo1): A = close, Y = open");
+            telemetry.addLine("Stopper positions (gamepad2 dpad, hold): up/down = open +/-, right/left = closed +/-");
+            telemetry.addData("Stopper OPEN pos (copy to ModuleConfig)", "%.3f", stopperOpenPos);
+            telemetry.addData("Stopper CLOSED pos (copy to ModuleConfig)", "%.3f", stopperClosedPos);
             telemetry.addLine("Turret 1 (servo2): dpad right / left");
             telemetry.addLine("Turret 2 (servo3): right bumper / left bumper");
             telemetry.addLine("B = push (intake, open stopper, close). Right stick Y = pre-open time, X = shoot time");

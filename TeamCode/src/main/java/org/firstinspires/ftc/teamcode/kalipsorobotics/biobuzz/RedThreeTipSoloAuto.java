@@ -1,16 +1,11 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
-import android.util.Size;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.AutoToBallsPathingAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.beambreak.BeamBreakCountAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.VisionAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.VisionPickupAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.Flower;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
@@ -37,13 +32,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.Raytracer;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.TFLitePollenNectarDetector;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallVision;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
-import org.firstinspires.ftc.vision.VisionPortal;
-
-import java.util.List;
 
 @Autonomous
 public class RedThreeTipSoloAuto extends KOpMode {
@@ -55,15 +45,12 @@ public class RedThreeTipSoloAuto extends KOpMode {
     Turret turret = null;
     FlowerMech flowerMech = null;
     TurretAutoAlign turretAutoAlign = null;
-    VisionPortal visionPortal = null;
-    BeamBreakCountAction beamBreakCountAction = null;
+    BallVision ballVision = null;
 
     final double waitForShooterRunMS = 0.0;
-    final double lookForBallsTimeoutSec = 1.0;     // TODO-measure: how long to look before giving up
-    final int fullBallCount = 4;                   // the robot holds 4 balls
-
-    // Must match the webcam name in the robot configuration (same as PollenNectarLive)
-    static final String WEBCAM_NAME = "Arducam";
+    final double flowerIntakeMS = 2500;            // TODO-measure: longest the intake runs on a flower trip (it also stops once backed out)
+    final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
+    final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
 
     final Position ROBOT_START_POS = new Position(1371.6, 152.0, 90);//double check 90 or nega 90
     final Point PARK_POINT = new Point(392, 1371);
@@ -91,52 +78,14 @@ public class RedThreeTipSoloAuto extends KOpMode {
         stopper = new Stopper(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, ShooterConfig.TARGET_POINT_1);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret); // follows SharedData.getTargetPoint() (Cell on the robot's end); each ShooterRun names its own Cell
         startAprilTagDetection(turret);
-        beamBreakCountAction = new BeamBreakCountAction(opModeUtilities); // counts the balls inside the robot
-        beamBreakCountAction.setName("beamBreakCountAction");
+        // No BeamBreakCountAction: the beam breaks are not on the robot yet (V2), and building it needs their sensors in the
+        // hardware map. Trip 4 knows the intake is full from the intake motor current instead (VisionPickupAction).
 
-        // Camera for trip 4: the raytracer puts every ball it sees into SharedData.getBallInformation() (field mm).
+        // Camera for trip 4: every ball it sees goes into SharedData.getBallInformation() (field mm).
         SharedData.resetBallInformation();
-        TFLitePollenNectarDetector detector = new TFLitePollenNectarDetector(hardwareMap.appContext)
-                .withMinConfidence(0.35f);
-        new Raytracer(detector, VisionConfig.ARDUCAM);
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, WEBCAM_NAME))
-                .setCameraResolution(new Size(1280, 720)) // the raytracer needs 1280x720
-                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .addProcessor(detector)
-                .enableLiveView(false)
-                .build();
-    }
-
-    /**
-     * Supplier for the trip 4 look actions. Done (returns true) when the robot is already full, or when the camera sees a ball:
-     * then the closest ball goes into SharedData.setTargetClusterXY for AutoToBallsPathingAction.
-     * Target null = nothing to grab, so the grab action finishes right away without driving.
-     */
-    private Boolean lookForBalls() {
-        if (intake.getBallCount() >= fullBallCount) {
-            SharedData.setTargetClusterXY(null);
-            return true;
-        }
-        Position robot = new Position(SharedData.getOdometryWheelIMUPosition());
-        List<BallInformation> balls = SharedData.getBallInformation();
-        BallInformation closest = null;
-        double closestDistance = Double.MAX_VALUE;
-        for (BallInformation ball : balls) {
-            double distance = Math.hypot(ball.x - robot.getX(), ball.y - robot.getY());
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closest = ball;
-            }
-        }
-        if (closest == null) {
-            SharedData.setTargetClusterXY(null); // if this look times out, the grab does nothing
-            return null;
-        }
-        SharedData.setTargetClusterXY(new Point(closest.x, closest.y));
-        return true;
+        ballVision = BallVision.start(hardwareMap, ballDetector, false);
     }
 
     @Override
@@ -159,7 +108,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip0WaitUntilShooterRun.setDependentActions(delayBeforeStart);
         redThreeTipSoloAuto.addAction(trip0WaitUntilShooterRun);
 
-        ShooterRun trip0ShooterRun = new ShooterRun(opModeUtilities, shooter, SharedData.getTargetPoint(), ROBOT_START_POS.toPoint());
+        ShooterRun trip0ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_2, ROBOT_START_POS.toPoint());
         trip0ShooterRun.setName("trip0ShooterRun");
         trip0ShooterRun.setDependentActions(trip0WaitUntilShooterRun);
         redThreeTipSoloAuto.addAction(trip0ShooterRun);
@@ -186,7 +135,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         //END OF TRIP 0
 
         //TRIP 1
-        FullFlowerAction trip1FlowerIntake = new FullFlowerAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_1);
+        FullFlowerAction trip1FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_1);
         trip1FlowerIntake.setName("trip1FlowerIntake");
         trip1FlowerIntake.setDependentActions(trip0Shoot);
         redThreeTipSoloAuto.addAction(trip1FlowerIntake);
@@ -197,7 +146,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip1GoToShoot.setDependentActions(trip1FlowerIntake);
         redThreeTipSoloAuto.addAction(trip1GoToShoot);
 
-        ShooterRun trip1ShooterRun = new ShooterRun(opModeUtilities, shooter, SharedData.getTargetPoint(), new Point(1037, 397));
+        ShooterRun trip1ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_2, new Point(1037, 397));
         trip1ShooterRun.setName("trip1ShooterRun");
         trip1ShooterRun.setDependentActions(trip1GoToShoot);
         redThreeTipSoloAuto.addAction(trip1ShooterRun);
@@ -224,7 +173,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         //END OF TRIP 1
 
         //TRIP 2
-        FullFlowerAction trip2FlowerIntake = new FullFlowerAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_2);
+        FullFlowerAction trip2FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_2);
         trip2FlowerIntake.setName("trip2FlowerIntake");
         trip2FlowerIntake.setDependentActions(trip1Shoot);
         redThreeTipSoloAuto.addAction(trip2FlowerIntake);
@@ -236,7 +185,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip2GoToShoot.setDependentActions(trip2FlowerIntake);
         redThreeTipSoloAuto.addAction(trip2GoToShoot);
 
-        ShooterRun trip2ShooterRun = new ShooterRun(opModeUtilities, shooter, SharedData.getTargetPoint(), new Point(1037, 397));
+        ShooterRun trip2ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_2, new Point(1037, 397));
         trip2ShooterRun.setName("trip2ShooterRun");
         trip2ShooterRun.setDependentActions(trip2GoToShoot);
         redThreeTipSoloAuto.addAction(trip2ShooterRun);
@@ -264,7 +213,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
 
         //TRIP 3
         // shoot again from the same spot before going to the garden
-        ShooterRun trip3ShooterRun = new ShooterRun(opModeUtilities, shooter, SharedData.getTargetPoint(), new Point(1037, 397));
+        ShooterRun trip3ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_2, new Point(1037, 397));
         trip3ShooterRun.setName("trip3ShooterRun");
         trip3ShooterRun.setDependentActions(trip2ShooterStop);
         redThreeTipSoloAuto.addAction(trip3ShooterRun);
@@ -331,7 +280,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip3GoToShoot.setDependentActions(trip3IntakeGarden2);
         redThreeTipSoloAuto.addAction(trip3GoToShoot);
 
-        ShooterRun trip3GardenShooterRun = new ShooterRun(opModeUtilities, shooter, SharedData.getTargetPoint(), new Point(300, 2949));
+        ShooterRun trip3GardenShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, new Point(300, 2949));
         trip3GardenShooterRun.setName("trip3GardenShooterRun");
         trip3GardenShooterRun.setDependentActions(trip3GoToShoot);
         redThreeTipSoloAuto.addAction(trip3GardenShooterRun);
@@ -364,33 +313,20 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip4LookAtBalls.setDependentActions(trip3GardenShoot);
         redThreeTipSoloAuto.addAction(trip4LookAtBalls);
 
-        VisionAction<Boolean> trip4LookForBalls = new VisionAction<>(this::lookForBalls, lookForBallsTimeoutSec);
-        trip4LookForBalls.setName("trip4LookForBalls");
-        trip4LookForBalls.setDependentActions(trip4LookAtBalls);
-        redThreeTipSoloAuto.addAction(trip4LookForBalls);
-
-        AutoToBallsPathingAction trip4GrabBalls = new AutoToBallsPathingAction(driveTrain, stopper, intake, true);
+        // Look from here, then drive to the best balls with the intake on, look again, until full (or nothing left / timeout).
+        VisionPickupAction trip4GrabBalls = new VisionPickupAction(driveTrain, stopper, intake, allianceColor)
+                .setTimeoutMs(visionPickupTimeoutMS);
         trip4GrabBalls.setName("trip4GrabBalls");
-        trip4GrabBalls.setDependentActions(trip4LookForBalls);
+        trip4GrabBalls.setDependentActions(trip4LookAtBalls);
         redThreeTipSoloAuto.addAction(trip4GrabBalls);
-
-        VisionAction<Boolean> trip4LookForBalls2 = new VisionAction<>(this::lookForBalls, lookForBallsTimeoutSec);
-        trip4LookForBalls2.setName("trip4LookForBalls2");
-        trip4LookForBalls2.setDependentActions(trip4GrabBalls);
-        redThreeTipSoloAuto.addAction(trip4LookForBalls2);
-
-        AutoToBallsPathingAction trip4GrabBalls2 = new AutoToBallsPathingAction(driveTrain, stopper, intake, true);
-        trip4GrabBalls2.setName("trip4GrabBalls2");
-        trip4GrabBalls2.setDependentActions(trip4LookForBalls2);
-        redThreeTipSoloAuto.addAction(trip4GrabBalls2);
 
         IPurePursuitAction trip4GoToShoot = new PurePursuitAction(driveTrain);
         trip4GoToShoot.setName("trip4GoToShoot");
         trip4GoToShoot.addPoint(300, 2949, 102.6);
-        trip4GoToShoot.setDependentActions(trip4GrabBalls2);
+        trip4GoToShoot.setDependentActions(trip4GrabBalls);
         redThreeTipSoloAuto.addAction(trip4GoToShoot);
 
-        ShooterRun trip4ShooterRun = new ShooterRun(opModeUtilities, shooter, SharedData.getTargetPoint(), new Point(300, 2949));
+        ShooterRun trip4ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, new Point(300, 2949));
         trip4ShooterRun.setName("trip4ShooterRun");
         trip4ShooterRun.setDependentActions(trip4GoToShoot);
         redThreeTipSoloAuto.addAction(trip4ShooterRun);
@@ -427,13 +363,12 @@ public class RedThreeTipSoloAuto extends KOpMode {
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
             intake.update();
-            beamBreakCountAction.updateCheckDone(); // publishes the ball count that lookForBalls() reads
             turretAutoAlign.updateCheckDone(); // the turret only moves while its action is updated
             redThreeTipSoloAuto.updateCheckDone();
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         shooter.stop();
-        visionPortal.close();
+        ballVision.close();
         cleanupRobot();
     }
 }

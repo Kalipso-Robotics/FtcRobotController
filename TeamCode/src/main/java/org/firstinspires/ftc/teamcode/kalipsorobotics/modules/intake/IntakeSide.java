@@ -6,6 +6,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 /**
  * One side of the double-sided intake (modeled on Stopper). One motor drives this side's intake
@@ -148,5 +151,15 @@ public class IntakeSide {
 
     public double getPower() {
         return power;
+    }
+
+    /** Motor current in mA (0 if the motor cannot report it). Not in the bulk cache: one extra hub read per call. */
+    public double getCurrentMA() {
+        return motor instanceof DcMotorEx ? ((DcMotorEx) motor).getCurrent(CurrentUnit.MILLIAMPS) : 0;
+    }
+
+    /** Motor speed in ticks/s (0 if the motor cannot report it). */
+    public double getVelocity() {
+        return motor instanceof DcMotorEx ? ((DcMotorEx) motor).getVelocity() : 0;
     }
 }
