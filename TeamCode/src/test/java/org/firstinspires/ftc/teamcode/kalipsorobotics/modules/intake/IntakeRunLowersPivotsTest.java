@@ -21,11 +21,11 @@ public class IntakeRunLowersPivotsTest {
 
     @Before
     public void setUp() {
-        pivotA = FlowerInterlockTest.fakeServo();
-        pivotB = FlowerInterlockTest.fakeServo();
-        IntakeSide sideA = new IntakeSide(BeamBreakPosition.IntakeSide.A, FlowerInterlockTest.fakeMotor(), new KServo(pivotA));
-        IntakeSide sideB = new IntakeSide(BeamBreakPosition.IntakeSide.B, FlowerInterlockTest.fakeMotor(), new KServo(pivotB));
-        intake = new Intake(sideA, sideB, new Flower(new KServo(FlowerInterlockTest.fakeServo()), sideA));
+        pivotA = FlowerMechInterlockTest.fakeServo();
+        pivotB = FlowerMechInterlockTest.fakeServo();
+        IntakeSide sideA = new IntakeSide(BeamBreakPosition.IntakeSide.A, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotA));
+        IntakeSide sideB = new IntakeSide(BeamBreakPosition.IntakeSide.B, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotB));
+        intake = new Intake(sideA, sideB, new FlowerMech(new KServo(FlowerMechInterlockTest.fakeServo()), sideA));
     }
 
     private void assertBothDown() {

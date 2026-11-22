@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.*;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig.*;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -25,16 +24,15 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Flower;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -425,15 +423,15 @@ public class TeleOp extends KOpMode {
         if (isPending(flowerAssist)) {
             return; // the assist owns the arm
         }
-        Flower flower = intake.getFlower();
+        FlowerMech flowerMech = intake.getFlower();
         if (flowerTogglePressed) {
             flowerWanted = !flowerWanted;
             KLog.d("Intaking_Flower", () -> "event=toggle wanted=" + flowerWanted);
         }
-        if (flowerWanted && !flower.isDown()) {
-            flower.lower();
-        } else if (!flowerWanted && !flower.isUp()) {
-            flower.raise();
+        if (flowerWanted && !flowerMech.isDown()) {
+            flowerMech.lower();
+        } else if (!flowerWanted && !flowerMech.isUp()) {
+            flowerMech.raise();
         }
     }
 

@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Flower;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerInterlockTest;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
@@ -96,16 +96,16 @@ public class PushBallTest {
     }
 
     private static class Rig {
-        final Servo stopperServo = FlowerInterlockTest.fakeServo();
-        final DcMotor motorA = FlowerInterlockTest.fakeMotor();
-        final DcMotor motorB = FlowerInterlockTest.fakeMotor();
+        final Servo stopperServo = FlowerMechInterlockTest.fakeServo();
+        final DcMotor motorA = FlowerMechInterlockTest.fakeMotor();
+        final DcMotor motorB = FlowerMechInterlockTest.fakeMotor();
         final PushBall pushBall;
 
         Rig() {
-            IntakeSide sideA = new IntakeSide(A, motorA, new KServo(FlowerInterlockTest.fakeServo(), 1e6, 255, 0, false));
-            IntakeSide sideB = new IntakeSide(B, motorB, new KServo(FlowerInterlockTest.fakeServo(), 1e6, 255, 0, false));
-            Flower flower = new Flower(new KServo(FlowerInterlockTest.fakeServo(), 1e6, 255, 0, false), sideA);
-            Intake intake = new Intake(sideA, sideB, flower);
+            IntakeSide sideA = new IntakeSide(A, motorA, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false));
+            IntakeSide sideB = new IntakeSide(B, motorB, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false));
+            FlowerMech flowerMech = new FlowerMech(new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false), sideA);
+            Intake intake = new Intake(sideA, sideB, flowerMech);
             Stopper stopper = new Stopper(new KServo(stopperServo, 1e6, 255, 0, false));
             pushBall = new PushBall(stopper, intake);
         }

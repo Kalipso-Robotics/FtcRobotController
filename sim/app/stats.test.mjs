@@ -156,7 +156,7 @@ test('estimatedChecks follows affects of unmeasured params only', () => {
 
 test('placeName turns wall and Flower ids into words', () => {
   assert.equal(placeName('wall-yMin'), 'the top wall');
-  assert.equal(placeName('flower-C'), 'Flower C');
+  assert.equal(placeName('flowerMech-C'), 'Flower C');
   assert.equal(placeName('hive-leg-low'), "the Hive's low leg");
   assert.equal(placeName('partner'), 'R2');
   assert.equal(placeName('mystery'), 'mystery');

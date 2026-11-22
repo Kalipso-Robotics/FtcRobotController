@@ -29,7 +29,7 @@ Each commit must compile and pass unit tests so reverting to it is safe.
 - Axes: odometry side is the **front**; +X straight ahead, +Y to the right. Intake side A = front (+X), B = back (confirm against `BeamBreakPosition` comments, keep consistent).
 - Drivetrain: 4 mecanum motors, OctoQuad + 3 goBILDA odometry pods (unchanged). No brake servo.
 - `OctoConfig` is tuned (counts/mm, IMU scalar, mirror from 2026-10-03; TCP offsets and track width updated from CAD on 2026-11-16 after the pods moved, pending a spin check). Do not edit it; every value there has a dated measurement behind it.
-- Ports: 7 motors (4 drive, 2 intake, 1 shooter), 6 servos (2 intake pivots, stopper, hood, turret, flower).
+- Ports: 7 motors (4 drive, 2 intake, 1 shooter), 6 servos (2 intake pivots, stopper, hood, turret, flowerMech).
 - **Intake** (double sided, independent): each side has its own motor and its own pivot servo. That motor drives the side's intake wheels AND its 2 transfer wheel sets. Spring loaded to ground. Balls stack from the outside in toward the center, then up to the turret.
 - **Stopper**: servo that holds balls just before the shooter. Opening it while feeding shoots. Running intake against a closed stopper is OK briefly; too long stalls the motor.
 - **Shooter**: one 6000 RPM goBILDA motor, chain to 6x 72 mm flywheels (3 per side) with 4 goBILDA flywheel weights. Deflector design, no counter-roller. `KMotor.getRPS()` is motor-shaft RPS.
@@ -44,7 +44,7 @@ Each commit must compile and pass unit tests so reverting to it is safe.
 ## Architecture (agreed)
 | Layer | Class | Pattern source | Owns |
 |---|---|---|---|
-| Hardware | `IntakeSide` (2 instances, A and B) | `Stopper` / `Tilter` | motor, pivot servo, `lower()`, `raise()`, `run(power)`, `stop()`, `isDown()`. If the flower is on this side, `raise()` raises the flower first |
+| Hardware | `IntakeSide` (2 instances, A and B) | `Stopper` / `Tilter` | motor, pivot servo, `lower()`, `raise()`, `run(power)`, `stop()`, `isDown()`. If the flowerMech is on this side, `raise()` raises the flowerMech first |
 | Hardware | `Flower` | `Stopper` | one servo; refuses to go down unless its side `isDown()` |
 | Hardware | `Intake` | existing module | both sides + beam-break state; `getSide(IntakeSide)`, `getSideFacing(direction)` |
 | Policy | `IntakeController` interface | `DriveController` | decides which side runs each loop |
@@ -53,7 +53,7 @@ Each commit must compile and pass unit tests so reverting to it is safe.
 
 Two instances of `IntakeSide` is deliberate: the hardware is identical, so duplicated behavior would be the bug. Side-specific behavior lives in the controller. Changing "other side raises" must be about one line; a new strategy (driver assist, ball-aware) is a new controller class plus one line in TeleOp.
 
-**Flower interlock (critical):** the flower may be down only while its intake is down. If that intake raises for any reason while the flower is down, that is a fault. Enforce it inside `IntakeSide.raise()` and `Flower.lower()`, and unit test it.
+**Flower interlock (critical):** the flowerMech may be down only while its intake is down. If that intake raises for any reason while the flowerMech is down, that is a fault. Enforce it inside `IntakeSide.raise()` and `Flower.lower()`, and unit test it.
 
 ## Shooter specifics
 - **Ball types**: POLLEN 2.8 in, NECTAR 3.6 in, no way to tell them apart yet. Shoot all at the same RPS/hood per distance. Problems seen: exit power differs by type, and NECTAR shots sag robot voltage. Only 4x POLLEN is somewhat consistent today.
@@ -66,7 +66,7 @@ Two instances of `IntakeSide` is deliberate: the hardware is identical, so dupli
 ## Logging (every subsystem)
 Why: on the real robot, logcat grep is the fastest way to see what each subsystem did and why. Every module, action, controller and test OpMode logs through `KLog` only (no `Log.d`, no `System.out`, no telemetry-only debugging).
 - **Tags are `Group_Thing`** so one grep gets a layer or a whole flow: `Robot_<Module>` for hardware modules (`Robot_Intake`, `Robot_Flower`, `Robot_Stopper`, `Robot_Shooter`, `Robot_Hood`, `Robot_Turret`, `Robot_BeamBreak`); `Shooting_<Action>` for the shot flow (`Shooting_ShootAction`, `Shooting_ShooterReady`, `Shooting_PushBall`); `Intaking_<Thing>` (`Intaking_IntakeController`, `Intaking_RunIntake`); `Vision_<Thing>` (`Vision_Limelight`, `Vision_OdoReset`); `Auto_<Thing>` (`Auto_Decider`, `Auto_Path`). `grep Robot_` = all hardware, `grep Shooting_` = one full shot end to end, `grep Robot_Turret` = one module. Keep tag strings as constants next to each class.
-- **Log state changes and decisions, not every loop.** E.g. side switched A->B and why (velocity, deadband), pivot lowered/raised, flower blocked by interlock, stopper open/close, shot fired (RPS dip), action start/done/timeout, beam-break count changed, turret target clamped. Per-loop numbers (RPS, servo targets) only behind the existing `KLog.isDebug()` gate.
+- **Log state changes and decisions, not every loop.** E.g. side switched A->B and why (velocity, deadband), pivot lowered/raised, flowerMech blocked by interlock, stopper open/close, shot fired (RPS dip), action start/done/timeout, beam-break count changed, turret target clamped. Per-loop numbers (RPS, servo targets) only behind the existing `KLog.isDebug()` gate.
 - **Use the `Supplier<String>` overload** (`KLog.d(tag, () -> ...)`) for anything with string building, so disabled logs cost nothing in the loop, as `Shooter` already does.
 - **Same line format inside a tag**: `key=value` pairs (e.g. `side=A event=lower reason=driveDir vx=312`) so logs can be grepped and parsed into CSV without regex gymnastics.
 - **Faults use `KLog.e`** (interlock violation, stall timeout, sensor unreliable per `BeamBreakArray.isCountReliable()`, out-of-range turret target).
@@ -75,7 +75,7 @@ Why: on the real robot, logcat grep is the fastest way to see what each subsyste
 ## Ask Ken live (do not decide alone)
 - Feed order and timings inside the shoot action (run intake into a closed stopper first, or start feeding when it opens).
 - Intake side-switching details (deadband, what happens when stopped, driver override buttons).
-- Which side the flower is on, gamepad mapping (start from last year's `decode/TeleOp`).
+- Which side the flowerMech is on, gamepad mapping (start from last year's `decode/TeleOp`).
 - Servo models and ranges, hardware map names if unsure.
 
 ## Build order
@@ -86,7 +86,7 @@ Why: on the real robot, logcat grep is the fastest way to see what each subsyste
 5. Shoot `KActionSet`.
 6. TeleOp rewired to the new modules.
 7. One test OpMode per subsystem (`test/` has the patterns) so each part is a 5-minute check on the real robot.
-8. Unit tests for pure logic: flower interlock, side selection, beam-break counting with N sensors, turret heading-to-servo mapping, empty interpolation table.
+8. Unit tests for pure logic: flowerMech interlock, side selection, beam-break counting with N sensors, turret heading-to-servo mapping, empty interpolation table.
 9. Shooter PIDF baselines + interpolation collector.
 10. Wire `AutoDecider` moves (GET_FLOWER_*, intake, shoot) in the `biobuzz/` autos to the real actions.
 11. Write `teleop-to-sim-handoff.md` at repo root: every changed/added/deleted module and action, the hardware map names, what the sim's fake hardware in `TeamCode/src/test/.../sim/` must change, and the full "measure on robot" checklist.
@@ -109,12 +109,12 @@ Decisions made during execution (owner answers and orchestrator rulings).
 - Intake overrides: gamepad 2 right trigger = stop, right bumper = reverse. Nothing else.
 - Flower is on side A (front). Gamepad 2 B toggles it.
 - Turret servo travel: 355 deg placeholder (`TODO-measure`). The turret target clamps to ±180 deg.
-- Device names: motors `shooter`, `intakeA`, `intakeB`; servos `intakePivotA`, `intakePivotB`, `turret`, `flower`. `stopper`, `hood`, drive, `limelight`, `octoquad` are unchanged.
+- Device names: motors `shooter`, `intakeA`, `intakeB`; servos `intakePivotA`, `intakePivotB`, `turret`, `flowerMech`. `stopper`, `hood`, drive, `limelight`, `octoquad` are unchanged.
 
 **Orchestrator rulings (milestone 1)**
 - `Turret` keeps its `getInstance` / `setInstanceNull` shell so about 20 callers do not change. `getAngleRad()` returns the last commanded angle; `isMoving()` is the `KServo` travel-time estimate.
 - `TurretConfig.TURRET_OFFSET_DEG` is a static Dashboard value, so it persists across OpModes; autos zero it at start.
-- Interlocks live in the hardware layer: `Flower.lower()` refuses unless its side `isDown()`; `IntakeSide.raise()` raises the flower first and holds the pivot until the flower is up. A pending raise completes only when `update()` or `raise()` is called again, so the milestone 2 controller must call `intake.update()` every loop.
+- Interlocks live in the hardware layer: `Flower.lower()` refuses unless its side `isDown()`; `IntakeSide.raise()` raises the flowerMech first and holds the pivot until the flowerMech is up. A pending raise completes only when `update()` or `raise()` is called again, so the milestone 2 controller must call `intake.update()` every loop.
 - Each side's pivot is commanded raised at init (the side is spring loaded down and would exceed the starting size).
 - `ShooterInterpolationDataLookup` no longer shares a static list (each `new Shooter` used to append another copy) and returns a safe default for empty and one-row tables.
 - `KMotor.goToRPS` voltage compensation is back on, behind `ShooterConfig.USE_VOLTAGE_COMPENSATION`.
@@ -129,7 +129,7 @@ Decisions made during execution (owner answers and orchestrator rulings).
 - `DriveController`'s concrete pattern source is `FieldOrientedDriveAction` (the `FieldOrientedDrive` class is commented out); `DriveDirectionIntakeController` follows it.
 - Odometry velocity is field frame in mm/ms. The controller rotates it by heading into robot-forward mm/s (`vx·cosθ + vy·sinθ`, ×1000) before picking a side.
 - Side selection uses one threshold with keep-last (`> +T` → A, `< −T` → B, otherwise keep the last side, A by default). The keep-last band is the deadband/hysteresis. The unselected side stops and raises; that is the one line to change if both sides should stay down.
-- GP2 B is now the flower toggle. The old GP2-B odometry-turret-align toggle is gone: odometry align is always on, and GP2 X still toggles turret align overall. The driver's flower intent survives side A being raised: the interlock lifts the flower, and TeleOp lowers it again once A is back down.
+- GP2 B is now the flowerMech toggle. The old GP2-B odometry-turret-align toggle is gone: odometry align is always on, and GP2 X still toggles turret align overall. The driver's flowerMech intent survives side A being raised: the interlock lifts the flowerMech, and TeleOp lowers it again once A is back down.
 - The interim `intake.lower()` in `RunIntake` / `RunIntakeTime(both)` stays for the autos until milestone 3. TeleOp no longer uses `RunIntake`.
 - Shoot flow: no pre-feed. `PushBall` = intake stop → open stopper → feed A → wait → feed B → close stopper. Feeding happens with both sides raised (the controller raises at full); the transfer wheels share the motor, **confirm on robot (Ken)**.
 - `ShooterReady` logs are retagged to `Shooting_ShooterReady`. `ShootAllAction` logs use `Shooting_ShootAction`.
@@ -141,8 +141,8 @@ Decisions made during execution (owner answers and orchestrator rulings).
 **Orchestrator rulings (field/targeting/TeleOp plan)**
 - Pass polarity: `FieldConfig.passTargetForSide(robotY)` targets the half of the field opposite the robot (y mirrored about `HIVE_CENTER`), no alliance flip, because per-alliance frames already make alliance polarity +1. Veto if alliance polarity was meant.
 - TeleOp shots never fire on timeout: `ShooterReady` / `TurretReadyTeleOp` take a timeout; a timeout aborts `ShootAllAction` without feeding (`event=abort reason=timeout`). Auto constructors keep fire-on-timeout. GP1 LB is a press edge.
-- Flower deploy gate: `AutoToBallsPathingAction.shouldLowerFlower` (arm up, side down, distance >= `FLOWER_DEPLOY_CLEARANCE_MM`). Arm already down at start is not redeployed; too close means skip the arm (`event=flowerSkipped reason=tooClose`). `useFlower` is now a `Point flower` (null = not a Flower pile).
-- `FieldConfig.flowerPilePoint` / `nearestFlower` hold the pile logic shared by auto and TeleOp. GP1: X flower assist (while pending TeleOp skips intake/flower/idle-stop; stick input cancels), Y pass, LB hive shot, LT stop, RB slow.
+- Flower deploy gate: `AutoToBallsPathingAction.shouldLowerFlower` (arm up, side down, distance >= `FLOWER_DEPLOY_CLEARANCE_MM`). Arm already down at start is not redeployed; too close means skip the arm (`event=flowerSkipped reason=tooClose`). `useFlower` is now a `Point flowerMech` (null = not a Flower pile).
+- `FieldConfig.flowerPilePoint` / `nearestFlower` hold the pile logic shared by auto and TeleOp. GP1: X flowerMech assist (while pending TeleOp skips intake/flowerMech/idle-stop; stick input cancels), Y pass, LB hive shot, LT stop, RB slow.
 - AprilTags: manual IDs per alliance and Cell. Limelight pipelines need reconfiguring for 36h11 IDs 30-45. (Superseded below: poses now come from manual geometry.)
 - TeleOp now counts balls (`BeamBreakCountAction`), has a Blue variant, and the manual zero cannot snap odometry to (0,0,0).
 - `DecideParams` (untracked teammate file) duplicates `FieldConfig.FLOWER_BALL_OFFSET_MM`; not touched.

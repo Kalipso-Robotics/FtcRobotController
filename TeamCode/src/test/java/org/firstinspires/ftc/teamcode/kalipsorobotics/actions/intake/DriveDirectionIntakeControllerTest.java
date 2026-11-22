@@ -10,9 +10,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerInterlockTest;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Flower;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
@@ -36,22 +35,22 @@ public class DriveDirectionIntakeControllerTest {
     private Servo pivotA, pivotB, flowerServo;
     private DcMotor motorA, motorB;
     private IntakeSide sideA, sideB;
-    private Flower flower;
+    private FlowerMech flowerMech;
     private DriveDirectionIntakeController controller;
 
     @Before
     public void setUp() throws Exception {
         SharedData.resetBeamBreakData();
-        pivotA = FlowerInterlockTest.fakeServo();
-        pivotB = FlowerInterlockTest.fakeServo();
-        flowerServo = FlowerInterlockTest.fakeServo();
-        motorA = FlowerInterlockTest.fakeMotor();
-        motorB = FlowerInterlockTest.fakeMotor();
+        pivotA = FlowerMechInterlockTest.fakeServo();
+        pivotB = FlowerMechInterlockTest.fakeServo();
+        flowerServo = FlowerMechInterlockTest.fakeServo();
+        motorA = FlowerMechInterlockTest.fakeMotor();
+        motorB = FlowerMechInterlockTest.fakeMotor();
         sideA = new IntakeSide(A, motorA, new KServo(pivotA, FAST, 255, 0, false));
         sideB = new IntakeSide(B, motorB, new KServo(pivotB, FAST, 255, 0, false));
-        flower = new Flower(new KServo(flowerServo, 1000, 255, 0, false), sideA);
-        waitUntil(flower::isUp);
-        controller = new DriveDirectionIntakeController(new Intake(sideA, sideB, flower));
+        flowerMech = new FlowerMech(new KServo(flowerServo, 1000, 255, 0, false), sideA);
+        waitUntil(flowerMech::isUp);
+        controller = new DriveDirectionIntakeController(new Intake(sideA, sideB, flowerMech));
     }
 
     @After
@@ -110,8 +109,8 @@ public class DriveDirectionIntakeControllerTest {
         drive(1000, 0, 0);
         controller.update();
         waitUntil(sideA::isDown);
-        assertTrue(flower.lower());
-        waitUntil(flower::isDown);
+        assertTrue(flowerMech.lower());
+        waitUntil(flowerMech::isDown);
 
         drive(-1000, 0, 0);
         controller.update();

@@ -8,12 +8,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.CloseStopperInstantDone;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerInterlockTest;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.Test;
 
 public class StopperActionsTest {
-    private final Servo servo = FlowerInterlockTest.fakeServo();
+    private final Servo servo = FlowerMechInterlockTest.fakeServo();
     private final Stopper stopper = new Stopper(new KServo(servo, 1e6, 255, 0, false));
 
     @Test

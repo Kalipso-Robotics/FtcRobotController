@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
  * Interlock: the arm may be down only while its intake side is down, so lower() refuses unless
  * that side isDown(). The side's raise() raises the arm first (see IntakeSide).
  */
-public class Flower {
+public class FlowerMech {
     public static final String TAG = "Robot_Flower";
 
     private static final double POSITION_TOLERANCE = 1e-6;
@@ -23,13 +23,13 @@ public class Flower {
     private boolean isCommandedDown = false;
     private boolean isBlocked = false;
 
-    public Flower(OpModeUtilities opModeUtilities, IntakeSide side) {
+    public FlowerMech(OpModeUtilities opModeUtilities, IntakeSide side) {
         this(new KServo(opModeUtilities.getHardwareMap().servo.get("flower"),
                 KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false), side); // TODO-measure: servo model, speed and range
     }
 
     /** Direct-injection constructor, for a servo you have already pulled out of the hardware map (unit tests). */
-    public Flower(KServo servo, IntakeSide side) {
+    public FlowerMech(KServo servo, IntakeSide side) {
         this.servo = servo;
         this.side = side;
         servo.setTargetPosition(ModuleConfig.FLOWER_UP_POS);
@@ -100,4 +100,6 @@ public class Flower {
     public double getPosition() {
         return servo.getTargetPosition();
     }
+
+
 }

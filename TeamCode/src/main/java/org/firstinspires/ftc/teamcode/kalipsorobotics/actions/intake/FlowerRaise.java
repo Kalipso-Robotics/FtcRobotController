@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Flower;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 /**
@@ -14,11 +14,11 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 public class FlowerRaise extends Action {
     public static final String TAG = "Intaking_Flower";
 
-    private final Flower flower;
+    private final FlowerMech flowerMech;
     private final ElapsedTime timer = new ElapsedTime();
 
-    public FlowerRaise(Flower flower) {
-        this.flower = flower;
+    public FlowerRaise(FlowerMech flowerMech) {
+        this.flowerMech = flowerMech;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class FlowerRaise extends Action {
         if (!hasStarted) {
             hasStarted = true;
             timer.reset();
-            flower.raise();
+            flowerMech.raise();
             KLog.d(TAG, () -> "name=" + getName() + " event=start raise");
         }
         if (timer.milliseconds() >= IntakeConfig.FLOWER_MOVE_MS) {

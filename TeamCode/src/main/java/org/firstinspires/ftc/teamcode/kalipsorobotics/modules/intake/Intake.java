@@ -13,19 +13,19 @@ public class Intake {
 
     private final IntakeSide sideA;
     private final IntakeSide sideB;
-    private final Flower flower;
+    private final FlowerMech flowerMech;
 
     public Intake(OpModeUtilities opModeUtilities) {
         sideA = new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.A);
         sideB = new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.B);
-        flower = new Flower(opModeUtilities, getSide(ModuleConfig.FLOWER_SIDE));
+        flowerMech = new FlowerMech(opModeUtilities, getSide(ModuleConfig.FLOWER_SIDE));
     }
 
     /** Direct-injection constructor (unit tests, public so actions tests can build one). The flower must already be attached to one of the sides. */
-    public Intake(IntakeSide sideA, IntakeSide sideB, Flower flower) {
+    public Intake(IntakeSide sideA, IntakeSide sideB, FlowerMech flowerMech) {
         this.sideA = sideA;
         this.sideB = sideB;
-        this.flower = flower;
+        this.flowerMech = flowerMech;
     }
 
     public IntakeSide getSide(BeamBreakPosition.IntakeSide side) {
@@ -37,8 +37,8 @@ public class Intake {
         return robotForward >= 0 ? sideA : sideB;
     }
 
-    public Flower getFlower() {
-        return flower;
+    public FlowerMech getFlower() {
+        return flowerMech;
     }
 
     /** Runs both sides, the closest equivalent of last year's single intake motor. */

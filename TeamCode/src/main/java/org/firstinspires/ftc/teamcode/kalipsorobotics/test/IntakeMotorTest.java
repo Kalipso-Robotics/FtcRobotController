@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.test;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Flower;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -22,7 +22,7 @@ public class IntakeMotorTest extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
         Intake intake = new Intake(opModeUtilities);
-        Flower flower = intake.getFlower();
+        FlowerMech flowerMech = intake.getFlower();
         BeamBreakPosition.IntakeSide selected = BeamBreakPosition.IntakeSide.A;
         waitForStart();
 
@@ -49,11 +49,11 @@ public class IntakeMotorTest extends KOpMode {
                 KLog.d(TAG, () -> "event=raise side=" + side.getSide());
             }
             if (kGamePad2.isButtonBFirstPressed()) {
-                if (flower.isDown()) {
-                    flower.raise();
+                if (flowerMech.isDown()) {
+                    flowerMech.raise();
                     KLog.d(TAG, "event=flowerRaise");
                 } else {
-                    boolean lowered = flower.lower();
+                    boolean lowered = flowerMech.lower();
                     KLog.d(TAG, () -> "event=flowerLower accepted=" + lowered);
                 }
             }
@@ -72,8 +72,8 @@ public class IntakeMotorTest extends KOpMode {
             telemetry.addData("isDown", side.isDown());
             telemetry.addData("power", "%.2f", side.getPower());
             telemetry.addData("ballCount", intake.getBallCount());
-            telemetry.addData("flowerDown", flower.isDown());
-            telemetry.addData("flowerUp", flower.isUp());
+            telemetry.addData("flowerDown", flowerMech.isDown());
+            telemetry.addData("flowerUp", flowerMech.isUp());
             telemetry.update();
         }
         intake.stop();

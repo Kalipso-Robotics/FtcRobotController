@@ -25,7 +25,7 @@ public class IntakeSide {
     private final double downPos;
     private final double upPos;
 
-    private Flower flower = null;
+    private FlowerMech flowerMech = null;
     private boolean isCommandedDown = false;
     private boolean isRaisePending = false;
     private double power = 0;
@@ -52,11 +52,11 @@ public class IntakeSide {
     }
 
     /** Called by the Flower constructor, so a flower is always attached to the side it checks. */
-    void attachFlower(Flower flower) {
-        if (this.flower != null) {
+    void attachFlower(FlowerMech flowerMech) {
+        if (this.flowerMech != null) {
             throw new IllegalStateException("side " + side + " already has a flower");
         }
-        this.flower = flower;
+        this.flowerMech = flowerMech;
     }
 
     public void lower() {
@@ -77,12 +77,12 @@ public class IntakeSide {
         if (!isCommandedDown) {
             return;
         }
-        if (flower != null && !flower.isUp()) {
+        if (flowerMech != null && !flowerMech.isUp()) {
             if (!isRaisePending) {
                 isRaisePending = true;
                 KLog.e(TAG, "side=" + side + " event=raiseDeferred reason=flowerNotUp");
             }
-            flower.raise();
+            flowerMech.raise();
             return;
         }
         isRaisePending = false;
@@ -126,7 +126,7 @@ public class IntakeSide {
      */
     public boolean setPivotPosition(double position) {
         boolean toDown = Math.abs(position - downPos) < 1e-6; // stepped values miss DOWN by ~1e-16
-        if (isCommandedDown && !toDown && flower != null && !flower.isUp()) {
+        if (isCommandedDown && !toDown && flowerMech != null && !flowerMech.isUp()) {
             KLog.e(TAG, "side=" + side + " event=blocked reason=flowerNotUp pos=" + position);
             return false;
         }
