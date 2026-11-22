@@ -2,7 +2,7 @@
 
 The shooter picks its flywheel speed (RPS) and hood position from the distance to the Hive.
 `ShooterInterpolationDataLookup` reads the rows in `ShooterInterpolationConfig.shooterData`.
-That table is empty until you measure it on the BIOBUZZ robot.
+Its rows are still the old DECODE robot's numbers, carried over, not BIOBUZZ data. Replace all of them with a BIOBUZZ sweep before trusting shot distance.
 
 ## The three OpModes
 

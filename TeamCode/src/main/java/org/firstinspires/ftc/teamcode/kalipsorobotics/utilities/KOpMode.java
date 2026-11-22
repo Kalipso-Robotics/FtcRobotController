@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Ac
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
@@ -67,6 +68,12 @@ public abstract class KOpMode extends LinearOpMode {
     }
 
     protected void initializeRobotConfig() {
+    }
+
+    /** Starts the Limelight on its own thread (hive state, tipping, re-zero fixes). Call after the turret exists; cleanupRobot() stops it. */
+    protected void startAprilTagDetection(Turret turret) {
+        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, allianceColor);
+        OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
     }
 
     /**

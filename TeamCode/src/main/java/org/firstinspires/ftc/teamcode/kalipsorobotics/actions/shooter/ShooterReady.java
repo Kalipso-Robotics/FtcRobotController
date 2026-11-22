@@ -61,7 +61,8 @@ public class ShooterReady extends Action {
             KLog.d(TAG, () -> "name=" + getName() + " event=waiting reason=rpsOutOfRange");
         }
 
-        if (actionTime.milliseconds() > timeoutMS) {
+        // Not when it just became ready: that is not a timeout.
+        if (!isDone && actionTime.milliseconds() > timeoutMS) {
             timedOut = true;
             if (!holdOnTimeout) {
                 isDone = true;

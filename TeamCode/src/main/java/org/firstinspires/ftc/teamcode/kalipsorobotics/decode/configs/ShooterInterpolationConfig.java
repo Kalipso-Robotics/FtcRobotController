@@ -9,9 +9,9 @@ public class ShooterInterpolationConfig {
     public static double rpsOffset = 0;
     public static double hoodOffset = 0;
     public static final double HOOD_INIT_OFFSET = 0;
-    public final static double MIN_HOOD = 0.1284; //0.72 old hood
-    public final static double MAX_HOOD = 0.3; // 0.3 old hood 37.38mm space by caliper from bottom
-    public static double FAR_SHOOT_RPS = 66.5;
+    public final static double MIN_HOOD = 0.1284; // TODO-measure //0.72 old hood
+    public final static double MAX_HOOD = 0.3; // TODO-measure // 0.3 old hood 37.38mm space by caliper from bottom
+    public static double FAR_SHOOT_RPS = 66.5; // TODO-measure
     // One motor now spins 6 flywheels + 4 weights: the ceiling is about 1/kf (~87 RPS loaded), and the
     // PIDF needs headroom to recover between balls and under NECTAR voltage sag. Shooter clamps every target to this.
     public static final double MAX_RPS = 70; // TODO-measure
@@ -24,13 +24,13 @@ public class ShooterInterpolationConfig {
     public static double NECTAR_RPS_OFFSET = 0;
     public static double NECTAR_HOOD_OFFSET = 0;
 
-    public static final double NEAR_SHOOT_RPS = 36.6;
-    public static final int FAR_DISTANCE = 2760;
-    public static final int NEAR_DISTANCE = 1785;
-    public static double maxHoodCompensate = 0.005; //0.02166;
+    public static final double NEAR_SHOOT_RPS = 36.6; // TODO-measure
+    public static final int FAR_DISTANCE = 2760; // TODO-measure
+    public static final int NEAR_DISTANCE = 1785; // TODO-measure
+    public static double maxHoodCompensate = 0.005; // TODO-measure //0.02166;
     public static double minHoodCompensate = -maxHoodCompensate;//-0.02166;
 
-    public static double hoodCompensateCoefficient = maxHoodCompensate; // 0.2
+    public static double hoodCompensateCoefficient = maxHoodCompensate; // TODO-measure // 0.2
 
     public static  double DEFAULT_VOLTAGE = 12.5;
     /*
@@ -55,9 +55,10 @@ public class ShooterInterpolationConfig {
     */
 
     static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate; //0.31754;
-    public static final int BETWEEN_FAR_NEAR_TIP = 3240;
+    public static final int BETWEEN_FAR_NEAR_TIP = 3240; // TODO-measure
     // Rows of: distanceMM, rps, hoodPosition (sorted by distance). Empty until measured on the BIOBUZZ robot;
     // ShooterInterpolationDataLookup returns DEFAULT_RPS / MIN_HOOD while it is empty.
+    // TODO-measure: fill the table; the commented-out rows above are DECODE carry-over, do not reuse them.
     public static double[] shooterData = {
     };
 }

@@ -1,0 +1,1 @@
+{ "name": "defend_red_hive", "archetype": "defender", "start": [2000, 1800, 180], "guard": "red-hive", "fraction": 0.5 }

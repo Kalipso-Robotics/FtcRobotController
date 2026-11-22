@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "footprint": {
+    "front": 265.5,
+    "back": 265.5,
+    "width": 355
+  },
+  "meshes": [
+    {
+      "file": "drivetrain_black.stl",
+      "part": "body",
+      "color": "#1c1d21",
+      "scale": 1,
+      "rotationDeg": [0, 0, -90],
+      "offset": [-78.1, -160.3, 7.0]
+    },
+    {
+      "file": "drivetrain_purple.stl",
+      "part": "body",
+      "color": "#6a3fa6",
+      "scale": 1,
+      "rotationDeg": [0, 0, -90],
+      "offset": [-78.1, -160.3, 7.0]
+    },
+    {
+      "file": "drivetrain_silicone.stl",
+      "part": "body",
+      "color": "#cfc9bd",
+      "scale": 1,
+      "rotationDeg": [0, 0, -90],
+      "offset": [-78.1, -160.3, 7.0]
+    },
+    {
+      "file": "upper_black.stl",
+      "part": "body",
+      "color": "#1c1d21",
+      "scale": 1,
+      "rotationDeg": [0, 0, 0],
+      "offset": [0, 0, 0]
+    },
+    {
+      "file": "upper_purple.stl",
+      "part": "body",
+      "color": "#6a3fa6",
+      "scale": 1,
+      "rotationDeg": [0, 0, 0],
+      "offset": [0, 0, 0]
+    },
+    {
+      "file": "upper_silicone.stl",
+      "part": "body",
+      "color": "#cfc9bd",
+      "scale": 1,
+      "rotationDeg": [0, 0, 0],
+      "offset": [0, 0, 0]
+    },
+    {
+      "file": "turret.stl",
+      "part": "turret",
+      "color": "#6a3fa6",
+      "scale": 1,
+      "rotationDeg": [0, 0, 0],
+      "offset": [0, 0, 0]
+    },
+    {
+      "file": "Sim_Shooter_hood.stl",
+      "part": "hood",
+      "color": "#6a3fa6",
+      "scale": 1,
+      "rotationDeg": [0, 0, -90],
+      "offset": [-78.1, -160.3, 7.0]
+    }
+  ],
+  "intakeZones": [
+    {
+      "name": "front",
+      "side": "front",
+      "min": [225, -150, 0],
+      "max": [300, 150, 100]
+    },
+    {
+      "name": "back",
+      "side": "back",
+      "min": [-300, -150, 0],
+      "max": [-225, 150, 100]
+    }
+  ],
+  "transferPath": [[223, 0, 57], [134, 0, 91], [61, 0, 127], [0, 0, 171], [0, 0, 250], [0, 0, 334], [0, 0, 460]],
+  "turret": {
+    "pivot": [0, 0, 334]
+  },
+  "shooter": {
+    "exit": [0, 0, 460],
+    "hoodPivot": [-53, 18, 354],
+    "hoodMinDeg": 55,
+    "hoodMaxDeg": 90
+  },
+  "beams": [
+    {
+      "name": "beamBreakAOuter",
+      "emitter": [165, 60, 79],
+      "receiver": [165, -60, 79]
+    },
+    {
+      "name": "beamBreakAInner",
+      "emitter": [40, 60, 141],
+      "receiver": [40, -60, 141]
+    },
+    {
+      "name": "beamBreakBInner",
+      "emitter": [-40, 60, 141],
+      "receiver": [-40, -60, 141]
+    },
+    {
+      "name": "beamBreakBOuter",
+      "emitter": [-165, 60, 79],
+      "receiver": [-165, -60, 79]
+    }
+  ],
+  "noodles": [
+    {
+      "name": "starAOuter",
+      "center": [134, 0, 152],
+      "axis": [0, 1, 0],
+      "radius": 61,
+      "length": 80,
+      "blades": 5
+    },
+    {
+      "name": "starAInner",
+      "center": [84, 0, 213],
+      "axis": [0, 1, 0],
+      "radius": 61,
+      "length": 80,
+      "blades": 5
+    },
+    {
+      "name": "starBInner",
+      "center": [-84, 0, 213],
+      "axis": [0, 1, 0],
+      "radius": 61,
+      "length": 80,
+      "blades": 5
+    },
+    {
+      "name": "starBOuter",
+      "center": [-134, 0, 152],
+      "axis": [0, 1, 0],
+      "radius": 61,
+      "length": 80,
+      "blades": 5
+    }
+  ]
+}

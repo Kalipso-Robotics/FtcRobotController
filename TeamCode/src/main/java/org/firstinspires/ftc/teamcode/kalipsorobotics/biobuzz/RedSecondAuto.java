@@ -69,6 +69,7 @@ public class RedSecondAuto extends KOpMode {
         stopper = new Stopper(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
+        startAprilTagDetection(turret);
         KLog.d("Auto_RedSecond", "event=init");
     }
 

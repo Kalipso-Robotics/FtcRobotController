@@ -158,7 +158,11 @@ public class RedDecideAutoPartnerFirst extends RedDecideAuto {
     @Override
     void syncWithHive() {
         CellState a = SharedData.getCellAState();
-        if (a == null || a == CellState.TIPPING) {
+        if (a == null) {
+            super.syncWithHive(); // no Cell sensor: fall back to the Limelight
+            return;
+        }
+        if (a == CellState.TIPPING) {
             return;
         }
         Cell sensedUp = (a == CellState.UP) ? Cell.A : Cell.B;

@@ -68,6 +68,8 @@ public class AprilTagConfig {
     public static double HIVE_WINDOW_MAX_AGE_MS = 300;
     /** A Limelight result older than this when we read it is thrown away (stale cached frame). */
     public static double MAX_LIMELIGHT_STALENESS_MS = 100;
+    /** An auto only believes the HIVE's up CELL if it was seen this recently. */
+    public static double HIVE_STATE_MAX_AGE_MS = 2000; // TODO-measure: how stale a sighting may be before the Hive may have tipped since
     /** A CELL is published as up once this many frames in the window say so and none say the other CELL. */
     public static int HIVE_WINDOW_MIN_AGREE = 3;
     /** Tipping is published once this many frames in the window say tipping. */

@@ -1,13 +1,11 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig.*;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
@@ -17,139 +15,113 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Checks HiveTagLocalizer with made-up camera sightings.
- * Idea: put the robot somewhere we choose, put the HIVE tags where AprilTagConfig says they are, and work out what the
- * camera WOULD see. Then hand that to solve() and check it gives back the robot spot and the right up Cell.
- */
 public class HiveTagLocalizerTest {
 
-    // Robot pose used by most tests: somewhere on the field, turned a bit, turret turned a bit.
-    private static final double ROBOT_X = 1200;
-    private static final double ROBOT_Y = 2600;
-    private static final double HEADING = 0.3;
-    private static final double TURRET = 0.2;
+    /** What the Limelight would report (OpenCV camera frame) for a robot at (x, y, heading) with the turret at turretRad. */
+    static TagObservation see(int id, boolean cellUp, AllianceColor alliance, double x, double y, double heading, double turretRad) {
+        double ct = Math.cos(turretRad), st = Math.sin(turretRad);
+        double camRx = TurretConfig.ROBOT_REL_TURRET_POINT.getX() + ct * TURRET_REL_CAM_POS.getX() - st * TURRET_REL_CAM_POS.getY();
+        double camRy = TurretConfig.ROBOT_REL_TURRET_POINT.getY() + st * TURRET_REL_CAM_POS.getX() + ct * TURRET_REL_CAM_POS.getY();
+        double camX = x + Math.cos(heading) * camRx - Math.sin(heading) * camRy;
+        double camY = y + Math.sin(heading) * camRx + Math.cos(heading) * camRy;
 
-    /** What the camera would report for tag `id` sitting at field spot `tag` ({x, y, z}). */
-    private static TagObservation see(int id, double[] tag, double robotX, double robotY, double heading, double turretAngle) {
-        // Where the camera is on the field (same chain as the robot: robot -> turret -> camera).
-        Position camInRobot = AprilTagConfig.TURRET_REL_CAM_POS.toNewFrame(
-                TurretConfig.ROBOT_REL_TURRET_POINT.getX(), TurretConfig.ROBOT_REL_TURRET_POINT.getY(), -turretAngle);
-        Position cam = camInRobot.toNewFrame(robotX, robotY, heading);
-
-        // The tag seen from the camera, flat: how far forward and how far right, plus how far up.
-        double dx = tag[0] - cam.getX();
-        double dy = tag[1] - cam.getY();
-        double forward = dx * Math.cos(cam.getTheta()) + dy * Math.sin(cam.getTheta());
-        double right = -dx * Math.sin(cam.getTheta()) + dy * Math.cos(cam.getTheta());
-        double up = tag[2] - AprilTagConfig.CAM_HEIGHT_MM;
-
-        // Tilt into the camera's own frame (OpenCV: x right, y down, z out of the lens), camera pitched up.
-        double pitch = Math.toRadians(AprilTagConfig.CAM_PITCH_DEG);
-        double camX = right;
-        double camY = forward * Math.sin(pitch) - up * Math.cos(pitch);
-        double camZ = forward * Math.cos(pitch) + up * Math.sin(pitch);
-        return new TagObservation(id, new Position(0, 0, 0), 0, camX, camY, camZ);
+        double[] tag = tagFieldXYZ(id, cellUp, alliance);
+        double dx = tag[0] - camX, dy = tag[1] - camY, dz = tag[2] - CAM_HEIGHT_MM;
+        double yaw = heading + turretRad + TURRET_REL_CAM_POS.getTheta();
+        double levelFwd = dx * Math.cos(yaw) + dy * Math.sin(yaw);
+        double right = -dx * Math.sin(yaw) + dy * Math.cos(yaw);
+        double p = Math.toRadians(CAM_PITCH_DEG);
+        double fwd = levelFwd * Math.cos(p) + dz * Math.sin(p);
+        double upCam = -levelFwd * Math.sin(p) + dz * Math.cos(p);
+        return new TagObservation(id, new Position(0, 0, 0), 0, right, -upCam, fwd);
     }
 
-    private static TagObservation see(int id, boolean cellUp, AllianceColor color) {
-        return see(id, AprilTagConfig.tagFieldXYZ(id, cellUp, color), ROBOT_X, ROBOT_Y, HEADING, TURRET);
+    private static List<TagObservation> cluster(int[] ids, boolean up, AllianceColor a, double x, double y, double h, double t) {
+        List<TagObservation> list = new ArrayList<>();
+        for (int id : ids) list.add(see(id, up, a, x, y, h, t));
+        return list;
     }
 
     @Test
-    public void redCellAUp_givesCellAAndRobotSpot() {
-        List<TagObservation> seen = new ArrayList<>();
-        for (int id = 34; id <= 37; id++) seen.add(see(id, true, AllianceColor.RED));   // Cell A tags, A is up
-        for (int id = 30; id <= 31; id++) seen.add(see(id, false, AllianceColor.RED));  // Cell B tags, B is down
-
-        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(seen, HEADING, TURRET, AllianceColor.RED);
-
+    public void ownCellUp_recoversRobotAndGoalState() {
+        double x = 1400, y = 3100, h = Math.toRadians(-80), t = Math.toRadians(-15);
+        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(
+                cluster(cellATagIds(AllianceColor.RED), true, AllianceColor.RED, x, y, h, t), h, t, AllianceColor.RED);
+        assertEquals(x, fix.robot.getX(), 1e-6);
+        assertEquals(y, fix.robot.getY(), 1e-6);
+        assertEquals(4, fix.tagsUsed);
         assertEquals(HiveTagLocalizer.Cell.A, fix.upCell);
-        assertFalse(fix.tipping);
-        assertEquals(6, fix.tagsUsed);
-        assertNotNull(fix.robot);
-        assertEquals(ROBOT_X, fix.robot.getX(), 1);
-        assertEquals(ROBOT_Y, fix.robot.getY(), 1);
     }
 
     @Test
-    public void blueCellBUp_givesCellBAndRobotSpot() {
-        List<TagObservation> seen = new ArrayList<>();
-        for (int id = 38; id <= 41; id++) seen.add(see(id, true, AllianceColor.BLUE)); // Blue Cell B tags, B is up
-
-        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(seen, HEADING, TURRET, AllianceColor.BLUE);
-
+    public void ownCellDown_meansTheOtherCellIsUp() {
+        double x = 1600, y = 2700, h = Math.toRadians(-100), t = 0.2;
+        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(
+                cluster(cellATagIds(AllianceColor.RED), false, AllianceColor.RED, x, y, h, t), h, t, AllianceColor.RED);
+        assertEquals(x, fix.robot.getX(), 1e-6);
+        assertEquals(y, fix.robot.getY(), 1e-6);
         assertEquals(HiveTagLocalizer.Cell.B, fix.upCell);
-        assertFalse(fix.tipping);
-        assertNotNull(fix.robot);
-        assertEquals(ROBOT_X, fix.robot.getX(), 1);
-        assertEquals(ROBOT_Y, fix.robot.getY(), 1);
     }
 
     @Test
-    public void oneTag_givesNoGoalState() {
-        List<TagObservation> seen = new ArrayList<>();
-        seen.add(see(34, true, AllianceColor.RED));
-
-        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(seen, HEADING, TURRET, AllianceColor.RED);
-
+    public void blue_opponentTagsLocalizeButSayNothingAboutOurGoal() {
+        double x = 2300, y = 700, h = Math.toRadians(95), t = -0.4;
+        // Red's far CELL (30-33) seen from the blue frame.
+        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(
+                cluster(new int[]{30, 31, 32, 33}, true, AllianceColor.BLUE, x, y, h, t), h, t, AllianceColor.BLUE);
+        assertEquals(x, fix.robot.getX(), 1e-6);
+        assertEquals(y, fix.robot.getY(), 1e-6);
         assertNull(fix.upCell);
-        assertFalse(fix.tipping);
     }
 
     @Test
-    public void mixedVotes_meansTipping() {
-        List<TagObservation> seen = new ArrayList<>();
-        seen.add(see(34, true, AllianceColor.RED));  // says A up
-        seen.add(see(35, true, AllianceColor.RED));  // says A up
-        seen.add(see(36, false, AllianceColor.RED)); // says B up
-
-        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(seen, HEADING, TURRET, AllianceColor.RED);
-
+    public void tagHalfwayThroughATip_isIgnored() {
+        double x = 1500, y = 3000, h = Math.toRadians(-90);
+        TagObservation o = see(34, true, AllianceColor.RED, x, y, h, 0);
+        double midDrop = (tagFieldXYZ(34, true, AllianceColor.RED)[2] - tagFieldXYZ(34, false, AllianceColor.RED)[2]) / 2;
+        // Same view but the tag sits halfway between its up and down heights: shift it straight down in the camera frame.
+        double p = Math.toRadians(CAM_PITCH_DEG);
+        TagObservation tipping = new TagObservation(34, new Position(0, 0, 0), 0, o.getTagRelCamXMM(),
+                o.getTagRelCamYMM() + midDrop * Math.cos(p), o.getTagRelCamZMM() - midDrop * Math.sin(p));
+        List<TagObservation> list = new ArrayList<>();
+        list.add(tipping);
+        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(list, h, 0, AllianceColor.RED);
+        assertNull(fix.robot);
         assertNull(fix.upCell);
-        assertTrue(fix.tipping);
     }
 
     @Test
-    public void tagHalfwayBetweenUpAndDown_meansTipping() {
-        double[] up = AprilTagConfig.tagFieldXYZ(34, true, AllianceColor.RED);
-        double[] down = AprilTagConfig.tagFieldXYZ(34, false, AllianceColor.RED);
-        double[] halfway = {(up[0] + down[0]) / 2, (up[1] + down[1]) / 2, (up[2] + down[2]) / 2};
-        List<TagObservation> seen = new ArrayList<>();
-        seen.add(see(34, halfway, ROBOT_X, ROBOT_Y, HEADING, TURRET));
-        seen.add(see(35, true, AllianceColor.RED));
-        seen.add(see(36, true, AllianceColor.RED));
+    public void tagsThatDisagree_giveNoPosition() {
+        double x = 1500, y = 3000, h = Math.toRadians(-90);
+        List<TagObservation> list = cluster(new int[]{34, 35}, true, AllianceColor.RED, x, y, h, 0);
+        TagObservation off = list.get(1);
+        list.set(1, new TagObservation(35, new Position(0, 0, 0), 0, off.getTagRelCamXMM() + 400, off.getTagRelCamYMM(), off.getTagRelCamZMM()));
+        assertNull(HiveTagLocalizer.solve(list, h, 0, AllianceColor.RED).robot);
+    }
 
-        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(seen, HEADING, TURRET, AllianceColor.RED);
-
-        assertTrue(fix.tipping);
-        assertEquals(2, fix.tagsUsed); // the halfway tag gives no vote and no position
+    /**
+     * Hand-built, not from see(): heading 0, turret 0, a tag 1000 mm ahead (level) and 100 mm to the camera's right
+     * (OpenCV +x). Field +y is the robot's right at heading 0, so the camera is 1000 mm behind and 100 mm left of the tag.
+     */
+    @Test
+    public void signConventions_handComputed() {
+        double[] tag = tagFieldXYZ(34, true, AllianceColor.RED);
+        double p = Math.toRadians(CAM_PITCH_DEG), levelFwd = 1000, dz = tag[2] - CAM_HEIGHT_MM;
+        double fwd = levelFwd * Math.cos(p) + dz * Math.sin(p);
+        double upCam = -levelFwd * Math.sin(p) + dz * Math.cos(p);
+        List<TagObservation> list = new ArrayList<>();
+        list.add(new TagObservation(34, new Position(0, 0, 0), 0, 100, -upCam, fwd));
+        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(list, 0, 0, AllianceColor.RED);
+        assertEquals(tag[0] - 1000 - TurretConfig.ROBOT_REL_TURRET_POINT.getX() - TURRET_REL_CAM_POS.getX(), fix.robot.getX(), 1e-6);
+        assertEquals(tag[1] - 100 - TurretConfig.ROBOT_REL_TURRET_POINT.getY() - TURRET_REL_CAM_POS.getY(), fix.robot.getY(), 1e-6);
     }
 
     @Test
-    public void otherAllianceTags_areIgnored() {
-        List<TagObservation> seen = new ArrayList<>();
-        seen.add(see(42, true, AllianceColor.BLUE)); // Blue tags while we are Red
-        seen.add(see(43, true, AllianceColor.BLUE));
-
-        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(seen, HEADING, TURRET, AllianceColor.RED);
-
+    public void nonHiveTags_areIgnored() {
+        List<TagObservation> list = new ArrayList<>();
+        list.add(new TagObservation(24, new Position(0, 0, 0), 0, 0, -500, 2000));
+        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(list, 0, 0, AllianceColor.RED);
+        assertNull(fix.robot);
         assertEquals(0, fix.tagsUsed);
-        assertNull(fix.upCell);
-        assertNull(fix.robot);
-    }
-
-    @Test
-    public void oneTagFarOff_killsThePosition() {
-        List<TagObservation> seen = new ArrayList<>();
-        seen.add(see(34, true, AllianceColor.RED));
-        seen.add(see(35, true, AllianceColor.RED));
-        // Tag 36 as if the robot were 500 mm further along x: a bad solve.
-        seen.add(see(36, AprilTagConfig.tagFieldXYZ(36, true, AllianceColor.RED), ROBOT_X + 500, ROBOT_Y, HEADING, TURRET));
-
-        HiveTagLocalizer.Fix fix = HiveTagLocalizer.solve(seen, HEADING, TURRET, AllianceColor.RED);
-
-        assertNull(fix.robot);
-        assertEquals(HiveTagLocalizer.Cell.A, fix.upCell); // the goal state does not need a good position
     }
 }

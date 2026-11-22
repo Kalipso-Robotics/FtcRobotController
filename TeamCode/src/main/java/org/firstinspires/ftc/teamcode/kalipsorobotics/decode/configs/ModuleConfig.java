@@ -11,8 +11,8 @@ public class ModuleConfig {
 
 
     //========STOPPER========
-    public static final double STOPPER_SERVO_CLOSED_POS = 0.47; //0.49
-    public static final double STOPPER_SERVO_OPEN_POS = 0.31; //0.35
+    public static final double STOPPER_SERVO_CLOSED_POS = 0.47; // TODO-measure
+    public static final double STOPPER_SERVO_OPEN_POS = 0.31; // TODO-measure
 
     //========INTAKE========
     // Side A is the front (+X, odometry side), side B the back.

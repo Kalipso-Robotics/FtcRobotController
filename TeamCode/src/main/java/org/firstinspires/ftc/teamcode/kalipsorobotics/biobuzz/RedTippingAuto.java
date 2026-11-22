@@ -353,6 +353,7 @@ public class RedTippingAuto extends KOpMode {
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
+        startAprilTagDetection(turret);
     }
 
     /** A fresh aim for one trip at that trip's Cell (a TurretAutoAlign keeps its target for its whole life). */

@@ -1,0 +1,4 @@
+{ "name": "generic", "robot": { "front": 200, "back": 200, "width": 400 },
+  "massKg": 12, "maxSpeedMmS": 800, "accelMmS2": 2000, "turnRadS": 3,
+  "intake": { "types": ["pollen", "nectar"], "sides": ["front", "back"] },
+  "preload": 0, "shotIntervalMs": 300, "shotSpreadDeg": 3 }
