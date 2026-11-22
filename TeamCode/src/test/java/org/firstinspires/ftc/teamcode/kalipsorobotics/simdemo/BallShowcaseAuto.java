@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.simdemo;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.RoundTripAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -24,14 +25,14 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 /**
  * A SIM-ONLY auto that shows the ball handling working end to end. It is not robot code and it does not replace RedTippingAuto
  * (whose shoot and intake lines are all commented out). It is built from the same classes the robot uses: the DECODE-era
- * RoundTripAction (drive and intake along a path, then ShooterRun, ShooterReady, TurretReadyAuto and PushBall), Shooter, Intake,
+ * RoundTripAction (drive and intake along a path, then ShooterRun, ShooterReady, TurretReady and PushBall), Shooter, Intake,
  * Stopper, Turret and TurretAutoAlign. When the team connects those lines in its own auto, that auto behaves the same way here.
  *
  * What it does, in the Red frame:
  *   1. shoot the 4 preloaded pollen into the red Hive's up Cell (with its 3 nectar that tips the Hive and the balls spill out)
  *   2. drive into the red Garden (4 pollen in a line), then to launch point B and shoot them into the Cell that is up now
  *   3. pick up the 4 pollen in Flower B, shoot them into the same Cell (8 pollen tips it)
- * The turret aims at the target point of each trip (the DECODE code aims at TurretConfig.X/Y_INIT_SETUP_MM, so those are set per trip).
+ * The turret aims at the target point of each trip (each trip builds its own TurretAutoAlign).
  */
 public class BallShowcaseAuto extends KOpMode {
 
@@ -50,15 +51,11 @@ public class BallShowcaseAuto extends KOpMode {
     private Intake intake;
     private Stopper stopper;
     private Turret turret;
-    private TurretAutoAlign turretAutoAlign;
 
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0; // the turret starts facing straight ahead
-        TurretConfig.X_INIT_SETUP_MM = FieldConfig.aTargetPoint.getX(); // the turret aims at the first Cell
-        TurretConfig.Y_INIT_SETUP_MM = FieldConfig.aTargetPoint.getY();
     }
 
     @Override
@@ -70,9 +67,7 @@ public class BallShowcaseAuto extends KOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         sleep(1000);
 
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, START_X_MM, START_Y_MM, Math.toRadians(-90));
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(START_X_MM, START_Y_MM, Math.toRadians(-90)));
 
         showcase = new KActionSet();
         intake = new Intake(opModeUtilities);
@@ -80,13 +75,17 @@ public class BallShowcaseAuto extends KOpMode {
         stopper = new Stopper(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
-        turretAutoAlign.setToleranceDeg(5);
+    }
+
+    private TurretAutoAlign aimAt(Point target) {
+        TurretAutoAlign aim = new TurretAutoAlign(opModeUtilities, turret, target);
+        aim.setToleranceDeg(5);
+        return aim;
     }
 
     /** One trip: drive the points (intake runs along the way when asked), then shoot at the target from the last point. */
     private RoundTripAction trip(String name, Point target, Point launch, boolean runIntake, double[][] points) {
-        RoundTripAction trip = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake,
+        RoundTripAction trip = new RoundTripAction(opModeUtilities, driveTrain, aimAt(target), shooter, stopper, intake,
                 target, launch, 0, runIntake, false, true);
         trip.setName(name);
         trip.getMoveToBall().clearPoints();

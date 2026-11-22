@@ -94,6 +94,18 @@ final class SimCamera {
     void publish(SimWorld world) {
         List<BallInformation> seen = see(world.ballPositions(), world.getX(), world.getY(), world.getTheta());
         SharedData.setBallInformation(seen);
+        publishHive(world);
+    }
+
+    /** Tilt (radians) inside which the Hive counts as moving. A Hive that stands still is tilted 30 degrees = 0.5236. */
+    static final double HIVE_SETTLED_RAD = 0.45;
+
+    /** What the Limelight would tell the robot about OUR (red) Hive: Cell A UP, DOWN or TIPPING. The red tilt is positive when Cell A is lifted. */
+    private static void publishHive(SimWorld world) {
+        double redTilt = world.hiveAngles()[0];
+        SharedData.CellState state = redTilt > HIVE_SETTLED_RAD ? SharedData.CellState.UP
+                : redTilt < -HIVE_SETTLED_RAD ? SharedData.CellState.DOWN : SharedData.CellState.TIPPING;
+        SharedData.setCellAState(state);
     }
 
     private static BallInformation.Type typeOf(int type) {

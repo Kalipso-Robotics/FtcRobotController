@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.DepotRoundTrip;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.RoundTripAction;
@@ -10,11 +13,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -26,6 +27,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 enum DepotTrips {
     SWEEP_IN,
@@ -37,6 +39,7 @@ enum DepotTrips {
     SWEEP_800,
 }
 
+@Disabled
 @Autonomous
 public class RedAutoDepot extends KOpMode {
     KActionSet autoDepot;
@@ -45,14 +48,13 @@ public class RedAutoDepot extends KOpMode {
     Point farLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y);
     Point thirdLaunchPoint =  new Point(SHOOT_FAR_X, SHOOT_FAR_Y + 100);
     Point firstShootPoint = new Point(0,0);
-    Point firstShotTargetPoint = new Point(Shooter.TARGET_POINT.getX(), Shooter.TARGET_POINT.getY() + 141.4213562373);
+    Point firstShotTargetPoint = new Point(ShooterConfig.TARGET_POINT.getX(), ShooterConfig.TARGET_POINT.getY() + 141.4213562373);
     private KActionSet lastTrip;
     private DriveTrain driveTrain;
     Shooter shooter = null;
     Intake intake = null;
     Stopper stopper = null;
     Turret turret = null;
-    Tilter tilter = null;
     DepotRoundTrip trip1 = null;
     RoundTripAction trip0 = null;
     DepotRoundTrip trip2 = null;
@@ -68,7 +70,7 @@ public class RedAutoDepot extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.TURRET_OFFSET_DEG = 0;
     }
 
     @Override
@@ -86,9 +88,7 @@ public class RedAutoDepot extends KOpMode {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(0, 0, 0));
 
         autoDepot = new KActionSet();
         KLog.d("RedAutoDepot-Init", "Creating intake, shooter, stopper modules");
@@ -96,14 +96,13 @@ public class RedAutoDepot extends KOpMode {
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        tilter = new Tilter(opModeUtilities);
         shooterRun = new ShooterRun(opModeUtilities, shooter, 0, ShooterInterpolationConfig.MAX_HOOD);
         shooterRun.setShooterRunMode(ShooterRunMode.STOP);
         KLog.d("RedAutoDepot-Init", () -> "Stopper created: " + (stopper != null ? "SUCCESS" : "NULL"));
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, new Point(3419.5 - 152.2, (1400 - 175) * allianceColor.getPolarity())) /* the old TurretConfig default DECODE goal point */;
 
         KLog.d("RedAutoDepot-Init", "Finished initializeRobot()");
     }
@@ -126,7 +125,7 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- TRIP 1 (spike mark) ---------------------- ~5 sec
 
-        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        trip1 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip1.setName("trip1");
         trip1.getMoveToShoot().getShooterReady().setName("ShooterReady_trip1");
         trip1.setDependentActions(trip0);
@@ -137,7 +136,7 @@ public class RedAutoDepot extends KOpMode {
 
         // ----------------- TRIP 2 (corner) ---------------------- ~8 sec
 
-        trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        trip2 = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), thirdLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         trip2.setName("trip2");
         trip2.getMoveToShoot().getShooterReady().setName("ShooterReady_trip2");
         trip2.setDependentActions(trip1);
@@ -195,8 +194,6 @@ public class RedAutoDepot extends KOpMode {
         KLog.d("auto", "-------------" +
                 "-DEPOT AUTO STARTED-------------");
         KLog.d("RedAutoDepot-Run", () -> "Before waitForStart() - stopper is: " + (stopper != null ? "NOT NULL" : "NULL"));
-        tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
-        tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         waitForStart();
         KLog.d("RedAutoDepot-Run", "After waitForStart() - starting autonomous loop");
@@ -261,7 +258,7 @@ public class RedAutoDepot extends KOpMode {
     }
 
     public DepotRoundTrip generateRetryTrip(DepotRoundTrip lastTrip, DepotTrips trip) {
-        DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
+        DepotRoundTrip retryTrip = new DepotRoundTrip(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), farLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, allianceColor);
         retryTrip.getMoveToShoot().getShooterReady().setName("ShooterReady_retryTrip");
         retryTrip.getMoveToDepot().clearPoints();
         // first try

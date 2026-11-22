@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import java.util.Locale;
  */
 @TeleOp
 public class OctoStartup extends LinearOpMode {
+    public static final String TAG = "Test_Odometry";
 
     /** ~100 mm of pod travel: a deliberate push, not a nudge. */
     private static final int PUSH_COUNTS = (int) (100 * OctoConfig.CPM_THEORETICAL);
@@ -139,7 +141,10 @@ public class OctoStartup extends LinearOpMode {
         telemetry.addLine("  INVERT_X, INVERT_X2, INVERT_Y, MIRROR_BOARD_FRAME");
         telemetry.addLine();
         telemetry.addLine("You move the robot by hand. Nothing here drives motors.");
-        telemetry.addLine("dpad U/D cursor | dpad L/R flip | Y adopt | A commit | B zero | X clear");
+        telemetry.addLine("Step 0 BOARD:    A calibrate IMU | X skip the identity check");
+        telemetry.addLine("Step 1 GESTURES: dpad U/D cursor | dpad L/R flip | Y adopt | X clear latches | A commit");
+        telemetry.addLine("Step 2 CONFIRM:  A accept | Y back to gestures | X skip confirm");
+        telemetry.addLine("B zeroes the pose on every step.");
         telemetry.addLine("Every commit or finish autosaves to OctoStartup_LATEST.txt.");
         telemetry.addLine("Press START.");
         telemetry.update();
@@ -303,6 +308,7 @@ public class OctoStartup extends LinearOpMode {
     // ------------------------------------------------------------------------ rendering
 
     private void render() {
+        telemetry.addLine("NEXT: " + nextAction());
         switch (check) {
             case FIRMWARE: renderFirmware(); break;
             case GESTURES: renderGestures(); break;
@@ -347,6 +353,7 @@ public class OctoStartup extends LinearOpMode {
             telemetry.addLine("a bump gives a bad heading zero with no error and no symptom");
             telemetry.addLine("until a spin test fails much later.");
         }
+        telemetry.addLine("A calibrate | X skip identity | B zero");
         telemetry.addLine("X skips the identity check but still calibrates the IMU --");
         telemetry.addLine("that part can't be skipped, everything below depends on it.");
 
@@ -373,6 +380,10 @@ public class OctoStartup extends LinearOpMode {
         telemetry.addLine();
         telemetry.addLine(String.format(Locale.US,
                 "live  ch0 %7d  ch2 %7d  ch1 %7d  heading %7.1f", rawX, rawX2, rawY, headingDeg));
+        String why = whyNotLatched();
+        if (why != null) {
+            telemetry.addLine("not latched: " + why);
+        }
         telemetry.addLine(String.format(Locale.US,
                 "FORWARD     %s", sugX == null && sugX2 == null ? "--"
                         : "ch0 " + (sugX == null ? "--" : "latched")
@@ -391,7 +402,7 @@ public class OctoStartup extends LinearOpMode {
                     row == cursor ? ">" : " ", ROW[row], value(row), sug));
         }
         telemetry.addLine();
-        telemetry.addLine("dpad U/D cursor | dpad L/R flip | Y adopt | X clear | A commit");
+        telemetry.addLine("dpad U/D cursor | dpad L/R flip | Y adopt | X clear | A commit | B zero");
         telemetry.addLine(dirty()
                 ? "(A recalibrates once: hold the robot STILL for ~2 s)"
                 : "(no direction changed: A will not recalibrate)");
@@ -439,7 +450,7 @@ public class OctoStartup extends LinearOpMode {
                 ? "AGREE -- fusion is self-consistent" : "disagree or move too small"));
         telemetry.addLine();
         OctoConfig.renderAcceptBlock(telemetry, reason);
-        telemetry.addLine("Y back to gestures | X skip this confirm");
+        telemetry.addLine("A accept | Y back to gestures | X skip this confirm | B zero");
         if (!dataOk) telemetry.addData("*** BAD READ", "crc/status invalid, %d so far", badReads);
 
         if (gamepad1.yWasPressed()) {
@@ -452,6 +463,9 @@ public class OctoStartup extends LinearOpMode {
                 results.add(reason == null
                         ? String.format(Locale.US, "confirm   h %+.0f  y %+.0f  OK", headingDeg, by)
                         : "confirm   SKIPPED");
+                boolean skipped = reason != null;
+                KLog.d(TAG, () -> "tool=OctoStartup event=accept step=CONFIRM skipped=" + skipped
+                        + " invX=" + invX + " invX2=" + invX2 + " invY=" + invY + " mirror=" + mirror);
                 for (String s : pasteBlock()) csv.writeLine(s);
                 flush();
                 enterCheck(Check.DONE);
@@ -467,7 +481,8 @@ public class OctoStartup extends LinearOpMode {
         telemetry.addLine();
         for (String s : pasteBlock()) telemetry.addLine(s);
         telemetry.addLine();
-        telemetry.addLine("Paste into OctoConfig, rebuild, THEN run OctoTune.");
+        telemetry.addLine("DONE: paste into OctoConfig, add the date comment, rebuild,");
+        telemetry.addLine("      then run OctoTune, then CompareOdometryTest.");
         telemetry.addData("bad reads", "%d", badReads);
         telemetry.addLine("CSV: " + csv.getPath());
         telemetry.addLine("Autosaved: OctoStartup_LATEST.txt (same folder)");
@@ -486,7 +501,46 @@ public class OctoStartup extends LinearOpMode {
 
     private static String verdict(boolean ok) { return ok ? "OK" : "--"; }
 
+    /** One line: what to do now on this step. */
+    private String nextAction() {
+        switch (check) {
+            case FIRMWARE: return "robot STILL, then A to calibrate the IMU";
+            case GESTURES:
+                if (sugX == null && sugX2 == null) return "B zero, then push FORWARD ~100 mm";
+                if (sugMirror == null) return "B zero, then TWIST LEFT 45 deg+";
+                if (!yLatched) return "B zero, then PUSH LEFT ~100 mm, no turn";
+                return "all latched: Y adopt, then A commit";
+            case CONFIRM:  return "B zero, turn 90 deg LEFT, push FORWARD ~1 ft, then A";
+            default:       return "paste the block into OctoConfig";
+        }
+    }
+
+    /**
+     * Why the gesture being tried has not latched, with the measured value against its gate. null when the robot has
+     * not moved enough to be trying one, or nothing is left to latch. Same gates as latchGestures().
+     */
+    private String whyNotLatched() {
+        int minMove = PUSH_COUNTS / 4;
+        boolean flat = Math.abs(headingDeg) < QUIET_HEADING_DEG;
+        if (sugX == null && Math.abs(rawX) >= minMove && Math.abs(rawX) >= Math.abs(rawY)) {
+            if (!flat) return String.format(Locale.US, "FORWARD turned: heading %.1f > %.0f deg", Math.abs(headingDeg), QUIET_HEADING_DEG);
+            if (Math.abs(rawX) < PUSH_COUNTS) return String.format(Locale.US, "FORWARD too short: ch0 %d < %d", Math.abs(rawX), PUSH_COUNTS);
+            if (Math.abs(rawY) >= Math.abs(rawX) / 3) return String.format(Locale.US, "FORWARD cross-axis too big: ch1 %d >= %d", Math.abs(rawY), Math.abs(rawX) / 3);
+        }
+        if (!yLatched && Math.abs(rawY) >= minMove && Math.abs(rawY) > Math.abs(rawX)) {
+            if (!flat) return String.format(Locale.US, "PUSH LEFT turned: heading %.1f > %.0f deg", Math.abs(headingDeg), QUIET_HEADING_DEG);
+            if (Math.abs(rawY) < PUSH_COUNTS) return String.format(Locale.US, "PUSH LEFT too short: ch1 %d < %d", Math.abs(rawY), PUSH_COUNTS);
+            if (Math.abs(rawX) >= Math.abs(rawY) / 3) return String.format(Locale.US, "PUSH LEFT cross-axis too big: ch0 %d >= %d", Math.abs(rawX), Math.abs(rawY) / 3);
+        }
+        if (sugMirror == null && Math.abs(headingDeg) >= QUIET_HEADING_DEG && Math.abs(headingDeg) <= TWIST_MIN_DEG) {
+            return String.format(Locale.US, "TWIST too small: %.1f <= %.0f deg", Math.abs(headingDeg), TWIST_MIN_DEG);
+        }
+        return null;
+    }
+
     private void enterCheck(Check c) {
+        Check from = check;
+        KLog.d(TAG, () -> "tool=OctoStartup event=step from=" + from + " to=" + c);
         check = c;
         csv.writeLine("# --- check " + c);
         flush();

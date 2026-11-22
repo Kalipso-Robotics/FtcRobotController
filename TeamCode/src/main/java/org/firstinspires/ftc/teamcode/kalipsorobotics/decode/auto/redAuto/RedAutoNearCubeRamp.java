@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.RoundTripAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 
 
 @Disabled
@@ -11,7 +11,7 @@ public class RedAutoNearCubeRamp extends RedAutoNearRamp {
 
     @Override
     protected void handleTrip1() {
-        trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
+        trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip1.setName("trip1");
         trip1.getShooterReady().setName("shooterReady_trip1");
         trip1.getMoveToBall().clearPoints();

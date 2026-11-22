@@ -57,15 +57,17 @@ public final class OctoConfig {
     // bring-up 2026-09-22 via OctoStartup (OctoStartup_LATEST.txt), redone after a 200%+
     // deviation in OctoTune showed X counting backwards -- ch0/ch2 direction changed from the
     // 2026-09-21 bring-up, presumably a re-seated or swapped connector.
+    // (2026-09-22 names: "check 1" = today's FORWARD gesture, "check 2" = PUSH LEFT,
+    //  "check 3" = the CONFIRM L-test; OctoStartup now runs GESTURES then CONFIRM.)
     //   check 1 forward push: ch0 +8321, ch2 +8247, pose x +620mm
     //   check 2 sideways:     SKIPPED (still trusted from 2026-09-21, port 1 untouched)
-    public static final boolean INVERT_X  = false;  // [2026-09-22] OctoStartup check 1
-    public static final boolean INVERT_Y  = false;   // [2026-09-22] OctoStartup check 3
-    public static final boolean INVERT_X2 = false;   // [2026-09-22] OctoStartup check 1
+    public static final boolean INVERT_X  = false;  // [2026-09-22] OctoStartup FORWARD gesture
+    public static final boolean INVERT_Y  = false;   // [2026-09-22] OctoStartup CONFIRM L-test
+    public static final boolean INVERT_X2 = false;   // [2026-09-22] OctoStartup FORWARD gesture
 
     /**
      * True when the board's frame is the mirror of yours and the pose must be flipped.
-     * Determined by the L-test, OctoStartup check 3. Do not guess it.
+     * Determined by OctoStartup's TWIST LEFT gesture and proven by its CONFIRM L-test. Do not guess it.
      *
      * *** NEVER use INVERT_Y to express your axis convention. ***
      * The board integrates field pose as field += R(heading) * body_increment. Flipping one
@@ -142,8 +144,13 @@ public final class OctoConfig {
     // the fixed spinGeometry signs. Y pod 28.3 / 27.8 mm IN FRONT -> X = -28.0. Right pod radius
     // 72.8 / 83.5 is pivot-dependent (hand wander), so Y = track/2, assuming centred X pods.
     // [TAPE-VERIFY both] If a spin-in-place wanders MORE than with 0/0, negate both.
-    public static final float TCP_OFFSET_MM_X   = -29.2f;  // [2026-10-03] mean of 5 spins (-28.3,-27.8,-31.3,-31.0,-27.7)
-    public static final float TCP_OFFSET_MM_Y   = 77.3f;   // [2026-10-03] track/2, tape-verify
+    // [2026-11-16] PODS MOVED. Values below from CAD ("26-27 Drivetrain", the three "4 bar odometry"
+    // occurrences; omni-wheel centres vs the mecanum wheelbase centre). Robot frame: right parallel pod
+    // (port 0) 85.6 mm fwd / 76.0 mm right, left parallel pod (port 2) 85.6 fwd / 76.0 left, perpendicular
+    // pod (port 1) 36.1 mm fwd / 0 lateral. offset = -(pod position), board frame y-LEFT, same rule as above.
+    // SPIN-VERIFY with OctoTune HEADING; the 2026-10-03 spin values were 2.5 mm off tape, expect similar.
+    public static final float TCP_OFFSET_MM_X   = -36.1f;  // [2026-11-16] CAD: perpendicular pod 36.1 mm in front (was -29.2, 2026-10-03 spins, old pod position)
+    public static final float TCP_OFFSET_MM_Y   = 76.0f;   // [2026-11-16] CAD: right parallel pod 76.0 mm right (was 77.3, old pod position)
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the
@@ -151,7 +158,7 @@ public final class OctoConfig {
      * Solved by OctoTune's HEADING spin (see spinGeometry), not tape.
      */
     // [2026-10-03] 3 OctoTune HEADING spins: 154.66 (10/02 CCW), 154.27 (CW), 154.85 (CCW).
-    public static final float TRACK_WIDTH_MM = 154.5f;  // [2026-10-03] mean of 6 spins (154.66,154.27,154.85,154.37,154.61,154.51)
+    public static final float TRACK_WIDTH_MM = 152.0f;  // [2026-11-16] CAD: parallel pods 152.0 mm apart (was 154.5, 2026-10-03 spins, old pod position). SPIN-VERIFY
 
     public static final int VELOCITY_INTERVAL_MS = 25;
 
@@ -267,10 +274,16 @@ public final class OctoConfig {
      * robust to where you pivot, the two TCP offsets are not.
      */
     public static double[] spinGeometry(int rawX, int rawX2, int rawY, double netDeg, int turns) {
+        return spinGeometry(rawX, rawX2, rawY, netDeg, turns, COUNTS_PER_MM_X, COUNTS_PER_MM_X2, COUNTS_PER_MM_Y);
+    }
+
+    /** Same, with the counts/mm to use (OctoTune passes the values it just measured, not the seeds above). */
+    public static double[] spinGeometry(int rawX, int rawX2, int rawY, double netDeg, int turns,
+                                        double cpmX, double cpmX2, double cpmY) {
         double rad = Math.signum(netDeg) * turns * 2 * Math.PI;
-        double right =  (rawX  / COUNTS_PER_MM_X)  / rad;
-        double left  = -(rawX2 / COUNTS_PER_MM_X2) / rad;
-        return new double[] { -(rawY / COUNTS_PER_MM_Y) / rad, right, left, right + left };
+        double right =  (rawX  / cpmX)  / rad;
+        double left  = -(rawX2 / cpmX2) / rad;
+        return new double[] { -(rawY / cpmY) / rad, right, left, right + left };
     }
 
     // ----------------------------------------------------------------------- board setup
@@ -296,8 +309,8 @@ public final class OctoConfig {
      * once, where a clean slate is actually what you want.
      *
      * saveParametersToFlash() from here would burn a flash write on every single init for a
-     * backup that only matters after a brownout. OctoTune saves once, at the end of tuning,
-     * when the numbers have actually changed.
+     * backup that only matters after a brownout. Nothing in this codebase calls it today:
+     * apply() at every init is the only source of the values on the board.
      */
     public static void apply(OctoQuad q) {
         q.setChannelBankConfig(OctoQuad.ChannelBankConfig.ALL_QUADRATURE);

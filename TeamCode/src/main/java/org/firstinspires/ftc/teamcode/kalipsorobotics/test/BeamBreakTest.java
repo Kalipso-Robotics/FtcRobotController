@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.beambreak.BeamBrea
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.BeamBreakConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakArray;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakSensor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KGamePad;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -17,14 +16,13 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import java.util.List;
 
 /**
- * Bring-up and tuning OpMode for the four beam break sensors.
+ * Bring-up and tuning OpMode for the beam break sensors in BeamBreakConfig.SENSORS.
  *
  * <h3>Setting the thresholds</h3>
  * Run it with the robot empty, then push a ball into each position in turn. Each sensor row shows
  * the lowest and highest voltage it has seen and a suggested threshold at the midpoint of that
  * window. Once you have swept every position, copy the suggested values into
- * {@link BeamBreakConfig} - or type them straight into the FTC Dashboard, since the config fields
- * are live-tunable, and confirm here before committing them.
+ * the matching entry of {@link BeamBreakConfig#SENSORS} and redeploy to confirm.
  *
  * If a sensor's min and max are nearly equal after you have blocked it, the beam is not actually
  * being broken (check alignment) or BLOCKED_IS_LOW_VOLTAGE is set wrong.
@@ -81,6 +79,7 @@ public class BeamBreakTest extends LinearOpMode {
         telemetry.addLine("Beam break bring-up. Push a ball into each position to sweep voltages.");
         telemetry.update();
 
+        boolean startingPatternCorrection = BeamBreakConfig.ENABLE_PATTERN_CORRECTION; // B toggles it; restored on exit
         waitForStart();
 
         long loopCount = 0;
@@ -126,19 +125,19 @@ public class BeamBreakTest extends LinearOpMode {
             }
             telemetry.addLine();
 
-            telemetry.addLine("pos    volts  [min  max] sugg  thr  raw filt  ms  trans glitch");
-            for (BeamBreakPosition position : BeamBreakPosition.values()) {
-                BeamBreakSensor sensor = array.getSensor(position);
+            telemetry.addLine("pos        volts  [min  max] sugg  thr  raw filt  ms  trans glitch");
+            for (int index = 0; index < array.getSensors().size(); index++) {
+                BeamBreakSensor sensor = array.getSensor(index);
                 telemetry.addLine(String.format(
-                        "%-6s %5.2f  [%4.2f %4.2f] %4.2f %4.2f  %s  %s %5d %5d %5d",
-                        position.shortLabel(),
+                        "%-10s %5.2f  [%4.2f %4.2f] %4.2f %4.2f  %s  %s %5d %5d %5d",
+                        sensor.getPosition().getDeviceName(),
                         sensor.getLastVoltage(),
                         sensor.getMinVoltageSeen(),
                         sensor.getMaxVoltageSeen(),
                         sensor.getSuggestedThresholdVolts(),
                         sensor.getThresholdVolts(),
                         sensor.isRawBlocked() ? "X" : ".",
-                        sensor.isBlocked() ? "X" : (published.isInferredBlocked(position) ? "+" : "."),
+                        sensor.isBlocked() ? "X" : (published.isInferredBlocked(index) ? "+" : "."),
                         sensor.getMsInFilteredState(nowMs),
                         sensor.getFilteredTransitionCount(),
                         sensor.getRejectedGlitchCount()));
@@ -154,5 +153,6 @@ public class BeamBreakTest extends LinearOpMode {
             telemetry.addLine("A = reset filters/voltage window   B = toggle correction");
             telemetry.update();
         }
+        BeamBreakConfig.ENABLE_PATTERN_CORRECTION = startingPatternCorrection; // the flag is static: do not leak the test's toggle into TeleOp
     }
 }

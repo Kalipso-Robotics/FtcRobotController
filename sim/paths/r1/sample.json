@@ -1,0 +1,13 @@
+{
+  "name": "sample",
+  "alliance": "red",
+  "start": [1389.5, 3406, -90],
+  "steps": [
+    { "drive": [1524, 3000, -90] },
+    { "shoot": 3 },
+    { "intake": true },
+    { "drive": [900, 2300, 180] },
+    { "drive": [400, 2300, 180] },
+    { "intake": false }
+  ]
+}

@@ -3,7 +3,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
@@ -30,10 +31,9 @@ public abstract class KOpMode extends LinearOpMode {
     protected Action lastIntakeAction = null;
     protected Action lastMoveAction = null;
     protected Action lastShooterAction = null;
-    protected Action lastTiltAction = null;
     protected Action lastStopperAction = null;
     protected Action lastZeroAction = null;
-    protected TurretAutoAlignTeleOp turretAutoAlignTeleOp = null;
+    protected TurretAutoAlign turretAutoAlignTeleOp = null;
     protected ShooterRun shooterRun = null;
     protected AprilTagDetectionAction aprilTagDetectionAction = null;
     protected ResetOdometryToLimelight resetOdometryToPosition = null;
@@ -68,6 +68,12 @@ public abstract class KOpMode extends LinearOpMode {
     }
 
     protected void initializeRobotConfig() {
+    }
+
+    /** Starts the Limelight on its own thread (hive state, tipping, re-zero fixes). Call after the turret exists; cleanupRobot() stops it. */
+    protected void startAprilTagDetection(Turret turret) {
+        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, allianceColor);
+        OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
     }
 
     /**
@@ -131,9 +137,6 @@ public abstract class KOpMode extends LinearOpMode {
     protected void setLastShooterAction(Action action) {
         lastShooterAction = action;
     }
-    protected void setLastTiltAction(Action action) {
-        lastTiltAction = action;
-    }
     protected void setLastStopperAction(Action action) {
         lastStopperAction = action;
     }
@@ -168,10 +171,6 @@ public abstract class KOpMode extends LinearOpMode {
         if (lastStopperAction != null && lastStopperAction != lastIntakeAction && lastStopperAction != lastMoveAction && lastStopperAction != lastShooterAction) {
             KLog.d("KOpMode", "lastStopperAction updateCheckDone");
             lastStopperAction.updateCheckDone();
-        }
-
-        if (lastTiltAction != null) {
-            lastTiltAction.updateCheckDone();
         }
 
         if (shooterRun != null) {

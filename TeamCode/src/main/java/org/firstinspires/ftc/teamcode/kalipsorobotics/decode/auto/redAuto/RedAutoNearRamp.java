@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+@Disabled
 @Autonomous
 public class RedAutoNearRamp extends RedAutoNearRampThirdSpike {
 

@@ -3,10 +3,11 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometrySensorCombinations;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.PoseHistory;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.LimelightPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.PositionHistory;
@@ -40,6 +41,40 @@ public class SharedData {
     public static void setOdometryWheelIMUPosition(Position position, long sampleNanos) {
         odometryWheelIMUPosition.reset(position);
         odometryWheelIMUPoseHistory.record(sampleNanos, position);
+        targetCheckCounter++;
+        if (targetCheckCounter >= ShooterConfig.TARGET_CHECK_EVERY_N_LOOPS) {
+            targetCheckCounter = 0;
+            targetPoint = pickTargetPoint(position.getY(), targetPoint);
+        }
+    }
+
+    // ---- Hive Cell target: the one place that picks which Cell the shooter and turret aim at ----
+
+    private static volatile Point targetPoint = null;
+    private static int targetCheckCounter = 0;
+
+    /**
+     * The Hive Cell on the robot's end of the Hive: ShooterConfig.TARGET_POINT_1 (Cell A) when robot y is above
+     * ShooterConfig.TARGET_SWITCH_Y_MM, TARGET_POINT_2 (Cell B) below it. Re-checked every ShooterConfig.TARGET_CHECK_EVERY_N_LOOPS odometry updates. Same numbers for
+     * RED and BLUE: each alliance has its own frame (FieldConfig), so there is no polarity flip.
+     */
+    public static Point getTargetPoint() {
+        Point target = targetPoint;
+        if (target == null) { // nothing picked yet this OpMode: pick now from the current pose
+            target = pickTargetPoint(odometryWheelIMUPosition.getY(), null);
+            targetPoint = target;
+        }
+        return target;
+    }
+
+    /** Keeps the current Cell inside the deadband around the switch line. */
+    private static Point pickTargetPoint(double robotY, Point current) {
+        double switchY = ShooterConfig.TARGET_SWITCH_Y_MM;
+        double deadband = ShooterConfig.TARGET_SWITCH_DEADBAND_MM;
+        if (robotY > switchY + deadband) return ShooterConfig.TARGET_POINT_1;
+        if (robotY < switchY - deadband) return ShooterConfig.TARGET_POINT_2;
+        if (current != null) return current;
+        return robotY >= switchY ? ShooterConfig.TARGET_POINT_1 : ShooterConfig.TARGET_POINT_2;
     }
 
     private static final PoseHistory odometryWheelIMUPoseHistory = new PoseHistory(128);
@@ -79,6 +114,7 @@ public class SharedData {
 
     public static void resetOdometryWheelIMUPosition() {
         odometryWheelIMUPosition.reset(new Position(0, 0, 0));
+        targetPoint = null; // re-picked from the new pose on the next getTargetPoint()
     }
 
 
@@ -105,21 +141,33 @@ public class SharedData {
     }
 
 
-    private static final LimelightPos limelightRawPosition = new LimelightPos(0,0,0,0,0);
-    public static void setLimelightRawPosition(LimelightPos position) {
-        limelightRawPosition.setPos(position);
-    }
-    public static LimelightPos getLimelightRawPosition() {
-        return limelightRawPosition;
-    }
-
-
+    // Latest HIVE-tag fix (AprilTagDetectionAction). Written by the vision thread, read by the main loop.
     private static final Position limelightGlobalPosition = new Position(0, 0, 0);
-    public static Position getLimelightGlobalPosition() {
+    private static volatile long limelightFixNanos = 0;
+    public static synchronized Position getLimelightGlobalPosition() {
         return new Position(limelightGlobalPosition);
     }
-    public static void setLimelightGlobalPosition(Position position) {
+    public static synchronized void setLimelightGlobalPosition(Position position) {
         limelightGlobalPosition.reset(position);
+        limelightFixNanos = System.nanoTime();
+    }
+    /** Age of the last HIVE-tag fix in ms, or infinity if there never was one. */
+    public static double getLimelightFixAgeMs() {
+        return limelightFixNanos == 0 ? Double.POSITIVE_INFINITY : (System.nanoTime() - limelightFixNanos) / 1e6;
+    }
+
+    // Goal state: which of our CELLs was last seen up. The HIVE only changes on a TIP, so the last sighting stands.
+    private static volatile HiveTagLocalizer.Cell hiveUpCell = null;
+    private static volatile long hiveUpCellNanos = 0;
+    public static HiveTagLocalizer.Cell getHiveUpCell() {
+        return hiveUpCell;
+    }
+    public static void setHiveUpCell(HiveTagLocalizer.Cell cell) {
+        hiveUpCell = cell;
+        hiveUpCellNanos = System.nanoTime();
+    }
+    public static double getHiveUpCellAgeMs() {
+        return hiveUpCellNanos == 0 ? Double.POSITIVE_INFINITY : (System.nanoTime() - hiveUpCellNanos) / 1e6;
     }
 
 
@@ -181,18 +229,6 @@ public class SharedData {
         voltage = newVoltage;
     }
 
-    private static final Position unfilteredLimelightGlobalPos = new Position(0,0,0);
-    public static Position getUnfilteredLimelightGlobalPos() {
-        return new Position(unfilteredLimelightGlobalPos);
-    }
-
-    public static void setUnfilteredLimelightGlobalPos(Position position) {
-        if (position != null) {
-            unfilteredLimelightGlobalPos.reset(position);
-        } else {
-            unfilteredLimelightGlobalPos.reset(new Position(0,0,0));
-        }
-    }
 
     private static volatile List<VisionRecognition> pollenNectarDetections = new ArrayList<>();
     private static volatile long pollenNectarDetectionsTimeMs = 0;
@@ -228,6 +264,20 @@ public class SharedData {
 
     public static boolean isHiveTipping() {
         return hiveTipping;
+    }
+
+    /** What one Cell of OUR Hive is doing: standing up, down, or swinging between the two. */
+    public enum CellState { UP, DOWN, TIPPING }
+
+    /** State of Cell A (the +y Cell), as the Limelight would sense it. null = nothing senses it. Cell B is the opposite (TIPPING stays TIPPING). */
+    private static volatile CellState cellAState = null;
+
+    public static void setCellAState(CellState state) {
+        SharedData.cellAState = state;
+    }
+
+    public static CellState getCellAState() {
+        return cellAState;
     }
 
     private static volatile List<BallInformation> ballInformation = new ArrayList<>();

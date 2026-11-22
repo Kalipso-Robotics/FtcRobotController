@@ -1,29 +1,31 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+
 import com.acmerobotics.dashboard.config.Config;
 
 
 @Config
 public class TurretConfig {
     //==========TURRET=========
-    public static final double TICKS_PER_ROTATION = 384.5;
-    public static final double BIG_TO_SMALL_PULLEY = 125.0/32.0;
-    public static final double TICKS_PER_DEGREE = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / 360.0;
-    public static final double TICKS_PER_RADIAN = (TICKS_PER_ROTATION * BIG_TO_SMALL_PULLEY) / (2 * Math.PI); //
+    // One servo, no encoder. Servo 50T -> 15T pinion, same shaft 37T -> 92T turret ring (from CAD).
+    // Two external meshes, so the turret turns the same direction as the servo.
+    public static final double SERVO_GEAR_T = 50;
+    public static final double PINION_T = 15;
+    public static final double TOP_GEAR_T = 37;
+    public static final double RING_T = 92;
+    public static final double TURRET_DEG_PER_SERVO_DEG = (SERVO_GEAR_T / PINION_T) * (TOP_GEAR_T / RING_T); // ~1.3406
 
-    //target MidPoint
-    public static double X_INIT_SETUP_MM = 3419.5 - 152.2; //3400      3,619.5 mm - 200m = 3,419.5       142.5 - 8
-    public static double Y_INIT_SETUP_MM = 1400 - 175; // 1400 - 177.8
-    public static int TICKS_INIT_OFFSET = 0;
-    public static double DEFAULT_TOLERANCE_TICKS = (TICKS_PER_DEGREE) * 1.5;
-    public static double kP = 0.006;   // faster response
-    public static double kI = 0;       // keep at 0
-    public static double kD = 0.0004;  // reduces overshoot (main time saver) 0.0001
-    public static double kS = 0.01;    // 0.025 faster final approach
-    public static double kF = 0;     // 375 // for tracking moving targets
-    public static double kP_teleop = 0.006;   //0.01 faster response
-    public static double kI_teleop = 0;       // keep at 0
-    public static double kD_teleop = 0.0004;  // reduces overshoot (main time saver) 0.0002
-    public static double kS_teleop = 0.01;   //0.025 faster final approach
-    public static double kF_teleop = 0;     // 375 // for tracking moving targets
+    public static final double SERVO_RANGE_DEG = 355; // TODO-measure: servo model not chosen yet
+    public static final double SERVO_ZERO_POS = 0.5; // servo position with the turret straight ahead // TODO-measure
+    public static final int SERVO_DIRECTION = 1; // 1 or -1, flip if the turret turns the wrong way // TODO-measure
+    // Reachable turret travel, centered on straight ahead. Capped at one turn: no wrap logic, targets past it are clamped.
+    public static final double MAX_TURRET_DEG = Math.min(360, SERVO_RANGE_DEG * TURRET_DEG_PER_SERVO_DEG) / 2;
+
+    /** Turret pivot in the robot frame (x forward, y right). Also the launcher position SOTM leads from. TODO-measure: DECODE value. */
+    public static final Point ROBOT_REL_TURRET_POINT = new Point(-24.51971493, 2.50233587);
+
+    // Driver turret offset added to every aim angle, degrees. TeleOp gamepad 2 dpad left/right changes it.
+    public static double TURRET_OFFSET_DEG = 0;
+
 }

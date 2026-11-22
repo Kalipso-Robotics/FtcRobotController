@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
+<<<<<<< HEAD
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter.TARGET_POINT;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
@@ -20,177 +21,125 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+=======
+>>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
+
 /**
- * RPS Prediction Data Collection TeleOp
+ * Open-loop check: what RPS a given motor power gives, at the battery voltage, hood and distance at the time.
+ * Output: RobotLogs/RPSPredictionData_*.csv with CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM.
+ * Distance is from odometry to the Hive Cell on the robot's end (SharedData.getTargetPoint).
+ * Pattern source: this file's earlier LinearOpMode version, ported to KOpMode + startOdometry.
  *
- * This program collects data for shooter RPS prediction by allowing manual
- * power control and selective data recording.
- *
- * Workflow:
- * 1. Adjust shooter power using DPad/A/B buttons
- * 2. Press X to run the shooter at the set power
- * 3. Press Left Trigger to record shoot data (RPS, Power, Distance)
- * 4. Press Y to save the last recorded shoot to file
- *
- * Controls:
- * - DPad Up: Increase shooter power by 0.05
- * - DPad Down: Decrease shooter power by 0.05
- * - DPad Left: Decrease hood position by 0.05
- * - DPad Right: Increase hood position by 0.05
- * - A Button: Increase shooter power by 0.01
- * - B Button: Decrease shooter power by 0.01
- * - X Button: Run shooter at current power
- * - Right Trigger: Run intake full speed + Close stopper
- * - Left Trigger: Record shoot data (RPS, Power, Distance to target)
- * - Y Button: Save last recorded shoot to file
- *
- * Data recorded per shoot:
- * - Current RPS
- * - Current Power
- * - Current Voltage
- * - Hood Position
- * - Distance to target (MM)
+ * Controls (GP1):
+ *   dpad up / down    shooter power +/- POWER_STEP_BIG        A / B    power +/- POWER_STEP_SMALL
+ *   dpad right / left hood +/- HOOD_STEP (clamped MIN_HOOD..MAX_HOOD)
+ *   X (hold)          run the shooter at the set power
+ *   RT (hold)         intake + stopper closed (load)
+ *   LT (hold)         stopper open + intake (shoot); the press records RPS/power/voltage/hood/distance
+ *   Y                 save the last recorded shot to the file
  */
 @TeleOp(name = "RPS Prediction Data Collector", group = "Test")
-public class RPSPredictionDataCollector extends LinearOpMode {
+public class RPSPredictionDataCollector extends KOpMode {
+    public static final String TAG = "Test_Shooter";
+    private static final double POWER_STEP_BIG = 0.05;
+    private static final double POWER_STEP_SMALL = 0.01;
+    private static final double HOOD_STEP = 0.01;
 
-    /**
-     * Inner class to hold shoot data
-     */
-    private static class ShootData {
-        double currentRPS;
-        double currentPower;
-        double currentVoltage;
-        double hoodPosition;
-        double distanceToTargetMM;
-
-        ShootData(double rps, double power, double voltage, double hood, double distance) {
-            this.currentRPS = rps;
-            this.currentPower = power;
-            this.currentVoltage = voltage;
-            this.hoodPosition = hood;
-            this.distanceToTargetMM = distance;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("RPS=%.2f, Power=%.2f, Voltage=%.2fV, Hood=%.2f, Distance=%.2fmm",
-                currentRPS, currentPower, currentVoltage, hoodPosition, distanceToTargetMM);
-        }
-
-        String toCSV() {
-            return String.format("%.2f,%.2f,%.2f,%.2f,%.2f", currentRPS, currentPower, currentVoltage, hoodPosition, distanceToTargetMM);
-        }
-    }
-
-    private Shooter shooter;
-    private Intake intake;
-    private Stopper stopper;
-    private Odometry odometry;
-    private DriveTrain driveTrain;
-    private IMUModule imuModule;
-    private TurretAutoAlignTeleOp turretAutoAlignTeleop;
-    private Turret turret;
-    private KFileWriter fileWriter;
-    private OpModeUtilities opModeUtilities;
-
-    private double shooterPower = 0.0;
-    private double hoodPosition = 0.8;
-    private ShootData lastShoot = null;
-    private boolean wasLeftTriggerPressed = false;
+    private static final String[] CONTROLS = {
+            "dpad up/down: power +/-" + POWER_STEP_BIG + "   A/B: power +/-" + POWER_STEP_SMALL,
+            "dpad right/left: hood +/-" + HOOD_STEP,
+            "X hold: run shooter   RT hold: load (intake, stopper closed)",
+            "LT hold: shoot (records the shot)   Y: save last shot",
+    };
 
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry.addLine("=== RPS Prediction Data Collector ===");
-        telemetry.addLine("Initializing...");
-        telemetry.update();
+        initializeRobot();
+        DriveTrain.setInstanceNull();
+        DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
+        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+        Shooter shooter = new Shooter(opModeUtilities);
+        Intake intake = new Intake(opModeUtilities);
+        Stopper stopper = new Stopper(opModeUtilities);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null); // keeps the pose from auto, else (0,0,0)
 
-        // Initialize hardware
-        initializeHardware();
-
-        // Initialize file writer
-        opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
-        fileWriter = new KFileWriter("RPSPredictionData", opModeUtilities);
-        Turret.setInstanceNull();
-        turret = Turret.getInstance(opModeUtilities);
-        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
-        turretAutoAlignTeleop = new TurretAutoAlignTeleOp(opModeUtilities, turret, AllianceColor.RED);
-        turretAutoAlignTeleop.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
-        // Write CSV header
+        KFileWriter fileWriter = new KFileWriter("RPSPredictionData", opModeUtilities);
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
+        flush(fileWriter);
 
-        telemetry.addLine("Initialization complete!");
-        telemetry.addLine();
-        telemetry.addLine("Controls:");
-        telemetry.addLine("- DPad Up/Down: ±0.05 power");
-        telemetry.addLine("- DPad Left/Right: ±0.05 hood");
-        telemetry.addLine("- A Button: +0.01 power");
-        telemetry.addLine("- B Button: -0.01 power");
-        telemetry.addLine("- X Button: Run shooter");
-        telemetry.addLine("- Right Trigger: Intake + Close stopper");
-        telemetry.addLine("- Left Trigger: Record shoot data");
-        telemetry.addLine("- Y Button: Save last shoot to file");
-        telemetry.addLine();
+        double shooterPower = 0;
+        double hoodPosition = ShooterInterpolationConfig.MIN_HOOD;
+        shooter.getHood().setPosition(hoodPosition);
+        Point hiveTarget = null;
+        String lastShot = null;
+        String message = "";
+        boolean wasShooting = false;
+
+        for (String line : CONTROLS) {
+            telemetry.addLine(line);
+        }
         telemetry.addLine("Press PLAY to start");
         telemetry.update();
-
-        KLog.d("RPSPredictionDataCollector", "Initialization complete. Waiting for start...");
-        shooter.getHood().setPosition(0.8);
         waitForStart();
 
-        // Main control loop
         while (opModeIsActive()) {
-            // Update odometry
-            odometry.updateAll();
-            turretAutoAlignTeleop.updateCheckDone();
-            aprilTagDetectionAction.updateCheckDone();
+            opModeUtilities.clearBulkCache();
+            hiveTarget = SharedData.getTargetPoint();
+            double distanceMM = SharedData.getOdometryWheelIMUPosition().toPoint().distanceTo(hiveTarget);
 
-            // ========== Power Control ==========
-            if (gamepad1.dpad_up) {
-                shooterPower += 0.05;
+            double powerBefore = shooterPower;
+            if (kGamePad1.isDpadUpFirstPressed()) {
+                shooterPower += POWER_STEP_BIG;
             }
-            if (gamepad1.dpad_down) {
-                shooterPower -= 0.05;
+            if (kGamePad1.isDpadDownFirstPressed()) {
+                shooterPower -= POWER_STEP_BIG;
             }
-            if (gamepad1.a) {
-                shooterPower += 0.01;
+            if (kGamePad1.isButtonAFirstPressed()) {
+                shooterPower += POWER_STEP_SMALL;
             }
-            if (gamepad1.b) {
-                shooterPower -= 0.01;
+            if (kGamePad1.isButtonBFirstPressed()) {
+                shooterPower -= POWER_STEP_SMALL;
             }
-
-            // Clamp shooter power between 0 and 1
-            if (shooterPower < 0) {
-                shooterPower = 0;
-            }
-            if (shooterPower > 1.0) {
-                shooterPower = 1.0;
+            shooterPower = MathFunctions.clamp(shooterPower, 0, 1);
+            if (shooterPower != powerBefore) {
+                double p = shooterPower;
+                KLog.d(TAG, () -> "event=powerSet power=" + p);
             }
 
-            // ========== Hood Control ==========
-            if (gamepad1.dpad_right) {
-                hoodPosition += 0.01;
+            double hoodBefore = hoodPosition;
+            if (kGamePad1.isDpadRightFirstPressed()) {
+                hoodPosition += HOOD_STEP;
             }
-            if (gamepad1.dpad_left) {
-                hoodPosition -= 0.01;
+            if (kGamePad1.isDpadLeftFirstPressed()) {
+                hoodPosition -= HOOD_STEP;
             }
-
-            // Clamp hood position between 0 and 1
-            if (hoodPosition < 0) {
-                hoodPosition = 0;
-            }
-            if (hoodPosition > 1.0) {
-                hoodPosition = 1.0;
-            }
-
-            // Apply hood position
+            hoodPosition = MathFunctions.clamp(hoodPosition, ShooterInterpolationConfig.MIN_HOOD, ShooterInterpolationConfig.MAX_HOOD);
             shooter.getHood().setPosition(hoodPosition);
+            if (hoodPosition != hoodBefore) {
+                double h = hoodPosition;
+                KLog.d(TAG, () -> "event=hoodSet hood=" + h);
+            }
 
-            // ========== Trigger Controls ==========
+            boolean shooting = gamepad1.left_trigger > 0.1;
             if (gamepad1.right_trigger > 0.1) {
+<<<<<<< HEAD
                 // Right trigger: Run intake + Close stopper
                 intake.getIntakeMotorFlower().setPower(1.0);
                 stopper.getStopper().setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
@@ -216,128 +165,64 @@ public class RPSPredictionDataCollector extends LinearOpMode {
                 // No triggers: Stop intake
                 intake.getIntakeMotorFlower().setPower(0);
                 wasLeftTriggerPressed = false;
-            }
-
-            if (gamepad1.x) {
-                shooter.setPower(shooterPower);
+=======
+                intake.run(1.0);
+                stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
+            } else if (shooting) {
+                stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
+                intake.run(1.0);
+                if (!wasShooting) {
+                    lastShot = String.format("%.2f,%.2f,%.2f,%.4f,%.2f",
+                            shooter.getRPS(), shooterPower, getBatteryVoltage(), hoodPosition, distanceMM);
+                    String s = lastShot;
+                    KLog.d(TAG, () -> "event=shotRecorded row=" + s);
+                }
             } else {
-                shooter.setPower(0);
+                intake.stop();
+>>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
             }
+            wasShooting = shooting;
 
-            // ========== Y Button: Save Last Shoot to File ==========
-            if (gamepad1.y) {
-                if (lastShoot != null) {
-                    fileWriter.writeLine(lastShoot.toCSV());
-                    KLog.d("RPSPredictionData", () -> "SAVED TO FILE: " + lastShoot.toString());
-                    telemetry.addLine("*** SAVED TO FILE ***");
+            shooter.setPower(gamepad1.x ? shooterPower : 0);
+
+            if (kGamePad1.isButtonYFirstPressed()) {
+                if (lastShot != null) {
+                    fileWriter.writeLine(lastShot);
+                    flush(fileWriter);
+                    message = "SAVED: " + lastShot;
+                    String s = lastShot;
+                    KLog.d(TAG, () -> "event=saved row=" + s);
                 } else {
-                    KLog.d("RPSPredictionData", "No shoot data to save!");
-                    telemetry.addLine("*** NO DATA TO SAVE ***");
+                    message = "Nothing to save: shoot with LT first";
+                    KLog.d(TAG, "event=saveRefused reason=noShot");
                 }
             }
 
-            // ========== Telemetry ==========
-            telemetry.addLine("=== RPS Prediction Data Collector ===");
-            telemetry.addLine();
-            telemetry.addData("Shooter Power", "%.2f", shooterPower);
-            telemetry.addData("Hood Position", "%.2f", hoodPosition);
-            telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
-            telemetry.addData("Limelight Distance to Target", "%.2f mm", calculateDistanceToTarget());
-            telemetry.addData("Odometry Distance to Target", shooter.getDistance(SharedData.getOdometryWheelIMUPosition(), TARGET_POINT));
-            telemetry.addLine();
-
-            if (lastShoot != null) {
-                telemetry.addLine("--- Last Recorded Shoot ---");
-                telemetry.addData("Last RPS", "%.2f", lastShoot.currentRPS);
-                telemetry.addData("Last Power", "%.2f", lastShoot.currentPower);
-                telemetry.addData("Last Voltage", "%.2f V", lastShoot.currentVoltage);
-                telemetry.addData("Last Hood", "%.2f", lastShoot.hoodPosition);
-                telemetry.addData("Last Distance", "%.2f mm", lastShoot.distanceToTargetMM);
-            } else {
-                telemetry.addLine("--- No Shoot Recorded Yet ---");
+            for (String line : CONTROLS) {
+                telemetry.addLine(line);
             }
-
-            telemetry.addLine();
-            telemetry.addLine("Controls:");
-            telemetry.addLine("DPad Up/Down: ±0.05 power");
-            telemetry.addLine("DPad Left/Right: ±0.05 hood");
-            telemetry.addLine("A/B: ±0.01 power");
-            telemetry.addLine("X: Run shooter");
-            telemetry.addLine("Right Trigger: Intake + Close");
-            telemetry.addLine("Left Trigger: Record shoot");
-            telemetry.addLine("Y: Save to file");
+            if (!message.isEmpty()) {
+                telemetry.addLine(message);
+            }
+            telemetry.addData("Shooter Power", "%.2f", shooterPower);
+            telemetry.addData("Hood Position", "%.4f", hoodPosition);
+            telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
+            telemetry.addData("Odometry distance to target", "%.0f mm", distanceMM);
+            telemetry.addData("Last shot (not saved until Y)", lastShot == null ? "none" : lastShot);
             telemetry.update();
         }
 
-        // Cleanup
         shooter.stop();
+<<<<<<< HEAD
         intake.getIntakeMotorFlower().setPower(0);
+=======
+        intake.stop();
+>>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
         fileWriter.close();
-
-        telemetry.addLine("=== DATA COLLECTION COMPLETE ===");
-        telemetry.addLine();
-        telemetry.addLine("File saved to:");
-        telemetry.addLine("/sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/");
-        telemetry.update();
-
-        KLog.d("RPSPredictionDataCollector", "Data collection complete. File closed.");
-        KLog.d("RPSPredictionDataCollector", "Pull files using: adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/OdometryLog/ ~/");
-
-        // Keep telemetry visible
-        while (opModeIsActive()) {
-            sleep(100);
-        }
+        KLog.d(TAG, "event=done file=RobotLogs/ pull: adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs/");
+        cleanupRobot();
     }
 
-    /**
-     * Initialize all hardware components
-     */
-    private void initializeHardware() {
-        opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
-
-        // Initialize drive train and IMU for odometry
-        driveTrain = DriveTrain.getInstance(opModeUtilities);
-        imuModule = IMUModule.getInstance(opModeUtilities);
-
-        // Initialize odometry
-        odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-
-        // Initialize shooter, intake, and stopper
-        shooter = new Shooter(opModeUtilities);
-        intake = new Intake(opModeUtilities);
-        stopper = new Stopper(opModeUtilities);
-
-
-
-        KLog.d("RPSPredictionDataCollector", "Hardware initialized successfully");
-    }
-
-    /**
-     * Calculate distance to target based on current odometry position
-     * and target position from TurretConfig
-     */
-    private double calculateDistanceToTarget() {
-        return SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM();
-
-//        Position currentPosition = odometry.update();
-//
-//        double currentX = currentPosition.getX();
-//        double currentY = currentPosition.getY();
-//
-//        double targetX = TurretConfig.X_INIT_SETUP_MM;
-//        double targetY = TurretConfig.Y_INIT_SETUP_MM;
-//
-//        double dx = targetX - currentX;
-//        double dy = targetY - currentY;
-//
-//        double distance = Math.sqrt((dx * dx) + (dy * dy));
-//
-//        return distance;
-    }
-
-    /**
-     * Get battery voltage from voltage sensor
-     */
     private double getBatteryVoltage() {
         double result = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : hardwareMap.voltageSensor) {
@@ -347,5 +232,13 @@ public class RPSPredictionDataCollector extends LinearOpMode {
             }
         }
         return result;
+    }
+
+    private static void flush(KFileWriter writer) {
+        try {
+            writer.flush();
+        } catch (java.io.IOException e) {
+            KLog.e(TAG, "event=flushFailed", e);
+        }
     }
 }

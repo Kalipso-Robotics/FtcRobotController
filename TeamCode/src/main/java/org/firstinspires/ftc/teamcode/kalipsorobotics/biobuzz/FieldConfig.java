@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 public class FieldConfig {
     // Each alliance has its own frame, with (0,0) at the corner of its own loading zone (field drawing
@@ -26,7 +28,59 @@ public class FieldConfig {
     private final static double SHOOT_TARGET_B_Y = 3657.6-2135;
     public static Point bTargetPoint =  new Point(SHOOT_TARGET_B_X, SHOOT_TARGET_B_Y);
 
-    public final static double FLOWER_A_X = 100;   // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
+    // The pickup target is this far from a Flower's center, straight out from its wall (the arm knocks balls off by
+    // driving in, so likely smaller). Measured value, not Dashboard-tuned.
+    public final static double FLOWER_BALL_OFFSET_MM = 150; // TODO-measure
+
+    /** The closest of the four Flowers (A-D) to the robot. */
+    public static Point nearestFlower(Point robot) {
+        Point best = aFlowerPoint;
+        for (Point f : new Point[]{bFlowerPoint, cFlowerPoint, dFlowerPoint}) {
+            if (MathFunctions.distance(robot, f) < MathFunctions.distance(robot, best)) best = f;
+        }
+        return best;
+    }
+
+    /** Where to drive to pick up a Flower's balls: the Flower point moved FLOWER_BALL_OFFSET_MM from its nearest wall into the field. */
+    public static Point flowerPilePoint(Point flower) {
+        double x = flower.getX(), y = flower.getY();
+        double toLowX = x, toHighX = FIELD_MM - x, toLowY = y, toHighY = FIELD_MM - y;
+        double min = Math.min(Math.min(toLowX, toHighX), Math.min(toLowY, toHighY));
+        if (min == toLowX) return new Point(x + FLOWER_BALL_OFFSET_MM, y);
+        if (min == toHighX) return new Point(x - FLOWER_BALL_OFFSET_MM, y);
+        if (min == toLowY) return new Point(x, y + FLOWER_BALL_OFFSET_MM);
+        return new Point(x, y - FLOWER_BALL_OFFSET_MM);
+    }
+
+    // Pass: a low, flat shot UNDER the Hive (its lowest CELL edge is ~777 mm up, manual Figure 9-10), between the frame
+    // legs, to the half of the field opposite the robot. The ball may roll on after landing; that is fine.
+    /** Landing point distance from the far wall. Keeps the ball well inside the field. TODO-measure with PASS_RPS. */
+    public final static double PASS_Y_FROM_WALL_MM = 1000;
+    /** The landing point never gets closer than this to the side walls. */
+    public final static double PASS_WALL_MARGIN_MM = 900;
+    /** The pass line crosses the Hive middle at least this far inside each leg. */
+    public final static double PASS_LEG_CLEARANCE_MM = 150;
+
+    /**
+     * Where a pass aims from the robot's position: on the half opposite the robot (no alliance flip: each alliance has
+     * its own frame), on the line from the robot through the gap between the Hive legs, clamped inside the walls.
+     * Straight across when the robot is already in line with the gap.
+     */
+    public static Point passTarget(Point robot) {
+        double ty = robot.getY() >= HIVE_CENTER ? PASS_Y_FROM_WALL_MM : FIELD_MM - PASS_Y_FROM_WALL_MM;
+        double crossX = MathFunctions.clamp(robot.getX(), HIVE_LEG_LOW_X[2] + PASS_LEG_CLEARANCE_MM, HIVE_LEG_HIGH_X[0] - PASS_LEG_CLEARANCE_MM);
+        double toMiddle = HIVE_CENTER - robot.getY();
+        double tx = Math.abs(toMiddle) < 1 ? crossX
+                : robot.getX() + (crossX - robot.getX()) * (ty - robot.getY()) / toMiddle;
+        return new Point(MathFunctions.clamp(tx, PASS_WALL_MARGIN_MM, FIELD_MM - PASS_WALL_MARGIN_MM), ty);
+    }
+
+    // Where the robot sits when it is zeroed against the loading-zone corner (center of the robot, own frame).
+    public final static Position CORNER_ZERO_POSE = new Position(230, 230, 0); // TODO-measure
+
+    private final static double FIELD_MM = 3657.6;
+
+    public final static double FLOWER_A_X = 100;  // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
     private final static double FLOWER_A_Y = 2500;
     public static Point aFlowerPoint =  new Point(FLOWER_A_X, FLOWER_A_Y);
 

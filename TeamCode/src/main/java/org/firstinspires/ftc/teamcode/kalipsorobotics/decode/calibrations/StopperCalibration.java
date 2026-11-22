@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.calibrations;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
 public class StopperCalibration extends KOpMode {
+    public static final String TAG = "Calibration_Stopper";
 
     private static final double POSITION_INCREMENT = 0.01;
 
@@ -27,10 +29,11 @@ public class StopperCalibration extends KOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double stopperPosition = 0.5;
+        double stopperPosition = ModuleConfig.STOPPER_SERVO_CLOSED_POS;
 
 
         initializeRobot();
+        stopper.getStopper().setPosition(stopperPosition);
         waitForStart();
         while (opModeIsActive()) {
 
@@ -43,13 +46,22 @@ public class StopperCalibration extends KOpMode {
             }
 
             if (kGamePad2.isRightTriggerPressed()) {
+<<<<<<< HEAD
                 intake.getIntakeMotorFlower().setPower(1);
             }  else {
                 intake.getIntakeMotorFlower().setPower(0);
+=======
+                intake.run(1);
+            }  else {
+                intake.stop();
+>>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
             }
 
 
-            KLog.d("stopperPosition", "stopperPosition" + stopperPosition);
+            if (KLog.isDebug()) {
+                double loggedPosition = stopperPosition;
+                KLog.d(TAG, () -> "stopperPos=" + loggedPosition);
+            }
             telemetry.addData("stopperPosition", stopperPosition); //0.11 0.51 0.91
             telemetry.update();
         }

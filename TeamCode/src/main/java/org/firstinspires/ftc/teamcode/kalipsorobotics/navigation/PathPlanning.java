@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
@@ -239,6 +240,14 @@ public class PathPlanning {
      * @param robotHeadingRad which way the robot's front points now, or NaN if unknown (no turning cost)
      */
     public PickupPlan planPickup(Point robot, double robotHeadingRad, Point ball) {
+        return planPickup(robot, robotHeadingRad, ball, null);
+    }
+
+    /**
+     * Same as above, but only one intake may lead: forceBack true = back only, false = front only,
+     * null = whichever works best. Used when only one side can do the job (the Flower arm is on one side).
+     */
+    public PickupPlan planPickup(Point robot, double robotHeadingRad, Point ball, Boolean forceBack) {
         PickupPlan rejected = rejectBall(ball);
         if (rejected != null) {
             return rejected;
@@ -246,7 +255,7 @@ public class PathPlanning {
 
         for (boolean pullIn : new boolean[]{false, true}) {
             for (boolean intoRing : new boolean[]{false, true}) {
-                PickupPlan best = bestApproach(robot, robotHeadingRad, ball, pullIn, intoRing);
+                PickupPlan best = bestApproach(robot, robotHeadingRad, ball, pullIn, intoRing, forceBack);
                 if (best != null) {
                     return best;
                 }
@@ -283,13 +292,14 @@ public class PathPlanning {
      * stand-off (outside the ring, or inside it). Null if there is none.
      */
     private PickupPlan bestApproach(Point robot, double robotHeadingRad, Point ball, boolean pullIn,
-                                    boolean intoRing) {
+                                    boolean intoRing, Boolean forceBack) {
+        boolean[] ends = forceBack == null ? new boolean[]{false, true} : new boolean[]{forceBack};
         PickupPlan best = null;
         double bestCost = Double.MAX_VALUE;
         for (int i = 0; i < APPROACH_DIRECTIONS; i++) {
             double aimRad = 2 * Math.PI * i / APPROACH_DIRECTIONS;
             // Front first, so when two ends cost the same the front wins.
-            for (boolean back : new boolean[]{false, true}) {
+            for (boolean back : ends) {
                 PickupPlan candidate = approachFrom(robot, ball, aimRad, back, pullIn, intoRing);
                 if (candidate == null) {
                     continue;
@@ -347,6 +357,21 @@ public class PathPlanning {
         return PickupPlan.ok(path, standOff, bodyHeading, inRing, pullIn, back, why);
     }
 
+    /**
+     * The plan's stand-off moved overshootMm further along the drive-in direction, so the intake drives
+     * through the ball instead of stopping with it at the mouth. The stand-off itself when the body would
+     * not fit there (wall, leg, other side) or the plan failed.
+     */
+    public Point overshoot(PickupPlan plan, double overshootMm) {
+        if (!plan.isOk() || overshootMm <= 0) {
+            return plan.standOff;
+        }
+        double travelRad = plan.useBackIntake ? plan.finalHeadingRad + Math.PI : plan.finalHeadingRad;
+        Point past = new Point(plan.standOff.getX() + overshootMm * Math.cos(travelRad),
+                plan.standOff.getY() + overshootMm * Math.sin(travelRad));
+        return bodyBlocked(past, plan.finalHeadingRad) ? plan.standOff : past;
+    }
+
     /** Where the robot center stops: short of the ball by the reach of the leading intake. */
     private static Point standOffFor(Point ball, double aimRad, boolean back, boolean pullIn) {
         double reach = pullIn ? RobotFootprint.pullInMm(back) : RobotFootprint.grabMm(back);
@@ -378,7 +403,7 @@ public class PathPlanning {
         if (Double.isNaN(fromRad)) {
             return 0;
         }
-        double turn = Math.abs(Math.atan2(Math.sin(toRad - fromRad), Math.cos(toRad - fromRad)));
+        double turn = Math.abs(MathFunctions.angleWrapRad(toRad - fromRad));
         return TURN_COST_MM_PER_RAD * turn;
     }
 

@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Shoo
 
 import android.annotation.SuppressLint;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
@@ -25,14 +24,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class ShooterRun extends Action {
+    public static final String TAG = "Shooting_ShooterRun";
 
-    public static final double FAR_TOLERANCE = 0.75;
-    public static final double MIDDLE_TOLERANCE = 0.75;
-    public static final double NEAR_TOLERANCE = 0.50;
+    public static final double FAR_TOLERANCE = 0.75; // TODO-measure
+    public static final double MIDDLE_TOLERANCE = 0.75; // TODO-measure
+    public static final double NEAR_TOLERANCE = 0.50; // TODO-measure
     private final OpModeUtilities opModeUtilities;
     private ShooterRunMode shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
     private final Shooter shooter;
-    private final Point targetPoint;
+    private Point targetPoint;
     private Point launchPoint;
     private ElapsedTime rpsInRangeTimer;
     private ElapsedTime rampUpTimeTimer;
@@ -43,7 +43,6 @@ public class ShooterRun extends Action {
     private double targetHoodPosition = 0;
     private double distanceMM = -1;
     ElapsedTime elapsedTime;
-    private boolean useLimelight = false;
 
     private boolean useOdometry = true;
     private boolean isWithinRange = false;
@@ -57,7 +56,7 @@ public class ShooterRun extends Action {
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD;
         this.shooter = shooter;
         this.targetPoint = null;
-        this.name = "ShooterReady";
+        this.name = "ShooterRun";
         elapsedTime = new ElapsedTime();
         this.distanceMM = -1;
         this.targetRPS = targetRPS;
@@ -69,7 +68,7 @@ public class ShooterRun extends Action {
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_FIXED_POINT;
         this.shooter = shooter;
         this.targetPoint = targetPoint;
-        this.name = "ShooterReady";
+        this.name = "ShooterRun";
         elapsedTime = new ElapsedTime();
         this.launchPoint = launchPoint;
         this.distanceMM = 0;
@@ -82,36 +81,37 @@ public class ShooterRun extends Action {
         this.shooterRunMode = ShooterRunMode.SHOOT_USING_CURRENT_POINT;
         this.shooter = shooter;
         this.targetPoint = targetPoint;
-        this.name = "ShooterReady";
+        this.name = "ShooterRun";
         elapsedTime = new ElapsedTime();
         this.distanceMM = -1;
     }
 
     public boolean isWithinRange() {
-        KLog.d("ShooterRun", () -> "isWithinRange called. Power: " + shooter.getShooter1().getPower() + " Current RPS: " + currentRPS +
-                ", Target RPS: " + targetRPS + ", At Within Range: " + isWithinRange);
+        if (KLog.isDebug()) {
+            KLog.d(TAG, () -> "event=isWithinRange power=" + shooter.getShooterMotor().getPower() + " currentRps=" + currentRPS +
+                    " targetRps=" + targetRPS + " withinRange=" + isWithinRange);
+        }
         return isWithinRange;
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void update() {
-        KLog.d("ShooterRun", () -> "update() called - hasStarted: " + hasStarted + ", Current RPS: " + currentRPS);
         currentRPS = shooter.getRPS();
         if (!hasStarted) {
-            shooter.getShooter1().resetPID();
-            shooter.getShooter2().resetPID();
+            shooter.getShooterMotor().resetPID();
 
             rpsInRangeTimer = new ElapsedTime();
             hasStarted = true;
             rampUpTimeTimer = new ElapsedTime();
-            KLog.d("ShooterRun", "*** SHOOTER RUN STARTED ***");
-            KLog.d("ShooterRun", () -> "Target RPS: " + targetRPS + ", Target Hood: " + targetHoodPosition + ", Distance: " + distanceMM);
-            KLog.d("ShooterRun", () -> "PIDF: " + shooter.getShooter1().getPIDFController());
+            KLog.d(TAG, () -> "event=start targetRps=" + targetRPS + " targetHood=" + targetHoodPosition + " distanceMm=" + distanceMM
+                    + " pidf=" + shooter.getShooterMotor().getPIDFController());
             elapsedTime.reset();
         }
 
-        KLog.d("ShooterRun", () -> "update() called - hasStarted: " + hasStarted + ", isDone: " + isDone);
+        if (KLog.isDebug()) {
+            KLog.d(TAG, () -> "currentRps=" + currentRPS + " isDone=" + isDone);
+        }
 
         IShooterPredictor.ShooterParams params;
 
@@ -182,8 +182,7 @@ public class ShooterRun extends Action {
         if (deltaRPS > ShooterConfig.accelBoostDeltaRPSThreshold && shouldBangBangCompensate) {
             // Need to ACCELERATE - current RPS too low
             if (prevMode != DcMotor.ZeroPowerBehavior.FLOAT) {
-                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                shooter.getShooterMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 prevMode = DcMotor.ZeroPowerBehavior.FLOAT;
             }
             shooter.setPower(calculateEffectiveCompensationPower());
@@ -191,8 +190,7 @@ public class ShooterRun extends Action {
         } else if (deltaRPS < ShooterConfig.decelBoostDeltaRPSThreshold && shouldBangBangCompensate) {
             // Need to DECELERATE - current RPS too high
             if (prevMode != DcMotor.ZeroPowerBehavior.BRAKE) {
-                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                shooter.getShooterMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 prevMode = DcMotor.ZeroPowerBehavior.BRAKE;
             }
             shooter.setPower(0);
@@ -200,8 +198,7 @@ public class ShooterRun extends Action {
         } else {
             // Within threshold - use PID control for fine adjustment
             if (prevMode != DcMotor.ZeroPowerBehavior.FLOAT) {
-                shooter.getShooter1().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                shooter.getShooter2().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                shooter.getShooterMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 prevMode = DcMotor.ZeroPowerBehavior.FLOAT;
             }
             shooter.goToRPS(targetRPS);
@@ -250,23 +247,14 @@ public class ShooterRun extends Action {
         return odometryDistanceMM;
     }
 
-    private double getLimelightDistance() {
-        double limelightDistanceMM = SharedData.getLimelightRawPosition().getAprilTagDistanceToCamMM() + AprilTagConfig.GOAL_TO_APRIL_TAG_OFFSET_DISTANCE;
-        KLog.d("ShooterRun_Distance", () -> "Limelight distance: " + limelightDistanceMM + " mm");
-        return limelightDistanceMM;
+    // Distance always comes from odometry (Limelight re-zeros odometry instead of overriding the distance).
+    private double getCurrentDistanceMM() {
+        return getOdometryDistanceMM();
     }
 
-    private double getCurrentDistanceMM() {
-        double odometryDistanceMM = getOdometryDistanceMM();
-        KLog.d("ShooterRun_Distance", () -> "ODOMETRY DISTANCE " + odometryDistanceMM + " mm");
-        if (useLimelight && !SharedData.getLimelightRawPosition().isEmpty()) {
-            double limelightDistanceMM = getLimelightDistance();
-            KLog.d("ShooterRun_Distance", () -> "OVERRIDING ODOMETRY DISTANCE WITH LIMELIGHT " + limelightDistanceMM + " mm");
-            KLog.d("ShooterRun_Distance", () -> "Final Distance " + limelightDistanceMM);
-            return limelightDistanceMM;
-        }
-        KLog.d("ShooterRun_Distance", () -> "Final Distance " + odometryDistanceMM);
-        return odometryDistanceMM;
+    /** The goal used for the distance in SHOOT_USING_CURRENT_POINT; RPS and hood follow it on the next update. */
+    public void setTargetPoint(Point targetPoint) {
+        this.targetPoint = targetPoint;
     }
 
     public void setLaunchPoint(Point launchPoint) {
@@ -293,10 +281,6 @@ public class ShooterRun extends Action {
         setShooterRunMode(ShooterRunMode.STOP);
         shooter.stop();
         KLog.d("ShooterRun_Stop", "ShooterRun Stop");
-    }
-
-    public void setUseLimelight(boolean useLimelight){
-        this.useLimelight = useLimelight;
     }
 
     public void setTargetHoodPosition(double targetHoodPosition) {
@@ -328,7 +312,7 @@ public class ShooterRun extends Action {
 
     public void setUseOdometry(boolean useOdometry) {
         this.useOdometry = useOdometry;
-        KLog.d("ShooterRun", () -> "Odometry was set to: " + useOdometry);
+        KLog.d(TAG, () -> "event=setUseOdometry useOdometry=" + useOdometry);
     }
 
 
@@ -344,9 +328,9 @@ public class ShooterRun extends Action {
 
     public double calculateEffectiveCompensationPower() {
         if (distanceMM > NEAR_DISTANCE) {
-            return 1;
+            return ShooterConfig.BANG_POWER_FAR;
         } else {
-            return 0.7;
+            return ShooterConfig.BANG_POWER_NEAR;
         }
     }
 
@@ -375,23 +359,22 @@ public class ShooterRun extends Action {
             return;
         }
 
-        double power1 = shooter.getShooter1().getPower();
-        double power2 = shooter.getShooter2().getPower();
+        double power = shooter.getShooterMotor().getPower();
 
-        boolean powerIsZero = Math.abs(power1) < 1e-9 || Math.abs(power2) < 1e-9;
+        boolean powerIsZero = Math.abs(power) < 1e-9;
         if (!powerIsZero) {
             return;
         }
 
         // Power 0 while target is 0 (STOP / park) is expected - just note it, no stack trace.
         if (Math.abs(targetRPS) < 1e-9) {
-            KLog.d("ShooterRun_PowerZero", () -> "Power 0.0 with target 0 (expected stop) -> shooter1: " +
-                    power1 + " shooter2: " + power2 + " | mode: " + shooterRunMode);
+            KLog.d("ShooterRun_PowerZero", () -> "Power 0.0 with target 0 (expected stop) -> shooter: " +
+                    power + " | mode: " + shooterRunMode);
             return;
         }
 
         // Power 0 while we still want a non-zero RPS is the bug we are hunting - dump the trace.
-        KLog.d("ShooterRun_PowerZero", () -> "UNEXPECTED POWER 0.0 -> shooter1: " + power1 + " shooter2: " + power2 +
+        KLog.d("ShooterRun_PowerZero", () -> "UNEXPECTED POWER 0.0 -> shooter: " + power +
                 " | mode: " + shooterRunMode + " targetRPS: " + targetRPS + " currentRPS: " + currentRPS);
 
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();

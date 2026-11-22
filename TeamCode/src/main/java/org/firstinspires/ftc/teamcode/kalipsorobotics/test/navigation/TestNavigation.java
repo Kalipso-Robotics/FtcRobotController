@@ -157,12 +157,9 @@ public class TestNavigation extends LinearOpMode {
         GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
 
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule);
-
         // Start odometry executor service
         executorService = Executors.newSingleThreadExecutor();
-        OpModeUtilities.runOdometryExecutorService(executorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, executorService, driveTrain, imuModule, new Position(0, 0, 0));
         
         KLog.d(TAG, "Hardware initialized successfully");
     }

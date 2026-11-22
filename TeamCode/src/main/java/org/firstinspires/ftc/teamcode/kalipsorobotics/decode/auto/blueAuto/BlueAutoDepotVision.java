@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  * Blue Near autonomous with vision-guided ball collection.
  * Mirrors RedAutoNearVision with alliance-specific configuration.
  */
+@Disabled
 @Autonomous(name = "BlueAutoDepotVision")
 public class BlueAutoDepotVision extends RedAutoDepotVision {
 
@@ -19,6 +20,6 @@ public class BlueAutoDepotVision extends RedAutoDepotVision {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(this.allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.TURRET_OFFSET_DEG = 0;
     }
 }

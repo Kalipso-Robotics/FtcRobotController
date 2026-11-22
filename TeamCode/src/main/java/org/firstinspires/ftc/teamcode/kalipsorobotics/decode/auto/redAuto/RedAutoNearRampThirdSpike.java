@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
@@ -7,13 +10,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathAc
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode.RoundTripAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Tilter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -24,7 +24,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+@Disabled
 @Autonomous
 public class RedAutoNearRampThirdSpike extends KOpMode {
 //    public static final int WAIT_AT_GATE_TIME_MS = 500;
@@ -44,7 +46,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     final double FINAL_SHOOT_NEAR_Y = -100; //300
     final double THIRD_SHOOT_NEAR_X = 1900; //2400
     final double THIRD_SHOOT_NEAR_Y = 0; //300
-    Point firstShotTargetPoint = Shooter.TARGET_POINT;
+    Point firstShotTargetPoint = ShooterConfig.TARGET_POINT_1;
     Point nearLaunchPoint =  new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y);
     Point firstShootPoint = new Point(FIRST_SHOOT_X, FIRST_SHOOT_Y);
 
@@ -53,7 +55,6 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     Intake intake = null;
     Stopper stopper = null;
     Turret turret = null;
-    Tilter tilter = null;
     TurretAutoAlign turretAutoAlign = null;
     RoundTripAction trip0 = null;
     RoundTripAction trip1 = null;
@@ -70,7 +71,6 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.RED;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = (int) -Math.round((TurretConfig.TICKS_PER_ROTATION * TurretConfig.BIG_TO_SMALL_PULLEY) / 2); //offset by 180 deg
 
     }
 
@@ -86,20 +86,17 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
         sleep(1000); // Optional: let hardware initialize
 
         // Create odometry
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule, 3060, 712 * allianceColor.getPolarity(), -2.4049 * allianceColor.getPolarity()); //3015.93, 765.86, -2.4030
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(3060, 712 * allianceColor.getPolarity(), -2.4049 * allianceColor.getPolarity()));
 
 
         redAutoNear = new KActionSet();
         intake = new Intake(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
-        tilter = new Tilter(opModeUtilities);
 
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, new Point(3419.5 - 152.2, (1400 - 175) * allianceColor.getPolarity())) /* the old TurretConfig default DECODE goal point */;
 
         turretAutoAlign.setToleranceDeg(2.5);
     }
@@ -172,8 +169,6 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
             setAutoDelayAction.updateCheckDone();
         }
         KLog.d("auto", "--------------NEAR AUTO STARTED-------------");
-        tilter.getTilterLeft().setPosition(ModuleConfig.TILT_LEFT_UP_POS);
-        tilter.getTilterRight().setPosition(ModuleConfig.TILT_RIGHT_UP_POS);
         stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         waitForStart();
         while (opModeIsActive()) {
@@ -188,7 +183,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     }
 
     protected void handleTrip1() {
-        trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
+        trip1 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0);
         trip1.setName("trip1");
         trip1.getShooterReady().setName("shooterReady_trip1");
         trip1.getMoveToBall().clearPoints();
@@ -224,7 +219,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
     protected void handleTrip4() {
         trip4Ramp = null;
-        trip4Spike = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 0, true);
+        trip4Spike = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(SHOOT_NEAR_X, SHOOT_NEAR_Y * allianceColor.getPolarity()), 0, true);
         trip4Spike.setName("trip4Spike");
         trip4Spike.getShooterReady().setName("shooterReady_trip4Spike");
         // move to intake
@@ -255,7 +250,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
 
 
     public void handleTrip5() {
-        trip5 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity()), 0);
+        trip5 = new RoundTripAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), new Point(FINAL_SHOOT_NEAR_X, FINAL_SHOOT_NEAR_Y * allianceColor.getPolarity()), 0);
         trip5.setName("trip5");
         // move to intake
         if (trip4Spike != null) {
@@ -287,7 +282,7 @@ public class RedAutoNearRampThirdSpike extends KOpMode {
     }
 
     public RampCycleAction generateRampTrip(double waitAtGateTimeMS) {
-        RampCycleAction rampTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, Shooter.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, 1250, waitAtGateTimeMS);
+        RampCycleAction rampTrip = new RampCycleAction(opModeUtilities, driveTrain, turretAutoAlign, shooter, stopper, intake, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()), nearLaunchPoint.multiplyY(allianceColor.getPolarity()), 0, 1250, waitAtGateTimeMS);
         rampTrip.getTripToShoot().getShooterReady().setName("rampTrip");
         rampTrip.getMoveToRamp().clearPoints();
         rampTrip.getMoveToEat().clearPoints();

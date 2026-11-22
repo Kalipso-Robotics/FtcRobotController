@@ -6,12 +6,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * All four beam break sensors together, plus the physical-plausibility pass that makes the count
+ * Every beam break sensor in BeamBreakConfig.SENSORS together (any count, ordered A end to B end), plus the physical-plausibility pass that makes the count
  * robust to a single ball's hole lining up with a beam.
  *
  * Every {@link #update(long)} ends by publishing an immutable {@link BeamBreakData} snapshot to
@@ -34,8 +32,11 @@ import java.util.Map;
  * clear position as a ball, which is the smallest correction that restores a possible pattern:
  *
  * <pre>
- *   count = CAPACITY - (length of the longest contiguous run of clear readings)
+ *   count = min(capacity, sensors - (length of the longest contiguous run of clear readings))
  * </pre>
+ *
+ * Each blocked sensor counts as one ball, clamped to capacity, so this assumes sensors are spaced
+ * at least a ball apart.
  *
  * The count that formula produces does not depend on which of two equally long runs you keep, so
  * the total is unambiguous even when the per-position assignment is a coin flip. Ties are broken
@@ -57,19 +58,23 @@ import java.util.Map;
  */
 public class BeamBreakArray {
 
-    private final Map<BeamBreakPosition, BeamBreakSensor> sensors =
-            new EnumMap<>(BeamBreakPosition.class);
+    public static final String TAG = "Robot_BeamBreak";
+
+    /** In physical order, index 0 at the A end. */
+    private final List<BeamBreakSensor> sensors;
+    private final int capacity;
 
     /** Debounced per-sensor readings, before the pattern pass. Indexed by physical position. */
-    private final boolean[] measuredBlocked = new boolean[BeamBreakPosition.COUNT];
+    private final boolean[] measuredBlocked;
     /** Readings after the pattern pass - what getCount() and isBlocked() report. */
-    private final boolean[] correctedBlocked = new boolean[BeamBreakPosition.COUNT];
+    private final boolean[] correctedBlocked;
 
     private int count;
     private int measuredCount;
     private boolean patternPlausible = true;
     private int correctionCount;
     private boolean settling;
+    private boolean wasReliable = true;
 
     /**
      * The last published snapshot. Every public reader below goes through this, so the array and
@@ -77,21 +82,29 @@ public class BeamBreakArray {
      */
     private volatile BeamBreakData lastSnapshot = BeamBreakData.UNKNOWN;
 
+    /** Builds every sensor in BeamBreakConfig.SENSORS from the hardware map. */
     public BeamBreakArray(OpModeUtilities opModeUtilities) {
-        for (BeamBreakPosition position : BeamBreakPosition.values()) {
-            sensors.put(position, new BeamBreakSensor(opModeUtilities, position));
-        }
+        this(sensorsFromConfig(opModeUtilities), BeamBreakConfig.CAPACITY);
     }
 
-    /** Direct-injection constructor for sensors you built yourself. Must cover every position. */
-    public BeamBreakArray(List<BeamBreakSensor> sensorList) {
-        for (BeamBreakSensor sensor : sensorList) {
-            sensors.put(sensor.getPosition(), sensor);
+    /** Direct-injection constructor for sensors you built yourself, in A-to-B order. */
+    public BeamBreakArray(List<BeamBreakSensor> sensorList, int capacity) {
+        // Occupancy is packed into an int bitmask in BeamBreakData.
+        if (sensorList.isEmpty() || sensorList.size() >= Integer.SIZE) {
+            throw new IllegalArgumentException("BeamBreakArray needs 1-31 sensors, got " + sensorList.size());
         }
-        if (sensors.size() != BeamBreakPosition.COUNT) {
-            throw new IllegalArgumentException(
-                    "BeamBreakArray needs one sensor per position, got " + sensors.size());
+        this.sensors = new ArrayList<>(sensorList);
+        this.capacity = capacity;
+        this.measuredBlocked = new boolean[sensors.size()];
+        this.correctedBlocked = new boolean[sensors.size()];
+    }
+
+    private static List<BeamBreakSensor> sensorsFromConfig(OpModeUtilities opModeUtilities) {
+        List<BeamBreakSensor> list = new ArrayList<>();
+        for (BeamBreakPosition position : BeamBreakConfig.SENSORS) {
+            list.add(new BeamBreakSensor(opModeUtilities, position));
         }
+        return list;
     }
 
     /** Reads every sensor, runs both filter stages, then runs the pattern pass. Call once per loop. */
@@ -100,12 +113,13 @@ public class BeamBreakArray {
     }
 
     public void update(long nowMs) {
+        int previousCount = count;
         measuredCount = 0;
-        for (BeamBreakPosition position : BeamBreakPosition.values()) {
-            BeamBreakSensor sensor = sensors.get(position);
+        for (int index = 0; index < sensors.size(); index++) {
+            BeamBreakSensor sensor = sensors.get(index);
             sensor.update(nowMs);
             boolean blocked = sensor.isBlocked();
-            measuredBlocked[position.index()] = blocked;
+            measuredBlocked[index] = blocked;
             if (blocked) {
                 measuredCount++;
             }
@@ -116,17 +130,26 @@ public class BeamBreakArray {
         lastSnapshot = buildSnapshot(nowMs);
         SharedData.setBeamBreakData(lastSnapshot);
 
-        KLog.d("BeamBreak", () -> String.format(
-                "count=%d measured=%d plausible=%s settling=%s corrections=%d pattern=%s%s",
-                count, measuredCount, patternPlausible, settling, correctionCount, getOccupancyString(),
-                isCountReliable() ? "" : " UNRELIABLE:" + getFaultedPositions()));
+        boolean reliable = lastSnapshot.isReliable();
+        if (wasReliable && !reliable) {
+            KLog.e(TAG, "fault=unreliable faulted=" + getFaultedPositions() + " pattern=" + getOccupancyString());
+        }
+        wasReliable = reliable;
+        if (count != previousCount) {
+            KLog.d(TAG, () -> String.format("countChanged=%d->%d pattern=%s", previousCount, count, getOccupancyString()));
+        }
+        if (KLog.isDebug()) {
+            KLog.d(TAG, () -> String.format(
+                    "count=%d measured=%d plausible=%s settling=%s corrections=%d pattern=%s",
+                    count, measuredCount, patternPlausible, settling, correctionCount, getOccupancyString()));
+        }
     }
 
     /** Packs this update's results into the immutable snapshot that subscribers read. */
     private BeamBreakData buildSnapshot(long nowMs) {
         int blockedMask = 0;
         int measuredMask = 0;
-        for (int index = 0; index < BeamBreakPosition.COUNT; index++) {
+        for (int index = 0; index < sensors.size(); index++) {
             if (correctedBlocked[index]) {
                 blockedMask |= 1 << index;
             }
@@ -134,7 +157,7 @@ public class BeamBreakArray {
                 measuredMask |= 1 << index;
             }
         }
-        return new BeamBreakData(count, measuredCount, blockedMask, measuredMask, correctionCount,
+        return new BeamBreakData(count, measuredCount, capacity, sensors.size(), blockedMask, measuredMask, correctionCount,
                 patternPlausible, settling, isCountReliable(), nowMs);
     }
 
@@ -144,7 +167,8 @@ public class BeamBreakArray {
      * possible this is a no-op, because there is at most one clear run to keep.
      */
     private void applyPatternCorrection(long nowMs) {
-        System.arraycopy(measuredBlocked, 0, correctedBlocked, 0, BeamBreakPosition.COUNT);
+        int n = sensors.size();
+        System.arraycopy(measuredBlocked, 0, correctedBlocked, 0, n);
         patternPlausible = countClearRuns() <= 1;
         correctionCount = 0;
         settling = !isSettled(nowMs);
@@ -152,7 +176,7 @@ public class BeamBreakArray {
         if (!BeamBreakConfig.ENABLE_PATTERN_CORRECTION || settling) {
             // Mid-motion the readings are allowed to look impossible, so take them at face value
             // rather than inventing a ball that is only in transit. See CORRECTION_SETTLE_MS.
-            count = measuredCount;
+            count = Math.min(capacity, measuredCount);
             return;
         }
 
@@ -161,7 +185,7 @@ public class BeamBreakArray {
         long bestStability = Long.MIN_VALUE;
 
         int i = 0;
-        while (i < BeamBreakPosition.COUNT) {
+        while (i < n) {
             if (measuredBlocked[i]) {
                 i++;
                 continue;
@@ -170,8 +194,8 @@ public class BeamBreakArray {
             // How long has the least-settled position in this run been reading clear? A run
             // containing a position that just flipped is the likelier glitch.
             long runStability = Long.MAX_VALUE;
-            while (i < BeamBreakPosition.COUNT && !measuredBlocked[i]) {
-                long msClear = sensors.get(BeamBreakPosition.fromIndex(i)).getMsInFilteredState(nowMs);
+            while (i < n && !measuredBlocked[i]) {
+                long msClear = sensors.get(i).getMsInFilteredState(nowMs);
                 runStability = Math.min(runStability, msClear);
                 i++;
             }
@@ -183,7 +207,7 @@ public class BeamBreakArray {
             }
         }
 
-        for (int index = 0; index < BeamBreakPosition.COUNT; index++) {
+        for (int index = 0; index < n; index++) {
             boolean insideKeptRun = bestStart >= 0 && index >= bestStart && index < bestStart + bestLength;
             if (!measuredBlocked[index] && !insideKeptRun) {
                 correctedBlocked[index] = true;
@@ -191,19 +215,18 @@ public class BeamBreakArray {
             }
         }
 
-        count = BeamBreakPosition.COUNT - bestLength;
+        count = Math.min(capacity, n - bestLength);
 
-        if (correctionCount > 0) {
+        if (correctionCount > 0 && KLog.isDebug()) {
             final int corrected = correctionCount;
-            KLog.d("BeamBreak_Correction", () -> String.format(
-                    "Impossible pattern %s - inferred %d ball(s) reading clear through a hole, count=%d",
+            KLog.d(TAG, () -> String.format("impossiblePattern=%s inferredBalls=%d count=%d",
                     renderPattern(measuredBlocked), corrected, count));
         }
     }
 
     /** True once every sensor has held its filtered state for at least CORRECTION_SETTLE_MS. */
     private boolean isSettled(long nowMs) {
-        for (BeamBreakSensor sensor : sensors.values()) {
+        for (BeamBreakSensor sensor : sensors) {
             if (sensor.getMsInFilteredState(nowMs) < BeamBreakConfig.CORRECTION_SETTLE_MS) {
                 return false;
             }
@@ -214,7 +237,7 @@ public class BeamBreakArray {
     private int countClearRuns() {
         int runs = 0;
         boolean inRun = false;
-        for (int index = 0; index < BeamBreakPosition.COUNT; index++) {
+        for (int index = 0; index < sensors.size(); index++) {
             if (!measuredBlocked[index]) {
                 if (!inRun) {
                     runs++;
@@ -267,18 +290,18 @@ public class BeamBreakArray {
     }
 
     /** Occupancy at one position, after the plausibility pass. */
-    public boolean isBlocked(BeamBreakPosition position) {
-        return lastSnapshot.isBlocked(position);
+    public boolean isBlocked(int index) {
+        return lastSnapshot.isBlocked(index);
     }
 
     /** Occupancy at one position straight from its debounced sensor, uncorrected. */
-    public boolean isMeasuredBlocked(BeamBreakPosition position) {
-        return lastSnapshot.isMeasuredBlocked(position);
+    public boolean isMeasuredBlocked(int index) {
+        return lastSnapshot.isMeasuredBlocked(index);
     }
 
     /** True when this position reads clear but was counted as a ball by the plausibility pass. */
-    public boolean isInferredBlocked(BeamBreakPosition position) {
-        return lastSnapshot.isInferredBlocked(position);
+    public boolean isInferredBlocked(int index) {
+        return lastSnapshot.isInferredBlocked(index);
     }
 
     public boolean isFull() {
@@ -290,7 +313,7 @@ public class BeamBreakArray {
     }
 
     public int getCapacity() {
-        return BeamBreakPosition.COUNT;
+        return capacity;
     }
 
     /**
@@ -298,7 +321,7 @@ public class BeamBreakArray {
      * sensor stuck reading blocked, so gate match logic on this rather than assuming the count.
      */
     public boolean isCountReliable() {
-        for (BeamBreakSensor sensor : sensors.values()) {
+        for (BeamBreakSensor sensor : sensors) {
             if (sensor.isFaulted() || !sensor.isInitialized()) {
                 return false;
             }
@@ -308,19 +331,20 @@ public class BeamBreakArray {
 
     public List<BeamBreakPosition> getFaultedPositions() {
         List<BeamBreakPosition> faulted = new ArrayList<>();
-        for (BeamBreakPosition position : BeamBreakPosition.values()) {
-            if (sensors.get(position).isFaulted()) {
-                faulted.add(position);
+        for (BeamBreakSensor sensor : sensors) {
+            if (sensor.isFaulted()) {
+                faulted.add(sensor.getPosition());
             }
         }
         return faulted;
     }
 
-    public BeamBreakSensor getSensor(BeamBreakPosition position) {
-        return sensors.get(position);
+    public BeamBreakSensor getSensor(int index) {
+        return sensors.get(index);
     }
 
-    public Map<BeamBreakPosition, BeamBreakSensor> getSensors() {
+    /** In physical order, index 0 at the A end. */
+    public List<BeamBreakSensor> getSensors() {
         return sensors;
     }
 
@@ -342,7 +366,7 @@ public class BeamBreakArray {
 
     /** Drops all filter state so the next update() reseeds from live readings. */
     public void reset() {
-        for (BeamBreakSensor sensor : sensors.values()) {
+        for (BeamBreakSensor sensor : sensors) {
             sensor.reset();
         }
         count = 0;
@@ -350,6 +374,7 @@ public class BeamBreakArray {
         correctionCount = 0;
         patternPlausible = true;
         settling = false;
+        wasReliable = true;
         lastSnapshot = BeamBreakData.UNKNOWN;
         SharedData.resetBeamBreakData();
     }

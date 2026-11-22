@@ -5,6 +5,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -50,7 +51,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
         intakeStop = new IntakeStop(intake);
         runUntilFullSpeed = new RunIntake(intake);
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, allianceColor);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret, ShooterConfig.TARGET_POINT.multiplyY(allianceColor.getPolarity()));
 //        shootAction = new ShootAllAction(stopper, intake, shooter, Shooter.RED_TARGET_FROM_NEAR, LaunchPosition.AUTO);
         kFileWriter.writeLine("distance, rps, hood position");
     }
@@ -79,7 +80,7 @@ public class ShooterRegressionModelDataCollector extends KOpMode {
              */
 
             //TODO make csv converter into array for easy coding
-            distance = shooter.getDistance(SharedData.getOdometryWheelIMUPosition(), Shooter.TARGET_POINT);
+            distance = shooter.getDistance(SharedData.getOdometryWheelIMUPosition(), ShooterConfig.TARGET_POINT);
             if (kGamePad1.isButtonAFirstPressed()) { //log
                 kFileWriter.writeLine(distance + "," + rps + "," + hoodPosition);
                 KLog.d("Regression Module Data Collector", () -> "data logged: distance: " + distance + " rps: " + rps + " hood pos: " + hoodPosition);

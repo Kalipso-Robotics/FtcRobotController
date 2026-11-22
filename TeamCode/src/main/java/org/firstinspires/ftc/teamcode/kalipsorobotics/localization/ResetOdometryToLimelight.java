@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.localization;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
+/** Re-zero odometry x/y to the Limelight fix (the window-averaged one AprilTagDetectionAction publishes). */
 public class ResetOdometryToLimelight extends Action {
+    public static final String TAG = "Vision_OdoReset";
 
     Turret turret;
-
-    private boolean overrideOdometry = false;
 
     public ResetOdometryToLimelight(Turret turret) {
         this.turret = turret;
@@ -18,20 +20,25 @@ public class ResetOdometryToLimelight extends Action {
 
     @Override
     protected void update() {
-        double turretVelocity = turret.getCurrentVelocity();
-        if (SharedData.getLimelightRawPosition().isEmpty() || turretVelocity > 10) {
-            KLog.d("ResetOdometryToPosition", () -> "No Valid Detection Not Updating. turretVelocity (deg / sec):  " + turretVelocity);
+        double fixAgeMs = SharedData.getLimelightFixAgeMs();
+        if (fixAgeMs > AprilTagConfig.MAX_FIX_AGE_MS) {
+            KLog.d(TAG, () -> "event=skip reason=noFreshFix ageMs=" + fixAgeMs);
             isDone = true;
             return;
         }
-        Position limelightGlobalPosition = SharedData.getLimelightGlobalPosition();
-        KLog.d("ResetOdometryToPosition", () -> "If I were resetting but I am not. Resetting odometry WheelIMU, " + SharedData.getOdometryWheelIMUPosition() + " Odometry Wheel, " + SharedData.getOdometryWheelPosition() + " to position, " + limelightGlobalPosition);
+        // No turret encoder: while the servo is still travelling, the commanded angle is not where the camera points.
+        if (turret.isMoving()) {
+            KLog.d(TAG, "event=skip reason=turretMoving");
+            isDone = true;
+            return;
+        }
+        // Heading stays from the IMU; the fix only corrects x and y.
+        Position odometry = SharedData.getOdometryWheelIMUPosition();
+        Position fix = SharedData.getLimelightGlobalPosition();
+        Position limelightGlobalPosition = new Position(fix.getX(), fix.getY(), odometry.getTheta());
+        KLog.d(TAG, () -> "event=reset from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + limelightGlobalPosition);
         SharedData.setOdometryWheelPosition(limelightGlobalPosition);
         SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
         isDone = true;
-    }
-
-    public void setOverrideOdometry(boolean overrideOdometry) {
-        this.overrideOdometry = overrideOdometry;
     }
 }

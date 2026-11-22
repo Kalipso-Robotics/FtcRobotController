@@ -1,0 +1,2 @@
+{ "name": "defender", "robot": { "front": 200, "back": 200, "width": 400 },
+  "massKg": 12, "maxSpeedMmS": 1500, "accelMmS2": 3000, "turnRadS": 4 }

@@ -1,73 +1,77 @@
-
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+/**
+ * The double-sided intake: side A (front, +X) and side B (back), plus the Flower on whichever
+ * side ModuleConfig.FLOWER_SIDE says. Which side runs when is decided by the caller, not here.
+ */
 public class Intake {
 
-    private final OpModeUtilities opModeUtilities;
 
-    DcMotor intakeMotorFlower;
-    DcMotor intakeMotorNonFlower;
+    private final IntakeSide sideA;
+    private final IntakeSide sideB;
+    private final FlowerMech flowerMech;
 
     public Intake(OpModeUtilities opModeUtilities) {
-        this.opModeUtilities = opModeUtilities;
-        this.intakeMotorFlower = opModeUtilities.getHardwareMap().dcMotor.get("intake"); // todo config
-        this.intakeMotorNonFlower = opModeUtilities.getHardwareMap().dcMotor.get("intake"); // todo config
-        intakeMotorFlower.setDirection(DcMotorSimple.Direction.FORWARD);
-        intakeMotorNonFlower.setDirection(DcMotorSimple.Direction.FORWARD);
+        sideA = new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.A);
+        sideB = new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.B);
+        flowerMech = new FlowerMech(opModeUtilities, getSide(ModuleConfig.FLOWER_SIDE));
     }
 
-    public DcMotor getIntakeMotorFlower() {
-        return intakeMotorFlower;
-    }
-    public DcMotor getIntakeMotorNonFlower() {
-        return intakeMotorNonFlower;
-    }
-
-    public DcMotorEx getIntakeMotorFlowerEx() {
-        return (DcMotorEx) intakeMotorFlower;
-    }
-    public DcMotorEx getIntakeMotorNonFlowerEx() {
-        return (DcMotorEx) intakeMotorNonFlower;
+    /** Direct-injection constructor (unit tests, public so actions tests can build one). The flower must already be attached to one of the sides. */
+    public Intake(IntakeSide sideA, IntakeSide sideB, FlowerMech flowerMech) {
+        this.sideA = sideA;
+        this.sideB = sideB;
+        this.flowerMech = flowerMech;
     }
 
-    /** Which intake faces the robot's front (+x). Flip this if the flower intake is on the back. */
-    public static boolean FLOWER_IS_FRONT = true;
-
-    /** Forward speed (mm/ms) below which the robot counts as stopped; 0.05 mm/ms = 50 mm/s. */
-    public static double DIRECTION_DEADBAND_MM_PER_MS = 0.05;
-
-    private DcMotor lastChosenIntake = null;
-
-    /**
-     * Picks the intake on the side the robot is driving toward: the field-frame velocity from
-     * SharedData is rotated by the heading into the robot frame (x = forward). Only chooses; it does not power either motor.
-     * Below the deadband (stopped or just strafing) it keeps the previous choice, starting with the front intake.
-     */
-    public DcMotor chooseIntake() {
-        DcMotor front = FLOWER_IS_FRONT ? intakeMotorFlower : intakeMotorNonFlower;
-        DcMotor back = FLOWER_IS_FRONT ? intakeMotorNonFlower : intakeMotorFlower;
-
-        // SharedData velocity is field frame (both Odometry and OctoQuadOdo), so rotate it into the
-        // robot frame by the heading: forward = vx*cos(theta) + vy*sin(theta).
-        double heading = SharedData.peekOdometryWheelIMUPosition().getTheta();
-        Velocity fieldVelocity = SharedData.peekOdometryWheelIMUVelocity();
-        double forwardVelocity = fieldVelocity.getX() * Math.cos(heading) + fieldVelocity.getY() * Math.sin(heading);
-
-        if (forwardVelocity > DIRECTION_DEADBAND_MM_PER_MS) {
-            lastChosenIntake = front;
-        } else if (forwardVelocity < -DIRECTION_DEADBAND_MM_PER_MS) {
-            lastChosenIntake = back;
-        } else if (lastChosenIntake == null) {
-            lastChosenIntake = front;
-        }
-        return lastChosenIntake;
+    public IntakeSide getSide(BeamBreakPosition.IntakeSide side) {
+        return side == BeamBreakPosition.IntakeSide.A ? sideA : sideB;
     }
 
+    /** The side facing a robot-frame forward (+X) direction or velocity: A for forward or zero, B for backward. */
+    public IntakeSide getSideFacing(double robotForward) {
+        return robotForward >= 0 ? sideA : sideB;
+    }
+
+    public FlowerMech getFlower() {
+        return flowerMech;
+    }
+
+    /** Runs both sides, the closest equivalent of last year's single intake motor. */
+    public void run(double power) {
+        sideA.run(power);
+        sideB.run(power);
+    }
+
+    /** Lowers both sides. Does not touch the flower. */
+    public void lower() {
+        sideA.lower();
+        sideB.lower();
+    }
+
+    public void stop() {
+        sideA.stop();
+        sideB.stop();
+    }
+
+    /** Call once per loop. */
+    public void update() {
+        sideA.update();
+        sideB.update();
+    }
+
+    /** Balls held, as last published by BeamBreakArray to SharedData. */
+    public int getBallCount() {
+        return SharedData.getBallCount();
+    }
+
+    /** True when the published beam-break count is at capacity. */
+    public boolean isFull() {
+        return SharedData.getBeamBreakData().isFull();
+    }
 }

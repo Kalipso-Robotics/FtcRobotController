@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
  *
  *   // Relocalize off whatever tag is in view — the action owns the transform chain.
  *   AprilTagDetectionAction relocalize =
- *       new AprilTagDetectionAction(opModeUtilities, turret, tagId, alliance, aprilTags);
+ *       new AprilTagDetectionAction(opModeUtilities, turret, alliance, aprilTags);
  *
  *   // Same frame, different question.
  *   DetectedBlob ball = artifacts.getLargestPurpleBlob();

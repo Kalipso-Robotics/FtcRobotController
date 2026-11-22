@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,34 +18,49 @@ import java.util.ArrayList;
 /**
  * Motor Power and RPS Data Collection TeleOp
  *
- * This program tests shooter motors at different power levels (0.05 to 1.0)
+ * This program tests the shooter motor at different power levels
  * and collects RPS data over time to analyze motor performance.
+ * Pattern source: this file's pre-milestone-2 two-motor version, reduced to one motor.
+ *
+ * To measure ShooterConfig.kf: read the kf column (kf = effective power / steady RPS, where effective power = power * battery voltage / DEFAULT_VOLTAGE
+ * when ShooterConfig.USE_VOLTAGE_COMPENSATION, matching KMotor.goToRPS) at about 0.8 power
+ * with a full battery, then paste it into ShooterConfig.kf. kf is a measured value, not Dashboard-tuned.
  *
  * Methodology:
- * 1. Loop through power levels from 0.05 to 1.0 in 0.05 increments
+ * 1. Loop through power levels from POWER_START (0.3) to POWER_END (1.0) in POWER_INCREMENT (0.1) steps
  * 2. For each power level:
- *    - Set power to both shooter1 and shooter2
- *    - Wait 2 seconds for motors to stabilize
- *    - Collect RPS data for 1 second (sampling every 50ms = 20 samples)
+ *    - Set power to the shooter motor
+ *    - Wait STABILIZATION_TIME_MS (6 s) for the flywheel to settle
+ *    - Collect RPS data for DATA_COLLECTION_TIME_MS (1 s), sampling every SAMPLE_INTERVAL_MS (10 ms)
  *    - Record RPS_MAX, RPS_MIN, RPS_avg, and Battery_Voltage
  *
- * Output file columns: Power, RPS_MAX, RPS_MIN, RPS_avg, Battery_Voltage
+ * Output file columns: Power, RPS_MAX, RPS_MIN, RPS_avg, Battery_Voltage, kf
  */
 
-@Disabled
+@TeleOp(name = "MotorPowerRPSDataCollector", group = "Test")
 public class MotorPowerRPSDataCollector extends LinearOpMode {
 
     // Test parameters
     private static final double POWER_START = 0.3;
     private static final double POWER_END = 1;
     private static final double POWER_INCREMENT = 0.1;
-    private static final long STABILIZATION_TIME_MS = 6000; // 2 seconds
+    private static final long STABILIZATION_TIME_MS = 6000; // 6 s
     private static final long DATA_COLLECTION_TIME_MS = 1000; // 1 second
-    private static final long SAMPLE_INTERVAL_MS = 10; // Sample every 50ms/
-    private KMotor shooter1;
-    private KMotor shooter2;
+    private static final long SAMPLE_INTERVAL_MS = 10; // 10 ms
+    private static final String TAG = "Test_Shooter";
+    private KMotor shooter;
     private KFileWriter fileWriter;
     private OpModeUtilities opModeUtilities;
+
+    /** kf = effective power / rps; effective power mirrors KMotor.goToRPS voltage compensation. */
+    static double computeKf(double power, double batteryVoltage, double rpsAvg) {
+        if (rpsAvg <= 0) {
+            return 0;
+        }
+        double effectivePower = ShooterConfig.USE_VOLTAGE_COMPENSATION
+                ? power * batteryVoltage / ShooterInterpolationConfig.DEFAULT_VOLTAGE : power;
+        return effectivePower / rpsAvg;
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -61,19 +76,19 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         fileWriter = new KFileWriter("MotorPowerRPSData", opModeUtilities);
 
         // Write CSV header
-        fileWriter.writeLine("Power,RPS_MAX,RPS_MIN,RPS_avg,Battery_Voltage");
+        fileWriter.writeLine("Power,RPS_MAX,RPS_MIN,RPS_avg,Battery_Voltage,kf");
 
         telemetry.addLine("Initialization complete!");
         telemetry.addLine();
         telemetry.addLine("This test will:");
-        telemetry.addLine("- Test power levels: 0.05 to 1.0 (step 0.05)");
-        telemetry.addLine("- Wait 2s for stabilization");
-        telemetry.addLine("- Collect RPS data for 1s");
+        telemetry.addLine(String.format("- Test power levels: %.1f to %.1f (step %.1f)", POWER_START, POWER_END, POWER_INCREMENT));
+        telemetry.addLine("- Wait " + STABILIZATION_TIME_MS / 1000 + " s for stabilization");
+        telemetry.addLine("- Collect RPS data for " + DATA_COLLECTION_TIME_MS / 1000 + " s, every " + SAMPLE_INTERVAL_MS + " ms");
         telemetry.addLine();
         telemetry.addLine("Press PLAY to start data collection");
         telemetry.update();
 
-        KLog.d("MotorPowerRPSDataCollector", "Initialization complete. Waiting for start...");
+        KLog.d(TAG, "event=initDone");
 
         waitForStart();
 
@@ -90,9 +105,8 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
             telemetry.addData("Current Power", "%.2f", currentPower);
             telemetry.addLine();
 
-            // Step 1: Set power to both motors
-            shooter1.setPower(currentPower);
-            shooter2.setPower(currentPower);
+            // Step 1: Set power
+            shooter.setPower(currentPower);
 
             telemetry.addLine("Status: Motors running at " + String.format("%.2f", currentPower) + " power");
             telemetry.addData("Stabilization Time", "%d ms", STABILIZATION_TIME_MS);
@@ -100,7 +114,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
 
             double finalCurrentPower = currentPower;
             int finalTestNumber = testNumber;
-            KLog.d("MotorPowerRPSDataCollector", () -> String.format("Test %d/%d - Power: %.2f - Stabilizing...",
+            KLog.d(TAG, () -> String.format("event=stabilizing test=%d/%d power=%.2f",
                     finalTestNumber, totalTests, finalCurrentPower));
 
             // Step 2: Wait for stabilization
@@ -110,58 +124,42 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
             telemetry.update();
 
             // Step 3: Collect RPS data for 1 second
-            ArrayList<Double> rpsData1 = new ArrayList<>();
-            ArrayList<Double> rpsData2 = new ArrayList<>();
+            ArrayList<Double> rpsData = new ArrayList<>();
             long startTime = System.currentTimeMillis();
             long endTime = startTime + DATA_COLLECTION_TIME_MS;
 
             while (System.currentTimeMillis() < endTime && opModeIsActive()) {
-                double rps1 = shooter1.getRPS();
-                double rps2 = shooter2.getRPS();
-                rpsData1.add(rps1);
-                rpsData2.add(rps2);
+                double rps = shooter.getRPS();
+                rpsData.add(rps);
 
                 telemetry.addLine("Status: Collecting RPS data...");
-                telemetry.addData("Samples Collected", rpsData1.size());
-                telemetry.addData("Shooter1 Current RPS", "%.2f", rps1);
-                telemetry.addData("Shooter2 Current RPS", "%.2f", rps2);
+                telemetry.addData("Samples Collected", rpsData.size());
+                telemetry.addData("Shooter Current RPS", "%.2f", rps);
                 telemetry.update();
 
                 sleep(SAMPLE_INTERVAL_MS);
             }
 
             // Step 4: Calculate statistics
-            double rpsMax1 = calculateMax(rpsData1);
-            double rpsMin1 = calculateMin(rpsData1);
-            double rpsAvg1 = calculateAverage(rpsData1);
+            double rpsMax = calculateMax(rpsData);
+            double rpsMin = calculateMin(rpsData);
+            double rpsAvg = calculateAverage(rpsData);
+            double kf = computeKf(currentPower, batteryVoltage, rpsAvg);
 
-            double rpsMax2 = calculateMax(rpsData2);
-            double rpsMin2 = calculateMin(rpsData2);
-            double rpsAvg2 = calculateAverage(rpsData2);
-
-
-
-            // Step 5: Write data to file (one line for each motor)
-            String line1 = String.format("%.2f,%.2f,%.2f,%.2f,%.2f",
-                currentPower, rpsMax1, rpsMin1, rpsAvg1, batteryVoltage);
-            fileWriter.writeLine(line1);
-
-//            // Also log shooter2 data (optional - comment out if you only want shooter1)
-//            String line2 = String.format("%.2f,%.2f,%.2f,%.2f,%.2f",
-//                currentPower, rpsMax2, rpsMin2, rpsAvg2, batteryVoltage);
-//            // Uncomment the line below to also log shooter2 data
-            // fileWriter.writeLine(line2);
+            fileWriter.writeLine(String.format("%.2f,%.2f,%.2f,%.2f,%.2f,%.5f",
+                currentPower, rpsMax, rpsMin, rpsAvg, batteryVoltage, kf));
 
             int finalTestNumber1 = testNumber;
             double finalCurrentPower1 = currentPower;
-            KLog.d("MotorPowerRPSDataCollector", () -> String.format(
-                "Test %d/%d Complete - Power: %.2f | Shooter1: MAX=%.2f MIN=%.2f AVG=%.2f | Battery: %.2fV",
-                    finalTestNumber1, totalTests, finalCurrentPower1, rpsMax1, rpsMin1, rpsAvg1, batteryVoltage));
+            KLog.d(TAG, () -> String.format(
+                "event=testDone test=%d/%d power=%.2f rpsMax=%.2f rpsMin=%.2f rpsAvg=%.2f kf=%.5f batteryV=%.2f",
+                    finalTestNumber1, totalTests, finalCurrentPower1, rpsMax, rpsMin, rpsAvg, kf, batteryVoltage));
 
             telemetry.addLine("Status: Data recorded!");
-            telemetry.addData("RPS Max (Shooter1)", "%.2f", rpsMax1);
-            telemetry.addData("RPS Min (Shooter1)", "%.2f", rpsMin1);
-            telemetry.addData("RPS Avg (Shooter1)", "%.2f", rpsAvg1);
+            telemetry.addData("RPS Max", "%.2f", rpsMax);
+            telemetry.addData("RPS Min", "%.2f", rpsMin);
+            telemetry.addData("RPS Avg", "%.2f", rpsAvg);
+            telemetry.addData("kf (effective power / RPS)", "%.5f", kf);
             telemetry.addData("Battery Voltage", "%.2f V", batteryVoltage);
             telemetry.update();
 
@@ -173,8 +171,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         }
 
         // Stop motors
-        shooter1.stopAndResetPID();
-        shooter2.stopAndResetPID();
+        shooter.stopAndResetPID();
 
         // Close file
         fileWriter.close();
@@ -184,15 +181,15 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         telemetry.addLine("File saved to:");
         telemetry.addLine("/sdcard/Android/data/");
         telemetry.addLine("com.qualcomm.ftcrobotcontroller/");
-        telemetry.addLine("files/OdometryLog/");
+        telemetry.addLine("files/RobotLogs/");
         telemetry.addLine();
         telemetry.addLine("Pull file using:");
         telemetry.addLine("adb pull /sdcard/Android/data/");
         telemetry.addLine("com.qualcomm.ftcrobotcontroller/");
-        telemetry.addLine("files/OdometryLog/ ~/Downloads");
+        telemetry.addLine("files/RobotLogs/ ~/Downloads");
         telemetry.update();
 
-        KLog.d("MotorPowerRPSDataCollector", "Data collection complete. File closed.");
+        KLog.d(TAG, "event=done file=closed");
 
         // Keep telemetry visible
         while (opModeIsActive()) {
@@ -201,30 +198,19 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
     }
 
     /**
-     * Initialize shooter motors with proper configuration
+     * Initialize the shooter motor with proper configuration
      */
     private void initializeHardware() {
-        // Initialize shooter1
-        DcMotor motor1 = hardwareMap.dcMotor.get("shooter1");
-        motor1.setDirection(DcMotorSimple.Direction.REVERSE);
-        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        motor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        DcMotor motor = hardwareMap.dcMotor.get("shooter");
+        motor.setDirection(ShooterConfig.SHOOTER_MOTOR_DIRECTION); // same constant Shooter uses
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        shooter1 = new KMotor(motor1,
+        shooter = new KMotor(motor,
             ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
 
-        // Initialize shooter2
-        DcMotor motor2 = hardwareMap.dcMotor.get("shooter2");
-        motor2.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        motor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        shooter2 = new KMotor(motor2,
-            ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
-
-        KLog.d("MotorPowerRPSDataCollector", "Motors initialized successfully");
+        KLog.d(TAG, "event=motorsInit");
     }
 
     /**

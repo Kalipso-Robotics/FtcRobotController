@@ -30,7 +30,7 @@
       "y": 252,
       "headingDeg": 90
     },
-    "note": "RedDecideAuto for when the partner shoots first from the up side (use partner red_partner_up_side). Start must equal the pose it gives Odometry: (1500, BACK_MM = 252, +90 deg). It waits until Cell B is up, then decides like RedDecideAuto."
+    "note": "RedDecideAuto for when the partner shoots first from the up side (use partner red_partner_first). Start must equal the pose it gives Odometry: (1500, BACK_MM = 252, +90 deg). It waits until Cell B is up, then decides like RedDecideAuto."
   },
   {
     "name": "RedDecideAutoNotSolo",

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActions.pathActions.decode;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -63,7 +64,7 @@ public class VisionRoundTripAction extends RoundTripAction {
         private final Stopper stopper;
         private final Intake intake;
 
-        private Point targetPoint = Shooter.TARGET_POINT;
+        private Point targetPoint = ShooterConfig.TARGET_POINT;
         private Point launchPoint = new Point(0, 0);
         private double waitForShooterReadyMS = 0;
         private boolean shouldRunIntake = true;

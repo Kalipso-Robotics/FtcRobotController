@@ -1,8 +1,8 @@
 {
   "pollenRadiusMm": 35.56,
-  "pollenMassKg": 0.015,
+  "pollenMassKg": 0.0249,
   "nectarRadiusMm": 45.72,
-  "nectarMassKg": 0.02,
+  "nectarMassKg": 0.0413,
   "ballFriction": 0.5,
   "ballBounce": 0.4,
   "ballRollingDamping": 0.6,
@@ -34,8 +34,8 @@
   "_notes": {
     "pollenRadiusMm": "2.8 in ball (manual 9.8)",
     "nectarRadiusMm": "3.6 in ball (manual 9.8)",
-    "pollenMassKg": "UNMEASURED: the manual gives no mass",
-    "nectarMassKg": "UNMEASURED: 0.020/0.015 = 1.33, which the team's two tip tests imply",
+    "pollenMassKg": "MEASURED by the team: 0.055 lb = 24.9 g (the manual gives no mass)",
+    "nectarMassKg": "MEASURED by the team: 0.091 lb = 41.3 g, 1.66 pollen",
     "ballFriction": "UNMEASURED",
     "ballBounce": "UNMEASURED",
     "ballRollingDamping": "UNMEASURED",

@@ -5,14 +5,15 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAutoNearRampThirdSpike;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+@Disabled
 @Autonomous
 public class BlueAutoNearRampThirdSpike extends RedAutoNearRampThirdSpike {
     @Override
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(this.allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = (int) Math.round(-((TurretConfig.TICKS_PER_ROTATION * TurretConfig.BIG_TO_SMALL_PULLEY) / 2)) * allianceColor.getPolarity(); //offset by 180 deg
     }
 
 }

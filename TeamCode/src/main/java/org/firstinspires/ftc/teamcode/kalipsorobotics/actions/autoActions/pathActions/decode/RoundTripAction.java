@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -21,7 +20,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyAuto;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
@@ -44,7 +43,7 @@ public class RoundTripAction extends KActionSet {
     private final PurePursuitReady purePursuitReadyIntakeStop;
     private final ShooterStop shooterStop;
     private final TurretAutoAlign turretAutoAlign;
-    private final TurretReadyAuto turretReadyAuto;
+    private final TurretReady turretReadyAuto;
     private boolean hasUpdatedShooterReady = false;
     private boolean shouldShooterStop = true;
     private boolean wasShootFired = false;
@@ -110,15 +109,10 @@ public class RoundTripAction extends KActionSet {
         shooterReady.setDependentActions(moveToBalls);
         this.addAction(shooterReady);
 
-        turretReadyAuto = new TurretReadyAuto(turretAutoAlign);
+        turretReadyAuto = new TurretReady(turretAutoAlign);
         turretReadyAuto.setName("turretReady");
         turretReadyAuto.setDependentActions(moveToBalls);
         this.addAction(turretReadyAuto);
-
-        TurretStop turretStop = new TurretStop(turretAutoAlign);
-        turretStop.setName("turretStop");
-        turretStop.setDependentActions(turretReadyAuto);
-        this.addAction(turretStop);
 
         pushBall = new PushBall(stopper, intake);
         pushBall.setName("shoot");

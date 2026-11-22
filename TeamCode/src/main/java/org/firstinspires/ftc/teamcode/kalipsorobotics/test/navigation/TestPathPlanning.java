@@ -47,10 +47,7 @@ public class TestPathPlanning extends KOpMode {
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         sleep(1000);
 
-        Odometry.setInstanceNull();
-        Odometry odometry = Odometry.getInstance(opModeUtilities, driveTrain, imuModule,
-                START_X, START_Y, Math.toRadians(0));
-        OpModeUtilities.runOdometryExecutorService(odoExecutorService, odometry);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, new Position(START_X, START_Y, Math.toRadians(0)));
 
         PathPlanning planner = PathPlanning.forField(BUFFER_MM);
         // The planner goes to the target cluster in SharedData. Normally the ball detection sets it;

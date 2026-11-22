@@ -72,9 +72,14 @@ public class BallCluster {
         if (isEliminated(alliance)) {
             return 0;
         }
-        int nectar = Math.min(getCount(allianceType(alliance)), INTAKE_CAPACITY);
-        int pollen = Math.min(getCount(BallInformation.Type.YELLOW), INTAKE_CAPACITY - nectar);
-        return nectar * NECTAR_POINTS + pollen * POLLEN_POINTS;
+        return points(getCount(allianceType(alliance)), getCount(BallInformation.Type.YELLOW), INTAKE_CAPACITY);
+    }
+
+    /** Points of picking up these balls when only room fit: nectar first (worth more), then pollen. */
+    public static int points(int nectar, int pollen, int room) {
+        int takenNectar = Math.min(nectar, room);
+        int takenPollen = Math.min(pollen, room - takenNectar);
+        return takenNectar * NECTAR_POINTS + takenPollen * POLLEN_POINTS;
     }
 
     public static int tileColumnOf(double x) {

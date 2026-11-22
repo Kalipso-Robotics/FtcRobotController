@@ -165,13 +165,17 @@ export async function createWorld(init) {
   }
   function movePartner(toNanos) {
     if (!partner || partnerStartNanos === null) return;
-    const tPath = (toNanos - partnerStartNanos) / 1e9 * partner.speed;
-    setPartnerTo(partnerPoseAt(partner.poses, tPath), true);
-    partnerPickUp(tPath);
-    // each ball is due at its block's "from" plus its place in the block; a ball R2 has not picked up yet makes it wait
-    while (partnerShotsFired < partnerShotTimes.length && tPath >= partnerShotTimes[partnerShotsFired]) {
-      if (!partnerShoot(tPath)) break;
+    if (partnerLastNanos === null) partnerLastNanos = partnerStartNanos;
+    let tNext = partnerT + (toNanos - partnerLastNanos) / 1e9 * partner.speed;
+    partnerLastNanos = toNanos;
+    // a shoot stop holds R2's path clock at its end until R2 has fired every ball it carries (it cannot leave with balls, like our robot)
+    for (const b of shotBlocks) {
+      if (partnerT >= b.from && partnerT <= b.to + 1e-9 && tNext > b.to && partnerCarried() > 0) tNext = b.to;
     }
+    partnerT = tNext;
+    setPartnerTo(partnerPoseAt(partner.poses, partnerT), true);
+    partnerPickUp();
+    partnerShootStep();
   }
 
   // ---- balls, Flowers, Gardens, Hives ----
@@ -339,7 +343,7 @@ export async function createWorld(init) {
       for (const side of [1, -1]) {
         const y = side * reach * Math.cos(phi) - s * Math.sin(phi);
         const z = side * reach * Math.sin(phi) + s * Math.cos(phi);
-        if (z > 0.15) out.push({ hive: hive.name, x: origin.x, y: origin.y + y, z: origin.z + z });
+        if (z > 0.15) out.push({ hive: hive.name, x: origin.x, y: origin.y + y, z: origin.z + z, settled: Math.abs(phi) > hive.tilt * 0.9 });
       }
     }
     return out;
@@ -429,16 +433,20 @@ export async function createWorld(init) {
     putInSlot(ball, i % 2 === 0);
   }
 
-  // R2's balls: pollen carried inside R2 until its shots.
-  //   partner.shots = one block or a list of blocks { from, count, everyMs } (seconds on its path clock), fired one after another
-  //   partner.pickups = [{ at, x, y, count }]: at that time R2 takes the nearest loose pollen within 350 mm of (x, y) into itself
+  // R2 works like R1: it holds at most 4 balls (G407), its intake takes only balls that touch its intake mouth, and it shoots one ball
+  // every everyMs at a Cell that is up and has stopped moving.
+  //   partner.pickups = [{ from, to }]: R2's intake runs while its path clock is in [from, to]
+  //   partner.shots   = [{ from, to, everyMs, side, preload }]: a shoot stop. R2 shoots while its path clock is in [from, to] and holds the
+  //                     clock at "to" until every ball it carries is fired. side "A" / "B" = only the Cell on that end of the Hive.
+  //                     preload (first block only): balls R2 starts with.
   const shotBlocks = [].concat(partner?.shots ?? []);
-  const partnerShotTimes = [];     // when each ball is due, in order
-  const partnerShotSide = [];      // optional "side": "A" or "B" per block = only shoot into the Cell on that end of the Hive (A end = big y)
-  for (const b of shotBlocks) for (let i = 0; i < b.count; i++) { partnerShotTimes.push(b.from + i * b.everyMs / 1000); partnerShotSide.push(b.side); }
-  const partnerPickups = (partner?.pickups ?? []).map((p) => ({ ...p, done: false }));
-  const pickupTotal = partnerPickups.reduce((n, p) => n + p.count, 0);
+  const intakeWindows = [].concat(partner?.pickups ?? []);
   const partnerBalls = [];         // the balls R2 carries or has carried, in shooting order
+  let partnerShotsFired = 0;
+  let partnerT = 0;                // R2's path clock (seconds), held back while R2 still has balls to shoot at a shoot stop
+  let partnerLastNanos = null;
+  let partnerLastShotNanos = -1e18;
+  const partnerCarried = () => partnerBalls.length - partnerShotsFired;
   function carryInPartner(ball) {
     if (ball.body) world.removeRigidBody(ball.body);
     ball.body = null;
@@ -446,32 +454,40 @@ export async function createWorld(init) {
     ball.partnerHeld = true;
     partnerBalls.push(ball);
   }
-  for (let i = 0; i < Math.max(0, partnerShotTimes.length - pickupTotal); i++) carryInPartner(addBall(0, 0, 0, 5));   // the preload
-  let partnerShotsFired = 0;
+  for (let i = 0; i < shotBlocks.reduce((n, b) => n + (b.preload ?? 0), 0); i++) carryInPartner(addBall(0, 0, 0, 5));   // the preload
 
-  /** R2's intake: grab the nearest loose pollen balls around a pile. */
-  function partnerPickUp(tPath) {
-    for (const pk of partnerPickups) {
-      if (pk.done || tPath < pk.at) continue;
-      pk.done = true;
-      const near = balls
-        .filter((b) => b.type === 0 && !b.held && b.body && b.body.translation().z < 0.2)   // on the floor (a spilled ball keeps inCell, so check the height)
-        .map((b) => ({ b, d: Math.hypot(b.body.translation().x / MM - pk.x, b.body.translation().y / MM - pk.y) }))
-        .filter((e) => e.d < (pk.radius ?? 350))
-        .sort((a, c) => a.d - c.d)
-        .slice(0, pk.count);
-      for (const e of near) carryInPartner(e.b);
-      worldEvents.push({ name: `*partner picked up ${near.length} pollen ball(s)`, nanos: simNanos });
+  /** R2's intake: the same mouth as R1's (front and back), only while its intake window is open, up to 4 balls held. */
+  function partnerPickUp() {
+    if (!intakeWindows.some((w) => partnerT >= w.from && partnerT <= w.to) || partnerCarried() >= 4) return;
+    const px = partnerPose[0] * MM, py = partnerPose[1] * MM, th = partnerPose[2];
+    const c = Math.cos(th), s = Math.sin(th);
+    const halfW = partner.width * MM / 2 - 0.01;
+    for (const ball of balls) {
+      if (ball.held || !ball.body) continue;
+      const q = ball.body.translation();
+      if (q.z > ball.radius + 0.06) continue;              // only balls on the floor
+      const dx = q.x - px, dy = q.y - py;
+      const lx = dx * c + dy * s, ly = -dx * s + dy * c;
+      if (Math.abs(ly) > halfW) continue;
+      const front = lx > partner.front * MM - 0.06 && lx < partner.front * MM + intakeMouthM.front * MM;
+      const back = lx < -partner.back * MM + 0.06 && lx > -partner.back * MM - intakeMouthM.back * MM;
+      if (front || back) {
+        carryInPartner(ball);
+        worldEvents.push({ name: `*partner picked up a ${ball.type === 0 ? 'pollen' : ball.type === 1 ? 'red nectar' : 'blue nectar'} ball (${partnerCarried()} held)`, nanos: simNanos });
+        if (partnerCarried() >= 4) return;
+      }
     }
   }
 
-  /** R2 shoots its next ball at the nearest up Cell, like R1's auto-aimed shot (same aim error). */
-  function partnerShoot(tPath) {
+  /** At a shoot stop: one ball every everyMs at a settled up Cell of our Hive, aimed like R1's auto-aimed shot (same aim error). */
+  function partnerShootStep() {
+    const stop = shotBlocks.find((b) => partnerT >= b.from && partnerT <= b.to + 1e-9);
+    if (!stop || partnerCarried() <= 0) return;
+    if (simNanos - partnerLastShotNanos < (stop.everyMs ?? 110) * 1e6) return;
+    const openings = upCellOpenings().filter((o) => o.hive === 'red-hive' && o.settled
+      && (!stop.side || (stop.side === 'A') === (o.y > 1828.8 * MM)));   // R2 is our partner: only our alliance's Hive, and only a Cell that has stopped moving
+    if (!openings.length) return;   // no Cell is ready: wait
     const ball = partnerBalls[partnerShotsFired];
-    if (!ball) return false;   // not picked up yet: wait
-    const side = partnerShotSide[partnerShotsFired];
-    const openings = upCellOpenings().filter((o) => o.hive === 'red-hive' && (!side || (side === 'A') === (o.y > 1828.8 * MM)));   // R2 is our partner: only our alliance's Hive
-    if (!openings.length) return false;   // no Cell is up: wait
     const exit = { x: partnerPose[0] * MM, y: partnerPose[1] * MM, z: P.exitHeightMm * MM };
     openings.sort((a, b) => Math.hypot(a.x - exit.x, a.y - exit.y) - Math.hypot(b.x - exit.x, b.y - exit.y));
     const { v, angle, azimuth: aimed } = solveLaunch(exit, openings[0], (P.autoAimAngleDeg * Math.PI) / 180);
@@ -482,8 +498,8 @@ export async function createWorld(init) {
     giveBody(ball, exit.x, exit.y, exit.z, v * Math.cos(angle) * Math.cos(azimuth), v * Math.cos(angle) * Math.sin(azimuth), v * Math.sin(angle));
     ball.shot = true;
     partnerShotsFired++;
-    worldEvents.push({ name: `*partner shot a pollen ball (${v.toFixed(1)} m/s)`, nanos: simNanos });
-    return true;
+    partnerLastShotNanos = simNanos;
+    worldEvents.push({ name: `*partner shot a ${ball.type === 0 ? 'pollen' : 'nectar'} ball (${v.toFixed(1)} m/s)`, nanos: simNanos });
   }
 
   // ---- stepping ----

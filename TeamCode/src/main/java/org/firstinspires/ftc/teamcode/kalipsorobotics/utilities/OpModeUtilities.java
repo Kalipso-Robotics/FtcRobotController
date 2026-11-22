@@ -6,6 +6,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.April
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryLogger;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 
@@ -74,6 +78,32 @@ public class OpModeUtilities {
      * @param executorService
      * @param odometry
      */
+    /**
+     * Starts odometry from the source OdometryConfig.USE_OCTOQUAD picks (OctoQuad pods or drive-port encoders) and runs it
+     * on the executor. Both publish to SharedData.setOdometryWheelIMUPosition, so readers do not change.
+     * start != null: a fresh instance at that pose (both singletons are cleared first).
+     * start == null: reuse the instance the last OpMode left (auto -> TeleOp pose carry-over), or (0,0,0) if none.
+     * The OctoQuad calibrates its IMU the first time (up to 15 s, keep the robot still) and throws if "octoquad" is not in the config.
+     * Pattern source: the Odometry.getInstance + runOdometryExecutorService pairs this replaces.
+     */
+    public static void startOdometry(OpModeUtilities opModeUtilities, ExecutorService executorService,
+                                     DriveTrain driveTrain, IMUModule imuModule, Position start) {
+        if (start != null) {
+            Odometry.setInstanceNull();
+            OctoQuadOdo.setInstanceNull();
+        }
+        boolean octo = OdometryConfig.USE_OCTOQUAD;
+        if (octo) {
+            OctoQuadOdo odo = (start == null) ? OctoQuadOdo.getInstance(opModeUtilities) : OctoQuadOdo.getInstance(opModeUtilities, start);
+            runOdometryExecutorService(executorService, odo);
+        } else {
+            Odometry odo = (start == null) ? Odometry.getInstance(opModeUtilities, driveTrain, imuModule)
+                    : Odometry.getInstance(opModeUtilities, driveTrain, imuModule, start);
+            runOdometryExecutorService(executorService, odo);
+        }
+        KLog.d("Robot_Odometry", () -> "event=start source=" + (octo ? "octo" : "wheel") + " start=" + start);
+    }
+
     public static void runOdometryExecutorService(ExecutorService executorService, Odometry odometry) {
         KLog.d("ExecutorService_Run", () -> "runOdometryExecutorService called");
         KLog.d("ExecutorService_Run", () -> "odometry instance: " + odometry);
@@ -190,11 +220,14 @@ public class OpModeUtilities {
 
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        KLog.d("ExecutorService_Run", () -> "April Tag Thread is running. OpMode.isActive: " + aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive());
                         if (aprilTagDetectionAction.getOpModeUtilities().getOpMode().opModeIsActive()) {
-                            KLog.d("ExecutorService_Run", () -> "April Tag OpModeIsActive. Running");
                             aprilTagDetectionAction.updateCheckDone();
                         }
+                        // ponytail: fixed nap instead of busy-spinning on the same frame (Limelight <= 90 fps ~ 11 ms);
+                        // it used to burn a core the main loop needs. Wait on the frame timestamp if this ever lags.
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     } catch (Exception e) {
                         KLog.e("ExecutorService_Run", "Exception in AprilTag update loop", e);
                         // Continue running despite errors in individual updates

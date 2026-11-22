@@ -3,23 +3,35 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
+/**
+ * Feeds the held balls into the shooter: stop the intake, open the stopper, run side A and side B AT THE SAME TIME
+ * (each after its own delay, IntakeConfig.FEED_A_DELAY_MS / FEED_B_DELAY_MS, both 0 by default), then close the stopper.
+ * Times: FEED_A_MS / FEED_B_MS. In auto, gate it like last year: pushBall.setDependentActions(driveReady, shooterReady, turretReady).
+ * Note: TeleOp's ShootAllAction uses this too, so the parallel feed changes TeleOp shooting as well.
+ * Pattern source: the previous PushBall chain and decode RoundTripAction gating.
+ */
 public class PushBall extends KActionSet {
-//    private final RunIntakeUntilFullSpeed runUntilFullSpeed;
+    public static final String TAG = "Shooting_PushBall";
+
     private final KServoAutoAction openStopper;
-    private final RunIntakeTime runIntakeTime;
-    private final CloseStopperInstantDone closeStopperInstantDone;
+    private final RunIntakeTime feedA;
+    private final RunIntakeTime feedB;
+    private final CloseStopper closeStopper;
     public PushBall(Stopper stopper, Intake intake) {
 
-        KLog.d("PushAllBalls", () -> "current pos " + SharedData.getOdometryWheelIMUPosition());
+        KLog.d(TAG, () -> "event=create pos=" + SharedData.getOdometryWheelIMUPosition());
 
         IntakeStop intakeStop = new IntakeStop(intake);
         this.addAction(intakeStop);
@@ -29,46 +41,52 @@ public class PushBall extends KActionSet {
         openStopper.setDependentActions(intakeStop);
         this.addAction(openStopper);
 
-        KLog.d("PushAllBalls", () -> "openStopper " + openStopper.getIsDone());
+        IntakeSide sideA = intake.getSide(BeamBreakPosition.IntakeSide.A);
+        IntakeSide sideB = intake.getSide(BeamBreakPosition.IntakeSide.B);
 
-        runIntakeTime = new RunIntakeTime(intake, IntakeConfig.shootTimeMS, IntakeConfig.intakePower);
-        runIntakeTime.setName("runIntakeTime");
-        runIntakeTime.setDependentActions(openStopper);
-        this.addAction(runIntakeTime);
+        // A and B feed at the same time; each side waits its own delay first (both 0 = together).
+        WaitAction delayA = new WaitAction(IntakeConfig.FEED_A_DELAY_MS);
+        delayA.setName("feedADelay");
+        delayA.setDependentActions(openStopper);
+        this.addAction(delayA);
 
-        closeStopperInstantDone = new CloseStopperInstantDone(stopper);
-        closeStopperInstantDone.setName("closeStopperInstantDone");
-        closeStopperInstantDone.setDependentActions(runIntakeTime);
-        this.addAction(closeStopperInstantDone);
-//
-//        runUntilFullSpeed = new RunIntakeUntilFullSpeed(intake);
-//        runUntilFullSpeed.setDependentActions(openStopper);
-//        runUntilFullSpeed.setName("untilShootingDone");
-////        untilShootingDone.setDependentActions(pushLeft, pushRight);
-//        this.addAction(runUntilFullSpeed);
-//
-//        KLog.d("PushAllBalls", "run intake " + runUntilFullSpeed.getIsDone());
+        feedA = new RunIntakeTime(sideA, IntakeConfig.FEED_A_MS, IntakeConfig.intakePower);
+        feedA.setName("feedA");
+        feedA.setDependentActions(delayA);
+        this.addAction(feedA);
 
+        WaitAction delayB = new WaitAction(IntakeConfig.FEED_B_DELAY_MS);
+        delayB.setName("feedBDelay");
+        delayB.setDependentActions(openStopper);
+        this.addAction(delayB);
 
-        KLog.d("teleop", "pusher Stopped(based off intake)");
+        feedB = new RunIntakeTime(sideB, IntakeConfig.FEED_B_MS, IntakeConfig.intakePower);
+        feedB.setName("feedB");
+        feedB.setDependentActions(delayB);
+        this.addAction(feedB);
 
+        closeStopper = new CloseStopper(stopper);
+        closeStopper.setName("closeStopper");
+        closeStopper.setDependentActions(feedA, feedB);
+        this.addAction(closeStopper);
     }
-
-//    public RunIntakeUntilFullSpeed getRunUntilFullSpeed() {
-//        return runUntilFullSpeed;
-//    }
 
     public KServoAutoAction getOpenStopper() {
         return openStopper;
     }
 
+    /** KActionSet never sets hasStarted; RedDecideAuto reads it to drop a shoot only before the feed starts. */
+    @Override
+    protected void beforeUpdate() {
+        super.beforeUpdate();
+        hasStarted = true;
+    }
+
     @Override
     protected void afterUpdate() {
-        KLog.d("PushBall_Status", () -> String.format("[%s] Status - OpenStopper: %s, RunIntake: %s, CloseStopper: %s",
-                getName() != null ? getName() : "unnamed",
-                openStopper.getIsDone() ? "DONE" : "NOT DONE",
-                runIntakeTime.getIsDone() ? "DONE" : "NOT DONE",
-                closeStopperInstantDone.getIsDone() ? "DONE" : "NOT DONE"
-                ));
+        if (KLog.isDebug()) {
+            KLog.d(TAG, () -> String.format("name=%s openStopperDone=%s feedADone=%s feedBDone=%s closeStopperDone=%s",
+                    getName(), openStopper.getIsDone(), feedA.getIsDone(), feedB.getIsDone(), closeStopper.getIsDone()));
+        }
     }
 }

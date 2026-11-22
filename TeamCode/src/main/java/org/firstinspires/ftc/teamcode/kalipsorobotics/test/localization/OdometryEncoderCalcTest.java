@@ -52,7 +52,7 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
         Turret.setInstanceNull();
         Turret turret = Turret.getInstance(opModeUtilities);
 
-        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
+        AprilTagDetectionAction aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, AllianceColor.RED);
 
         waitForStart();
         try {
@@ -75,12 +75,12 @@ public class OdometryEncoderCalcTest extends LinearOpMode {
                 }
 
                 if (gamepad1.x) {
-                    aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 20, AllianceColor.BLUE);
+                    aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, AllianceColor.BLUE);
                     AprilTagDetectionAction finalAprilTagDetectionAction1 = aprilTagDetectionAction;
                     KLog.d("OdoEncoderCalcTest", () -> "Successfully switched color to blue " + finalAprilTagDetectionAction1);
                 }
                 if (gamepad1.b) {
-                    aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, 24, AllianceColor.RED);
+                    aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, AllianceColor.RED);
                     AprilTagDetectionAction finalAprilTagDetectionAction2 = aprilTagDetectionAction;
                     KLog.d("OdoEncoderCalcTest", () -> "Successfully switched color to red " + finalAprilTagDetectionAction2);
                 }

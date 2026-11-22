@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.blueAuto;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.auto.redAuto.RedAutoDepotScanning;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
+@Disabled
 @Autonomous
 public class BlueAutoDepotScanning extends RedAutoDepotScanning {
 
@@ -15,6 +17,6 @@ public class BlueAutoDepotScanning extends RedAutoDepotScanning {
     protected void initializeRobotConfig() {
         this.allianceColor = AllianceColor.BLUE;
         SharedData.setAllianceColor(allianceColor);
-        TurretConfig.TICKS_INIT_OFFSET = 0;
+        TurretConfig.TURRET_OFFSET_DEG = 0;
     }
 }

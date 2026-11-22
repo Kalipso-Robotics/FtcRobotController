@@ -2,14 +2,14 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
-import java.util.*;
+import java.util.ArrayList;
 
 /**
  * Linear interpolation lookup for shooter parameters based on manually tuned test data.
- * Data is hard-coded from ShooterTestedManualData.csv for performance.
+ * Rows live in ShooterInterpolationConfig.shooterData.
  */
 public class ShooterInterpolationDataLookup implements IShooterPredictor {
     // No clamping - use the exact values from the manual tuning data
@@ -26,73 +26,68 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
         }
     }
 
-    // Static data from ShooterTestedManualData.csv
-    // Format: DistanceMM, RPS, Hood Position Relative
-    private static final ArrayList<DataPoint> DATA_POINTS = new ArrayList<DataPoint>() {{
-        //in  ShooterInterpolationConfig
-    }};
+    // Rows come from ShooterInterpolationConfig.shooterData (distanceMM, rps, hoodPosition).
+    // Rebuilt by each constructor so a second lookup never duplicates rows.
+    private final ArrayList<DataPoint> dataPoints = new ArrayList<>();
+    private boolean emptyTableLogged = false;
 
     /**
-     * Default constructor - uses static data.
+     * Default constructor - copies the rows from ShooterInterpolationConfig.shooterData.
      */
     public ShooterInterpolationDataLookup() {
-        for (int i = 0; i < shooterData.length; i += 3) {
-            DATA_POINTS.add(new DataPoint(ShooterInterpolationConfig.shooterData[i],
-                    ShooterInterpolationConfig.shooterData[i + 1],
-                    ShooterInterpolationConfig.shooterData[i + 2]));
+        for (int i = 0; i + 2 < shooterData.length; i += 3) {
+            dataPoints.add(new DataPoint(shooterData[i], shooterData[i + 1], shooterData[i + 2]));
         }
     }
 
-
-
     /**
      * Get shooter parameters for a given distance using linear interpolation.
+     * Empty table: safe default. Below the first row: first row. Above the last row: last row.
      *
      * @param distanceMM Distance to target in millimeters
      * @return Shooter parameters (RPS and hood position)
      */
     @Override
     public IShooterPredictor.ShooterParams predict(double distanceMM) {
-
-        // If distance is below minimum, return first point
-        if (distanceMM <= DATA_POINTS.get(0).distanceMM) {
-            DataPoint dp = DATA_POINTS.get(0);
-            double clampedHood = clampHood(dp.hoodPosition);
-            clampedHood += HOOD_INIT_OFFSET;
-            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood + hoodOffset);
+        if (dataPoints.isEmpty()) {
+            if (!emptyTableLogged) {
+                emptyTableLogged = true;
+                KLog.e(Shooter.TAG, "event=emptyInterpolationTable rps=" + DEFAULT_RPS + " hood=" + MIN_HOOD);
+            }
+            return toParams(DEFAULT_RPS, MIN_HOOD);
         }
 
-        // If distance is above maximum, return last point
-        if (distanceMM >= DATA_POINTS.get(DATA_POINTS.size() - 1).distanceMM) {
-            DataPoint dp = DATA_POINTS.get(DATA_POINTS.size() - 3);
-            double clampedHood = clampHood(dp.hoodPosition);
-            clampedHood += HOOD_INIT_OFFSET;
-            return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood + hoodOffset);
+        DataPoint first = dataPoints.get(0);
+        if (distanceMM <= first.distanceMM) {
+            return toParams(first.rps, first.hoodPosition);
+        }
+
+        DataPoint last = dataPoints.get(dataPoints.size() - 1);
+        if (distanceMM >= last.distanceMM) {
+            return toParams(last.rps, last.hoodPosition);
         }
 
         // Find the two surrounding points
-        for (int i = 0; i < DATA_POINTS.size() - 1; i++) {
-            DataPoint lower = DATA_POINTS.get(i);
-            DataPoint upper = DATA_POINTS.get(i + 1);
+        for (int i = 0; i < dataPoints.size() - 1; i++) {
+            DataPoint lower = dataPoints.get(i);
+            DataPoint upper = dataPoints.get(i + 1);
 
             if (distanceMM >= lower.distanceMM && distanceMM <= upper.distanceMM) {
                 // Linear interpolation
                 double t = (distanceMM - lower.distanceMM) / (upper.distanceMM - lower.distanceMM);
-
                 double interpolatedRPS = lower.rps + t * (upper.rps - lower.rps);
                 double interpolatedHood = lower.hoodPosition + t * (upper.hoodPosition - lower.hoodPosition);
-
-                double clampedHood = clampHood(interpolatedHood);
-                clampedHood += HOOD_INIT_OFFSET;
-                return new IShooterPredictor.ShooterParams(interpolatedRPS + rpsOffset, clampedHood + hoodOffset);
+                return toParams(interpolatedRPS, interpolatedHood);
             }
         }
 
-        // Should never reach here, but return last point as fallback
-        DataPoint dp = DATA_POINTS.get(0);
-        double clampedHood = clampHood(dp.hoodPosition);
-        clampedHood += HOOD_INIT_OFFSET;
-        return new IShooterPredictor.ShooterParams(dp.rps + rpsOffset, clampedHood + hoodOffset);
+        // Only reached if the table is not sorted by distance
+        return toParams(last.rps, last.hoodPosition);
+    }
+
+    private IShooterPredictor.ShooterParams toParams(double rps, double hood) {
+        double clampedHood = clampHood(hood) + HOOD_INIT_OFFSET;
+        return new IShooterPredictor.ShooterParams(rps + rpsOffset, clampedHood + hoodOffset);
     }
 
     /**
@@ -103,23 +98,9 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
     }
 
     /**
-     * Get the minimum distance in the dataset.
-     */
-    public double getMinDistance() {
-        return DATA_POINTS.get(0).distanceMM;
-    }
-
-    /**
-     * Get the maximum distance in the dataset.
-     */
-    public double getMaxDistance() {
-        return DATA_POINTS.get(DATA_POINTS.size() - 1).distanceMM;
-    }
-
-    /**
      * Get the number of data points loaded.
      */
     public int getDataPointCount() {
-        return DATA_POINTS.size();
+        return dataPoints.size();
     }
 }
