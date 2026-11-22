@@ -238,16 +238,11 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip3ShooterStop.setDependentActions(trip3Shoot);
         redThreeTipSoloAuto.addAction(trip3ShooterStop);
 
-        IPurePursuitAction trip3ForceAngle = new PurePursuitAction(driveTrain);
-        trip3ForceAngle.setName("trip3ForceAngle");
-        trip3ForceAngle.addPoint(1027, 487, 108.5);
-        trip3ForceAngle.setDependentActions(trip3Shoot);
-        redThreeTipSoloAuto.addAction(trip3ForceAngle);
-
         IPurePursuitAction trip3GoToGarden = new PurePursuitAction(driveTrain);
         trip3GoToGarden.setName("trip3GoToGarden");
+        trip3GoToGarden.addPoint(1027, 487, 108.5);
         trip3GoToGarden.addPoint(289, 2949, 102.6);
-        trip3GoToGarden.setDependentActions(trip3ForceAngle);
+        trip3GoToGarden.setDependentActions(trip3Shoot);
         redThreeTipSoloAuto.addAction(trip3GoToGarden);
 
         IntakeFullAction trip3IntakeFullAction = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
@@ -255,29 +250,18 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip3IntakeFullAction.setDependentActions(trip3GoToGarden);
         redThreeTipSoloAuto.addAction(trip3IntakeFullAction);
 
-        IPurePursuitAction trip3IntakeGarden = new PurePursuitAction(driveTrain);
-        trip3IntakeGarden.setName("trip3IntakeGarden");
-        trip3IntakeGarden.addPoint(188, 3309, 90.0);
-        trip3IntakeGarden.setDependentActions(trip3GoToGarden);
-        redThreeTipSoloAuto.addAction(trip3IntakeGarden);
-
-        // in and out a second time to make sure we got the balls
-        IPurePursuitAction trip3GoToGarden2 = new PurePursuitAction(driveTrain);
-        trip3GoToGarden2.setName("trip3GoToGarden2");
-        trip3GoToGarden2.addPoint(289, 2949, 102.6);
-        trip3GoToGarden2.setDependentActions(trip3IntakeGarden);
-        redThreeTipSoloAuto.addAction(trip3GoToGarden2);
-
-        IPurePursuitAction trip3IntakeGarden2 = new PurePursuitAction(driveTrain);
-        trip3IntakeGarden2.setName("trip3IntakeGarden2");
-        trip3IntakeGarden2.addPoint(188, 3309, 90.0);
-        trip3IntakeGarden2.setDependentActions(trip3GoToGarden2);
-        redThreeTipSoloAuto.addAction(trip3IntakeGarden2);
+        IPurePursuitAction trip3IntakeSweepGarden = new PurePursuitAction(driveTrain);
+        trip3IntakeSweepGarden.setName("trip3IntakeGarden");
+        trip3IntakeSweepGarden.addPoint(188, 3309, 90.0);
+        trip3IntakeSweepGarden.addPoint(289, 2949, 102.6);
+        trip3IntakeSweepGarden.addPoint(188, 3309, 90.0);
+        trip3IntakeSweepGarden.setDependentActions(trip3GoToGarden);
+        redThreeTipSoloAuto.addAction(trip3IntakeSweepGarden);
 
         IPurePursuitAction trip3GoToShoot = new PurePursuitAction(driveTrain);
         trip3GoToShoot.setName("trip3GoToShoot");
         trip3GoToShoot.addPoint(300, 2949, 102.6);
-        trip3GoToShoot.setDependentActions(trip3IntakeGarden2);
+        trip3GoToShoot.setDependentActions(trip3IntakeSweepGarden);
         redThreeTipSoloAuto.addAction(trip3GoToShoot);
 
         ShooterRun trip3GardenShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, new Point(300, 2949));
