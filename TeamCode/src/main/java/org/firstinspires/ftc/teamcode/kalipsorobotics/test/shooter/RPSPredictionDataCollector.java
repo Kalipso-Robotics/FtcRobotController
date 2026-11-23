@@ -1,28 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
-<<<<<<< HEAD
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter.TARGET_POINT;
-
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
-
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-=======
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
@@ -139,33 +116,6 @@ public class RPSPredictionDataCollector extends KOpMode {
 
             boolean shooting = gamepad1.left_trigger > 0.1;
             if (gamepad1.right_trigger > 0.1) {
-<<<<<<< HEAD
-                // Right trigger: Run intake + Close stopper
-                intake.getIntakeMotorFlower().setPower(1.0);
-                stopper.getStopper().setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-            } else if (gamepad1.left_trigger > 0.1) {
-                // Left trigger: Record shoot data
-                stopper.getStopper().setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
-                intake.getIntakeMotorFlower().setPower(1.0);
-
-                // Record shoot data when trigger is first pressed (edge detection)
-                if (!wasLeftTriggerPressed) {
-                    double currentRPS = shooter.getRPS();
-                    double currentVoltage = getBatteryVoltage();
-                    double distanceToTargetMM = calculateDistanceToTarget();
-
-                    lastShoot = new ShootData(currentRPS, shooterPower, currentVoltage, hoodPosition, distanceToTargetMM);
-
-                    // Log to KLog
-                    KLog.d("RPSPredictionData", () -> "SHOOT RECORDED: " + lastShoot);
-
-                    wasLeftTriggerPressed = true;
-                }
-            } else {
-                // No triggers: Stop intake
-                intake.getIntakeMotorFlower().setPower(0);
-                wasLeftTriggerPressed = false;
-=======
                 intake.run(1.0);
                 stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
             } else if (shooting) {
@@ -179,7 +129,6 @@ public class RPSPredictionDataCollector extends KOpMode {
                 }
             } else {
                 intake.stop();
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
             }
             wasShooting = shooting;
 
@@ -213,11 +162,7 @@ public class RPSPredictionDataCollector extends KOpMode {
         }
 
         shooter.stop();
-<<<<<<< HEAD
-        intake.getIntakeMotorFlower().setPower(0);
-=======
         intake.stop();
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
         fileWriter.close();
         KLog.d(TAG, "event=done file=RobotLogs/ pull: adb pull /sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs/");
         cleanupRobot();

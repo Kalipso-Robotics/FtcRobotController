@@ -49,16 +49,12 @@ public class IntakeFullAction extends KActionSet {
             return;
         }
         this.setIsDone(true);
-<<<<<<< HEAD
-        intake.getIntakeMotorFlower().setPower(0);
-=======
         if (side != null) {
             side.stop();
         } else {
             intake.stop();
         }
         KLog.d(TAG, () -> "name=" + getName() + " event=stopAndSetDone");
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
     }
 }
 

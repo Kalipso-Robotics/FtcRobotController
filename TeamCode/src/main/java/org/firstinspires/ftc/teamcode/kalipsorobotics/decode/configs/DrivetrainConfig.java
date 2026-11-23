@@ -22,8 +22,8 @@ public class DrivetrainConfig {
 
     public static DcMotor.ZeroPowerBehavior zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE;
 
-    public static final RevHubOrientationOnRobot.LogoFacingDirection IMU_LOGO_FACING_DIRECTION = RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD;
-    public static final RevHubOrientationOnRobot.UsbFacingDirection IMU_USB_FACING_DIRECTION = RevHubOrientationOnRobot.UsbFacingDirection.RIGHT;
+    public static final RevHubOrientationOnRobot.LogoFacingDirection IMU_LOGO_FACING_DIRECTION = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+    public static final RevHubOrientationOnRobot.UsbFacingDirection IMU_USB_FACING_DIRECTION = RevHubOrientationOnRobot.UsbFacingDirection.UP;
 
 
 }

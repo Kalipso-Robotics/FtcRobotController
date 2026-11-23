@@ -4,15 +4,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
-<<<<<<< HEAD
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlignTeleOp;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReadyTeleOp;
-=======
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -100,20 +95,9 @@ public class ShootAllAction extends KActionSet {
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlign turretAutoAlign) {
 
-<<<<<<< HEAD
-//        ActivateBraking activateBraking = new ActivateBraking(driveBrake);
-//        activateBraking.setName("ActivateBraking");
-//        this.addAction(activateBraking);
-
-        intake.getIntakeMotorFlower().setPower(0.2);
-
-
-        shooterReady = new ShooterReady(shooterRun);
-=======
         shooterReady = abortOnTimeout
                 ? new ShooterReady(shooterRun, ShooterConfig.TELEOP_READY_TIMEOUT_MS)
                 : new ShooterReady(shooterRun);
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 

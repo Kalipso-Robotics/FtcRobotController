@@ -46,15 +46,9 @@ public class StopperCalibration extends KOpMode {
             }
 
             if (kGamePad2.isRightTriggerPressed()) {
-<<<<<<< HEAD
-                intake.getIntakeMotorFlower().setPower(1);
-            }  else {
-                intake.getIntakeMotorFlower().setPower(0);
-=======
                 intake.run(1);
             }  else {
                 intake.stop();
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
             }
 
 

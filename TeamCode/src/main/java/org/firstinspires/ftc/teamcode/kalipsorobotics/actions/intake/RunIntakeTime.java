@@ -76,18 +76,10 @@ public class RunIntakeTime extends Action {
         if (isDone) {
             return;
         }
-<<<<<<< HEAD
-        intake.getIntakeMotorFlower().setPower(power);
-
-        if (timer.milliseconds() > timeMS) {
-            KLog.d("intake", () -> "RunIntake Timer met, stopping intake " + "current time: " + timer.milliseconds() + " ms");
-            intake.getIntakeMotorFlower().setPower(0);
-=======
         setPower(power);
 
         if (timer.milliseconds() > timeMS) {
             setPower(0);
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
             isDone = true;
             KLog.d(TAG, () -> "name=" + getName() + " side=" + sideLabel() + " event=done elapsedMs=" + timer.milliseconds());
         } else if (KLog.isDebug()) {

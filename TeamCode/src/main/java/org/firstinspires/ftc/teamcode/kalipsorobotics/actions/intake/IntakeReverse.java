@@ -15,11 +15,7 @@ public class IntakeReverse extends Action {
 
     @Override
     protected void update() {
-<<<<<<< HEAD
-        intake.getIntakeMotorFlower().setPower(-1);
-=======
         intake.run(-1);
->>>>>>> 9c27d2d1b179e33b4e0870dc56c7d8a16e21afc9
         isDone = true;
         KLog.d(TAG, () -> "name=" + getName() + " event=reverse");
     }
