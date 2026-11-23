@@ -54,16 +54,10 @@ public final class OctoConfig {
      * handedness are wiring facts and get settled in one session before a tape measure comes
      * out, because tuning against a wrongly-signed pod wastes the whole session.
      */
-    // bring-up 2026-09-22 via OctoStartup (OctoStartup_LATEST.txt), redone after a 200%+
-    // deviation in OctoTune showed X counting backwards -- ch0/ch2 direction changed from the
-    // 2026-09-21 bring-up, presumably a re-seated or swapped connector.
-    // (2026-09-22 names: "check 1" = today's FORWARD gesture, "check 2" = PUSH LEFT,
-    //  "check 3" = the CONFIRM L-test; OctoStartup now runs GESTURES then CONFIRM.)
-    //   check 1 forward push: ch0 +8321, ch2 +8247, pose x +620mm
-    //   check 2 sideways:     SKIPPED (still trusted from 2026-09-21, port 1 untouched)
-    public static final boolean INVERT_X  = false;  // [2026-09-22] OctoStartup FORWARD gesture
-    public static final boolean INVERT_Y  = false;   // [2026-09-22] OctoStartup CONFIRM L-test
-    public static final boolean INVERT_X2 = false;   // [2026-09-22] OctoStartup FORWARD gesture
+    // [UNVERIFIED] pods moved 2026-11-16: re-run OctoStartup and replace this line with its date.
+    public static final boolean INVERT_X  = true;
+    public static final boolean INVERT_Y  = true;
+    public static final boolean INVERT_X2 = true;
 
     /**
      * True when the board's frame is the mirror of yours and the pose must be flipped.
@@ -231,7 +225,7 @@ public final class OctoConfig {
     // ------------------------------------------------------------------- heading monitor
 
     /**
-     * Heading from the two parallel pods alone, degrees, CCW positive. Independent of the IMU.
+     * Heading from the two parallel pods alone, degrees, CW positive. Independent of the IMU.
      *
      * Sign follows YOUR convention: positive clockwise. Under a clockwise (rightward) turn the
      * left pod advances and the right pod retreats, so (left - right) / trackWidth is the angle.

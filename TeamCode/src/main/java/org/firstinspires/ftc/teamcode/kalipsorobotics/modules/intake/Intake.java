@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  */
 public class Intake {
 
+
     private final IntakeSide sideA;
     private final IntakeSide sideB;
     private final FlowerMech flowerMech;
