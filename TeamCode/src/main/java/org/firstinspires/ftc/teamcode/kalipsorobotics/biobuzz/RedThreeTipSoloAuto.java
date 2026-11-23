@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
@@ -52,8 +53,10 @@ public class RedThreeTipSoloAuto extends KOpMode {
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
 
-    final Position ROBOT_START_POS = new Position(1371.6, 152.0, 90);//double check 90 or nega 90
+    final Position ROBOT_START_POS = new Position(858, 3033, 90);//double check 90 or nega 90
     final Point PARK_POINT = new Point(392, 1371);
+    final double AUTO_LENGTH_MS = 30000;
+    final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
 
     @Override
@@ -135,7 +138,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         //END OF TRIP 0
 
         //TRIP 1
-        FullFlowerAction trip1FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_1);
+        FullFlowerAction trip1FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_2);
         trip1FlowerIntake.setName("trip1FlowerIntake");
         trip1FlowerIntake.setDependentActions(trip0Shoot);
         redThreeTipSoloAuto.addAction(trip1FlowerIntake);
@@ -173,7 +176,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         //END OF TRIP 1
 
         //TRIP 2
-        FullFlowerAction trip2FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_2);
+        FullFlowerAction trip2FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_1);
         trip2FlowerIntake.setName("trip2FlowerIntake");
         trip2FlowerIntake.setDependentActions(trip1Shoot);
         redThreeTipSoloAuto.addAction(trip2FlowerIntake);
@@ -358,13 +361,31 @@ public class RedThreeTipSoloAuto extends KOpMode {
         redThreeTipSoloAuto.addAction(trip4Park);
         //END OF TRIP 4
 
+        // FORCE PARK: with FORCE_PARK_MS_LEFT left in the match, drop everything and park
+        IPurePursuitAction forcePark = new PurePursuitAction(driveTrain);
+        forcePark.setName("forcePark");
+        forcePark.addPoint(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
+
         waitForStartPrecomputingPaths();
+        ElapsedTime matchTimer = new ElapsedTime();   // starts when the match starts
+        boolean forceParking = false;
 
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
             intake.update();
             turretAutoAlign.updateCheckDone(); // the turret only moves while its action is updated
-            redThreeTipSoloAuto.updateCheckDone();
+
+            boolean timeToPark = matchTimer.milliseconds() >= AUTO_LENGTH_MS - FORCE_PARK_MS_LEFT;
+            if (timeToPark && !forceParking) {
+                forceParking = true;
+                KLog.d("RedThreeTipSoloAuto", "force park at " + matchTimer.milliseconds() + " ms");
+            }
+
+            if (forceParking) {
+                forcePark.updateCheckDone();   // the auto actions are not updated any more
+            } else {
+                redThreeTipSoloAuto.updateCheckDone();
+            }
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
         }
         shooter.stop();
