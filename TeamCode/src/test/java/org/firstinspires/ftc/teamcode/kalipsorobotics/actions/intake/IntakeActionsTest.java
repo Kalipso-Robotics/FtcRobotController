@@ -7,6 +7,7 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.B
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.B;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.After;
 import org.junit.Before;
@@ -28,7 +30,7 @@ public class IntakeActionsTest {
 
     private final Servo pivotServoA = FlowerMechInterlockTest.fakeServo();
     private final Servo pivotServoB = FlowerMechInterlockTest.fakeServo();
-    private final Servo flowerServo = FlowerMechInterlockTest.fakeServo();
+    private final CRServo flowerServo = FlowerMechInterlockTest.fakeCRServo();
     private final DcMotor motorA = FlowerMechInterlockTest.fakeMotor();
     private final DcMotor motorB = FlowerMechInterlockTest.fakeMotor();
     private IntakeSide sideA;
@@ -42,7 +44,7 @@ public class IntakeActionsTest {
         IntakeConfig.FLOWER_MOVE_MS = 20;
         sideA = new IntakeSide(A, motorA, new KServo(pivotServoA, 1e6, 255, 0, false));
         sideB = new IntakeSide(B, motorB, new KServo(pivotServoB, 1e6, 255, 0, false));
-        flowerMech = new FlowerMech(new KServo(flowerServo, 1e6, 255, 0, false), sideA);
+        flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         intake = new Intake(sideA, sideB, flowerMech);
     }
 
@@ -66,7 +68,7 @@ public class IntakeActionsTest {
         runToDone(new IntakeSideLower(sideA));
         assertTrue(flowerMech.lower());
         runToDone(new IntakeSideRaise(sideA));
-        assertEquals(ModuleConfig.FLOWER_UP_POS, flowerServo.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
         assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotServoA.getPosition(), 1e-9);
         assertTrue(sideA.isUp());
     }
@@ -80,7 +82,7 @@ public class IntakeActionsTest {
         runToDone(new IntakeStow(intake));
         assertEquals(0, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
-        assertEquals(ModuleConfig.FLOWER_UP_POS, flowerServo.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
         assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotServoA.getPosition(), 1e-9);
         assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotServoB.getPosition(), 1e-9);
     }
@@ -90,7 +92,7 @@ public class IntakeActionsTest {
         long start = System.currentTimeMillis();
         runToDone(new FlowerLower(flowerMech, 40));
         assertTrue(System.currentTimeMillis() - start >= 40);
-        assertEquals(ModuleConfig.FLOWER_UP_POS, flowerServo.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
     }
 
     @Test

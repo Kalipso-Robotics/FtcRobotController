@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.After;
 import org.junit.Test;
@@ -104,7 +105,7 @@ public class PushBallTest {
         Rig() {
             IntakeSide sideA = new IntakeSide(A, motorA, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false));
             IntakeSide sideB = new IntakeSide(B, motorB, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false));
-            FlowerMech flowerMech = new FlowerMech(new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false), sideA);
+            FlowerMech flowerMech = new FlowerMech(new KCRServo(FlowerMechInterlockTest.fakeCRServo(), false), sideA);
             Intake intake = new Intake(sideA, sideB, flowerMech);
             Stopper stopper = new Stopper(new KServo(stopperServo, 1e6, 255, 0, false));
             pushBall = new PushBall(stopper, intake);

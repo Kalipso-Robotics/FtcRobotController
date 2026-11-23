@@ -36,7 +36,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 public class BasicTeleop extends KOpMode {
     public static final String TAG = "Test_Basic";
 
-    private static final String[] SERVOS = {"pivotA", "pivotB", "flower", "stopper", "hood", "turret"};
+    private static final String[] SERVOS = {"pivotA", "pivotB", "stopper", "hood", "turret"};
 
     private DriveTrain driveTrain;
     private Intake intake;
@@ -174,9 +174,6 @@ public class BasicTeleop extends KOpMode {
             case "pivotB":
                 ok = sideB.setPivotPosition(pos);
                 break;
-            case "flower":
-                ok = intake.getFlower().setPosition(pos);
-                break;
             case "stopper":
                 stopper.getStopper().setTargetPosition(pos); // keeps the KServo target (shown on screen) in sync
                 break;
@@ -193,7 +190,7 @@ public class BasicTeleop extends KOpMode {
             KLog.d(TAG, () -> "event=servoSet name=" + name + " pos=" + logged);
         } else {
             lastRefusal = name + " to " + String.format("%.3f", pos) + " refused by the interlock"
-                    + (name.equals("flower") ? " (its intake side must be down)" : " (raise the flower first)");
+                    + " (raise the flower first)";
             KLog.d(TAG, () -> "event=servoRefused name=" + name + " pos=" + logged);
         }
     }
@@ -204,8 +201,6 @@ public class BasicTeleop extends KOpMode {
                 return sideA.getPivotPosition();
             case "pivotB":
                 return sideB.getPivotPosition();
-            case "flower":
-                return intake.getFlower().getPosition();
             case "stopper":
                 return stopper.getStopper().getTargetPosition();
             case "hood":

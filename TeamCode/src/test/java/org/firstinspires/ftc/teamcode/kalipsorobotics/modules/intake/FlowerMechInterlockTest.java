@@ -4,12 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,17 +21,17 @@ import java.lang.reflect.Proxy;
 import java.util.function.BooleanSupplier;
 
 /**
- * The flower may be down only while its intake side is down. Servo travel is time-estimated by
- * KServo, so the pivots get a very fast speed (done within a few ms) and the flower a slower one
- * (tens of ms) so "the pivot has not moved yet" can be checked right after a raise.
+ * The flower may be down only while its intake side is down. Pivot travel is time-estimated by
+ * KServo (very fast speed here); the CR flower is done FLOWER_MOVE_MS after its command (set to 30 ms here)
+ * so "the pivot has not moved yet" can be checked right after a raise.
  */
 public class FlowerMechInterlockTest {
 
     private static final double FAST_DEG_PER_SEC = 1e6;
-    private static final double FLOWER_DEG_PER_SEC = 1000;
 
     private Servo pivotServoA;
-    private Servo flowerServo;
+    private CRServo flowerServo;
+    private final double flowerMs = IntakeConfig.FLOWER_MOVE_MS;
     private DcMotor motorA;
     private IntakeSide sideA;
     private FlowerMech flowerMech;
@@ -35,18 +39,24 @@ public class FlowerMechInterlockTest {
     @Before
     public void setUp() throws InterruptedException {
         pivotServoA = fakeServo();
-        flowerServo = fakeServo();
+        IntakeConfig.FLOWER_MOVE_MS = 30;
+        flowerServo = fakeCRServo();
         motorA = fakeMotor();
         sideA = new IntakeSide(BeamBreakPosition.IntakeSide.A, motorA, new KServo(pivotServoA, FAST_DEG_PER_SEC, 255, 0, false));
-        flowerMech = new FlowerMech(new KServo(flowerServo, FLOWER_DEG_PER_SEC, 255, 0, false), sideA);
+        flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         waitUntil(flowerMech::isUp);
+    }
+
+    @After
+    public void tearDown() {
+        IntakeConfig.FLOWER_MOVE_MS = flowerMs;
     }
 
     @Test
     public void flowerRefusesToLower_whileSideIsUp() {
         assertFalse(flowerMech.lower());
         assertFalse(flowerMech.isDown());
-        assertEquals(ModuleConfig.FLOWER_UP_POS, flowerServo.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
     }
 
     @Test
@@ -55,7 +65,7 @@ public class FlowerMechInterlockTest {
         waitUntil(sideA::isDown);
 
         assertTrue(flowerMech.lower());
-        assertEquals(ModuleConfig.FLOWER_DOWN_POS, flowerServo.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.FLOWER_DOWN_POWER, flowerServo.getPower(), 1e-9);
         waitUntil(flowerMech::isDown);
     }
 
@@ -67,7 +77,7 @@ public class FlowerMechInterlockTest {
         waitUntil(flowerMech::isDown);
 
         sideA.raise();
-        assertEquals(ModuleConfig.FLOWER_UP_POS, flowerServo.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
         assertEquals(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS, pivotServoA.getPosition(), 1e-9);
         assertFalse("flower must not go back down while its side is raising", flowerMech.lower());
 
@@ -136,29 +146,23 @@ public class FlowerMechInterlockTest {
     }
 
     @Test
-    public void flowerSetPosition_refusesNonUp_whileSideIsUp() {
-        assertFalse(flowerMech.setPosition(0.5));
-        assertEquals(ModuleConfig.FLOWER_UP_POS, flowerServo.getPosition(), 1e-9);
-        assertTrue(flowerMech.setPosition(ModuleConfig.FLOWER_UP_POS));
+    public void flowerSetPower_refusesTowardDown_whileSideIsUp() {
+        assertFalse(flowerMech.setPower(IntakeConfig.FLOWER_DOWN_POWER));
+        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_UP_POWER));
+        assertTrue(flowerMech.setPower(0));
     }
 
     @Test
-    public void flowerSetPosition_moves_onceSideIsDown() throws InterruptedException {
+    public void flowerSetPower_towardDown_onceSideIsDown_thenBackUpLetsPivotLeave() throws InterruptedException {
         sideA.lower();
         waitUntil(sideA::isDown);
-        assertTrue(flowerMech.setPosition(0.5));
-        assertEquals(0.5, flowerServo.getPosition(), 1e-9);
+        assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_DOWN_POWER));
+        assertEquals(IntakeConfig.FLOWER_DOWN_POWER, flowerServo.getPower(), 1e-9);
         assertFalse(flowerMech.isUp());
-    }
+        assertFalse(sideA.setPivotPosition(0.5));
 
-    @Test
-    public void flowerSteppedBackToUp_countsAsUp_soPivotCanLeaveDown() throws InterruptedException {
-        sideA.lower();
-        waitUntil(sideA::isDown);
-        double stepped = ModuleConfig.FLOWER_UP_POS + 0.05;
-        assertTrue(flowerMech.setPosition(stepped));
-        for (int i = 0; i < 5; i++) stepped -= 0.01; // 0.19999999999999996: float steps miss UP exactly
-        assertTrue(flowerMech.setPosition(stepped));
+        assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_UP_POWER * 0.5));
         waitUntil(flowerMech::isUp);
         assertTrue(sideA.setPivotPosition(0.5));
     }
@@ -173,6 +177,10 @@ public class FlowerMechInterlockTest {
 
     public static Servo fakeServo() {
         return fake(Servo.class, "setPosition", "getPosition");
+    }
+
+    public static CRServo fakeCRServo() {
+        return fake(CRServo.class, "setPower", "getPower");
     }
 
     public static DcMotor fakeMotor() {

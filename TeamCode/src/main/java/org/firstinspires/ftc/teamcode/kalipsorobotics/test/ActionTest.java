@@ -162,7 +162,7 @@ public class ActionTest extends KOpMode {
         }
         telemetry.addData("pivots", "A %.3f %s  B %.3f %s", sideA.getPivotPosition(), sideA.isDown() ? "down" : "up",
                 sideB.getPivotPosition(), sideB.isDown() ? "down" : "up");
-        telemetry.addData("flower", "%.3f", intake.getFlower().getPosition());
+        telemetry.addData("flower", "power %.2f", intake.getFlower().getPower());
         telemetry.addData("stopper", "%.3f", stopper.getStopper().getTargetPosition());
         telemetry.addData("hood", "%.4f", shooter.getHood().getTargetPosition());
         telemetry.addData("turret", "%.1f deg", turret.getAngleDeg());

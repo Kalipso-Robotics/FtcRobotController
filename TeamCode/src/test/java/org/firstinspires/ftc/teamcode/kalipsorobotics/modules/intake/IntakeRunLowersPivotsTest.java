@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class IntakeRunLowersPivotsTest {
         pivotB = FlowerMechInterlockTest.fakeServo();
         IntakeSide sideA = new IntakeSide(BeamBreakPosition.IntakeSide.A, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotA));
         IntakeSide sideB = new IntakeSide(BeamBreakPosition.IntakeSide.B, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotB));
-        intake = new Intake(sideA, sideB, new FlowerMech(new KServo(FlowerMechInterlockTest.fakeServo()), sideA));
+        intake = new Intake(sideA, sideB, new FlowerMech(new KCRServo(FlowerMechInterlockTest.fakeCRServo(), false), sideA));
     }
 
     private void assertBothDown() {

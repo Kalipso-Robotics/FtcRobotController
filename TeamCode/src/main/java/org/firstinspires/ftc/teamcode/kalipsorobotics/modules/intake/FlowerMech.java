@@ -1,13 +1,20 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 
 /**
- * One servo arm on one intake side (modeled on Stopper). Driving into a Flower with the arm down
- * knocks its balls into the intake.
+ * One arm on one intake side, driven by an Axon Max in CR mode (configure "flower" as a Continuous Rotation Servo).
+ * Driving into a Flower with the arm down knocks its balls into the intake.
+ *
+ * No position feedback: lower()/raise() set IntakeConfig.FLOWER_DOWN_POWER / FLOWER_UP_POWER and keep it applied,
+ * pushing the arm into its hard stop. isDown()/isUp() turn true FLOWER_MOVE_MS after the command.
+ * ponytail: open-loop timed travel; add the Axon analog feedback wire (AnalogInput) if timing proves unreliable.
+ * Tune with FlowerCRTuner.
  *
  * Interlock: the arm may be down only while its intake side is down, so lower() refuses unless
  * that side isDown(). The side's raise() raises the arm first (see IntakeSide).
@@ -15,24 +22,23 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 public class FlowerMech {
     public static final String TAG = "Robot_Flower";
 
-    private static final double POSITION_TOLERANCE = 1e-6;
-
-    private final KServo servo;
+    private final KCRServo servo;
     private final IntakeSide side;
+    private final ElapsedTime sinceCommand = new ElapsedTime();
 
     private boolean isCommandedDown = false;
     private boolean isBlocked = false;
 
     public FlowerMech(OpModeUtilities opModeUtilities, IntakeSide side) {
-        this(new KServo(opModeUtilities.getHardwareMap().servo.get("flower"),
-                KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false), side); // TODO-measure: servo model, speed and range
+        this(new KCRServo(opModeUtilities.getHardwareMap().crservo.get("flower"), IntakeConfig.FLOWER_FLIP_DIRECTION), side);
     }
 
     /** Direct-injection constructor, for a servo you have already pulled out of the hardware map (unit tests). */
-    public FlowerMech(KServo servo, IntakeSide side) {
+    public FlowerMech(KCRServo servo, IntakeSide side) {
         this.servo = servo;
         this.side = side;
-        servo.setTargetPosition(ModuleConfig.FLOWER_UP_POS);
+        servo.setPower(IntakeConfig.FLOWER_UP_POWER);
+        sinceCommand.reset();
         side.attachFlower(this);
         KLog.d(TAG, () -> "side=" + side.getSide() + " event=init flower=up");
     }
@@ -54,7 +60,8 @@ public class FlowerMech {
         }
         isBlocked = false;
         isCommandedDown = true;
-        servo.setTargetPosition(ModuleConfig.FLOWER_DOWN_POS);
+        servo.setPower(IntakeConfig.FLOWER_DOWN_POWER);
+        sinceCommand.reset();
         KLog.d(TAG, () -> "side=" + side.getSide() + " event=lower");
         return true;
     }
@@ -65,41 +72,44 @@ public class FlowerMech {
             return;
         }
         isCommandedDown = false;
-        servo.setTargetPosition(ModuleConfig.FLOWER_UP_POS);
+        servo.setPower(IntakeConfig.FLOWER_UP_POWER);
+        sinceCommand.reset();
         KLog.d(TAG, () -> "side=" + side.getSide() + " event=raise");
     }
 
     /**
-     * Manual arm control (BasicTeleop). Keeps the interlock: any position other than UP is refused (returns false,
-     * logs event=blocked) unless this arm's intake side is down.
+     * Manual power (FlowerCRTuner). Keeps the interlock: power that is not toward up (same sign as FLOWER_UP_POWER,
+     * or 0) is refused (returns false, logs event=blocked) unless this arm's intake side is down.
+     * Power 0 counts as up only for the interlock, so the arm may be sagging; raise() before driving.
      */
-    public boolean setPosition(double position) {
-        boolean toUp = Math.abs(position - ModuleConfig.FLOWER_UP_POS) < POSITION_TOLERANCE; // stepped values miss UP by ~1e-16
-        if (!toUp && !side.isDown()) {
-            KLog.e(TAG, "side=" + side.getSide() + " event=blocked reason=intakeUp pos=" + position);
+    public boolean setPower(double power) {
+        boolean towardUp = power == 0 || Math.signum(power) == Math.signum(IntakeConfig.FLOWER_UP_POWER);
+        if (!towardUp && !side.isDown()) {
+            KLog.e(TAG, "side=" + side.getSide() + " event=blocked reason=intakeUp power=" + power);
             return false;
         }
         isBlocked = false;
-        isCommandedDown = !toUp;
-        servo.setTargetPosition(position);
-        KLog.d(TAG, () -> "side=" + side.getSide() + " event=setPosition pos=" + position);
+        if (isCommandedDown == towardUp) {
+            sinceCommand.reset();
+        }
+        isCommandedDown = !towardUp;
+        servo.setPower(power);
+        KLog.d(TAG, () -> "side=" + side.getSide() + " event=setPower power=" + power);
         return true;
     }
 
-    /** True once commanded down and the servo has had time to get there. */
+    /** True once commanded down and FLOWER_MOVE_MS has passed. */
     public boolean isDown() {
-        return isCommandedDown && servo.isDone();
+        return isCommandedDown && sinceCommand.milliseconds() >= IntakeConfig.FLOWER_MOVE_MS;
     }
 
-    /** True once commanded up and the servo has had time to get there. */
+    /** True once commanded up and FLOWER_MOVE_MS has passed. */
     public boolean isUp() {
-        return !isCommandedDown && servo.isDone();
+        return !isCommandedDown && sinceCommand.milliseconds() >= IntakeConfig.FLOWER_MOVE_MS;
     }
 
-    /** Last commanded servo position, for telemetry. */
-    public double getPosition() {
-        return servo.getTargetPosition();
+    /** Last commanded power (after flip), for telemetry. */
+    public double getPower() {
+        return servo.getPower();
     }
-
-
 }

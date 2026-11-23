@@ -26,8 +26,6 @@ public class ModuleConfig {
     //========FLOWER========
     // Which intake side carries the flower arm. Changing sides is this one line.
     public static final BeamBreakPosition.IntakeSide FLOWER_SIDE = BeamBreakPosition.IntakeSide.A;
-    public static final double FLOWER_DOWN_POS = 0.8; // TODO-measure
-    public static final double FLOWER_UP_POS = 0.2; // TODO-measure
 
 
     //========BASIC TELEOP (test/BasicTeleop, manual control)========
