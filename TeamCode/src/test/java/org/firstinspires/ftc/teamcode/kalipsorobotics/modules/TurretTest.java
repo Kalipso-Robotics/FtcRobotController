@@ -21,7 +21,7 @@ public class TurretTest {
 
     @Test
     public void degToPosToDeg_roundTripsAcrossReachableRange() {
-        for (double deg = -TurretConfig.MAX_TURRET_DEG; deg <= TurretConfig.MAX_TURRET_DEG; deg += 7.5) {
+        for (double deg = TurretConfig.MIN_TURRET_DEG; deg <= TurretConfig.MAX_TURRET_DEG; deg += 7.5) {
             assertEquals(deg, Turret.turretDegFromServoPos(Turret.servoPosFromTurretDeg(deg)), 1e-9);
         }
     }
@@ -29,7 +29,7 @@ public class TurretTest {
     @Test
     public void targetBeyondRange_clampsToLimit() {
         assertEquals(TurretConfig.MAX_TURRET_DEG, Turret.clampTurretDeg(TurretConfig.MAX_TURRET_DEG + 15), 1e-12);
-        assertEquals(-TurretConfig.MAX_TURRET_DEG, Turret.clampTurretDeg(-TurretConfig.MAX_TURRET_DEG - 15), 1e-12);
+        assertEquals(TurretConfig.MIN_TURRET_DEG, Turret.clampTurretDeg(TurretConfig.MIN_TURRET_DEG - 15), 1e-12);
         assertEquals(12.4, Turret.clampTurretDeg(12.4), 1e-12);
     }
 

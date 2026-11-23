@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
@@ -56,7 +57,11 @@ public class Turret {
 
     private static void resetHardwareMap(OpModeUtilities opModeUtilities, Turret turret) {
         turret.opModeUtilities = opModeUtilities;
-        Servo servo = opModeUtilities.getHardwareMap().servo.get("turret");
+        Servo servo = opModeUtilities.getHardwareMap().servo.get("turret1");
+        // REV hubs default to 600-2400 us, which only reaches 90% of the Axon's range and breaks SERVO_RANGE_DEG.
+        if (servo instanceof PwmControl) {
+            ((PwmControl) servo).setPwmRange(new PwmControl.PwmRange(500, 2500));
+        }
         turret.turretServo = new KServo(servo, KServo.AXON_MAX_SPEED_DEG_PER_SEC, // TODO-measure: servo model not chosen yet
                 TurretConfig.SERVO_RANGE_DEG, TurretConfig.SERVO_ZERO_POS, false);
     }
@@ -71,6 +76,11 @@ public class Turret {
 
     /** Points the turret, clamped to the reachable range. Logs a fault once each time a target goes out of range. */
     public void setAngleDeg(double turretDeg) {
+        setAngleDeg(turretDeg, TurretConfig.SERVO_RANGE_DEG);
+    }
+
+    /** Same, with an assumed servo range instead of TurretConfig.SERVO_RANGE_DEG (TurretServoTest range check). */
+    public void setAngleDeg(double turretDeg, double servoRangeDeg) {
         double clampedDeg = clampTurretDeg(turretDeg);
         boolean wasClamped = isClamped;
         isClamped = clampedDeg != turretDeg;
@@ -80,10 +90,11 @@ public class Turret {
             KLog.d(TAG, () -> String.format("event=inRange targetDeg=%.1f", clampedDeg));
         }
         commandedDeg = clampedDeg;
-        double servoPos = servoPosFromTurretDeg(clampedDeg);
+        double servoPos = servoPosFromTurretDeg(clampedDeg, servoRangeDeg);
+        boolean changed = Math.abs(servoPos - turretServo.getPosition()) > 1e-6;
         busyUntilMs = Math.max(busyUntilMs, System.currentTimeMillis() + turretServo.estimateFinishTimeMs(turretServo.getPosition(), servoPos));
         turretServo.setTargetPosition(servoPos);
-        if (KLog.isDebug()) {
+        if (changed && KLog.isDebug()) { // only on change: every loop floods logcat and evicts the init logs
             KLog.d(TAG, () -> String.format("targetDeg=%.2f servoPos=%.4f", clampedDeg, servoPos));
         }
     }
@@ -118,12 +129,16 @@ public class Turret {
     }
 
     public static double clampTurretDeg(double turretDeg) {
-        return MathFunctions.clamp(turretDeg, -TurretConfig.MAX_TURRET_DEG, TurretConfig.MAX_TURRET_DEG);
+        return MathFunctions.clamp(turretDeg, TurretConfig.MIN_TURRET_DEG, TurretConfig.MAX_TURRET_DEG);
     }
 
     public static double servoPosFromTurretDeg(double turretDeg) {
+        return servoPosFromTurretDeg(turretDeg, TurretConfig.SERVO_RANGE_DEG);
+    }
+
+    public static double servoPosFromTurretDeg(double turretDeg, double servoRangeDeg) {
         double servoDeg = turretDeg / TurretConfig.TURRET_DEG_PER_SERVO_DEG;
-        return KServo.clampServoPos(TurretConfig.SERVO_ZERO_POS + TurretConfig.SERVO_DIRECTION * servoDeg / TurretConfig.SERVO_RANGE_DEG);
+        return KServo.clampServoPos(TurretConfig.SERVO_ZERO_POS + TurretConfig.SERVO_DIRECTION * servoDeg / servoRangeDeg);
     }
 
     public static double turretDegFromServoPos(double servoPos) {

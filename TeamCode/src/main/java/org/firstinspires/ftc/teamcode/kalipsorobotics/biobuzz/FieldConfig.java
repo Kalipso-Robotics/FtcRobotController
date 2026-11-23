@@ -67,8 +67,11 @@ public class FieldConfig {
         return new Point(MathFunctions.clamp(tx, PASS_WALL_MARGIN_MM, FIELD_MM - PASS_WALL_MARGIN_MM), ty);
     }
 
-    // Where the robot sits when it is zeroed against the loading-zone corner (center of the robot, own frame).
-    public final static Position CORNER_ZERO_POSE = new Position(230, 230, 0); // TODO-measure
+    // Where the robot sits when it is zeroed against the loading-zone corner, facing +x (own frame). It is the
+    // wheelbase centre, the point odometry reports, not the bumper corner. Also the start pose of every OpMode
+    // that starts odometry fresh without an auto pose (OpModeUtilities.startOdometry(null)).
+    // [2026-11-22] measured on the robot: 278 mm from the back wall, 188 mm from the side wall.
+    public final static Position CORNER_ZERO_POSE = new Position(278, 188, 0);
 
     private final static double FIELD_MM = 3657.6;
 

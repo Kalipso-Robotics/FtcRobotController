@@ -30,7 +30,7 @@ public class FlowerMech {
     private boolean isBlocked = false;
 
     public FlowerMech(OpModeUtilities opModeUtilities, IntakeSide side) {
-        this(new KCRServo(opModeUtilities.getHardwareMap().crservo.get("flower"), IntakeConfig.FLOWER_FLIP_DIRECTION), side);
+        this(new KCRServo(opModeUtilities.getHardwareMap().crservo.get("flowerPivot"), IntakeConfig.FLOWER_FLIP_DIRECTION), side);
     }
 
     /** Direct-injection constructor, for a servo you have already pulled out of the hardware map (unit tests). */

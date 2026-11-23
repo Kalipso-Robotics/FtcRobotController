@@ -56,7 +56,7 @@ public final class OctoConfig {
      */
     // [UNVERIFIED] pods moved 2026-11-16: re-run OctoStartup and replace this line with its date.
     public static final boolean INVERT_X  = true;
-    public static final boolean INVERT_Y  = true;
+    public static final boolean INVERT_Y  = false;
     public static final boolean INVERT_X2 = true;
 
     /**
@@ -98,15 +98,15 @@ public final class OctoConfig {
     // [2026-09-22] re-measured via OctoTune after the INVERT_X/INVERT_X2 fix (see the booleans
     // above): raw 24408 / 1828.8mm, 0.6% off theoretical. COUNTS_PER_MM_X2 now tracks it
     // closely (13.344 vs 13.346), confirming port 2 is alive again -- it read ~0 before the fix.
-    public static final float COUNTS_PER_MM_X   = 19.911f;  // [2026-10-03] OctoTune pushes, see note above
-    public static final float COUNTS_PER_MM_X2  = 19.911f;  // [2026-10-03] OctoTune pushes, see note above
+    public static final float COUNTS_PER_MM_X   = 20.08443f;  // [2026-10-03] OctoTune pushes, see note above
+    public static final float COUNTS_PER_MM_X2  = 20.05249f;  // [2026-10-03] OctoTune pushes, see note above
     // [2026-09-22] Y re-measured after the L-test redo confirmed MIRROR_BOARD_FRAME/INVERT_Y
     // unchanged (still self-consistent, y-LEFT/CCW+): raw 16110 / 1219.2mm, 0.4% off theoretical.
-    public static final float COUNTS_PER_MM_Y   = 19.911f;  // [2026-10-03] OctoTune pushes, see note above
+    public static final float COUNTS_PER_MM_Y   = 19.96309f;  // [2026-10-03] OctoTune pushes, see note above
     // [2026-09-26] HEADING re-measured with the net-signed OctoTune fix, 10 turns each way:
     // CW netDeg 3586.1 -> 1.0203, CCW netDeg -3587.7 -> 1.0199, averaged. (The 2026-09-22
     // value 1.0164 came from the old abs-sum measurement, which counted wobble as rotation.)
-    public static final float IMU_HEADING_SCALAR = 1.0206f;      // [2026-10-03] 3 spins (CCW,CW,CCW) 1.02050/1.02073/1.02051, seed was 1.0201
+    public static final float IMU_HEADING_SCALAR = 1.0202f;      // [2026-10-03] 3 spins (CCW,CW,CCW) 1.02050/1.02073/1.02051, seed was 1.0201
     /**
      * Tracking-centre offsets, BOARD frame (y-LEFT while MIRROR_BOARD_FRAME is true).
      *
@@ -143,8 +143,8 @@ public final class OctoConfig {
     // (port 0) 85.6 mm fwd / 76.0 mm right, left parallel pod (port 2) 85.6 fwd / 76.0 left, perpendicular
     // pod (port 1) 36.1 mm fwd / 0 lateral. offset = -(pod position), board frame y-LEFT, same rule as above.
     // SPIN-VERIFY with OctoTune HEADING; the 2026-10-03 spin values were 2.5 mm off tape, expect similar.
-    public static final float TCP_OFFSET_MM_X   = -36.1f;  // [2026-11-16] CAD: perpendicular pod 36.1 mm in front (was -29.2, 2026-10-03 spins, old pod position)
-    public static final float TCP_OFFSET_MM_Y   = 76.0f;   // [2026-11-16] CAD: right parallel pod 76.0 mm right (was 77.3, old pod position)
+    public static final float TCP_OFFSET_MM_X   = -43.9f;  // [2026-11-16] CAD: perpendicular pod 36.1 mm in front (was -29.2, 2026-10-03 spins, old pod position)
+    public static final float TCP_OFFSET_MM_Y   = 82.1f;   // [2026-11-16] CAD: right parallel pod 76.0 mm right (was 77.3, old pod position)
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the
@@ -152,7 +152,7 @@ public final class OctoConfig {
      * Solved by OctoTune's HEADING spin (see spinGeometry), not tape.
      */
     // [2026-10-03] 3 OctoTune HEADING spins: 154.66 (10/02 CCW), 154.27 (CW), 154.85 (CCW).
-    public static final float TRACK_WIDTH_MM = 152.0f;  // [2026-11-16] CAD: parallel pods 152.0 mm apart (was 154.5, 2026-10-03 spins, old pod position). SPIN-VERIFY
+    public static final float TRACK_WIDTH_MM = 152.46f;  // [2026-11-16] CAD: parallel pods 152.0 mm apart (was 154.5, 2026-10-03 spins, old pod position). SPIN-VERIFY
 
     public static final int VELOCITY_INTERVAL_MS = 25;
 

@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 public class FieldOrientedDriveAction implements DriveController {
     OpModeUtilities opModeUtilities;
@@ -40,7 +40,7 @@ public class FieldOrientedDriveAction implements DriveController {
         double turn = gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x;
         double strafe = gamepadx * gamepadx * gamepadx;
 
-        double botHeading = imuModule.getIMU().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = botHeadingRad();
 
         double rotX = strafe * Math.cos(-botHeading) - forward * Math.sin(-botHeading);
         double rotY = strafe * Math.sin(-botHeading) + forward * Math.cos(-botHeading);
@@ -77,7 +77,7 @@ public class FieldOrientedDriveAction implements DriveController {
         double turn = gamepad.right_stick_x * gamepad.right_stick_x * gamepad.right_stick_x * powerCoefficient;
         double strafe = gamepad.left_stick_x * gamepad.left_stick_x * gamepad.left_stick_x * powerCoefficient;
 
-        double botHeading = imuModule.getIMU().getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+        double botHeading = botHeadingRad();
 
         double rotX = strafe * Math.cos(-botHeading) - forward * Math.sin(-botHeading);
         double rotY = strafe * Math.sin(-botHeading) + forward * Math.cos(-botHeading);
@@ -107,6 +107,15 @@ public class FieldOrientedDriveAction implements DriveController {
 
         double[] driveTrainPowers = {fLeftPower, fRightPower, bLeftPower, bRightPower};
         return driveTrainPowers;
+    }
+
+    /**
+     * Odometry (OctoQuad) heading, the same one the turret aims with: field-relative and survives rezero. Not the raw
+     * IMU yaw: its hub orientation is still the DECODE mount and it resets at init. Odometry theta is clockwise-positive;
+     * the rotation below expects CCW like the IMU, hence the minus.
+     */
+    private static double botHeadingRad() {
+        return -SharedData.getOdometryWheelIMUPosition().getTheta();
     }
 
     @Override

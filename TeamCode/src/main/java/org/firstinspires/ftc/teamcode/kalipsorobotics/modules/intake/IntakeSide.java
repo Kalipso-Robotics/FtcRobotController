@@ -35,8 +35,8 @@ public class IntakeSide {
 
     public IntakeSide(OpModeUtilities opModeUtilities, BeamBreakPosition.IntakeSide side) {
         this(side,
-                opModeUtilities.getHardwareMap().dcMotor.get("intake" + side.name()),
-                new KServo(opModeUtilities.getHardwareMap().servo.get("intakePivot" + side.name()),
+                opModeUtilities.getHardwareMap().dcMotor.get(side == BeamBreakPosition.IntakeSide.A ? "intakeFront" : "intakeBack"),
+                new KServo(opModeUtilities.getHardwareMap().servo.get(side == BeamBreakPosition.IntakeSide.A ? "intakePivot1" : "intakePivot2"),
                         KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false)); // TODO-measure: servo model, speed and range
     }
 

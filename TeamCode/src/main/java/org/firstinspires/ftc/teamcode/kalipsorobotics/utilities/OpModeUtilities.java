@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 import android.os.Process;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryLogger;
@@ -82,7 +83,7 @@ public class OpModeUtilities {
      * Starts odometry from the source OdometryConfig.USE_OCTOQUAD picks (OctoQuad pods or drive-port encoders) and runs it
      * on the executor. Both publish to SharedData.setOdometryWheelIMUPosition, so readers do not change.
      * start != null: a fresh instance at that pose (both singletons are cleared first).
-     * start == null: reuse the instance the last OpMode left (auto -> TeleOp pose carry-over), or (0,0,0) if none.
+     * start == null: reuse the instance the last OpMode left (auto -> TeleOp pose carry-over), or FieldConfig.CORNER_ZERO_POSE if none.
      * The OctoQuad calibrates its IMU the first time (up to 15 s, keep the robot still) and throws if "octoquad" is not in the config.
      * Pattern source: the Odometry.getInstance + runOdometryExecutorService pairs this replaces.
      */
@@ -92,14 +93,13 @@ public class OpModeUtilities {
             Odometry.setInstanceNull();
             OctoQuadOdo.setInstanceNull();
         }
+        // null = keep the pose from auto if there is one; a fresh instance starts at the corner, not (0,0,0).
+        Position fresh = (start == null) ? new Position(FieldConfig.CORNER_ZERO_POSE) : start;
         boolean octo = OdometryConfig.USE_OCTOQUAD;
         if (octo) {
-            OctoQuadOdo odo = (start == null) ? OctoQuadOdo.getInstance(opModeUtilities) : OctoQuadOdo.getInstance(opModeUtilities, start);
-            runOdometryExecutorService(executorService, odo);
+            runOdometryExecutorService(executorService, OctoQuadOdo.getInstance(opModeUtilities, fresh));
         } else {
-            Odometry odo = (start == null) ? Odometry.getInstance(opModeUtilities, driveTrain, imuModule)
-                    : Odometry.getInstance(opModeUtilities, driveTrain, imuModule, start);
-            runOdometryExecutorService(executorService, odo);
+            runOdometryExecutorService(executorService, Odometry.getInstance(opModeUtilities, driveTrain, imuModule, fresh));
         }
         KLog.d("Robot_Odometry", () -> "event=start source=" + (octo ? "octo" : "wheel") + " start=" + start);
     }

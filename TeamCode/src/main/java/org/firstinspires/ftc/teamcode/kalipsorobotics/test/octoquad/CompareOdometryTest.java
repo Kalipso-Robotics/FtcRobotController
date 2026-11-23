@@ -78,7 +78,7 @@ public class CompareOdometryTest extends LinearOpMode {
     private OpModeUtilities opModeUtilities;
     private DriveTrain driveTrain;
     private IMUModule imuModule;
-//    private DcMotor intake;
+    private DcMotor intakeFront, intakeBack;
 
     private double pathMm, turnedDeg;
     private double prevX, prevY;
@@ -116,7 +116,8 @@ public class CompareOdometryTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         q = hardwareMap.get(OctoQuad.class, OctoConfig.HARDWARE_NAME);
-//        intake = hardwareMap.get(DcMotor.class, "intake");
+        intakeFront = hardwareMap.get(DcMotor.class, "intakeFront");
+        intakeBack = hardwareMap.get(DcMotor.class, "intakeBack");
 
         OctoConfig.apply(q);
 
@@ -213,13 +214,17 @@ public class CompareOdometryTest extends LinearOpMode {
                     }
                 }
 
-//                if (gamepad1.right_trigger > 0.1) {
-//                    intake.setPower(-speed);
-//                } else if (gamepad1.right_bumper) {
-//                    intake.setPower(speed);
-//                } else {
-//                    intake.setPower(0);
-//                }
+                // Signs match SpeedController: front +, back - = intake in.
+                if (gamepad1.right_trigger > 0.1) {
+                    intakeFront.setPower(speed);
+                    intakeBack.setPower(-speed);
+                } else if (gamepad1.right_bumper) {
+                    intakeFront.setPower(-1);   // regurgitate
+                    intakeBack.setPower(1);
+                } else {
+                    intakeFront.setPower(0);
+                    intakeBack.setPower(0);
+                }
 
                 if (gamepad1.dpadDownWasPressed()) {
                     speed = MathFunctions.clamp(speed - 0.1, 0, 1);
@@ -229,7 +234,7 @@ public class CompareOdometryTest extends LinearOpMode {
 
                 logLoop(loopMs);
                 render();
-                telemetry.addLine("Speed: " + speed);
+                telemetry.addLine("Intake speed (dpad up/down): " + speed + "  RT = in, RB = regurgitate");
                 telemetry.update();
 
                 KLog.d("odo_compare", () -> String.format(Locale.US,

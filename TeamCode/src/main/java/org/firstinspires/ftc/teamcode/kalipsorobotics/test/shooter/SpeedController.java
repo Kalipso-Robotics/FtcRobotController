@@ -7,12 +7,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 
 
 @Config
 @TeleOp
 public class SpeedController extends LinearOpMode {
+
+    private static final String TAG = "SpeedController";
 
     private static final double SHOOTER_POWER_STEP = 0.001;
     private static final double SERVO_STEP = 0.0005;
@@ -43,14 +46,18 @@ public class SpeedController extends LinearOpMode {
         Servo hoodServo = hardwareMap.servo.get("hood"); // 0.929
         Servo stopperServo = hardwareMap.servo.get("stopper");
         Servo turret1Servo = hardwareMap.servo.get("turret1"); //0.84
-        Servo turret2Servo = hardwareMap.servo.get("turret2");
+        // Control hub: 0 = intakePivot1, 1 = turret1, 2 = intakePivot2
+        Servo intakePivot1Servo = hardwareMap.servo.get("intakePivot1");
+        Servo intakePivot2Servo = hardwareMap.servo.get("intakePivot2");
+
 
         // ---- Targets ----
         double shooterPower = 0;
         double stopperPosition = 0.5;
         double hoodPosition = 0.96;
         double turret1Position = 0.233;
-        double turret2Position = 0.5;
+        double intakePivot1Position = 0.5;
+        double intakePivot2Position = 0.5;
 
         double intakePower = 1;
         double stopperOpenPos = STOPPER_OPEN_POS_DEFAULT;
@@ -171,6 +178,22 @@ public class SpeedController extends LinearOpMode {
                 turret1Servo.setPosition(turret1Position);
             }
 
+            // Intake pivots (gamepad2 sticks, held): left stick Y = pivot1, right stick Y = pivot2 (up = +)
+            if (Math.abs(gamepad2.left_stick_y) > 0.5) {
+                intakePivot1Position = Math.max(0, Math.min(1, intakePivot1Position + (gamepad2.left_stick_y < 0 ? SERVO_STEP : -SERVO_STEP)));
+                intakePivot1Servo.setPosition(intakePivot1Position);
+            }
+            if (Math.abs(gamepad2.right_stick_y) > 0.5) {
+                intakePivot2Position = Math.max(0, Math.min(1, intakePivot2Position + (gamepad2.right_stick_y < 0 ? SERVO_STEP : -SERVO_STEP)));
+                intakePivot2Servo.setPosition(intakePivot2Position);
+            }
+
+            if (gamepad1.dpad_right || gamepad1.dpad_left
+                    || Math.abs(gamepad2.left_stick_y) > 0.5 || Math.abs(gamepad2.right_stick_y) > 0.5) {
+                final double p1 = intakePivot1Position, t1 = turret1Position, p2 = intakePivot2Position;
+                KLog.d(TAG, () -> String.format("event=servoMove intakePivot1=%.4f turret1=%.4f intakePivot2=%.4f", p1, t1, p2));
+            }
+
 
             telemetry.addLine("--- Controls (gamepad1) ---");
             telemetry.addLine("Shooter (motor0): left stick Y (up = -, down = +), X = stop");
@@ -182,6 +205,7 @@ public class SpeedController extends LinearOpMode {
             telemetry.addData("Stopper CLOSED pos (copy to ModuleConfig)", "%.3f", stopperClosedPos);
             telemetry.addLine("Turret 1 (servo2): dpad right / left");
             telemetry.addLine("Turret 2 (servo3): right bumper / left bumper");
+            telemetry.addLine("Intake pivots (gamepad2, hold): left stick Y = pivot1 (CH0), right stick Y = pivot2 (CH2)");
             telemetry.addLine("B = push (intake, open stopper, close). Right stick Y = pre-open time, X = shoot time");
             telemetry.addData("Push state", pushState);
             telemetry.addData("Push pre-open / shoot (ms)", "%.0f / %.0f", PRE_OPEN_MS, SHOOT_MS);
@@ -196,7 +220,8 @@ public class SpeedController extends LinearOpMode {
             telemetry.addData("Hood (servo0)", "%.4f / %.4f", hoodPosition, hoodServo.getPosition());
             telemetry.addData("Stopper (servo1)", "%.4f", stopperServo.getPosition());
             telemetry.addData("Turret 1 (servo2)", "%.4f / %.4f", turret1Position, turret1Servo.getPosition());
-            telemetry.addData("Turret 2 (servo3)", "%.4f / %.4f", turret2Position, turret2Servo.getPosition());
+            telemetry.addData("Intake pivot 1 (CH0)", "%.4f / %.4f", intakePivot1Position, intakePivot1Servo.getPosition());
+            telemetry.addData("Intake pivot 2 (CH2)", "%.4f / %.4f", intakePivot2Position, intakePivot2Servo.getPosition());
             telemetry.update();
         }
     }
