@@ -1,19 +1,33 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.junit.Test;
 
 /** The aim math in TurretAutoAlign: field point + robot pose -> turret angle (turret + = same way as + heading). */
 public class TurretAutoAlignTest {
 
+    /** Aim from the turret pivot: the target is given relative to (x, y), moved along with the pivot offset at this heading. */
     private static double aimDeg(Point target, double x, double y, double headingDeg, double offsetDeg) {
-        return Math.toDegrees(TurretAutoAlign.calculateTargetAngleRad(
-                target, new Position(x, y, Math.toRadians(headingDeg)), offsetDeg));
+        Position robot = new Position(x, y, Math.toRadians(headingDeg));
+        Point pivot = Turret.launcherPoint(robot);
+        Point fromPivot = new Point(target.getX() + pivot.getX() - x, target.getY() + pivot.getY() - y);
+        return Math.toDegrees(TurretAutoAlign.calculateTargetAngleRad(fromPivot, robot, offsetDeg));
+    }
+
+    @Test
+    public void aimsFromThePivotNotTheRobotCenter() {
+        // Target 1000 mm straight ahead of the pivot is 0 deg; the same point seen from the robot center would not be.
+        Point pivot = Turret.launcherPoint(new Position(0, 0, 0));
+        assertEquals(0, Math.toDegrees(TurretAutoAlign.calculateTargetAngleRad(
+                new Point(pivot.getX() + 1000, pivot.getY()), new Position(0, 0, 0), 0)), 1e-9);
     }
 
     @Test
@@ -51,8 +65,8 @@ public class TurretAutoAlignTest {
     /** RedDecideAuto drives to the launch point facing the Cell (driveTo faceToward), so the turret barely turns. */
     @Test
     public void atLaunchPointFacingCell_isAboutZero() {
-        checkFacing(FieldConfig.aLaunchPoint, FieldConfig.aTargetPoint);
-        checkFacing(FieldConfig.bLaunchPoint, FieldConfig.bTargetPoint);
+        checkFacing(FieldConfig.aLaunchPoint, ShooterConfig.TARGET_POINT_1);
+        checkFacing(FieldConfig.bLaunchPoint, ShooterConfig.TARGET_POINT_2);
     }
 
     private static void checkFacing(Point launch, Point target) {

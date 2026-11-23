@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -42,8 +44,8 @@ public class AprilTagConfigTest {
         double[] a = AprilTagConfig.tagFieldXYZ(34, true, AllianceColor.RED);
         double[] b = AprilTagConfig.tagFieldXYZ(30, true, AllianceColor.RED);
         assertTrue(a[1] > FIELD / 2 && b[1] < FIELD / 2);
-        assertEquals(FieldConfig.aTargetPoint.getX(), a[0], 250);
-        assertEquals(FieldConfig.bTargetPoint.getX(), b[0], 250);
+        assertEquals(ShooterConfig.TARGET_POINT_1.getX(), a[0], 250);
+        assertEquals(ShooterConfig.TARGET_POINT_2.getX(), b[0], 250);
     }
 
     /** Figure 9-17 order: red far reads 33 32 31 30 left to right, red audience 34 35 36 37. */

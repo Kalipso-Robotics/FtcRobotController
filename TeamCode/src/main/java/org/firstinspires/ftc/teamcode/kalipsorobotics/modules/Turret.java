@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.modules;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -107,6 +109,12 @@ public class Turret {
 
     /** A servo holds its last position; nothing to do. */
     public void stop() {
+    }
+
+    /** Field position of the turret pivot (where the ball leaves) for a robot pose. */
+    public static Point launcherPoint(Position robot) {
+        return new Position(TurretConfig.ROBOT_REL_TURRET_POINT.getX(), TurretConfig.ROBOT_REL_TURRET_POINT.getY(), 0)
+                .toNewFrame(robot).toPoint();
     }
 
     public static double clampTurretDeg(double turretDeg) {

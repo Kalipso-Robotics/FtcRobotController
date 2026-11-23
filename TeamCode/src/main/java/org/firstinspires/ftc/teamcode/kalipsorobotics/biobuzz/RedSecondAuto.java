@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
@@ -81,7 +83,7 @@ public class RedSecondAuto extends KOpMode {
 
     /** Gated trip that shoots into Cell A (aLaunchPoint) or B (bLaunchPoint). intakeSide null = no pickup. */
     private RoundTripAction trip(boolean cellA, IntakeSide intakeSide) {
-        Point target = cellA ? FieldConfig.aTargetPoint : FieldConfig.bTargetPoint;
+        Point target = cellA ? ShooterConfig.TARGET_POINT_1 : ShooterConfig.TARGET_POINT_2;
         Point launch = cellA ? FieldConfig.aLaunchPoint : FieldConfig.bLaunchPoint;
         return new RoundTripAction(opModeUtilities, driveTrain, aimAt(target), shooter, stopper, intake, target, launch, 0, intakeSide);
     }

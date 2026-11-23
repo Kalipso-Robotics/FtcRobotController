@@ -61,7 +61,7 @@ public class ShooterDataCollector extends KOpMode {
         Point hiveTarget = SharedData.getTargetPoint();
         shooterRun = new ShooterRun(opModeUtilities, shooter, hiveTarget);
         turretAutoAlignTeleOp = new TurretAutoAlign(opModeUtilities, turret); // follows SharedData.getTargetPoint()
-        turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.STOP); // turned on when a shot starts
+        turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY); // aims the whole time, like TeleOp
         turretAutoAlignTeleOp.setToleranceDeg(2);
         KFileWriter rows = new KFileWriter("ShooterDataRows", opModeUtilities);
         rows.writeLine("// distanceMM, rps, hood, // hit|miss measuredRps=<flywheel RPS at the shot>   paste only the // hit rows into ShooterInterpolationConfig.shooterData");
@@ -95,6 +95,8 @@ public class ShooterDataCollector extends KOpMode {
             shooterRun.setTargetPoint(hiveTarget);
             if (isPending(shootAllAction)) {
                 shotMeasuredRps = shooter.getRPS(); // the feed is the end of the action: the last running loop is the shot
+            } else {
+                turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY); // ShootAllAction stops it at the feed
             }
 
             if (kGamePad1.isLeftBumperPressed() && !isPending(shootAllAction)) {

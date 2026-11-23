@@ -157,3 +157,10 @@ Decisions made during execution (owner answers and orchestrator rulings).
 - Renamed `TurretConfig.TRIM_DEG` to `TURRET_OFFSET_DEG`.
 - The AprilTag thread sleeps 10 ms per pass instead of busy-spinning on the same Limelight frame.
 - Limelight pipeline: 36h11, tag size 82.55 mm. Device config, not code.
+
+**Targeting fixes (2026-11-22)**
+- `ShooterConfig.TARGET_POINT_1/2` are the only Cell aim points (A = (1466.8, 2189.8) high y, x/y were swapped; B = (1466.8, 1391.9)). `FieldConfig.a/bTargetPoint` deleted. `TARGET_SWITCH_Y_MM` = Hive center 1828.8.
+- `HiveTagLocalizer` turns the camera by `+turretAngle` (was `-`, so every off-center re-zero was wrong by hundreds of mm).
+- Static aim and shot distance are measured from the turret pivot (`Turret.launcherPoint`), same as SOTM, so the distance table means the same thing with SOTM on or off. A pass never uses the SOTM solution.
+- `ShooterDataCollector` aims the turret continuously. Rigid autos keep per-trip RPS by Cell; the turret follows `SharedData.getTargetPoint()`.
+- Open: `HiveTagLocalizer` skips opponent tags, but `blue_opponentTagsLocalizeButSayNothingAboutOurGoal` (and the 2026-11-17 ruling) expect all 16 to localize. Owner call.

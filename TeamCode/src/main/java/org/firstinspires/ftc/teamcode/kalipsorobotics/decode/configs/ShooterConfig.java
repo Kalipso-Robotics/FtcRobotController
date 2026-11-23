@@ -10,14 +10,14 @@ public class ShooterConfig {
 
     public static final double OUT_OF_RANGE_THRESHOLD = 20 * 12 * 25.4;
     // Hive Cell aim points, measured. SharedData.getTargetPoint() picks one by robot y.
-    public static final Point TARGET_POINT_1 = new Point(2189.771, 1466.796); // Cell A
-    public static final Point TARGET_POINT_2 = new Point(1466.797, 1391.947); // Cell B
+    public static final Point TARGET_POINT_1 = new Point(1466.796, 2189.771); // Cell A (high y)
+    public static final Point TARGET_POINT_2 = new Point(1466.797, 1391.947); // Cell B (low y)
     /** Old DECODE goal, fixed. Only the decode/ OpModes use it; BioBuzz aims at SharedData.getTargetPoint(). */
     public static final Point TARGET_POINT = TARGET_POINT_1;
 
     // ---- Hive Cell target switch (SharedData.getTargetPoint) ----
     /** Robot y above this aims at TARGET_POINT_1 (Cell A), below it at TARGET_POINT_2 (Cell B). */
-    public static double TARGET_SWITCH_Y_MM = 1800;
+    public static double TARGET_SWITCH_Y_MM = 1828.8; // Hive center (field 3657.6 / 2)
     /** Inside this band around TARGET_SWITCH_Y_MM the last Cell is kept, so the target does not flicker. TODO-measure */
     public static double TARGET_SWITCH_DEADBAND_MM = 150;
     /** The target is re-checked once every this many odometry updates, not every loop. */

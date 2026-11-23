@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;
@@ -126,7 +128,7 @@ public final class SimMain {
         out.println("#hive " + FieldConfig.HIVE_MIN_X + " " + FieldConfig.HIVE_MIN_Y + " " + FieldConfig.HIVE_MAX_X + " " + FieldConfig.HIVE_MAX_Y);
         out.println("#midline " + FieldConfig.MIDLINE_X);
         Object[][] points = {{"launch-A", FieldConfig.aLaunchPoint}, {"launch-B", FieldConfig.bLaunchPoint},
-                {"target-A", FieldConfig.aTargetPoint}, {"target-B", FieldConfig.bTargetPoint}, {"garden", FieldConfig.gardenPoint}};
+                {"target-A", ShooterConfig.TARGET_POINT_1}, {"target-B", ShooterConfig.TARGET_POINT_2}, {"garden", FieldConfig.gardenPoint}};
         for (Object[] point : points) {
             out.println("#point " + point[0] + " " + ((Point) point[1]).getX() + " " + ((Point) point[1]).getY());
         }

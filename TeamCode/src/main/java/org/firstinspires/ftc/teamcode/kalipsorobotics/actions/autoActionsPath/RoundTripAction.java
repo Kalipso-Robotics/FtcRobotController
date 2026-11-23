@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
@@ -34,7 +36,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
  *    (purePursuitReadyIntakeStop); ShooterRun warms up during the drive; PushBall waits for the drive (purePursuitReadyShooting),
  *    ShooterReady (if shouldDependOnFlywheel) and TurretReady; then ShooterStop (setShouldShooterStop(false) keeps it spinning).
  *    Auto: {@code RoundTripAction trip = new RoundTripAction(opModeUtilities, driveTrain, aim, shooter, stopper, intake,
- *          FieldConfig.aTargetPoint, FieldConfig.aLaunchPoint, 0, intake.getSide(BeamBreakPosition.IntakeSide.A));
+ *          ShooterConfig.TARGET_POINT_1, FieldConfig.aLaunchPoint, 0, intake.getSide(BeamBreakPosition.IntakeSide.A));
  *          trip.getMoveToBall().addPoint(...);}
  *
  * 2. SHOOT-FIRST TRIP (the two older BIOBUZZ constructors, kept unchanged for RedTippingAuto): moveToShoot, shoot, then

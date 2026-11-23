@@ -213,7 +213,7 @@ public class RedDecideAuto extends KOpMode {
 
     /** The point the turret is aimed at before the first shot. */
     Point firstTurretTarget() {
-        return FieldConfig.aTargetPoint;
+        return ShooterConfig.TARGET_POINT_1;
     }
 
     /** Called once, right after START. Here a subclass can change what we believe about the Hive. */
@@ -926,7 +926,7 @@ public class RedDecideAuto extends KOpMode {
      */
     private KActionSet shootMove(Cell cell) {
         Point launch = launchPointOf(cell);
-        Point target = (cell == Cell.A) ? FieldConfig.aTargetPoint : FieldConfig.bTargetPoint;
+        Point target = (cell == Cell.A) ? ShooterConfig.TARGET_POINT_1 : ShooterConfig.TARGET_POINT_2;
 
         // A fresh aim per shot, aimed at THIS Cell.
         TurretAutoAlign aim = new TurretAutoAlign(opModeUtilities, turret, target);

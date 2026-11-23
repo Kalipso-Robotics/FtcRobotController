@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -307,7 +308,8 @@ public class ShooterRun extends Action {
         if (sotm != null) {
             return sotm.shotDistanceMM;
         }
-        return SharedData.peekOdometryWheelIMUPosition().toPoint().distanceTo(targetPoint);
+        // From the turret pivot, like SOTM, so the distance table means the same thing with SOTM on or off.
+        return Turret.launcherPoint(SharedData.peekOdometryWheelIMUPosition()).distanceTo(targetPoint);
     }
 
     public void setUseOdometry(boolean useOdometry) {

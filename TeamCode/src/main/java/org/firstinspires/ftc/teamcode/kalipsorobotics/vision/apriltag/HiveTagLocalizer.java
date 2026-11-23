@@ -60,10 +60,10 @@ public final class HiveTagLocalizer {
     public static Fix solve(List<TagObservation> observations, double headingRad, double turretAngleRad, AllianceColor allianceColor) {
         double pitch = Math.toRadians(AprilTagConfig.CAM_PITCH_DEG);
 
-        // Where the camera is in the robot frame (x forward, y right). Same chain as last year's AprilTagDetectionAction,
-        // including the minus sign on the turret angle. TODO-verify on the robot: turn the turret and check x/y holds still.
+        // Where the camera is in the robot frame (x forward, y right). The turret angle turns the camera the same way it
+        // aims (+ = clockwise, like heading). TODO-verify on the robot: turn the turret and check x/y holds still.
         Position camInRobot = AprilTagConfig.TURRET_REL_CAM_POS.toNewFrame(
-                TurretConfig.ROBOT_REL_TURRET_POINT.getX(), TurretConfig.ROBOT_REL_TURRET_POINT.getY(), -turretAngleRad);
+                TurretConfig.ROBOT_REL_TURRET_POINT.getX(), TurretConfig.ROBOT_REL_TURRET_POINT.getY(), turretAngleRad);
 
         int votesAUp = 0;
         int votesBUp = 0;

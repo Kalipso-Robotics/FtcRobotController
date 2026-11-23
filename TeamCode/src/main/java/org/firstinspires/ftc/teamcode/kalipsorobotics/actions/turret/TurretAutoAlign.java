@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.DoneStateAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
@@ -102,9 +103,11 @@ public class TurretAutoAlign extends Action {
     }
 
     private void alignToTarget() {
-        targetAngleRad = calculateTargetAngleRad(getTargetPoint(), SharedData.peekOdometryWheelIMUPosition(), TurretConfig.TURRET_OFFSET_DEG);
+        Point target = getTargetPoint();
+        targetAngleRad = calculateTargetAngleRad(target, SharedData.peekOdometryWheelIMUPosition(), TurretConfig.TURRET_OFFSET_DEG);
         SOTM.Solution sotm = SOTM.usableSolution();
-        if (sotm != null) {
+        // SOTM only solves for a Hive Cell; any other target (a pass) keeps the static aim.
+        if (sotm != null && MathFunctions.distance(target, SOTMConfig.GOALS[sotm.goalIndex]) < 1) {
             targetAngleRad = calculateTargetAngleRad(sotm.aimHeadingRad, sotm.releaseHeadingRad, TurretConfig.TURRET_OFFSET_DEG);
         }
 
@@ -121,8 +124,10 @@ public class TurretAutoAlign extends Action {
         }
     }
 
+    /** Aims from the turret pivot (where the ball leaves), same as SOTM, not the robot center. */
     public static double calculateTargetAngleRad(Point targetPoint, Position currentPosition, double offsetDeg) {
-        double angleTargetRadian = Math.atan2(targetPoint.getY() - currentPosition.getY(), targetPoint.getX() - currentPosition.getX());
+        Point launcher = Turret.launcherPoint(currentPosition);
+        double angleTargetRadian = Math.atan2(targetPoint.getY() - launcher.getY(), targetPoint.getX() - launcher.getX());
         return calculateTargetAngleRad(angleTargetRadian, currentPosition.getTheta(), offsetDeg);
     }
 

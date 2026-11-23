@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import static org.junit.Assert.assertTrue;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
@@ -87,8 +89,8 @@ public class SOTMClosedLoopTest {
     public void strafingPastTheHive_landsOnTheCell() {
         // 1.2 m/s across the field, slowing down, robot turning; ~1.5 m from Cell A.
         Drive d = new Drive(900, 3300, Math.toRadians(-60), 1.2, 0.2, 0.0015, -0.002, 0.0005, 0.00001);
-        double withSotm = miss(d, FieldConfig.aTargetPoint, true);
-        double without = miss(d, FieldConfig.aTargetPoint, false);
+        double withSotm = miss(d, ShooterConfig.TARGET_POINT_1, true);
+        double without = miss(d, ShooterConfig.TARGET_POINT_1, false);
         assertTrue("SOTM miss " + withSotm + " mm", withSotm < 10);
         assertTrue("static aim should miss badly, missed " + without + " mm", without > 300);
     }
@@ -96,14 +98,14 @@ public class SOTMClosedLoopTest {
     @Test
     public void drivingAwayAndSpinning_landsOnTheCell() {
         Drive d = new Drive(1500, 600, Math.toRadians(80), -0.1, -0.8, -0.003, 0, 0.001, 0);
-        assertTrue(miss(d, FieldConfig.bTargetPoint, true) < 10);
+        assertTrue(miss(d, ShooterConfig.TARGET_POINT_2, true) < 10);
     }
 
     @Test
     public void standingStill_isTheStaticAim() {
         Drive d = new Drive(1200, 3000, 0, 0, 0, 0, 0, 0, 0);
-        assertTrue(miss(d, FieldConfig.aTargetPoint, true) < 1e-6);
+        assertTrue(miss(d, ShooterConfig.TARGET_POINT_1, true) < 1e-6);
         // The static aim points from the robot center, not the turret pivot: off by the pivot's few-mm side offset.
-        assertTrue(miss(d, FieldConfig.aTargetPoint, false) < 30);
+        assertTrue(miss(d, ShooterConfig.TARGET_POINT_1, false) < 30);
     }
 }

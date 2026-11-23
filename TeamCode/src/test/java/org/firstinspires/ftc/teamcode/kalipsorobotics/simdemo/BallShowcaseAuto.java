@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.simdemo;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
@@ -101,8 +103,8 @@ public class BallShowcaseAuto extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        Point launchA = FieldConfig.aLaunchPoint, targetA = FieldConfig.aTargetPoint;
-        Point launchB = FieldConfig.bLaunchPoint, targetB = FieldConfig.bTargetPoint;
+        Point launchA = FieldConfig.aLaunchPoint, targetA = ShooterConfig.TARGET_POINT_1;
+        Point launchB = FieldConfig.bLaunchPoint, targetB = ShooterConfig.TARGET_POINT_2;
 
         // 1. the preload into Cell A
         RoundTripAction preload = trip("preload", targetA, launchA, false, new double[][]{{launchA.getX(), launchA.getY(), -90}});

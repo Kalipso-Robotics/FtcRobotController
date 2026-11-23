@@ -16,17 +16,9 @@ public class FieldConfig {
     private final static double SHOOT_POSITION_A_Y = 3657.6-609;
     public static Point aLaunchPoint =  new Point(SHOOT_POSITION_A_X, SHOOT_POSITION_A_Y);
 
-    public final static double SHOOT_TARGET_A_X = 1524;
-    private final static double SHOOT_TARGET_A_Y = 3657.6-1524;
-    public static Point aTargetPoint =  new Point(SHOOT_TARGET_A_X, SHOOT_TARGET_A_Y);
-
     private final static double SHOOT_POSITION_B_X = 1524;
     private final static double SHOOT_POSITION_B_Y = 609;
     public static Point bLaunchPoint =  new Point(SHOOT_POSITION_B_X, SHOOT_POSITION_B_Y);
-
-    public final static double SHOOT_TARGET_B_X = 1524;
-    private final static double SHOOT_TARGET_B_Y = 3657.6-2135;
-    public static Point bTargetPoint =  new Point(SHOOT_TARGET_B_X, SHOOT_TARGET_B_Y);
 
     // The pickup target is this far from a Flower's center, straight out from its wall (the arm knocks balls off by
     // driving in, so likely smaller). Measured value, not Dashboard-tuned.

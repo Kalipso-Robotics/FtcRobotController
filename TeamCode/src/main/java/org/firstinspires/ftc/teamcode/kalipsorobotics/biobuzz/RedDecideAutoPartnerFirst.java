@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
@@ -39,7 +41,7 @@ public class RedDecideAutoPartnerFirst extends RedDecideAuto {
 
     @Override
     Point firstTurretTarget() {
-        return FieldConfig.bTargetPoint;                            // the first Cell WE shoot is B
+        return ShooterConfig.TARGET_POINT_2;                            // the first Cell WE shoot is B
     }
 
     /**
