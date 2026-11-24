@@ -6,7 +6,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 /**
  * Shoot-on-the-move tunables. Units: mm, ms, rad.
  *
- * Tuning recipe: (1) recollect flight times from slow-mo video and refit A/B,
+ * Tuning recipe: (1) time one near and one far shot on slow-mo video, fit flight time t = A + B*distance
+ * (miss ~= robot speed * flight-time error, so ~50 ms is plenty; no LUT needed),
  * (2) measure TurretConfig.ROBOT_REL_TURRET_POINT, (3) tune RELEASE_LATENCY_MS until stationary and strafing
  * shots both land.
  */
@@ -14,8 +15,12 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 public class SOTMConfig {
     // ---- Switch ----
 
-    /** Dashboard kill switch. At standstill the deadband makes the solution equal the static aim. */
-    public static boolean enabled = false;
+    /** Dashboard kill switch: runs the SOTM thread and aims the turret at the virtual goal (and keeps it tracking
+     *  during a shot). At standstill the deadband makes the solution equal the static aim. */
+    public static boolean aimTurret = true;
+    /** Shooter RPS looks up the virtual-goal distance instead of the real one. Only applies while aimTurret is on.
+     *  Turn on once the RPS LUT and PIDF are tuned. */
+    public static boolean adjustShooterRPS = false;
 
     // ---- Measured (physical constants, not Dashboard-tuned) ----
 
@@ -28,9 +33,9 @@ public class SOTMConfig {
 
     public static double RELEASE_LATENCY_MS = 50;
 
-    /** Flight time t = A + B * distance. Fit of the old LUT (RMS 86 ms), recollect later. */
-    public static double FLIGHT_TIME_A_MS = 344;
-    public static double FLIGHT_TIME_B_MS_PER_MM = 0.186;
+    /** Flight time t = A + B * distance. Rough constant ~1 s for now; refit from slow-mo (old LUT fit was 344 + 0.186*d). */
+    public static double FLIGHT_TIME_A_MS = 1000;
+    public static double FLIGHT_TIME_B_MS_PER_MM = 0;
 
     // ---- Tuned: motion estimate ----
 

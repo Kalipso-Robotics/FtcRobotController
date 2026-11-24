@@ -10,7 +10,7 @@ public class ShooterInterpolationConfig {
     public static double hoodOffset = 0;
     public static final double HOOD_INIT_OFFSET = 0;
     public final static double MIN_HOOD = 0.1284; // TODO-measure //0.72 old hood
-    public final static double MAX_HOOD = 0.3; // TODO-measure // 0.3 old hood 37.38mm space by caliper from bottom
+    public final static double MAX_HOOD = 0.5; // TODO-measure // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5; // TODO-measure
     // One motor now spins 6 flywheels + 4 weights: the ceiling is about 1/kf (~87 RPS loaded), and the
     // PIDF needs headroom to recover between balls and under NECTAR voltage sag. Shooter clamps every target to this.

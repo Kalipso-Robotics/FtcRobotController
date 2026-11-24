@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -304,7 +305,7 @@ public class ShooterRun extends Action {
     }
 
     public static double getDistanceToTargetFromCurrentPos(Point targetPoint) {
-        SOTM.Solution sotm = SOTM.usableSolution();
+        SOTM.Solution sotm = SOTMConfig.adjustShooterRPS ? SOTM.usableSolution() : null;
         if (sotm != null) {
             return sotm.shotDistanceMM;
         }

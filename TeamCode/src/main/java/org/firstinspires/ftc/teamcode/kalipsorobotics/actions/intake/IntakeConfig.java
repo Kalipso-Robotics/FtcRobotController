@@ -22,8 +22,8 @@ public class IntakeConfig {
 
     // Flower arm: Axon Max in CR mode. Power is held after the move, pushing the arm into its hard stop,
     // so keep it as low as still reliably gets there and holds (high stall power heats the servo). Tune with FlowerCRTuner.
-    public static double FLOWER_DOWN_POWER = 0.4; // TODO-measure
-    public static double FLOWER_UP_POWER = -0.4; // TODO-measure: must be the opposite sign of DOWN (interlock uses the sign)
+    public static double FLOWER_DOWN_POWER = 0; // TODO-measure
+    public static double FLOWER_UP_POWER = 0; // TODO-measure: must be the opposite sign of DOWN (interlock uses the sign)
     public static boolean FLOWER_FLIP_DIRECTION = false; // read once at init
 
     // Robot-frame forward speed beyond which the intake side switches; inside +/- this keeps the last side.

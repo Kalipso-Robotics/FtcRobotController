@@ -28,7 +28,7 @@ public class SOTMClosedLoopTest {
 
     @Before
     public void config() {
-        SOTMConfig.enabled = true;
+        SOTMConfig.aimTurret = true;
         SOTMConfig.RELEASE_LATENCY_MS = 50;
         SOTMConfig.FLIGHT_TIME_A_MS = 344;
         SOTMConfig.FLIGHT_TIME_B_MS_PER_MM = 0.186;

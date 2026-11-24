@@ -57,13 +57,26 @@ public class AprilTagConfigTest {
         assertTrue(AprilTagConfig.tagFieldXYZ(42, true, AllianceColor.RED)[0] > AprilTagConfig.tagFieldXYZ(30, true, AllianceColor.RED)[0]);
     }
 
-    /** Heights from manual Figure 9-10 geometry: up CELL tags ~1.25 m, down ~0.89 m, far enough apart to classify. */
+    /** Tag centres measured in the official field CAD (2026-11-23), Red frame. x/across come from the manual. */
+    @Test
+    public void tagCentresMatchFieldCad() {
+        double[] xs = {1340.1, 1435.3, 1575.0, 1670.3};
+        for (int i = 0; i < 4; i++) {
+            double[] up = AprilTagConfig.tagFieldXYZ(34 + i, true, AllianceColor.RED);
+            double[] down = AprilTagConfig.tagFieldXYZ(34 + i, false, AllianceColor.RED);
+            assertEquals(xs[i], up[0], 0.5);
+            assertEquals(2156.2, up[1], 0.5);
+            assertEquals(1261.5, up[2], 0.5);
+            assertEquals(xs[i], down[0], 0.5);
+            assertEquals(2118.2, down[1], 0.5);
+            assertEquals(905.4, down[2], 0.5);
+        }
+    }
+
     @Test
     public void upAndDownHeightsAreSeparable() {
         double up = AprilTagConfig.tagFieldXYZ(34, true, AllianceColor.RED)[2];
         double down = AprilTagConfig.tagFieldXYZ(34, false, AllianceColor.RED)[2];
-        assertEquals(1249, up, 15);
-        assertEquals(887, down, 15);
         assertTrue(up - down > 2 * AprilTagConfig.TAG_HEIGHT_TOLERANCE_MM);
     }
 

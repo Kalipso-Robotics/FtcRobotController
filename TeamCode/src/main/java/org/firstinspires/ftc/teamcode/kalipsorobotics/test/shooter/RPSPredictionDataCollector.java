@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.FieldOrientedDriveAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
@@ -35,23 +38,31 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  * Pattern source: this file's earlier LinearOpMode version, ported to KOpMode + startOdometry.
  *
  * Turret aims at the Hive target the whole time (TurretAutoAlign, ticked by updateActions()).
+ * Intake: both sides run while RT is held (not while PushBall is feeding).
+ * Consistent shots: LT arms a shot; PushBall (the same feed TeleOp uses) starts only once the turret is aligned
+ * and the flywheel has held the same power for SETTLE_MS (after power changes, shooter on, and the last feed).
+ * The row's RPS is read at that moment, i.e. the steady RPS the first ball leaves at.
  *
  * Controls (GP1):
- *   sticks            field-centric drive (IMU yaw; "forward" = the way the robot faced at init)
+ *   sticks            field-centric drive (FieldOrientedDriveAction)
  *   dpad up / down    shooter power +/- POWER_STEP_BIG        A / B    power +/- POWER_STEP_SMALL
  *   dpad right / left hood +/- HOOD_STEP (clamped MIN_HOOD..MAX_HOOD)
- *   X (hold)          run the shooter at the set power
- *   RT (hold)         intake + stopper closed (load)
- *   LT (hold)         stopper open + intake (shoot); the press records RPS/power/voltage/hood/distance
- *   Y                 save the last recorded shot to the file
+ *   X                 toggle the shooter on/off at the set power
+ *   RT (hold)         run the intake (both sides)
+ *   LB                arm a shot (press again to cancel); PushBall fires when ready and records RPS/power/voltage/hood/distance
+ *   Y                 save the last recorded shot to the file (save hits only)
  *   RB                rezero: robot pushed into the loading-zone corner facing +x -> FieldConfig.CORNER_ZERO_POSE
  *
  * Turret debug: KLog tag Test_Shooter, "event=turret" every TURRET_LOG_MS: pose, target, field aim, turret deg,
  * servo position. Positive turretDeg must swing the turret to the robot's RIGHT (clockwise from above).
  */
+@Config
 @TeleOp(name = "RPS Prediction Data Collector", group = "Test")
 public class RPSPredictionDataCollector extends KOpMode {
     public static final String TAG = "Test_Shooter";
+    /** Flywheel must hold one power this long (and this long after a feed) before PushBall fires. TODO-measure */
+    public static double SETTLE_MS = 1500;
+    public static double TURRET_TOLERANCE_DEG = 2;
     private static final double POWER_STEP_BIG = 0.05;
     private static final double POWER_STEP_SMALL = 0.01;
     private static final double HOOD_STEP = 0.01;
@@ -61,8 +72,8 @@ public class RPSPredictionDataCollector extends KOpMode {
             "sticks: field-centric drive   turret auto-aims at the Hive",
             "dpad up/down: power +/-" + POWER_STEP_BIG + "   A/B: power +/-" + POWER_STEP_SMALL,
             "dpad right/left: hood +/-" + HOOD_STEP,
-            "X hold: run shooter   RT hold: load (intake, stopper closed)",
-            "LT hold: shoot (records the shot)   Y: save last shot",
+            "X: shooter on/off   RT hold: intake",
+            "LT: arm/cancel shot (PushBall fires when aligned + settled)   Y: save last shot (hits only)",
             "RB: rezero odometry (robot in corner, facing +x)",
     };
 
@@ -83,6 +94,8 @@ public class RPSPredictionDataCollector extends KOpMode {
 
         turretAutoAlignTeleOp = new TurretAutoAlign(opModeUtilities, turret); // follows SharedData.getTargetPoint(); updateActions() ticks it
         turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
+        turretAutoAlignTeleOp.setToleranceDeg(TURRET_TOLERANCE_DEG);
+        stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
         KLog.d(TAG, () -> String.format("event=turretConfig degPerServoDeg=%.4f servoRangeDeg=%.1f zeroPos=%.3f dir=%d limitsDeg=%.1f..%.1f pivot=%s startPose=%s",
                 TurretConfig.TURRET_DEG_PER_SERVO_DEG, TurretConfig.SERVO_RANGE_DEG, TurretConfig.SERVO_ZERO_POS,
                 TurretConfig.SERVO_DIRECTION, TurretConfig.MIN_TURRET_DEG, TurretConfig.MAX_TURRET_DEG, TurretConfig.ROBOT_REL_TURRET_POINT,
@@ -99,7 +112,11 @@ public class RPSPredictionDataCollector extends KOpMode {
         Point hiveTarget = null;
         String lastShot = null;
         String message = "";
-        boolean wasShooting = false;
+        boolean shooterOn = false;
+        boolean shotArmed = false;
+        PushBall pushBall = null;
+        boolean wasFeeding = false;
+        ElapsedTime settleTimer = new ElapsedTime();
 
         for (String line : CONTROLS) {
             telemetry.addLine(line);
@@ -149,8 +166,18 @@ public class RPSPredictionDataCollector extends KOpMode {
             }
             shooterPower = MathFunctions.clamp(shooterPower, 0, 1);
             if (shooterPower != powerBefore) {
+                settleTimer.reset();
                 double p = shooterPower;
                 KLog.d(TAG, () -> "event=powerSet power=" + p);
+            }
+            if (kGamePad1.isButtonXFirstPressed()) {
+                shooterOn = !shooterOn;
+                settleTimer.reset();
+                if (!shooterOn) {
+                    shotArmed = false;
+                }
+                boolean on = shooterOn;
+                KLog.d(TAG, () -> "event=shooterToggle on=" + on);
             }
 
             double hoodBefore = hoodPosition;
@@ -167,25 +194,50 @@ public class RPSPredictionDataCollector extends KOpMode {
                 KLog.d(TAG, () -> "event=hoodSet hood=" + h);
             }
 
-            boolean shooting = gamepad1.left_trigger > 0.1;
-            if (gamepad1.right_trigger > 0.1) {
-                intake.run(1.0);
-                stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
-            } else if (shooting) {
-                stopper.setPosition(ModuleConfig.STOPPER_SERVO_OPEN_POS);
-                intake.run(1.0);
-                if (!wasShooting) {
-                    lastShot = String.format("%.2f,%.2f,%.2f,%.4f,%.2f",
-                            shooter.getRPS(), shooterPower, getBatteryVoltage(), hoodPosition, distanceMM);
-                    String s = lastShot;
-                    KLog.d(TAG, () -> "event=shotRecorded row=" + s);
-                }
-            } else {
-                intake.stop();
+            boolean feeding = isPending(pushBall);
+            if (wasFeeding && !feeding) {
+                settleTimer.reset(); // the feed dropped the flywheel: let it recover before the next shot
+                KLog.d(TAG, "event=feedDone");
             }
-            wasShooting = shooting;
+            wasFeeding = feeding;
 
-            shooter.setPower(gamepad1.x ? shooterPower : 0);
+            if (kGamePad1.isLeftBumperFirstPressed() && !feeding) {
+                if (shotArmed) {
+                    shotArmed = false;
+                    message = "Shot cancelled";
+                } else if (!shooterOn) {
+                    message = "Shooter is off: press X first";
+                } else {
+                    shotArmed = true;
+                    message = "";
+                }
+                boolean armed = shotArmed;
+                KLog.d(TAG, () -> "event=shotArm armed=" + armed);
+            }
+
+            boolean aligned = turretAutoAlignTeleOp.isWithinRange();
+            boolean settled = settleTimer.milliseconds() >= SETTLE_MS;
+            if (shotArmed && aligned && settled) {
+                shotArmed = false;
+                lastShot = String.format("%.2f,%.2f,%.2f,%.4f,%.2f",
+                        shooter.getRPS(), shooterPower, getBatteryVoltage(), hoodPosition, distanceMM);
+                pushBall = new PushBall(stopper, intake);
+                setLastShooterAction(pushBall); // updateActions() ticks it; it owns the intake + stopper until done
+                feeding = true;
+                String s = lastShot;
+                KLog.d(TAG, () -> "event=shotRecorded row=" + s);
+            }
+
+            if (!feeding) {
+                if (gamepad1.right_trigger > 0.1) {
+                    intake.lower();
+                    intake.run(1.0);
+                } else {
+                    intake.stop();
+                }
+            }
+
+            shooter.setPower(shooterOn ? shooterPower : 0);
 
             if (kGamePad1.isButtonYFirstPressed()) {
                 if (lastShot != null) {
@@ -206,7 +258,11 @@ public class RPSPredictionDataCollector extends KOpMode {
             if (!message.isEmpty()) {
                 telemetry.addLine(message);
             }
-            telemetry.addData("Shooter Power", "%.2f", shooterPower);
+            telemetry.addData("Shot", feeding ? "FEEDING" : !shotArmed ? "idle"
+                    : "armed, waiting for " + (aligned ? "" : "turret ") + (settled ? "" : "spin-up"));
+            telemetry.addData("Shooter on / power", "%b / %.2f", shooterOn, shooterPower);
+            telemetry.addData("Settled", "%.0f / %.0f ms", Math.min(settleTimer.milliseconds(), SETTLE_MS), SETTLE_MS);
+            telemetry.addData("Balls", intake.getBallCount());
             telemetry.addData("Hood Position", "%.4f", hoodPosition);
             telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
             telemetry.addData("Turret target / delta", "%.1f / %.1f deg",

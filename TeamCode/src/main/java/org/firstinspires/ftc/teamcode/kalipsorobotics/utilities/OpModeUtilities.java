@@ -175,7 +175,7 @@ public class OpModeUtilities {
 
     /**
      * Runs SOTM on its own thread, one solve per new odometry sample (blocks on the sample, no sleeps).
-     * The thread exits when SOTMConfig.enabled goes false; the caller restarts it (see SOTM.isRunning).
+     * The thread exits when SOTMConfig.aimTurret goes false; the caller restarts it (see SOTM.isRunning).
      */
     public static void runSOTMExecutorService(ExecutorService executorService, SOTM sotm) {
         sotm.setRunning(true);
@@ -183,7 +183,7 @@ public class OpModeUtilities {
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
             long lastSample = 0;
             try {
-                while (!Thread.currentThread().isInterrupted() && SOTMConfig.enabled) {
+                while (!Thread.currentThread().isInterrupted() && SOTMConfig.aimTurret) {
                     try {
                         if (SharedData.awaitOdometrySampleAfter(lastSample, 50)) {
                             if (sotm.getOpModeUtilities().getOpMode().opModeIsActive()) {

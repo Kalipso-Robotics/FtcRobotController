@@ -98,14 +98,16 @@ public class RaytracerPublishTest {
     }
 
     @Test
-    public void atTheOriginFieldXIsForwardAndFieldYIsLeft() {
+    public void atTheOriginFieldXIsForwardAndFieldYIsRight() {
         SharedData.setOdometryWheelIMUPosition(new Position(0, 0, 0), nanos);
 
         frame(project("pollen", 0.9f, 120, 850, POLLEN_R)); // 120 mm left, 850 mm forward
 
+        // odometry is +y RIGHT (OctoConfig), so a ball on the left is negative y
+
         BallInformation b = SharedData.getBallInformation().get(0);
         assertEquals(850, b.x, 1e-3);
-        assertEquals(120, b.y, 1e-3);
+        assertEquals(-120, b.y, 1e-3);
         assertEquals(1, localizer.getLastResult().detections.size());
     }
 

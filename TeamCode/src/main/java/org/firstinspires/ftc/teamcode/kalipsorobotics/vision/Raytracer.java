@@ -328,7 +328,8 @@ public class Raytracer {
     /** Robot-frame point (x = left, y = forward) to field coordinates at robotPose. */
     static Point toField(Point local, Position robotPose) {
         if (local == null) return null;
-        return new Position(local.getY(), local.getX(), 0).toNewFrame(robotPose).toPoint();
+        // local x is LEFT-positive, odometry y is RIGHT-positive: negate it.
+        return new Position(local.getY(), -local.getX(), 0).toNewFrame(robotPose).toPoint();
     }
 
     /**

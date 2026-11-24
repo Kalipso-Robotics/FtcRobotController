@@ -22,7 +22,7 @@ public class TurretConfig {
     // [2026-11-22] 0.2589 pointed the shooter out the BACK: collector commanded 45 right from the corner, turret went
     // ~225 right. Front = 0.2589 + 180 deg of turret (0.3782 of servo, toward higher pos with dir -1). Fine-tune with
     // TurretServoTest (hold bumper + dpad).
-    public static final double SERVO_ZERO_POS = 0.6371;
+    public static final double SERVO_ZERO_POS = 0.4690;
     // Positive turret angle = clockwise seen from above (to the robot's right, same as heading). Check with the
     // Test_Shooter "turret" log: a positive turretDeg must swing the turret right; if it swings left, flip this.
     // [2026-11-22] -1: straight ahead needed a HIGHER servo pos than 0.5 to undo "a little right", so higher pos =
@@ -39,10 +39,11 @@ public class TurretConfig {
      * Turret pivot in the robot frame (x forward, y right, mm), measured from the robot centre (middle of the 4 mecanum
      * wheels), which is the point the OctoQuad localizer reports (OctoConfig.TCP_OFFSET_MM_*). Also the launcher
      * position SOTM leads from.
-     * From CAD (BioBuzz Robot Assembly V1, lazy susan bearing center), 2026-11-22: 5.8 mm behind centre, centred
-     * side to side. (Was (-24.52, 2.50), the DECODE robot.)
+     * From CAD (BioBuzz Robot Assembly V1, lazy susan bearing center), 2026-11-23: 5.6 mm AHEAD of centre, centred
+     * side to side. Forward = the way the Arducam looks (+y in CAD); the 11-22 value (-5.8) had forward flipped.
+     * (Was (-24.52, 2.50), the DECODE robot.)
      */
-    public static final Point ROBOT_REL_TURRET_POINT = new Point(-5.8, 0.0);
+    public static final Point ROBOT_REL_TURRET_POINT = new Point(5.6, 0.0);
 
     // Driver turret offset added to every aim angle, degrees. TeleOp gamepad 2 dpad left/right changes it.
     public static double TURRET_OFFSET_DEG = 0;

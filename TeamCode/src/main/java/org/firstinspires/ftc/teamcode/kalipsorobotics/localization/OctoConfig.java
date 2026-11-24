@@ -143,8 +143,12 @@ public final class OctoConfig {
     // (port 0) 85.6 mm fwd / 76.0 mm right, left parallel pod (port 2) 85.6 fwd / 76.0 left, perpendicular
     // pod (port 1) 36.1 mm fwd / 0 lateral. offset = -(pod position), board frame y-LEFT, same rule as above.
     // SPIN-VERIFY with OctoTune HEADING; the 2026-10-03 spin values were 2.5 mm off tape, expect similar.
-    public static final float TCP_OFFSET_MM_X   = -43.9f;  // [2026-11-16] CAD: perpendicular pod 36.1 mm in front (was -29.2, 2026-10-03 spins, old pod position)
-    public static final float TCP_OFFSET_MM_Y   = 82.1f;   // [2026-11-16] CAD: right parallel pod 76.0 mm right (was 77.3, old pod position)
+    // [2026-11-23] CAD re-read with forward = the way the Arducam looks (+y in CAD), robot centre from the three
+    // correctly placed mecanum wheels (the fourth sits at the wrong x in the CAD). Perpendicular pod 35.6 mm BEHIND
+    // centre, right parallel pod 76.0 mm right (85.1 behind). The 11-16 read had forward flipped, same as the
+    // turret point. SPIN-VERIFY: OctoTune HEADING reports yPodBehind directly; expect about +35.6.
+    public static final float TCP_OFFSET_MM_X   = 35.6f;   // was -43.9 (11-16 CAD, forward flipped)
+    public static final float TCP_OFFSET_MM_Y   = 76.0f;   // was 82.1 (11-16 CAD)
 
     /**
      * Distance between the two PARALLEL pods (port 0 and port 2), millimetres. Used only by the

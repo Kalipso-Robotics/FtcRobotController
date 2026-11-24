@@ -121,8 +121,9 @@ public class RaytracerFitTest {
     @Test
     public void recoversASyntheticMount() {
         VisionConfig.Camera lens = VisionConfig.ARDUCAM;
-        VisionConfig.Mount truth = new VisionConfig.Mount(29.3, 1.2, -0.8,
-                lens.mount.xMM, lens.mount.yMM, lens.mount.zMM);
+        // Offset from the live mount: the fit searches around it, so a fixed truth breaks whenever the mount changes.
+        VisionConfig.Mount truth = new VisionConfig.Mount(lens.mount.pitchDeg + 1.3, lens.mount.yawDeg + 1.2,
+                lens.mount.rollDeg - 0.8, lens.mount.xMM, lens.mount.yMM, lens.mount.zMM);
         Matrix r = Raytracer.camToRobot(truth);
         double radius = VisionConfig.POLLEN_DIAMETER_MM / 2.0;
 

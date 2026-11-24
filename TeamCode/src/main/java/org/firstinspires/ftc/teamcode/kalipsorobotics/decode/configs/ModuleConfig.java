@@ -16,10 +16,12 @@ public class ModuleConfig {
 
     //========INTAKE========
     // Side A is the front (+X, odometry side), side B the back.
-    public static final double INTAKE_PIVOT_A_DOWN_POS = 0.3; // TODO-measure
-    public static final double INTAKE_PIVOT_A_UP_POS = 0.7; // TODO-measure
+    public static final double INTAKE_PIVOT_A_DOWN_POS = 0.68; // TODO-measure
+    public static final double INTAKE_PIVOT_A_UP_POS = 0.58; // TODO-measure
+    // 0.44 ALL THE WAY UP FOR A(1) servo for INNIT_POS
     public static final double INTAKE_PIVOT_B_DOWN_POS = 0.3; // TODO-measure
-    public static final double INTAKE_PIVOT_B_UP_POS = 0.7; // TODO-measure
+    public static final double INTAKE_PIVOT_B_UP_POS = 0.55; // TODO-measure
+    // 0.55 ALL THE WAY UP for B (2) servo for INNIT POS
     public static final DcMotorSimple.Direction INTAKE_MOTOR_A_DIRECTION = DcMotorSimple.Direction.FORWARD; // TODO-measure
     public static final DcMotorSimple.Direction INTAKE_MOTOR_B_DIRECTION = DcMotorSimple.Direction.FORWARD; // TODO-measure
 

@@ -15,12 +15,14 @@ public class AprilTagConfig {
 
     // ---- Limelight mount (measured, not Dashboard-tuned) ----
 
-    /** Camera on the turret, turret frame (x forward, y right, theta = camera yaw vs the turret). TODO-measure: DECODE value. */
-    public static final Position TURRET_REL_CAM_POS = new Position(-147.565, 0.977, 0);
-    /** Lens height above the tiles. TODO-measure */
-    public static final double CAM_HEIGHT_MM = 350;
-    /** Camera tilt above horizontal (the tags are overhead). TODO-measure */
-    public static final double CAM_PITCH_DEG = 25;
+    // From CAD 2026-11-23: Limelight STEP model on Albert Shooter (Linkage hood), glass center vs lazy susan center.
+    // The camera faces the same way as the shooter. Floor = bottom of the mecanum wheels in BioBuzz Robot Assembly V1.
+    /** Camera on the turret, turret frame (x forward, y right, theta = camera yaw vs the turret). From CAD; verify with the turret sweep. */
+    public static final Position TURRET_REL_CAM_POS = new Position(101.9, -0.5, 0);
+    /** Lens height above the tiles. From CAD (~388); tape-check on the robot, wheels may sit 3 mm lower than modeled. */
+    public static final double CAM_HEIGHT_MM = 388;
+    /** Camera tilt above horizontal (the tags are overhead). From CAD: optical axis (0, 0.819, 0.574). */
+    public static final double CAM_PITCH_DEG = 35.0;
 
     // ---- BIOBUZZ tags (manual 9.6, 9.9, Figures 9-9, 9-10, 9-15, 9-17) ----
     // 36h11, 3.25 in, four per CELL on the CELL's underside. Set the Limelight pipeline to 36h11, size 82.55 mm.
@@ -44,10 +46,11 @@ public class AprilTagConfig {
     public static final double HIVE_TILT_RAD = Math.toRadians(30);
     /** Each HIVE's pivot is this far from the field center along x (25.5 in center to center). */
     public static final double HIVE_X_FROM_CENTER_MM = 25.5 / 2 * IN;
-    /** Tag centerline from the pivot along the level arm: half the 18.84 in gap + 12.04 in CELL - 9.938 in (front to holes) + 2.75 in (holes to tags). */
-    public static final double TAG_ALONG_ARM_MM = (18.84 / 2 + 12.04 - 9.938 + 2.75) * IN;
-    /** CELL underside below the pivot axis, level. VERIFY: 3.0 in from the 30.6 in "bottom of HIVE", 1.3 in from the 53.5 in "bottom of opening". */
-    public static final double TAG_BELOW_PIVOT_MM = 2.2 * IN;
+    /** Tag centerline from the pivot along the level arm. From the official field CAD (field-cad-step, Game Pieces),
+     *  2026-11-23. (Manual sum 18.84/2 + 12.04 - 9.938 + 2.75 in = 362.5 mm was 6.4 mm long.) */
+    public static final double TAG_ALONG_ARM_MM = 356.1;
+    /** CELL underside (tag face) below the pivot axis, level. From the official field CAD, 2026-11-23 (was a 2.2 in guess). */
+    public static final double TAG_BELOW_PIVOT_MM = 37.9;
     /** Tag centers across the cluster, in printed order (lowest ID first), cluster center = CELL centerline. */
     private static final double[] TAG_ACROSS_MM = {-6.5 * IN, -2.75 * IN, 2.75 * IN, 6.5 * IN};
 

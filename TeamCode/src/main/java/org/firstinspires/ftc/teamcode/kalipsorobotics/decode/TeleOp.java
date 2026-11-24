@@ -141,7 +141,7 @@ public class TeleOp extends KOpMode {
 
         OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
         sotm = new SOTM(opModeUtilities);
-        if (SOTMConfig.enabled) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
+        if (SOTMConfig.aimTurret) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
         driveAction = USE_FIELD_ORIENTED_DRIVE
                 ? new FieldOrientedDriveAction(driveTrain, imuModule)
                 : new DriveAction(driveTrain);
@@ -189,7 +189,7 @@ public class TeleOp extends KOpMode {
 
         while (opModeIsActive()) {
             // Dashboard may flip SOTM on mid-match; the thread exits itself when it's turned off.
-            if (SOTMConfig.enabled && !sotm.isRunning()) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
+            if (SOTMConfig.aimTurret && !sotm.isRunning()) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
             opModeUtilities.clearBulkCache();
             lastLoopTime = loopTimer.milliseconds();
             loopTimer.reset();

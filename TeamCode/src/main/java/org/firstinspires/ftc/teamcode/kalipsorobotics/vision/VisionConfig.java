@@ -77,7 +77,10 @@ public class VisionConfig {
     public static Camera ARDUCAM = new Camera("Arducam", 1280, 720,
             888.2839, 887.1260, 700.0372, 314.0664,
             0.045011, -0.059862, 0.000330, 0.001499, 0.005590,
-            new Mount(28, 0, 0, -157.548, 236.163, 163.470));
+            // From CAD 2026-11-23 (newest mount in Rubber Band Transfer V2), lens front vs wheel centre and floor:
+            // 145.0 right, 121.3 forward, 317.2 up, pitched 25.0 down, yawed 10.0 left. Pitch/yaw are the bracket
+            // nominals: refit with RaytracerFitTest at 1280x720. (Was 28, 0, 0, -157.548, 236.163, 163.470: old mount.)
+            new Mount(25.0, 10.0, 0, -145.0, 317.2, 121.3));
 
     // ---- ball detection ----
 

@@ -38,7 +38,7 @@ public class SOTM {
         }
 
         public boolean isUsable() {
-            return SOTMConfig.enabled && converged
+            return SOTMConfig.aimTurret && converged
                     && (System.nanoTime() - sampleNanos) / 1e6 <= SOTMConfig.MAX_SOLUTION_AGE_MS;
         }
 
@@ -54,7 +54,7 @@ public class SOTM {
 
     /** The published solution if it is enabled, fresh and converged, else null. */
     public static Solution usableSolution() {
-        if (!SOTMConfig.enabled) return null;
+        if (!SOTMConfig.aimTurret) return null;
         Solution s = SharedData.getSOTMSolution();
         return s != null && s.isUsable() ? s : null;
     }
