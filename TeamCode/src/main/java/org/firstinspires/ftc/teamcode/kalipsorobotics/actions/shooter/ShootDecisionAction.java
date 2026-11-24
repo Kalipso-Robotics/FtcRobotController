@@ -14,9 +14,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLoc
  */
 public class ShootDecisionAction extends Action {
 
-    // Where we shoot from on each side. Position angles are in radians.
-    public static final Position SHOOT_TIP_ZONE_1 = new Position(1194, 402, Math.toRadians(90));
-    public static final Position SHOOT_TIP_ZONE_2 = new Position(1164, 3087, Math.toRadians(270));
+    // Where we shoot from on each side (same spots as RedThreeTipSoloAuto). Position angles are in radians.
+    public static final Position SHOOT_TIP_ZONE_1 = new Position(1037, 397, Math.toRadians(289.1));
+    public static final Position SHOOT_TIP_ZONE_2 = new Position(300, 2949, Math.toRadians(102.6));
 
     // The answers
     private Position shootPosition = SHOOT_TIP_ZONE_1;
