@@ -28,11 +28,13 @@ public class FullFlowerAction extends KActionSet {
         }
 
         IPurePursuitAction setup = new PurePursuitAction(driveTrain);
+        setup.setMaxTimeOutMS(4000); // give up if blocked (e.g. against the flower base) (TODO-measure)
         setup.addPoint(flower.getSetupPoint().getX(), flower.getSetupPoint().getY(), flower.getSetupHeadingDeg());
         setup.setName("setup");
         this.addAction(setup);
 
         IPurePursuitAction goToFlower = new PurePursuitAction(driveTrain);
+        goToFlower.setMaxTimeOutMS(1500); // give up if blocked (e.g. against the flower base) (TODO-measure)
         goToFlower.addPoint(flower.getPoint().getX(), flower.getPoint().getY(), flower.getFlowerHeadingDeg());
         goToFlower.setName("goToFlower");
         goToFlower.setDependentActions(setup);
@@ -50,6 +52,7 @@ public class FullFlowerAction extends KActionSet {
 
         // Back out only once the arm is down (or gave up), so the robot never leaves before the arm swept the pile.
         IPurePursuitAction exitFlower = new PurePursuitAction(driveTrain);
+        exitFlower.setMaxTimeOutMS(1500); // give up if blocked (e.g. against the flower base) (TODO-measure)
         exitFlower.addPoint(flower.getExitPoint().getX(), flower.getExitPoint().getY(), flower.getExitHeadingDeg());
         exitFlower.setName("exitFlower");
         exitFlower.setDependentActions(goToFlower, flowerLower);

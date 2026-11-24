@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterSto
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 /**
  * One trip, written like a trip in RedThreeTipSoloAuto:
@@ -47,6 +49,13 @@ public class DecisionRoundTripAction extends KActionSet {
             return;   // nowhere has balls: empty trip
         }
 
+        // Hive never seen: act like the rigid auto. Flowers go to Cell B, everything after goes to Cell A.
+        if (SharedData.getHiveUpCell() == null
+                && whereToIntake != IntakeSources.FLOWER_1 && whereToIntake != IntakeSources.FLOWER_2) {
+            shootPosition = ShootDecisionAction.SHOOT_TIP_ZONE_2;
+            targetPoint = ShooterConfig.TARGET_POINT_1;
+        }
+
         // INTAKE
         KActionSet intakeBalls = new KActionSet();
         intakeBalls.setName("intakeBalls");
@@ -61,8 +70,28 @@ public class DecisionRoundTripAction extends KActionSet {
             FullFlowerAction flowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, flower);
             flowerIntake.setName("flowerIntake");
             intakeBalls.addAction(flowerIntake);
+        } else if (whereToIntake == IntakeSources.GARDEN) {
+            // garden: same path as RedThreeTipSoloAuto trip 3. The intake runs while driving and sweeping.
+            IPurePursuitAction goToGarden = new PurePursuitAction(driveTrain);
+            goToGarden.setName("goToGarden");
+            goToGarden.addPoint(1027, 487, 108.5);
+            goToGarden.addPoint(289, 2949, 102.6);
+            intakeBalls.addAction(goToGarden);
+
+            IntakeFullAction runIntake = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
+            runIntake.setName("runIntake");
+            runIntake.setDependentActions(goToGarden);
+            intakeBalls.addAction(runIntake);
+
+            IPurePursuitAction sweepGarden = new PurePursuitAction(driveTrain);
+            sweepGarden.setName("sweepGarden");
+            sweepGarden.addPoint(188, 3309, 90.0);
+            sweepGarden.addPoint(289, 2949, 102.6);
+            sweepGarden.addPoint(188, 3309, 90.0);
+            sweepGarden.setDependentActions(goToGarden);
+            intakeBalls.addAction(sweepGarden);
         } else {
-            // garden and tip zones: drive there with the intake on
+            // tip zones: drive there with the intake on
             Point intakePoint = IntakeDecisionAction.pointOf(whereToIntake);
 
             IPurePursuitAction goToIntake = new PurePursuitAction(driveTrain);
@@ -92,7 +121,7 @@ public class DecisionRoundTripAction extends KActionSet {
 
         ShooterReady shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
-        shooterReady.setDependentActions(shooterRun);
+        shooterReady.setDependentActions(goToShoot);
         this.addAction(shooterReady);
 
         TurretReady turretReady = new TurretReady(turretAutoAlign);

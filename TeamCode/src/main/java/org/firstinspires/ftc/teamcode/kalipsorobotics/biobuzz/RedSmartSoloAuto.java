@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
@@ -13,9 +15,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.Flower;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeDecisionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootDecisionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
@@ -37,7 +36,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallVision;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.colorblobbing.BlobSelectionStrategy;
 
 @Autonomous
 public class RedSmartSoloAuto extends KOpMode {
@@ -116,7 +114,7 @@ public class RedSmartSoloAuto extends KOpMode {
 
         ShooterReady shooterReadyPreload = new ShooterReady(shooterRunPreload);
         shooterReadyPreload.setName("shooterReadyPreload");
-        shooterReadyPreload.setDependentActions(shooterRunPreload);
+        shooterReadyPreload.setDependentActions(waitUntilShooterRun);
         redSmartSoloAuto.addAction(shooterReadyPreload);
 
         TurretReady turretReadyPreload = new TurretReady(turretAutoAlign);
@@ -128,6 +126,11 @@ public class RedSmartSoloAuto extends KOpMode {
         shootPreload.setName("shootPreload");
         shootPreload.setDependentActions(shooterReadyPreload,turretReadyPreload);
         redSmartSoloAuto.addAction(shootPreload);
+
+        ShooterStop shooterStop = new ShooterStop(shooterRunPreload);
+        shooterStop.setName("shooterStop");
+        shooterStop.setDependentActions(shootPreload);
+        redSmartSoloAuto.addAction(shooterStop);
         // TRIPS 1, 2, 3...: built one at a time during the match (see the loop below),
         // so each one decides with what the robot knows right then.
         IntakeSources.resetAll();
@@ -186,7 +189,9 @@ public class RedSmartSoloAuto extends KOpMode {
                     trip.setName("trip" + tripNumber);
 
                     if (intakeDecision.getChosenSource() == null) {
-                        nothingLeftToIntake = true;   // TODO: park
+                        nothingLeftToIntake = true;
+                        forceParking = true;   // nothing left to intake: park now, like the rigid auto
+                        KLog.d("RedSmartSoloAuto", "nothing left to intake, parking at " + matchTimer.milliseconds() + " ms");
                     }
                 }
             }

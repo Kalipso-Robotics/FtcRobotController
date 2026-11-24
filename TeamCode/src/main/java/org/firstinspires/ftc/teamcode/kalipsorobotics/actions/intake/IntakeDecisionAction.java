@@ -52,6 +52,7 @@ public class IntakeDecisionAction extends Action {
         Point shoot = shootDecision.getShootPosition().toPoint();
 
         chosenSource = null;
+
         double shortestRoute = Double.MAX_VALUE;
 
         for (IntakeSources first : IntakeSources.values()) {
@@ -125,8 +126,8 @@ public class IntakeDecisionAction extends Action {
     /** Where each place is on the field. */
     public static Point pointOf(IntakeSources source) {
         switch (source) {
-            case FLOWER_1:   return Flower.FLOWER_1.getPoint();
-            case FLOWER_2:   return Flower.FLOWER_2.getPoint();
+            case FLOWER_1:   return Flower.FLOWER_1.getSetupPoint();
+            case FLOWER_2:   return Flower.FLOWER_2.getSetupPoint();
             case GARDEN:     return FieldConfig.gardenPoint;
             case TIP_ZONE_1: return TIP_ZONE_1_POSITION.toPoint();
             case TIP_ZONE_2: return TIP_ZONE_2_POSITION.toPoint();
