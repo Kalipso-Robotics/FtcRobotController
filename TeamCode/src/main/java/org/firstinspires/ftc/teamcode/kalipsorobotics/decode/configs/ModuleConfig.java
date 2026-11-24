@@ -23,7 +23,7 @@ public class ModuleConfig {
     public static final double INTAKE_PIVOT_B_UP_POS = 0.55; // TODO-measure
     // 0.55 ALL THE WAY UP for B (2) servo for INNIT POS
     public static final DcMotorSimple.Direction INTAKE_MOTOR_A_DIRECTION = DcMotorSimple.Direction.FORWARD; // TODO-measure
-    public static final DcMotorSimple.Direction INTAKE_MOTOR_B_DIRECTION = DcMotorSimple.Direction.FORWARD; // TODO-measure
+    public static final DcMotorSimple.Direction INTAKE_MOTOR_B_DIRECTION = DcMotorSimple.Direction.REVERSE; // + power = intake in on both sides; fix spin here, not with a minus sign in callers
 
     //========FLOWER========
     // Which intake side carries the flower arm. Changing sides is this one line.

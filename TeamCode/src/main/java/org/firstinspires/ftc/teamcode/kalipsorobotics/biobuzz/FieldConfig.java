@@ -73,6 +73,11 @@ public class FieldConfig {
     // [2026-11-22] measured on the robot: 278 mm from the back wall, 188 mm from the side wall.
     public final static Position CORNER_ZERO_POSE = new Position(278, 188, 0);
 
+    // Same idea at the other end of the same wall (high x, low y), robot still facing +x. [2026-11-23] The team's
+    // (193, 3315, 90) is with +y forward; here x is forward, so x/y swap and heading is 0. The odometry log agrees
+    // (3349, 182, -1 deg after driving there from CORNER_ZERO_POSE).
+    public final static Position FAR_CORNER_ZERO_POSE = new Position(3315, 193, 0);
+
     private final static double FIELD_MM = 3657.6;
 
     public final static double FLOWER_A_X = 100;  // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm

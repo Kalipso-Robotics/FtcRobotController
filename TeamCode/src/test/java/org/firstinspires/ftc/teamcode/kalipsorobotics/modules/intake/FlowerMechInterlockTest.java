@@ -22,7 +22,7 @@ import java.util.function.BooleanSupplier;
 
 /**
  * The flower may be down only while its intake side is down. Pivot travel is time-estimated by
- * KServo (very fast speed here); the CR flower is done FLOWER_MOVE_MS after its command (set to 30 ms here)
+ * KServo (very fast speed here); the CR flower runs for FLOWER_LOWER_MS / FLOWER_RAISE_MS
  * so "the pivot has not moved yet" can be checked right after a raise.
  */
 public class FlowerMechInterlockTest {
@@ -31,7 +31,10 @@ public class FlowerMechInterlockTest {
 
     private Servo pivotServoA;
     private CRServo flowerServo;
-    private final double flowerMs = IntakeConfig.FLOWER_MOVE_MS;
+    private final double lowerMs = IntakeConfig.FLOWER_LOWER_MS;
+    private final double raiseMs = IntakeConfig.FLOWER_RAISE_MS;
+    private final double downPower = IntakeConfig.FLOWER_DOWN_POWER;
+    private final double upPower = IntakeConfig.FLOWER_UP_POWER;
     private DcMotor motorA;
     private IntakeSide sideA;
     private FlowerMech flowerMech;
@@ -39,7 +42,10 @@ public class FlowerMechInterlockTest {
     @Before
     public void setUp() throws InterruptedException {
         pivotServoA = fakeServo();
-        IntakeConfig.FLOWER_MOVE_MS = 30;
+        IntakeConfig.FLOWER_LOWER_MS = 60;
+        IntakeConfig.FLOWER_RAISE_MS = 30;
+        IntakeConfig.FLOWER_DOWN_POWER = -0.5; // real powers: at the 0 default every power check would pass
+        IntakeConfig.FLOWER_UP_POWER = 0.5;
         flowerServo = fakeCRServo();
         motorA = fakeMotor();
         sideA = new IntakeSide(BeamBreakPosition.IntakeSide.A, motorA, new KServo(pivotServoA, FAST_DEG_PER_SEC, 255, 0, false));
@@ -49,14 +55,17 @@ public class FlowerMechInterlockTest {
 
     @After
     public void tearDown() {
-        IntakeConfig.FLOWER_MOVE_MS = flowerMs;
+        IntakeConfig.FLOWER_LOWER_MS = lowerMs;
+        IntakeConfig.FLOWER_RAISE_MS = raiseMs;
+        IntakeConfig.FLOWER_DOWN_POWER = downPower;
+        IntakeConfig.FLOWER_UP_POWER = upPower;
     }
 
     @Test
     public void flowerRefusesToLower_whileSideIsUp() {
         assertFalse(flowerMech.lower());
         assertFalse(flowerMech.isDown());
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        assertEquals(0, flowerServo.getPower(), 1e-9);
     }
 
     @Test
@@ -148,7 +157,7 @@ public class FlowerMechInterlockTest {
     @Test
     public void flowerSetPower_refusesTowardDown_whileSideIsUp() {
         assertFalse(flowerMech.setPower(IntakeConfig.FLOWER_DOWN_POWER));
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        assertEquals(0, flowerServo.getPower(), 1e-9);
         assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_UP_POWER));
         assertTrue(flowerMech.setPower(0));
     }
@@ -165,6 +174,45 @@ public class FlowerMechInterlockTest {
         assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_UP_POWER * 0.5));
         waitUntil(flowerMech::isUp);
         assertTrue(sideA.setPivotPosition(0.5));
+    }
+
+    @Test
+    public void timedMove_usesItsOwnTime_thenCutsPower() throws InterruptedException {
+        assertEquals("no power at init", 0, flowerServo.getPower(), 1e-9);
+        sideA.lower();
+        waitUntil(sideA::isDown);
+
+        long start = System.nanoTime();
+        assertTrue(flowerMech.lower());
+        sideA.update();
+        assertEquals(IntakeConfig.FLOWER_DOWN_POWER, flowerServo.getPower(), 1e-9);
+        waitUntil(() -> {
+            sideA.update();
+            return flowerServo.getPower() == 0;
+        });
+        assertTrue(System.nanoTime() - start >= IntakeConfig.FLOWER_LOWER_MS * 1e6);
+        assertTrue(flowerMech.isDown());
+
+        IntakeConfig.FLOWER_LOWER_MS = 5000; // raise must not use the lower time
+        flowerMech.raise();
+        sideA.update();
+        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        waitUntil(() -> {
+            sideA.update();
+            return flowerServo.getPower() == 0;
+        });
+        assertTrue(flowerMech.isUp());
+    }
+
+    @Test
+    public void manualPower_isNotCutByTheTimer() throws InterruptedException {
+        sideA.lower();
+        waitUntil(sideA::isDown);
+        assertTrue(flowerMech.lower());
+        assertTrue(flowerMech.setPower(-0.3));
+        waitUntil(flowerMech::isDown);
+        sideA.update();
+        assertEquals(-0.3, flowerServo.getPower(), 1e-9);
     }
 
     private static void waitUntil(BooleanSupplier condition) throws InterruptedException {

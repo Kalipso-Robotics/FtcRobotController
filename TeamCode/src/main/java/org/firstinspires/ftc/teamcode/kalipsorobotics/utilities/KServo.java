@@ -12,6 +12,8 @@ public class KServo {
     private final double rangeDegrees;
     private final double zeroPosition;
     private final boolean flipDirection;
+    private double minPos = 0;
+    private double maxPos = 1;
 
     private double targetPosition;
     private double lastPosition;
@@ -37,6 +39,13 @@ public class KServo {
         this(servo, KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false);
     }
 
+    /** Hard limits: setPosition / setTargetPosition clamp to [min, max]. getServo() bypasses them. */
+    public KServo setLimits(double min, double max) {
+        this.minPos = min;
+        this.maxPos = max;
+        return this;
+    }
+
     private final int counter = 0;
 
     public double estimateTimeMs(double currentPosition, double targetPosition) {
@@ -54,7 +63,7 @@ public class KServo {
 
     public void setTargetPosition(double position) {
         lastPosition = servo.getPosition();
-        targetPosition = position;
+        targetPosition = MathFunctions.clamp(position, minPos, maxPos);
         if (Math.abs(lastPosition - targetPosition) > 0.000001) {
             estimatedFinishTime = estimateFinishTimeMs(lastPosition, targetPosition);
             startTime = System.currentTimeMillis();
@@ -95,7 +104,7 @@ public class KServo {
 
 
     public void setPosition(double position) {
-        servo.setPosition(position);
+        servo.setPosition(MathFunctions.clamp(position, minPos, maxPos));
     }
 
     public boolean isCurrentPosEqualTo(double position) {

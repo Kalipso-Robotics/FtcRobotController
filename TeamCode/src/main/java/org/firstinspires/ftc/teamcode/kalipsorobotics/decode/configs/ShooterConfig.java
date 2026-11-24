@@ -38,8 +38,12 @@ public class ShooterConfig {
     public static double BANG_POWER_FAR = 1; // TODO-measure
     public static double BANG_POWER_NEAR = 0.7; // TODO-measure
     public static boolean hoodFlipDirection = true;
+    // Hood mechanical hard limits (raw servo pos). Every hood command is clamped to these in KServo.
+    // Measure with HoodServoToZero (A = down, Y = up). 0..1 = no limit until measured.
+    public static final double HOOD_DOWN_POS = 0; // TODO-measure
+    public static final double HOOD_UP_POS = 1; // TODO-measure
     /** Flywheel motor direction; Shooter and MotorPowerRPSDataCollector both use it. */
-    public static DcMotorSimple.Direction SHOOTER_MOTOR_DIRECTION = DcMotorSimple.Direction.REVERSE; // TODO-measure
+    public static DcMotorSimple.Direction SHOOTER_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD; // TODO-measure
 
     public static double AUTO_SHOOTER_READY_TIMEOUT_MS = 3500; // TODO-measure
     // TeleOp never fires on timeout: RPS or turret not ready by then aborts the shot (flywheel keeps spinning).

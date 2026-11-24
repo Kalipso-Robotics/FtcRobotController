@@ -94,8 +94,11 @@ public class IntakeSide {
         KLog.d(TAG, () -> "side=" + side + " event=raise");
     }
 
-    /** Call once per loop: finishes a raise that was waiting for the flower. */
+    /** Call once per loop: ends the flower's timed move and finishes a raise that was waiting for the flower. */
     public void update() {
+        if (flowerMech != null) {
+            flowerMech.update();
+        }
         if (isRaisePending) {
             raise();
         }

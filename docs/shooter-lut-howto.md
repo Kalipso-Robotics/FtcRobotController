@@ -10,7 +10,7 @@ Its rows are still the old DECODE robot's numbers, carried over, not BIOBUZZ dat
 |---|---|---|
 | `MotorPowerRPSDataCollector` | finds kF | `MotorPowerRPSData_*.csv` |
 | `ShooterDataCollector` | **fills the LUT** | `ShooterDataRows_*.csv` |
-| `RPSPredictionDataCollector` | open-loop check: power -> RPS at a voltage, hood and distance | `RPSPredictionData_*.csv` |
+| `RPSPredictionDataCollector` | open-loop check: power -> RPS at a voltage, hood and distance, plus target point and turret offset | `RPSPredictionData_*.csv` |
 
 All files go to `/sdcard/Android/data/com.qualcomm.ftcrobotcontroller/files/RobotLogs/`.
 

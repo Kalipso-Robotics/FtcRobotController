@@ -14,12 +14,13 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 
 /**
- * Tunes the CR flower arm (IntakeConfig.FLOWER_DOWN_POWER / FLOWER_UP_POWER / FLOWER_MOVE_MS / FLOWER_FLIP_DIRECTION).
+ * Tunes the CR flower arm (IntakeConfig.FLOWER_DOWN_POWER / FLOWER_UP_POWER / FLOWER_LOWER_MS /
+ * FLOWER_RAISE_MS / FLOWER_FLIP_DIRECTION). Start with the arm up by hand.
  * Pattern source: IntakeMotorTest. GP1:
  *   A / Y      = lower / raise the flower's intake side (flower can only go down while the side is down)
- *   left stick = raw flower power (up on the stick = positive). Find the sign that goes down and the lowest power that
- *                still reaches the stop and holds; "ms since command" shows how long it took.
- *   X / B      = flower.lower() / raise() with the IntakeConfig values (edit them live on the Dashboard)
+ *   left stick = raw flower power (up on the stick = positive). Find the sign that goes down and a power that moves well.
+ *   X / B      = flower.lower() / raise(): the timed moves with the IntakeConfig values. Adjust the two times live on the
+ *                Dashboard until each move ends right at the end of travel.
  * Then copy the values into IntakeConfig. FLOWER_FLIP_DIRECTION is read at init, so restart after changing it.
  */
 @TeleOp(name = "FlowerCRTuner", group = "Test")
@@ -77,8 +78,8 @@ public class FlowerCRTuner extends KOpMode {
             telemetry.addData("flower power", "%.2f%s", flower.getPower(), manual ? " (manual)" : "");
             telemetry.addData("flower", flower.isDown() ? "DOWN" : flower.isUp() ? "UP" : "moving");
             telemetry.addData("ms since command", "%.0f", sinceCommand.milliseconds());
-            telemetry.addData("config", "down %.2f  up %.2f  move %.0f ms  flip %b", IntakeConfig.FLOWER_DOWN_POWER,
-                    IntakeConfig.FLOWER_UP_POWER, IntakeConfig.FLOWER_MOVE_MS, IntakeConfig.FLOWER_FLIP_DIRECTION);
+            telemetry.addData("config", "down %.2f  up %.2f  lower %.0f ms  raise %.0f ms  flip %b", IntakeConfig.FLOWER_DOWN_POWER,
+                    IntakeConfig.FLOWER_UP_POWER, IntakeConfig.FLOWER_LOWER_MS, IntakeConfig.FLOWER_RAISE_MS, IntakeConfig.FLOWER_FLIP_DIRECTION);
             telemetry.update();
         }
         flower.setPower(0);

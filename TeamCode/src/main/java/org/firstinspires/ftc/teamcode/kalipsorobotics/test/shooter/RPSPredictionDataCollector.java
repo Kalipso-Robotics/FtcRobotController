@@ -6,11 +6,13 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.FieldOrientedDriveAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
@@ -33,13 +35,14 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 /**
  * Open-loop check: what RPS a given motor power gives, at the battery voltage, hood and distance at the time.
- * Output: RobotLogs/RPSPredictionData_*.csv with CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM.
- * Distance is from odometry to the Hive Cell on the robot's end (SharedData.getTargetPoint).
+ * Output: RobotLogs/RPSPredictionData_*.csv with CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM,
+ * TargetX,TargetY (the Hive Cell), TurretOffsetDeg, AimX,AimY (the point aimed at: the Cell swung around the pivot by the offset).
+ * Distance is from the turret pivot (odometry) to the Hive Cell on the robot's end (SharedData.getTargetPoint).
  * Pattern source: this file's earlier LinearOpMode version, ported to KOpMode + startOdometry.
  *
  * Turret aims at the Hive target the whole time (TurretAutoAlign, ticked by updateActions()).
  * Intake: both sides run while RT is held (not while PushBall is feeding).
- * Consistent shots: LT arms a shot; PushBall (the same feed TeleOp uses) starts only once the turret is aligned
+ * Consistent shots: LB arms a shot; PushBall (the same feed TeleOp uses) starts only once the turret is aligned
  * and the flywheel has held the same power for SETTLE_MS (after power changes, shooter on, and the last feed).
  * The row's RPS is read at that moment, i.e. the steady RPS the first ball leaves at.
  *
@@ -47,11 +50,17 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  *   sticks            field-centric drive (FieldOrientedDriveAction)
  *   dpad up / down    shooter power +/- POWER_STEP_BIG        A / B    power +/- POWER_STEP_SMALL
  *   dpad right / left hood +/- HOOD_STEP (clamped MIN_HOOD..MAX_HOOD)
+ *   LT (hold) + A / B hood +/- HOOD_STEP_FINE
  *   X                 toggle the shooter on/off at the set power
  *   RT (hold)         run the intake (both sides)
  *   LB                arm a shot (press again to cancel); PushBall fires when ready and records RPS/power/voltage/hood/distance
  *   Y                 save the last recorded shot to the file (save hits only)
  *   RB                rezero: robot pushed into the loading-zone corner facing +x -> FieldConfig.CORNER_ZERO_POSE
+ *   Back              rezero: robot pushed into the far (high x, low y) corner facing +x -> FieldConfig.FAR_CORNER_ZERO_POSE
+ *   LT (hold) + dpad left / right   turret offset -/+ TURRET_OFFSET_STEP_DEG (TurretConfig.TURRET_OFFSET_DEG; 0 at start and at the end)
+ *   LT (hold) + dpad down           turret offset back to 0
+ * All on GP1: Start+A / Start+B to swap gamepads would change the power. The offset only turns the turret: the power is
+ * the set one and DistanceToTargetMM stays pivot to Cell.
  *
  * Turret debug: KLog tag Test_Shooter, "event=turret" every TURRET_LOG_MS: pose, target, field aim, turret deg,
  * servo position. Positive turretDeg must swing the turret to the robot's RIGHT (clockwise from above).
@@ -65,16 +74,19 @@ public class RPSPredictionDataCollector extends KOpMode {
     public static double TURRET_TOLERANCE_DEG = 2;
     private static final double POWER_STEP_BIG = 0.05;
     private static final double POWER_STEP_SMALL = 0.01;
-    private static final double HOOD_STEP = 0.01;
+    private static final double HOOD_STEP = 0.005;
+    private static final double HOOD_STEP_FINE = 0.001;
+    private static final double TURRET_OFFSET_STEP_DEG = 1;
     private static final long TURRET_LOG_MS = 250;
 
     private static final String[] CONTROLS = {
             "sticks: field-centric drive   turret auto-aims at the Hive",
             "dpad up/down: power +/-" + POWER_STEP_BIG + "   A/B: power +/-" + POWER_STEP_SMALL,
-            "dpad right/left: hood +/-" + HOOD_STEP,
+            "dpad right/left: hood +/-" + HOOD_STEP + "   LT hold + A/B: hood +/-" + HOOD_STEP_FINE,
             "X: shooter on/off   RT hold: intake",
-            "LT: arm/cancel shot (PushBall fires when aligned + settled)   Y: save last shot (hits only)",
-            "RB: rezero odometry (robot in corner, facing +x)",
+            "LB: arm/cancel shot (PushBall fires when aligned + settled)   Y: save last shot (hits only)",
+            "RB: rezero odometry (loading-zone corner, facing +x)   Back: far corner, facing +x",
+            "LT hold + dpad left/right: turret offset -/+" + TURRET_OFFSET_STEP_DEG + " deg   LT hold + dpad down: offset 0",
     };
 
     @Override
@@ -92,6 +104,7 @@ public class RPSPredictionDataCollector extends KOpMode {
         FieldOrientedDriveAction driveAction = new FieldOrientedDriveAction(driveTrain, imuModule);
         OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null); // keeps the pose from auto, else the corner
 
+        TurretConfig.TURRET_OFFSET_DEG = 0;
         turretAutoAlignTeleOp = new TurretAutoAlign(opModeUtilities, turret); // follows SharedData.getTargetPoint(); updateActions() ticks it
         turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.RUN_USING_ODOMETRY);
         turretAutoAlignTeleOp.setToleranceDeg(TURRET_TOLERANCE_DEG);
@@ -103,7 +116,7 @@ public class RPSPredictionDataCollector extends KOpMode {
         long lastTurretLogMs = 0;
 
         KFileWriter fileWriter = new KFileWriter("RPSPredictionData", opModeUtilities);
-        fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM");
+        fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM,TargetX,TargetY,TurretOffsetDeg,AimX,AimY");
         flush(fileWriter);
 
         double shooterPower = 0;
@@ -128,11 +141,37 @@ public class RPSPredictionDataCollector extends KOpMode {
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
             hiveTarget = SharedData.getTargetPoint();
-            double distanceMM = SharedData.getOdometryWheelIMUPosition().toPoint().distanceTo(hiveTarget);
+            double distanceMM = ShooterRun.getDistanceToTargetFromCurrentPos(hiveTarget); // turret pivot to Cell, same call that reads the table
             if (kGamePad1.isRightBumperFirstPressed()) {
                 setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.CORNER_ZERO_POSE))); // updateActions() applies it
                 message = "Rezeroed to corner " + FieldConfig.CORNER_ZERO_POSE;
                 KLog.d(TAG, () -> "event=rezero from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + FieldConfig.CORNER_ZERO_POSE);
+            }
+            if (kGamePad1.isBackButtonFirstPressed()) {
+                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.FAR_CORNER_ZERO_POSE)));
+                message = "Rezeroed to far corner " + FieldConfig.FAR_CORNER_ZERO_POSE;
+                KLog.d(TAG, () -> "event=rezero from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + FieldConfig.FAR_CORNER_ZERO_POSE);
+            }
+            // Read each once per loop: FirstPressed clears itself. LT held = the dpad trims the turret and A/B step the hood finely; power and the coarse hood step are off.
+            boolean trimTurret = gamepad1.left_trigger > 0.1;
+            boolean dpadUp = kGamePad1.isDpadUpFirstPressed();
+            boolean dpadDown = kGamePad1.isDpadDownFirstPressed();
+            boolean dpadLeft = kGamePad1.isDpadLeftFirstPressed();
+            boolean dpadRight = kGamePad1.isDpadRightFirstPressed();
+            boolean buttonA = kGamePad1.isButtonAFirstPressed();
+            boolean buttonB = kGamePad1.isButtonBFirstPressed();
+            double offsetBefore = TurretConfig.TURRET_OFFSET_DEG;
+            if (trimTurret && dpadLeft) {
+                TurretConfig.TURRET_OFFSET_DEG -= TURRET_OFFSET_STEP_DEG;
+            }
+            if (trimTurret && dpadRight) {
+                TurretConfig.TURRET_OFFSET_DEG += TURRET_OFFSET_STEP_DEG;
+            }
+            if (trimTurret && dpadDown) {
+                TurretConfig.TURRET_OFFSET_DEG = 0;
+            }
+            if (TurretConfig.TURRET_OFFSET_DEG != offsetBefore) {
+                KLog.d(TAG, () -> "event=turretOffsetSet offsetDeg=" + TurretConfig.TURRET_OFFSET_DEG);
             }
             driveAction.move(gamepad1);
             updateActions();
@@ -152,16 +191,16 @@ public class RPSPredictionDataCollector extends KOpMode {
             }
 
             double powerBefore = shooterPower;
-            if (kGamePad1.isDpadUpFirstPressed()) {
+            if (!trimTurret && dpadUp) {
                 shooterPower += POWER_STEP_BIG;
             }
-            if (kGamePad1.isDpadDownFirstPressed()) {
+            if (!trimTurret && dpadDown) {
                 shooterPower -= POWER_STEP_BIG;
             }
-            if (kGamePad1.isButtonAFirstPressed()) {
+            if (!trimTurret && buttonA) {
                 shooterPower += POWER_STEP_SMALL;
             }
-            if (kGamePad1.isButtonBFirstPressed()) {
+            if (!trimTurret && buttonB) {
                 shooterPower -= POWER_STEP_SMALL;
             }
             shooterPower = MathFunctions.clamp(shooterPower, 0, 1);
@@ -181,11 +220,17 @@ public class RPSPredictionDataCollector extends KOpMode {
             }
 
             double hoodBefore = hoodPosition;
-            if (kGamePad1.isDpadRightFirstPressed()) {
+            if (!trimTurret && dpadRight) {
                 hoodPosition += HOOD_STEP;
             }
-            if (kGamePad1.isDpadLeftFirstPressed()) {
+            if (!trimTurret && dpadLeft) {
                 hoodPosition -= HOOD_STEP;
+            }
+            if (trimTurret && buttonA) {
+                hoodPosition += HOOD_STEP_FINE;
+            }
+            if (trimTurret && buttonB) {
+                hoodPosition -= HOOD_STEP_FINE;
             }
             hoodPosition = MathFunctions.clamp(hoodPosition, ShooterInterpolationConfig.MIN_HOOD, ShooterInterpolationConfig.MAX_HOOD);
             shooter.getHood().setPosition(hoodPosition);
@@ -219,8 +264,10 @@ public class RPSPredictionDataCollector extends KOpMode {
             boolean settled = settleTimer.milliseconds() >= SETTLE_MS;
             if (shotArmed && aligned && settled) {
                 shotArmed = false;
-                lastShot = String.format("%.2f,%.2f,%.2f,%.4f,%.2f",
-                        shooter.getRPS(), shooterPower, getBatteryVoltage(), hoodPosition, distanceMM);
+                Point aim = TurretAutoAlign.offsetTargetPoint(hiveTarget, SharedData.getOdometryWheelIMUPosition(), TurretConfig.TURRET_OFFSET_DEG);
+                lastShot = String.format("%.2f,%.2f,%.2f,%.4f,%.2f,%.1f,%.1f,%.1f,%.1f,%.1f",
+                        shooter.getRPS(), shooterPower, getBatteryVoltage(), hoodPosition, distanceMM,
+                        hiveTarget.getX(), hiveTarget.getY(), TurretConfig.TURRET_OFFSET_DEG, aim.getX(), aim.getY());
                 pushBall = new PushBall(stopper, intake);
                 setLastShooterAction(pushBall); // updateActions() ticks it; it owns the intake + stopper until done
                 feeding = true;
@@ -247,7 +294,7 @@ public class RPSPredictionDataCollector extends KOpMode {
                     String s = lastShot;
                     KLog.d(TAG, () -> "event=saved row=" + s);
                 } else {
-                    message = "Nothing to save: shoot with LT first";
+                    message = "Nothing to save: shoot with LB first";
                     KLog.d(TAG, "event=saveRefused reason=noShot");
                 }
             }
@@ -267,14 +314,18 @@ public class RPSPredictionDataCollector extends KOpMode {
             telemetry.addData("Current RPS", "%.2f", shooter.getRPS());
             telemetry.addData("Turret target / delta", "%.1f / %.1f deg",
                     Math.toDegrees(turretAutoAlignTeleOp.getTargetAngleRad()), turretAutoAlignTeleOp.getDeltaAngleDeg());
+            telemetry.addData("Turret offset", "%.1f deg", TurretConfig.TURRET_OFFSET_DEG);
             telemetry.addData("Turret cmd / servo / clamped", "%.1f deg / %.4f / %b",
                     turret.getAngleDeg(), Turret.servoPosFromTurretDeg(turret.getAngleDeg()), turret.isClamped());
             telemetry.addData("Odometry pose", SharedData.getOdometryWheelIMUPosition());
-            telemetry.addData("Odometry distance to target", "%.0f mm", distanceMM);
+            telemetry.addData("Target Cell", "%s (%.0f, %.0f)", hiveTarget == ShooterConfig.TARGET_POINT_1 ? "A (high y)" : "B (low y)",
+                    hiveTarget.getX(), hiveTarget.getY());
+            telemetry.addData("Turret to target (odometry)", "%.0f mm", distanceMM);
             telemetry.addData("Last shot (not saved until Y)", lastShot == null ? "none" : lastShot);
             telemetry.update();
         }
 
+        TurretConfig.TURRET_OFFSET_DEG = 0; // static: don't leak the trim into TeleOp
         shooter.stop();
         intake.stop();
         driveTrain.setPower(0);

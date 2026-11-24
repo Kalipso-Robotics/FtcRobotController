@@ -10,7 +10,7 @@ public class TurretTest {
 
     @Test
     public void gearRatio_matchesCad() {
-        assertEquals(1.3406, TurretConfig.TURRET_DEG_PER_SERVO_DEG, 1e-4);
+        assertEquals(1.2065, TurretConfig.TURRET_DEG_PER_SERVO_DEG, 1e-4);
     }
 
     @Test

@@ -26,7 +26,10 @@ import org.junit.Test;
 /** The one-line auto intake actions: lower/raise/stow a side, the Flower arm, and the lowerFirst runs. */
 public class IntakeActionsTest {
     private final double pivotMs = IntakeConfig.PIVOT_MOVE_MS;
-    private final double flowerMs = IntakeConfig.FLOWER_MOVE_MS;
+    private final double lowerMs = IntakeConfig.FLOWER_LOWER_MS;
+    private final double raiseMs = IntakeConfig.FLOWER_RAISE_MS;
+    private final double downPower = IntakeConfig.FLOWER_DOWN_POWER;
+    private final double upPower = IntakeConfig.FLOWER_UP_POWER;
 
     private final Servo pivotServoA = FlowerMechInterlockTest.fakeServo();
     private final Servo pivotServoB = FlowerMechInterlockTest.fakeServo();
@@ -41,7 +44,10 @@ public class IntakeActionsTest {
     @Before
     public void setUp() {
         IntakeConfig.PIVOT_MOVE_MS = 20;
-        IntakeConfig.FLOWER_MOVE_MS = 20;
+        IntakeConfig.FLOWER_LOWER_MS = 20;
+        IntakeConfig.FLOWER_RAISE_MS = 20;
+        IntakeConfig.FLOWER_DOWN_POWER = -0.5; // real powers: at the 0 default every power check would pass
+        IntakeConfig.FLOWER_UP_POWER = 0.5;
         sideA = new IntakeSide(A, motorA, new KServo(pivotServoA, 1e6, 255, 0, false));
         sideB = new IntakeSide(B, motorB, new KServo(pivotServoB, 1e6, 255, 0, false));
         flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
@@ -51,7 +57,10 @@ public class IntakeActionsTest {
     @After
     public void restoreConfig() {
         IntakeConfig.PIVOT_MOVE_MS = pivotMs;
-        IntakeConfig.FLOWER_MOVE_MS = flowerMs;
+        IntakeConfig.FLOWER_LOWER_MS = lowerMs;
+        IntakeConfig.FLOWER_RAISE_MS = raiseMs;
+        IntakeConfig.FLOWER_DOWN_POWER = downPower;
+        IntakeConfig.FLOWER_UP_POWER = upPower;
     }
 
     @Test
@@ -68,7 +77,7 @@ public class IntakeActionsTest {
         runToDone(new IntakeSideLower(sideA));
         assertTrue(flowerMech.lower());
         runToDone(new IntakeSideRaise(sideA));
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        assertEquals(0, flowerServo.getPower(), 1e-9);
         assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotServoA.getPosition(), 1e-9);
         assertTrue(sideA.isUp());
     }
@@ -82,9 +91,17 @@ public class IntakeActionsTest {
         runToDone(new IntakeStow(intake));
         assertEquals(0, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        assertEquals(0, flowerServo.getPower(), 1e-9);
         assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotServoA.getPosition(), 1e-9);
         assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotServoB.getPosition(), 1e-9);
+    }
+
+    /** PushBall and auto run one side with +power, so run() must not negate a side (direction lives in ModuleConfig). */
+    @Test
+    public void runBoth_samePowerAsPerSideRun() {
+        intake.run(1);
+        assertEquals(1, motorA.getPower(), 1e-9);
+        assertEquals(1, motorB.getPower(), 1e-9);
     }
 
     @Test
@@ -92,7 +109,7 @@ public class IntakeActionsTest {
         long start = System.currentTimeMillis();
         runToDone(new FlowerLower(flowerMech, 40));
         assertTrue(System.currentTimeMillis() - start >= 40);
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        assertEquals(0, flowerServo.getPower(), 1e-9);
     }
 
     @Test
@@ -100,8 +117,10 @@ public class IntakeActionsTest {
         runToDone(new IntakeSideLower(sideA));
         runToDone(new FlowerLower(flowerMech, 1000));
         assertTrue(flowerMech.isDown());
+        assertEquals(0, flowerServo.getPower(), 1e-9);
         runToDone(new FlowerRaise(flowerMech));
         assertTrue(flowerMech.isUp());
+        assertEquals(0, flowerServo.getPower(), 1e-9);
     }
 
     @Test

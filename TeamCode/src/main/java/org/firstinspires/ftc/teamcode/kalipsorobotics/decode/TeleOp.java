@@ -90,6 +90,7 @@ public class TeleOp extends KOpMode {
     private boolean stopShooterPressed = false;
     private boolean zeroLimelightPressed = false;
     private boolean zeroCornerPressed = false;
+    private boolean zeroFarCornerPressed = false;
     private boolean releaseStopperPressed = false;
     private boolean toggleTurretAlign = false;
     private boolean incrementRPSPressed;
@@ -230,6 +231,7 @@ public class TeleOp extends KOpMode {
 
             zeroLimelightPressed = kGamePad2.isLeftStickButtonFirstPressed();
             zeroCornerPressed = kGamePad2.isRightStickButtonFirstPressed();
+            zeroFarCornerPressed = kGamePad2.isBackButtonFirstPressed();
 
             intakeStopPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
@@ -420,10 +422,11 @@ public class TeleOp extends KOpMode {
 
     /** GP2 B toggles driver intent; the interlock lifts the flower when side A raises, and it re-lowers when A is down. */
     private void handleFlower() {
+        FlowerMech flowerMech = intake.getFlower();
+        flowerMech.update(); // every loop: the intake controller (which also does it) is skipped during shots and the assist
         if (isPending(flowerAssist)) {
             return; // the assist owns the arm
         }
-        FlowerMech flowerMech = intake.getFlower();
         if (flowerTogglePressed) {
             flowerWanted = !flowerWanted;
             KLog.d("Intaking_Flower", () -> "event=toggle wanted=" + flowerWanted);
@@ -601,9 +604,10 @@ public class TeleOp extends KOpMode {
             return;
         }
 
-        if (zeroCornerPressed) {
+        if (zeroCornerPressed || zeroFarCornerPressed) {
             if (!isPending(resetOdometryToPos)) {
-                resetOdometryToPos = new ResetOdometryToPos(FieldConfig.CORNER_ZERO_POSE);
+                resetOdometryToPos = new ResetOdometryToPos(zeroFarCornerPressed
+                        ? FieldConfig.FAR_CORNER_ZERO_POSE : FieldConfig.CORNER_ZERO_POSE);
                 setLastZeroAction(resetOdometryToPos);
                 KLog.d("TeleOp_Zeroing", () -> "Corner zero started - Position: " + SharedData.getOdometryWheelIMUPosition());
             }

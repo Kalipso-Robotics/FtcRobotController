@@ -136,6 +136,14 @@ public class TurretAutoAlign extends Action {
         return MathFunctions.angleWrapRad(aimRad - headingRad + Math.toRadians(offsetDeg));
     }
 
+    /** The field point actually aimed at with a trim: the target swung around the turret pivot by offsetDeg, same distance. */
+    public static Point offsetTargetPoint(Point target, Position currentPosition, double offsetDeg) {
+        Point launcher = Turret.launcherPoint(currentPosition);
+        double aimRad = Math.atan2(target.getY() - launcher.getY(), target.getX() - launcher.getX()) + Math.toRadians(offsetDeg);
+        double distance = launcher.distanceTo(target);
+        return new Point(launcher.getX() + distance * Math.cos(aimRad), launcher.getY() + distance * Math.sin(aimRad));
+    }
+
     public double getTargetAngleRad() {
         return targetAngleRad;
     }

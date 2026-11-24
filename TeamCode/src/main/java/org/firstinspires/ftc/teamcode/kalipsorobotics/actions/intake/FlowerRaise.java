@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 /**
- * Raises the Flower arm (always allowed), done after IntakeConfig.FLOWER_MOVE_MS. The mirror of FlowerLower.
+ * Raises the Flower arm (always allowed), done after IntakeConfig.FLOWER_RAISE_MS (at once if already up). The mirror of FlowerLower.
  * Auto: {@code new FlowerRaise(intake.getFlower())}
  * Pattern source: RunIntakeTime (timer) and CloseStopperAction (one servo move).
  */
@@ -32,7 +32,8 @@ public class FlowerRaise extends Action {
             flowerMech.raise();
             KLog.d(TAG, () -> "name=" + getName() + " event=start raise");
         }
-        if (timer.milliseconds() >= IntakeConfig.FLOWER_MOVE_MS) {
+        flowerMech.update();
+        if (!flowerMech.isMoving()) {
             isDone = true;
             KLog.d(TAG, () -> "name=" + getName() + " event=done raise elapsedMs=" + timer.milliseconds());
         }

@@ -45,7 +45,7 @@ public class Intake {
     /** Runs both sides, the closest equivalent of last year's single intake motor. */
     public void run(double power) {
         sideA.run(power);
-        sideB.run(-power);
+        sideB.run(power);
     }
 
     /** Lowers both sides. Does not touch the flower. */

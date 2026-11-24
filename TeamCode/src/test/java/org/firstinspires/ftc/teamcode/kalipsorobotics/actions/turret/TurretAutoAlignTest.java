@@ -5,10 +5,12 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConf
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.junit.Test;
 
 /** The aim math in TurretAutoAlign: field point + robot pose -> turret angle (turret + = same way as + heading). */
@@ -51,6 +53,21 @@ public class TurretAutoAlignTest {
         assertEquals(92, aimDeg(new Point(0, 1000), 0, 0, 0, 2), 1e-9);
     }
 
+    /** The logged aim point: no trim = the Cell itself; aiming at it with no trim = aiming at the Cell with the trim; same distance. */
+    @Test
+    public void offsetTargetPoint_isWhereTheTrimmedTurretPoints() {
+        Position robot = new Position(3349, 182, Math.toRadians(-100));
+        Point cell = ShooterConfig.TARGET_POINT_2;
+        assertEquals(0, TurretAutoAlign.offsetTargetPoint(cell, robot, 0).distanceTo(cell), 1e-6);
+        for (double offsetDeg : new double[]{-7, 3}) {
+            Point aim = TurretAutoAlign.offsetTargetPoint(cell, robot, offsetDeg);
+            assertEquals(TurretAutoAlign.calculateTargetAngleRad(cell, robot, offsetDeg),
+                    TurretAutoAlign.calculateTargetAngleRad(aim, robot, 0), 1e-9);
+            Point pivot = Turret.launcherPoint(robot);
+            assertEquals(pivot.distanceTo(cell), pivot.distanceTo(aim), 1e-6);
+        }
+    }
+
     @Test
     public void resultIsAlwaysWithinPlusMinus180() {
         for (int h = -720; h <= 720; h += 15) {
@@ -60,6 +77,29 @@ public class TurretAutoAlignTest {
                 assertTrue("h=" + h + " a=" + a + " -> " + deg, deg >= -180 - 1e-9 && deg <= 180 + 1e-9);
             }
         }
+    }
+
+    /** RPSPredictionDataCollector and ShooterRun: the Cell on the robot's end, distance from the turret pivot. */
+    @Test
+    public void shotDistance_isFromThePivotToTheCellOnTheRobotsEnd() {
+        checkDistance(FieldConfig.CORNER_ZERO_POSE, ShooterConfig.TARGET_POINT_2);
+        checkDistance(FieldConfig.FAR_CORNER_ZERO_POSE, ShooterConfig.TARGET_POINT_2);
+        checkDistance(new Position(193, 3315, Math.PI / 2), ShooterConfig.TARGET_POINT_1);
+        checkDistance(new Position(3349, 182, Math.toRadians(-1.3)), ShooterConfig.TARGET_POINT_2); // logged shot, 2026-11-23
+        assertEquals(2242.0, ShooterRun.getDistanceToTargetFromCurrentPos(SharedData.getTargetPoint()), 1); // was 2237.56 from the centre
+        SharedData.resetOdometryWheelIMUPosition();
+    }
+
+    private static void checkDistance(Position robot, Point expectedCell) {
+        for (int i = 0; i < ShooterConfig.TARGET_CHECK_EVERY_N_LOOPS; i++) { // the target is re-picked once per N updates
+            SharedData.setOdometryWheelIMUPosition(new Position(robot));
+        }
+        Point cell = SharedData.getTargetPoint();
+        assertEquals(expectedCell.getY(), cell.getY(), 1e-9);
+        double pivotX = robot.getX() + 5.6 * Math.cos(robot.getTheta());
+        double pivotY = robot.getY() + 5.6 * Math.sin(robot.getTheta());
+        assertEquals(Math.hypot(cell.getX() - pivotX, cell.getY() - pivotY),
+                ShooterRun.getDistanceToTargetFromCurrentPos(cell), 1e-6);
     }
 
     /** RedDecideAuto drives to the launch point facing the Cell (driveTo faceToward), so the turret barely turns. */

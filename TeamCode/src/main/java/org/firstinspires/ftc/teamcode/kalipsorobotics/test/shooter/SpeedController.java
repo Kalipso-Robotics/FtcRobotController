@@ -1,19 +1,29 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToPos;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 
 @Config
 @TeleOp
-public class SpeedController extends LinearOpMode {
+public class SpeedController extends KOpMode {
 
     private static final String TAG = "SpeedController";
 
@@ -36,6 +46,19 @@ public class SpeedController extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        initializeRobot();
+        DriveTrain.setInstanceNull();
+        DriveTrain driveTrain = DriveTrain.getInstance(opModeUtilities);
+        IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null); // keeps the pose from auto, else the corner
+
+        // Turret auto-align (gamepad2 A toggles). Starts off so the dpad drives the servo raw.
+        // Note: Turret sets turret1's PWM range to 500-2500us, so raw positions match TurretConfig.SERVO_ZERO_POS.
+        Turret turret = Turret.getInstance(opModeUtilities);
+        turretAutoAlignTeleOp = new TurretAutoAlign(opModeUtilities, turret); // aims at SharedData.getTargetPoint(); updateActions() ticks it
+        turretAutoAlignTeleOp.setTurretRunMode(TurretRunMode.STOP);
+        boolean autoAlign = false;
+
 
         // ---- Motors (names are the hardware config names) ----
         KMotor shooterMotor = new KMotor(hardwareMap.dcMotor.get("shooter"), 0, 0, 0, 0);
@@ -69,6 +92,28 @@ public class SpeedController extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
+            opModeUtilities.clearBulkCache(); // initializeRobot() set MANUAL bulk caching
+
+            // Turret auto-align: gamepad2 A toggles, gamepad2 RB / Back rezero odometry to the loading-zone corner (facing +x) / far corner (facing +x)
+            if (kGamePad2.isButtonAFirstPressed()) {
+                autoAlign = !autoAlign;
+                turretAutoAlignTeleOp.setTurretRunMode(autoAlign ? TurretRunMode.RUN_USING_ODOMETRY : TurretRunMode.STOP);
+                if (!autoAlign) {
+                    turret1Position = turret1Servo.getPosition(); // dpad resumes from where auto-align left it
+                }
+                final boolean on = autoAlign;
+                KLog.d(TAG, () -> "event=autoAlign on=" + on);
+            }
+            if (kGamePad2.isRightBumperFirstPressed()) {
+                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.CORNER_ZERO_POSE)));
+                KLog.d(TAG, () -> "event=rezero to=" + FieldConfig.CORNER_ZERO_POSE);
+            }
+            if (kGamePad2.isBackButtonFirstPressed()) {
+                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.FAR_CORNER_ZERO_POSE)));
+                KLog.d(TAG, () -> "event=rezero to=" + FieldConfig.FAR_CORNER_ZERO_POSE);
+            }
+            updateActions();
+
 
             // Shooter (motor0): left stick Y adjusts power, X stops
             if (gamepad1.left_stick_y < 0) {
@@ -169,8 +214,10 @@ public class SpeedController extends LinearOpMode {
                 stopperServo.setPosition(stopperOpenPos);
             }
 
-            // Turret 1 (servo2): dpad right / left
-            if (gamepad1.dpad_right) {
+            // Turret 1 (servo2): dpad right / left (auto-align off only)
+            if (autoAlign) {
+                // TurretAutoAlign owns the turret
+            } else if (gamepad1.dpad_right) {
                 turret1Position = Math.min(1, turret1Position + SERVO_STEP);
                 turret1Servo.setPosition(turret1Position);
             } else if (gamepad1.dpad_left) {
@@ -203,7 +250,12 @@ public class SpeedController extends LinearOpMode {
             telemetry.addLine("Stopper positions (gamepad2 dpad, hold): up/down = open +/-, right/left = closed +/-");
             telemetry.addData("Stopper OPEN pos (copy to ModuleConfig)", "%.3f", stopperOpenPos);
             telemetry.addData("Stopper CLOSED pos (copy to ModuleConfig)", "%.3f", stopperClosedPos);
-            telemetry.addLine("Turret 1 (servo2): dpad right / left");
+            telemetry.addLine("Turret 1 (servo2): dpad right / left (auto-align off)");
+            telemetry.addLine("Turret auto-align (gamepad2): A = toggle, RB = rezero odometry (loading-zone corner, facing +x), Back = far corner, facing +x");
+            telemetry.addData("Auto-align on / aligned", "%b / %b", autoAlign, turretAutoAlignTeleOp.isWithinRange());
+            telemetry.addData("Turret target / delta", "%.1f / %.1f deg",
+                    Math.toDegrees(turretAutoAlignTeleOp.getTargetAngleRad()), turretAutoAlignTeleOp.getDeltaAngleDeg());
+            telemetry.addData("Odometry pose", SharedData.getOdometryWheelIMUPosition());
             telemetry.addLine("Turret 2 (servo3): right bumper / left bumper");
             telemetry.addLine("Intake pivots (gamepad2, hold): left stick Y = pivot1 (CH0), right stick Y = pivot2 (CH2)");
             telemetry.addLine("B = push (intake, open stopper, close). Right stick Y = pre-open time, X = shoot time");
@@ -224,5 +276,6 @@ public class SpeedController extends LinearOpMode {
             telemetry.addData("Intake pivot 2 (CH2)", "%.4f / %.4f", intakePivot2Position, intakePivot2Servo.getPosition());
             telemetry.update();
         }
+        cleanupRobot();
     }
 }
