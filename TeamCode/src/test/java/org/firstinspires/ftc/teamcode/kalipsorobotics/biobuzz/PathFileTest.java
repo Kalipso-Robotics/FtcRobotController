@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.PathFile;
 import org.junit.Test;
 
 import java.util.List;

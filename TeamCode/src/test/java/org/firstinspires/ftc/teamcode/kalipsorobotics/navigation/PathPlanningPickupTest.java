@@ -6,7 +6,7 @@
 //import static org.junit.Assert.assertTrue;
 //
 //import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.AutoToBallsPathingAction;
-//import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+//import org.firstinspires.ftc.teamcode.kalipsorobotics.Configs.FieldConfig;
 //import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 //import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 //import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
