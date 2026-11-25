@@ -111,21 +111,23 @@ public class KMotor {
         double rawPower = pidfController.calculate(currentRPS, targetRPS, 0.0, MAX_POWER);
         double voltage = SharedData.getVoltage();
         // Scale power up as the battery sags so the same target RPS gets the same effective power.
-        // Skipped when no voltage has been read yet (near zero) to avoid dividing by zero.
-        double newPower = rawPower;
-        if (ShooterConfig.USE_VOLTAGE_COMPENSATION && !(Math.abs(voltage) < 0.000000001)) {
-            newPower = clampPower(rawPower * (DEFAULT_VOLTAGE / voltage));
-        }
+        double scale = voltageScale(voltage);
+        double newPower = clampPower(rawPower * scale);
         motor.setPower(newPower);
 
         if (KLog.isDebug()) {
             double power = newPower;
             KLog.d(TAG, () -> String.format(
-                    "event=goToRps motor=%s targetRps=%.2f currentRps=%.2f error=%.2f rawPower=%.3f power=%.3f voltage=%.2f compensation=%b",
+                    "event=goToRps motor=%s targetRps=%.2f currentRps=%.2f error=%.2f rawPower=%.3f power=%.3f voltage=%.2f voltageScale=%.3f",
                     motor.getDeviceName(), targetRPS, currentRPS, (targetRPS - currentRPS), rawPower, power, voltage,
-                    ShooterConfig.USE_VOLTAGE_COMPENSATION));
+                    scale));
         }
         return currentRPS;
+    }
+
+    /** Voltage compensation factor for shooter power: 1 at DEFAULT_VOLTAGE, or when no voltage has been read yet. */
+    public static double voltageScale(double voltage) {
+        return voltage > 0 ? Math.pow(DEFAULT_VOLTAGE / voltage, ShooterConfig.VOLTAGE_COMP_EXPONENT) : 1;
     }
 
     public double clampPower(double power, double max_power, double min_power) {

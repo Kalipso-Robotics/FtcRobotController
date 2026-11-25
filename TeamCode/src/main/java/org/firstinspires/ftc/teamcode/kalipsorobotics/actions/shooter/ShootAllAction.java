@@ -3,11 +3,11 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
@@ -32,6 +32,8 @@ public class ShootAllAction extends KActionSet {
     private PushBall pushBall;
 
     private TurretReady turretReady;
+
+    private IntakeReady intakeReady;
 
     private ResetOdometryToLimelight resetOdometryToPosition;
     private IntakeStop intakeStop;
@@ -91,6 +93,28 @@ public class ShootAllAction extends KActionSet {
         return shooterReady;
     }
 
+    public PushBall getPushBall() {
+        return pushBall;
+    }
+
+    public IntakeReady getTransferReady() {
+        return intakeReady;
+    }
+
+    /** The transfer never got in tolerance and the shot went on after IntakeConfig.FEED_GATE_TIMEOUT_MS. */
+    public boolean transferTimedOut() {
+        return intakeReady.timedOut();
+    }
+
+    /** Cancel / abort before the feed: TransferReady has the transfer spinning and nothing else would stop it. */
+    @Override
+    public void setIsDone(boolean isDone) {
+        if (isDone && !this.isDone && intakeReady.getHasStarted() && !pushBall.getHasStarted()) {
+            intake.stop();
+        }
+        super.setIsDone(isDone);
+    }
+
 
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlign turretAutoAlign) {
@@ -108,9 +132,15 @@ public class ShootAllAction extends KActionSet {
         this.addAction(turretReady);
 
 
-        pushBall = new PushBall(stopper, intake);
+        // Holds both transfer sides at IntakeConfig.FEED_RPS against the closed stopper; PushBall (which opens it) waits for this.
+        intakeReady = new IntakeReady(intake);
+        intakeReady.setName("transferReady");
+        this.addAction(intakeReady);
+
+        // Shooter error feeds PushBall's IntakeConfig.FEED_RPS_COMP_ON compensation; with it off (default) this is the plain feed.
+        pushBall = new PushBall(stopper, intake, () -> shooterRun.getTargetRPS() - shooter.getRPS());
         pushBall.setName("pushAllBalls");
-        pushBall.setDependentActions(shooterReady, turretReady);
+        pushBall.setDependentActions(shooterReady, turretReady, intakeReady);
         this.addAction(pushBall);
 
 
@@ -152,16 +182,22 @@ public class ShootAllAction extends KActionSet {
             //Refresh targetRPS
             shooterRun.update();
             hasStarted = true;
+            stopper.close(); // TransferReady spins the transfer: an open stopper would feed early
             if (!enableLimelightZeroing) {
                 resetOdometryToPosition.setIsDone(true);
             }
         }
 
-        KLog.d(TAG, () -> "event=status shooterReady=" + shooterReady.getIsDone() + " turretReady=" + turretReady.getIsDone() + " pushBall=" + pushBall.getIsDone());
+        KLog.d(TAG, () -> "event=status shooterReady=" + shooterReady.getIsDone() + " turretReady=" + turretReady.getIsDone()
+                + " transferReady=" + intakeReady.getIsDone() + " pushBall=" + pushBall.getIsDone());
     }
 
     @Override
     public void afterUpdate() {
+        // TransferReady stops ticking once done: keep the transfer at speed while shooter / turret finish, until PushBall takes over.
+        if (intakeReady.getIsDone() && !pushBall.getHasStarted()) {
+            intakeReady.holdFeedRPS();
+        }
         // Once only: setShooterRunMode also runs update(), so calling it every loop doubles the shooter update.
         if (pushBall.getIsDone() && shooterRun.getShooterRunMode() != ShooterRunMode.SHOOT_USING_CURRENT_POINT) {
 //            double maintainRPSValue = shooterRun.getTargetRPS() * 0.925;

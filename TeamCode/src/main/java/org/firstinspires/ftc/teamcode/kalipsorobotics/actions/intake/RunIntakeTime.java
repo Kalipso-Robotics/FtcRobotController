@@ -6,6 +6,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.util.function.DoubleSupplier;
+
 /** Runs the intake (both sides, or one side) at a power for a time, then stops it. */
 public class RunIntakeTime extends Action {
     public static final String TAG = "Intaking_RunIntakeTime";
@@ -16,6 +18,7 @@ public class RunIntakeTime extends Action {
     private final double power;
     private final ElapsedTime timer = new ElapsedTime();
     private final boolean lowerFirst;
+    private DoubleSupplier targetRPS = () -> 0;
 
     /** Both sides. */
     public RunIntakeTime(Intake intake, double timeMS, double power) {
@@ -47,8 +50,20 @@ public class RunIntakeTime extends Action {
         this.lowerFirst = lowerFirst;
     }
 
+    /**
+     * One side only: hold this transfer RPS (IntakeSide.runRPS) instead of the fixed power. Read every loop, so a live
+     * target (Dashboard, PushBall's shooter RPS compensation) applies mid-feed. <= 0 keeps the power.
+     */
+    public RunIntakeTime holdRPS(DoubleSupplier targetRPS) {
+        this.targetRPS = targetRPS;
+        return this;
+    }
+
     private void setPower(double power) {
-        if (side != null) {
+        double target = targetRPS.getAsDouble();
+        if (side != null && target > 0 && power != 0) {
+            side.runRPS(target);
+        } else if (side != null) {
             side.run(power);
         } else {
             intake.run(power);
@@ -71,7 +86,7 @@ public class RunIntakeTime extends Action {
                     side.lower();
                 }
             }
-            KLog.d(TAG, () -> "name=" + getName() + " side=" + sideLabel() + " event=start power=" + power + " timeMs=" + timeMS);
+            KLog.d(TAG, () -> "name=" + getName() + " side=" + sideLabel() + " event=start power=" + power + " targetRps=" + targetRPS.getAsDouble() + " timeMs=" + timeMS);
         }
         if (isDone) {
             return;

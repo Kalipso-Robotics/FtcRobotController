@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.PID.PIDFController;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
@@ -32,6 +36,7 @@ public class IntakeSide {
     private boolean isCommandedDown = false;
     private boolean isRaisePending = false;
     private double power = 0;
+    private final PIDFController feedController;
 
     public IntakeSide(OpModeUtilities opModeUtilities, BeamBreakPosition.IntakeSide side) {
         this(side,
@@ -48,6 +53,7 @@ public class IntakeSide {
         boolean isA = side == BeamBreakPosition.IntakeSide.A;
         this.downPos = isA ? ModuleConfig.INTAKE_PIVOT_A_DOWN_POS : ModuleConfig.INTAKE_PIVOT_B_DOWN_POS;
         this.upPos = isA ? ModuleConfig.INTAKE_PIVOT_A_UP_POS : ModuleConfig.INTAKE_PIVOT_B_UP_POS;
+        this.feedController = PIDFController.flywheel("Intake_" + side, 0, 0, 0, 0).build(); // gains read per call in runRPS
         motor.setDirection(isA ? ModuleConfig.INTAKE_MOTOR_A_DIRECTION : ModuleConfig.INTAKE_MOTOR_B_DIRECTION);
         // Start raised: the side is spring loaded to the ground, so lowered would stick out past the starting size.
         pivot.setTargetPosition(upPos);
@@ -104,7 +110,9 @@ public class IntakeSide {
         }
     }
 
+    /** Open loop. Also ends any closed loop (runRPS), so the next one starts clean. */
     public void run(double power) {
+        feedController.reset();
         motor.setPower(power);
         if (power != this.power) {
             this.power = power;
@@ -114,6 +122,31 @@ public class IntakeSide {
 
     public void stop() {
         run(0);
+    }
+
+    /**
+     * Closed loop on this side's encoder, forward only, in motor RPS: power = kF * target + kP * error, times
+     * KMotor.voltageScale (same battery compensation as the shooter). Gains are this side's IntakeConfig.FEED_KF_* /
+     * FEED_KP_* (power per RPS), read every call so Dashboard edits apply live. Call every loop; run() ends it.
+     */
+    public void runRPS(double targetRPS) {
+        boolean isA = side == BeamBreakPosition.IntakeSide.A;
+        feedController.setKf(isA ? IntakeConfig.FEED_KF_A : IntakeConfig.FEED_KF_B);
+        feedController.setKp(isA ? IntakeConfig.FEED_KP_A : IntakeConfig.FEED_KP_B);
+        double rps = getRPS();
+        double newPower = Math.min(1, feedController.calculate(rps, targetRPS) * KMotor.voltageScale(SharedData.getVoltage()));
+        motor.setPower(newPower);
+        power = newPower;
+        if (KLog.isDebug()) {
+            KLog.d(TAG, () -> String.format("side=%s event=runRPS targetRps=%.2f rps=%.2f power=%.3f",
+                    side, targetRPS, rps, newPower));
+        }
+    }
+
+    /** kF (power per RPS) that would give today's open-loop power at today's speed: power / (rps * voltageScale); NaN when not moving forward. */
+    public double estimateKf() {
+        double rps = getRPS();
+        return rps > 0.1 ? power / (rps * KMotor.voltageScale(SharedData.getVoltage())) : Double.NaN;
     }
 
     /** True once the pivot was commanded down, is not waiting to raise, and has had time to get there. */
@@ -159,6 +192,21 @@ public class IntakeSide {
     /** Motor current in mA (0 if the motor cannot report it). Not in the bulk cache: one extra hub read per call. */
     public double getCurrentMA() {
         return motor instanceof DcMotorEx ? ((DcMotorEx) motor).getCurrent(CurrentUnit.MILLIAMPS) : 0;
+    }
+
+    /** True when this side's RPS is within toleranceRPS of targetRPS. */
+    public boolean isAtRPS(double targetRPS, double toleranceRPS) {
+        return Math.abs(getRPS() - targetRPS) <= toleranceRPS;
+    }
+
+    /** Motor output speed in rev/s (ModuleConfig.INTAKE_TICKS_PER_REV); + = intake-in / feed direction. */
+    public double getRPS() {
+        return getVelocity() / ModuleConfig.INTAKE_TICKS_PER_REV;
+    }
+
+    /** Raw encoder count (direction applied, like getVelocity). */
+    public int getCurrentPosition() {
+        return motor.getCurrentPosition();
     }
 
     /** Motor speed in ticks/s (0 if the motor cannot report it). */

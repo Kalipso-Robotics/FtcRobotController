@@ -22,47 +22,156 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.B
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.B;
 
 public class PushBallTest {
+    private final double preFeedMs = IntakeConfig.PRE_FEED_MS;
     private final double feedAMs = IntakeConfig.FEED_A_MS;
     private final double feedBMs = IntakeConfig.FEED_B_MS;
     private final double delayAMs = IntakeConfig.FEED_A_DELAY_MS;
     private final double delayBMs = IntakeConfig.FEED_B_DELAY_MS;
+    private final double feedRps = IntakeConfig.FEED_RPS;
+    private final double kfA = IntakeConfig.FEED_KF_A, kfB = IntakeConfig.FEED_KF_B;
+    private final double kpA = IntakeConfig.FEED_KP_A, kpB = IntakeConfig.FEED_KP_B;
 
     @After
     public void restoreConfig() {
+        IntakeConfig.PRE_FEED_MS = preFeedMs;
         IntakeConfig.FEED_A_MS = feedAMs;
         IntakeConfig.FEED_B_MS = feedBMs;
         IntakeConfig.FEED_A_DELAY_MS = delayAMs;
         IntakeConfig.FEED_B_DELAY_MS = delayBMs;
+        IntakeConfig.FEED_RPS = feedRps;
+        IntakeConfig.FEED_KF_A = kfA;
+        IntakeConfig.FEED_KF_B = kfB;
+        IntakeConfig.FEED_KP_A = kpA;
+        IntakeConfig.FEED_KP_B = kpB;
+        IntakeConfig.FEED_RPS_COMP_ON = compOn;
+        IntakeConfig.FEED_RPS_COMP_GAIN = compGain;
+    }
+
+
+    private final boolean compOn = IntakeConfig.FEED_RPS_COMP_ON;
+    private final double compGain = IntakeConfig.FEED_RPS_COMP_GAIN;
+
+    @Test
+    public void rpsCompOn_shooterBelowTarget_feedsFaster_aboveTarget_feedsSlower() throws Exception {
+        IntakeConfig.PRE_FEED_MS = 20;
+        IntakeConfig.FEED_A_MS = 200;
+        IntakeConfig.FEED_B_MS = 200;
+        IntakeConfig.FEED_A_DELAY_MS = 0;
+        IntakeConfig.FEED_B_DELAY_MS = 0;
+        IntakeConfig.FEED_RPS = 10;
+        IntakeConfig.FEED_KF_A = 0.05; // fake encoders read 0 RPS: power = kF * target * voltageScale
+        IntakeConfig.FEED_KF_B = 0.03;
+        IntakeConfig.FEED_KP_A = 0;
+        IntakeConfig.FEED_KP_B = 0;
+        IntakeConfig.FEED_RPS_COMP_ON = true;
+        IntakeConfig.FEED_RPS_COMP_GAIN = 1;
+        org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData.setVoltage(
+                org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.DEFAULT_VOLTAGE);
+        double[] rpsError = {2}; // shooter 2 RPS under target -> transfer 12 RPS
+        Rig rig = new Rig(() -> rpsError[0]);
+
+        boolean sawFast = false, sawSlow = false;
+        long deadline = System.currentTimeMillis() + 3000;
+        while (!rig.pushBall.getIsDone()) {
+            assertTrue("timed out", System.currentTimeMillis() < deadline);
+            rig.pushBall.updateCheckDone();
+            double a = rig.motorA.getPower(), b = rig.motorB.getPower();
+            if (Math.abs(rig.stopperServo.getPosition() - ModuleConfig.STOPPER_SERVO_OPEN_POS) < 1e-9 && a != 0 && a != IntakeConfig.SHOOT_FEED_POWER) {
+                if (rpsError[0] > 0) {
+                    assertEquals(0.6, a, 1e-9);
+                    assertEquals(0.36, b, 1e-9);
+                    sawFast = true;
+                    rpsError[0] = -3; // read live: shooter 3 RPS over target -> transfer 7 RPS
+                } else {
+                    assertEquals(0.35, a, 1e-9);
+                    assertEquals(0.21, b, 1e-9);
+                    sawSlow = true;
+                }
+            }
+            Thread.sleep(1);
+        }
+        assertTrue(sawFast && sawSlow);
+        rig.assertEndState();
     }
 
     @Test
-    public void feedsBothSidesAtOnceWithStopperOpenAndClosesAtEnd() throws Exception {
+    public void feedVelocityOn_preFeedOpenLoop_thenEachSideFeedsWithItsOwnGains() throws Exception {
+        IntakeConfig.PRE_FEED_MS = 50;
+        IntakeConfig.FEED_A_MS = 40;
+        IntakeConfig.FEED_B_MS = 40;
+        IntakeConfig.FEED_A_DELAY_MS = 0;
+        IntakeConfig.FEED_B_DELAY_MS = 0;
+        IntakeConfig.FEED_RPS = 10;
+        IntakeConfig.FEED_KF_A = 0.05; // fake encoders read 0 RPS: power = (kF + kP) * target * voltageScale
+        IntakeConfig.FEED_KF_B = 0.03;
+        IntakeConfig.FEED_KP_A = 0;
+        IntakeConfig.FEED_KP_B = 0;
+        org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData.setVoltage(
+                org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.DEFAULT_VOLTAGE);
+        Rig rig = new Rig();
+
+        boolean sawFeed = false, opened = false;
+        long deadline = System.currentTimeMillis() + 3000;
+        while (!rig.pushBall.getIsDone()) {
+            assertTrue("timed out", System.currentTimeMillis() < deadline);
+            rig.pushBall.updateCheckDone();
+            double a = rig.motorA.getPower(), b = rig.motorB.getPower();
+            opened |= Math.abs(rig.stopperServo.getPosition() - ModuleConfig.STOPPER_SERVO_OPEN_POS) < 1e-9;
+            if (!opened) {
+                assertEquals("pre-feed A stays open loop", IntakeConfig.SHOOT_FEED_POWER, a, 1e-9);
+                assertEquals("pre-feed B stays open loop", IntakeConfig.SHOOT_FEED_POWER, b, 1e-9);
+            } else if (a != 0 && b != 0 && a != IntakeConfig.SHOOT_FEED_POWER) {
+                assertEquals("feed A closed loop", 0.5, a, 1e-9);
+                assertEquals("feed B closed loop", 0.3, b, 1e-9);
+                sawFeed = true;
+            }
+            Thread.sleep(1);
+        }
+        assertTrue("both sides fed closed loop", sawFeed);
+        rig.assertEndState();
+    }
+
+    @Test
+    public void preFeedsBothSidesThenOpensAndFeedsWithoutAPowerGap() throws Exception {
+        IntakeConfig.PRE_FEED_MS = 80;
         IntakeConfig.FEED_A_MS = 60;
         IntakeConfig.FEED_B_MS = 60;
         IntakeConfig.FEED_A_DELAY_MS = 0;
         IntakeConfig.FEED_B_DELAY_MS = 0;
         Rig rig = new Rig();
 
-        boolean sawBoth = false;
+        long startMs = -1, openMs = -1, stopMs = -1;
         long deadline = System.currentTimeMillis() + 3000;
         while (!rig.pushBall.getIsDone()) {
             assertTrue("timed out", System.currentTimeMillis() < deadline);
             rig.pushBall.updateCheckDone();
             double a = rig.motorA.getPower(), b = rig.motorB.getPower();
-            if (a != 0 || b != 0) {
-                assertEquals("stopper must be open before any feed", ModuleConfig.STOPPER_SERVO_OPEN_POS, rig.stopperServo.getPosition(), 1e-9);
+            long now = System.currentTimeMillis();
+            boolean running = a != 0 && b != 0;
+            if (startMs < 0) {
+                assertTrue("both sides must spin from the first update", running);
+                startMs = now;
             }
-            if (a != 0 && b != 0) {
-                sawBoth = true;
+            if (openMs < 0 && Math.abs(rig.stopperServo.getPosition() - ModuleConfig.STOPPER_SERVO_OPEN_POS) < 1e-9) {
+                openMs = now;
+                assertTrue("both sides must still spin as the stopper opens", running);
+            }
+            if (a == 0 && b == 0 && stopMs < 0) {
+                stopMs = now;
+            }
+            if (stopMs >= 0) {
+                assertTrue("no power gap: once stopped, the feed is over", a == 0 && b == 0);
             }
             Thread.sleep(1);
         }
-        assertTrue("A and B must feed at the same time", sawBoth);
+        assertTrue("stopper must stay closed for the pre-feed", openMs >= 0 && openMs - startMs >= 70);
+        assertTrue("the feed time counts from the stopper being open", stopMs - openMs >= 50);
         rig.assertEndState();
     }
 
     @Test
     public void feedBDelay_startsBAfterA() throws Exception {
+        IntakeConfig.PRE_FEED_MS = 50;
         IntakeConfig.FEED_A_MS = 40;
         IntakeConfig.FEED_B_MS = 40;
         IntakeConfig.FEED_A_DELAY_MS = 0;
@@ -80,6 +189,7 @@ public class PushBallTest {
             }
             if (b != 0) {
                 assertTrue("B must wait for its delay", sawAOnly);
+                assertEquals("a delayed side skips the pre-feed", ModuleConfig.STOPPER_SERVO_OPEN_POS, rig.stopperServo.getPosition(), 1e-9);
                 sawB = true;
             }
             Thread.sleep(1);
@@ -103,12 +213,16 @@ public class PushBallTest {
         final PushBall pushBall;
 
         Rig() {
+            this(null);
+        }
+
+        Rig(java.util.function.DoubleSupplier shooterRpsError) {
             IntakeSide sideA = new IntakeSide(A, motorA, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false));
             IntakeSide sideB = new IntakeSide(B, motorB, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false));
             FlowerMech flowerMech = new FlowerMech(new KCRServo(FlowerMechInterlockTest.fakeCRServo(), false), sideA);
             Intake intake = new Intake(sideA, sideB, flowerMech);
             Stopper stopper = new Stopper(new KServo(stopperServo, 1e6, 255, 0, false));
-            pushBall = new PushBall(stopper, intake);
+            pushBall = new PushBall(stopper, intake, shooterRpsError);
         }
 
         void assertEndState() {

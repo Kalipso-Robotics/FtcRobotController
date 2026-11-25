@@ -10,8 +10,8 @@ public class ShooterConfig {
 
     public static final double OUT_OF_RANGE_THRESHOLD = 20 * 12 * 25.4;
     // Hive Cell aim points, measured. SharedData.getTargetPoint() picks one by robot y.
-    public static final Point TARGET_POINT_1 = new Point(1466.796, 2189.771); // Cell A (high y)
-    public static final Point TARGET_POINT_2 = new Point(1466.797, 1391.947); // Cell B (low y)
+    public static final Point TARGET_POINT_1 = new Point(1485, 2189.771); // Cell A (high y)
+    public static final Point TARGET_POINT_2 = new Point(1485, 1391.947); // Cell B (low y)
     /** Old DECODE goal, fixed. Only the decode/ OpModes use it; BioBuzz aims at SharedData.getTargetPoint(). */
     public static final Point TARGET_POINT = TARGET_POINT_1;
 
@@ -23,12 +23,14 @@ public class ShooterConfig {
     /** The target is re-checked once every this many odometry updates, not every loop. */
     public static int TARGET_CHECK_EVERY_N_LOOPS = 4;
     public static double timeToStabilize = 50; // TODO-measure
-    public static double kp = 0.085; //TODO tune until going from depot to near is fast enough
     public static double kp_rampDown = 0.085; // 0.003
     public static double ki = 0;
     public static double kd = 0;
     // kf = steady power / steady RPS at about 0.8 power on a full battery, measured with MotorPowerRPSDataCollector.
-    public static double kf = 0.01148; // TODO-measure
+    public static double kf = 0.01128; // TODO-measure
+
+    public static double kp = 0.04930; //TODO tune until going from depot to near is fast enough
+
     public static double kA = 0;
     public static boolean shouldBangBangCompensate = false;
 
@@ -55,6 +57,7 @@ public class ShooterConfig {
     public static double PASS_RPS = 25; // TODO-measure
     public static double PASS_HOOD = 0.2; // TODO-measure
 
-    // Scale shooter power by DEFAULT_VOLTAGE / battery voltage in KMotor.goToRPS.
-    public static boolean USE_VOLTAGE_COMPENSATION = true;
+    // KMotor.goToRPS scales shooter power by (DEFAULT_VOLTAGE / battery voltage) ^ this. 0 = off, 1 = full.
+    // Measure: ShooterDataCollector kF samples at one power on two batteries, ln(RPS1/RPS2) / ln(V1/V2). Re-measure kf after.
+    public static double VOLTAGE_COMP_EXPONENT = 1; // TODO-measure
 }
