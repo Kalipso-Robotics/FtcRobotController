@@ -22,7 +22,7 @@ Odometry side is the **front**. +X straight ahead, +Y to the right, heading posi
 | Flower arm | `flower` (servo) | `modules/intake/Flower` | `ModuleConfig.FLOWER_SIDE`, `FLOWER_UP/DOWN_POS` | `test/IntakeMotorTest` (B = toggle) | One arm on side A. **Interlock:** it may only be down while its intake is down, and raising that intake raises the flower first. This lives in `Flower`/`IntakeSide`; never bypass it from an OpMode. |
 | Beam breaks | `beamBreak0` .. `beamBreak5` (analog), A end to B end | `modules/beambreak/BeamBreakArray` | `BeamBreakConfig.SENSORS`, thresholds, `BLOCKED_IS_LOW_VOLTAGE` | `test/BeamBreakTest` | Count and positions are placeholders. One blocked beam = one ball, capped at capacity (4). Check `isCountReliable()` before trusting the count. |
 | Stopper | `stopper` (servo) | `modules/Stopper` | `ModuleConfig.STOPPER_SERVO_OPEN/CLOSED_POS` | `decode/calibrations/StopperCalibration` | Holds balls before the shooter. Running intake into a closed stopper is OK briefly; too long stalls the motor. |
-| Shooter | `shooter` (motor, encoder) | `modules/shooter/Shooter`, `actions/shooter/ShooterRun`, `ShooterReady` | `ShooterConfig` (PIDF, `PASS_RPS`, timeouts), `ShooterInterpolationConfig` (table, `MAX_RPS` 70) | `test/shooter/MotorPowerRPSDataCollector` (kf), `ShooterDataCollector` (table rows), `ShooterEncoderTest` | One 6000 RPM motor, 1:1 chain to 6x 72 mm flywheels + 4 weights. Voltage compensation is behind a `ShooterConfig` flag. The shot table starts empty. |
+| Shooter | `shooter` (motor, encoder) | `modules/shooter/Shooter`, `actions/shooter/ShooterRun`, `ShooterReady` | `ShooterConfig` (PIDF, `PASS_RPS`, timeouts), `ShooterInterpolationConfig` (table, `MAX_RPS` 70) | `test/shooter/ShooterDataCollector` (kf, kp), `MotorPowerRPSDataCollector` (kf sweep), `RPSPredictionDataCollector` (table rows), `ShooterEncoderTest` | One 6000 RPM motor, 1:1 chain to 6x 72 mm flywheels + 4 weights. Voltage compensation strength is `ShooterConfig.VOLTAGE_COMP_EXPONENT`. The shot table starts empty. |
 | Hood | `hood` (servo) | inside `Shooter` | `ShooterInterpolationConfig.MIN/MAX_HOOD` | `test/HoodServoToZero` | About 30 to 40 degrees of travel. |
 | Turret | `turret` (servo) | `modules/Turret`, `actions/turret/TurretAutoAlignTeleOp` | `TurretConfig` (gear ratio 60/20 * 37/92 = 1.2065, `SERVO_RANGE_DEG`, `SERVO_ZERO_POS`, `SERVO_DIRECTION`) | `test/turret/TurretServoTest` | Axon MAX, 60T > 20T, same shaft 37T > 92T ring (two meshes, turret turns the same way as the servo; PWM set to 500-2500 us). No encoder: `getAngleRad()` is the last commanded angle. Aims from odometry, clamps out-of-range targets (logged). |
 | Limelight 3A | `limelight` | `vision/apriltag/LimelightAprilTagCamera`, `localization/ResetOdometryToLimelight` | `AprilTagConfig` | `test/cameraVision/LimeLightTest` | On the turret. Only re-zeroes odometry and reads goal state. Pipelines must be set on the device (36h11 IDs 30-45). |
@@ -64,7 +64,7 @@ Each step assumes the previous one passed. Log with `adb logcat | grep Robot_` (
 5. `HoodServoToZero`: hood zero and range.
 6. `TurretServoTest`: zero, direction, range (`TurretConfig`).
 7. `BeamBreakTest`: thresholds, order, which beams one POLLEN vs one NECTAR blocks.
-8. `MotorPowerRPSDataCollector`: kf. Then `ShooterDataCollector`: fill the shot table.
+8. `ShooterDataCollector`: kf, then kp. Then `RPSPredictionDataCollector`: fill the shot table.
 9. `LimeLightTest`: tag detection after pipelines are configured.
 10. `BasicTeleop`, then full `TeleOp`.
 

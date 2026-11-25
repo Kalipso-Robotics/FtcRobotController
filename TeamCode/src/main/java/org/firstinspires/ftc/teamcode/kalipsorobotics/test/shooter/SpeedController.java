@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
@@ -30,14 +31,10 @@ public class SpeedController extends KOpMode {
     private static final double SHOOTER_POWER_STEP = 0.001;
     private static final double SERVO_STEP = 0.0005;
 
-    private static final double STOPPER_POSITION_A = 0.15;
-    private static final double STOPPER_POSITION_Y = 0.3;
-
     // B = push sequence: run intake (stopper closed) for PRE_OPEN_MS, open stopper and keep intaking
     // for SHOOT_MS, then close stopper and stop intake. Both times tunable on the right stick or FTC Dashboard.
-    // Stopper open/closed defaults; adjust live on gamepad2 dpad and copy the telemetry values into ModuleConfig by hand.
-    private static final double STOPPER_OPEN_POS_DEFAULT = 0.362;
-    private static final double STOPPER_CLOSED_POS_DEFAULT = 0.449;
+    // Stopper and pivot positions and intake directions start from ModuleConfig on every init. Nudges made here are
+    // not saved: copy the telemetry values into ModuleConfig by hand.
     public static double PRE_OPEN_MS = 300; // intake runs this long before the stopper opens
     public static double SHOOT_MS = 400;    // stopper open + intake running, then close
     private static final double TIME_STEP_MS = 2; // per loop while the right stick is held
@@ -64,6 +61,9 @@ public class SpeedController extends KOpMode {
         KMotor shooterMotor = new KMotor(hardwareMap.dcMotor.get("shooter"), 0, 0, 0, 0);
         DcMotor intakeMotor1 = hardwareMap.dcMotor.get("intakeFront");
         DcMotor intakeMotor2 = hardwareMap.dcMotor.get("intakeBack");
+        // + power = intake in on both sides, same as IntakeSide
+        intakeMotor1.setDirection(ModuleConfig.INTAKE_MOTOR_A_DIRECTION);
+        intakeMotor2.setDirection(ModuleConfig.INTAKE_MOTOR_B_DIRECTION);
 
         // ---- Servos (names are the hardware config names) ----
         Servo hoodServo = hardwareMap.servo.get("hood"); // 0.929
@@ -76,15 +76,14 @@ public class SpeedController extends KOpMode {
 
         // ---- Targets ----
         double shooterPower = 0;
-        double stopperPosition = 0.5;
         double hoodPosition = 0.96;
         double turret1Position = 0.233;
-        double intakePivot1Position = 0.5;
-        double intakePivot2Position = 0.5;
+        double intakePivot1Position = ModuleConfig.INTAKE_PIVOT_A_UP_POS;
+        double intakePivot2Position = ModuleConfig.INTAKE_PIVOT_B_UP_POS;
 
         double intakePower = 1;
-        double stopperOpenPos = STOPPER_OPEN_POS_DEFAULT;
-        double stopperClosedPos = STOPPER_CLOSED_POS_DEFAULT;
+        double stopperOpenPos = ModuleConfig.STOPPER_SERVO_OPEN_POS;
+        double stopperClosedPos = ModuleConfig.STOPPER_SERVO_CLOSED_POS;
 
         PushState pushState = PushState.IDLE;
         ElapsedTime pushTimer = new ElapsedTime();
@@ -158,9 +157,6 @@ public class SpeedController extends KOpMode {
                 }
             }
 
-            // 0.404 OPEN
-            // 0.440 CLOSED
-
             // B (first press): push sequence. Ignored while one is already running.
             boolean bPressed = gamepad1.b && !prevB;
             prevB = gamepad1.b;
@@ -181,14 +177,14 @@ public class SpeedController extends KOpMode {
 
             if (pushState != PushState.IDLE) {
                 intakeMotor1.setPower(intakePower);
-                intakeMotor2.setPower(-intakePower);
+                intakeMotor2.setPower(intakePower);
             } else if (gamepad1.right_bumper) {
                 stopperServo.setPosition(stopperClosedPos);
                 intakeMotor1.setPower(intakePower);
-                intakeMotor2.setPower(-intakePower);
+                intakeMotor2.setPower(intakePower);
             } else if (gamepad1.left_bumper) {
                 intakeMotor1.setPower(-intakePower);
-                intakeMotor2.setPower(intakePower);
+                intakeMotor2.setPower(-intakePower);
             } else {
                 intakeMotor1.setPower(0);
                 intakeMotor2.setPower(0);
@@ -203,14 +199,12 @@ public class SpeedController extends KOpMode {
                 hoodServo.setPosition(hoodPosition);
             }
 
-            // Stopper (servo1): A / Y jump to fixed positions
+            // Stopper (servo1): A = closed, Y = open
             if (pushState != PushState.IDLE) {
                 // PushBall sequence owns the stopper
             } else if (gamepad1.a) {
-                stopperPosition += SERVO_STEP;
                 stopperServo.setPosition(stopperClosedPos);
             } else if (gamepad1.y) {
-                stopperPosition -= SERVO_STEP;
                 stopperServo.setPosition(stopperOpenPos);
             }
 
@@ -223,6 +217,19 @@ public class SpeedController extends KOpMode {
             } else if (gamepad1.dpad_left) {
                 turret1Position = Math.max(0, turret1Position - SERVO_STEP);
                 turret1Servo.setPosition(turret1Position);
+            }
+
+            // Intake pivots: gamepad2 X / Y jump both to the ModuleConfig down / up positions (no flower interlock here)
+            if (kGamePad2.isButtonXFirstPressed()) {
+                intakePivot1Position = ModuleConfig.INTAKE_PIVOT_A_DOWN_POS;
+                intakePivot2Position = ModuleConfig.INTAKE_PIVOT_B_DOWN_POS;
+                intakePivot1Servo.setPosition(intakePivot1Position);
+                intakePivot2Servo.setPosition(intakePivot2Position);
+            } else if (kGamePad2.isButtonYFirstPressed()) {
+                intakePivot1Position = ModuleConfig.INTAKE_PIVOT_A_UP_POS;
+                intakePivot2Position = ModuleConfig.INTAKE_PIVOT_B_UP_POS;
+                intakePivot1Servo.setPosition(intakePivot1Position);
+                intakePivot2Servo.setPosition(intakePivot2Position);
             }
 
             // Intake pivots (gamepad2 sticks, held): left stick Y = pivot1, right stick Y = pivot2 (up = +)
@@ -258,6 +265,7 @@ public class SpeedController extends KOpMode {
             telemetry.addData("Odometry pose", SharedData.getOdometryWheelIMUPosition());
             telemetry.addLine("Turret 2 (servo3): right bumper / left bumper");
             telemetry.addLine("Intake pivots (gamepad2, hold): left stick Y = pivot1 (CH0), right stick Y = pivot2 (CH2)");
+            telemetry.addLine("Intake pivots (gamepad2): X = both to ModuleConfig down, Y = both to ModuleConfig up. Flower must be up: no interlock");
             telemetry.addLine("B = push (intake, open stopper, close). Right stick Y = pre-open time, X = shoot time");
             telemetry.addData("Push state", pushState);
             telemetry.addData("Push pre-open / shoot (ms)", "%.0f / %.0f", PRE_OPEN_MS, SHOOT_MS);
@@ -266,7 +274,7 @@ public class SpeedController extends KOpMode {
             telemetry.addData("Shooter power (motor0)", "%.3f", shooterPower); // -0.47
             telemetry.addData("Shooter RPS (motor0)", "%.2f", shooterMotor.getRPS());
             telemetry.addData("Intake 1 power (motor1)", "%.2f", intakePower);
-            telemetry.addData("Intake 2 power (motor2)", "%.2f", -intakePower);
+            telemetry.addData("Intake 2 power (motor2)", "%.2f", intakePower);
 
             telemetry.addLine("--- Servos (target / actual) ---");
             telemetry.addData("Hood (servo0)", "%.4f / %.4f", hoodPosition, hoodServo.getPosition());
