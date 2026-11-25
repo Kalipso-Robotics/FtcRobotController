@@ -29,6 +29,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -146,7 +147,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip1FlowerIntake.setDependentActions(trip0Shoot);
         redThreeTipSoloAuto.addAction(trip1FlowerIntake);
 
-        IPurePursuitAction trip1GoToShoot = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip1GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip1GoToShoot.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip1GoToShoot.setName("trip1GoToShoot");
         trip1GoToShoot.addPoint(1037, 397, 289.1);
@@ -186,7 +187,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         redThreeTipSoloAuto.addAction(trip2FlowerIntake);
 
         // TODO-check: added so the robot is at (1037, 397) for this shot, same as trip 1
-        IPurePursuitAction trip2GoToShoot = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip2GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip2GoToShoot.setMaxTimeOutMS(1500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip2GoToShoot.setName("trip2GoToShoot");
         trip2GoToShoot.addPoint(1037, 397, 289.1);
@@ -221,7 +222,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
 
         //TRIP 3
 
-        IPurePursuitAction trip3GoToGarden = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip3GoToGarden = new AdaptivePurePursuitAction(driveTrain);
         trip3GoToGarden.setMaxTimeOutMS(4500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip3GoToGarden.setName("trip3GoToGarden");
         trip3GoToGarden.addPoint(1027, 487, 108.5);
@@ -234,7 +235,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip3IntakeFullAction.setDependentActions(trip3GoToGarden);
         redThreeTipSoloAuto.addAction(trip3IntakeFullAction);
 
-        IPurePursuitAction trip3IntakeSweepGarden = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip3IntakeSweepGarden = new AdaptivePurePursuitAction(driveTrain);
         trip3IntakeSweepGarden.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip3IntakeSweepGarden.setName("trip3IntakeGarden");
         trip3IntakeSweepGarden.addPoint(188, 3309, 90.0);
@@ -249,7 +250,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip3StopIntake.setDependentActions(trip3IntakeSweepGarden);
         redThreeTipSoloAuto.addAction(trip3StopIntake);
 
-        IPurePursuitAction trip3GoToShoot = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip3GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip3GoToShoot.setMaxTimeOutMS(1500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip3GoToShoot.setName("trip3GoToShoot");
         trip3GoToShoot.addPoint(300, 2949, 102.6);
@@ -283,7 +284,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         //END OF TRIP 3
 
         //TRIP 4
-        IPurePursuitAction trip4LookAtBalls = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip4LookAtBalls = new AdaptivePurePursuitAction(driveTrain);
         trip4LookAtBalls.setMaxTimeOutMS(2000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip4LookAtBalls.setName("trip4LookAtBalls");
         trip4LookAtBalls.addPoint(450, 2321, 221.7);
@@ -297,7 +298,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip4GrabBalls.setDependentActions(trip4LookAtBalls);
         redThreeTipSoloAuto.addAction(trip4GrabBalls);
 
-        IPurePursuitAction trip4GoToShoot = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip4GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip4GoToShoot.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip4GoToShoot.setName("trip4GoToShoot");
         trip4GoToShoot.addPoint(300, 2949, 102.6);
@@ -341,7 +342,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         trip4StopEverything.setDependentActions(trip4Shoot);
         redThreeTipSoloAuto.addAction(trip4StopEverything);
 
-        IPurePursuitAction trip4Park = new PurePursuitAction(driveTrain);
+        IPurePursuitAction trip4Park = new AdaptivePurePursuitAction(driveTrain);
         trip4Park.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip4Park.setName("trip4Park");
         trip4Park.addPoint(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
@@ -350,7 +351,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         //END OF TRIP 4
 
         // FORCE PARK: with FORCE_PARK_MS_LEFT left in the match, drop everything and park
-        IPurePursuitAction forcePark = new PurePursuitAction(driveTrain);
+        IPurePursuitAction forcePark = new AdaptivePurePursuitAction(driveTrain);
         forcePark.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         forcePark.setName("forcePark");
         forcePark.addPoint(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
