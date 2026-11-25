@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.VisionPickupAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.Flower;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeDecisionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeSources;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootDecisionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
@@ -23,9 +25,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
 /**
  * One trip, written like a trip in RedThreeTipSoloAuto:
@@ -72,8 +75,9 @@ public class DecisionRoundTripAction extends KActionSet {
             intakeBalls.addAction(flowerIntake);
         } else if (whereToIntake == IntakeSources.GARDEN) {
             // garden: same path as RedThreeTipSoloAuto trip 3. The intake runs while driving and sweeping.
-            IPurePursuitAction goToGarden = new PurePursuitAction(driveTrain);
+            IPurePursuitAction goToGarden = new AdaptivePurePursuitAction(driveTrain);
             goToGarden.setName("goToGarden");
+            goToGarden.setMaxTimeOutMS(4500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
             goToGarden.addPoint(1027, 487, 108.5);
             goToGarden.addPoint(289, 2949, 102.6);
             intakeBalls.addAction(goToGarden);
@@ -83,32 +87,44 @@ public class DecisionRoundTripAction extends KActionSet {
             runIntake.setDependentActions(goToGarden);
             intakeBalls.addAction(runIntake);
 
-            IPurePursuitAction sweepGarden = new PurePursuitAction(driveTrain);
+            IPurePursuitAction sweepGarden = new AdaptivePurePursuitAction(driveTrain);
             sweepGarden.setName("sweepGarden");
+            sweepGarden.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
             sweepGarden.addPoint(188, 3309, 90.0);
             sweepGarden.addPoint(289, 2949, 102.6);
             sweepGarden.addPoint(188, 3309, 90.0);
             sweepGarden.setDependentActions(goToGarden);
             intakeBalls.addAction(sweepGarden);
+
+            // Sweep done: stop the intake now, so its timer does not keep it running into the shot (same as the rigid auto).
+            IntakeStop stopIntake = new IntakeStop(runIntake);
+            stopIntake.setName("stopIntake");
+            stopIntake.setDependentActions(sweepGarden);
+            intakeBalls.addAction(stopIntake);
         } else {
             // tip zones: drive there with the intake on
             Point intakePoint = IntakeDecisionAction.pointOf(whereToIntake);
 
-            IPurePursuitAction goToIntake = new PurePursuitAction(driveTrain);
+            IPurePursuitAction goToIntake = new AdaptivePurePursuitAction(driveTrain);
             goToIntake.setName("goToIntake");
+            goToIntake.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
             goToIntake.addPoint(intakePoint.getX(), intakePoint.getY(), IntakeDecisionAction.headingDegOf(whereToIntake));
             intakeBalls.addAction(goToIntake);
 
-            IntakeFullAction runIntake = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
-            runIntake.setName("runIntake");
-            runIntake.setDependentActions(goToIntake);
-            intakeBalls.addAction(runIntake);
+            VisionPickupAction lookAndGrabBalls = new VisionPickupAction(driveTrain,stopper,intake, AllianceColor.RED);
+            lookAndGrabBalls.setName("lookAndGrabBalls");
+            lookAndGrabBalls.setTimeoutMs(6000);
+            lookAndGrabBalls.setDependentActions(goToIntake);   // look only after arriving at the look spot
+            lookAndGrabBalls.setDependentActions(goToIntake);
+            intakeBalls.addAction(lookAndGrabBalls);
+
         }
         this.addAction(intakeBalls);
 
         // GO TO SHOOT
-        IPurePursuitAction goToShoot = new PurePursuitAction(driveTrain);
+        IPurePursuitAction goToShoot = new AdaptivePurePursuitAction(driveTrain);
         goToShoot.setName("goToShoot");
+        goToShoot.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         goToShoot.addPoint(shootPosition.getX(), shootPosition.getY(), Math.toDegrees(shootPosition.getTheta()));
         goToShoot.setDependentActions(intakeBalls);
         this.addAction(goToShoot);

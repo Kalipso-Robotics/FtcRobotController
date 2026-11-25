@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
@@ -39,7 +39,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 
 @Autonomous
 public class RedSmartSoloAuto extends KOpMode {
-    final Position ROBOT_START_POS = new Position(858,3033,90);
+    final Position ROBOT_START_POS = new Position(973, 3303, 90);
     KActionSet redSmartSoloAuto;
     DriveTrain driveTrain;
     Intake intake;
@@ -107,7 +107,7 @@ public class RedSmartSoloAuto extends KOpMode {
         waitUntilShooterRun.setDependentActions(delayBeforeStart);
         redSmartSoloAuto.addAction(waitUntilShooterRun);
 
-        ShooterRun shooterRunPreload = new ShooterRun(opModeUtilities,shooter, ShooterConfig.TARGET_POINT_2, ROBOT_START_POS.toPoint());
+        ShooterRun shooterRunPreload = new ShooterRun(opModeUtilities,shooter, ShooterConfig.TARGET_POINT_1, ROBOT_START_POS.toPoint());   // preload goes into the up Cell with the 3 nectar (Cell A), same as the rigid auto
         shooterRunPreload.setName("shooterRunPreload");
         shooterRunPreload.setDependentActions(waitUntilShooterRun);
         redSmartSoloAuto.addAction(shooterRunPreload);
@@ -142,8 +142,9 @@ public class RedSmartSoloAuto extends KOpMode {
         ElapsedTime hiveSettleTimer = new ElapsedTime();
 
         // FORCE PARK: with FORCE_PARK_MS_LEFT left in the match, drop everything and park
-        IPurePursuitAction forcePark = new PurePursuitAction(driveTrain);
+        IPurePursuitAction forcePark = new AdaptivePurePursuitAction(driveTrain);
         forcePark.setName("forcePark");
+        forcePark.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         forcePark.addPoint(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
 
         waitForStartPrecomputingPaths();
@@ -158,6 +159,7 @@ public class RedSmartSoloAuto extends KOpMode {
             boolean timeToPark = matchTimer.milliseconds() >= AUTO_LENGTH_MS - FORCE_PARK_MS_LEFT;
             if (timeToPark && !forceParking) {
                 forceParking = true;
+                stopEverythingButDrive();   // the trip is not updated any more, so nothing turns them back on
                 KLog.d("RedSmartSoloAuto", "force park at " + matchTimer.milliseconds() + " ms");
             }
 
@@ -191,6 +193,7 @@ public class RedSmartSoloAuto extends KOpMode {
                     if (intakeDecision.getChosenSource() == null) {
                         nothingLeftToIntake = true;
                         forceParking = true;   // nothing left to intake: park now, like the rigid auto
+                        stopEverythingButDrive();
                         KLog.d("RedSmartSoloAuto", "nothing left to intake, parking at " + matchTimer.milliseconds() + " ms");
                     }
                 }
@@ -201,6 +204,14 @@ public class RedSmartSoloAuto extends KOpMode {
         shooter.stop();
         ballVision.close();
         cleanupRobot();
+    }
+
+    /** Shooter, intake and turret off: parking only needs the drivetrain. */
+    private void stopEverythingButDrive() {
+        shooter.stop();
+        intake.stop();
+        turretAutoAlign.stop();
+        KLog.d("RedSmartSoloAuto", "stopped shooter, intake and turret before parking");
     }
 
     /**

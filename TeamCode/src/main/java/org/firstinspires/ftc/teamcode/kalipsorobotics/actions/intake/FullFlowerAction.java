@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -27,18 +28,11 @@ public class FullFlowerAction extends KActionSet {
             return;
         }
 
-        IPurePursuitAction setup = new PurePursuitAction(driveTrain);
+        IPurePursuitAction setup = new AdaptivePurePursuitAction(driveTrain);
         setup.setMaxTimeOutMS(4000); // give up if blocked (e.g. against the flower base) (TODO-measure)
         setup.addPoint(flower.getSetupPoint().getX(), flower.getSetupPoint().getY(), flower.getSetupHeadingDeg());
         setup.setName("setup");
         this.addAction(setup);
-
-        IPurePursuitAction goToFlower = new PurePursuitAction(driveTrain);
-        goToFlower.setMaxTimeOutMS(1500); // give up if blocked (e.g. against the flower base) (TODO-measure)
-        goToFlower.addPoint(flower.getPoint().getX(), flower.getPoint().getY(), flower.getFlowerHeadingDeg());
-        goToFlower.setName("goToFlower");
-        goToFlower.setDependentActions(setup);
-        this.addAction(goToFlower);
 
         IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, intakeTimeMS, power);
         intakeFullAction.setName("intakeFullAction");
@@ -50,8 +44,15 @@ public class FullFlowerAction extends KActionSet {
         flowerLower.setDependentActions(setup);
         this.addAction(flowerLower);
 
+        IPurePursuitAction goToFlower = new AdaptivePurePursuitAction(driveTrain);
+        goToFlower.setMaxTimeOutMS(1500); // give up if blocked (e.g. against the flower base) (TODO-measure)
+        goToFlower.addPoint(flower.getPoint().getX(), flower.getPoint().getY(), flower.getFlowerHeadingDeg());
+        goToFlower.setName("goToFlower");
+        goToFlower.setDependentActions(flowerLower);
+        this.addAction(goToFlower);
+
         // Back out only once the arm is down (or gave up), so the robot never leaves before the arm swept the pile.
-        IPurePursuitAction exitFlower = new PurePursuitAction(driveTrain);
+        IPurePursuitAction exitFlower = new AdaptivePurePursuitAction(driveTrain);
         exitFlower.setMaxTimeOutMS(1500); // give up if blocked (e.g. against the flower base) (TODO-measure)
         exitFlower.addPoint(flower.getExitPoint().getX(), flower.getExitPoint().getY(), flower.getExitHeadingDeg());
         exitFlower.setName("exitFlower");
