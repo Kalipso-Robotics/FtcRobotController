@@ -23,7 +23,7 @@ public class IntakeConfig {
     // The pre-feed stays open loop: it pushes a closed stopper, so a loop would see ~0 speed and go to full power.
     // Tune per side with IntakeTest. kF is measured free running (no balls): measured against a closed stopper it comes
     // out several times too high and the loop overdrives. Retune FEED_A_MS / FEED_B_MS after changing FEED_RPS.
-    public static double FEED_RPS = 22; // TODO-measure: ~the old open-loop feed (0.9 power); motor free speed is ~27 RPS
+    public static double FEED_RPS = 8; // TODO-measure: ~the old open-loop feed (0.9 power); motor free speed is ~27 RPS
     public static double FEED_KF_A = 0.11034; // TODO-measure: power per RPS = 1 / free RPS at full power; read "kF est" in IntakeTest
     public static double FEED_KF_B = 0.10251; // TODO-measure
     public static double FEED_KP_A = 0.01; // TODO-measure: power per RPS of error; raise until the loaded dip shrinks without hunting

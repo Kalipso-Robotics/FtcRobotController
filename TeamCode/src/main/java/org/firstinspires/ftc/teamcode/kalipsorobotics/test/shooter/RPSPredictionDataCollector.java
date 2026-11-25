@@ -140,8 +140,8 @@ public class RPSPredictionDataCollector extends KOpMode {
         fileWriter.writeLine("CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM,TargetX,TargetY,TurretOffsetDeg,AimX,AimY,FeedRPS,TargetRPS,FeedRpsComp,TransferTimedOut");
         flush(fileWriter);
 
-        double targetRPS = 0;
-        double hoodPosition = ShooterInterpolationConfig.MIN_HOOD;
+        double targetRPS = 38;
+        double hoodPosition = 0.25;
         shooter.getHood().setPosition(hoodPosition);
         // ShootAllAction needs a ShooterRun; updateActions() ticks it (KOpMode.shooterRun). STOP until X turns it on.
         ShooterRun rpsLoop = new ShooterRun(opModeUtilities, shooter, 0, hoodPosition);
