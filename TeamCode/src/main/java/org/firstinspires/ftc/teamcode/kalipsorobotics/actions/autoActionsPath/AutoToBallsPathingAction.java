@@ -4,7 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Ac
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;

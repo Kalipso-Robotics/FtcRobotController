@@ -5,7 +5,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;

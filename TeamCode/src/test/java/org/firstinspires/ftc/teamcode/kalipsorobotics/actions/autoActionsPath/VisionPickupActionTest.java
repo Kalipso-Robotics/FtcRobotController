@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallCluster;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallCluster;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;

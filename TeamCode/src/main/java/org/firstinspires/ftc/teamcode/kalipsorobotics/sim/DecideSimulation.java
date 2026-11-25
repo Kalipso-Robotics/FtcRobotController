@@ -1,13 +1,14 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.AutoDecider.HiveState;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.PartnerMode;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.AutoDecider.HiveState;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Cell;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Move;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.PartnerMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Pile;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;

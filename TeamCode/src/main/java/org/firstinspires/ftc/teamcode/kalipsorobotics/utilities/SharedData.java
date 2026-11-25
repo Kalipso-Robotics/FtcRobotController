@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;

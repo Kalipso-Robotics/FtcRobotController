@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.navigation;
 
 import static org.junit.Assert.assertEquals;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.junit.Test;
 

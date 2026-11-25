@@ -1,7 +1,8 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
@@ -15,14 +16,16 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterSto
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.PartnerMode;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Cell;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Move;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.PartnerMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Pile;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallCluster;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallVision;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;

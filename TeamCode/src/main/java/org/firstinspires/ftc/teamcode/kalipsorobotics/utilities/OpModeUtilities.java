@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 import android.os.Process;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.FieldConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OdometryLogger;

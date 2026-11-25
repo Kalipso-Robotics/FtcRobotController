@@ -1,17 +1,19 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Cell;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Move;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Pile;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData.CellState;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 
 /**
  * RedDecideAuto for when the PARTNER shoots first (solo preload, the partner robot).
