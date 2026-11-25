@@ -244,6 +244,12 @@ public class ShooterRun extends Action {
     }
 
     private double getOdometryDistanceMM() {
+        // The direct RPS constructor has no target; ShootAllAction still flips to CURRENT_POINT after the feed.
+        // -1 = no distance: CURRENT_POINT then holds the RPS and hood it already has.
+        if (targetPoint == null) {
+            KLog.d("ShooterRun_Distance", "No target point, no distance");
+            return -1;
+        }
         double odometryDistanceMM = getDistanceToTargetFromCurrentPos(targetPoint);
         KLog.d("ShooterRun_Distance", () -> "Odometry distance: " + odometryDistanceMM + " mm");
         return odometryDistanceMM;

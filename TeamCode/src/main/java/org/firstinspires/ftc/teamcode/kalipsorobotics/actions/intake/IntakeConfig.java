@@ -24,10 +24,10 @@ public class IntakeConfig {
     // Tune per side with IntakeTest. kF is measured free running (no balls): measured against a closed stopper it comes
     // out several times too high and the loop overdrives. Retune FEED_A_MS / FEED_B_MS after changing FEED_RPS.
     public static double FEED_RPS = 8; // TODO-measure: ~the old open-loop feed (0.9 power); motor free speed is ~27 RPS
-    public static double FEED_KF_A = 0.11034; // TODO-measure: power per RPS = 1 / free RPS at full power; read "kF est" in IntakeTest
-    public static double FEED_KF_B = 0.10251; // TODO-measure
-    public static double FEED_KP_A = 0.01; // TODO-measure: power per RPS of error; raise until the loaded dip shrinks without hunting
-    public static double FEED_KP_B = 0.01; // TODO-measure
+    public static double FEED_KF_A = 0.15598; // TODO-measure: power per RPS = 1 / free RPS at full power; read "kF est" in IntakeTest
+    public static double FEED_KF_B = 0.11183; // TODO-measure
+    public static double FEED_KP_A = 0.16623; // TODO-measure: power per RPS of error; raise until the loaded dip shrinks without hunting
+    public static double FEED_KP_B = 0.20235; // TODO-measure
     // Transfer "at speed" band for TransferReady (ShootAllAction): |RPS - FEED_RPS| <= this.
     // Hub velocity steps are ~0.2 RPS here (103.8 ticks/rev), so this can be tight.
     public static double FEED_RPS_TOLERANCE = 1.5; // TODO-measure

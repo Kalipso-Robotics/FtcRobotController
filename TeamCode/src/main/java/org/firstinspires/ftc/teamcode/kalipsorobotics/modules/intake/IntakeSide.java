@@ -131,8 +131,13 @@ public class IntakeSide {
      */
     public void runRPS(double targetRPS) {
         boolean isA = side == BeamBreakPosition.IntakeSide.A;
-        feedController.setKf(isA ? IntakeConfig.FEED_KF_A : IntakeConfig.FEED_KF_B);
-        feedController.setKp(isA ? IntakeConfig.FEED_KP_A : IntakeConfig.FEED_KP_B);
+        runRPS(targetRPS, isA ? IntakeConfig.FEED_KF_A : IntakeConfig.FEED_KF_B, isA ? IntakeConfig.FEED_KP_A : IntakeConfig.FEED_KP_B);
+    }
+
+    /** runRPS with these gains instead of IntakeConfig's (gain tuning: MotorPowerRPSDataCollector). Returns the RPS it read. */
+    public double runRPS(double targetRPS, double kf, double kp) {
+        feedController.setKf(kf);
+        feedController.setKp(kp);
         double rps = getRPS();
         double newPower = Math.min(1, feedController.calculate(rps, targetRPS) * KMotor.voltageScale(SharedData.getVoltage()));
         motor.setPower(newPower);
@@ -141,6 +146,7 @@ public class IntakeSide {
             KLog.d(TAG, () -> String.format("side=%s event=runRPS targetRps=%.2f rps=%.2f power=%.3f",
                     side, targetRPS, rps, newPower));
         }
+        return rps;
     }
 
     /** kF (power per RPS) that would give today's open-loop power at today's speed: power / (rps * voltageScale); NaN when not moving forward. */
