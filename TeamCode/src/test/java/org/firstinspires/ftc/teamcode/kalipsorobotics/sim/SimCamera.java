@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
 import java.util.ArrayList;

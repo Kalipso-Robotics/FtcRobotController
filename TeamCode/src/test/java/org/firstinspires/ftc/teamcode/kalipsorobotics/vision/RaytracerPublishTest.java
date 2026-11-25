@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.vision;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Matrix;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
@@ -11,7 +10,6 @@ import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;

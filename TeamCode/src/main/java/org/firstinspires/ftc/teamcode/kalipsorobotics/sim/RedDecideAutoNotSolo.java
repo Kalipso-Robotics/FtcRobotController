@@ -1,11 +1,12 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Cell;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Move;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 
 /**
  * RedDecideAutoPartnerFirst for a STRONG partner (NOT SOLO).

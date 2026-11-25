@@ -15,7 +15,7 @@ public class RedTippingAutoSimTest {
     public void redTippingAutoRunsToTheEnd() throws Exception {
         // Start pose = the one RedTippingAuto.initializeRobot gives Odometry: (171.5 + 1218, 3658 - 171.5, -90 deg).
         SimRunner.Result result = SimRunner.runInNewJvm(
-                "org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto",
+                "org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto",
                 171.5 + 1218, 3658 - 171.5, Math.toRadians(-90));
 
         double[] first = result.frames.get(0);
@@ -52,7 +52,7 @@ public class RedTippingAutoSimTest {
     /** The same scenario twice must give the same frames: that is what makes a run trustworthy. */
     @Test
     public void sameRunTwiceGivesTheSameFrames() throws Exception {
-        String opMode = "org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto";
+        String opMode = "org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto";
         SimRunner.Result a = SimRunner.runInNewJvm(opMode, 171.5 + 1218, 3658 - 171.5, Math.toRadians(-90));
         SimRunner.Result b = SimRunner.runInNewJvm(opMode, 171.5 + 1218, 3658 - 171.5, Math.toRadians(-90));
 

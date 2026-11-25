@@ -2,10 +2,10 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullDetector;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallCluster;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallInformation;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.BallMemory;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.ClusterDetectionAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallCluster;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.BallMemory;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.ClusterDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;

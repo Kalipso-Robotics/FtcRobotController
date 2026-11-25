@@ -1,14 +1,16 @@
-package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
+package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.AutoDecider.HiveState;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Cell;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Move;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.PartnerMode;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.AutoDecider;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.AutoDecider.HiveState;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Cell;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Move;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.PartnerMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Pile;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.DecideSimulation;
 import org.junit.Test;
 
 import java.util.ArrayList;
