@@ -56,7 +56,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
 
-    final Position ROBOT_START_POS = new Position(858, 3033, 90);//double check 90 or nega 90
+    final Position ROBOT_START_POS = new Position(973, 3303, 90);//double check 90 or nega 90
     final Point PARK_POINT = new Point(392, 1371);
     final double AUTO_LENGTH_MS = 30000;
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
