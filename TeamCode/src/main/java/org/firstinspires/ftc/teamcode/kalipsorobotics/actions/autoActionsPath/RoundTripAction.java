@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
@@ -36,7 +36,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
  *    (purePursuitReadyIntakeStop); ShooterRun warms up during the drive; PushBall waits for the drive (purePursuitReadyShooting),
  *    ShooterReady (if shouldDependOnFlywheel) and TurretReady; then ShooterStop (setShouldShooterStop(false) keeps it spinning).
  *    Auto: {@code RoundTripAction trip = new RoundTripAction(opModeUtilities, driveTrain, aim, shooter, stopper, intake,
- *          ShooterConfig.TARGET_POINT_1, FieldConfig.aLaunchPoint, 0, intake.getSide(BeamBreakPosition.IntakeSide.A));
+ *          ShooterConfig.TARGET_POINT_1, FieldConfig.aLaunchPoint, 0, intake.getModule(BeamBreakPosition.IntakeSide.A));
  *          trip.getMoveToBall().addPoint(...);}
  *
  * 2. SHOOT-FIRST TRIP (the two older BIOBUZZ constructors, kept unchanged for RedTippingAuto): moveToShoot, shoot, then
@@ -79,7 +79,7 @@ public class RoundTripAction extends KActionSet {
      */
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter,
                            Stopper stopper, Intake intake, Point targetPoint, Point launchPoint, double waitForShooterReadyMS,
-                           IntakeSide intakeSide, boolean shouldDependOnFlywheel, boolean useAdaptivePP) {
+                           IntakeModule intakeSide, boolean shouldDependOnFlywheel, boolean useAdaptivePP) {
         this.launchPoint = launchPoint;
         this.aim = turretAutoAlign;
 
@@ -146,7 +146,7 @@ public class RoundTripAction extends KActionSet {
     /** Gated trip, waits for the flywheel, adaptive pure pursuit. */
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter,
                            Stopper stopper, Intake intake, Point targetPoint, Point launchPoint, double waitForShooterReadyMS,
-                           IntakeSide intakeSide) {
+                           IntakeModule intakeSide) {
         this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPoint, waitForShooterReadyMS,
                 intakeSide, true, true);
     }
@@ -154,7 +154,7 @@ public class RoundTripAction extends KActionSet {
     /** Gated trip, adaptive pure pursuit. */
     public RoundTripAction(OpModeUtilities opModeUtilities, DriveTrain drivetrain, TurretAutoAlign turretAutoAlign, Shooter shooter,
                            Stopper stopper, Intake intake, Point targetPoint, Point launchPoint, double waitForShooterReadyMS,
-                           IntakeSide intakeSide, boolean shouldDependOnFlywheel) {
+                           IntakeModule intakeSide, boolean shouldDependOnFlywheel) {
         this(opModeUtilities, drivetrain, turretAutoAlign, shooter, stopper, intake, targetPoint, launchPoint, waitForShooterReadyMS,
                 intakeSide, shouldDependOnFlywheel, true);
     }

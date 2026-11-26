@@ -151,7 +151,6 @@ public class ShootAllAction extends KActionSet {
         resetOdometryToPosition.setName("resetOdometryToPosition");
         resetOdometryToPosition.setDependentActions(pushBall);
         this.addAction(resetOdometryToPosition);
-
     }
 
     /** Abort only when a gate timed out and the two gates are not both ready (both ready = a legit feed). */

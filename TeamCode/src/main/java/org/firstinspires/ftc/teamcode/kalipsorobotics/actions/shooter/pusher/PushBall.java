@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
@@ -21,20 +21,21 @@ import java.util.function.DoubleSupplier;
  * Feeds the held balls into the shooter: stop the intake, spin both sides against the closed stopper (PRE_FEED_MS), open
  * the stopper with them still spinning, run side A and side B AT THE SAME TIME (each after its own delay,
  * IntakeConfig.FEED_A_DELAY_MS / FEED_B_DELAY_MS, both 0 by default), then close the stopper. A side with a delay skips the pre-feed.
- * Times: FEED_A_MS / FEED_B_MS, counted from the stopper being open. In auto, gate it like last year: pushBall.setDependentActions(driveReady, shooterReady, turretReady).
+ * Times: FEED_A_MS / FEED_B_MS, counted from the stopper being open (openStopper done + IntakeConfig.STOPPER_OPEN_MS). In auto, gate it like last year: pushBall.setDependentActions(driveReady, shooterReady, turretReady).
  * Note: TeleOp's ShootAllAction uses this too, so the parallel feed changes TeleOp shooting as well.
  * Pattern source: the previous PushBall chain and decode RoundTripAction gating.
  */
 public class PushBall extends KActionSet {
     public static final String TAG = "Shooting_PushBall";
 
-    private final IntakeSide sideA;
-    private final IntakeSide sideB;
+    private final IntakeModule sideA;
+    private final IntakeModule sideB;
     private final boolean preFeedA;
     private final boolean preFeedB;
     private final double feedPower = IntakeConfig.SHOOT_FEED_POWER;
     private final WaitAction preFeed;
     private final KServoAutoAction openStopper;
+    private final WaitAction stopperOpen;
     private final RunIntakeTime feedA;
     private final RunIntakeTime feedB;
     private final CloseStopper closeStopper;
@@ -64,8 +65,14 @@ public class PushBall extends KActionSet {
         openStopper.setDependentActions(preFeed);
         this.addAction(openStopper);
 
-        sideA = intake.getSide(BeamBreakPosition.IntakeSide.A);
-        sideB = intake.getSide(BeamBreakPosition.IntakeSide.B);
+        // openStopper is done on KServo's travel estimate; wait the measured open time too so the feed timers start open.
+        stopperOpen = new WaitAction(IntakeConfig.STOPPER_OPEN_MS);
+        stopperOpen.setName("stopperOpen");
+        stopperOpen.setDependentActions(openStopper);
+        this.addAction(stopperOpen);
+
+        sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
+        sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
         preFeedA = IntakeConfig.FEED_A_DELAY_MS <= 0;
         preFeedB = IntakeConfig.FEED_B_DELAY_MS <= 0;
         DoubleSupplier feedRps = shooterRpsError == null || !IntakeConfig.FEED_RPS_COMP_ON
@@ -76,7 +83,7 @@ public class PushBall extends KActionSet {
         // A and B feed at the same time; each side waits its own delay first (both 0 = together).
         WaitAction delayA = new WaitAction(IntakeConfig.FEED_A_DELAY_MS);
         delayA.setName("feedADelay");
-        delayA.setDependentActions(openStopper);
+        delayA.setDependentActions(stopperOpen);
         this.addAction(delayA);
 
         // Closed loop on each side's encoder when IntakeConfig.FEED_RPS > 0; the pre-feed below stays open loop.
@@ -87,7 +94,7 @@ public class PushBall extends KActionSet {
 
         WaitAction delayB = new WaitAction(IntakeConfig.FEED_B_DELAY_MS);
         delayB.setName("feedBDelay");
-        delayB.setDependentActions(openStopper);
+        delayB.setDependentActions(stopperOpen);
         this.addAction(delayB);
 
         feedB = new RunIntakeTime(sideB, IntakeConfig.FEED_B_MS, feedPower).holdRPS(feedRps);
@@ -115,7 +122,7 @@ public class PushBall extends KActionSet {
     @Override
     protected void afterUpdate() {
         // Never zeroed at the handover: the sides keep this power until feedA / feedB take over.
-        if (!openStopper.getIsDone()) {
+        if (!stopperOpen.getIsDone()) {
             if (preFeedA) {
                 sideA.run(feedPower);
             }
@@ -124,8 +131,8 @@ public class PushBall extends KActionSet {
             }
         }
         if (KLog.isDebug()) {
-            KLog.d(TAG, () -> String.format("name=%s preFeedDone=%s openStopperDone=%s feedADone=%s feedBDone=%s closeStopperDone=%s",
-                    getName(), preFeed.getIsDone(), openStopper.getIsDone(), feedA.getIsDone(), feedB.getIsDone(), closeStopper.getIsDone()));
+            KLog.d(TAG, () -> String.format("name=%s preFeedDone=%s openStopperDone=%s stopperOpenDone=%s feedADone=%s feedBDone=%s closeStopperDone=%s",
+                    getName(), preFeed.getIsDone(), openStopper.getIsDone(), stopperOpen.getIsDone(), feedA.getIsDone(), feedB.getIsDone(), closeStopper.getIsDone()));
         }
     }
 }

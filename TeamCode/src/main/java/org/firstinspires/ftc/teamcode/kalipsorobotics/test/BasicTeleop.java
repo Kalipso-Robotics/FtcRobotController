@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakArray;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
@@ -40,8 +40,8 @@ public class BasicTeleop extends KOpMode {
 
     private DriveTrain driveTrain;
     private Intake intake;
-    private IntakeSide sideA;
-    private IntakeSide sideB;
+    private IntakeModule sideA;
+    private IntakeModule sideB;
     private Stopper stopper;
     private Shooter shooter;
     private Turret turret;
@@ -61,8 +61,8 @@ public class BasicTeleop extends KOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         intake = new Intake(opModeUtilities);
-        sideA = intake.getSide(BeamBreakPosition.IntakeSide.A);
-        sideB = intake.getSide(BeamBreakPosition.IntakeSide.B);
+        sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
+        sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
         stopper = new Stopper(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         beamBreakArray = new BeamBreakArray(opModeUtilities);

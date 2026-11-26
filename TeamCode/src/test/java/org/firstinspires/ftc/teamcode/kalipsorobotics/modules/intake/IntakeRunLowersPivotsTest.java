@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
+
 import static org.junit.Assert.assertEquals;
 
 import com.qualcomm.robotcore.hardware.Servo;
@@ -24,14 +26,14 @@ public class IntakeRunLowersPivotsTest {
     public void setUp() {
         pivotA = FlowerMechInterlockTest.fakeServo();
         pivotB = FlowerMechInterlockTest.fakeServo();
-        IntakeSide sideA = new IntakeSide(BeamBreakPosition.IntakeSide.A, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotA));
-        IntakeSide sideB = new IntakeSide(BeamBreakPosition.IntakeSide.B, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotB));
+        IntakeModule sideA = new IntakeModule(BeamBreakPosition.IntakeSide.A, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotA), IntakeConfig.SIDE_A);
+        IntakeModule sideB = new IntakeModule(BeamBreakPosition.IntakeSide.B, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotB), IntakeConfig.SIDE_B);
         intake = new Intake(sideA, sideB, new FlowerMech(new KCRServo(FlowerMechInterlockTest.fakeCRServo(), false), sideA));
     }
 
     private void assertBothDown() {
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS, pivotA.getPosition(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_DOWN_POS, pivotB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotDownPos, pivotB.getPosition(), 1e-9);
     }
 
     @Test

@@ -61,5 +61,11 @@ public class ShooterInterpolationConfig {
     // ShooterInterpolationDataLookup returns DEFAULT_RPS / MIN_HOOD while it is empty.
     // TODO-measure: fill the table; the commented-out rows above are DECODE carry-over, do not reuse them.
     public static double[] shooterData = {
+            950,  35.8, 0.345, 10.0, // 10
+            1070, 36.2, 0.322, 9.0,  // 9
+            1200, 37.0, 0.285, 7.0,  // 7
+            1350, 36.5, 0.28,  8.0,  // 8
+            1500, 38.0, 0.255, 13.0, // 13
+            1686, 39.0, 0.25,  13.0, // 13
     };
 }

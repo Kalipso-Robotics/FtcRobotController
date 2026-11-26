@@ -17,7 +17,7 @@ public class SOTMConfig {
 
     /** Dashboard kill switch: runs the SOTM thread and aims the turret at the virtual goal (and keeps it tracking
      *  during a shot). At standstill the deadband makes the solution equal the static aim. */
-    public static boolean aimTurret = true;
+    public static boolean aimTurret = false;
     /** Shooter RPS looks up the virtual-goal distance instead of the real one. Only applies while aimTurret is on.
      *  Turn on once the RPS LUT and PIDF are tuned. */
     public static boolean adjustShooterRPS = false;

@@ -4,7 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KGamePad;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -27,17 +27,17 @@ import java.util.ArrayList;
  *   X = cancel
  * The stopper is held closed the whole OpMode. Intake: load the balls before pressing. Each press is one sequence on one motor; the screen then shows that motor's results.
  * Run a motor's kF first: its kP sequence uses the kF that measured (the config kF if it was not run). Nothing is written
- * into the configs: copy the values at the end into ShooterConfig.kf / kp or IntakeConfig.FEED_KF_A / FEED_KP_A (_B).
+ * into the configs: copy the values at the end into ShooterConfig.kf / kp or IntakeConfig.SIDE_A.kF / kP (SIDE_B).
  * Pattern source: this file's pre-milestone-2 two-motor version.
  *
  * kF: open loop, power POWER_START to POWER_END in POWER_INCREMENT steps. Each step waits the motor's stabilization time,
  *   then averages the RPS for DATA_COLLECTION_TIME_MS. kF = effective power / RPS, where effective power = power before
- *   KMotor.voltageScale, matching KMotor.goToRPS and IntakeSide.runRPS. Result = average of the steps.
+ *   KMotor.voltageScale, matching KMotor.goToRPS and IntakeModule.runRPS. Result = average of the steps.
  *   Files MotorPowerRPSData (shooter), IntakeAPowerRPSData, IntakeBPowerRPSData:
  *   Power, RPS_MAX, RPS_MIN, RPS_avg, Battery_Voltage, kf
  *
  * kP: one target RPS at a time, lowest first. Every trial settles at the motor's step size below the target, then steps
- *   up to it with the loop the robot runs (shooter: KMotor.goToRPS; intake: IntakeSide.runRPS) at the kP being tried.
+ *   up to it with the loop the robot runs (shooter: KMotor.goToRPS; intake: IntakeModule.runRPS) at the kP being tried.
  *   KpTuner raises / bisects kP at that RPS until it has the fastest calm (accurate, not oscillating) one, then moves to
  *   the next RPS, and at the end verifies one kP at every RPS.
  *   Shooter: SHOOTER_KP_RPS_START to SHOOTER_KP_RPS_END. Intake: IntakeConfig.FEED_RPS minus INTAKE_KP_BELOW_FEED_RPS
@@ -275,19 +275,17 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
     }
 
     private class IntakeTuned extends Tuned {
-        private final IntakeSide side;
-        private final IntakeSide other; // runs open loop at OTHER_INTAKE_POWER during this side's sequences
-        private final boolean isA;
+        private final IntakeModule side;
+        private final IntakeModule other; // runs open loop at OTHER_INTAKE_POWER during this side's sequences
 
-        IntakeTuned(IntakeSide side, IntakeSide other, String kfButton, String kpButton) {
+        IntakeTuned(IntakeModule side, IntakeModule other, String kfButton, String kpButton) {
             super("Intake " + side.getSide(), "Test_Intake" + side.getSide(), kfButton, kpButton,
-                    "IntakeConfig.FEED_KF_" + side.getSide() + " / FEED_KP_" + side.getSide(),
+                    "IntakeConfig.SIDE_" + side.getSide() + ".kF / kP",
                     "Intake" + side.getSide() + "PowerRPSData", "Intake" + side.getSide() + "KpTuning",
                     INTAKE_STABILIZATION_MS, INTAKE_KP_STEP_RPS, INTAKE_START_TOLERANCE_RPS, INTAKE_START_STEADY_RPS,
                     INTAKE_START_TIMEOUT_MS);
             this.side = side;
             this.other = other;
-            this.isA = side.getSide() == BeamBreakPosition.IntakeSide.A;
         }
 
         @Override
@@ -338,12 +336,12 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
 
         @Override
         double configKf() {
-            return isA ? IntakeConfig.FEED_KF_A : IntakeConfig.FEED_KF_B;
+            return side.getConfig().kF;
         }
 
         @Override
         double configKp() {
-            return isA ? IntakeConfig.FEED_KP_A : IntakeConfig.FEED_KP_B;
+            return side.getConfig().kP;
         }
 
         /** Read when the sequence starts, so a Dashboard FEED_RPS edit applies. Targets whose start would be too slow are left out. */
@@ -373,9 +371,9 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         shooter = new ShooterTuned(initializeShooter());
         stopper = new Stopper(opModeUtilities); // constructor closes it; never opened here, so the balls stay in
-        IntakeSide sideA = new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.A);
-        IntakeSide sideB = new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.B);
-        // IntakeSide inits raised (starting size); tuning runs with both sides down, like intaking / feeding.
+        IntakeModule sideA = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.A, IntakeConfig.SIDE_A);
+        IntakeModule sideB = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.B, IntakeConfig.SIDE_B);
+        // IntakeModule inits raised (starting size); tuning runs with both sides down, like intaking / feeding.
         sideA.lower();
         sideB.lower();
         intakeA = new IntakeTuned(sideA, sideB, "DPAD RIGHT", "DPAD UP");

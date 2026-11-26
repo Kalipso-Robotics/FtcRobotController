@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
@@ -36,8 +36,8 @@ public class IntakeActionsTest {
     private final double raiseMs = IntakeConfig.FLOWER_RAISE_MS;
     private final double downPower = IntakeConfig.FLOWER_DOWN_POWER;
     private final double upPower = IntakeConfig.FLOWER_UP_POWER;
-    private final double kfA = IntakeConfig.FEED_KF_A, kfB = IntakeConfig.FEED_KF_B;
-    private final double kpA = IntakeConfig.FEED_KP_A, kpB = IntakeConfig.FEED_KP_B;
+    private final double kfA = IntakeConfig.SIDE_A.kF, kfB = IntakeConfig.SIDE_B.kF;
+    private final double kpA = IntakeConfig.SIDE_A.kP, kpB = IntakeConfig.SIDE_B.kP;
     private final double voltage = SharedData.getVoltage();
 
     private final Servo pivotServoA = FlowerMechInterlockTest.fakeServo();
@@ -45,8 +45,8 @@ public class IntakeActionsTest {
     private final CRServo flowerServo = FlowerMechInterlockTest.fakeCRServo();
     private final DcMotor motorA = FlowerMechInterlockTest.fakeMotor();
     private final DcMotor motorB = FlowerMechInterlockTest.fakeMotor();
-    private IntakeSide sideA;
-    private IntakeSide sideB;
+    private IntakeModule sideA;
+    private IntakeModule sideB;
     private FlowerMech flowerMech;
     private Intake intake;
 
@@ -57,14 +57,14 @@ public class IntakeActionsTest {
         IntakeConfig.FLOWER_RAISE_MS = 20;
         IntakeConfig.FLOWER_DOWN_POWER = -0.5; // real powers: at the 0 default every power check would pass
         IntakeConfig.FLOWER_UP_POWER = 0.5;
-        // Feed RPS loop (IntakeSide.runRPS): different gains per side so a side mix-up fails.
+        // Feed RPS loop (IntakeModule.runRPS): different gains per side so a side mix-up fails.
         SharedData.setVoltage(ShooterInterpolationConfig.DEFAULT_VOLTAGE); // voltageScale = 1
-        IntakeConfig.FEED_KF_A = 0.05;
-        IntakeConfig.FEED_KF_B = 0.08;
-        IntakeConfig.FEED_KP_A = 0;
-        IntakeConfig.FEED_KP_B = 0;
-        sideA = new IntakeSide(A, motorA, new KServo(pivotServoA, 1e6, 255, 0, false));
-        sideB = new IntakeSide(B, motorB, new KServo(pivotServoB, 1e6, 255, 0, false));
+        IntakeConfig.SIDE_A.kF = 0.05;
+        IntakeConfig.SIDE_B.kF = 0.08;
+        IntakeConfig.SIDE_A.kP = 0;
+        IntakeConfig.SIDE_B.kP = 0;
+        sideA = new IntakeModule(A, motorA, new KServo(pivotServoA, 1e6, 255, 0, false), IntakeConfig.SIDE_A);
+        sideB = new IntakeModule(B, motorB, new KServo(pivotServoB, 1e6, 255, 0, false), IntakeConfig.SIDE_B);
         flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         intake = new Intake(sideA, sideB, flowerMech);
     }
@@ -76,14 +76,14 @@ public class IntakeActionsTest {
         IntakeConfig.FLOWER_RAISE_MS = raiseMs;
         IntakeConfig.FLOWER_DOWN_POWER = downPower;
         IntakeConfig.FLOWER_UP_POWER = upPower;
-        IntakeConfig.FEED_KF_A = kfA;
-        IntakeConfig.FEED_KF_B = kfB;
-        IntakeConfig.FEED_KP_A = kpA;
-        IntakeConfig.FEED_KP_B = kpB;
+        IntakeConfig.SIDE_A.kF = kfA;
+        IntakeConfig.SIDE_B.kF = kfB;
+        IntakeConfig.SIDE_A.kP = kpA;
+        IntakeConfig.SIDE_B.kP = kpB;
         SharedData.setVoltage(voltage);
     }
 
-    // ---- Feed RPS loop, per side (IntakeSide.runRPS / getRPS / estimateKf) ----
+    // ---- Feed RPS loop, per side (IntakeModule.runRPS / getRPS / estimateKf) ----
 
     @Test
     public void atTarget_powerIsKfTimesTarget_perSide() {
@@ -97,7 +97,7 @@ public class IntakeActionsTest {
 
     @Test
     public void slowedByLoad_kpAddsPower_onlyOnThatSide() {
-        IntakeConfig.FEED_KP_A = 0.1;
+        IntakeConfig.SIDE_A.kP = 0.1;
         VelocityRig a = new VelocityRig(BeamBreakPosition.IntakeSide.A, 8); // 2 RPS under target
         VelocityRig b = new VelocityRig(BeamBreakPosition.IntakeSide.B, 8);
         a.side.runRPS(10);
@@ -116,7 +116,7 @@ public class IntakeActionsTest {
 
     @Test
     public void powerClampedToOne_andRunGoesBackToOpenLoop() {
-        IntakeConfig.FEED_KP_B = 1;
+        IntakeConfig.SIDE_B.kP = 1;
         VelocityRig b = new VelocityRig(BeamBreakPosition.IntakeSide.B, 0); // stalled
         b.side.runRPS(10);
         assertEquals(1, b.power(), 1e-9);
@@ -163,10 +163,10 @@ public class IntakeActionsTest {
         }
     }
 
-    /** An IntakeSide on a fake DcMotorEx whose encoder always reads the given RPS (as ticks/s, like the hub). */
+    /** An IntakeModule on a fake DcMotorEx whose encoder always reads the given RPS (as ticks/s, like the hub). */
     private static class VelocityRig {
         final double[] power = {0};
-        final IntakeSide side;
+        final IntakeModule side;
 
         VelocityRig(BeamBreakPosition.IntakeSide which, double rps) {
             double ticksPerSec = rps * ModuleConfig.INTAKE_TICKS_PER_REV;
@@ -184,7 +184,7 @@ public class IntakeActionsTest {
                                 return null;
                         }
                     });
-            side = new IntakeSide(which, motor, new KServo(FlowerMechInterlockTest.fakeServo()));
+            side = new IntakeModule(which, motor, new KServo(FlowerMechInterlockTest.fakeServo()), (which == BeamBreakPosition.IntakeSide.A ? IntakeConfig.SIDE_A : IntakeConfig.SIDE_B));
         }
 
         double power() {
@@ -195,34 +195,34 @@ public class IntakeActionsTest {
     @Test
     public void sideLower_lowersAndWaitsPivotMove() throws Exception {
         long start = System.currentTimeMillis();
-        runToDone(new IntakeSideLower(sideA));
+        runToDone(new IntakeModuleLower(sideA));
         assertTrue(System.currentTimeMillis() - start >= IntakeConfig.PIVOT_MOVE_MS);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS, pivotServoA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotServoA.getPosition(), 1e-9);
         assertTrue(sideA.isDown());
     }
 
     @Test
     public void sideRaise_raisesFlowerFirstThenSide() throws Exception {
-        runToDone(new IntakeSideLower(sideA));
+        runToDone(new IntakeModuleLower(sideA));
         assertTrue(flowerMech.lower());
-        runToDone(new IntakeSideRaise(sideA));
+        runToDone(new IntakeModuleRaise(sideA));
         assertEquals(0, flowerServo.getPower(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotServoA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotUpPos, pivotServoA.getPosition(), 1e-9);
         assertTrue(sideA.isUp());
     }
 
     @Test
     public void stow_stopsAndRaisesEverything() throws Exception {
-        runToDone(new IntakeSideLower(sideA));
-        runToDone(new IntakeSideLower(sideB));
+        runToDone(new IntakeModuleLower(sideA));
+        runToDone(new IntakeModuleLower(sideB));
         assertTrue(flowerMech.lower());
         intake.run(1);
         runToDone(new IntakeStow(intake));
         assertEquals(0, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
         assertEquals(0, flowerServo.getPower(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotServoA.getPosition(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotServoB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotUpPos, pivotServoA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotServoB.getPosition(), 1e-9);
     }
 
     /** PushBall and auto run one side with +power, so run() must not negate a side (direction lives in ModuleConfig). */
@@ -243,7 +243,7 @@ public class IntakeActionsTest {
 
     @Test
     public void flowerLower_thenRaise_onceSideIsDown() throws Exception {
-        runToDone(new IntakeSideLower(sideA));
+        runToDone(new IntakeModuleLower(sideA));
         runToDone(new FlowerLower(flowerMech, 1000));
         assertTrue(flowerMech.isDown());
         assertEquals(0, flowerServo.getPower(), 1e-9);
@@ -255,9 +255,9 @@ public class IntakeActionsTest {
     @Test
     public void runIntakeTime_lowerFirst_lowersSide_threeArgFormDoesNot() throws Exception {
         runToDone(new RunIntakeTime(sideB, 10, 1));
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotServoB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotServoB.getPosition(), 1e-9);
         runToDone(new RunIntakeTime(sideB, 10, 1, true));
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_DOWN_POS, pivotServoB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotDownPos, pivotServoB.getPosition(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
     }
 
@@ -265,20 +265,20 @@ public class IntakeActionsTest {
     public void intakeFullAction_oneSide_lowersItsSide() throws Exception {
         Stopper stopper = new Stopper(new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false));
         runToDone(new IntakeFullAction(stopper, sideB, 10, 1));
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_DOWN_POS, pivotServoB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotDownPos, pivotServoB.getPosition(), 1e-9);
     }
 
     @Test
     public void driveDirectionIntakeAction_setDone_stopsAndRaisesBoth() {
-        runToDone(new IntakeSideLower(sideA));
-        runToDone(new IntakeSideLower(sideB));
+        runToDone(new IntakeModuleLower(sideA));
+        runToDone(new IntakeModuleLower(sideB));
         intake.run(1);
         DriveDirectionIntakeAction action = new DriveDirectionIntakeAction(intake);
         action.setIsDone(true);
         assertEquals(0, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotServoA.getPosition(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotServoB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotUpPos, pivotServoA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotServoB.getPosition(), 1e-9);
         assertFalse(sideA.isDown());
     }
 

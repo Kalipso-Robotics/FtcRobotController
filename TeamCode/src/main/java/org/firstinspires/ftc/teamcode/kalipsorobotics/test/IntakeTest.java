@@ -10,7 +10,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
@@ -25,19 +26,19 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
  *   dpad down        = toggle side B motor at TEST_POWER. X / B / RB sweep take over while active.
  *                      Check per side: +power must give + ticks and + RPS, and RPS ~ power * 27 (1620 rpm, no balls).
  *   dpad right/left  = step the selected pivot +/- PIVOT_STEP
- *   A / Y            = selected pivot to ModuleConfig DOWN / UP
+ *   A / Y            = selected pivot to its config DOWN / UP
  *   X (hold)         = selected side closed loop at IntakeConfig.FEED_RPS (the shot feed), other side follows triggers
  *   B (hold)         = both sides closed loop, like PushBall's feed
  *   RB               = kF sweep (KfSweep), both sides open loop: 0.3, 0.5 ... 0.9, then 1.0, 10 s each.
  *                      Telemetry shows each step's RPS and kF (power / (RPS * voltageScale), averaged after
  *                      2 s of spin-up), then the average kF per side over all steps. RB again = cancel.
  *                      Triggers / X / B are ignored while it runs. Do it with NO balls in. Logged as event=sweep*.
- * Copy the found positions into ModuleConfig.INTAKE_PIVOT_*_POS.
+ * Copy the found positions into IntakeConfig.SIDE_A / SIDE_B pivotDownPos / pivotUpPos.
  *
  * The stopper is held closed the whole OpMode, so balls stay in the system while the sides run.
  *
- * Feed velocity tuning, per side, in transfer motor RPS (gains are IntakeConfig.FEED_KF_A/B, FEED_KP_A/B, live on Dashboard):
- *   1. kF, NO balls in the system: hold RT fully, read "kF est" for each side, copy into FEED_KF_A / FEED_KF_B.
+ * Feed velocity tuning, per side, in transfer motor RPS (gains are IntakeConfig.SIDE_A / SIDE_B kF, kP, live on Dashboard):
+ *   1. kF, NO balls in the system: hold RT fully, read "kF est" for each side, copy into SIDE_A.kF / SIDE_B.kF.
  *      RPS at full power should be ~26 (1620 rpm motor); if not, fix ModuleConfig.INTAKE_TICKS_PER_REV first.
  *      Don't measure kF with balls against the closed stopper: the wheels near-stall and kF comes out far too high.
  *   2. Still no balls, hold X: RPS should sit near FEED_RPS with kP = 0. If not, fix kF first.
@@ -57,8 +58,8 @@ public class IntakeTest extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
         Intake intake = new Intake(opModeUtilities);
-        IntakeSide sideA = intake.getSide(BeamBreakPosition.IntakeSide.A);
-        IntakeSide sideB = intake.getSide(BeamBreakPosition.IntakeSide.B);
+        IntakeModule sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
+        IntakeModule sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
         intake.lower(); // init at ModuleConfig DOWN
         Stopper stopper = new Stopper(opModeUtilities); // constructor closes it; never opened here, so the 4 balls stay in
         boolean selectedA = true;
@@ -91,7 +92,7 @@ public class IntakeTest extends KOpMode {
             }
             boolean holdBoth = kGamePad1.isBPressed();
             boolean holdSelected = kGamePad1.isXPressed();
-            IntakeSide[] sides = {sideA, sideB};
+            IntakeModule[] sides = {sideA, sideB};
             if (kGamePad1.isDpadUpFirstPressed() && !sweep.isRunning()) {
                 testOn[0] = !testOn[0];
                 boolean on = testOn[0];
@@ -109,7 +110,7 @@ public class IntakeTest extends KOpMode {
                 power = sweep.power(); // this step's power, 0 once done
             }
             for (int i = 0; i < 2; i++) {
-                IntakeSide s = sides[i];
+                IntakeModule s = sides[i];
                 boolean holding = holdBoth || (holdSelected && (i == 0) == selectedA);
                 if (holding) {
                     s.runRPS(IntakeConfig.FEED_RPS);
@@ -132,9 +133,9 @@ public class IntakeTest extends KOpMode {
                 }
                 wasHolding[i] = holding;
             }
-            IntakeSide side = selectedA ? sideA : sideB;
-            double down = selectedA ? ModuleConfig.INTAKE_PIVOT_A_DOWN_POS : ModuleConfig.INTAKE_PIVOT_B_DOWN_POS;
-            double up = selectedA ? ModuleConfig.INTAKE_PIVOT_A_UP_POS : ModuleConfig.INTAKE_PIVOT_B_UP_POS;
+            IntakeModule side = selectedA ? sideA : sideB;
+            double down = side.getConfig().pivotDownPos;
+            double up = side.getConfig().pivotUpPos;
 
             double step = 0;
             if (kGamePad1.isDpadRightFirstPressed()) step = PIVOT_STEP;
@@ -153,7 +154,7 @@ public class IntakeTest extends KOpMode {
 
             telemetry.addLine("RT run | LT reverse | LB side | dpad U/D test A/B | R/L pivot +/-step | A down, Y up | X hold side, B hold both | RB kF sweep");
             for (int i = 0; i < 2; i++) {
-                IntakeSide s = sides[i];
+                IntakeModule s = sides[i];
                 double p = s.getPower();
                 double rps = s.getRPS();
                 String check = Math.abs(p) < 0.05 ? "motor off"
@@ -170,18 +171,18 @@ public class IntakeTest extends KOpMode {
             telemetry.addData("pivot step", "%.3f", PIVOT_STEP);
             telemetry.addData("triggers", "RT %.2f  LT %.2f -> power %.2f", rt, lt, power);
             telemetry.addData("feed target", "%.2f RPS  (0 = PushBall uses open loop)", IntakeConfig.FEED_RPS);
-            if (IntakeConfig.FEED_RPS <= 0 || IntakeConfig.FEED_KF_A <= 0 || IntakeConfig.FEED_KF_B <= 0) {
-                telemetry.addLine("!! X/B give 0 power until FEED_RPS and FEED_KF_A/B are set (do the RT kF step first)");
+            if (IntakeConfig.FEED_RPS <= 0 || IntakeConfig.SIDE_A.kF <= 0 || IntakeConfig.SIDE_B.kF <= 0) {
+                telemetry.addLine("!! X/B give 0 power until FEED_RPS and SIDE_A/SIDE_B kF are set (do the RT kF step first)");
             }
             for (int i = 0; i < 2; i++) {
-                IntakeSide s = sides[i];
-                boolean isA = i == 0;
+                IntakeModule s = sides[i];
+                IntakeModuleConfig cfg = s.getConfig();
                 double rps = s.getRPS();
                 if (wasHolding[i]) {
                     double feedTarget = IntakeConfig.FEED_RPS;
                     double dip = dipRps[i] == Double.MAX_VALUE ? rps : dipRps[i];
                     telemetry.addData("hold " + s.getSide(), "kF %.5f kP %.5f | %.2f RPS  err %.1f%%  dip %.2f (%.1f%%)  power %.2f",
-                            isA ? IntakeConfig.FEED_KF_A : IntakeConfig.FEED_KF_B, isA ? IntakeConfig.FEED_KP_A : IntakeConfig.FEED_KP_B,
+                            cfg.kF, cfg.kP,
                             rps, feedTarget > 0 ? 100 * (feedTarget - rps) / feedTarget : 0,
                             dip, feedTarget > 0 ? 100 * (feedTarget - dip) / feedTarget : 0, s.getPower());
                 } else {
@@ -189,8 +190,7 @@ public class IntakeTest extends KOpMode {
                 }
                 telemetry.addData("side " + s.getSide(), "pivot %.3f (down %.2f up %.2f) %s | power %.2f  %.0f mA  %.2f RPS",
                         s.getPivotPosition(),
-                        isA ? ModuleConfig.INTAKE_PIVOT_A_DOWN_POS : ModuleConfig.INTAKE_PIVOT_B_DOWN_POS,
-                        isA ? ModuleConfig.INTAKE_PIVOT_A_UP_POS : ModuleConfig.INTAKE_PIVOT_B_UP_POS,
+                        cfg.pivotDownPos, cfg.pivotUpPos,
                         s.isDown() ? "DOWN" : s.isUp() ? "UP" : "moving/custom",
                         s.getPower(), s.getCurrentMA(), rps);
             }

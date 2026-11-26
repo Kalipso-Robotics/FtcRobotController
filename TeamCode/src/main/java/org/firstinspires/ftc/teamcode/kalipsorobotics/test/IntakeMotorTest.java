@@ -7,25 +7,25 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullDetector;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakArray;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 
 /**
  * Hand-driven check of one intake side at a time. Pattern source: decode/calibrations/StopperCalibration (KOpMode skeleton).
+ * The stopper is closed at start (like TeleOp) so balls pack against it.
  * GP2: dpad up/down = side A/B, A = lower, Y = raise, RT = run, LT = reverse, B = flower toggle,
  * X (hold) = selected side closed loop at IntakeConfig.FEED_RPS (the shot feed; tune it in IntakeTest).
- * Flower interlock stays in Flower/IntakeSide; this only calls their methods and logs the result.
+ * Flower interlock stays in Flower/IntakeModule; this only calls their methods and logs the result.
  *
- * Also the IntakeFullDetector tuner: hold RT and feed balls in one at a time; currentMA is graphed on the Dashboard
- * (and logged). Set IntakeFullDetector.EMPTY_CURRENT_MA (running empty) and FULL_CURRENT_MA (4 balls packed) from it.
- *
- * SPIKE (motor-signal ball counting): the log line also carries t + beam-break counts as ground truth, so a logcat
- * pull can score a velocity-dip counter against BeamBreakArray offline. Remove the bb* fields when the spike ends.
+ * Also the IntakeFullDetector tuner (all thresholds in IntakeConfig, live on the Dashboard): hold RT and add one ball
+ * at a time. filteredMA is graphed; set BALL_1..4_MA a bit below each step. Packed against the closed stopper, set
+ * STALL_CURRENT_MA below that current and STALL_RPS above that RPS. "peak" is the highest filteredMA this run.
  */
 @TeleOp(name = "IntakeMotorTest", group = "Test")
 public class IntakeMotorTest extends KOpMode {
@@ -36,12 +36,14 @@ public class IntakeMotorTest extends KOpMode {
         initializeRobot();
         Intake intake = new Intake(opModeUtilities);
         FlowerMech flowerMech = intake.getFlower();
+        Stopper stopper = new Stopper(opModeUtilities);
         BeamBreakPosition.IntakeSide selected = BeamBreakPosition.IntakeSide.A;
         IntakeFullDetector fullDetector = new IntakeFullDetector();
-        BeamBreakArray beamBreaks = new BeamBreakArray(opModeUtilities); // spike: ground truth
         boolean wasRunning = false;
+        double peakFilteredMA = 0;
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
+        stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS); // balls must pack against it for the stall to show
 
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
@@ -52,11 +54,11 @@ public class IntakeMotorTest extends KOpMode {
                 selected = BeamBreakPosition.IntakeSide.B;
             }
             if (selected != previous) {
-                intake.getSide(previous).stop();
+                intake.getModule(previous).stop();
                 BeamBreakPosition.IntakeSide now = selected;
                 KLog.d(TAG, () -> "event=selectSide side=" + now);
             }
-            IntakeSide side = intake.getSide(selected);
+            IntakeModule side = intake.getModule(selected);
 
             if (kGamePad2.isButtonAFirstPressed()) {
                 side.lower();
@@ -88,36 +90,50 @@ public class IntakeMotorTest extends KOpMode {
             intake.update();
 
             long now = System.currentTimeMillis();
-            beamBreaks.update(now);
             if (running && !wasRunning) {
                 fullDetector.reset(now);
+                peakFilteredMA = 0;
             }
             wasRunning = running;
             double currentMA = side.getCurrentMA();
             double velocity = side.getVelocity();
             if (running) {
-                fullDetector.update(currentMA, now);
+                fullDetector.update(currentMA, side.getRPS(), now);
+                peakFilteredMA = Math.max(peakFilteredMA, fullDetector.getFilteredMA());
             }
             KLog.d(TAG, () -> "t=" + now + " side=" + side.getSide() + " running=" + running + " power=" + side.getPower()
                     + " currentMA=" + currentMA + " velocity=" + velocity
                     + " filteredMA=" + fullDetector.getFilteredMA() + " balls=" + fullDetector.estimateBalls()
-                    + " full=" + fullDetector.isFull() + " bbCount=" + beamBreaks.getCount()
-                    + " bbMeasured=" + beamBreaks.getMeasuredCount() + " bbReliable=" + beamBreaks.isCountReliable()
-                    + " bbOcc=" + beamBreaks.getOccupancyString());
+                    + " rps=" + side.getRPS() + " full=" + fullDetector.isFull());
 
-            telemetry.addData("side", selected);
-            telemetry.addData("pivotPos", "%.3f", side.getPivotPosition());
-            telemetry.addData("isDown", side.isDown());
+            double filteredMA = fullDetector.getFilteredMA();
+            double rps = side.getRPS();
+            String detector = !running ? "idle (hold RT)"
+                    : fullDetector.isIgnoring(now) ? "spin-up ignore"
+                    : fullDetector.isFull() ? "FULL (latched, release RT to reset)"
+                    : fullDetector.isStalling() ? "stalling " + fullDetector.stallHeldMs(now) + "/" + (long) IntakeConfig.STALL_CONFIRM_MS + "ms"
+                    : "watching";
+            telemetry.addLine("--- Full detector: " + detector + " ---");
+            telemetry.addData("balls (estimate)", fullDetector.estimateBalls());
+            telemetry.addData("mA raw / filtered / peak", "%.0f / %.0f / %.0f", currentMA, filteredMA, peakFilteredMA);
+            telemetry.addData("ball mA 1/2/3/4", "%.0f / %.0f / %.0f / %.0f",
+                    IntakeConfig.BALL_1_MA, IntakeConfig.BALL_2_MA, IntakeConfig.BALL_3_MA, IntakeConfig.BALL_4_MA);
+            telemetry.addData("stall mA", "%.0f >= %.0f  %s", filteredMA, IntakeConfig.STALL_CURRENT_MA,
+                    filteredMA >= IntakeConfig.STALL_CURRENT_MA ? "YES" : "no");
+            telemetry.addData("stall RPS", "%.1f <= %.1f  %s", rps, IntakeConfig.STALL_RPS,
+                    rps <= IntakeConfig.STALL_RPS ? "YES" : "no");
+            telemetry.addData("confirm / ignore / filter", "%.0fms / %.0fms / %.2f",
+                    IntakeConfig.STALL_CONFIRM_MS, IntakeConfig.STALL_IGNORE_MS, IntakeConfig.STALL_FILTER);
+            telemetry.addLine("--- Intake ---");
+            telemetry.addData("side / isDown / pivot", "%s / %b / %.3f", selected, side.isDown(), side.getPivotPosition());
             telemetry.addData("power", "%.2f", side.getPower());
+            telemetry.addData("RPS / feed target / kF est", "%.2f / %.2f / %.5f", rps, IntakeConfig.FEED_RPS, side.estimateKf());
+            telemetry.addData("flower down / up", "%b / %b", flowerMech.isDown(), flowerMech.isUp());
+            telemetry.addLine("GP2: dpad U/D side A/B | A lower | Y raise | RT run | LT reverse | X feed RPS | B flower");
+            // plain numbers so the Dashboard can graph them
             telemetry.addData("currentMA", currentMA);
-            telemetry.addData("filteredMA", fullDetector.getFilteredMA());
-            telemetry.addData("velocity", velocity);
-            telemetry.addData("RPS / feed target / kF est", "%.2f / %.2f / %.5f", side.getRPS(), IntakeConfig.FEED_RPS, side.estimateKf());
-            telemetry.addData("ballEstimate", fullDetector.estimateBalls());
-            telemetry.addData("full", fullDetector.isFull());
-            telemetry.addData("bbCount / reliable", "%d / %b", beamBreaks.getCount(), beamBreaks.isCountReliable());
-            telemetry.addData("flowerDown", flowerMech.isDown());
-            telemetry.addData("flowerUp", flowerMech.isUp());
+            telemetry.addData("filteredMA", filteredMA);
+            telemetry.addData("rps", rps);
             telemetry.update();
         }
         intake.stop();

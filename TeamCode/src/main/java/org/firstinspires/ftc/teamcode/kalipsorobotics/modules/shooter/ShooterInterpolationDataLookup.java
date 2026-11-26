@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig.FEED_RPS;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig.*;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
@@ -16,13 +17,15 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
 
     public static class DataPoint {
         final double distanceMM;
-        final double rps;
+        final double shooterRPS;
         final double hoodPosition;
+        final double intakeRPS;
 
-        DataPoint(double distanceMM, double rps, double hoodPosition) {
+        DataPoint(double distanceMM, double rps, double hoodPosition, double intakeRPS) {
             this.distanceMM = distanceMM;
-            this.rps = rps;
+            this.shooterRPS = rps;
             this.hoodPosition = hoodPosition;
+            this.intakeRPS = intakeRPS;
         }
     }
 
@@ -36,7 +39,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
      */
     public ShooterInterpolationDataLookup() {
         for (int i = 0; i + 2 < shooterData.length; i += 3) {
-            dataPoints.add(new DataPoint(shooterData[i], shooterData[i + 1], shooterData[i + 2]));
+            dataPoints.add(new DataPoint(shooterData[i], shooterData[i + 1], shooterData[i + 2], shooterData[i+3]));
         }
     }
 
@@ -54,17 +57,17 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
                 emptyTableLogged = true;
                 KLog.e(Shooter.TAG, "event=emptyInterpolationTable rps=" + DEFAULT_RPS + " hood=" + MIN_HOOD);
             }
-            return toParams(DEFAULT_RPS, MIN_HOOD);
+            return toParams(DEFAULT_RPS, MIN_HOOD, FEED_RPS);
         }
 
         DataPoint first = dataPoints.get(0);
         if (distanceMM <= first.distanceMM) {
-            return toParams(first.rps, first.hoodPosition);
+            return toParams(first.shooterRPS, first.hoodPosition, first.intakeRPS);
         }
 
         DataPoint last = dataPoints.get(dataPoints.size() - 1);
         if (distanceMM >= last.distanceMM) {
-            return toParams(last.rps, last.hoodPosition);
+            return toParams(last.shooterRPS, last.hoodPosition, last.intakeRPS);
         }
 
         // Find the two surrounding points
@@ -75,19 +78,20 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
             if (distanceMM >= lower.distanceMM && distanceMM <= upper.distanceMM) {
                 // Linear interpolation
                 double t = (distanceMM - lower.distanceMM) / (upper.distanceMM - lower.distanceMM);
-                double interpolatedRPS = lower.rps + t * (upper.rps - lower.rps);
+                double interpolatedShooterRPS = lower.shooterRPS + t * (upper.shooterRPS - lower.shooterRPS);
                 double interpolatedHood = lower.hoodPosition + t * (upper.hoodPosition - lower.hoodPosition);
-                return toParams(interpolatedRPS, interpolatedHood);
+                double interpolatedIntakeRPS = lower.intakeRPS + t * (upper.intakeRPS - lower.intakeRPS);
+                return toParams(interpolatedShooterRPS, interpolatedHood, interpolatedIntakeRPS);
             }
         }
 
         // Only reached if the table is not sorted by distance
-        return toParams(last.rps, last.hoodPosition);
+        return toParams(last.shooterRPS, last.hoodPosition, last.intakeRPS);
     }
 
-    private IShooterPredictor.ShooterParams toParams(double rps, double hood) {
+    private IShooterPredictor.ShooterParams toParams(double shooterRPS, double hood, double intakeRPS) {
         double clampedHood = clampHood(hood) + HOOD_INIT_OFFSET;
-        return new IShooterPredictor.ShooterParams(rps + rpsOffset, clampedHood + hoodOffset);
+        return new IShooterPredictor.ShooterParams(shooterRPS + rpsOffset, clampedHood + hoodOffset, intakeRPS);
     }
 
     /**

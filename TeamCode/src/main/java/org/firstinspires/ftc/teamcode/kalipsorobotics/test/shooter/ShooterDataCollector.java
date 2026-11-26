@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -17,7 +19,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.test.KfSweep;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
@@ -107,8 +109,8 @@ public class ShooterDataCollector extends KOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry()); // Dashboard graphs
 
         // No flower here: this OpMode only runs the intake motors
-        intake = new Intake(new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.A),
-                new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.B), null);
+        intake = new Intake(new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.A, IntakeConfig.SIDE_A),
+                new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.B, IntakeConfig.SIDE_B), null);
         stopper = new Stopper(opModeUtilities);
         Shooter shooter = new Shooter(opModeUtilities);
         PIDFController pidf = shooter.getShooterMotor().getPIDFController();

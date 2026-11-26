@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.PID.PIDFController;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -17,20 +16,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 /**
  * One side of the double-sided intake (modeled on Stopper). One motor drives this side's intake
  * wheels and its two transfer wheel sets; one servo pivots the side down to the ground or up.
- * There are two instances, A (front, +X) and B (back). The hardware is identical, so the only
- * per-side difference here is which device names and config positions are read.
+ * There are two instances, A (front, +X) and B (back). The hardware is identical; everything that differs per
+ * side (device names, motor direction, pivot positions, feed gains) is in its IntakeModuleConfig.
  *
  * Flower interlock: if the Flower is on this side, raise() raises the flower first and leaves the
  * pivot down until the flower is up. The pending raise then finishes on a later raise() or update().
  */
-public class IntakeSide {
+public class IntakeModule {
     public static final String TAG = "Robot_Intake";
 
     private final BeamBreakPosition.IntakeSide side;
     private final DcMotor motor;
     private final KServo pivot;
-    private final double downPos;
-    private final double upPos;
+    private final IntakeModuleConfig cfg;
 
     private FlowerMech flowerMech = null;
     private boolean isCommandedDown = false;
@@ -38,25 +36,25 @@ public class IntakeSide {
     private double power = 0;
     private final PIDFController feedController;
 
-    public IntakeSide(OpModeUtilities opModeUtilities, BeamBreakPosition.IntakeSide side) {
+    public IntakeModule(OpModeUtilities opModeUtilities, BeamBreakPosition.IntakeSide side, IntakeModuleConfig cfg) {
         this(side,
-                opModeUtilities.getHardwareMap().dcMotor.get(side == BeamBreakPosition.IntakeSide.A ? "intakeFront" : "intakeBack"),
-                new KServo(opModeUtilities.getHardwareMap().servo.get(side == BeamBreakPosition.IntakeSide.A ? "intakePivot1" : "intakePivot2"),
-                        KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false)); // TODO-measure: servo model, speed and range
+                opModeUtilities.getHardwareMap().dcMotor.get(cfg.motorName),
+                new KServo(opModeUtilities.getHardwareMap().servo.get(cfg.pivotName),
+                        KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false), // TODO-measure: servo model, speed and range
+                cfg);
     }
 
     /** Direct-injection constructor, for hardware you have already pulled out of the hardware map (unit tests). */
-    public IntakeSide(BeamBreakPosition.IntakeSide side, DcMotor motor, KServo pivot) {
+    public IntakeModule(BeamBreakPosition.IntakeSide side, DcMotor motor, KServo pivot, IntakeModuleConfig cfg) {
         this.side = side;
         this.motor = motor;
         this.pivot = pivot;
-        boolean isA = side == BeamBreakPosition.IntakeSide.A;
-        this.downPos = isA ? ModuleConfig.INTAKE_PIVOT_A_DOWN_POS : ModuleConfig.INTAKE_PIVOT_B_DOWN_POS;
-        this.upPos = isA ? ModuleConfig.INTAKE_PIVOT_A_UP_POS : ModuleConfig.INTAKE_PIVOT_B_UP_POS;
+        this.cfg = cfg;
         this.feedController = PIDFController.flywheel("Intake_" + side, 0, 0, 0, 0).build(); // gains read per call in runRPS
-        motor.setDirection(isA ? ModuleConfig.INTAKE_MOTOR_A_DIRECTION : ModuleConfig.INTAKE_MOTOR_B_DIRECTION);
+        motor.setDirection(cfg.direction);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Start raised: the side is spring loaded to the ground, so lowered would stick out past the starting size.
-        pivot.setTargetPosition(upPos);
+        pivot.setTargetPosition(cfg.pivotUpPos);
         KLog.d(TAG, () -> "side=" + side + " event=init pivot=up");
     }
 
@@ -77,7 +75,7 @@ public class IntakeSide {
             return;
         }
         isCommandedDown = true;
-        pivot.setTargetPosition(downPos);
+        pivot.setTargetPosition(cfg.pivotDownPos);
         KLog.d(TAG, () -> "side=" + side + " event=lower");
     }
 
@@ -96,7 +94,7 @@ public class IntakeSide {
         }
         isRaisePending = false;
         isCommandedDown = false;
-        pivot.setTargetPosition(upPos);
+        pivot.setTargetPosition(cfg.pivotUpPos);
         KLog.d(TAG, () -> "side=" + side + " event=raise");
     }
 
@@ -126,15 +124,14 @@ public class IntakeSide {
 
     /**
      * Closed loop on this side's encoder, forward only, in motor RPS: power = kF * target + kP * error, times
-     * KMotor.voltageScale (same battery compensation as the shooter). Gains are this side's IntakeConfig.FEED_KF_* /
-     * FEED_KP_* (power per RPS), read every call so Dashboard edits apply live. Call every loop; run() ends it.
+     * KMotor.voltageScale (same battery compensation as the shooter). Gains are this side's config kF / kP
+     * (power per RPS), read every call so Dashboard edits apply live. Call every loop; run() ends it.
      */
     public void runRPS(double targetRPS) {
-        boolean isA = side == BeamBreakPosition.IntakeSide.A;
-        runRPS(targetRPS, isA ? IntakeConfig.FEED_KF_A : IntakeConfig.FEED_KF_B, isA ? IntakeConfig.FEED_KP_A : IntakeConfig.FEED_KP_B);
+        runRPS(targetRPS, cfg.kF, cfg.kP);
     }
 
-    /** runRPS with these gains instead of IntakeConfig's (gain tuning: MotorPowerRPSDataCollector). Returns the RPS it read. */
+    /** runRPS with these gains instead of the config's (gain tuning: MotorPowerRPSDataCollector). Returns the RPS it read. */
     public double runRPS(double targetRPS, double kf, double kp) {
         feedController.setKf(kf);
         feedController.setKp(kp);
@@ -170,7 +167,7 @@ public class IntakeSide {
      * Flower is not up (logs event=blocked, returns false). Any position other than DOWN counts as "not down".
      */
     public boolean setPivotPosition(double position) {
-        boolean toDown = Math.abs(position - downPos) < 1e-6; // stepped values miss DOWN by ~1e-16
+        boolean toDown = Math.abs(position - cfg.pivotDownPos) < 1e-6; // stepped values miss DOWN by ~1e-16
         if (isCommandedDown && !toDown && flowerMech != null && !flowerMech.isUp()) {
             KLog.e(TAG, "side=" + side + " event=blocked reason=flowerNotUp pos=" + position);
             return false;
@@ -184,6 +181,10 @@ public class IntakeSide {
 
     public BeamBreakPosition.IntakeSide getSide() {
         return side;
+    }
+
+    public IntakeModuleConfig getConfig() {
+        return cfg;
     }
 
     /** Last commanded pivot servo position, for telemetry. */

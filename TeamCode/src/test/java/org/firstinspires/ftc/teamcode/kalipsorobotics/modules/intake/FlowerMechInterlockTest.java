@@ -36,7 +36,7 @@ public class FlowerMechInterlockTest {
     private final double downPower = IntakeConfig.FLOWER_DOWN_POWER;
     private final double upPower = IntakeConfig.FLOWER_UP_POWER;
     private DcMotor motorA;
-    private IntakeSide sideA;
+    private IntakeModule sideA;
     private FlowerMech flowerMech;
 
     @Before
@@ -48,7 +48,7 @@ public class FlowerMechInterlockTest {
         IntakeConfig.FLOWER_UP_POWER = 0.5;
         flowerServo = fakeCRServo();
         motorA = fakeMotor();
-        sideA = new IntakeSide(BeamBreakPosition.IntakeSide.A, motorA, new KServo(pivotServoA, FAST_DEG_PER_SEC, 255, 0, false));
+        sideA = new IntakeModule(BeamBreakPosition.IntakeSide.A, motorA, new KServo(pivotServoA, FAST_DEG_PER_SEC, 255, 0, false), IntakeConfig.SIDE_A);
         flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         waitUntil(flowerMech::isUp);
     }
@@ -87,13 +87,13 @@ public class FlowerMechInterlockTest {
 
         sideA.raise();
         assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS, pivotServoA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotServoA.getPosition(), 1e-9);
         assertFalse("flower must not go back down while its side is raising", flowerMech.lower());
 
         // No further raise() from the caller: update() alone finishes the raise once the flower is up.
         waitUntil(() -> {
             sideA.update();
-            return pivotServoA.getPosition() == ModuleConfig.INTAKE_PIVOT_A_UP_POS;
+            return pivotServoA.getPosition() == IntakeConfig.SIDE_A.pivotUpPos;
         });
         assertTrue(flowerMech.isUp());
     }
@@ -101,12 +101,12 @@ public class FlowerMechInterlockTest {
     @Test
     public void sideWithoutFlower_raisesImmediately() throws InterruptedException {
         Servo pivotServoB = fakeServo();
-        IntakeSide sideB = new IntakeSide(BeamBreakPosition.IntakeSide.B, fakeMotor(), new KServo(pivotServoB, FAST_DEG_PER_SEC, 255, 0, false));
+        IntakeModule sideB = new IntakeModule(BeamBreakPosition.IntakeSide.B, fakeMotor(), new KServo(pivotServoB, FAST_DEG_PER_SEC, 255, 0, false), IntakeConfig.SIDE_B);
         sideB.lower();
         waitUntil(sideB::isDown);
 
         sideB.raise();
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotServoB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotServoB.getPosition(), 1e-9);
         assertFalse(sideB.isDown());
     }
 
@@ -142,12 +142,12 @@ public class FlowerMechInterlockTest {
         waitUntil(flowerMech::isDown);
 
         assertFalse(sideA.setPivotPosition(0.5));
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS, pivotServoA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotServoA.getPosition(), 1e-9);
     }
 
     @Test
     public void setPivotPosition_movesAndKeepsDownFlagInSync() throws InterruptedException {
-        assertTrue(sideA.setPivotPosition(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS));
+        assertTrue(sideA.setPivotPosition(IntakeConfig.SIDE_A.pivotDownPos));
         waitUntil(sideA::isDown);
         assertTrue(sideA.setPivotPosition(0.5));
         assertEquals(0.5, pivotServoA.getPosition(), 1e-9);

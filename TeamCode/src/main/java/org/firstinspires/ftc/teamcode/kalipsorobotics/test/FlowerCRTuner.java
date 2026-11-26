@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 
@@ -33,7 +33,7 @@ public class FlowerCRTuner extends KOpMode {
         initializeRobot();
         Intake intake = new Intake(opModeUtilities);
         FlowerMech flower = intake.getFlower();
-        IntakeSide side = intake.getSide(ModuleConfig.FLOWER_SIDE);
+        IntakeModule side = intake.getModule(ModuleConfig.FLOWER_SIDE);
         ElapsedTime sinceCommand = new ElapsedTime();
         boolean manual = false;
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());

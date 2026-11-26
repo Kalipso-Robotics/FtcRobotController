@@ -10,17 +10,19 @@ public interface IShooterPredictor {
      * Result containing shooter parameters.
      */
     class ShooterParams {
-        public final double rps;
+        public final double shooterRPS;
         public final double hoodPosition;
+        public final double intakeRPS;
 
-        public ShooterParams(double rps, double hoodPosition) {
-            this.rps = rps;
+        public ShooterParams(double shooterRPS, double hoodPosition, double intakeRPS) {
+            this.shooterRPS = shooterRPS;
             this.hoodPosition = hoodPosition;
+            this.intakeRPS = intakeRPS;
         }
 
         @Override
         public String toString() {
-            return String.format("ShooterParams(rps=%.2f, hood=%.4f)", rps, hoodPosition);
+            return String.format("ShooterParams(rps=%.2f, hood=%.4f)", shooterRPS, hoodPosition);
         }
     }
 
