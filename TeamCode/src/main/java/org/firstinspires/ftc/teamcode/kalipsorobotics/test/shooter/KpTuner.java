@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Finds the flywheel kP (MotorPowerRPSDataCollector, button B). At each target RPS it runs step-response trials with a
+ * Finds a velocity loop kP (MotorPowerRPSDataCollector: flywheel, intake A, intake B). At each target RPS it runs step-response trials with a
  * rising kP (x RATIO) until one oscillates, bisects between the last calm kP and the first oscillating one, then tries one
  * kP on each side of the fastest.
  * That RPS's best kP is the fastest settling calm trial; within TIE_MS of the fastest the lowest kP wins (calmer).
