@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.junit.Test;
 
 public class FieldConfigTest {
-    private static final double FIELD = 3657.6;
+    private static final double FIELD = 142 * 25.4;
 
     @Test
     public void nearestFlowerPicksTheClosest() {

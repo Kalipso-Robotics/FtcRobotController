@@ -47,7 +47,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = " TeleOp")
 public class TeleOp extends KOpMode {
     // Robot-centric is the default drive mode. Flip to true to drive field-oriented instead.
-    private static final boolean USE_FIELD_ORIENTED_DRIVE = false;
+    private static final boolean USE_FIELD_ORIENTED_DRIVE = true;
     // TEMP: Limelight unplugged. false = no AprilTag thread, no rezero after shots, GP2 left-stick zero does nothing.
     private static final boolean USE_LIMELIGHT = false;
 
@@ -84,6 +84,7 @@ public class TeleOp extends KOpMode {
     // Button state variables
     private boolean drivingSticksActive = false;
     private boolean slowDrivePressed = false;
+    private boolean resetDriveForwardPressed = false;
     private boolean shootAllActionPressed = false;
     private boolean intakeStopPressed = false;
     private boolean intakeReversePressed = false;
@@ -209,6 +210,8 @@ public class TeleOp extends KOpMode {
             passButtonPressed = kGamePad1.isButtonYFirstPressed();
 
             slowDrivePressed = kGamePad1.isRightBumperPressed();
+            // Field-oriented: point the robot away from the driver and press A. Not with Start: Start+A pairs GP1.
+            resetDriveForwardPressed = kGamePad1.isButtonAFirstPressed() && !kGamePad1.isStartButtonPressed();
 
             shootAllActionPressed = kGamePad1.isLeftBumperFirstPressed();
             stopShooterPressed = kGamePad1.isLeftTriggerFirstPressed();
@@ -230,7 +233,8 @@ public class TeleOp extends KOpMode {
 
 
             zeroLimelightPressed = kGamePad2.isLeftStickButtonFirstPressed();
-            zeroCornerPressed = kGamePad2.isRightStickButtonFirstPressed();
+            // Robot parked in the loading-zone corner, facing +x. Not while Start is held: Start+B pairs a controller.
+            zeroCornerPressed = kGamePad2.isButtonBFirstPressed() && !kGamePad2.isStartButtonPressed();
             zeroFarCornerPressed = kGamePad2.isBackButtonFirstPressed();
 
             intakeStopPressed = kGamePad2.isRightTriggerPressed();
@@ -276,8 +280,7 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Intake Current Rps A ", "%.2f",intake.getRPSSideA());
             telemetry.addData("Intake Current Rps B ", "%.2f",intake.getRPSSideB());
             telemetry.addData("Hive Cell ", hiveTarget == TARGET_POINT_1 ? "A" : "B");
-            telemetry.addData("Up CELL (seen) ", "%s (%.1fs ago)%s", SharedData.getHiveUpCell(), SharedData.getHiveUpCellAgeMs() / 1000,
-                    isOurCellDown() ? " -> LB PASSES" : "");
+            telemetry.addData("Up CELL (seen) ", upCellText());
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());
             telemetry.addData("Rps Offset ", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset ", "%.2f", ShooterInterpolationConfig.hoodOffset);
@@ -297,8 +300,7 @@ public class TeleOp extends KOpMode {
             KLog.d("Intake Current Rps A", () -> String.format("%.2f", intake.getRPSSideA()));
             KLog.d("Intake Current Rps B", () -> String.format("%.2f", intake.getRPSSideB()));
             KLog.d("Hive Cell", () -> (hiveTarget == TARGET_POINT_1 ? "A" : "B"));
-            KLog.d("Up CELL (seen)", () -> String.format("%s (%.1fs ago)%s", SharedData.getHiveUpCell(), SharedData.getHiveUpCellAgeMs() / 1000,
-                    isOurCellDown() ? " -> LB PASSES" : ""));
+            KLog.d("Up CELL (seen)", this::upCellText);
             KLog.d("Distance", () -> String.format("%.0f", shooterRun.getDistanceMM()));
             KLog.d("Rps Offset", () -> String.format("%.2f", ShooterInterpolationConfig.rpsOffset));
             KLog.d("Hood Offset", () -> String.format("%.2f", ShooterInterpolationConfig.hoodOffset));
@@ -311,6 +313,9 @@ public class TeleOp extends KOpMode {
         cleanupRobot();
     }
     private void handleDriving() {
+        if (resetDriveForwardPressed && driveAction instanceof FieldOrientedDriveAction) {
+            ((FieldOrientedDriveAction) driveAction).setForwardToCurrentHeading();
+        }
 
         if (slowDrivePressed) {
             driveAction.setPowerCoefficient(0.3);
@@ -590,6 +595,13 @@ public class TeleOp extends KOpMode {
      * ponytail: trusts the last sighting (a TIP seen from anywhere updates it); a TIP nobody saw leaves it stale until
      * the camera sees a CELL again. Telemetry shows the age; add a freshness limit if that bites.
      */
+    /** Age is +Infinity until a camera has reported the up Cell (never, while USE_LIMELIGHT is false). */
+    private String upCellText() {
+        double ageMs = SharedData.getHiveUpCellAgeMs();
+        if (Double.isInfinite(ageMs)) return "never seen" + (USE_LIMELIGHT ? "" : " (Limelight off)");
+        return String.format("%s (%.1fs ago)%s", SharedData.getHiveUpCell(), ageMs / 1000, isOurCellDown() ? " -> LB PASSES" : "");
+    }
+
     private boolean isOurCellDown() {
         HiveTagLocalizer.Cell up = SharedData.getHiveUpCell();
         HiveTagLocalizer.Cell ours = hiveTarget == TARGET_POINT_1 ? HiveTagLocalizer.Cell.A : HiveTagLocalizer.Cell.B;

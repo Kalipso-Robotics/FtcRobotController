@@ -86,10 +86,15 @@ public abstract class KOpMode extends LinearOpMode {
     protected void waitForStartPrecomputingPaths() {
         while (!isStarted() && !isStopRequested()) {
             AdaptivePurePursuitAction.runPrecomputeStepForAll();
+            initLoop();
             telemetry.addData("paths precomputed", AdaptivePurePursuitAction.allPrecomputeDone());
             telemetry.update();
             idle();
         }
+    }
+
+    /** Runs every loop of waitForStartPrecomputingPaths(), before START. Override for init-time work (e.g. turret aim). */
+    protected void initLoop() {
     }
 
     /**

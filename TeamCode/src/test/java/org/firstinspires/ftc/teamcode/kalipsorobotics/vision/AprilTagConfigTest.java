@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
 import org.junit.Test;
 
 public class AprilTagConfigTest {
-    private static final double FIELD = 3657.6;
+    private static final double FIELD = 142 * 25.4;
 
     @Test
     public void idsPerAlliance() {
@@ -56,20 +56,19 @@ public class AprilTagConfigTest {
         assertTrue(AprilTagConfig.tagFieldXYZ(42, true, AllianceColor.RED)[0] > AprilTagConfig.tagFieldXYZ(30, true, AllianceColor.RED)[0]);
     }
 
-    /** Tag centres measured in the official field CAD (2026-11-23), Red frame. x/across come from the manual. */
+    /** Tag centres from the official BIOBUZZ field CAD (2026-11-26), Red frame, shifted by (FIELD - 3585.7) / 2 for our field size. */
     @Test
     public void tagCentresMatchFieldCad() {
-        double[] xs = {1340.1, 1435.3, 1575.0, 1670.3};
+        double d = (FIELD - 3585.7) / 2;
+        double[] xs = {1304.1 + d, 1399.4 + d, 1539.1 + d, 1634.3 + d};
         for (int i = 0; i < 4; i++) {
             double[] up = AprilTagConfig.tagFieldXYZ(34 + i, true, AllianceColor.RED);
             double[] down = AprilTagConfig.tagFieldXYZ(34 + i, false, AllianceColor.RED);
-            assertEquals(xs[i], up[0], 0.5);
-            assertEquals(2156.2, up[1], 0.5);
-            assertEquals(1261.5, up[2], 0.5);
-            assertEquals(xs[i], down[0], 0.5);
-            assertEquals(2118.2, down[1], 0.5);
-            assertEquals(905.4, down[2], 0.5);
+            assertArrayEquals(new double[]{xs[i], 2125.8 + d, 1264.6}, up, 0.2);
+            assertArrayEquals(new double[]{xs[i], 2087.7 + d, 902.2}, down, 0.2);
         }
+        assertArrayEquals(new double[]{1634.3 + d, 1460.0 + d, 1264.6}, AprilTagConfig.tagFieldXYZ(30, true, AllianceColor.RED), 0.2);
+        assertArrayEquals(new double[]{2281.6 + d, 1498.0 + d, 902.2}, AprilTagConfig.tagFieldXYZ(42, false, AllianceColor.RED), 0.2);
     }
 
     @Test

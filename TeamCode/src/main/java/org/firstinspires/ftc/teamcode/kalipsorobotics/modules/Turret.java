@@ -76,11 +76,6 @@ public class Turret {
 
     /** Points the turret, clamped to the reachable range. Logs a fault once each time a target goes out of range. */
     public void setAngleDeg(double turretDeg) {
-        setAngleDeg(turretDeg, TurretConfig.SERVO_RANGE_DEG);
-    }
-
-    /** Same, with an assumed servo range instead of TurretConfig.SERVO_RANGE_DEG (TurretServoTest range check). */
-    public void setAngleDeg(double turretDeg, double servoRangeDeg) {
         double clampedDeg = clampTurretDeg(turretDeg);
         boolean wasClamped = isClamped;
         isClamped = clampedDeg != turretDeg;
@@ -90,7 +85,7 @@ public class Turret {
             KLog.d(TAG, () -> String.format("event=inRange targetDeg=%.1f", clampedDeg));
         }
         commandedDeg = clampedDeg;
-        double servoPos = servoPosFromTurretDeg(clampedDeg, servoRangeDeg);
+        double servoPos = servoPosFromTurretDeg(clampedDeg);
         boolean changed = Math.abs(servoPos - turretServo.getPosition()) > 1e-6;
         busyUntilMs = Math.max(busyUntilMs, System.currentTimeMillis() + turretServo.estimateFinishTimeMs(turretServo.getPosition(), servoPos));
         turretServo.setTargetPosition(servoPos);
@@ -133,12 +128,8 @@ public class Turret {
     }
 
     public static double servoPosFromTurretDeg(double turretDeg) {
-        return servoPosFromTurretDeg(turretDeg, TurretConfig.SERVO_RANGE_DEG);
-    }
-
-    public static double servoPosFromTurretDeg(double turretDeg, double servoRangeDeg) {
         double servoDeg = turretDeg / TurretConfig.TURRET_DEG_PER_SERVO_DEG;
-        return KServo.clampServoPos(TurretConfig.SERVO_ZERO_POS + TurretConfig.SERVO_DIRECTION * servoDeg / servoRangeDeg);
+        return KServo.clampServoPos(TurretConfig.SERVO_ZERO_POS + TurretConfig.SERVO_DIRECTION * servoDeg / TurretConfig.SERVO_RANGE_DEG);
     }
 
     public static double turretDegFromServoPos(double servoPos) {

@@ -43,7 +43,7 @@ import java.util.List;
 
 @Autonomous
 public class RedSmartSoloAuto extends KOpMode {
-    final Position ROBOT_START_POS = new Position(973, 3303, 90);
+    final Position ROBOT_START_POS = new Position(973, 3303, Math.toRadians(-90)); // theta is RADIANS; faces -y like ThreeTipSoloAuto
     KActionSet redSmartSoloAuto;
     DriveTrain driveTrain;
     Intake intake;

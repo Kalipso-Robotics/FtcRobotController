@@ -61,9 +61,9 @@ public class PathPlanningPickupDemoTest {
         System.out.println("--- AUTO (stay on own side) ---");
         show("AUTO: ball on the opposing side", auto, robot, new Point(2560, 1800), PickupPlan.Reason.OPPOSING_SIDE);
         show("AUTO: ring ball on own side", auto, robot, new Point(1130, 1800), PickupPlan.Reason.OK);
-        show("AUTO: 29 mm from the midline (pulls in)", auto, new Point(500, 3000), new Point(1800, 3000), PickupPlan.Reason.OK);
+        show("AUTO: 29 mm from the midline (pulls in)", auto, new Point(500, 3000), new Point(1774, 3000), PickupPlan.Reason.OK);
         show("ball in a field corner", teleop, robot, new Point(30, 30), PickupPlan.Reason.NO_APPROACH);
-        show("AUTO: 300 mm from the midline", auto, new Point(500, 3000), new Point(1529, 3000), PickupPlan.Reason.OK);
+        show("AUTO: 300 mm from the midline", auto, new Point(500, 3000), new Point(1503, 3000), PickupPlan.Reason.OK);
 
         System.out.println("--- ten pictured cases ---");
         double mid = 3657.6 / 2;

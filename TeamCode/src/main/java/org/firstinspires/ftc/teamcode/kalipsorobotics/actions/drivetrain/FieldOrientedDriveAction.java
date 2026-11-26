@@ -20,6 +20,8 @@ public class FieldOrientedDriveAction implements DriveController {
     private final DcMotor leftEncoder;
 
     private double powerCoefficient = 1;
+    // Odometry heading (rad, CCW) the driver calls "stick up". 0 = facing +x, the corner-zero heading.
+    private double forwardHeadingRad = 0;
 
     private final double[] driveTrainPower = new double[4];
 
@@ -114,8 +116,13 @@ public class FieldOrientedDriveAction implements DriveController {
      * IMU yaw: its hub orientation is still the DECODE mount and it resets at init. Odometry theta is clockwise-positive;
      * the rotation below expects CCW like the IMU, hence the minus.
      */
-    private static double botHeadingRad() {
-        return -SharedData.getOdometryWheelIMUPosition().getTheta();
+    private double botHeadingRad() {
+        return -SharedData.getOdometryWheelIMUPosition().getTheta() - forwardHeadingRad;
+    }
+
+    /** Makes the direction the robot faces right now "stick up". Drive-only: odometry and the turret are untouched. */
+    public void setForwardToCurrentHeading() {
+        forwardHeadingRad = -SharedData.getOdometryWheelIMUPosition().getTheta();
     }
 
     @Override

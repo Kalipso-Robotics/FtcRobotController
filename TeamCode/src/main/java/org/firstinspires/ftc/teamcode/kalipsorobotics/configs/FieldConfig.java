@@ -12,8 +12,12 @@ public class FieldConfig {
     // and the field is symmetric under that rotation, so the numbers below (the garden at x~220,
     // y~3582, flower A, the Hive) are correct in BOTH frames and each alliance uses them as they are.
 
+    /** Field interior, inside wall to inside wall at tile height. 142 in (team choice, 2026-11-26); the official BIOBUZZ CAD
+     *  is 3585.7 (141.17 in), manual says "approximately 144 in" +-1 in. Hive and aim points hang off FIELD_MM / 2. */
+    public final static double FIELD_MM = 142 * 25.4;
+
     private final static double SHOOT_POSITION_A_X = 1524;
-    private final static double SHOOT_POSITION_A_Y = 3657.6-609;
+    private final static double SHOOT_POSITION_A_Y = FIELD_MM - 609;
     public static Point aLaunchPoint =  new Point(SHOOT_POSITION_A_X, SHOOT_POSITION_A_Y);
 
     private final static double SHOOT_POSITION_B_X = 1524;
@@ -78,8 +82,6 @@ public class FieldConfig {
     // (3349, 182, -1 deg after driving there from CORNER_ZERO_POSE).
     public final static Position FAR_CORNER_ZERO_POSE = new Position(3315, 193, 0);
 
-    private final static double FIELD_MM = 3657.6;
-
     public final static double FLOWER_A_X = 100;  // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
     private final static double FLOWER_A_Y = 2500;
     public static Point aFlowerPoint =  new Point(FLOWER_A_X, FLOWER_A_Y);
@@ -92,8 +94,8 @@ public class FieldConfig {
     // going around the field like a pinwheel, so the field is symmetric under a 180 degree rotation,
     // not a mirror. C and D are A and B rotated 180 degrees about the field center.
     // VERIFY on the real field: the manual puts A at y = 96 in (2438.4 mm) from the audience wall.
-    public static Point cFlowerPoint =  new Point(3657.6 - FLOWER_A_X, 3657.6 - FLOWER_A_Y);
-    public static Point dFlowerPoint =  new Point(3657.6 - FLOWER_B_X, 3657.6 - FLOWER_B_Y);
+    public static Point cFlowerPoint =  new Point(FIELD_MM - FLOWER_A_X, FIELD_MM - FLOWER_A_Y);
+    public static Point dFlowerPoint =  new Point(FIELD_MM - FLOWER_B_X, FIELD_MM - FLOWER_B_Y);
 
     // Flower obstacle footprint for path planning: a square centered on each flower point.
     // The flower base is about 5 in by 4.5 in (measured by the team), so the square uses the longer
@@ -104,13 +106,13 @@ public class FieldConfig {
     // Manual G402: during AUTO, columns A-C are the red side and D-F the blue side, split at the line
     // between columns C and D. In either alliance's own frame its own side is x < MIDLINE_X (its
     // loading zone is at x = 0), and the opposing side is x > MIDLINE_X.
-    public final static double MIDLINE_X = 3657.6 / 2;
+    public final static double MIDLINE_X = FIELD_MM / 2;
 
     // Hive frame footprint (axis-aligned, un-inflated), centered on the field.
     // Game manual 9.6.1: frame is 49.46 in wide (along X) by 38.95 in deep (along Y) at its base.
     // Orientation from Figure 9-4. NOMINAL: confirm with a tape measure on the real field, and note
     // the tipped CELLS can stick out past this footprint, so keep BUFFER_MM generous.
-    private final static double HIVE_CENTER = 3657.6 / 2;
+    private final static double HIVE_CENTER = FIELD_MM / 2;
     private final static double HIVE_HALF_WIDTH_X = 49.46 * 25.4 / 2;
     private final static double HIVE_HALF_DEPTH_Y = 38.95 * 25.4 / 2;
     public final static double HIVE_MIN_X = HIVE_CENTER - HIVE_HALF_WIDTH_X;
@@ -154,6 +156,6 @@ public class FieldConfig {
     };
 
     public final static double GARDEN_X = 220;
-    private final static double GARDEN_Y = 3657.6-75;
+    private final static double GARDEN_Y = FIELD_MM - 75;
     public static Point gardenPoint =  new Point(GARDEN_X, GARDEN_Y);
 }

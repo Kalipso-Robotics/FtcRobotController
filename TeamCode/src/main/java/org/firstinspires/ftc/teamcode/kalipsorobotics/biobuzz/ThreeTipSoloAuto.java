@@ -31,7 +31,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -40,7 +39,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallVision;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
 @Autonomous
-public class RedThreeTipSoloAuto extends KOpMode {
+public class ThreeTipSoloAuto extends KOpMode {
     KActionSet redThreeTipSoloAuto;
     public DriveTrain driveTrain;
     Shooter shooter = null;
@@ -56,9 +55,10 @@ public class RedThreeTipSoloAuto extends KOpMode {
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
 
-    final Position ROBOT_START_POS = new Position(973, 3303, 90);//double check 90 or nega 90
+    final Position ROBOT_START_POS = new Position(996, 3360, Math.toRadians(-90)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
     final Point PARK_POINT = new Point(392, 1371);
     final double AUTO_LENGTH_MS = 30000;
+    static final boolean USE_LIMELIGHT = false; // nothing in this auto reads the Limelight yet; true = start it anyway
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
 
@@ -85,7 +85,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
         turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret); // follows SharedData.getTargetPoint() (Cell on the robot's end); each ShooterRun names its own Cell
-        startAprilTagDetection(turret);
+        if (USE_LIMELIGHT) startAprilTagDetection(turret);
         // No BeamBreakCountAction: the beam breaks are not on the robot yet (V2), and building it needs their sensors in the
         // hardware map. Trip 4 knows the intake is full from the intake motor current instead (VisionPickupAction).
 
@@ -103,6 +103,7 @@ public class RedThreeTipSoloAuto extends KOpMode {
         setAutoDelayAction.setName("setAutoDelayAction");
         while (!setAutoDelayAction.getIsDone() && opModeInInit()) {
             setAutoDelayAction.updateCheckDone();
+            initLoop();
         }
 
         WaitAction delayBeforeStart = new WaitAction(setAutoDelayAction.getTimeMS());
@@ -382,6 +383,12 @@ public class RedThreeTipSoloAuto extends KOpMode {
         shooter.stop();
         ballVision.close();
         cleanupRobot();
+    }
+
+    /** Aim the turret at the target from the start pose during init, so trip 0 shoots without waiting on the turret. */
+    @Override
+    protected void initLoop() {
+        turretAutoAlign.updateCheckDone();
     }
 
     /** Shooter, intake and turret off: parking only needs the drivetrain. */

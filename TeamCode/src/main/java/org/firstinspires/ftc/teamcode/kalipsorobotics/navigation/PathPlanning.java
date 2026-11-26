@@ -22,7 +22,7 @@ import java.util.Locale;
  * built once in the constructor. Only the links to the robot and the goal happen in plan().
  */
 public class PathPlanning {
-    public static final double FIELD_SIZE_MM = 3657.6;
+    public static final double FIELD_SIZE_MM = FieldConfig.FIELD_MM;
 
     /** How far past the buffered corner the detour point is pushed, on each axis. */
     public static double CORNER_OFFSET_MM = 20;

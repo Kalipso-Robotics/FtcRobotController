@@ -41,8 +41,8 @@ Ports used: 7 motors (4 drive, 2 intake, 1 shooter), 6 servos (2 pivots, flower,
 - **Git:** small milestone commits that each compile, on a branch; don't commit teammates' untracked files.
 
 ## Current TeleOp controls (`decode/TeleOp`, `TeleOpBlue` extends it)
-- **GP1:** left stick drive, right stick turn (field-oriented), RB = slow. X = flower assist (nearest Flower; any stick input cancels). Y = pass (fixed `PASS_RPS`/`PASS_HOOD`). LB = hive shot (fires only once RPS and turret are ready; aborts after `TELEOP_READY_TIMEOUT_MS`). LT = stop + flywheel off.
-- **GP2:** RT = intake stop, RB = intake reverse, B = flower toggle. Left stick button = Limelight re-zero, right stick button = corner-pose zero (`FieldConfig.CORNER_ZERO_POSE`). Dpad = turret trim, LB + dpad = hood trim.
+- **GP1:** left stick drive, right stick turn (field-oriented), RB = slow. X = flower assist (nearest Flower; any stick input cancels). Y = pass (fixed `PASS_RPS`/`PASS_HOOD`). A = field-oriented re-center (robot facing away from driver = stick up; default +x). LB = hive shot (fires only once RPS and turret are ready; aborts after `TELEOP_READY_TIMEOUT_MS`). LT = stop + flywheel off.
+- **GP2:** RT = intake stop, RB = intake reverse, left stick Y = flower. B = corner-pose zero (`FieldConfig.CORNER_ZERO_POSE`, robot in the loading-zone corner facing +x), Back = far-corner zero, left stick button = Limelight re-zero. Dpad = turret trim, LB + dpad = hood trim.
 - Intake runs from `DriveDirectionIntakeController` by default.
 - Structure: `initializeRobot()` builds modules; the loop calls `handleDriving / handleTurret / handleIntake / handleFlower / handleStopper / handleShooting / handleZeroing`. Shooting owns the intake while it runs.
 

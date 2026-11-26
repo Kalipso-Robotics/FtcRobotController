@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
 
 import com.acmerobotics.dashboard.config.Config;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
 
@@ -41,16 +42,17 @@ public class AprilTagConfig {
     }
 
     private static final double IN = 25.4;
-    private static final double FIELD_MM = 144 * IN;
-    public static final double HIVE_PIVOT_Z_MM = 43.95 * IN;
+    private static final double FIELD_MM = FieldConfig.FIELD_MM;
+    /** Pivot axis height above the tiles. Official BIOBUZZ CAD, 2026-11-26. */
+    public static final double HIVE_PIVOT_Z_MM = 1116.3;
     public static final double HIVE_TILT_RAD = Math.toRadians(30);
     /** Each HIVE's pivot is this far from the field center along x (25.5 in center to center). */
-    public static final double HIVE_X_FROM_CENTER_MM = 25.5 / 2 * IN;
-    /** Tag centerline from the pivot along the level arm. From the official field CAD (field-cad-step, Game Pieces),
-     *  2026-11-23. (Manual sum 18.84/2 + 12.04 - 9.938 + 2.75 in = 362.5 mm was 6.4 mm long.) */
-    public static final double TAG_ALONG_ARM_MM = 356.1;
-    /** CELL underside (tag face) below the pivot axis, level. From the official field CAD, 2026-11-23 (was a 2.2 in guess). */
-    public static final double TAG_BELOW_PIVOT_MM = 37.9;
+    public static final double HIVE_X_FROM_CENTER_MM = 323.6; // CAD 2026-11-26 (manual 25.5 in / 2 = 323.85)
+    /** Tag centerline from the pivot along the level arm. Official BIOBUZZ CAD + manual tag drawing, 2026-11-26
+     *  (the 2026-11-23 value 356.1 was the sheet center; the tags sit 6.3 mm toward the Cell front). */
+    public static final double TAG_ALONG_ARM_MM = 362.4;
+    /** CELL underside (printed tag face) below the pivot axis, level. Official BIOBUZZ CAD, 2026-11-26. */
+    public static final double TAG_BELOW_PIVOT_MM = 38.1;
     /** Tag centers across the cluster, in printed order (lowest ID first), cluster center = CELL centerline. */
     private static final double[] TAG_ACROSS_MM = {-6.5 * IN, -2.75 * IN, 2.75 * IN, 6.5 * IN};
 
