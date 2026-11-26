@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Proxy;
 
-/** The stopper must not open until shooter, turret AND both transfer sides are ready. */
+/** The stopper must not open until shooter, turret AND the intake (either side) are ready. */
 public class ShootAllActionTest {
     private final double rps = IntakeConfig.FEED_RPS, tol = IntakeConfig.FEED_RPS_TOLERANCE;
     private final double timeout = IntakeConfig.FEED_GATE_TIMEOUT_MS, preFeed = IntakeConfig.PRE_FEED_MS;
@@ -67,26 +67,47 @@ public class ShootAllActionTest {
     }
 
     @Test
-    public void stopperStaysClosedUntilBothTransferSidesReachRps() throws Exception {
-        stopper.open(); // left open by the driver: the shot must close it before spinning the transfer
-        rpsA[0] = 20; // A at speed, B not
+    public void stopperStaysClosedUntilAnIntakeSideReachesRps() throws Exception {
+        stopper.open(); // left open by the driver: the shot must close it before spinning the intake
+        rpsA[0] = rpsB[0] = 10; // neither side at speed
         run(200);
         assertEquals(ModuleConfig.STOPPER_SERVO_CLOSED_POS, stopperServo.getPosition(), 1e-9);
-        assertFalse(shot.getPushBall().getHasStarted());
-        assertTrue("transfer is being spun up", powerB[0] > 0);
+        assertFalse(shot.getOpenStopper().getHasStarted());
+        assertTrue("intake is being spun up", powerA[0] > 0 && powerB[0] > 0);
 
-        rpsB[0] = 19;
+        rpsB[0] = 19; // one side in tolerance is enough
         run(200);
         assertEquals(ModuleConfig.STOPPER_SERVO_OPEN_POS, stopperServo.getPosition(), 1e-9);
-        assertFalse(shot.transferTimedOut());
+        assertFalse(shot.intakeTimedOut());
     }
 
     @Test
-    public void transferHeldWhileShooterIsNotReady_andStoppedOnCancel() throws Exception {
+    public void afterIntakeTime_stopperClosesAndIntakeStops() throws Exception {
+        double intakeTime = IntakeConfig.shootTime;
+        try {
+            IntakeConfig.shootTime = 100;
+            setUp(); // rebuild: the wait reads intakeTime at construction
+            rpsA[0] = rpsB[0] = 20;
+            run(50);
+            assertEquals(ModuleConfig.STOPPER_SERVO_OPEN_POS, stopperServo.getPosition(), 1e-9);
+            assertTrue("intake feeding while open", powerA[0] > 0);
+            run(200);
+            assertEquals(ModuleConfig.STOPPER_SERVO_CLOSED_POS, stopperServo.getPosition(), 1e-9);
+            assertEquals(0, powerA[0], 1e-9);
+            assertEquals(0, powerB[0], 1e-9);
+            assertTrue(shot.getIntakeRun().getIsDone());
+            assertTrue(shot.getIsDone());
+        } finally {
+            IntakeConfig.shootTime = intakeTime;
+        }
+    }
+
+    @Test
+    public void intakeHeldWhileShooterIsNotReady_andStoppedOnCancel() throws Exception {
         rpsA[0] = rpsB[0] = 20;
         shooterInRange = false;
         run(100);
-        assertTrue(shot.getTransferReady().getIsDone());
+        assertTrue(shot.getIntakeReady().getIsDone());
         assertEquals(ModuleConfig.STOPPER_SERVO_CLOSED_POS, stopperServo.getPosition(), 1e-9);
         assertTrue(powerA[0] > 0 && powerB[0] > 0);
         shot.setIsDone(true);

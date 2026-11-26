@@ -11,8 +11,15 @@ public class IntakeStop extends Action {
 
     IntakeFullAction intakeFullAction;
 
+    IntakeRun intakeRun;
+
     public IntakeStop(Intake intake) {
         this.intake = intake;
+    }
+
+    /** Stops an IntakeRun (so it is done and stops re-commanding RPS) and the intake with it. */
+    public IntakeStop(IntakeRun intakeRun) {
+        this.intakeRun = intakeRun;
     }
 
     public IntakeStop(IntakeFullAction intakeFullAction) {
@@ -27,6 +34,9 @@ public class IntakeStop extends Action {
         }
         if (intake != null) {
             intake.stop();
+        }
+        if (intakeRun != null) {
+            intakeRun.stop();
         }
         if (intakeFullAction != null) {
             intakeFullAction.stopAndSetDone();

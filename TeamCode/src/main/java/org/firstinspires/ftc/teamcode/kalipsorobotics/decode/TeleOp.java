@@ -202,7 +202,7 @@ public class TeleOp extends KOpMode {
                 stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                 hasClosedStopperInnit = true;
             }
-            // ========== READ ALL INPUTS (makes it clear what buttons do) ==========
+            // ===================Driver 1======================
             drivingSticksActive = kGamePad1.isAnyStickActive();
 
             flowerAssistPressed = kGamePad1.isButtonXFirstPressed();
@@ -271,8 +271,10 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Intake side", intakeController.getSelectedSide());
             telemetry.addData("Intake full", intakeController.isFull()); // motor stall, no beam breaks (IntakeFullDetector)
             telemetry.addData("Flower power", "%.2f", intake.getFlower().getPower());
-            telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
-            telemetry.addData("Current RPS ", "%.2f", shooterRun.getCurrentRPS());
+            telemetry.addData("Shooter Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
+            telemetry.addData("Shooter Current RPS ", "%.2f", shooterRun.getCurrentRPS());
+            telemetry.addData("Intake Current Rps A ", "%.2f",intake.getRPSSideA());
+            telemetry.addData("Intake Current Rps B ", "%.2f",intake.getRPSSideB());
             telemetry.addData("Hive Cell ", hiveTarget == TARGET_POINT_1 ? "A" : "B");
             telemetry.addData("Up CELL (seen) ", "%s (%.1fs ago)%s", SharedData.getHiveUpCell(), SharedData.getHiveUpCellAgeMs() / 1000,
                     isOurCellDown() ? " -> LB PASSES" : "");
@@ -282,22 +284,33 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Turret Offset Deg ", "%.1f", TurretConfig.TURRET_OFFSET_DEG);
             telemetry.addLine("Turret Mode: " + turretAutoAlignTeleOp.getTurretRunMode());
             telemetry.addData("Delta Heading (Turret)", turretAutoAlignTeleOp.getDeltaAngleDeg());
-            telemetry.addData("Delta RPS (Shooter)", shooterRun.getTargetRPS() - shooterRun.getCurrentRPS());            telemetry.update();
+            telemetry.addData("Delta RPS (Shooter)", shooterRun.getTargetRPS() - shooterRun.getCurrentRPS());
+            // Same values as the telemetry above, to LogCat (tag = caption). Lambdas: only built when KLog is on.
+            KLog.d("Odometry", () -> SharedData.getOdometryWheelIMUPosition().toCompactString());
+            KLog.d("Shot", () -> String.valueOf(shootCount));
+            KLog.d("READY", () -> String.valueOf(shooterRun.isWithinRange() && turretAutoAlignTeleOp.isWithinRange()));
+            KLog.d("Intake side", () -> String.valueOf(intakeController.getSelectedSide()));
+            KLog.d("Intake full", () -> String.valueOf(intakeController.isFull()));
+            KLog.d("Flower power", () -> String.format("%.2f", intake.getFlower().getPower()));
+            KLog.d("Shooter Target Rps", () -> String.format("%.2f Target Hood %.2f", shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition()));
+            KLog.d("Shooter Current RPS", () -> String.format("%.2f", shooterRun.getCurrentRPS()));
+            KLog.d("Intake Current Rps A", () -> String.format("%.2f", intake.getRPSSideA()));
+            KLog.d("Intake Current Rps B", () -> String.format("%.2f", intake.getRPSSideB()));
+            KLog.d("Hive Cell", () -> (hiveTarget == TARGET_POINT_1 ? "A" : "B"));
+            KLog.d("Up CELL (seen)", () -> String.format("%s (%.1fs ago)%s", SharedData.getHiveUpCell(), SharedData.getHiveUpCellAgeMs() / 1000,
+                    isOurCellDown() ? " -> LB PASSES" : ""));
+            KLog.d("Distance", () -> String.format("%.0f", shooterRun.getDistanceMM()));
+            KLog.d("Rps Offset", () -> String.format("%.2f", ShooterInterpolationConfig.rpsOffset));
+            KLog.d("Hood Offset", () -> String.format("%.2f", ShooterInterpolationConfig.hoodOffset));
+            KLog.d("Turret Offset Deg", () -> String.format("%.1f", TurretConfig.TURRET_OFFSET_DEG));
+            KLog.d("Turret Mode", () -> String.valueOf(turretAutoAlignTeleOp.getTurretRunMode()));
+            KLog.d("Delta Heading (Turret)", () -> String.valueOf(turretAutoAlignTeleOp.getDeltaAngleDeg()));
+            KLog.d("Delta RPS (Shooter)", () -> String.valueOf(shooterRun.getTargetRPS() - shooterRun.getCurrentRPS()));
+            telemetry.update();
         }
         cleanupRobot();
     }
     private void handleDriving() {
-
-        if (flowerAssist != null && !isPending(flowerAssist)) {
-            endFlowerAssist(); // finished or failed by itself
-        }
-        if (flowerAssistPressed && !isPending(flowerAssist) && !shotOrPassPending()) {
-            Point flower = FieldConfig.nearestFlower(new Position(SharedData.getOdometryWheelIMUPosition()).toPoint());
-            flowerAssist = new AutoToBallsPathingAction(driveTrain, stopper, intake, FieldConfig.flowerPilePoint(flower), false, flower);
-            flowerAssist.setName("FlowerAssist");
-            setLastMoveAction(flowerAssist);
-            KLog.d("TeleOp_Flower", () -> "event=assist flower=" + flower);
-        }
 
         if (slowDrivePressed) {
             driveAction.setPowerCoefficient(0.3);
@@ -315,6 +328,18 @@ public class TeleOp extends KOpMode {
         } else if (!isPending(flowerAssist)) {
             driveTrain.setPower(0);
         }
+
+        if (flowerAssist != null && !isPending(flowerAssist)) {
+            endFlowerAssist(); // finished or failed by itself
+        }
+        if (flowerAssistPressed && !isPending(flowerAssist) && !shotOrPassPending()) {
+            Point flower = FieldConfig.nearestFlower(new Position(SharedData.getOdometryWheelIMUPosition()).toPoint());
+            flowerAssist = new AutoToBallsPathingAction(driveTrain, stopper, intake, FieldConfig.flowerPilePoint(flower), false, flower);
+            flowerAssist.setName("FlowerAssist");
+            setLastMoveAction(flowerAssist);
+            KLog.d("TeleOp_Flower", () -> "event=assist flower=" + flower);
+        }
+
     }
 
     private void endFlowerAssist() {

@@ -136,28 +136,35 @@ public class IntakeActionsTest {
     }
 
     @Test
-    public void transferReady_doneWhenBothSidesInTolerance_elseTimesOut() throws Exception {
-        double rps = IntakeConfig.FEED_RPS, tol = IntakeConfig.FEED_RPS_TOLERANCE, timeout = IntakeConfig.FEED_GATE_TIMEOUT_MS;
+    public void intakeReady_doneWhenEitherSideInTolerance_elseTimesOut() throws Exception {
+        double tol = IntakeConfig.FEED_RPS_TOLERANCE, timeout = IntakeConfig.FEED_GATE_TIMEOUT_MS;
         try {
-            IntakeConfig.FEED_RPS = 20;
             IntakeConfig.FEED_RPS_TOLERANCE = 1.5;
             IntakeConfig.FEED_GATE_TIMEOUT_MS = 100;
-            IntakeReady ready = new IntakeReady(new Intake(new VelocityRig(A, 19).side, new VelocityRig(B, 21.4).side, null));
+            IntakeRun run = new IntakeRun(new Intake(new VelocityRig(A, 10).side, new VelocityRig(B, 21.4).side, null), 20);
+            IntakeReady ready = new IntakeReady(run);
+            run.updateCheckDone();
             ready.updateCheckDone();
-            assertTrue(ready.getIsDone());
+            assertTrue("B in tolerance is enough", ready.getIsDone());
             assertFalse(ready.timedOut());
 
             VelocityRig slowB = new VelocityRig(B, 17);
-            IntakeReady stuck = new IntakeReady(new Intake(new VelocityRig(A, 20).side, slowB.side, null));
+            IntakeRun stuckRun = new IntakeRun(new Intake(new VelocityRig(A, 17).side, slowB.side, null), 20);
+            IntakeReady stuck = new IntakeReady(stuckRun);
+            stuckRun.updateCheckDone();
             stuck.updateCheckDone();
-            assertFalse("B out of tolerance: keeps waiting", stuck.getIsDone());
-            assertTrue("holds the feed RPS while waiting", slowB.power() > 0);
+            assertFalse("both out of tolerance: keeps waiting", stuck.getIsDone());
+            assertTrue("IntakeRun holds the RPS while waiting", slowB.power() > 0);
             Thread.sleep(120);
+            stuckRun.updateCheckDone();
             stuck.updateCheckDone();
             assertTrue(stuck.getIsDone());
             assertTrue(stuck.timedOut());
+
+            stuckRun.stop();
+            assertTrue("stop() finishes IntakeRun", stuckRun.getIsDone());
+            assertEquals(0, slowB.power(), 1e-9);
         } finally {
-            IntakeConfig.FEED_RPS = rps;
             IntakeConfig.FEED_RPS_TOLERANCE = tol;
             IntakeConfig.FEED_GATE_TIMEOUT_MS = timeout;
         }

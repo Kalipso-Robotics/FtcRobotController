@@ -278,8 +278,8 @@ public class RPSPredictionDataCollector extends KOpMode {
             }
 
             boolean shooting = isPending(shot);
-            // Record the row the moment PushBall starts: shooter, turret and transfer were all ready.
-            if (shooting && pendingShot == null && shot.getPushBall().getHasStarted()) {
+            // Record the row the moment the stopper starts opening: shooter, turret and transfer were all ready.
+            if (shooting && pendingShot == null && shot.getOpenStopper().getHasStarted()) {
                 Point aim = TurretAutoAlign.offsetTargetPoint(hiveTarget, SharedData.getOdometryWheelIMUPosition(), TurretConfig.TURRET_OFFSET_DEG);
                 pendingShot = String.format("%.2f,%.3f,%.2f,%.4f,%.2f,%.1f,%.1f,%.1f,%.1f,%.1f,%.2f,%.2f,%d",
                         shooter.getRPS(), shooter.getShooterMotor().getPower(), getBatteryVoltage(), hoodPosition, distanceMM,
@@ -293,7 +293,7 @@ public class RPSPredictionDataCollector extends KOpMode {
                     message = "Not fed: shooter or turret not ready in time (ShootAllAction abort), nothing recorded";
                     KLog.d(TAG, "event=shotAborted");
                 } else {
-                    boolean transferTimedOut = shot.transferTimedOut();
+                    boolean transferTimedOut = shot.intakeTimedOut();
                     lastShot = pendingShot + "," + (transferTimedOut ? 1 : 0);
                     pendingShot = null;
                     lastTransferGate = transferTimedOut ? "TIMED OUT: fed with the transfer out of tolerance (suspect row)" : "ok, in tolerance";
@@ -391,12 +391,12 @@ public class RPSPredictionDataCollector extends KOpMode {
             }
             if (!shooting) {
                 telemetry.addData("Shot", "idle");
-            } else if (shot.getPushBall().getHasStarted()) {
+            } else if (shot.getOpenStopper().getHasStarted()) {
                 telemetry.addData("Shot", "FEEDING");
             } else {
                 telemetry.addData("Shot", "waiting: shooter %s  turret %s  transfer %s",
                         shot.getShooterReady().getIsDone() ? "READY" : "no", turretAutoAlignTeleOp.isWithinRange() ? "READY" : "no",
-                        shot.getTransferReady().getIsDone() ? (shot.transferTimedOut() ? "TIMED OUT" : "READY") : "no");
+                        shot.getIntakeReady().getIsDone() ? (shot.intakeTimedOut() ? "TIMED OUT" : "READY") : "no");
             }
             telemetry.addData("Shooter in range (ShooterRun)", "%s  error %.2f RPS, tol %.2f, hold %.0f ms",
                     rpsLoop.isWithinRange() ? "IN TOL" : "out", targetRPS - shooter.getRPS(), rpsLoop.calculateRPSTolerance(), ShooterConfig.timeToStabilize);
