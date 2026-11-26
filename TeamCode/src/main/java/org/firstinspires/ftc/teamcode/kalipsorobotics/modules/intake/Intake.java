@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.OUT_OF_RANGE_THRESHOLD;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.IShooterPredictor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterInterpolationDataLookup;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
@@ -19,11 +23,15 @@ public class Intake {
     private final IntakeModule sideB;
     private final FlowerMech flowerMech;
 
+    private final IShooterPredictor predictor;
+
 
     public Intake(OpModeUtilities opModeUtilities) {
         sideA = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.A, IntakeConfig.SIDE_A);
         sideB = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.B, IntakeConfig.SIDE_B);
         flowerMech = new FlowerMech(opModeUtilities, getModule(ModuleConfig.FLOWER_SIDE));
+
+        predictor = new ShooterInterpolationDataLookup();
     }
 
     /** Direct-injection constructor (unit tests, public so actions tests can build one). The flower must already be attached to one of the modules. */
@@ -31,8 +39,7 @@ public class Intake {
         this.sideA = sideA;
         this.sideB = sideB;
         this.flowerMech = flowerMech;
-
-
+        this.predictor = null;
     }
 
     public IntakeModule getModule(BeamBreakPosition.IntakeSide side) {
@@ -96,5 +103,16 @@ public class Intake {
     /** True when the published beam-break count is at capacity. */
     public boolean isFull() {
         return SharedData.getBeamBreakData().isFull();
+    }
+
+    public double getIntakeRPSPrediction(double distanceMM) {
+        if (distanceMM > OUT_OF_RANGE_THRESHOLD) {
+            if (KLog.isDebug()) {
+                KLog.d("Intake", () -> "event=outOfRangeFallback distanceMm=" + distanceMM +
+                        " fallbackMm=" + ShooterInterpolationConfig.FALLBACK_OUT_OF_RANGE_DISTANCE_MM);
+            }
+            return predictor.predict(ShooterInterpolationConfig.FALLBACK_OUT_OF_RANGE_DISTANCE_MM).intakeRPS;
+        }
+        return predictor.predict(distanceMM).intakeRPS;
     }
 }
