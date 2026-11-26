@@ -23,11 +23,15 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
+
+import java.util.List;
 
 /**
  * One trip, written like a trip in RedThreeTipSoloAuto:
@@ -36,13 +40,31 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceCo
  * The decision is made in the constructor, so build this trip only when the robot
  * is ready to go (after the last trip is done), not before the match starts.
  * If there is nowhere left to intake, the trip has no actions and is done right away.
+ *
+ * The first drive of each intake (to the flower, the garden or a tip zone) is planned around
+ * the Hive and the flowers by PathPlanning, starting from where the robot is when the trip is built.
  */
 public class DecisionRoundTripAction extends KActionSet {
+
+    private final DriveTrain driveTrain;
+    private final Stopper stopper;
+    private final Intake intake;
+    private final FlowerMech flowerMech;
+    private final double flowerIntakeMS;
+
+    private Point robot;            // where the robot is now, before this trip
+    private PathPlanning planner;   // the Hive, the flowers and the midline as obstacles
 
     public DecisionRoundTripAction(OpModeUtilities opModeUtilities, DriveTrain driveTrain, Shooter shooter,
                                    Stopper stopper, Intake intake, FlowerMech flowerMech,
                                    TurretAutoAlign turretAutoAlign, ShootDecisionAction shootDecision,
                                    IntakeDecisionAction decision, double flowerIntakeMS) {
+        this.driveTrain = driveTrain;
+        this.stopper = stopper;
+        this.intake = intake;
+        this.flowerMech = flowerMech;
+        this.flowerIntakeMS = flowerIntakeMS;
+
         decision.decide();   // also runs shootDecision.decide()
         Position shootPosition = shootDecision.getShootPosition();   // side of the Cell that is up
         Point targetPoint = shootDecision.getTargetPoint();          // the Cell that is up
@@ -50,6 +72,7 @@ public class DecisionRoundTripAction extends KActionSet {
         if (whereToIntake == null) {
             return;   // nowhere has balls: empty trip
         }
+        robot = SharedData.getOdometryWheelIMUPosition().toPoint();
 
         // Hive never seen: act like the rigid auto. Flowers go to Cell B, everything after goes to Cell A.
         if (SharedData.getHiveUpCell() == null
@@ -61,66 +84,113 @@ public class DecisionRoundTripAction extends KActionSet {
         // INTAKE
         KActionSet intakeBalls = new KActionSet();
         intakeBalls.setName("intakeBalls");
-        if (whereToIntake == IntakeSources.FLOWER_1 || whereToIntake == IntakeSources.FLOWER_2) {
-            // flowers: FullFlowerAction drives in, intakes and backs out by itself
-            Flower flower;
-            if (whereToIntake == IntakeSources.FLOWER_1) {
-                flower = Flower.FLOWER_1;
-            } else {
-                flower = Flower.FLOWER_2;
-            }
-            FullFlowerAction flowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, flower);
-            flowerIntake.setName("flowerIntake");
-            intakeBalls.addAction(flowerIntake);
+        planner = PathPlanning.forFieldAuto(AutoToBallsPathingAction.BUFFER_MM,
+                RobotFootprint.WIDTH_MM / 2 + AutoToBallsPathingAction.AUTO_MIDLINE_MARGIN_MM);
+        if (whereToIntake == IntakeSources.FLOWER_1) {
+            addFlowerIntake(intakeBalls, Flower.FLOWER_1);
+        } else if (whereToIntake == IntakeSources.FLOWER_2) {
+            addFlowerIntake(intakeBalls, Flower.FLOWER_2);
         } else if (whereToIntake == IntakeSources.GARDEN) {
-            // garden: same path as RedThreeTipSoloAuto trip 3. The intake runs while driving and sweeping.
-            IPurePursuitAction goToGarden = new AdaptivePurePursuitAction(driveTrain);
-            goToGarden.setName("goToGarden");
-            goToGarden.setMaxTimeOutMS(4500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
-            goToGarden.addPoint(1027, 487, 108.5);
-            goToGarden.addPoint(289, 2949, 102.6);
-            intakeBalls.addAction(goToGarden);
-
-            IntakeFullAction runIntake = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
-            runIntake.setName("runIntake");
-            runIntake.setDependentActions(goToGarden);
-            intakeBalls.addAction(runIntake);
-
-            IPurePursuitAction sweepGarden = new AdaptivePurePursuitAction(driveTrain);
-            sweepGarden.setName("sweepGarden");
-            sweepGarden.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
-            sweepGarden.addPoint(188, 3309, 90.0);
-            sweepGarden.addPoint(289, 2949, 102.6);
-            sweepGarden.addPoint(188, 3309, 90.0);
-            sweepGarden.setDependentActions(goToGarden);
-            intakeBalls.addAction(sweepGarden);
-
-            // Sweep done: stop the intake now, so its timer does not keep it running into the shot (same as the rigid auto).
-            IntakeStop stopIntake = new IntakeStop(runIntake);
-            stopIntake.setName("stopIntake");
-            stopIntake.setDependentActions(sweepGarden);
-            intakeBalls.addAction(stopIntake);
+            addGardenIntake(intakeBalls);
         } else {
-            // tip zones: drive there with the intake on
-            Point intakePoint = IntakeDecisionAction.pointOf(whereToIntake);
-
-            IPurePursuitAction goToIntake = new AdaptivePurePursuitAction(driveTrain);
-            goToIntake.setName("goToIntake");
-            goToIntake.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
-            goToIntake.addPoint(intakePoint.getX(), intakePoint.getY(), IntakeDecisionAction.headingDegOf(whereToIntake));
-            intakeBalls.addAction(goToIntake);
-
-            VisionPickupAction lookAndGrabBalls = new VisionPickupAction(driveTrain,stopper,intake, AllianceColor.RED);
-            lookAndGrabBalls.setName("lookAndGrabBalls");
-            lookAndGrabBalls.setTimeoutMs(6000);
-            lookAndGrabBalls.setDependentActions(goToIntake);   // look only after arriving at the look spot
-            lookAndGrabBalls.setDependentActions(goToIntake);
-            intakeBalls.addAction(lookAndGrabBalls);
-
+            addTipZoneIntake(intakeBalls, whereToIntake);
         }
         this.addAction(intakeBalls);
 
-        // GO TO SHOOT
+        // GO TO SHOOT, then SHOOT
+        addShoot(opModeUtilities, shooter, turretAutoAlign, intakeBalls, shootPosition, targetPoint);
+    }
+
+    /** Flowers: a planned drive to the setup point, then FullFlowerAction drives in, intakes and backs out by itself. */
+    private void addFlowerIntake(KActionSet intakeBalls, Flower flower) {
+        // A straight line from the start to Flower 1 hits the Hive leg, so this drive is planned.
+        List<Point> route = planner.plan(robot, flower.getSetupPoint());   // null = no route found
+
+        IPurePursuitAction goToFlowerSetup = new AdaptivePurePursuitAction(driveTrain);
+        goToFlowerSetup.setName("goToFlowerSetup");
+        goToFlowerSetup.setMaxTimeOutMS(4500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
+        if (route != null) {
+            for (int i = 0; i < route.size() - 1; i++) {
+                Point corner = route.get(i);
+                goToFlowerSetup.addPoint(corner.getX(), corner.getY(), flower.getSetupHeadingDeg());
+            }
+        }
+        goToFlowerSetup.addPoint(flower.getSetupPoint().getX(), flower.getSetupPoint().getY(), flower.getSetupHeadingDeg());
+        intakeBalls.addAction(goToFlowerSetup);
+
+        FullFlowerAction flowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, flower);
+        flowerIntake.setName("flowerIntake");
+        flowerIntake.setDependentActions(goToFlowerSetup);   // its own setup move is now a tiny move
+        intakeBalls.addAction(flowerIntake);
+    }
+
+    /** Garden: a planned drive to the garden entry, then the same sweep as RedThreeTipSoloAuto trip 3, intake running. */
+    private void addGardenIntake(KActionSet intakeBalls) {
+        IPurePursuitAction goToGarden = new AdaptivePurePursuitAction(driveTrain);
+        goToGarden.setName("goToGarden");
+        goToGarden.setMaxTimeOutMS(4500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
+
+        Point gardenEntry = new Point(289, 2949);
+        List<Point> gardenRoute = planner.plan(robot, gardenEntry);   // null = no route found
+        if (gardenRoute != null) {
+            for (int i = 0; i < gardenRoute.size() - 1; i++) {
+                Point corner = gardenRoute.get(i);
+                goToGarden.addPoint(corner.getX(), corner.getY(), 102.6);
+            }
+        }
+        goToGarden.addPoint(gardenEntry.getX(), gardenEntry.getY(), 102.6);
+        intakeBalls.addAction(goToGarden);
+
+        IntakeFullAction runIntake = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
+        runIntake.setName("runIntake");
+        runIntake.setDependentActions(goToGarden);
+        intakeBalls.addAction(runIntake);
+
+        // The sweep is an exact line along the garden on purpose, so it is NOT planned.
+        IPurePursuitAction sweepGarden = new AdaptivePurePursuitAction(driveTrain);
+        sweepGarden.setName("sweepGarden");
+        sweepGarden.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
+        sweepGarden.addPoint(188, 3309, 90.0);
+        sweepGarden.addPoint(289, 2949, 102.6);
+        sweepGarden.addPoint(188, 3309, 90.0);
+        sweepGarden.setDependentActions(goToGarden);
+        intakeBalls.addAction(sweepGarden);
+
+        // Sweep done: stop the intake now, so its timer does not keep it running into the shot (same as the rigid auto).
+        IntakeStop stopIntake = new IntakeStop(runIntake);
+        stopIntake.setName("stopIntake");
+        stopIntake.setDependentActions(sweepGarden);
+        intakeBalls.addAction(stopIntake);
+    }
+
+    /** Tip zones: a planned drive to the look spot, then vision finds the balls and drives through them. */
+    private void addTipZoneIntake(KActionSet intakeBalls, IntakeSources tipZone) {
+        Point intakePoint = IntakeDecisionAction.pointOf(tipZone);
+        double headingDeg = IntakeDecisionAction.headingDegOf(tipZone);
+
+        IPurePursuitAction goToIntake = new AdaptivePurePursuitAction(driveTrain);
+        goToIntake.setName("goToIntake");
+        goToIntake.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
+        List<Point> tipRoute = planner.plan(robot, intakePoint);   // null = no route found (tip zone 1 is inside Flower A's buffer)
+        if (tipRoute != null) {
+            for (int i = 0; i < tipRoute.size() - 1; i++) {
+                Point corner = tipRoute.get(i);
+                goToIntake.addPoint(corner.getX(), corner.getY(), headingDeg);
+            }
+        }
+        goToIntake.addPoint(intakePoint.getX(), intakePoint.getY(), headingDeg);
+        intakeBalls.addAction(goToIntake);
+
+        VisionPickupAction lookAndGrabBalls = new VisionPickupAction(driveTrain, stopper, intake, AllianceColor.RED);
+        lookAndGrabBalls.setName("lookAndGrabBalls");
+        lookAndGrabBalls.setTimeoutMs(6000);
+        lookAndGrabBalls.setDependentActions(goToIntake);   // look only after arriving at the look spot
+        intakeBalls.addAction(lookAndGrabBalls);
+    }
+
+    /** Drive to the shoot spot after the intake, spin up, aim, shoot, stop the shooter. */
+    private void addShoot(OpModeUtilities opModeUtilities, Shooter shooter, TurretAutoAlign turretAutoAlign,
+                          KActionSet intakeBalls, Position shootPosition, Point targetPoint) {
         IPurePursuitAction goToShoot = new AdaptivePurePursuitAction(driveTrain);
         goToShoot.setName("goToShoot");
         goToShoot.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
@@ -128,7 +198,6 @@ public class DecisionRoundTripAction extends KActionSet {
         goToShoot.setDependentActions(intakeBalls);
         this.addAction(goToShoot);
 
-        // SHOOT
         ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, targetPoint, shootPosition.toPoint());
         shooterRun.setName("shooterRun");
         shooterRun.setDependentActions(goToShoot);

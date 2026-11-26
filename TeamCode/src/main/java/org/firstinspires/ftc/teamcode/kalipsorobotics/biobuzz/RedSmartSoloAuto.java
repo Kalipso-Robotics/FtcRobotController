@@ -1,28 +1,24 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.DecisionRoundTripAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeSources;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.AutoToBallsPathingAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.DecisionRoundTripAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeDecisionAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeSources;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootDecisionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
@@ -31,11 +27,19 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.RobotFootprint;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallVision;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.HiveTagLocalizer;
+
+import java.util.List;
 
 @Autonomous
 public class RedSmartSoloAuto extends KOpMode {
@@ -73,7 +77,7 @@ public class RedSmartSoloAuto extends KOpMode {
         driveTrain = DriveTrain.getInstance(opModeUtilities);
         IMUModule imuModule = IMUModule.getInstance(opModeUtilities);
         sleep(1000);
-        OpModeUtilities.startOdometry(opModeUtilities,odoExecutorService,driveTrain,imuModule,ROBOT_START_POS);
+        OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, ROBOT_START_POS);
         redSmartSoloAuto = new KActionSet();
         intake = new Intake(opModeUtilities);
         flowerMech = intake.getFlower();
@@ -81,20 +85,20 @@ public class RedSmartSoloAuto extends KOpMode {
         stopper = new Stopper(opModeUtilities);
         Turret.setInstanceNull();
         turret = Turret.getInstance(opModeUtilities);
-        turretAutoAlign = new TurretAutoAlign(opModeUtilities,turret);
+        turretAutoAlign = new TurretAutoAlign(opModeUtilities, turret);
         startAprilTagDetection(turret);
 
         SharedData.resetBallInformation();
-        ballVision = BallVision.start(hardwareMap,ballDetector,false);
+        ballVision = BallVision.start(hardwareMap, ballDetector, false);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities,gamepad1);
+        SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
         setAutoDelayAction.setName("setAutoDelayAction");
-        while(!setAutoDelayAction.getIsDone()&& opModeInInit()){
+        while (!setAutoDelayAction.getIsDone() && opModeInInit()) {
             setAutoDelayAction.updateCheckDone();
         }
 
@@ -107,7 +111,7 @@ public class RedSmartSoloAuto extends KOpMode {
         waitUntilShooterRun.setDependentActions(delayBeforeStart);
         redSmartSoloAuto.addAction(waitUntilShooterRun);
 
-        ShooterRun shooterRunPreload = new ShooterRun(opModeUtilities,shooter, ShooterConfig.TARGET_POINT_1, ROBOT_START_POS.toPoint());   // preload goes into the up Cell with the 3 nectar (Cell A), same as the rigid auto
+        ShooterRun shooterRunPreload = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, ROBOT_START_POS.toPoint());   // preload goes into the up Cell with the 3 nectar (Cell A), same as the rigid auto
         shooterRunPreload.setName("shooterRunPreload");
         shooterRunPreload.setDependentActions(waitUntilShooterRun);
         redSmartSoloAuto.addAction(shooterRunPreload);
@@ -122,9 +126,9 @@ public class RedSmartSoloAuto extends KOpMode {
         turretReadyPreload.setDependentActions(delayBeforeStart);
         redSmartSoloAuto.addAction(turretReadyPreload);
 
-        PushBall shootPreload = new PushBall(stopper,intake);
+        PushBall shootPreload = new PushBall(stopper, intake);
         shootPreload.setName("shootPreload");
-        shootPreload.setDependentActions(shooterReadyPreload,turretReadyPreload);
+        shootPreload.setDependentActions(shooterReadyPreload, turretReadyPreload);
         redSmartSoloAuto.addAction(shootPreload);
 
         ShooterStop shooterStop = new ShooterStop(shooterRunPreload);
@@ -141,11 +145,9 @@ public class RedSmartSoloAuto extends KOpMode {
         boolean nothingLeftToIntake = false;
         ElapsedTime hiveSettleTimer = new ElapsedTime();
 
-        // FORCE PARK: with FORCE_PARK_MS_LEFT left in the match, drop everything and park
-        IPurePursuitAction forcePark = new AdaptivePurePursuitAction(driveTrain);
-        forcePark.setName("forcePark");
-        forcePark.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
-        forcePark.addPoint(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
+        // FORCE PARK: with FORCE_PARK_MS_LEFT left in the match, drop everything and park.
+        // Built when it is time to park (see buildForcePark), from wherever the robot is then.
+        IPurePursuitAction forcePark = null;
 
         waitForStartPrecomputingPaths();
         ElapsedTime matchTimer = new ElapsedTime();   // starts when the match starts
@@ -167,6 +169,9 @@ public class RedSmartSoloAuto extends KOpMode {
             boolean tripRunning = (trip != null && !trip.getIsDone());
 
             if (forceParking) {
+                if (forcePark == null) {
+                    forcePark = buildForcePark();   // only the first time
+                }
                 forcePark.updateCheckDone();   // no more preload or trips
 
             } else if (preloadRunning) {
@@ -204,6 +209,29 @@ public class RedSmartSoloAuto extends KOpMode {
         shooter.stop();
         ballVision.close();
         cleanupRobot();
+    }
+
+    /**
+     * The drive to PARK_POINT, planned around the Hive and the flowers from where the robot is right now.
+     * A straight line can hit them (from the garden it hits Flower A), so it is built at park time, not before the match.
+     */
+    private IPurePursuitAction buildForcePark() {
+        Point robot = SharedData.getOdometryWheelIMUPosition().toPoint();
+        PathPlanning planner = PathPlanning.forFieldAuto(AutoToBallsPathingAction.BUFFER_MM,
+                RobotFootprint.WIDTH_MM / 2 + AutoToBallsPathingAction.AUTO_MIDLINE_MARGIN_MM);
+        List<Point> parkRoute = planner.plan(robot, PARK_POINT);   // null = no route found
+
+        IPurePursuitAction forcePark = new AdaptivePurePursuitAction(driveTrain);
+        forcePark.setName("forcePark");
+        forcePark.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
+        if (parkRoute != null) {
+            for (int i = 0; i < parkRoute.size() - 1; i++) {
+                Point corner = parkRoute.get(i);
+                forcePark.addPoint(corner.getX(), corner.getY(), 90);
+            }
+        }
+        forcePark.addPoint(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
+        return forcePark;
     }
 
     /** Shooter, intake and turret off: parking only needs the drivetrain. */
