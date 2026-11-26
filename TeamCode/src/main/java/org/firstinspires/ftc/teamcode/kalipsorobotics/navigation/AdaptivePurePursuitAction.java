@@ -138,7 +138,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     private final double MAX_ANGULAR_VELOCITY = 12.8; //rad/s, maximum turning velocity of the robot 5.5
 
     private final double WHEELBASE_LENGTH = 232.414; //front wheel to back wheel
-    private final double TRACK_WIDTH = 276.58; //side to side
+    private final double TRACK_WIDTH = 264.03; //side to side
     private final double K_p = 0.00007; // 0.000021, 0.00002
     private final double K_a = 0.00001; // 0.001
     private final double K_v = 0.00036; // 0.00036 0.00225
