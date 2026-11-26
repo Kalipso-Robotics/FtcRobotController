@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -10,7 +11,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 /**
  * Pattern: ShooterRun, RPS only (no hood). Holds both intake sides closed loop at a target RPS, either a fixed one
  * (RUN_USING_TARGET_RPS) or one predicted from the distance to targetPoint (RUN_USING_CURRENT_POINT, via
- * Intake.getIntakeRPSPrediction). Never done on its own; isWithinRange() says when both sides are at speed.
+ * Intake.getIntakeRPSPrediction). Done only once stopped (stop() / STOP mode); isWithinRange() says when either side
+ * is at speed.
  */
 public class IntakeRun extends Action {
     public static final String TAG = "Shooting_IntakeRun";
@@ -52,6 +54,7 @@ public class IntakeRun extends Action {
                 intake.stop();
                 targetRPS = 0;
                 isWithinRange = false;
+                isDone = true;
                 return;
             case RUN_USING_TARGET_RPS:
                 distanceMM = -1;
@@ -68,7 +71,8 @@ public class IntakeRun extends Action {
         }
 
         intake.runRPS(targetRPS);
-        isWithinRange = intake.isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE);
+        isWithinRange = intake.getModule(BeamBreakPosition.IntakeSide.A).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE)
+                || intake.getModule(BeamBreakPosition.IntakeSide.B).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE);
 
         if (KLog.isDebug()) {
             KLog.d(TAG, () -> "mode=" + intakeRunMode + " targetRps=" + targetRPS + " distanceMm=" + distanceMM

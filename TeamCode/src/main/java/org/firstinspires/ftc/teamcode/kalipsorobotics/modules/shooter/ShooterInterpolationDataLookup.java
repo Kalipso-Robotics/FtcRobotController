@@ -29,7 +29,7 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
         }
     }
 
-    // Rows come from ShooterInterpolationConfig.shooterData (distanceMM, rps, hoodPosition).
+    // Rows come from ShooterInterpolationConfig.shooterData (distanceMM, rps, hoodPosition, intakeRPS).
     // Rebuilt by each constructor so a second lookup never duplicates rows.
     private final ArrayList<DataPoint> dataPoints = new ArrayList<>();
     private boolean emptyTableLogged = false;
@@ -38,8 +38,9 @@ public class ShooterInterpolationDataLookup implements IShooterPredictor {
      * Default constructor - copies the rows from ShooterInterpolationConfig.shooterData.
      */
     public ShooterInterpolationDataLookup() {
-        for (int i = 0; i + 2 < shooterData.length; i += 3) {
-            dataPoints.add(new DataPoint(shooterData[i], shooterData[i + 1], shooterData[i + 2], shooterData[i+3]));
+        // 4 values per row; a trailing partial row is ignored.
+        for (int i = 0; i + 3 < shooterData.length; i += 4) {
+            dataPoints.add(new DataPoint(shooterData[i], shooterData[i + 1], shooterData[i + 2], shooterData[i + 3]));
         }
     }
 

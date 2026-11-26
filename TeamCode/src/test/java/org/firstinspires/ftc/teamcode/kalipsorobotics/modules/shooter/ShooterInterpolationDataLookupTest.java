@@ -16,6 +16,7 @@ public class ShooterInterpolationDataLookupTest {
     private static final double TOL = 1e-9;
     // Hood values inside [MIN_HOOD, MAX_HOOD] so clampHood does not change them.
     private static final double HOOD_A = 0.15;
+    private static final double INTAKE = 10;
     private static final double HOOD_B = 0.20;
     private static final double HOOD_C = 0.25;
 
@@ -69,7 +70,7 @@ public class ShooterInterpolationDataLookupTest {
 
     @Test
     public void oneRow_returnsThatRowForAnyDistance() {
-        ShooterInterpolationDataLookup lookup = lookupFor(1500, 40, HOOD_A);
+        ShooterInterpolationDataLookup lookup = lookupFor(1500, 40, HOOD_A, INTAKE);
         for (double d : new double[]{0, 1500, 10000}) {
             assertParams(40, HOOD_A, lookup.predict(d));
         }
@@ -77,7 +78,7 @@ public class ShooterInterpolationDataLookupTest {
 
     @Test
     public void exactRows_returnThoseRows() {
-        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, INTAKE, 2000, 50, HOOD_B, INTAKE, 3000, 60, HOOD_C, INTAKE);
         assertParams(40, HOOD_A, lookup.predict(1000));
         assertParams(50, HOOD_B, lookup.predict(2000));
         assertParams(60, HOOD_C, lookup.predict(3000));
@@ -85,27 +86,27 @@ public class ShooterInterpolationDataLookupTest {
 
     @Test
     public void twoRows_interpolateLinearly() {
-        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B);
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, INTAKE, 2000, 50, HOOD_B, INTAKE);
         assertParams(42.5, HOOD_A + 0.25 * (HOOD_B - HOOD_A), lookup.predict(1250));
         assertParams(45, (HOOD_A + HOOD_B) / 2, lookup.predict(1500));
     }
 
     @Test
     public void threeRows_interpolateWithinTheRightSegment() {
-        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, INTAKE, 2000, 50, HOOD_B, INTAKE, 3000, 60, HOOD_C, INTAKE);
         assertParams(45, (HOOD_A + HOOD_B) / 2, lookup.predict(1500));
         assertParams(57.5, HOOD_B + 0.75 * (HOOD_C - HOOD_B), lookup.predict(2750));
     }
 
     @Test
     public void aboveMaximum_returnsLastRow() {
-        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, INTAKE, 2000, 50, HOOD_B, INTAKE, 3000, 60, HOOD_C, INTAKE);
         assertParams(60, HOOD_C, lookup.predict(5000));
     }
 
     @Test
     public void belowMinimum_returnsFirstRow() {
-        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
+        ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, INTAKE, 2000, 50, HOOD_B, INTAKE, 3000, 60, HOOD_C, INTAKE);
         assertParams(40, HOOD_A, lookup.predict(100));
     }
 
@@ -113,21 +114,23 @@ public class ShooterInterpolationDataLookupTest {
     @Test
     public void realTable_isWellFormed() {
         double[] rows = savedData;
-        assertEquals("rows of 3", 0, rows.length % 3);
-        for (int i = 0; i < rows.length; i += 3) {
-            if (i > 0) org.junit.Assert.assertTrue("sorted at row " + i / 3, rows[i] > rows[i - 3]);
-            org.junit.Assert.assertTrue("rps row " + i / 3, rows[i + 1] > 0 && rows[i + 1] <= ShooterInterpolationConfig.MAX_RPS);
-            org.junit.Assert.assertTrue("hood row " + i / 3, rows[i + 2] >= ShooterInterpolationConfig.MIN_HOOD
+        assertEquals("rows of 4", 0, rows.length % 4);
+        for (int i = 0; i < rows.length; i += 4) {
+            if (i > 0) org.junit.Assert.assertTrue("sorted at row " + i / 4, rows[i] > rows[i - 4]);
+            org.junit.Assert.assertTrue("rps row " + i / 4, rows[i + 1] > 0 && rows[i + 1] <= ShooterInterpolationConfig.MAX_RPS);
+            org.junit.Assert.assertTrue("hood row " + i / 4, rows[i + 2] >= ShooterInterpolationConfig.MIN_HOOD
                     && rows[i + 2] <= ShooterInterpolationConfig.MAX_HOOD);
+            org.junit.Assert.assertTrue("intake rps row " + i / 4, rows[i + 3] > 0);
         }
         ShooterInterpolationDataLookup lookup = lookupFor(rows);
-        assertEquals(rows.length / 3, lookup.getDataPointCount());
+        assertEquals(rows.length / 4, lookup.getDataPointCount());
+        assertEquals("intake rps", rows[3], lookup.predict(rows[0]).intakeRPS, TOL);
         assertParams(rows[1], rows[2], lookup.predict(rows[0])); // exact first row comes back unchanged
     }
 
     @Test
     public void constructingTwice_doesNotDuplicateRows() {
-        lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B);
+        lookupFor(1000, 40, HOOD_A, INTAKE, 2000, 50, HOOD_B, INTAKE);
         ShooterInterpolationDataLookup second = new ShooterInterpolationDataLookup();
         assertEquals(2, second.getDataPointCount());
     }

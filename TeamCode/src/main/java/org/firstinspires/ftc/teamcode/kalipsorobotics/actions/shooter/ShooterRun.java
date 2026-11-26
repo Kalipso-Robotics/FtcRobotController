@@ -262,6 +262,10 @@ public class ShooterRun extends Action {
         this.targetPoint = targetPoint;
     }
 
+    public Point getTargetPoint() {
+        return targetPoint;
+    }
+
     public void setLaunchPoint(Point launchPoint) {
         this.launchPoint = launchPoint;
     }

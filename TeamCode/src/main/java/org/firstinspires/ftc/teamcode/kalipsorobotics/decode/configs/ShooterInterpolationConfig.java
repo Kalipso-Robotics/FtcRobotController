@@ -57,7 +57,7 @@ public class ShooterInterpolationConfig {
 
     static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate; //0.31754;
     public static final int BETWEEN_FAR_NEAR_TIP = 3240; // TODO-measure
-    // Rows of: distanceMM, rps, hoodPosition (sorted by distance). Empty until measured on the BIOBUZZ robot;
+    // Rows of: distanceMM, rps, hoodPosition, intakeRPS (sorted by distance). Empty until measured on the BIOBUZZ robot;
     // ShooterInterpolationDataLookup returns DEFAULT_RPS / MIN_HOOD while it is empty.
     // TODO-measure: fill the table; the commented-out rows above are DECODE carry-over, do not reuse them.
     public static double[] shooterData = {

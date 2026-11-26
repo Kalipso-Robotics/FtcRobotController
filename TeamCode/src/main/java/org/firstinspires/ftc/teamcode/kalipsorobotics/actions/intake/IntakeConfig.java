@@ -41,6 +41,8 @@ public class IntakeConfig {
     // TransferReady gives up after this long (with balls against the closed stopper the transfer may never reach
     // FEED_RPS) and lets the shot go on, flagged timedOut(). Logged as Shooting_TransferReady event=timeout.
     public static double FEED_GATE_TIMEOUT_MS = 1500; // TODO-measure
+    // ShootAllAction: how long the stopper stays open (IntakeRun feeding) before it closes and the intake stops.
+    public static double shootTime = 1000; // TODO-measure: ms
 
     // Shooter RPS compensation (PushBall callers that pass a shooter error: ShootAllAction, so TeleOp too when on): during
     // the feed the transfer target becomes FEED_RPS + FEED_RPS_COMP_GAIN * (shooter target - actual RPS), so a sagging

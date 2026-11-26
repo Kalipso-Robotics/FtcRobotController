@@ -2,9 +2,13 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeReady;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.stopper.CloseStopperAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.stopper.OpenStopperAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
@@ -29,14 +33,17 @@ public class ShootAllAction extends KActionSet {
 
     private ShooterReady shooterReady;
 
-    private PushBall pushBall;
-
     private TurretReady turretReady;
 
+    private IntakeRun intakeRun;
     private IntakeReady intakeReady;
 
-    private ResetOdometryToLimelight resetOdometryToPosition;
+    private OpenStopperAction openStopper;
+    private WaitAction shootTimeWait;
+    private CloseStopperAction closeStopper;
     private IntakeStop intakeStop;
+
+    private ResetOdometryToLimelight resetOdometryToPosition;
 
     public void setEnableLimelightZeroing(boolean enableLimelightZeroing) {
         this.enableLimelightZeroing = enableLimelightZeroing;
@@ -63,7 +70,8 @@ public class ShootAllAction extends KActionSet {
         shooterRun.setTargetRPS(targetRPS);
         shooterRun.setTargetHoodPosition(targetHoodPos);
 
-        generateBasicAction(shooterRun, stopper, intake, turretAutoAlign);
+        // Fixed shooter RPS (pass / data collection): no distance to go by, so the intake runs at IntakeConfig.FEED_RPS.
+        generateBasicAction(shooterRun, stopper, intake, turretAutoAlign, new IntakeRun(intake, IntakeConfig.FEED_RPS));
     }
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlign turretAutoAlign) {
@@ -81,8 +89,13 @@ public class ShootAllAction extends KActionSet {
 
         shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
 
+        // Intake RPS from the distance to the shooter's goal (Intake.getIntakeRPSPrediction); FEED_RPS if there is no goal.
+        IntakeRun run = shooterRun.getTargetPoint() != null
+                ? new IntakeRun(intake, shooterRun.getTargetPoint())
+                : new IntakeRun(intake, IntakeConfig.FEED_RPS);
+        generateBasicAction(shooterRun, stopper, intake, turretAutoAlign, run);
 
-        generateBasicAction(shooterRun, stopper, intake, turretAutoAlign);
+        KLog.d("Intake Target RPS", () -> String.format("%.2f", intakeRun.getTargetRPS()));
     }
 
     public ShooterRun getShooterRun() {
@@ -93,31 +106,36 @@ public class ShootAllAction extends KActionSet {
         return shooterReady;
     }
 
-    public PushBall getPushBall() {
-        return pushBall;
+    public IntakeRun getIntakeRun() {
+        return intakeRun;
     }
 
-    public IntakeReady getTransferReady() {
+    public IntakeReady getIntakeReady() {
         return intakeReady;
     }
 
-    /** The transfer never got in tolerance and the shot went on after IntakeConfig.FEED_GATE_TIMEOUT_MS. */
-    public boolean transferTimedOut() {
+    /** Started = the feed has begun (shooter, turret and intake all ready). */
+    public OpenStopperAction getOpenStopper() {
+        return openStopper;
+    }
+
+    /** The intake never got in tolerance and the shot went on after IntakeConfig.FEED_GATE_TIMEOUT_MS. */
+    public boolean intakeTimedOut() {
         return intakeReady.timedOut();
     }
 
-    /** Cancel / abort before the feed: TransferReady has the transfer spinning and nothing else would stop it. */
+    /** Cancel / abort: IntakeRun keeps the intake spinning until IntakeStop, so stop it here if IntakeStop never ran. */
     @Override
     public void setIsDone(boolean isDone) {
-        if (isDone && !this.isDone && intakeReady.getHasStarted() && !pushBall.getHasStarted()) {
-            intake.stop();
+        if (isDone && !this.isDone && !intakeStop.getIsDone()) {
+            intakeRun.stop();
         }
         super.setIsDone(isDone);
     }
 
 
 
-    private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlign turretAutoAlign) {
+    private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlign turretAutoAlign, IntakeRun intakeRun) {
 
         shooterReady = abortOnTimeout
                 ? new ShooterReady(shooterRun, ShooterConfig.TELEOP_READY_TIMEOUT_MS)
@@ -132,24 +150,40 @@ public class ShootAllAction extends KActionSet {
         this.addAction(turretReady);
 
 
-        // Holds both transfer sides at IntakeConfig.FEED_RPS against the closed stopper; PushBall (which opens it) waits for this.
-        intakeReady = new IntakeReady(intake);
-        intakeReady.setName("transferReady");
+        // Spins the intake from the start, against the closed stopper; keeps running through the feed until intakeStop.
+        this.intakeRun = intakeRun;
+        intakeRun.setName("intakeRun");
+        this.addAction(intakeRun);
+
+        // Added after intakeRun so it sees this loop's RPS check. Done when either side is at intakeRun's target RPS.
+        intakeReady = new IntakeReady(intakeRun);
+        intakeReady.setName("intakeReady");
         this.addAction(intakeReady);
 
-        // Shooter error feeds PushBall's IntakeConfig.FEED_RPS_COMP_ON compensation; with it off (default) this is the plain feed.
-        pushBall = new PushBall(stopper, intake, () -> shooterRun.getTargetRPS() - shooter.getRPS());
-        pushBall.setName("pushAllBalls");
-        pushBall.setDependentActions(shooterReady, turretReady, intakeReady);
-        this.addAction(pushBall);
+        openStopper = new OpenStopperAction(stopper);
+        openStopper.setName("openStopper");
+        openStopper.setDependentActions(shooterReady, turretReady, intakeReady);
+        this.addAction(openStopper);
 
+        // Same dependencies as openStopper so it starts the same loop the stopper starts opening: the feed time.
+        shootTimeWait = new WaitAction(IntakeConfig.shootTime);
+        shootTimeWait.setName("openStopperWait");
+        shootTimeWait.setDependentActions(openStopper);
+        this.addAction(shootTimeWait);
 
-//        this.addAction(pushBall.getOpenStopper());
-//
+        closeStopper = new CloseStopperAction(stopper);
+        closeStopper.setName("closeStopper");
+        closeStopper.setDependentActions(shootTimeWait);
+        this.addAction(closeStopper);
+
+        intakeStop = new IntakeStop(intakeRun);
+        intakeStop.setName("intakeStop");
+        intakeStop.setDependentActions(shootTimeWait);
+        this.addAction(intakeStop);
 
         resetOdometryToPosition = new ResetOdometryToLimelight(turret);
         resetOdometryToPosition.setName("resetOdometryToPosition");
-        resetOdometryToPosition.setDependentActions(pushBall);
+        resetOdometryToPosition.setDependentActions(closeStopper, intakeStop);
         this.addAction(resetOdometryToPosition);
     }
 
@@ -161,7 +195,7 @@ public class ShootAllAction extends KActionSet {
 
     @Override
     public void update() {
-        // Checked before super.update(): KActionSet runs PushBall in the same pass as beforeUpdate(), so aborting there can leak a feed.
+        // Checked before super.update(): KActionSet runs openStopper in the same pass as beforeUpdate(), so aborting there can leak a feed.
         if (!isDone && shouldAbortOnTimeout(abortOnTimeout, shooterReady.timedOut(), turretReady.timedOut(),
                 shooterReady.getIsDone(), turretReady.getIsDone())) {
             KLog.e(TAG, "event=abort reason=timeout name=" + getName() + " shooterTimedOut=" + shooterReady.timedOut()
@@ -181,35 +215,32 @@ public class ShootAllAction extends KActionSet {
             //Refresh targetRPS
             shooterRun.update();
             hasStarted = true;
-            stopper.close(); // TransferReady spins the transfer: an open stopper would feed early
+            stopper.close(); // IntakeRun spins the intake from the start: an open stopper would feed early
             if (!enableLimelightZeroing) {
                 resetOdometryToPosition.setIsDone(true);
             }
         }
 
         KLog.d(TAG, () -> "event=status shooterReady=" + shooterReady.getIsDone() + " turretReady=" + turretReady.getIsDone()
-                + " transferReady=" + intakeReady.getIsDone() + " pushBall=" + pushBall.getIsDone());
+                + " intakeReady=" + intakeReady.getIsDone() + " stopperOpened=" + openStopper.getHasStarted()
+                + " stopperClosed=" + closeStopper.getIsDone() + " intakeStopped=" + intakeStop.getIsDone());
     }
 
     @Override
     public void afterUpdate() {
-        // TransferReady stops ticking once done: keep the transfer at speed while shooter / turret finish, until PushBall takes over.
-        if (intakeReady.getIsDone() && !pushBall.getHasStarted()) {
-            intakeReady.holdFeedRPS();
-        }
         // Once only: setShooterRunMode also runs update(), so calling it every loop doubles the shooter update.
-        if (pushBall.getIsDone() && shooterRun.getShooterRunMode() != ShooterRunMode.SHOOT_USING_CURRENT_POINT) {
+        if (closeStopper.getIsDone() && shooterRun.getShooterRunMode() != ShooterRunMode.SHOOT_USING_CURRENT_POINT) {
 //            double maintainRPSValue = shooterRun.getTargetRPS() * 0.925;
 //            shooterRun.setTargetRPS(maintainRPSValue);
             shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
             //KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
         }
         KLog.d(TAG, () -> String.format("event=update stopperOpen=%s turretDeltaDeg=%.2f turretWithinRange=%s deltaRps=%.2f",
-                (pushBall.getOpenStopper().getIsDone()),
+                (openStopper.getIsDone()),
                 (turretAutoAlign.getDeltaAngleDeg()),
                 (turretAutoAlign.isWithinRange()),
                 (shooterRun.getTargetRPS() - shooter.getRPS())));
-        if (pushBall.getOpenStopper().getIsDone()) {
+        if (openStopper.getIsDone()) {
             if (!SOTM.isActive()) {
                 turretAutoAlign.stop();
             }
