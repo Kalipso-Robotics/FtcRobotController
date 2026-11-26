@@ -45,7 +45,7 @@ public class DriveDirectionIntakeController implements IntakeController {
     @Override
     public void update() {
         long now = System.currentTimeMillis();
-        boolean full = fullDetector.isFull();
+        boolean full = false; //fullDetector.isFull(); TODO doesn't work yet, needs beam break nectar will cook values.
         if (full != wasFull) {
             wasFull = full;
             KLog.d(TAG, () -> "event=full value=" + full + " side=" + selected + " filteredMA=" + fullDetector.getFilteredMA());

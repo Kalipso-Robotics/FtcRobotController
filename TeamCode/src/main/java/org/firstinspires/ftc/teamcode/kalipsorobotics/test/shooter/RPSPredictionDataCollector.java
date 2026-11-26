@@ -329,7 +329,7 @@ public class RPSPredictionDataCollector extends KOpMode {
             if (!shooting) {
                 if (gamepad1.right_trigger > 0.1) {
                     intake.lower();
-                    if (IntakeConfig.FEED_RPS > 0) {
+                    if (false/*IntakeConfig.FEED_RPS > 0*/) {
                         // same closed loop and target as PushBall's feed, so LT + Y/X changes this too
                         intake.getModule(BeamBreakPosition.IntakeSide.A).runRPS(IntakeConfig.FEED_RPS);
                         intake.getModule(BeamBreakPosition.IntakeSide.B).runRPS(IntakeConfig.FEED_RPS);

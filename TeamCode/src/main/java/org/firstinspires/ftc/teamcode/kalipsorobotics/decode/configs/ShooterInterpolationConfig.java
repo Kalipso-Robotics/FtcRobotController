@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig.FEED_RPS;
+
 import com.acmerobotics.dashboard.config.Config;
+
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 
 @Config
 public class ShooterInterpolationConfig {
@@ -60,12 +64,18 @@ public class ShooterInterpolationConfig {
     // Rows of: distanceMM, rps, hoodPosition, intakeRPS (sorted by distance). Empty until measured on the BIOBUZZ robot;
     // ShooterInterpolationDataLookup returns DEFAULT_RPS / MIN_HOOD while it is empty.
     // TODO-measure: fill the table; the commented-out rows above are DECODE carry-over, do not reuse them.
+
+    static double adjustShooterRPS = 0;
+
+    //Distance, ShooterRPS, HoodPos, IntakeRPS
     public static double[] shooterData = {
-            950,  35.8, 0.345, 10.0, // 10
-            1070, 36.2, 0.322, 9.0,  // 9
-            1200, 37.0, 0.285, 7.0,  // 7
-            1350, 36.5, 0.28,  8.0,  // 8
-            1500, 38.0, 0.255, 13.0, // 13
-            1686, 39.0, 0.25,  13.0, // 13
+            950,  34.5 + adjustShooterRPS, 0.425, FEED_RPS, // 10
+            1100, 37 + adjustShooterRPS, 0.420, FEED_RPS,  // 9
+            1250, 39 + adjustShooterRPS, 0.305, FEED_RPS,  // 7
+            1400, 39.5 + adjustShooterRPS, 0.295,  FEED_RPS,  // 8
+            1540, 39.5 + adjustShooterRPS, 0.29, FEED_RPS, // 13
+            1702, 40.5 + adjustShooterRPS, 0.280,  FEED_RPS, // 13
+//            1862, 39 + adjustShooterRPS, 0.285, FEED_RPS
+            2251, 39 + adjustShooterRPS, 0.285, FEED_RPS
     };
 }
