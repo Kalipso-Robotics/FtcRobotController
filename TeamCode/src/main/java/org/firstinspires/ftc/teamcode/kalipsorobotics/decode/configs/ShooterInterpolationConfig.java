@@ -38,26 +38,6 @@ public class ShooterInterpolationConfig {
     public static double hoodCompensateCoefficient = maxHoodCompensate; // TODO-measure // 0.2
 
     public static  double DEFAULT_VOLTAGE = 12.5;
-    /*
-    public static double[] shooterData0 = {
-            710, 33.2 + rpsHack, MIN_HOOD,
-            890, 34.3 + rpsHack, MIN_HOOD - hoodHack,
-            1115, 35.0 + rpsHack, MAX_HOOD - hoodHack, // Near Auto First shoot, tuned, near auto distance: 1037.1287983659502
-            1320, 36.2 + rpsHack, MAX_HOOD - hoodHack,
-            1630, 37.8 + rpsHack, MAX_HOOD - hoodHack, //Near Auto, Trip 1,2 shooting point, tuned, distance: 1631.7190444436199
-            NEAR_DISTANCE, 39.1 + rpsHack, MAX_HOOD - hoodHack, //Near Tip Point
-            1920, 39.8 + rpsHack, MAX_HOOD - hoodHack,
-            2050, 40.7 + rpsHack, MAX_HOOD - hoodHack,
-            2200, 41.7 + rpsHack, MAX_HOOD - hoodHack, // 41.0
-            2400, 41.9 + rpsHack, MAX_HOOD - hoodHack,
-            2570, 45.2 + rpsHack, MAX_HOOD - hoodHack,
-            FAR_DISTANCE, 45.7 + rpsHack, MAX_HOOD - hoodHack, // TIP AREA DON'T TOUCH, far shoot
-            2965, 47.4 + rpsHack, MAX_HOOD - hoodHack, // TIP AREA !!! very good like 80% accuracy DON'T TOUCH. far shoot
-            3095, 48.0 + rpsHack, MAX_HOOD - hoodHack, // FAR SHOOT, first shoot ( 0 , 0 )
-            3300, 48.6 + rpsHack, MAX_HOOD - hoodHack,
-            3500, 49.3 + rpsHack, MAX_HOOD - hoodHack,
-    };
-    */
 
     static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate; //0.31754;
     public static final int BETWEEN_FAR_NEAR_TIP = 3240; // TODO-measure
@@ -69,12 +49,12 @@ public class ShooterInterpolationConfig {
 
     //Distance, ShooterRPS, HoodPos, IntakeRPS
     public static double[] shooterData = {
-            950,  34.5 + adjustShooterRPS, 0.425, FEED_RPS, // 10
-            1100, 37 + adjustShooterRPS, 0.420, FEED_RPS,  // 9
-            1250, 39 + adjustShooterRPS, 0.305, FEED_RPS,  // 7
-            1400, 39.5 + adjustShooterRPS, 0.295,  FEED_RPS,  // 8
-            1540, 39.5 + adjustShooterRPS, 0.29, FEED_RPS, // 13
-            1702, 40.5 + adjustShooterRPS, 0.280,  FEED_RPS, // 13
+            950,  34.5 + adjustShooterRPS, 0.425, FEED_RPS,
+            1100, 37 + adjustShooterRPS, 0.420, FEED_RPS,
+            1250, 39 + adjustShooterRPS, 0.305, FEED_RPS,
+            1400, 39.5 + adjustShooterRPS, 0.295,  FEED_RPS,
+            1540, 39.5 + adjustShooterRPS, 0.29, FEED_RPS,
+            1702, 40.5 + adjustShooterRPS, 0.280,  FEED_RPS,
 //            1862, 39 + adjustShooterRPS, 0.285, FEED_RPS
             2251, 39 + adjustShooterRPS, 0.285, FEED_RPS
     };
