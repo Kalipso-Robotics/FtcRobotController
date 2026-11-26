@@ -18,14 +18,14 @@ public enum Flower {
     // Stop = flower base (127 mm off the wall) + half the robot length (DriveTrain.ROBOT_LENGTH 400 / 2) = 327 mm off the wall.
     // TODO-measure on the field: the Flower arm must still reach the pile from here.
     FLOWER_1(new Point(1196, 327),  // pile at (1196, 62) against the wall
-            new Point(1206, 507), 90,     // setup point, setup heading
+            new Point(1196, 507), 90,     // setup point, setup heading
             90,                      // heading at the flower
-            new Point(1206, 507), 90,    // exit point, exit heading
+            new Point(1196, 507), 90,    // exit point, exit heading
             1000),                  // flower lower timeout ms
     FLOWER_2(new Point(327, 2385),  // pile at (64, 2385) against the wall
-            new Point(507, 2410), 0,
+            new Point(507, 2385), 0,
             0,
-            new Point(507, 2410), 0,
+            new Point(507, 2385), 0,
             1000);
 
     private final Point point;
