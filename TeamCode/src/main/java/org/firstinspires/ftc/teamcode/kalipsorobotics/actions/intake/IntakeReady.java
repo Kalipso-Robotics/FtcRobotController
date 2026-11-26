@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 /**
@@ -18,14 +18,16 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 public class IntakeReady extends Action {
     public static final String TAG = "Shooting_TransferReady";
 
-    private final IntakeSide sideA;
-    private final IntakeSide sideB;
+    private final Intake intake;
+    private final IntakeModule sideA;
+    private final IntakeModule sideB;
     private final ElapsedTime timer = new ElapsedTime();
     private boolean timedOut = false;
 
     public IntakeReady(Intake intake) {
-        sideA = intake.getSide(BeamBreakPosition.IntakeSide.A);
-        sideB = intake.getSide(BeamBreakPosition.IntakeSide.B);
+        this.intake = intake;
+        sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
+        sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
     }
 
     public boolean timedOut() {
@@ -35,8 +37,7 @@ public class IntakeReady extends Action {
     /** Both sides closed loop at IntakeConfig.FEED_RPS (no-op when it is <= 0). */
     public void holdFeedRPS() {
         if (IntakeConfig.FEED_RPS > 0) {
-            sideA.runRPS(IntakeConfig.FEED_RPS);
-            sideB.runRPS(IntakeConfig.FEED_RPS);
+            intake.runRPS(IntakeConfig.FEED_RPS);
         }
     }
 

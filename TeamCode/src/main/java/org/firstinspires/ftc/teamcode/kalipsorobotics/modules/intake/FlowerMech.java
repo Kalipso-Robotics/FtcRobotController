@@ -13,30 +13,30 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
  *
  * No position feedback: lower() runs FLOWER_DOWN_POWER for FLOWER_LOWER_MS, raise() runs FLOWER_UP_POWER for
  * FLOWER_RAISE_MS (IntakeConfig), then update() cuts the power, so update() must be called every loop
- * (IntakeSide.update() / Intake.update() do it). The arm must be up by hand when the OpMode is initialized.
+ * (IntakeModule.update() / Intake.update() do it). The arm must be up by hand when the OpMode is initialized.
  * ponytail: open-loop timed travel, and a reversal mid-move still runs its full time (pushes into the stop);
  * add the Axon analog feedback wire (AnalogInput) if timing proves unreliable. Tune with FlowerCRTuner.
  *
  * Interlock: the arm may be down only while its intake side is down, so lower() refuses unless
- * that side isDown(). The side's raise() raises the arm first (see IntakeSide).
+ * that side isDown(). The side's raise() raises the arm first (see IntakeModule).
  */
 public class FlowerMech {
     public static final String TAG = "Robot_Flower";
 
     private final KCRServo servo;
-    private final IntakeSide side;
+    private final IntakeModule side;
     private final ElapsedTime sinceCommand = new ElapsedTime();
 
     private boolean isCommandedDown = false;
     private boolean isMoving = false; // a timed lower/raise is running
     private boolean isBlocked = false;
 
-    public FlowerMech(OpModeUtilities opModeUtilities, IntakeSide side) {
+    public FlowerMech(OpModeUtilities opModeUtilities, IntakeModule side) {
         this(new KCRServo(opModeUtilities.getHardwareMap().crservo.get("flowerPivot"), IntakeConfig.FLOWER_FLIP_DIRECTION), side);
     }
 
     /** Direct-injection constructor, for a servo you have already pulled out of the hardware map (unit tests). */
-    public FlowerMech(KCRServo servo, IntakeSide side) {
+    public FlowerMech(KCRServo servo, IntakeModule side) {
         this.servo = servo;
         this.side = side;
         servo.setPower(0); // no timed move here: nothing calls update() until the OpMode starts

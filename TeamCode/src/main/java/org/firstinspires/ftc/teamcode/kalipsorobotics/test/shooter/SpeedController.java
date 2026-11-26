@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -61,9 +63,9 @@ public class SpeedController extends KOpMode {
         KMotor shooterMotor = new KMotor(hardwareMap.dcMotor.get("shooter"), 0, 0, 0, 0);
         DcMotor intakeMotor1 = hardwareMap.dcMotor.get("intakeFront");
         DcMotor intakeMotor2 = hardwareMap.dcMotor.get("intakeBack");
-        // + power = intake in on both sides, same as IntakeSide
-        intakeMotor1.setDirection(ModuleConfig.INTAKE_MOTOR_A_DIRECTION);
-        intakeMotor2.setDirection(ModuleConfig.INTAKE_MOTOR_B_DIRECTION);
+        // + power = intake in on both sides, same as IntakeModule
+        intakeMotor1.setDirection(IntakeConfig.SIDE_A.direction);
+        intakeMotor2.setDirection(IntakeConfig.SIDE_B.direction);
 
         // ---- Servos (names are the hardware config names) ----
         Servo hoodServo = hardwareMap.servo.get("hood"); // 0.929
@@ -78,8 +80,8 @@ public class SpeedController extends KOpMode {
         double shooterPower = 0;
         double hoodPosition = 0.96;
         double turret1Position = 0.233;
-        double intakePivot1Position = ModuleConfig.INTAKE_PIVOT_A_UP_POS;
-        double intakePivot2Position = ModuleConfig.INTAKE_PIVOT_B_UP_POS;
+        double intakePivot1Position = IntakeConfig.SIDE_A.pivotUpPos;
+        double intakePivot2Position = IntakeConfig.SIDE_B.pivotUpPos;
 
         double intakePower = 1;
         double stopperOpenPos = ModuleConfig.STOPPER_SERVO_OPEN_POS;
@@ -221,13 +223,13 @@ public class SpeedController extends KOpMode {
 
             // Intake pivots: gamepad2 X / Y jump both to the ModuleConfig down / up positions (no flower interlock here)
             if (kGamePad2.isButtonXFirstPressed()) {
-                intakePivot1Position = ModuleConfig.INTAKE_PIVOT_A_DOWN_POS;
-                intakePivot2Position = ModuleConfig.INTAKE_PIVOT_B_DOWN_POS;
+                intakePivot1Position = IntakeConfig.SIDE_A.pivotDownPos;
+                intakePivot2Position = IntakeConfig.SIDE_B.pivotDownPos;
                 intakePivot1Servo.setPosition(intakePivot1Position);
                 intakePivot2Servo.setPosition(intakePivot2Position);
             } else if (kGamePad2.isButtonYFirstPressed()) {
-                intakePivot1Position = ModuleConfig.INTAKE_PIVOT_A_UP_POS;
-                intakePivot2Position = ModuleConfig.INTAKE_PIVOT_B_UP_POS;
+                intakePivot1Position = IntakeConfig.SIDE_A.pivotUpPos;
+                intakePivot2Position = IntakeConfig.SIDE_B.pivotUpPos;
                 intakePivot1Servo.setPosition(intakePivot1Position);
                 intakePivot2Servo.setPosition(intakePivot2Position);
             }

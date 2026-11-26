@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PickupPlan;
@@ -103,7 +103,7 @@ public class AutoToBallsPathingAction extends Action {
     private boolean useFlower; // cleared when the flower's side cannot reach the pile and the other side picks up instead
 
     /** The side the planner chose. Set once the route is planned. */
-    private IntakeSide pickupSide;
+    private IntakeModule pickupSide;
 
     /** Runs the chosen side. Made once the route is planned, null if we only drive. */
     private IntakeFullAction intakeFullAction;
@@ -296,8 +296,8 @@ public class AutoToBallsPathingAction extends Action {
         pickupSide.lower();
         BeamBreakPosition.IntakeSide other = pickupSide.getSide() == BeamBreakPosition.IntakeSide.A
                 ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A;
-        intake.getSide(other).stop();
-        intake.getSide(other).raise();
+        intake.getModule(other).stop();
+        intake.getModule(other).raise();
         KLog.d(TAG, () -> "name=" + getName() + " event=intakeOn side=" + pickupSide.getSide());
     }
 
@@ -411,7 +411,7 @@ public class AutoToBallsPathingAction extends Action {
 
         // Step 6: the intake on the end the planner chose (it runs from INTAKE_START_DISTANCE_MM on).
         if (intake != null) {
-            pickupSide = intake.getSide(plan.useBackIntake ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A);
+            pickupSide = intake.getModule(plan.useBackIntake ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A);
             // From the start, the run must last the whole drive; setIsDone stops it when we finish.
             double runMs = intakeFromStart ? Double.MAX_VALUE : INTAKE_RUN_MS;
             intakeFullAction = new IntakeFullAction(stopper, pickupSide, runMs, IntakeConfig.intakePower);
@@ -468,7 +468,7 @@ public class AutoToBallsPathingAction extends Action {
     }
 
     /** The intake side picking up, or null until the route is planned (or if there is no intake). */
-    public IntakeSide getPickupSide() {
+    public IntakeModule getPickupSide() {
         return pickupSide;
     }
 

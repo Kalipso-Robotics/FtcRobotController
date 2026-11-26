@@ -7,8 +7,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerLower
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerRaise;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeSideLower;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeSideRaise;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeModuleLower;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeModuleRaise;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStow;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.HoodSetAction;
@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
@@ -41,8 +41,8 @@ public class ActionTest extends KOpMode {
     public static final String TAG = "Test_Action";
 
     private Intake intake;
-    private IntakeSide sideA;
-    private IntakeSide sideB;
+    private IntakeModule sideA;
+    private IntakeModule sideB;
     private Stopper stopper;
     private Shooter shooter;
     private Turret turret;
@@ -52,8 +52,8 @@ public class ActionTest extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
         intake = new Intake(opModeUtilities);
-        sideA = intake.getSide(BeamBreakPosition.IntakeSide.A);
-        sideB = intake.getSide(BeamBreakPosition.IntakeSide.B);
+        sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
+        sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
         stopper = new Stopper(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         Turret.setInstanceNull();
@@ -81,13 +81,13 @@ public class ActionTest extends KOpMode {
 
     private void firstLayer() {
         if (kGamePad1.isDpadDownFirstPressed()) {
-            startIntake(new IntakeSideLower(sideA), "lowerA");
+            startIntake(new IntakeModuleLower(sideA), "lowerA");
         } else if (kGamePad1.isDpadUpFirstPressed()) {
-            startIntake(new IntakeSideRaise(sideA), "raiseA");
+            startIntake(new IntakeModuleRaise(sideA), "raiseA");
         } else if (kGamePad1.isDpadLeftFirstPressed()) {
-            startIntake(new IntakeSideLower(sideB), "lowerB");
+            startIntake(new IntakeModuleLower(sideB), "lowerB");
         } else if (kGamePad1.isDpadRightFirstPressed()) {
-            startIntake(new IntakeSideRaise(sideB), "raiseB");
+            startIntake(new IntakeModuleRaise(sideB), "raiseB");
         } else if (kGamePad1.isButtonAFirstPressed()) {
             startIntake(new IntakeStow(intake), "stow");
         } else if (kGamePad1.isButtonXFirstPressed()) {

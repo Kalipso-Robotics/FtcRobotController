@@ -1096,8 +1096,8 @@ public class RedDecideAuto extends KOpMode {
     private void stowIntake(String reason) {
         intake.stop();
         intake.getFlower().raise();
-        intake.getSide(BeamBreakPosition.IntakeSide.A).raise(); // a raise waiting on the flower finishes in intake.update()
-        intake.getSide(BeamBreakPosition.IntakeSide.B).raise();
+        intake.getModule(BeamBreakPosition.IntakeSide.A).raise(); // a raise waiting on the flower finishes in intake.update()
+        intake.getModule(BeamBreakPosition.IntakeSide.B).raise();
         KLog.d(TAG, () -> "event=stowIntake reason=" + reason);
     }
 

@@ -25,12 +25,12 @@ public class IntakeStow extends KActionSet {
         flowerRaise.setDependentActions(stop);
         this.addAction(flowerRaise);
 
-        IntakeSideRaise raiseA = new IntakeSideRaise(intake.getSide(BeamBreakPosition.IntakeSide.A));
+        IntakeModuleRaise raiseA = new IntakeModuleRaise(intake.getModule(BeamBreakPosition.IntakeSide.A));
         raiseA.setName("stowRaiseA");
         raiseA.setDependentActions(flowerRaise);
         this.addAction(raiseA);
 
-        IntakeSideRaise raiseB = new IntakeSideRaise(intake.getSide(BeamBreakPosition.IntakeSide.B));
+        IntakeModuleRaise raiseB = new IntakeModuleRaise(intake.getModule(BeamBreakPosition.IntakeSide.B));
         raiseB.setName("stowRaiseB");
         raiseB.setDependentActions(flowerRaise);
         this.addAction(raiseB);

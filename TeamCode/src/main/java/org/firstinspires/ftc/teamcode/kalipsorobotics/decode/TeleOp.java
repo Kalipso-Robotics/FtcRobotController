@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.AutoToBallsPathingAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.beambreak.BeamBreakCountAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.cameraVision.AprilTagDetectionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveController;
@@ -49,6 +48,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 public class TeleOp extends KOpMode {
     // Robot-centric is the default drive mode. Flip to true to drive field-oriented instead.
     private static final boolean USE_FIELD_ORIENTED_DRIVE = false;
+    // TEMP: Limelight unplugged. false = no AprilTag thread, no rezero after shots, GP2 left-stick zero does nothing.
+    private static final boolean USE_LIMELIGHT = false;
 
     private boolean hasClosedStopperInnit = false;
     private DriveTrain driveTrain;
@@ -63,7 +64,6 @@ public class TeleOp extends KOpMode {
 
 
     AutoToBallsPathingAction flowerAssist = null; // GP1 X: drive to the nearest Flower and pick it up
-    BeamBreakCountAction beamBreaks = null;
     ShootAllAction passAction = null; // GP1 Y: weak fixed-RPS shot at the far half
 
 
@@ -71,7 +71,8 @@ public class TeleOp extends KOpMode {
     KServoAutoAction closeStopper = null;
 
     IntakeController intakeController = null;
-    private boolean flowerWanted = false;
+    private boolean flowerManual = false; // GP2 left stick is driving the flower CR servo
+    private static final double FLOWER_STICK_DEADBAND = 0.05;
     IntakeStop intakeStop = null;
     IntakeReverse intakeReverse = null;
 
@@ -86,7 +87,7 @@ public class TeleOp extends KOpMode {
     private boolean shootAllActionPressed = false;
     private boolean intakeStopPressed = false;
     private boolean intakeReversePressed = false;
-    private boolean flowerTogglePressed = false;
+    private double flowerStick = 0;
     private boolean stopShooterPressed = false;
     private boolean zeroLimelightPressed = false;
     private boolean zeroCornerPressed = false;
@@ -102,7 +103,7 @@ public class TeleOp extends KOpMode {
     private boolean setTurretOffset0Pressed;
     private boolean flowerAssistPressed;
     private boolean passButtonPressed;
-    private final boolean enableLimelightZeroing = true;
+    private final boolean enableLimelightZeroing = USE_LIMELIGHT;
 
     private Point hiveTarget = null; // the Hive Cell we aim at, see updateHiveTarget()
     private int shootCount = 0;
@@ -124,7 +125,6 @@ public class TeleOp extends KOpMode {
         turret = Turret.getInstance(opModeUtilities);
         intake = new Intake(opModeUtilities);
         intakeController = new DriveDirectionIntakeController(intake);
-        beamBreaks = new BeamBreakCountAction(opModeUtilities); // live ball count: capacity stop and Balls telemetry
         AutoToBallsPathingAction.checkFlowerClearance();
         shooter = new Shooter(opModeUtilities);
         stopper = new Stopper(opModeUtilities);
@@ -138,9 +138,10 @@ public class TeleOp extends KOpMode {
 
         OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null);
 //        odometry.setShouldFallbackToWheelTheta(true);
-        aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, allianceColor);
-
-        OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
+        if (USE_LIMELIGHT) {
+            aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, allianceColor);
+            OpModeUtilities.runAprilTagExecutorService(aprilTagExecutorService, aprilTagDetectionAction);
+        }
         sotm = new SOTM(opModeUtilities);
         if (SOTMConfig.aimTurret) OpModeUtilities.runSOTMExecutorService(sotmExecutorService, sotm);
         driveAction = USE_FIELD_ORIENTED_DRIVE
@@ -197,7 +198,6 @@ public class TeleOp extends KOpMode {
             if (KLog.isDebug()) {
                 KLog.d("Loop_Speed", () -> (int) lastLoopTime + "ms");
             }
-            beamBreaks.updateCheckDone();
             if (!hasClosedStopperInnit) {
                 stopper.setPosition(ModuleConfig.STOPPER_SERVO_CLOSED_POS);
                 hasClosedStopperInnit = true;
@@ -236,7 +236,7 @@ public class TeleOp extends KOpMode {
             intakeStopPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
 
-            flowerTogglePressed = kGamePad2.isButtonBFirstPressed();
+            flowerStick = -gamepad2.left_stick_y; // up on the stick = positive power
             releaseStopperPressed = kGamePad2.isYPressed();
 
             toggleTurretAlign = !kGamePad2.isToggleX();
@@ -269,8 +269,8 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Shot: ", shootCount);
             telemetry.addData("READY", shooterRun.isWithinRange() && turretAutoAlignTeleOp.isWithinRange());
             telemetry.addData("Intake side", intakeController.getSelectedSide());
-            telemetry.addData("Balls", intake.getBallCount());
-            telemetry.addData("Flower wanted/down", flowerWanted + "/" + intake.getFlower().isDown());
+            telemetry.addData("Intake full", intakeController.isFull()); // motor stall, no beam breaks (IntakeFullDetector)
+            telemetry.addData("Flower power", "%.2f", intake.getFlower().getPower());
             telemetry.addData("Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Current RPS ", "%.2f", shooterRun.getCurrentRPS());
             telemetry.addData("Hive Cell ", hiveTarget == TARGET_POINT_1 ? "A" : "B");
@@ -282,8 +282,7 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Turret Offset Deg ", "%.1f", TurretConfig.TURRET_OFFSET_DEG);
             telemetry.addLine("Turret Mode: " + turretAutoAlignTeleOp.getTurretRunMode());
             telemetry.addData("Delta Heading (Turret)", turretAutoAlignTeleOp.getDeltaAngleDeg());
-            telemetry.addData("Delta RPS (Shooter)", shooterRun.getTargetRPS() - shooterRun.getCurrentRPS());
-            telemetry.update();
+            telemetry.addData("Delta RPS (Shooter)", shooterRun.getTargetRPS() - shooterRun.getCurrentRPS());            telemetry.update();
         }
         cleanupRobot();
     }
@@ -320,7 +319,6 @@ public class TeleOp extends KOpMode {
 
     private void endFlowerAssist() {
         flowerAssist = null;
-        flowerWanted = false;
         setLastMoveAction(null);
         KLog.d("TeleOp_Flower", "event=assistEnd");
     }
@@ -402,6 +400,7 @@ public class TeleOp extends KOpMode {
         // PRIORITY 4: Manual reverse
         if (intakeReversePressed) {
             if (!isPending(intakeReverse)) {
+                intakeController.clearFull(); // reversing spits the balls out, or clears a false full
                 intakeReverse = new IntakeReverse(intake);
                 setLastIntakeAction(intakeReverse);
             }
@@ -420,21 +419,25 @@ public class TeleOp extends KOpMode {
         intakeController.update();
     }
 
-    /** GP2 B toggles driver intent; the interlock lifts the flower when side A raises, and it re-lowers when A is down. */
+    /**
+     * GP2 left stick drives the flower CR servo directly (same sign as FlowerCRTuner's stick). FlowerMech.setPower
+     * keeps the interlock: power toward down is refused while the flower's intake side is up, and the side's
+     * raise() still lifts the arm with a timed move. Power 0 is sent once on release, not every loop, so it
+     * doesn't cancel that timed raise.
+     */
     private void handleFlower() {
         FlowerMech flowerMech = intake.getFlower();
         flowerMech.update(); // every loop: the intake controller (which also does it) is skipped during shots and the assist
         if (isPending(flowerAssist)) {
+            flowerManual = false;
             return; // the assist owns the arm
         }
-        if (flowerTogglePressed) {
-            flowerWanted = !flowerWanted;
-            KLog.d("Intaking_Flower", () -> "event=toggle wanted=" + flowerWanted);
-        }
-        if (flowerWanted && !flowerMech.isDown()) {
-            flowerMech.lower();
-        } else if (!flowerWanted && !flowerMech.isUp()) {
-            flowerMech.raise();
+        if (Math.abs(flowerStick) > FLOWER_STICK_DEADBAND) {
+            flowerManual = true;
+            flowerMech.setPower(flowerStick);
+        } else if (flowerManual) {
+            flowerManual = false;
+            flowerMech.setPower(0);
         }
     }
 
@@ -535,6 +538,7 @@ public class TeleOp extends KOpMode {
                 }
 
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp, true);
+                intakeController.clearFull(); // the shot empties the robot
                 shootAllAction.setEnableLimelightZeroing(enableLimelightZeroing);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
@@ -575,6 +579,7 @@ public class TeleOp extends KOpMode {
             turnOnTurret();
         }
         passAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp, PASS_RPS, PASS_HOOD, true);
+        intakeController.clearFull(); // the pass empties the robot
         passAction.setName("Pass_" + shootCount);
         setLastShooterAction(passAction);
         setLastStopperAction(null);
@@ -592,7 +597,7 @@ public class TeleOp extends KOpMode {
     }
 
     private void handleZeroing() {
-        if (zeroLimelightPressed) {
+        if (zeroLimelightPressed && USE_LIMELIGHT) {
             if (!isPending(resetToLimelight)) {
                 // Skips on its own with no detection or a moving turret, so it never snaps odometry to the origin.
                 resetToLimelight = new ResetOdometryToLimelight(turret);

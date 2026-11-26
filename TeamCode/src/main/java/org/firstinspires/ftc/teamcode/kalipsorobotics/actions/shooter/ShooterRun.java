@@ -6,10 +6,7 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Shoo
 import android.annotation.SuppressLint;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.SOTMConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
@@ -134,7 +131,7 @@ public class ShooterRun extends Action {
             case SHOOT_USING_DISTANCE:
                 KLog.e("ShooterRun_SHOOT_USING_DISTANCE", "Distance: " + distanceMM);
                 params = getPrediction(distanceMM);
-                this.targetRPS = params.rps;
+                this.targetRPS = params.shooterRPS;
                 this.targetHoodPosition = params.hoodPosition;
                 break;
             case SHOOT_USING_FIXED_POINT:
@@ -144,7 +141,7 @@ public class ShooterRun extends Action {
                 KLog.d("ShooterRun_SHOOT_USING_FIXED_POINT", () -> "Launch Point " + launchPoint);
                 distanceMM = targetPoint.distanceTo(launchPoint);
                 params = getPrediction(distanceMM);
-                this.targetRPS = params.rps;
+                this.targetRPS = params.shooterRPS;
                 this.targetHoodPosition = params.hoodPosition;
                 KLog.d("ShooterRun_SHOOT_USING_FIXED_POINT", "TargetRPS: " + targetRPS + " distanceMM: " + distanceMM);
                 break;
@@ -155,7 +152,7 @@ public class ShooterRun extends Action {
                     KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", "NO DISTANCE FOUND, NOT CHANGING RPS OR HOOD");
                 } else {
                     params = getPrediction(currentDist);
-                    this.targetRPS = params.rps;
+                    this.targetRPS = params.shooterRPS;
                     this.targetHoodPosition = params.hoodPosition;
                     KLog.d("ShooterRun_SHOOT_USING_CURRENT_POINT", () -> "TargetRPS: " + targetRPS);
                 }

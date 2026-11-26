@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
@@ -115,8 +115,8 @@ public class RPSPredictionDataCollector extends KOpMode {
         Shooter shooter = new Shooter(opModeUtilities);
         PIDFController pidf = shooter.getShooterMotor().getPIDFController();
         // flowerPivot not plugged in yet: no flower; this OpMode only runs the intake motors
-        Intake intake = new Intake(new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.A),
-                new IntakeSide(opModeUtilities, BeamBreakPosition.IntakeSide.B), null);
+        Intake intake = new Intake(new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.A, IntakeConfig.SIDE_A),
+                new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.B, IntakeConfig.SIDE_B), null);
         Stopper stopper = new Stopper(opModeUtilities);
         Turret turret = Turret.getInstance(opModeUtilities);
         FieldOrientedDriveAction driveAction = new FieldOrientedDriveAction(driveTrain, imuModule);
@@ -331,8 +331,8 @@ public class RPSPredictionDataCollector extends KOpMode {
                     intake.lower();
                     if (IntakeConfig.FEED_RPS > 0) {
                         // same closed loop and target as PushBall's feed, so LT + Y/X changes this too
-                        intake.getSide(BeamBreakPosition.IntakeSide.A).runRPS(IntakeConfig.FEED_RPS);
-                        intake.getSide(BeamBreakPosition.IntakeSide.B).runRPS(IntakeConfig.FEED_RPS);
+                        intake.getModule(BeamBreakPosition.IntakeSide.A).runRPS(IntakeConfig.FEED_RPS);
+                        intake.getModule(BeamBreakPosition.IntakeSide.B).runRPS(IntakeConfig.FEED_RPS);
                     } else {
                         intake.run(1.0); // closed loop off in IntakeConfig
                     }
@@ -364,7 +364,7 @@ public class RPSPredictionDataCollector extends KOpMode {
                 KLog.d(TAG, () -> String.format("event=shooter rps=%.2f targetRps=%.2f on=%b power=%.3f voltage=%.2f hood=%.4f distanceMm=%.0f shooterInRange=%b aligned=%b shooting=%b rpsA=%.2f rpsB=%.2f balls=%d",
                         shooter.getRPS(), tr, on, shooter.getShooterMotor().getPower(), SharedData.getVoltage(), h, distanceMM,
                         rpsLoop.isWithinRange(), turretAutoAlignTeleOp.isWithinRange(), shootingNow,
-                        intake.getSide(BeamBreakPosition.IntakeSide.A).getRPS(), intake.getSide(BeamBreakPosition.IntakeSide.B).getRPS(), intake.getBallCount()));
+                        intake.getModule(BeamBreakPosition.IntakeSide.A).getRPS(), intake.getModule(BeamBreakPosition.IntakeSide.B).getRPS(), intake.getBallCount()));
             }
 
             if (!trimTurret && buttonY) {
@@ -405,11 +405,11 @@ public class RPSPredictionDataCollector extends KOpMode {
             telemetry.addData("Transfer set RPS / tol", "%.1f / %.1f   timeout %.0f ms", IntakeConfig.FEED_RPS,
                     IntakeConfig.FEED_RPS_TOLERANCE, IntakeConfig.FEED_GATE_TIMEOUT_MS);
             telemetry.addData("Transfer in tol A / B", "%s / %s",
-                    intake.getSide(BeamBreakPosition.IntakeSide.A).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out",
-                    intake.getSide(BeamBreakPosition.IntakeSide.B).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out");
+                    intake.getModule(BeamBreakPosition.IntakeSide.A).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out",
+                    intake.getModule(BeamBreakPosition.IntakeSide.B).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out");
             telemetry.addData("Last shot transfer gate", lastTransferGate);
-            IntakeSide transferA = intake.getSide(BeamBreakPosition.IntakeSide.A);
-            IntakeSide transferB = intake.getSide(BeamBreakPosition.IntakeSide.B);
+            IntakeModule transferA = intake.getModule(BeamBreakPosition.IntakeSide.A);
+            IntakeModule transferB = intake.getModule(BeamBreakPosition.IntakeSide.B);
             telemetry.addData("Transfer actual RPS A / B", "%.2f / %.2f", transferA.getRPS(), transferB.getRPS());
             telemetry.addData("Transfer power A / B", "%.2f / %.2f%s", transferA.getPower(), transferB.getPower(),
                     Math.max(transferA.getPower(), transferB.getPower()) >= 0.99 ? "  MAXED: target above top speed, lower it" : "");

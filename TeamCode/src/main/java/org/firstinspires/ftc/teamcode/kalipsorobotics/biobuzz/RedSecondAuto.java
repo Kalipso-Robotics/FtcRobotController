@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
@@ -83,7 +83,7 @@ public class RedSecondAuto extends KOpMode {
     }
 
     /** Gated trip that shoots into Cell A (aLaunchPoint) or B (bLaunchPoint). intakeSide null = no pickup. */
-    private RoundTripAction trip(boolean cellA, IntakeSide intakeSide) {
+    private RoundTripAction trip(boolean cellA, IntakeModule intakeSide) {
         Point target = cellA ? ShooterConfig.TARGET_POINT_1 : ShooterConfig.TARGET_POINT_2;
         Point launch = cellA ? FieldConfig.aLaunchPoint : FieldConfig.bLaunchPoint;
         return new RoundTripAction(opModeUtilities, driveTrain, aimAt(target), shooter, stopper, intake, target, launch, 0, intakeSide);
@@ -92,8 +92,8 @@ public class RedSecondAuto extends KOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         initializeRobot();
-        IntakeSide flowerSide = intake.getSide(ModuleConfig.FLOWER_SIDE);
-        IntakeSide sideA = intake.getSide(BeamBreakPosition.IntakeSide.A); // TODO-measure: which side faces the balls on each sweep
+        IntakeModule flowerSide = intake.getModule(ModuleConfig.FLOWER_SIDE);
+        IntakeModule sideA = intake.getModule(BeamBreakPosition.IntakeSide.A); // TODO-measure: which side faces the balls on each sweep
 
         // preload: drive to B's launch spot and shoot
         RoundTripAction trip1 = trip(false, null);

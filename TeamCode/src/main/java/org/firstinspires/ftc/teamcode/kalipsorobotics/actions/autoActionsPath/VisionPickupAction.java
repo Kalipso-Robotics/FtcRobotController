@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
@@ -118,9 +118,9 @@ public class VisionPickupAction extends Action {
                 break;
             case PICKUP:
                 pickup.updateCheckDone();
-                IntakeSide side = pickup.getPickupSide();
+                IntakeModule side = pickup.getPickupSide();
                 if (side != null) {
-                    fullDetector.update(side.getCurrentMA(), now);
+                    fullDetector.update(side.getCurrentMA(), side.getRPS(), now);
                     if (fullDetector.isFull()) {
                         side.raise(); // packed: lift it so it stops taking balls, the drive ends here
                         finish(EndReason.FULL);

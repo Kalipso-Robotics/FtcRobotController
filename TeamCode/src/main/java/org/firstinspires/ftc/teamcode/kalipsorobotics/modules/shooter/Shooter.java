@@ -208,10 +208,10 @@ public class Shooter {
         if (KLog.isDebug()) {
             KLog.d(TAG, () -> "event=predict x=" + currentPosition.getX() + " y=" + currentPosition.getY() +
                     " targetX=" + target.getX() + " targetY=" + target.getY() +
-                    " distanceMm=" + distance + " rps=" + params.rps + " hood=" + params.hoodPosition);
+                    " distanceMm=" + distance + " rps=" + params.shooterRPS + " hood=" + params.hoodPosition);
         }
 
-        return params.rps;
+        return params.shooterRPS;
     }
 
     /**

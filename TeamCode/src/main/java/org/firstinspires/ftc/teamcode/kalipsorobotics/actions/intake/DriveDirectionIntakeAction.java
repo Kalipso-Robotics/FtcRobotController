@@ -42,8 +42,8 @@ public class DriveDirectionIntakeAction extends Action {
             return;
         }
         for (BeamBreakPosition.IntakeSide s : BeamBreakPosition.IntakeSide.values()) {
-            intake.getSide(s).stop();
-            intake.getSide(s).raise();
+            intake.getModule(s).stop();
+            intake.getModule(s).raise();
         }
         KLog.d(TAG, () -> "name=" + getName() + " event=done");
     }

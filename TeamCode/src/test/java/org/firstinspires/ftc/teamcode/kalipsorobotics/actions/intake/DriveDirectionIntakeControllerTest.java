@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,11 +11,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakData;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
@@ -22,7 +22,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Constructor;
 import java.util.function.BooleanSupplier;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.DriveDirectionIntakeController.pickSide;
@@ -37,28 +36,33 @@ public class DriveDirectionIntakeControllerTest {
     private Servo pivotA, pivotB;
     private CRServo flowerServo;
     private DcMotor motorA, motorB;
-    private IntakeSide sideA, sideB;
+    private IntakeModule sideA, sideB;
     private FlowerMech flowerMech;
     private DriveDirectionIntakeController controller;
+    private ForcedDetector detector;
+
+    private double savedConfirmMs;
 
     @Before
     public void setUp() throws Exception {
-        SharedData.resetBeamBreakData();
+        savedConfirmMs = IntakeConfig.SIDE_SWITCH_CONFIRM_MS;
+        IntakeConfig.SIDE_SWITCH_CONFIRM_MS = 0; // instant switch unless a test sets it
         pivotA = FlowerMechInterlockTest.fakeServo();
         pivotB = FlowerMechInterlockTest.fakeServo();
         flowerServo = FlowerMechInterlockTest.fakeCRServo();
         motorA = FlowerMechInterlockTest.fakeMotor();
         motorB = FlowerMechInterlockTest.fakeMotor();
-        sideA = new IntakeSide(A, motorA, new KServo(pivotA, FAST, 255, 0, false));
-        sideB = new IntakeSide(B, motorB, new KServo(pivotB, FAST, 255, 0, false));
+        sideA = new IntakeModule(A, motorA, new KServo(pivotA, FAST, 255, 0, false), IntakeConfig.SIDE_A);
+        sideB = new IntakeModule(B, motorB, new KServo(pivotB, FAST, 255, 0, false), IntakeConfig.SIDE_B);
         flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         waitUntil(flowerMech::isUp);
-        controller = new DriveDirectionIntakeController(new Intake(sideA, sideB, flowerMech));
+        detector = new ForcedDetector();
+        controller = new DriveDirectionIntakeController(new Intake(sideA, sideB, flowerMech), detector);
     }
 
     @After
     public void tearDown() {
-        SharedData.resetBeamBreakData();
+        IntakeConfig.SIDE_SWITCH_CONFIRM_MS = savedConfirmMs;
         SharedData.resetOdometryWheelIMUVelocity();
         SharedData.setOdometryWheelIMUPosition(new Position(0, 0, 0));
     }
@@ -82,7 +86,7 @@ public class DriveDirectionIntakeControllerTest {
         assertEquals(A, controller.getSelectedSide());
         assertEquals(IntakeConfig.intakePower, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotB.getPosition(), 1e-9);
     }
 
     @Test
@@ -95,16 +99,52 @@ public class DriveDirectionIntakeControllerTest {
     }
 
     @Test
-    public void full_stopsAndRaisesBothSides() throws Exception {
+    public void full_stopsAndRaisesBothSides_evenWhenDrivingTheOtherWay() throws Exception {
         drive(1000, 0, 0);
         controller.update();
         waitUntil(sideA::isDown);
-        SharedData.setBeamBreakData(fullData());
+        detector.forceFull = true;
         controller.update();
+        assertTrue(controller.isFull());
         assertEquals(0, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_UP_POS, pivotA.getPosition(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_B_UP_POS, pivotB.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotUpPos, pivotA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotB.getPosition(), 1e-9);
+
+        drive(-1000, 0, 0); // driving backward must not lower B while full
+        controller.update();
+        assertEquals(A, controller.getSelectedSide());
+        assertEquals(0, motorB.getPower(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotB.getPosition(), 1e-9);
+    }
+
+    @Test
+    public void clearFull_intakesAgain() throws Exception {
+        drive(1000, 0, 0);
+        detector.forceFull = true;
+        controller.update();
+        assertEquals(0, motorA.getPower(), 1e-9);
+
+        controller.clearFull(); // a shot, pass or reverse
+        assertFalse(controller.isFull());
+        controller.update();
+        assertEquals(IntakeConfig.intakePower, motorA.getPower(), 1e-9);
+    }
+
+    /** Full on demand: the fake motors report no current. reset() (clearFull, or a side starting) clears it. */
+    private static class ForcedDetector extends IntakeFullDetector {
+        boolean forceFull = false;
+
+        @Override
+        public boolean isFull() {
+            return forceFull;
+        }
+
+        @Override
+        public void reset(long nowMs) {
+            super.reset(nowMs);
+            forceFull = false;
+        }
     }
 
     @Test
@@ -119,23 +159,38 @@ public class DriveDirectionIntakeControllerTest {
         controller.update();
         assertEquals(B, controller.getSelectedSide());
         assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
-        assertEquals(ModuleConfig.INTAKE_PIVOT_A_DOWN_POS, pivotA.getPosition(), 1e-9);
+        assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotA.getPosition(), 1e-9);
         waitUntil(() -> {
             controller.update();
-            return pivotA.getPosition() == ModuleConfig.INTAKE_PIVOT_A_UP_POS;
+            return pivotA.getPosition() == IntakeConfig.SIDE_A.pivotUpPos;
         });
+    }
+
+    @Test
+    public void briefReverse_doesNotSwitch_sustainedReverseDoes() throws Exception {
+        IntakeConfig.SIDE_SWITCH_CONFIRM_MS = 100;
+        drive(1000, 0, 0);
+        controller.update();
+        assertEquals(A, controller.getSelectedSide());
+
+        drive(-1000, 0, 0); // bounce off the balls
+        controller.update();
+        assertEquals(A, controller.getSelectedSide());
+        drive(1000, 0, 0); // back to pushing forward: the timer restarts
+        controller.update();
+        Thread.sleep(150);
+        drive(-1000, 0, 0);
+        controller.update();
+        assertEquals(A, controller.getSelectedSide()); // old crossing must not count
+
+        Thread.sleep(150); // held backward past the confirm time
+        controller.update();
+        assertEquals(B, controller.getSelectedSide());
     }
 
     private static void drive(double vxFieldMmPerS, double vyFieldMmPerS, double theta) {
         SharedData.setOdometryWheelIMUVelocity(new Velocity(vxFieldMmPerS / 1000, vyFieldMmPerS / 1000, 0));
         SharedData.setOdometryWheelIMUPosition(new Position(0, 0, theta));
-    }
-
-    private static BeamBreakData fullData() throws Exception {
-        Constructor<BeamBreakData> c = BeamBreakData.class.getDeclaredConstructor(int.class, int.class, int.class, int.class,
-                int.class, int.class, int.class, boolean.class, boolean.class, boolean.class, long.class);
-        c.setAccessible(true);
-        return c.newInstance(4, 4, 4, 4, 0, 0, 0, true, false, true, 0L);
     }
 
     private static void waitUntil(BooleanSupplier condition) throws InterruptedException {

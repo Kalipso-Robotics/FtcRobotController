@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
@@ -42,8 +42,8 @@ public class ShootAllActionTest {
         IntakeConfig.FEED_RPS_TOLERANCE = 1.5;
         IntakeConfig.FEED_GATE_TIMEOUT_MS = 60000;
         IntakeConfig.PRE_FEED_MS = 20;
-        Intake intake = new Intake(new IntakeSide(A, motor(rpsA, powerA), new KServo(FlowerMechInterlockTest.fakeServo())),
-                new IntakeSide(B, motor(rpsB, powerB), new KServo(FlowerMechInterlockTest.fakeServo())), null);
+        Intake intake = new Intake(new IntakeModule(A, motor(rpsA, powerA), new KServo(FlowerMechInterlockTest.fakeServo()), IntakeConfig.SIDE_A),
+                new IntakeModule(B, motor(rpsB, powerB), new KServo(FlowerMechInterlockTest.fakeServo()), IntakeConfig.SIDE_B), null);
         Shooter shooter = fakeShooter();
         ShooterRun shooterRun = new ShooterRun(null, shooter, 30, 0.5) {
             @Override public void update() { }

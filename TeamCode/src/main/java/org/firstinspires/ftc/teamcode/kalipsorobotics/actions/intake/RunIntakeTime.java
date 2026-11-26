@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,7 +13,7 @@ public class RunIntakeTime extends Action {
     public static final String TAG = "Intaking_RunIntakeTime";
 
     private final Intake intake;
-    private final IntakeSide side;
+    private final IntakeModule side;
     private double timeMS;
     private final double power;
     private final ElapsedTime timer = new ElapsedTime();
@@ -26,23 +26,23 @@ public class RunIntakeTime extends Action {
     }
 
     /** One side only, e.g. feeding that side's balls to the shooter. Does not lower the side (PushBall relies on that). */
-    public RunIntakeTime(IntakeSide side, double timeMS, double power) {
+    public RunIntakeTime(IntakeModule side, double timeMS, double power) {
         this(null, side, timeMS, power, false);
     }
 
     /**
      * One side only; lowerFirst=true lowers that side when it starts (picking up).
-     * Auto: {@code new RunIntakeTime(intake.getSide(BeamBreakPosition.IntakeSide.B), 2000, IntakeConfig.intakePower, true)}
+     * Auto: {@code new RunIntakeTime(intake.getModule(BeamBreakPosition.IntakeSide.B), 2000, IntakeConfig.intakePower, true)}
      */
-    public RunIntakeTime(IntakeSide side, double timeMS, double power, boolean lowerFirst) {
+    public RunIntakeTime(IntakeModule side, double timeMS, double power, boolean lowerFirst) {
         this(null, side, timeMS, power, lowerFirst);
     }
 
-    private RunIntakeTime(Intake intake, IntakeSide side, double timeMS, double power) {
+    private RunIntakeTime(Intake intake, IntakeModule side, double timeMS, double power) {
         this(intake, side, timeMS, power, intake != null);
     }
 
-    private RunIntakeTime(Intake intake, IntakeSide side, double timeMS, double power, boolean lowerFirst) {
+    private RunIntakeTime(Intake intake, IntakeModule side, double timeMS, double power, boolean lowerFirst) {
         this.intake = intake;
         this.side = side;
         this.timeMS = timeMS;
@@ -51,7 +51,7 @@ public class RunIntakeTime extends Action {
     }
 
     /**
-     * One side only: hold this transfer RPS (IntakeSide.runRPS) instead of the fixed power. Read every loop, so a live
+     * One side only: hold this transfer RPS (IntakeModule.runRPS) instead of the fixed power. Read every loop, so a live
      * target (Dashboard, PushBall's shooter RPS compensation) applies mid-feed. <= 0 keeps the power.
      */
     public RunIntakeTime holdRPS(DoubleSupplier targetRPS) {

@@ -7,6 +7,12 @@ public interface IntakeController {
     /** Call once per loop. */
     void update();
 
+    /** True once the intake has filled up (latched until clearFull). */
+    boolean isFull();
+
+    /** The balls left (shot, pass, reverse): forget the full latch and intake again. */
+    void clearFull();
+
     /** The side currently chosen to intake, for telemetry and logs. */
     BeamBreakPosition.IntakeSide getSelectedSide();
 }

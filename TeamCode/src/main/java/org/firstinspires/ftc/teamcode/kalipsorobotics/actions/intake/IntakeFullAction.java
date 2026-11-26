@@ -4,7 +4,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KA
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
@@ -14,7 +14,7 @@ public class IntakeFullAction extends KActionSet {
     private final RunIntakeTime runIntakeTime;
 
     private final Intake intake; // null when one side runs
-    private final IntakeSide side; // null when both sides run
+    private final IntakeModule side; // null when both sides run
 
     /** Both sides. */
     public IntakeFullAction(Stopper stopper, Intake intake, double timeMS, double power) {
@@ -22,11 +22,11 @@ public class IntakeFullAction extends KActionSet {
     }
 
     /** One side only (pattern: PushBall's per-side feed). Lowers that side when it starts. */
-    public IntakeFullAction(Stopper stopper, IntakeSide side, double timeMS, double power) {
+    public IntakeFullAction(Stopper stopper, IntakeModule side, double timeMS, double power) {
         this(stopper, null, side, new RunIntakeTime(side, timeMS, power, true));
     }
 
-    private IntakeFullAction(Stopper stopper, Intake intake, IntakeSide side, RunIntakeTime runIntakeTime) {
+    private IntakeFullAction(Stopper stopper, Intake intake, IntakeModule side, RunIntakeTime runIntakeTime) {
         this.intake = intake;
         this.side = side;
 

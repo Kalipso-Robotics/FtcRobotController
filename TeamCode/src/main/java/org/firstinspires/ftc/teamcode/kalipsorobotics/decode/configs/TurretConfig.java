@@ -23,7 +23,7 @@ public class TurretConfig {
     // ~225 right. Front = 0.2589 + 180 deg of turret (0.3782 of servo, toward higher pos with dir -1). Fine-tune with
     // TurretServoTest (hold bumper + dpad).
     // [2026-11-23] Everything above was measured on the old 50T/15T gears; re-measure after the 60T/20T swap.
-    public static final double SERVO_ZERO_POS = 0.4789; // TODO-measure
+    public static final double SERVO_ZERO_POS = 0.4322; // TODO-measure
     // Positive turret angle = clockwise seen from above (to the robot's right, same as heading). Check with the
     // Test_Shooter "turret" log: a positive turretDeg must swing the turret right; if it swings left, flip this.
     // [2026-11-22] -1: straight ahead needed a HIGHER servo pos than 0.5 to undo "a little right", so higher pos =

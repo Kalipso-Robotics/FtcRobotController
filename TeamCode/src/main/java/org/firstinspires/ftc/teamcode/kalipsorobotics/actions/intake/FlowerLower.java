@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
  * Lowers the Flower arm. The arm may only go down while its intake side is down, so this retries lower() every loop
  * until the interlock allows it, then is done after IntakeConfig.FLOWER_LOWER_MS. If it is still refused after
  * timeoutMS it logs KLog.e Intaking_Flower event=lowerTimeout and finishes anyway (the auto keeps going).
- * Auto: {@code new FlowerLower(intake.getFlower(), 1000)} after an IntakeSideLower on the flower's side.
+ * Auto: {@code new FlowerLower(intake.getFlower(), 1000)} after an IntakeModuleLower on the flower's side.
  * Pattern source: RunIntakeTime (timer) and CloseStopperAction (one servo move).
  */
 public class FlowerLower extends Action {

@@ -45,7 +45,7 @@ public class ShooterInterpolationDataLookupTest {
     }
 
     private static void assertParams(double rps, double hood, IShooterPredictor.ShooterParams p) {
-        assertEquals("rps", rps, p.rps, TOL);
+        assertEquals("rps", rps, p.shooterRPS, TOL);
         assertEquals("hood", hood, p.hoodPosition, TOL);
     }
 
@@ -107,6 +107,22 @@ public class ShooterInterpolationDataLookupTest {
     public void belowMinimum_returnsFirstRow() {
         ShooterInterpolationDataLookup lookup = lookupFor(1000, 40, HOOD_A, 2000, 50, HOOD_B, 3000, 60, HOOD_C);
         assertParams(40, HOOD_A, lookup.predict(100));
+    }
+
+    /** The real tuned table: whole rows, sorted by distance, hood inside the LUT range, RPS under the clamp. */
+    @Test
+    public void realTable_isWellFormed() {
+        double[] rows = savedData;
+        assertEquals("rows of 3", 0, rows.length % 3);
+        for (int i = 0; i < rows.length; i += 3) {
+            if (i > 0) org.junit.Assert.assertTrue("sorted at row " + i / 3, rows[i] > rows[i - 3]);
+            org.junit.Assert.assertTrue("rps row " + i / 3, rows[i + 1] > 0 && rows[i + 1] <= ShooterInterpolationConfig.MAX_RPS);
+            org.junit.Assert.assertTrue("hood row " + i / 3, rows[i + 2] >= ShooterInterpolationConfig.MIN_HOOD
+                    && rows[i + 2] <= ShooterInterpolationConfig.MAX_HOOD);
+        }
+        ShooterInterpolationDataLookup lookup = lookupFor(rows);
+        assertEquals(rows.length / 3, lookup.getDataPointCount());
+        assertParams(rows[1], rows[2], lookup.predict(rows[0])); // exact first row comes back unchanged
     }
 
     @Test

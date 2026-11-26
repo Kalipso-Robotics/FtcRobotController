@@ -24,7 +24,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadFWv3;
+import com.qualcomm.hardware.digitalchickenlabs.OctoQuad;
+
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoConfig;
 
 
 /**
@@ -40,8 +42,8 @@ public class OctoQuadSetupTest extends LinearOpMode
     // #####################################################################################
     static final int DEADWHEEL_PORT_X = 1;
     static final int DEADWHEEL_PORT_Y = 2;
-    static final OctoQuadFWv3.EncoderDirection DEADWHEEL_X_DIR = OctoQuadFWv3.EncoderDirection.FORWARD;
-    static final OctoQuadFWv3.EncoderDirection DEADWHEEL_Y_DIR = OctoQuadFWv3.EncoderDirection.REVERSE;
+    static final OctoQuad.EncoderDirection DEADWHEEL_X_DIR = OctoQuad.EncoderDirection.FORWARD;
+    static final OctoQuad.EncoderDirection DEADWHEEL_Y_DIR = OctoQuad.EncoderDirection.REVERSE;
     static final float X_TICKS_PER_MM = 12.66f;
     static final float Y_TICKS_PER_MM = 12.66f;
     static final float TCP_OFFSET_X_MM = -97.05f;
@@ -60,17 +62,16 @@ public class OctoQuadSetupTest extends LinearOpMode
     MovingStatistics statistics = new MovingStatistics(200);
 
     // Data structure which will store the localizer data read from the OctoQuad
-    OctoQuadFWv3.LocalizerDataBlock localizer = new OctoQuadFWv3.LocalizerDataBlock();
+    OctoQuad.LocalizerDataBlock localizer = new OctoQuad.LocalizerDataBlock();
 
     /*
      * Main OpMode function
      */
     public void runOpMode()
     {
-        // Begin by retrieving a handle to the device from the hardware map. Take care
-        // to specify 'OctoQuadFWv3' as specifying 'OctoQuad' will load the FTC SDK's
-        // built-in driver which only supports firmware v2.
-        OctoQuadFWv3 oq = hardwareMap.get(OctoQuadFWv3.class, "octoquad");
+        // Begin by retrieving a handle to the device from the hardware map.
+        // The SDK 11.0 built-in OctoQuad driver supports firmware v3.
+        OctoQuad oq = hardwareMap.get(OctoQuad.class, OctoConfig.HARDWARE_NAME);
 
         // Crank up the telemetry update frequency to make the data display a bit less laggy
         telemetry.setMsTransmissionInterval(50);
@@ -89,7 +90,7 @@ public class OctoQuadSetupTest extends LinearOpMode
         oq.setLocalizerTcpOffsetMM_Y(TCP_OFFSET_Y_MM);
         oq.setLocalizerImuHeadingScalar(IMU_SCALAR);
         oq.setLocalizerVelocityIntervalMS(25);
-        oq.setI2cRecoveryMode(OctoQuadFWv3.I2cRecoveryMode.MODE_1_PERIPH_RST_ON_FRAME_ERR);
+        oq.setI2cRecoveryMode(OctoQuad.I2cRecoveryMode.MODE_1_PERIPH_RST_ON_FRAME_ERR);
 
         // Resetting the localizer will apply the parameters configured above.
         // This function will NOT block until calibration of the IMU is complete -
@@ -113,8 +114,8 @@ public class OctoQuadSetupTest extends LinearOpMode
          */
         while (!isStopRequested())
         {
-            OctoQuadFWv3.LocalizerStatus status = oq.getLocalizerStatus();
-            if(status != OctoQuadFWv3.LocalizerStatus.RUNNING)
+            OctoQuad.LocalizerStatus status = oq.getLocalizerStatus();
+            if(status != OctoQuad.LocalizerStatus.RUNNING)
             {
                 telemetry.addData("Status", status);
                 telemetry.addLine("Waiting for localizer to report RUNNING status");

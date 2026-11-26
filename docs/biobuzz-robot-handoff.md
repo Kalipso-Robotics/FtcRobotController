@@ -44,16 +44,16 @@ Each commit must compile and pass unit tests so reverting to it is safe.
 ## Architecture (agreed)
 | Layer | Class | Pattern source | Owns |
 |---|---|---|---|
-| Hardware | `IntakeSide` (2 instances, A and B) | `Stopper` / `Tilter` | motor, pivot servo, `lower()`, `raise()`, `run(power)`, `stop()`, `isDown()`. If the flowerMech is on this side, `raise()` raises the flowerMech first |
+| Hardware | `IntakeModule` (2 instances, A and B, each with its own `IntakeModuleConfig`: `IntakeConfig.SIDE_A` / `SIDE_B`) | `Stopper` / `Tilter` | motor, pivot servo, `lower()`, `raise()`, `run(power)`, `stop()`, `isDown()`. If the flowerMech is on this side, `raise()` raises the flowerMech first |
 | Hardware | `Flower` | `Stopper` | one servo; refuses to go down unless its side `isDown()` |
-| Hardware | `Intake` | existing module | both sides + beam-break state; `getSide(IntakeSide)`, `getSideFacing(direction)` |
+| Hardware | `Intake` | existing module | both modules + beam-break state; both-side `run(power)`, `runRPS(rps)`, `lower()`, `raise()`, `isAtRPS()`; `getModule(IntakeSide)`, `getModuleFacing(direction)` |
 | Policy | `IntakeController` interface | `DriveController` | decides which side runs each loop |
 | Policy | `DriveDirectionIntakeController` | `FieldOrientedDrive` | robot-frame X velocity (deadband + hysteresis) picks the side: that side lowers and runs, the other side raises; at capacity both stop and raise |
 | Action | shoot `KActionSet` | `PushBall` / `ShootAllAction` | default: (intakes already stopped at 4 balls) wait RPS ready + turret aligned, run feed briefly, open stopper, feed side A, wait, feed side B, close stopper. Order = `setDependentActions` lines, timings in `IntakeConfig` |
 
-Two instances of `IntakeSide` is deliberate: the hardware is identical, so duplicated behavior would be the bug. Side-specific behavior lives in the controller. Changing "other side raises" must be about one line; a new strategy (driver assist, ball-aware) is a new controller class plus one line in TeleOp.
+Two instances of `IntakeModule` is deliberate: the hardware is identical, so duplicated behavior would be the bug. Side-specific behavior lives in the controller. Changing "other side raises" must be about one line; a new strategy (driver assist, ball-aware) is a new controller class plus one line in TeleOp.
 
-**Flower interlock (critical):** the flowerMech may be down only while its intake is down. If that intake raises for any reason while the flowerMech is down, that is a fault. Enforce it inside `IntakeSide.raise()` and `Flower.lower()`, and unit test it.
+**Flower interlock (critical):** the flowerMech may be down only while its intake is down. If that intake raises for any reason while the flowerMech is down, that is a fault. Enforce it inside `IntakeModule.raise()` and `Flower.lower()`, and unit test it.
 
 ## Shooter specifics
 - **Ball types**: POLLEN 2.8 in, NECTAR 3.6 in, no way to tell them apart yet on the robot. On the field, the Arducam finds them: `BallVision.start(hardwareMap, Detector.TFLITE | COLOR_BLOB, false)` publishes `SharedData.getBallInformation()` (RedDecideAuto, RedThreeTipSoloAuto), and `VisionPickupAction` is V1 pickup: look once, drive straight through the best pile with the intake on, stop when `IntakeFullDetector` (intake motor current, tuned with `IntakeMotorTest`) says full; in AUTO the body stays `AUTO_MIDLINE_MARGIN_MM` short of the center line. V2 (multi-pass + `BallMemory`, beam-break count) is `setMaxStops(>1)` (design: `docs/superpowers/specs/2026-11-22-vision-pickup-design.md`). Nothing tells ball types apart once they are inside the robot. Shoot all at the same RPS/hood per distance. Problems seen: exit power differs by type, and NECTAR shots sag robot voltage. Only 4x POLLEN is somewhat consistent today.
@@ -80,7 +80,7 @@ Why: on the real robot, logcat grep is the fastest way to see what each subsyste
 
 ## Build order
 1. Configs and hardware map names (placeholders marked).
-2. Modules: `IntakeSide`, `Intake`, `Flower`, `Stopper` (keep), `Shooter` (one motor, voltage flag), `Turret` (servo), hood, generic beam breaks. Delete obsolete modules.
+2. Modules: `IntakeModule`, `Intake`, `Flower`, `Stopper` (keep), `Shooter` (one motor, voltage flag), `Turret` (servo), hood, generic beam breaks. Delete obsolete modules.
 3. Small actions per module (lower, raise, run, stop, open/close, aim, spin up), modeled on existing actions.
 4. `IntakeController` + `DriveDirectionIntakeController`.
 5. Shoot `KActionSet`.
@@ -114,7 +114,7 @@ Decisions made during execution (owner answers and orchestrator rulings).
 **Orchestrator rulings (milestone 1)**
 - `Turret` keeps its `getInstance` / `setInstanceNull` shell so about 20 callers do not change. `getAngleRad()` returns the last commanded angle; `isMoving()` is the `KServo` travel-time estimate.
 - `TurretConfig.TURRET_OFFSET_DEG` is a static Dashboard value, so it persists across OpModes; autos zero it at start.
-- Interlocks live in the hardware layer: `Flower.lower()` refuses unless its side `isDown()`; `IntakeSide.raise()` raises the flowerMech first and holds the pivot until the flowerMech is up. A pending raise completes only when `update()` or `raise()` is called again, so the milestone 2 controller must call `intake.update()` every loop.
+- Interlocks live in the hardware layer: `Flower.lower()` refuses unless its side `isDown()`; `IntakeModule.raise()` raises the flowerMech first and holds the pivot until the flowerMech is up. A pending raise completes only when `update()` or `raise()` is called again, so the milestone 2 controller must call `intake.update()` every loop.
 - Each side's pivot is commanded raised at init (the side is spring loaded down and would exceed the starting size).
 - `ShooterInterpolationDataLookup` no longer shares a static list (each `new Shooter` used to append another copy) and returns a safe default for empty and one-row tables.
 - `KMotor.goToRPS` voltage compensation is back on; its strength is `ShooterConfig.VOLTAGE_COMP_EXPONENT` (0 = off, 1 = full).
@@ -132,7 +132,7 @@ Decisions made during execution (owner answers and orchestrator rulings).
 - GP2 B is now the flowerMech toggle. The old GP2-B odometry-turret-align toggle is gone: odometry align is always on, and GP2 X still toggles turret align overall. The driver's flowerMech intent survives side A being raised: the interlock lifts the flowerMech, and TeleOp lowers it again once A is back down.
 - The interim `intake.lower()` in `RunIntake` / `RunIntakeTime(both)` stays for the autos until milestone 3. TeleOp no longer uses `RunIntake`.
 - Shoot flow: no pre-feed. `PushBall` = intake stop → open stopper → feed A → wait → feed B → close stopper. Feeding happens with both sides raised (the controller raises at full); the transfer wheels share the motor, **confirm on robot (Ken)**.
-- Feed RPS hold (2026-11-24): `PushBall` feedA/feedB run `IntakeSide.runRPS` (kF*target + kP*error in transfer motor RPS, voltage-scaled, per-side gains `IntakeConfig.FEED_KF_A/B`, `FEED_KP_A/B`) when `FEED_RPS > 0`; pre-feed stays open loop. RPS uses `ModuleConfig.INTAKE_TICKS_PER_REV` (103.8, goBILDA 1620 rpm, ~27 RPS free), not the hub config's motor type, which read wrong (~0.7 RPS at full). Measure kF free running (no balls): measured against the closed stopper it came out ~2.5x too high, so the loop overdrove and target changes barely moved the speed. Tune per side in `IntakeTest` (X = hold selected side, B = both; kF est + dip telemetry), then retune `FEED_A_MS`/`FEED_B_MS`. `RPSPredictionDataCollector`: RT and shots both use `FEED_RPS` (LT+Y/X steps it).
+- Feed RPS hold (2026-11-24): `PushBall` feedA/feedB run `IntakeModule.runRPS` (kF*target + kP*error in transfer motor RPS, voltage-scaled, per-side gains `IntakeConfig.SIDE_A` / `SIDE_B` `.kF`, `.kP`) when `FEED_RPS > 0`; pre-feed stays open loop. RPS uses `ModuleConfig.INTAKE_TICKS_PER_REV` (103.8, goBILDA 1620 rpm, ~27 RPS free), not the hub config's motor type, which read wrong (~0.7 RPS at full). Measure kF free running (no balls): measured against the closed stopper it came out ~2.5x too high, so the loop overdrove and target changes barely moved the speed. Tune per side in `IntakeTest` (X = hold selected side, B = both; kF est + dip telemetry), then retune `FEED_A_MS`/`FEED_B_MS`. `RPSPredictionDataCollector`: RT and shots both use `FEED_RPS` (LT+Y/X steps it).
 - `ShooterReady` logs are retagged to `Shooting_ShooterReady`. `ShootAllAction` logs use `Shooting_ShootAction`.
 - `ShooterDataCollector` writes rows ready to paste into `ShooterInterpolationConfig.shooterData` through `KFileWriter` instead of `ShotLogger`, because `ShotLogger` has no hit/miss and a different column set.
 - New `TODO-measure` for the milestone 3 checklist: `IntakeConfig.FEED_A_MS` (400), `FEED_B_MS` (400), `WAIT_BETWEEN_SIDES_MS` (150), `SIDE_SWITCH_VX_MM_PER_S` (100); `ShooterConfig.kf` from `MotorPowerRPSDataCollector` at ~0.8 power on a full battery.
