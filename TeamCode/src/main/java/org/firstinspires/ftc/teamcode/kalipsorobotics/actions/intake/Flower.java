@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 /**
  * The two Flowers on our side (own frame, mm).
@@ -17,16 +18,24 @@ public enum Flower {
     // Flower point = where the robot CENTRE stops on the flower, not the pile at the wall (that drove the robot into the wall).
     // Stop = flower base (127 mm off the wall) + half the robot length (DriveTrain.ROBOT_LENGTH 400 / 2) = 327 mm off the wall.
     // TODO-measure on the field: the Flower arm must still reach the pile from here.
-    FLOWER_1(new Point(1196, 327),  // pile at (1196, 62) against the wall
+    /*FLOWER_1(new Point(1196, 327),  // pile at (1196, 62) against the wall
             new Point(1196, 507), 90,     // setup point, setup heading
-            90,                      // heading at the flower
+            90,// heading at the flower
             new Point(1196, 507), 90,    // exit point, exit heading
-            1000),                  // flower lower timeout ms
-    FLOWER_2(new Point(327, 2385),  // pile at (64, 2385) against the wall
+            1000),                 // flower lower timeout ms
+
+     */
+    FLOWER_1(new Point(1196, 327),  // pile at (64, 2385) against the wall
+            new Point(507, 2385), 90,
+            90,
+            new Point(1196, 507), 90,
+            1000),
+    FLOWER_2(new Point(667, 2385),  // pile at (64, 2385) against the wall
             new Point(507, 2385), 0,
             0,
             new Point(507, 2385), 0,
             1000);
+
 
     private final Point point;
     private final Point setupPoint;

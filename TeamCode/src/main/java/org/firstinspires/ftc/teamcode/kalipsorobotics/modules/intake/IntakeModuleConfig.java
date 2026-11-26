@@ -13,16 +13,18 @@ public class IntakeModuleConfig {
 
     public double pivotDownPos; // measured with IntakeTest
     public double pivotUpPos;
+    public double initPivotPos;
     public double kF; // feed closed loop, power per RPS = 1 / free RPS at full power; read "kF est" in IntakeTest
     public double kP; // power per RPS of error; raise until the loaded dip shrinks without hunting
 
     public IntakeModuleConfig(String motorName, String pivotName, DcMotorSimple.Direction direction,
-                              double pivotDownPos, double pivotUpPos, double kF, double kP) {
+                              double pivotDownPos, double pivotUpPos, double initPivotPos, double kF, double kP) {
         this.motorName = motorName;
         this.pivotName = pivotName;
         this.direction = direction;
         this.pivotDownPos = pivotDownPos;
         this.pivotUpPos = pivotUpPos;
+        this.initPivotPos = initPivotPos;
         this.kF = kF;
         this.kP = kP;
     }

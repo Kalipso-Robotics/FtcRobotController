@@ -11,9 +11,9 @@ public class IntakeConfig {
     // Per-side settings. Side A is the front (+X, odometry side), side B the back.
     // Pivot: 0.44 is all the way up for A's servo, 0.55 for B's (init limits). Feed kF / kP: see FEED_RPS below.
     public static IntakeModuleConfig SIDE_A = new IntakeModuleConfig("intakeFront", "intakePivot1",
-            DcMotorSimple.Direction.REVERSE, 0.68, 0.58, 0.15598, 0.16623); // TODO-measure: kF, kP
+            DcMotorSimple.Direction.REVERSE, 0.68, 0.58, 0.44, 0.15598, 0.16623); // TODO-measure: kF, kP
     public static IntakeModuleConfig SIDE_B = new IntakeModuleConfig("intakeBack", "intakePivot2",
-            DcMotorSimple.Direction.FORWARD, 0.30, 0.420, 0.11183, 0.20235); // TODO-measure: kF, kP
+            DcMotorSimple.Direction.FORWARD, 0.30, 0.420, 0.55, 0.11183, 0.20235); // TODO-measure: kF, kP
 
     public static double intakeBallTimeMS = 5250; // TODO-measure
     public static double intakePower = 1; // TODO-measure: picking balls up

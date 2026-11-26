@@ -146,6 +146,7 @@ public class ThreeTipSoloAuto extends KOpMode {
         FullFlowerAction trip1FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, Flower.FLOWER_2);
         trip1FlowerIntake.setName("trip1FlowerIntake");
         trip1FlowerIntake.setDependentActions(trip0Shoot);
+        trip1FlowerIntake.getFlowerLower().setIsDone(true);
         redThreeTipSoloAuto.addAction(trip1FlowerIntake);
 
         IPurePursuitAction trip1GoToShoot = new AdaptivePurePursuitAction(driveTrain);
