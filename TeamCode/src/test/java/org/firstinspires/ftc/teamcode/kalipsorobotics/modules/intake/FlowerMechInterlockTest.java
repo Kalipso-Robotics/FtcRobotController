@@ -4,14 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,20 +16,19 @@ import java.lang.reflect.Proxy;
 import java.util.function.BooleanSupplier;
 
 /**
- * The flower may be down only while its intake side is down. Pivot travel is time-estimated by
- * KServo (very fast speed here); the CR flower runs for FLOWER_LOWER_MS / FLOWER_RAISE_MS
- * so "the pivot has not moved yet" can be checked right after a raise.
+ * The flower may be down only while its intake side is down: the side's raise() raises the flower (through its KServo)
+ * first and holds the pivot until the flower's travel estimate is over. Pivot travel is very fast here; the flower
+ * servo is slower (FLOWER_DEG_PER_SEC: ~125 ms for a full move), so "the pivot has not moved yet" can be checked
+ * right after a raise. Lowering the flower itself is a plain KServoAutoAction / setTargetPosition (no interlock in
+ * FlowerMech): callers only lower it while the side is down.
  */
 public class FlowerMechInterlockTest {
 
     private static final double FAST_DEG_PER_SEC = 1e6;
+    private static final double FLOWER_DEG_PER_SEC = 2550; // 255 deg range: 100 ms per full move, x1.25 margin in KServo
 
     private Servo pivotServoA;
-    private CRServo flowerServo;
-    private final double lowerMs = IntakeConfig.FLOWER_LOWER_MS;
-    private final double raiseMs = IntakeConfig.FLOWER_RAISE_MS;
-    private final double downPower = IntakeConfig.FLOWER_DOWN_POWER;
-    private final double upPower = IntakeConfig.FLOWER_UP_POWER;
+    private Servo flowerServo;
     private DcMotor motorA;
     private IntakeModule sideA;
     private FlowerMech flowerMech;
@@ -40,53 +36,29 @@ public class FlowerMechInterlockTest {
     @Before
     public void setUp() throws InterruptedException {
         pivotServoA = fakeServo();
-        IntakeConfig.FLOWER_LOWER_MS = 60;
-        IntakeConfig.FLOWER_RAISE_MS = 30;
-        IntakeConfig.FLOWER_DOWN_POWER = -0.5; // real powers: at the 0 default every power check would pass
-        IntakeConfig.FLOWER_UP_POWER = 0.5;
-        flowerServo = fakeCRServo();
+        flowerServo = fakeServo();
         motorA = fakeMotor();
         sideA = new IntakeModule(IntakeSide.FRONT, motorA, new KServo(pivotServoA, FAST_DEG_PER_SEC, 255, 0, false), IntakeConfig.SIDE_A);
-        flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
+        flowerMech = new FlowerMech(new KServo(flowerServo, FLOWER_DEG_PER_SEC, 255, 0, false), sideA);
         waitUntil(flowerMech::isUp);
     }
 
-    @After
-    public void tearDown() {
-        IntakeConfig.FLOWER_LOWER_MS = lowerMs;
-        IntakeConfig.FLOWER_RAISE_MS = raiseMs;
-        IntakeConfig.FLOWER_DOWN_POWER = downPower;
-        IntakeConfig.FLOWER_UP_POWER = upPower;
-    }
-
-    @Test
-    public void flowerRefusesToLower_whileSideIsUp() {
-        assertFalse(flowerMech.lower());
-        assertFalse(flowerMech.isDown());
-        assertEquals(0, flowerServo.getPower(), 1e-9);
-    }
-
-    @Test
-    public void flowerLowers_onceSideIsDown() throws InterruptedException {
+    private void lowerSideThenFlower() throws InterruptedException {
         sideA.lower();
         waitUntil(sideA::isDown);
-
-        assertTrue(flowerMech.lower());
-        assertEquals(IntakeConfig.FLOWER_DOWN_POWER, flowerServo.getPower(), 1e-9);
-        waitUntil(flowerMech::isDown);
+        flowerMech.getServo().setTargetPosition(FlowerMech.DOWN_POS);
+        waitUntil(() -> flowerMech.isDown() && flowerMech.getServo().isDone());
     }
 
     @Test
     public void raisingSideWithFlowerDown_raisesFlowerFirst_thenPivotOnLaterUpdate() throws InterruptedException {
-        sideA.lower();
-        waitUntil(sideA::isDown);
-        assertTrue(flowerMech.lower());
-        waitUntil(flowerMech::isDown);
+        lowerSideThenFlower();
 
         sideA.raise();
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
-        assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotServoA.getPosition(), 1e-9);
-        assertFalse("flower must not go back down while its side is raising", flowerMech.lower());
+        assertEquals(FlowerMech.UP_POS, flowerServo.getPosition(), 1e-9);
+        assertEquals("pivot waits for the flower's travel", IntakeConfig.SIDE_A.pivotDownPos, pivotServoA.getPosition(), 1e-9);
+        sideA.update();
+        assertEquals("still travelling: pivot still down", IntakeConfig.SIDE_A.pivotDownPos, pivotServoA.getPosition(), 1e-9);
 
         // No further raise() from the caller: update() alone finishes the raise once the flower is up.
         waitUntil(() -> {
@@ -121,9 +93,7 @@ public class FlowerMechInterlockTest {
         waitUntil(sideA::isUp);
         sideA.lower();
         assertFalse(sideA.isUp());
-        waitUntil(sideA::isDown);
-        assertTrue(flowerMech.lower());
-        waitUntil(flowerMech::isDown);
+        lowerSideThenFlower();
         sideA.raise(); // deferred: flower is going up first
         assertFalse(sideA.isUp());
         waitUntil(() -> {
@@ -134,10 +104,7 @@ public class FlowerMechInterlockTest {
 
     @Test
     public void setPivotPosition_refusesToLeaveDown_whileFlowerIsDown() throws InterruptedException {
-        sideA.lower();
-        waitUntil(sideA::isDown);
-        assertTrue(flowerMech.lower());
-        waitUntil(flowerMech::isDown);
+        lowerSideThenFlower();
 
         assertFalse(sideA.setPivotPosition(0.5));
         assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotServoA.getPosition(), 1e-9);
@@ -153,64 +120,12 @@ public class FlowerMechInterlockTest {
     }
 
     @Test
-    public void flowerSetPower_refusesTowardDown_whileSideIsUp() {
-        assertFalse(flowerMech.setPower(IntakeConfig.FLOWER_DOWN_POWER));
-        assertEquals(0, flowerServo.getPower(), 1e-9);
-        assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_UP_POWER));
-        assertTrue(flowerMech.setPower(0));
-    }
-
-    @Test
-    public void flowerSetPower_towardDown_onceSideIsDown_thenBackUpLetsPivotLeave() throws InterruptedException {
-        sideA.lower();
-        waitUntil(sideA::isDown);
-        assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_DOWN_POWER));
-        assertEquals(IntakeConfig.FLOWER_DOWN_POWER, flowerServo.getPower(), 1e-9);
-        assertFalse(flowerMech.isUp());
-        assertFalse(sideA.setPivotPosition(0.5));
-
-        assertTrue(flowerMech.setPower(IntakeConfig.FLOWER_UP_POWER * 0.5));
-        waitUntil(flowerMech::isUp);
+    public void setPivotPosition_waitsForFlowerTravel_afterFlowerCommandedUp() throws InterruptedException {
+        lowerSideThenFlower();
+        flowerMech.getServo().setTargetPosition(FlowerMech.UP_POS);
+        assertFalse("flower still travelling up", sideA.setPivotPosition(0.5));
+        waitUntil(() -> flowerMech.getServo().isDone());
         assertTrue(sideA.setPivotPosition(0.5));
-    }
-
-    @Test
-    public void timedMove_usesItsOwnTime_thenCutsPower() throws InterruptedException {
-        assertEquals("no power at init", 0, flowerServo.getPower(), 1e-9);
-        sideA.lower();
-        waitUntil(sideA::isDown);
-
-        long start = System.nanoTime();
-        assertTrue(flowerMech.lower());
-        sideA.update();
-        assertEquals(IntakeConfig.FLOWER_DOWN_POWER, flowerServo.getPower(), 1e-9);
-        waitUntil(() -> {
-            sideA.update();
-            return flowerServo.getPower() == 0;
-        });
-        assertTrue(System.nanoTime() - start >= IntakeConfig.FLOWER_LOWER_MS * 1e6);
-        assertTrue(flowerMech.isDown());
-
-        IntakeConfig.FLOWER_LOWER_MS = 5000; // raise must not use the lower time
-        flowerMech.raise();
-        sideA.update();
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
-        waitUntil(() -> {
-            sideA.update();
-            return flowerServo.getPower() == 0;
-        });
-        assertTrue(flowerMech.isUp());
-    }
-
-    @Test
-    public void manualPower_isNotCutByTheTimer() throws InterruptedException {
-        sideA.lower();
-        waitUntil(sideA::isDown);
-        assertTrue(flowerMech.lower());
-        assertTrue(flowerMech.setPower(-0.3));
-        waitUntil(flowerMech::isDown);
-        sideA.update();
-        assertEquals(-0.3, flowerServo.getPower(), 1e-9);
     }
 
     private static void waitUntil(BooleanSupplier condition) throws InterruptedException {
@@ -223,10 +138,6 @@ public class FlowerMechInterlockTest {
 
     public static Servo fakeServo() {
         return fake(Servo.class, "setPosition", "getPosition");
-    }
-
-    public static CRServo fakeCRServo() {
-        return fake(CRServo.class, "setPower", "getPower");
     }
 
     public static DcMotor fakeMotor() {

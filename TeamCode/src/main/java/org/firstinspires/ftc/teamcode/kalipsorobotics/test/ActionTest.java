@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerLower;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerRaise;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeModuleLower;
@@ -91,9 +91,9 @@ public class ActionTest extends KOpMode {
         } else if (kGamePad1.isButtonAFirstPressed()) {
             startIntake(new IntakeStow(intake), "stow");
         } else if (kGamePad1.isButtonXFirstPressed()) {
-            startIntake(new FlowerLower(intake.getFlower(), 1000), "flowerDown");
+            startIntake(new KServoAutoAction(intake.getFlower().getServo(), FlowerMech.DOWN_POS), "flowerDown");
         } else if (kGamePad1.isButtonYFirstPressed()) {
-            startIntake(new FlowerRaise(intake.getFlower()), "flowerUp");
+            startIntake(new KServoAutoAction(intake.getFlower().getServo(), FlowerMech.UP_POS), "flowerUp");
         } else if (kGamePad1.isLeftBumperFirstPressed()) {
             startStopper(new OpenStopperAction(stopper), "stopperOpen");
         } else if (kGamePad1.isLeftTriggerFirstPressed()) {
@@ -162,7 +162,7 @@ public class ActionTest extends KOpMode {
         }
         telemetry.addData("pivots", "A %.3f %s  B %.3f %s", sideA.getPivotPosition(), sideA.isDown() ? "down" : "up",
                 sideB.getPivotPosition(), sideB.isDown() ? "down" : "up");
-        telemetry.addData("flower", "power %.2f", intake.getFlower().getPower());
+        telemetry.addData("flower", "pos %.2f", intake.getFlower().getServo().getPosition());
         telemetry.addData("stopper", "%.3f", stopper.getStopper().getTargetPosition());
         telemetry.addData("hood", "%.4f", shooter.getHood().getTargetPosition());
         telemetry.addData("turret", "%.1f deg", turret.getAngleDeg());

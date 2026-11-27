@@ -43,6 +43,9 @@ public class IntakeConfig {
     public static double FEED_GATE_TIMEOUT_MS = 1500; // TODO-measure
     // ShootAllAction: how long the stopper stays open (IntakeRun feeding) before it closes and the intake stops.
     public static double shootTimeMS = 500; // TODO-measure: ms
+    // IntakeRun (ShootAllAction's feed): side B's target RPS = side A's target * this. 1 = both sides the same speed.
+    // < 1 slows side B relative to A, > 1 speeds it up. Changes shot consistency; tune with IntakeRatioShotTest.
+    public static double FEED_SIDE_B_RATIO = 1.0; // TODO-measure
 
     // Shooter RPS compensation (PushBall callers that pass a shooter error: ShootAllAction, so TeleOp too when on): during
     // the feed the transfer target becomes FEED_RPS + FEED_RPS_COMP_GAIN * (shooter target - actual RPS), so a sagging

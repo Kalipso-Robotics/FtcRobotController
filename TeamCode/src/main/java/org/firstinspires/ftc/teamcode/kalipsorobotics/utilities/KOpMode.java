@@ -87,8 +87,7 @@ public abstract class KOpMode extends LinearOpMode {
         while (!isStarted() && !isStopRequested()) {
             AdaptivePurePursuitAction.runPrecomputeStepForAll();
             initLoop();
-            telemetry.addLine("INIT DONE");
-            telemetry.addLine(AdaptivePurePursuitAction.precomputeStatus());
+            telemetry.addLine(AdaptivePurePursuitAction.precomputeStatus()); // first line: says whether it is safe to press START
             telemetry.update();
             idle();
         }

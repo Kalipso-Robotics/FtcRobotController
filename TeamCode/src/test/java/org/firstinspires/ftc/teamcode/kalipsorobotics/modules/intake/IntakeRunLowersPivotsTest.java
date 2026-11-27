@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +25,7 @@ public class IntakeRunLowersPivotsTest {
         pivotB = FlowerMechInterlockTest.fakeServo();
         IntakeModule sideA = new IntakeModule(IntakeSide.FRONT, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotA), IntakeConfig.SIDE_A);
         IntakeModule sideB = new IntakeModule(IntakeSide.BACK, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotB), IntakeConfig.SIDE_B);
-        intake = new Intake(sideA, sideB, new FlowerMech(new KCRServo(FlowerMechInterlockTest.fakeCRServo(), false), sideA));
+        intake = new Intake(sideA, sideB, new FlowerMech(new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false), sideA));
     }
 
     private void assertBothDown() {

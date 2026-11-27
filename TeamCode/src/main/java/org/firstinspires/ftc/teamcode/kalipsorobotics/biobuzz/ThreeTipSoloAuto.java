@@ -5,11 +5,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.VisionPickupAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerLower;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerRaise;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
@@ -58,14 +57,14 @@ public class ThreeTipSoloAuto extends KOpMode {
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
 
-    final Position ROBOT_START_POS = new Position(932, 3428, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
-    final Point PARK_POINT = new Point(392, 1371);
+    final Position ROBOT_START_POS = new Position(1006, 3416, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
+    final Point PARK_POINT = new Point(188, 1360);
     final double AUTO_LENGTH_MS = 30000;
     static final boolean USE_LIMELIGHT = false; // nothing in this auto reads the Limelight yet; true = start it anyway
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
     // Flowers sit 63.5 mm off the wall, so the robot stops on the field side (+), not past the wall (-).
-    static final private double FLOWER_INTAKE_OFFSET_MM = 280;
+    static final private double FLOWER_INTAKE_OFFSET_MM = 280 + 250;
     static final private double FLOWER_EXIT_OFFSET_MM = 400;
     static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + FLOWER_INTAKE_OFFSET_MM, Math.toRadians(90));
     final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + FLOWER_EXIT_OFFSET_MM, Math.toRadians(90));
@@ -129,7 +128,12 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip0Shoot.setDependentActions(delayBeforeStart);
         redThreeTipSoloAuto.addAction(trip0Shoot);
 
-        FlowerLower flowerLowerTrip1 = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
+//        FlowerLower flowerLowerTrip1 = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
+//        flowerLowerTrip1.setName("flowerLowerTrip1");
+//        flowerLowerTrip1.setDependentActions(delayBeforeStart);
+//        redThreeTipSoloAuto.addAction(flowerLowerTrip1);
+
+        KServoAutoAction flowerLowerTrip1 = new KServoAutoAction(flowerMech.getServo(), FlowerMech.DOWN_POS);
         flowerLowerTrip1.setName("flowerLowerTrip1");
         flowerLowerTrip1.setDependentActions(delayBeforeStart);
         redThreeTipSoloAuto.addAction(flowerLowerTrip1);
@@ -191,11 +195,6 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip2FlowerIntake.setDependentActions(trip1Shoot);
         redThreeTipSoloAuto.addAction(trip2FlowerIntake);
 
-        FlowerRaise flowerRaiseTrip2 = new FlowerRaise(flowerMech);
-        flowerRaiseTrip2.setName("flowerRaiseTrip2");
-        flowerRaiseTrip2.setDependentActions(trip2FlowerIntake);
-        redThreeTipSoloAuto.addAction(flowerRaiseTrip2);
-
         // TODO-check: added so the robot is at (1037, 397) for this shot, same as trip 1
         IPurePursuitAction trip2GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip2GoToShoot.setMaxTimeOutMS(1500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
@@ -203,6 +202,16 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip2GoToShoot.addPosition(1052, 543, 100);
         trip2GoToShoot.setDependentActions(trip2FlowerIntake);
         redThreeTipSoloAuto.addAction(trip2GoToShoot);
+
+//        FlowerRaise flowerRaiseTrip2 = new FlowerRaise(flowerMech);
+//        flowerRaiseTrip2.setName("flowerRaiseTrip2");
+//        flowerRaiseTrip2.setDependentActions(trip2GoToShoot);
+//        redThreeTipSoloAuto.addAction(flowerRaiseTrip2);
+
+        KServoAutoAction flowerRaiseTrip2 = new KServoAutoAction(flowerMech.getServo(), FlowerMech.UP_POS);
+        flowerRaiseTrip2.setName("flowerRaiseTrip2");
+        flowerRaiseTrip2.setDependentActions(delayBeforeStart);
+        redThreeTipSoloAuto.addAction(flowerRaiseTrip2);
 
         ShootAllAction trip2Shoot = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlign);
         trip2Shoot.setName("trip2Shoot");

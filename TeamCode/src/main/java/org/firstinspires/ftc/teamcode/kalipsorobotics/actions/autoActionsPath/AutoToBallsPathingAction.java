@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
@@ -238,10 +239,9 @@ public class AutoToBallsPathingAction extends Action {
             if (useFlower && !flowerLowered && distanceToStop() <= INTAKE_START_DISTANCE_MM) {
                 double toFlower = Point.distance(currentRobotPoint(), flower);
                 if (shouldLowerFlower(false, pickupSide.isDown(), toFlower)) {
-                    flowerLowered = intake.getFlower().lower();
-                    if (flowerLowered) {
-                        KLog.d(TAG, () -> "name=" + getName() + " event=flowerLower reason=pickupFlower");
-                    }
+                    intake.getFlower().getServo().setTargetPosition(FlowerMech.DOWN_POS); // shouldLowerFlower checked the side is down
+                    flowerLowered = true;
+                    KLog.d(TAG, () -> "name=" + getName() + " event=flowerLower reason=pickupFlower");
                 } else if (toFlower < FLOWER_DEPLOY_CLEARANCE_MM) {
                     useFlower = false; // too close to drop the arm without landing on the Flower
                     KLog.e(TAG, "name=" + getName() + " event=flowerSkipped reason=tooClose dist=" + toFlower);
@@ -316,7 +316,7 @@ public class AutoToBallsPathingAction extends Action {
         }
         if (flowerLowered) {
             flowerLowered = false;
-            intake.getFlower().raise();
+            intake.getFlower().getServo().setTargetPosition(FlowerMech.UP_POS);
             KLog.d(TAG, () -> "name=" + getName() + " event=flowerRaise reason=pickupDone");
         }
     }

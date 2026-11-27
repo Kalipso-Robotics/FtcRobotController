@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
@@ -20,7 +22,7 @@ public class IntakeStow extends KActionSet {
         stop.setName("stowStop");
         this.addAction(stop);
 
-        FlowerRaise flowerRaise = new FlowerRaise(intake.getFlower());
+        KServoAutoAction flowerRaise = new KServoAutoAction(intake.getFlower().getServo(), FlowerMech.UP_POS);
         flowerRaise.setName("stowFlowerRaise");
         flowerRaise.setDependentActions(stop);
         this.addAction(flowerRaise);

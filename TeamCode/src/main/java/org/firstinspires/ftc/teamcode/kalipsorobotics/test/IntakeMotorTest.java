@@ -69,10 +69,14 @@ public class IntakeMotorTest extends KOpMode {
             }
             if (kGamePad2.isButtonBFirstPressed()) {
                 if (flowerMech.isDown()) {
-                    flowerMech.raise();
+                    flowerMech.getServo().setTargetPosition(FlowerMech.UP_POS);
                     KLog.d(TAG, "event=flowerRaise");
                 } else {
-                    boolean lowered = flowerMech.lower();
+                    // interlock: only lower while the flower's intake side is down
+                    boolean lowered = intake.getModule(ModuleConfig.FLOWER_SIDE).isDown();
+                    if (lowered) {
+                        flowerMech.getServo().setTargetPosition(FlowerMech.DOWN_POS);
+                    }
                     KLog.d(TAG, () -> "event=flowerLower accepted=" + lowered);
                 }
             }

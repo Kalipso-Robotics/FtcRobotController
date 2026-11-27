@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
@@ -14,7 +13,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechI
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.junit.After;
@@ -33,7 +31,7 @@ public class DriveDirectionIntakeControllerTest {
     private static final double T = 100;
 
     private Servo pivotA, pivotB;
-    private CRServo flowerServo;
+    private Servo flowerServo;
     private DcMotor motorA, motorB;
     private IntakeModule sideA, sideB;
     private FlowerMech flowerMech;
@@ -48,12 +46,12 @@ public class DriveDirectionIntakeControllerTest {
         IntakeConfig.SIDE_SWITCH_CONFIRM_MS = 0; // instant switch unless a test sets it
         pivotA = FlowerMechInterlockTest.fakeServo();
         pivotB = FlowerMechInterlockTest.fakeServo();
-        flowerServo = FlowerMechInterlockTest.fakeCRServo();
+        flowerServo = FlowerMechInterlockTest.fakeServo();
         motorA = FlowerMechInterlockTest.fakeMotor();
         motorB = FlowerMechInterlockTest.fakeMotor();
         sideA = new IntakeModule(FRONT, motorA, new KServo(pivotA, FAST, 255, 0, false), IntakeConfig.SIDE_A);
         sideB = new IntakeModule(BACK, motorB, new KServo(pivotB, FAST, 255, 0, false), IntakeConfig.SIDE_B);
-        flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
+        flowerMech = new FlowerMech(new KServo(flowerServo, 1e6, 255, 0, false), sideA);
         waitUntil(flowerMech::isUp);
         detector = new ForcedDetector();
         controller = new DriveDirectionIntakeController(new Intake(sideA, sideB, flowerMech), detector);
@@ -151,13 +149,13 @@ public class DriveDirectionIntakeControllerTest {
         drive(1000, 0, 0);
         controller.update();
         waitUntil(sideA::isDown);
-        assertTrue(flowerMech.lower());
+        flowerMech.getServo().setTargetPosition(FlowerMech.DOWN_POS);
         waitUntil(flowerMech::isDown);
 
         drive(-1000, 0, 0);
         controller.update();
         assertEquals(BACK, controller.getSelectedSide());
-        assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
+        assertEquals(FlowerMech.UP_POS, flowerServo.getPosition(), 1e-9);
         assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotA.getPosition(), 1e-9);
         waitUntil(() -> {
             controller.update();

@@ -8,7 +8,6 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Inta
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
@@ -20,7 +19,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechI
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.junit.After;
@@ -32,17 +31,13 @@ import java.lang.reflect.Proxy;
 /** The one-line auto intake actions: lower/raise/stow a side, the Flower arm, and the lowerFirst runs. */
 public class IntakeActionsTest {
     private final double pivotMs = IntakeConfig.PIVOT_MOVE_MS;
-    private final double lowerMs = IntakeConfig.FLOWER_LOWER_MS;
-    private final double raiseMs = IntakeConfig.FLOWER_RAISE_MS;
-    private final double downPower = IntakeConfig.FLOWER_DOWN_POWER;
-    private final double upPower = IntakeConfig.FLOWER_UP_POWER;
     private final double kfA = IntakeConfig.SIDE_A.kF, kfB = IntakeConfig.SIDE_B.kF;
     private final double kpA = IntakeConfig.SIDE_A.kP, kpB = IntakeConfig.SIDE_B.kP;
     private final double voltage = SharedData.getVoltage();
 
     private final Servo pivotServoA = FlowerMechInterlockTest.fakeServo();
     private final Servo pivotServoB = FlowerMechInterlockTest.fakeServo();
-    private final CRServo flowerServo = FlowerMechInterlockTest.fakeCRServo();
+    private final Servo flowerServo = FlowerMechInterlockTest.fakeServo();
     private final DcMotor motorA = FlowerMechInterlockTest.fakeMotor();
     private final DcMotor motorB = FlowerMechInterlockTest.fakeMotor();
     private IntakeModule sideA;
@@ -53,10 +48,6 @@ public class IntakeActionsTest {
     @Before
     public void setUp() {
         IntakeConfig.PIVOT_MOVE_MS = 20;
-        IntakeConfig.FLOWER_LOWER_MS = 20;
-        IntakeConfig.FLOWER_RAISE_MS = 20;
-        IntakeConfig.FLOWER_DOWN_POWER = -0.5; // real powers: at the 0 default every power check would pass
-        IntakeConfig.FLOWER_UP_POWER = 0.5;
         // Feed RPS loop (IntakeModule.runRPS): different gains per side so a side mix-up fails.
         SharedData.setVoltage(ShooterInterpolationConfig.DEFAULT_VOLTAGE); // voltageScale = 1
         IntakeConfig.SIDE_A.kF = 0.05;
@@ -65,17 +56,13 @@ public class IntakeActionsTest {
         IntakeConfig.SIDE_B.kP = 0;
         sideA = new IntakeModule(FRONT, motorA, new KServo(pivotServoA, 1e6, 255, 0, false), IntakeConfig.SIDE_A);
         sideB = new IntakeModule(BACK, motorB, new KServo(pivotServoB, 1e6, 255, 0, false), IntakeConfig.SIDE_B);
-        flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
+        flowerMech = new FlowerMech(new KServo(flowerServo, 1e6, 255, 0, false), sideA);
         intake = new Intake(sideA, sideB, flowerMech);
     }
 
     @After
     public void restoreConfig() {
         IntakeConfig.PIVOT_MOVE_MS = pivotMs;
-        IntakeConfig.FLOWER_LOWER_MS = lowerMs;
-        IntakeConfig.FLOWER_RAISE_MS = raiseMs;
-        IntakeConfig.FLOWER_DOWN_POWER = downPower;
-        IntakeConfig.FLOWER_UP_POWER = upPower;
         IntakeConfig.SIDE_A.kF = kfA;
         IntakeConfig.SIDE_B.kF = kfB;
         IntakeConfig.SIDE_A.kP = kpA;
@@ -211,9 +198,9 @@ public class IntakeActionsTest {
     @Test
     public void sideRaise_raisesFlowerFirstThenSide() throws Exception {
         runToDone(new IntakeModuleLower(sideA));
-        assertTrue(flowerMech.lower());
+        flowerMech.getServo().setTargetPosition(FlowerMech.DOWN_POS);
         runToDone(new IntakeModuleRaise(sideA));
-        assertEquals(0, flowerServo.getPower(), 1e-9);
+        assertEquals(FlowerMech.UP_POS, flowerServo.getPosition(), 1e-9);
         assertEquals(IntakeConfig.SIDE_A.pivotUpPos, pivotServoA.getPosition(), 1e-9);
         assertTrue(sideA.isUp());
     }
@@ -222,12 +209,12 @@ public class IntakeActionsTest {
     public void stow_stopsAndRaisesEverything() throws Exception {
         runToDone(new IntakeModuleLower(sideA));
         runToDone(new IntakeModuleLower(sideB));
-        assertTrue(flowerMech.lower());
+        flowerMech.getServo().setTargetPosition(FlowerMech.DOWN_POS);
         intake.run(1);
         runToDone(new IntakeStow(intake));
         assertEquals(0, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
-        assertEquals(0, flowerServo.getPower(), 1e-9);
+        assertEquals(FlowerMech.UP_POS, flowerServo.getPosition(), 1e-9);
         assertEquals(IntakeConfig.SIDE_A.pivotUpPos, pivotServoA.getPosition(), 1e-9);
         assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotServoB.getPosition(), 1e-9);
     }
@@ -241,22 +228,14 @@ public class IntakeActionsTest {
     }
 
     @Test
-    public void flowerLower_timesOutWhileSideIsUp() throws Exception {
-        long start = System.currentTimeMillis();
-        runToDone(new FlowerLower(flowerMech, 40));
-        assertTrue(System.currentTimeMillis() - start >= 40);
-        assertEquals(0, flowerServo.getPower(), 1e-9);
-    }
-
-    @Test
     public void flowerLower_thenRaise_onceSideIsDown() throws Exception {
         runToDone(new IntakeModuleLower(sideA));
-        runToDone(new FlowerLower(flowerMech, 1000));
+        runToDone(new KServoAutoAction(flowerMech.getServo(), FlowerMech.DOWN_POS));
         assertTrue(flowerMech.isDown());
-        assertEquals(0, flowerServo.getPower(), 1e-9);
-        runToDone(new FlowerRaise(flowerMech));
+        assertEquals(FlowerMech.DOWN_POS, flowerServo.getPosition(), 1e-9);
+        runToDone(new KServoAutoAction(flowerMech.getServo(), FlowerMech.UP_POS));
         assertTrue(flowerMech.isUp());
-        assertEquals(0, flowerServo.getPower(), 1e-9);
+        assertEquals(FlowerMech.UP_POS, flowerServo.getPosition(), 1e-9);
     }
 
     @Test

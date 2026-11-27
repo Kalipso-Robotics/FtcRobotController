@@ -46,7 +46,7 @@ public class IntakeRun extends Action {
     public void update() {
         if (!hasStarted) {
             hasStarted = true;
-            KLog.d(TAG, () -> "event=start mode=" + intakeRunMode + " targetRps=" + targetRPS + " targetPoint=" + targetPoint);
+            KLog.d(TAG, () -> "event=start mode=" + intakeRunMode + " targetRps=" + targetRPS + " ratioB=" + IntakeConfig.FEED_SIDE_B_RATIO + " targetPoint=" + targetPoint);
         }
 
         switch (intakeRunMode) {
@@ -70,13 +70,17 @@ public class IntakeRun extends Action {
                 break;
         }
 
-        intake.runRPS(targetRPS);
-        isWithinRange = intake.getModule(IntakeSide.FRONT).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE)
-                || intake.getModule(IntakeSide.BACK).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE);
+        // Side B runs at FEED_SIDE_B_RATIO times side A (read every loop so Dashboard / test edits apply live)
+        double targetA = getTargetRPSSideA();
+        double targetB = getTargetRPSSideB();
+        intake.getModule(IntakeSide.FRONT).runRPS(targetA);
+        intake.getModule(IntakeSide.BACK).runRPS(targetB);
+        isWithinRange = intake.getModule(IntakeSide.FRONT).isAtRPS(targetA, IntakeConfig.FEED_RPS_TOLERANCE)
+                || intake.getModule(IntakeSide.BACK).isAtRPS(targetB, IntakeConfig.FEED_RPS_TOLERANCE);
 
         if (KLog.isDebug()) {
-            KLog.d(TAG, () -> "mode=" + intakeRunMode + " targetRps=" + targetRPS + " distanceMm=" + distanceMM
-                    + " withinRange=" + isWithinRange);
+            KLog.d(TAG, () -> "mode=" + intakeRunMode + " targetRps=" + targetRPS + " ratioB=" + IntakeConfig.FEED_SIDE_B_RATIO
+                    + " distanceMm=" + distanceMM + " withinRange=" + isWithinRange);
         }
     }
 
@@ -117,6 +121,14 @@ public class IntakeRun extends Action {
 
     public double getTargetRPS() {
         return targetRPS;
+    }
+
+    public double getTargetRPSSideA() {
+        return targetRPS;
+    }
+
+    public double getTargetRPSSideB() {
+        return targetRPS * IntakeConfig.FEED_SIDE_B_RATIO;
     }
 
     public double getDistanceMM() {

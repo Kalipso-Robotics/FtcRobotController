@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.MathFunctions;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
@@ -14,19 +15,18 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 
 /**
- * Tunes the CR flower arm (IntakeConfig.FLOWER_DOWN_POWER / FLOWER_UP_POWER / FLOWER_LOWER_MS /
- * FLOWER_RAISE_MS / FLOWER_FLIP_DIRECTION). Start with the arm up by hand.
+ * Tunes the flower arm's servo positions (FlowerMech.UP_POS / DOWN_POS). "flowerPivot" is a KServo now (Axon in
+ * servo mode, configured as a Servo), so this sets positions instead of CR power.
  * Pattern source: IntakeMotorTest. GP1:
- *   A / Y      = lower / raise the flower's intake side (flower can only go down while the side is down)
- *   left stick = raw flower power (up on the stick = positive). Find the sign that goes down and a power that moves well.
- *   X / B      = flower.lower() / raise(): the timed moves with the IntakeConfig values. Adjust the two times live on the
- *                Dashboard until each move ends right at the end of travel.
- * Then copy the values into IntakeConfig. FLOWER_FLIP_DIRECTION is read at init, so restart after changing it.
+ *   A / Y          = lower / raise the flower's intake side (flower can only go down while the side is down)
+ *   dpad up / down = nudge the flower position +/- POS_STEP (only while the side is down, except back to UP_POS)
+ *   X / B          = flower to FlowerMech.DOWN_POS / UP_POS
+ * Nudge to the real up and down stops, then copy the shown positions into FlowerMech.
  */
 @TeleOp(name = "FlowerCRTuner", group = "Test")
 public class FlowerCRTuner extends KOpMode {
     public static final String TAG = "Test_Flower";
-    private static final double STICK_DEADBAND = 0.05;
+    private static final double POS_STEP = 0.01;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -35,7 +35,6 @@ public class FlowerCRTuner extends KOpMode {
         FlowerMech flower = intake.getFlower();
         IntakeModule side = intake.getModule(ModuleConfig.FLOWER_SIDE);
         ElapsedTime sinceCommand = new ElapsedTime();
-        boolean manual = false;
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         waitForStart();
         sinceCommand.reset();
@@ -50,39 +49,40 @@ public class FlowerCRTuner extends KOpMode {
                 sinceCommand.reset();
             }
 
-            double stick = -gamepad1.left_stick_y;
-            if (Math.abs(stick) > STICK_DEADBAND) {
-                if (!manual) {
-                    sinceCommand.reset();
+            boolean nudgeUp = kGamePad1.isDpadUpFirstPressed();
+            boolean nudgeDown = kGamePad1.isDpadDownFirstPressed();
+            if (nudgeUp || nudgeDown) {
+                double target = MathFunctions.clamp(flower.getServo().getPosition() + (nudgeUp ? POS_STEP : -POS_STEP), 0, 1);
+                boolean ok = target == FlowerMech.UP_POS || side.isDown(); // interlock: only leaves up while the side is down
+                if (ok) {
+                    flower.getServo().setTargetPosition(target);
                 }
-                manual = true;
-                flower.setPower(stick);
-            } else if (manual) {
-                manual = false;
-                flower.setPower(0);
+                sinceCommand.reset();
+                KLog.d(TAG, () -> "event=nudge accepted=" + ok + " pos=" + target);
             }
 
             if (kGamePad1.isButtonXFirstPressed()) {
-                boolean ok = flower.lower();
+                boolean ok = side.isDown();
+                if (ok) {
+                    flower.getServo().setTargetPosition(FlowerMech.DOWN_POS);
+                }
                 sinceCommand.reset();
-                KLog.d(TAG, () -> "event=lower accepted=" + ok + " power=" + IntakeConfig.FLOWER_DOWN_POWER);
+                KLog.d(TAG, () -> "event=lower accepted=" + ok + " pos=" + FlowerMech.DOWN_POS);
             } else if (kGamePad1.isButtonBFirstPressed()) {
-                flower.raise();
+                flower.getServo().setTargetPosition(FlowerMech.UP_POS);
                 sinceCommand.reset();
-                KLog.d(TAG, () -> "event=raise power=" + IntakeConfig.FLOWER_UP_POWER);
+                KLog.d(TAG, () -> "event=raise pos=" + FlowerMech.UP_POS);
             }
             intake.update();
 
-            telemetry.addLine("A/Y side down/up | stick raw power | X/B flower down/up (config)");
+            telemetry.addLine("A/Y side down/up | dpad up/down nudge flower | X/B flower down/up");
             telemetry.addData("side", "%s %s", ModuleConfig.FLOWER_SIDE, side.isDown() ? "DOWN" : side.isUp() ? "UP" : "moving");
-            telemetry.addData("flower power", "%.2f%s", flower.getPower(), manual ? " (manual)" : "");
+            telemetry.addData("flower pos", "%.3f%s", flower.getServo().getPosition(), flower.getServo().isDone() ? "" : " (moving)");
             telemetry.addData("flower", flower.isDown() ? "DOWN" : flower.isUp() ? "UP" : "moving");
             telemetry.addData("ms since command", "%.0f", sinceCommand.milliseconds());
-            telemetry.addData("config", "down %.2f  up %.2f  lower %.0f ms  raise %.0f ms  flip %b", IntakeConfig.FLOWER_DOWN_POWER,
-                    IntakeConfig.FLOWER_UP_POWER, IntakeConfig.FLOWER_LOWER_MS, IntakeConfig.FLOWER_RAISE_MS, IntakeConfig.FLOWER_FLIP_DIRECTION);
+            telemetry.addData("FlowerMech", "UP_POS %.3f  DOWN_POS %.3f", FlowerMech.UP_POS, FlowerMech.DOWN_POS);
             telemetry.update();
         }
-        flower.setPower(0);
         intake.stop();
         cleanupRobot();
     }

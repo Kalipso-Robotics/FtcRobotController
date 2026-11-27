@@ -85,12 +85,12 @@ public class IntakeModule {
         if (!isCommandedDown) {
             return;
         }
-        if (flowerMech != null && !flowerMech.isUp()) {
+        if (flowerMech != null && !isFlowerUp()) {
             if (!isRaisePending) {
                 isRaisePending = true;
                 KLog.e(TAG, "side=" + side + " event=raiseDeferred reason=flowerNotUp");
             }
-            flowerMech.raise();
+            flowerMech.getServo().setTargetPosition(FlowerMech.UP_POS);
             return;
         }
         isRaisePending = false;
@@ -99,11 +99,13 @@ public class IntakeModule {
         KLog.d(TAG, () -> "side=" + side + " event=raise");
     }
 
-    /** Call once per loop: ends the flower's timed move and finishes a raise that was waiting for the flower. */
+    /** Flower commanded up and its KServo travel estimate is over, so the pivot may leave down. */
+    private boolean isFlowerUp() {
+        return flowerMech.isUp() && flowerMech.getServo().isDone();
+    }
+
+    /** Call once per loop: finishes a raise that was waiting for the flower to be up. */
     public void update() {
-        if (flowerMech != null) {
-            flowerMech.update();
-        }
         if (isRaisePending) {
             raise();
         }
@@ -169,7 +171,7 @@ public class IntakeModule {
      */
     public boolean setPivotPosition(double position) {
         boolean toDown = Math.abs(position - intakeModuleConfig.pivotDownPos) < 1e-6; // stepped values miss DOWN by ~1e-16
-        if (isCommandedDown && !toDown && flowerMech != null && !flowerMech.isUp()) {
+        if (isCommandedDown && !toDown && flowerMech != null && !isFlowerUp()) {
             KLog.e(TAG, "side=" + side + " event=blocked reason=flowerNotUp pos=" + position);
             return false;
         }

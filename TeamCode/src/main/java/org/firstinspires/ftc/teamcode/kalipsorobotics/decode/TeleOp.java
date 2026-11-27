@@ -73,7 +73,6 @@ public class TeleOp extends KOpMode {
     KServoAutoAction closeStopper = null;
 
     IntakeController intakeController = null;
-    private boolean flowerManual = false; // GP2 left stick is driving the flower CR servo
     private static final double FLOWER_STICK_DEADBAND = 0.05;
     IntakeStop intakeStop = null;
     IntakeReverse intakeReverse = null;
@@ -242,7 +241,7 @@ public class TeleOp extends KOpMode {
             intakeStopPressed = kGamePad2.isRightTriggerPressed();
             intakeReversePressed = kGamePad2.isRightBumperPressed() && !kGamePad2.isLeftBumperPressed();
 
-            flowerStick = -gamepad2.left_stick_y; // up on the stick = positive power
+            flowerStick = -gamepad2.left_stick_y; // up on the stick = positive = flower down
             releaseStopperPressed = kGamePad2.isYPressed();
 
             toggleTurretAlign = !kGamePad2.isToggleX();
@@ -276,7 +275,7 @@ public class TeleOp extends KOpMode {
             telemetry.addData("READY", shooterRun.isWithinRange() && turretAutoAlignTeleOp.isWithinRange());
             telemetry.addData("Intake side", intakeController.getSelectedSide());
             telemetry.addData("Intake full", intakeController.isFull()); // motor stall, no beam breaks (IntakeFullDetector)
-            telemetry.addData("Flower power", "%.2f", intake.getFlower().getPower());
+            telemetry.addData("Flower pos", "%.2f", intake.getFlower().getServo().getPosition());
             telemetry.addData("Shooter Target Rps ", "%.2f Target Hood %.2f",shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition());
             telemetry.addData("Shooter Current RPS ", "%.2f", shooterRun.getCurrentRPS());
             telemetry.addData("Intake Current Rps A ", "%.2f",intake.getRPSSideA());
@@ -296,7 +295,7 @@ public class TeleOp extends KOpMode {
             KLog.d("READY", () -> String.valueOf(shooterRun.isWithinRange() && turretAutoAlignTeleOp.isWithinRange()));
             KLog.d("Intake side", () -> String.valueOf(intakeController.getSelectedSide()));
             KLog.d("Intake full", () -> String.valueOf(intakeController.isFull()));
-            KLog.d("Flower power", () -> String.format("%.2f", intake.getFlower().getPower()));
+            KLog.d("Flower pos", () -> String.format("%.2f", intake.getFlower().getServo().getPosition()));
             KLog.d("Shooter Target Rps", () -> String.format("%.2f Target Hood %.2f", shooterRun.getTargetRPS(), shooterRun.getTargetHoodPosition()));
             KLog.d("Shooter Current RPS", () -> String.format("%.2f", shooterRun.getCurrentRPS()));
             KLog.d("Intake Current Rps A", () -> String.format("%.2f", intake.getRPSSideA()));
@@ -452,24 +451,19 @@ public class TeleOp extends KOpMode {
     }
 
     /**
-     * GP2 left stick drives the flower CR servo directly (same sign as FlowerCRTuner's stick). FlowerMech.setPower
-     * keeps the interlock: power toward down is refused while the flower's intake side is up, and the side's
-     * raise() still lifts the arm with a timed move. Power 0 is sent once on release, not every loop, so it
-     * doesn't cancel that timed raise.
+     * GP2 left stick moves the flower servo: up on the stick = down position (same direction as the old CR power,
+     * FLOWER_DOWN_POWER was +1), down on the stick = up position. Centered = the servo holds where it is.
+     * Interlock: the arm only goes down while its intake side is down.
      */
     private void handleFlower() {
-        FlowerMech flowerMech = intake.getFlower();
-        flowerMech.update(); // every loop: the intake controller (which also does it) is skipped during shots and the assist
         if (isPending(flowerAssist)) {
-            flowerManual = false;
             return; // the assist owns the arm
         }
-        if (Math.abs(flowerStick) > FLOWER_STICK_DEADBAND) {
-            flowerManual = true;
-            flowerMech.setPower(flowerStick);
-        } else if (flowerManual) {
-            flowerManual = false;
-            flowerMech.setPower(0);
+        FlowerMech flowerMech = intake.getFlower();
+        if (flowerStick > FLOWER_STICK_DEADBAND && intake.getModule(ModuleConfig.FLOWER_SIDE).isDown()) {
+            flowerMech.getServo().setTargetPosition(FlowerMech.DOWN_POS);
+        } else if (flowerStick < -FLOWER_STICK_DEADBAND) {
+            flowerMech.getServo().setTargetPosition(FlowerMech.UP_POS);
         }
     }
 

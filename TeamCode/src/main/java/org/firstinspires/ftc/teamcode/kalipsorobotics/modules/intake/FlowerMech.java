@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 
 /**
@@ -23,118 +24,130 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
 public class FlowerMech {
     public static final String TAG = "Robot_Flower";
 
-    private final KCRServo servo;
-    private final IntakeModule side;
-    private final ElapsedTime sinceCommand = new ElapsedTime();
+//    private final KCRServo servo;
 
-    private boolean isCommandedDown = false;
-    private boolean isMoving = false; // a timed lower/raise is running
-    private boolean isBlocked = false;
+    private final KServo servo;
+
+    private final IntakeModule side;
+//    private final ElapsedTime sinceCommand = new ElapsedTime();
+//
+//    private boolean isCommandedDown = false;
+//    private boolean isMoving = false; // a timed lower/raise is running
+//    private boolean isBlocked = false;
+
+    public static final double UP_POS = 0.518;
+
+    public static final double DOWN_POS = 0.779;
+
 
     public FlowerMech(OpModeUtilities opModeUtilities, IntakeModule side) {
-        this(new KCRServo(opModeUtilities.getHardwareMap().crservo.get("flowerPivot"), IntakeConfig.FLOWER_FLIP_DIRECTION), side);
+        this(new KServo(opModeUtilities.getHardwareMap().servo.get("flowerPivot")), side);
     }
 
     /** Direct-injection constructor, for a servo you have already pulled out of the hardware map (unit tests). */
-    public FlowerMech(KCRServo servo, IntakeModule side) {
+    public FlowerMech(KServo servo, IntakeModule side) {
         this.servo = servo;
         this.side = side;
-        servo.setPower(0); // no timed move here: nothing calls update() until the OpMode starts
-        sinceCommand.reset();
+//        servo.setPower(0); // no timed move here: nothing calls update() until the OpMode starts
+//        sinceCommand.reset();
         side.attachFlower(this);
         KLog.d(TAG, () -> "side=" + side.getSide() + " event=init flower=up");
+    }
+
+    public KServo getServo() {
+        return servo;
     }
 
     /**
      * Lowers the arm, unless its intake side is not down: then it does nothing, logs a fault once,
      * and returns false. Returns true when the arm is commanded down (including already down).
      */
-    public boolean lower() {
-        if (isCommandedDown) {
-            return true;
-        }
-        if (!side.isDown()) {
-            if (!isBlocked) {
-                isBlocked = true;
-                KLog.e(TAG, "side=" + side.getSide() + " event=blocked reason=intakeUp");
-            }
-            return false;
-        }
-        isBlocked = false;
-        isCommandedDown = true;
-        startMove(IntakeConfig.FLOWER_DOWN_POWER);
-        KLog.d(TAG, () -> "side=" + side.getSide() + " event=lower");
-        return true;
-    }
-
-    public void raise() {
-        isBlocked = false;
-        if (!isCommandedDown) {
-            return;
-        }
-        isCommandedDown = false;
-        startMove(IntakeConfig.FLOWER_UP_POWER);
-        KLog.d(TAG, () -> "side=" + side.getSide() + " event=raise");
-    }
-
-    private void startMove(double power) {
-        isMoving = true;
-        servo.setPower(power);
-        sinceCommand.reset();
-    }
-
-    /** Call once per loop: cuts the power when the timed lower/raise is over. */
-    public void update() {
-        if (isMoving && isMoveTimeOver()) {
-            isMoving = false;
-            servo.setPower(0);
-            KLog.d(TAG, () -> "side=" + side.getSide() + " event=moveDone flower=" + (isCommandedDown ? "down" : "up"));
-        }
-    }
-
-    private boolean isMoveTimeOver() {
-        return sinceCommand.milliseconds() >= (isCommandedDown ? IntakeConfig.FLOWER_LOWER_MS : IntakeConfig.FLOWER_RAISE_MS);
-    }
-
-    /** True while a timed lower/raise is running (until update() cuts the power). */
-    public boolean isMoving() {
-        return isMoving;
-    }
-
-    /**
-     * Manual power (FlowerCRTuner), not timed: stays on until the next command. Keeps the interlock: power that is not toward up (same sign as FLOWER_UP_POWER,
-     * or 0) is refused (returns false, logs event=blocked) unless this arm's intake side is down.
-     * Power 0 counts as up only for the interlock, so the arm may be sagging; raise() before driving.
-     */
-    public boolean setPower(double power) {
-        boolean towardUp = power == 0 || Math.signum(power) == Math.signum(IntakeConfig.FLOWER_UP_POWER);
-        if (!towardUp && !side.isDown()) {
-            KLog.e(TAG, "side=" + side.getSide() + " event=blocked reason=intakeUp power=" + power);
-            return false;
-        }
-        isBlocked = false;
-        if (isCommandedDown == towardUp) {
-            sinceCommand.reset();
-        }
-        isCommandedDown = !towardUp;
-        isMoving = false;
-        servo.setPower(power);
-        KLog.d(TAG, () -> "side=" + side.getSide() + " event=setPower power=" + power);
-        return true;
-    }
-
+//    public boolean lower() {
+//        if (isCommandedDown) {
+//            return true;
+//        }
+//        if (!side.isDown()) {
+//            if (!isBlocked) {
+//                isBlocked = true;
+//                KLog.e(TAG, "side=" + side.getSide() + " event=blocked reason=intakeUp");
+//            }
+//            return false;
+//        }
+//        isBlocked = false;
+//        isCommandedDown = true;
+//        startMove(IntakeConfig.FLOWER_DOWN_POWER);
+//        KLog.d(TAG, () -> "side=" + side.getSide() + " event=lower");
+//        return true;
+//    }
+//
+//    public void raise() {
+//        isBlocked = false;
+//        if (!isCommandedDown) {
+//            return;
+//        }
+//        isCommandedDown = false;
+//        startMove(IntakeConfig.FLOWER_UP_POWER);
+//        KLog.d(TAG, () -> "side=" + side.getSide() + " event=raise");
+//    }
+//
+//    private void startMove(double power) {
+//        isMoving = true;
+//        servo.setPower(power);
+//        sinceCommand.reset();
+//    }
+//
+//    /** Call once per loop: cuts the power when the timed lower/raise is over. */
+//    public void update() {
+//        if (isMoving && isMoveTimeOver()) {
+//            isMoving = false;
+//            servo.setPower(0);
+//            KLog.d(TAG, () -> "side=" + side.getSide() + " event=moveDone flower=" + (isCommandedDown ? "down" : "up"));
+//        }
+//    }
+//
+//    private boolean isMoveTimeOver() {
+//        return sinceCommand.milliseconds() >= (isCommandedDown ? IntakeConfig.FLOWER_LOWER_MS : IntakeConfig.FLOWER_RAISE_MS);
+//    }
+//
+//    /** True while a timed lower/raise is running (until update() cuts the power). */
+//    public boolean isMoving() {
+//        return isMoving;
+//    }
+//
+//    /**
+//     * Manual power (FlowerCRTuner), not timed: stays on until the next command. Keeps the interlock: power that is not toward up (same sign as FLOWER_UP_POWER,
+//     * or 0) is refused (returns false, logs event=blocked) unless this arm's intake side is down.
+//     * Power 0 counts as up only for the interlock, so the arm may be sagging; raise() before driving.
+//     */
+//    public boolean setPower(double power) {
+//        boolean towardUp = power == 0 || Math.signum(power) == Math.signum(IntakeConfig.FLOWER_UP_POWER);
+//        if (!towardUp && !side.isDown()) {
+//            KLog.e(TAG, "side=" + side.getSide() + " event=blocked reason=intakeUp power=" + power);
+//            return false;
+//        }
+//        isBlocked = false;
+//        if (isCommandedDown == towardUp) {
+//            sinceCommand.reset();
+//        }
+//        isCommandedDown = !towardUp;
+//        isMoving = false;
+//        servo.setPower(power);
+//        KLog.d(TAG, () -> "side=" + side.getSide() + " event=setPower power=" + power);
+//        return true;
+//    }
+//
     /** True once commanded down and FLOWER_LOWER_MS has passed. */
     public boolean isDown() {
-        return isCommandedDown && isMoveTimeOver();
+        return servo.getPosition() == DOWN_POS;
     }
 
     /** True once commanded up and FLOWER_RAISE_MS has passed. */
     public boolean isUp() {
-        return !isCommandedDown && isMoveTimeOver();
+        return servo.getPosition() == UP_POS;
     }
-
-    /** Last commanded power (after flip), for telemetry. */
-    public double getPower() {
-        return servo.getPower();
-    }
+//
+//    /** Last commanded power (after flip), for telemetry. */
+//    public double getPower() {
+//        return servo.getPower();
+//    }
 }

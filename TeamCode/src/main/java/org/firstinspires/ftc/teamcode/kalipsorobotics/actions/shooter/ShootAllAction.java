@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.stopper.Cl
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.stopper.OpenStopperAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
@@ -48,6 +49,11 @@ public class ShootAllAction extends KActionSet {
     private IntakeStop intakeStop;
 
     private ResetOdometryToLimelight resetOdometryToPosition;
+
+    // Turret mode when the shot started: the turret is stopped during the feed and put back to this once the
+    // stopper closes (or the shot is cancelled), so callers that never turn it back on (autos) keep aiming.
+    private TurretRunMode turretModeBeforeShot = null;
+    private boolean turretRestored = false;
 
     public void setEnableLimelightZeroing(boolean enableLimelightZeroing) {
         this.enableLimelightZeroing = enableLimelightZeroing;
@@ -123,6 +129,9 @@ public class ShootAllAction extends KActionSet {
         if (isDone && !this.isDone && !intakeStop.getIsDone()) {
             intakeRun.stop();
         }
+        if (isDone && !this.isDone) {
+            restoreTurretMode();
+        }
         super.setIsDone(isDone);
     }
 
@@ -170,10 +179,10 @@ public class ShootAllAction extends KActionSet {
         intakeStop.setDependentActions(shootTimeWait);
         this.addAction(intakeStop);
 
-        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
-        resetOdometryToPosition.setName("resetOdometryToPosition");
-        resetOdometryToPosition.setDependentActions(closeStopper, intakeStop);
-        this.addAction(resetOdometryToPosition);
+//        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
+//        resetOdometryToPosition.setName("resetOdometryToPosition");
+//        resetOdometryToPosition.setDependentActions(closeStopper, intakeStop);
+//        this.addAction(resetOdometryToPosition);
     }
 
     @Override
@@ -186,6 +195,7 @@ public class ShootAllAction extends KActionSet {
             shooterRun.setShooterRunMode(shooterRunMode);
             shooterRun.update();
             hasStarted = true;
+            turretModeBeforeShot = turretAutoAlign.getTurretRunMode();
             stopper.close(); // IntakeRun spins the intake from the start: an open stopper would feed early
             if (!enableLimelightZeroing) {
                 resetOdometryToPosition.setIsDone(true);
@@ -211,11 +221,24 @@ public class ShootAllAction extends KActionSet {
                 (turretAutoAlign.getDeltaAngleDeg()),
                 (turretAutoAlign.isWithinRange()),
                 (shooterRun.getTargetRPS() - shooter.getRPS())));
-        if (openStopper.getIsDone()) {
+        if (openStopper.getIsDone() && !closeStopper.getIsDone()) {
             if (!SOTM.isActive()) {
-                turretAutoAlign.stop();
+                turretAutoAlign.stop(); // hold still while the balls feed
             }
         }
+        if (closeStopper.getIsDone()) {
+            restoreTurretMode();
+        }
+    }
+
+    /** Once per shot: put the turret back in the mode it had before the shot (stop() above left it in STOP). */
+    private void restoreTurretMode() {
+        if (turretRestored || turretModeBeforeShot == null) {
+            return;
+        }
+        turretRestored = true;
+        turretAutoAlign.setTurretRunMode(turretModeBeforeShot);
+        KLog.d(TAG, () -> "event=turretRestored mode=" + turretModeBeforeShot);
     }
 
     public void setTurretReady(boolean isDone) {

@@ -40,7 +40,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     static private double LOOK_AHEAD_RADIUS_MM = 150;
 
     private double currentLookAheadRadius;
-    static final private double LAST_RADIUS_MM = 15;
+    static final private double LAST_RADIUS_MM = 25;
     static final private double REPLAN_DISTANCE_MM = 50;
 
     private Position currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
@@ -77,6 +77,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     List<Position> injectedPathPoints = new ArrayList<>();
     private Path injectSourcePath = null; // robot start + pathPoints, captured when injection begins
     private IPurePursuitAction planStartFrom = null; // if set, plan from this action's last point
+    private Position planStartPosition = null; // if set, plan from here (wins over planStartFrom): see setPlanStartPosition
     private boolean startChecked = false; // whether the robot was checked to be at the planned start
     private boolean skipStartCheck = false; // set after a replan: the start is stale by design, don't replan again
     private int pointInject = 0;
@@ -132,18 +133,18 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 //    private final double K = 3.0; //based on how slow you want the robot to go around turns, 1000
 
     //TUNING NUMBERS: USE DATA ABOUT ROBOT new
-    private final double PATH_MAX_VELOCITY = 2200; // If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
+    private final double PATH_MAX_VELOCITY = 2100; // 2200 If the robot overshoots or skids in curves → lower it, if the robot is slow or choppy in straightaways → raise it
     // If robot cuts corners or skids → reduce K, if robot slows down too much in gentle curves → increase K
-    private final double MAX_ACCELERATION = 6220; // mm/s^2, maximum acceleration of the robot, 6000
+    private final double MAX_ACCELERATION = 4500; // mm/s^2, maximum acceleration of the robot, 6220
     private final double MAX_ACCELERATION_FINAL = MAX_ACCELERATION / 1.5; // mm/s^2
     // If the robot struggles to accelerate → lower a, if it's too conservative and slow → raise a
-    private final double MAX_ANGULAR_VELOCITY = 12.8; //rad/s, maximum turning velocity of the robot 5.5
+    private final double MAX_ANGULAR_VELOCITY = 9.53; //rad/s, maximum turning velocity of the robot 12.8
 
     private final double WHEELBASE_LENGTH = 232.414; //front wheel to back wheel
     private final double TRACK_WIDTH = 264.03; //side to side
-    private final double K_p = 0.00007; // 0.000021, 0.00002
+    private final double K_p = 0.000075; // 0.000021, 0.00002
     private final double K_a = 0.00001; // 0.001
-    private final double K_v = 0.00036; // 0.00036 0.00225
+    private final double K_v = 0.00032; // 0.00036 0.00225
     private final double K = 2.5; //based on how slow you want the robot to go around turns, 1000
 
     private final double K_OMEGA = Math.sqrt(MathFunctions.square(WHEELBASE_LENGTH) + MathFunctions.square(TRACK_WIDTH)) / 2; // mm/rad, wheel travel per radian of rotation
@@ -213,6 +214,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
      * that are already fully precomputed are skipped, so this is safe to spam every loop.
      */
     public static void runPrecomputeStepForAll() {
+        if (precomputeStartMs < 0) {
+            precomputeStartMs = System.currentTimeMillis();
+        }
         synchronized (INSTANCES) {
             for (Iterator<WeakReference<AdaptivePurePursuitAction>> it = INSTANCES.iterator(); it.hasNext(); ) {
                 AdaptivePurePursuitAction action = it.next().get();
@@ -232,6 +236,10 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
      * One telemetry line for init: how many paths are planned, and whether it is safe to press START.
      * A path that is not planned by START gets planned during the match, and the robot waits for it.
      */
+    // Init planning timer for precomputeStatus(): first runPrecomputeStepForAll() call -> all paths planned. -1 = not yet.
+    private static long precomputeStartMs = -1;
+    private static long precomputeDoneMs = -1;
+
     public static String precomputeStatus() {
         int total = 0;
         int done = 0;
@@ -247,9 +255,18 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                 }
             }
         }
-        return done >= total
-                ? "PATHS PLANNED " + done + "/" + total + " - READY, PRESS START"
-                : "PLANNING PATHS " + done + "/" + total + " - WAIT, DO NOT PRESS START";
+        if (done >= total) {
+            if (precomputeDoneMs < 0 && precomputeStartMs >= 0) {
+                precomputeDoneMs = System.currentTimeMillis();
+                final int n = total;
+                KLog.d("ppDebug", () -> "event=allPathsPlanned paths=" + n + " ms=" + (precomputeDoneMs - precomputeStartMs));
+            }
+            String time = precomputeDoneMs >= 0 ? String.format(" in %.1f s", (precomputeDoneMs - precomputeStartMs) / 1000.0) : "";
+            return "===== ALL PATHS PLANNED (" + done + "/" + total + time + ") - READY, PRESS START =====";
+        }
+        precomputeDoneMs = -1; // a path was added or replanned since: not done any more
+        String time = precomputeStartMs >= 0 ? String.format(", %.1f s so far", (System.currentTimeMillis() - precomputeStartMs) / 1000.0) : "";
+        return "===== PLANNING PATHS " + done + "/" + total + time + " - WAIT, DO NOT PRESS START =====";
     }
 
     /** True when every registered action with a real path has finished precomputing. */
@@ -272,6 +289,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
      */
     public static void clearInstanceRegistry() {
         INSTANCES.clear();
+        precomputeStartMs = -1;
+        precomputeDoneMs = -1;
     }
 
     public boolean isPrecomputeDone() {
@@ -587,6 +606,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                         injectSourcePath.getPoint(0)).getLength() > REPLAN_DISTANCE_MM) {
                     KLog.d("ppDebug", () -> getName() + " robot not at planned start, replanning");
                     planStartFrom = null;
+                    planStartPosition = null;
                     skipStartCheck = true; // only replan once, the new start is stale by the time it's done
                     reset();
                     return;
@@ -933,7 +953,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             // If the previous move hasn't finished yet, plan from where it will end (known ahead of
             // time, so this path can be precomputed during init). Otherwise the robot's live
             // position is the best start.
-            Position robotStart = (planStartFrom != null && !planStartFrom.getIsDone() && !planStartFrom.getPathPoints().isEmpty())
+            Position robotStart = planStartPosition != null
+                    ? new Position(planStartPosition)
+                    : (planStartFrom != null && !planStartFrom.getIsDone() && !planStartFrom.getPathPoints().isEmpty())
                     ? new Position(planStartFrom.getPathPoints().get(planStartFrom.getLastPointIndex()))
                     : new Position(SharedData.getOdometryWheelIMUPosition());
             List<Position> sourcePoints = new ArrayList<>(pathPoints);
@@ -1574,12 +1596,23 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     public void replan() {
         clearPoints();
         planStartFrom = null;   // plan from the live position, not a previous action's end
+        planStartPosition = null;
         skipStartCheck = true;  // the start is stale by the time precompute finishes; don't replan again
         reset();
     }
 
     public void setPlanStartFrom(IPurePursuitAction previousMove) {
         this.planStartFrom = previousMove;
+    }
+
+    /**
+     * Plan this path from a known position instead of the previous adaptive move's end. Use it when something that
+     * is not an adaptive move (e.g. a MoveStraightPIDAction) runs in between and moves the robot, so the path is
+     * planned right during init. Call before init precompute starts. If the robot isn't within REPLAN_DISTANCE_MM
+     * of it when this move starts, it still replans from the live position.
+     */
+    public void setPlanStartPosition(Position start) {
+        this.planStartPosition = start == null ? null : new Position(start);
     }
 
     @Override

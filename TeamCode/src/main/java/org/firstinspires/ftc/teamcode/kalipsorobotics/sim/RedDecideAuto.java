@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.sim;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
@@ -1095,7 +1096,7 @@ public class RedDecideAuto extends KOpMode {
     /** Intake off, Flower arm and both sides up: the robot must end inside its starting size. */
     private void stowIntake(String reason) {
         intake.stop();
-        intake.getFlower().raise();
+        intake.getFlower().getServo().setTargetPosition(FlowerMech.UP_POS);
         intake.getModule(IntakeSide.FRONT).raise(); // a raise waiting on the flower finishes in intake.update()
         intake.getModule(IntakeSide.BACK).raise();
         KLog.d(TAG, () -> "event=stowIntake reason=" + reason);
