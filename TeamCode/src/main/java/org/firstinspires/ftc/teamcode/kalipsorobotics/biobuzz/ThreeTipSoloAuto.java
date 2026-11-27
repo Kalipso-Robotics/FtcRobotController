@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Se
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.VisionPickupAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerLower;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerRaise;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
@@ -64,10 +65,12 @@ public class ThreeTipSoloAuto extends KOpMode {
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
     // Flowers sit 63.5 mm off the wall, so the robot stops on the field side (+), not past the wall (-).
-    static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + 482.6, Math.toRadians(90));
-    final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + 700, Math.toRadians(90));
-    static public final Position FLOWER_INTAKE_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX() + 482.6, FieldConfig.FLOWER_2_POINT.getY(), Math.toRadians(0));
-    public final static Position FLOWER_EXIT_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX() + 700, FieldConfig.FLOWER_2_POINT.getY(), Math.toRadians(0));
+    static final private double FLOWER_INTAKE_OFFSET_MM = 280;
+    static final private double FLOWER_EXIT_OFFSET_MM = 400;
+    static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + FLOWER_INTAKE_OFFSET_MM, Math.toRadians(90));
+    final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + FLOWER_EXIT_OFFSET_MM, Math.toRadians(90));
+    static public final Position FLOWER_INTAKE_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX() + FLOWER_INTAKE_OFFSET_MM, FieldConfig.FLOWER_2_POINT.getY(), Math.toRadians(0));
+    public final static Position FLOWER_EXIT_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX() + FLOWER_EXIT_OFFSET_MM, FieldConfig.FLOWER_2_POINT.getY(), Math.toRadians(0));
 
 
     @Override
@@ -126,10 +129,10 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip0Shoot.setDependentActions(delayBeforeStart);
         redThreeTipSoloAuto.addAction(trip0Shoot);
 
-        FlowerLower flowerLower = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
-        flowerLower.setName("flowerLower");
-        flowerLower.setDependentActions(delayBeforeStart);
-        redThreeTipSoloAuto.addAction(flowerLower);
+        FlowerLower flowerLowerTrip1 = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
+        flowerLowerTrip1.setName("flowerLowerTrip1");
+        flowerLowerTrip1.setDependentActions(delayBeforeStart);
+        redThreeTipSoloAuto.addAction(flowerLowerTrip1);
 
         IntakeModuleLower intakeModuleLowerFront = new IntakeModuleLower(intake.getModule(IntakeSide.FRONT));
         intakeModuleLowerFront.setName("intakeModuleLowerFront");
@@ -148,11 +151,22 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip1FlowerIntake.setDependentActions(trip0Shoot);
         trip1FlowerIntake.getFlowerLower().setIsDone(true);
         redThreeTipSoloAuto.addAction(trip1FlowerIntake);
+//
+//        FlowerRaise flowerRaiseTrip1 = new FlowerRaise(flowerMech);
+//        flowerRaiseTrip1.setName("flowerRaiseTrip1");
+//        flowerRaiseTrip1.setDependentActions(trip1FlowerIntake);
+//        redThreeTipSoloAuto.addAction(flowerRaiseTrip1);
+//
+//        WaitAction waitAfterRaisingFlower = new WaitAction(3000);
+//        waitAfterRaisingFlower.setName("waitAfterRaisingFlower");
+//        waitAfterRaisingFlower.setDependentActions(flowerRaiseTrip1);
+//        redThreeTipSoloAuto.addAction(waitAfterRaisingFlower);
 
         IPurePursuitAction trip1GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip1GoToShoot.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip1GoToShoot.setName("trip1GoToShoot");
-        trip1GoToShoot.addPosition(1172, 621, 100);
+        trip1GoToShoot.addPosition(812.8, 914.4, 90);
+        trip1GoToShoot.addPosition(FLOWER_INTAKE_POSITION_1.getX(), 621, 90);
         trip1GoToShoot.setDependentActions(trip1FlowerIntake);
         redThreeTipSoloAuto.addAction(trip1GoToShoot);
 
@@ -161,13 +175,26 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip1Shoot.setDependentActions(trip1GoToShoot);
         redThreeTipSoloAuto.addAction(trip1Shoot);
 
+
         //END OF TRIP 1
 
         //===============================TRIP 2===============================
+
+//        FlowerLower flowerLowerTrip2 = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
+//        flowerLowerTrip2.setName("flowerLowerTrip2");
+//        flowerLowerTrip2.setDependentActions(waitAfterRaisingFlower);
+//        redThreeTipSoloAuto.addAction(flowerLowerTrip2);
+
         FullFlowerAction trip2FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_1, FLOWER_EXIT_POSITION_1);
         trip2FlowerIntake.setName("trip2FlowerIntake");
+        trip2FlowerIntake.getFlowerLower().setIsDone(true);
         trip2FlowerIntake.setDependentActions(trip1Shoot);
         redThreeTipSoloAuto.addAction(trip2FlowerIntake);
+
+        FlowerRaise flowerRaiseTrip2 = new FlowerRaise(flowerMech);
+        flowerRaiseTrip2.setName("flowerRaiseTrip2");
+        flowerRaiseTrip2.setDependentActions(trip2FlowerIntake);
+        redThreeTipSoloAuto.addAction(flowerRaiseTrip2);
 
         // TODO-check: added so the robot is at (1037, 397) for this shot, same as trip 1
         IPurePursuitAction trip2GoToShoot = new AdaptivePurePursuitAction(driveTrain);

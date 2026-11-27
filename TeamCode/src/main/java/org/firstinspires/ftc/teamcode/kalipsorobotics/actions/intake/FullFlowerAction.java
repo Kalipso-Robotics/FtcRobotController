@@ -20,6 +20,16 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAct
 public class FullFlowerAction extends KActionSet {
 
 
+    public IPurePursuitAction getGoToFlower() {
+        return goToFlower;
+    }
+
+    public void setGoToFlower(IPurePursuitAction goToFlower) {
+        this.goToFlower = goToFlower;
+    }
+
+    private IPurePursuitAction goToFlower;
+
     public FlowerLower getFlowerLower() {
         return flowerLower;
     }
@@ -36,7 +46,7 @@ public class FullFlowerAction extends KActionSet {
 
 
 
-        IPurePursuitAction goToFlower = new AdaptivePurePursuitAction(driveTrain);
+        goToFlower = new AdaptivePurePursuitAction(driveTrain);
         goToFlower.setMaxTimeOutMS(4000); // give up if blocked (e.g. against the flower base) (TODO-measure)
         goToFlower.addPosition(flowerIntakePosition);
         goToFlower.setName("goToFlower");
@@ -46,7 +56,6 @@ public class FullFlowerAction extends KActionSet {
         intakeFullAction.setName("intakeFullAction");
         intakeFullAction.setDependentActions();
         this.addAction(intakeFullAction);
-
 
 
         flowerLower = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
@@ -73,10 +82,7 @@ public class FullFlowerAction extends KActionSet {
         stopIntake.setDependentActions(exitFlower);
         this.addAction(stopIntake);
 
-        FlowerRaise flowerRaise = new FlowerRaise(flowerMech);
-        flowerRaise.setName("flowerRaise");
-        flowerRaise.setDependentActions(exitFlower);
-        this.addAction(flowerRaise);
+
     }
 
     private static boolean isPlaceholder(Point point) {

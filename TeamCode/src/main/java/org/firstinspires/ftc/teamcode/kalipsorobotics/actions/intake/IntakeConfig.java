@@ -57,7 +57,7 @@ public class IntakeConfig {
     // Flower arm: Axon Max in CR mode, no position feedback. It runs at the power for the time, then power is cut.
     // Retune the times whenever a power changes. Tune with FlowerCRTuner.
 
-    public static final double FLOWER_TIMEOUT_MS = 300; //TODO Tune
+    public static final double FLOWER_TIMEOUT_MS = 5000; //TODO Tune
     public static double FLOWER_LOWER_MS = 1800; // TODO-measure: up -> down at FLOWER_DOWN_POWER
     public static double FLOWER_RAISE_MS = 1800; // TODO-measure: down -> up at FLOWER_UP_POWER
     public static double FLOWER_DOWN_POWER = 1; // TODO-measure
