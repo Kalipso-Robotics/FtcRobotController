@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterSto
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Cell;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Move;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.PartnerMode;
@@ -36,7 +37,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakData;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
@@ -1096,8 +1096,8 @@ public class RedDecideAuto extends KOpMode {
     private void stowIntake(String reason) {
         intake.stop();
         intake.getFlower().raise();
-        intake.getModule(BeamBreakPosition.IntakeSide.A).raise(); // a raise waiting on the flower finishes in intake.update()
-        intake.getModule(BeamBreakPosition.IntakeSide.B).raise();
+        intake.getModule(IntakeSide.FRONT).raise(); // a raise waiting on the flower finishes in intake.update()
+        intake.getModule(IntakeSide.BACK).raise();
         KLog.d(TAG, () -> "event=stowIntake reason=" + reason);
     }
 

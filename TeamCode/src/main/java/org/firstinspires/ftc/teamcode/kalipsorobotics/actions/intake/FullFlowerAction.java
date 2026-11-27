@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAct
  */
 public class FullFlowerAction extends KActionSet {
 
-    private final double FLOWER_TIMEOUT_MS = 300; //TODO Tune
+
     public FlowerLower getFlowerLower() {
         return flowerLower;
     }
@@ -30,7 +30,7 @@ public class FullFlowerAction extends KActionSet {
     }
 
     private FlowerLower flowerLower;
-    public FullFlowerAction(Stopper stopper, Intake intake, double intakeTimeMS, double power, FlowerMech flowerMech, DriveTrain driveTrain, Position flowerIntakePosition,Position flowerExitPosition){
+    public FullFlowerAction(Stopper stopper, Intake intake, double intakeTimeMS, double power, FlowerMech flowerMech, DriveTrain driveTrain, Position flowerIntakePosition, Position flowerExitPosition) {
         // (0, 0) is the field corner, never a real setup or exit point. Until they are measured in Flower.java this
         // trip is skipped (the set has no actions, so it is done at once) so the rest of the auto can still be tested.
 
@@ -39,15 +39,17 @@ public class FullFlowerAction extends KActionSet {
         IPurePursuitAction goToFlower = new AdaptivePurePursuitAction(driveTrain);
         goToFlower.setMaxTimeOutMS(4000); // give up if blocked (e.g. against the flower base) (TODO-measure)
         goToFlower.addPosition(flowerIntakePosition);
-        goToFlower.setName("setup");
+        goToFlower.setName("goToFlower");
         this.addAction(goToFlower);
 
-        IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, intakeTimeMS, power);
+        IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, 1_000_000, power);
         intakeFullAction.setName("intakeFullAction");
-        intakeFullAction.setDependentActions(goToFlower);
+        intakeFullAction.setDependentActions();
         this.addAction(intakeFullAction);
 
-        flowerLower = new FlowerLower(flowerMech, FLOWER_TIMEOUT_MS);
+
+
+        flowerLower = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
         flowerLower.setName("flowerLower");
         this.addAction(flowerLower);
 

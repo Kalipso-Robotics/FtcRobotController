@@ -26,7 +26,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
@@ -115,8 +115,8 @@ public class RPSPredictionDataCollector extends KOpMode {
         Shooter shooter = new Shooter(opModeUtilities);
         PIDFController pidf = shooter.getShooterMotor().getPIDFController();
         // flowerPivot not plugged in yet: no flower; this OpMode only runs the intake motors
-        Intake intake = new Intake(new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.A, IntakeConfig.SIDE_A),
-                new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.B, IntakeConfig.SIDE_B), null);
+        Intake intake = new Intake(new IntakeModule(opModeUtilities, IntakeSide.FRONT, IntakeConfig.SIDE_A),
+                new IntakeModule(opModeUtilities, IntakeSide.BACK, IntakeConfig.SIDE_B), null);
         Stopper stopper = new Stopper(opModeUtilities);
         Turret turret = Turret.getInstance(opModeUtilities);
         FieldOrientedDriveAction driveAction = new FieldOrientedDriveAction(driveTrain, imuModule);
@@ -168,14 +168,14 @@ public class RPSPredictionDataCollector extends KOpMode {
             hiveTarget = SharedData.getTargetPoint();
             double distanceMM = ShooterRun.getDistanceToTargetFromCurrentPos(hiveTarget); // turret pivot to Cell, same call that reads the table
             if (kGamePad1.isRightBumperFirstPressed()) {
-                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.CORNER_ZERO_POSE))); // updateActions() applies it
-                message = "Rezeroed to corner " + FieldConfig.CORNER_ZERO_POSE;
-                KLog.d(TAG, () -> "event=rezero from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + FieldConfig.CORNER_ZERO_POSE);
+                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.CORNER_ZERO_POSITION))); // updateActions() applies it
+                message = "Rezeroed to corner " + FieldConfig.CORNER_ZERO_POSITION;
+                KLog.d(TAG, () -> "event=rezero from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + FieldConfig.CORNER_ZERO_POSITION);
             }
             if (kGamePad1.isBackButtonFirstPressed()) {
-                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.FAR_CORNER_ZERO_POSE)));
-                message = "Rezeroed to far corner " + FieldConfig.FAR_CORNER_ZERO_POSE;
-                KLog.d(TAG, () -> "event=rezero from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + FieldConfig.FAR_CORNER_ZERO_POSE);
+                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.FAR_CORNER_ZERO_POSITION)));
+                message = "Rezeroed to far corner " + FieldConfig.FAR_CORNER_ZERO_POSITION;
+                KLog.d(TAG, () -> "event=rezero from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + FieldConfig.FAR_CORNER_ZERO_POSITION);
             }
             // Read each once per loop: FirstPressed clears itself. LT held = the dpad trims the turret (dpad up toggles feed comp), A/B step the hood finely and Y/X step the transfer RPS; their normal jobs are off.
             boolean trimTurret = gamepad1.left_trigger > 0.1;
@@ -312,7 +312,7 @@ public class RPSPredictionDataCollector extends KOpMode {
                 } else if (!shooterOn) {
                     message = "Shooter is off: press X first";
                 } else {
-                    shot = new ShootAllAction(turret, stopper, intake, shooter, rpsLoop, turretAutoAlignTeleOp, targetRPS, hoodPosition, true);
+                    shot = new ShootAllAction(turret, stopper, intake, shooter, rpsLoop, turretAutoAlignTeleOp, targetRPS, hoodPosition);
                     shot.setEnableLimelightZeroing(false);
                     shot.setName("collectorShot");
                     setLastShooterAction(shot); // updateActions() ticks it; it owns the intake + stopper until done
@@ -331,8 +331,8 @@ public class RPSPredictionDataCollector extends KOpMode {
                     intake.lower();
                     if (false/*IntakeConfig.FEED_RPS > 0*/) {
                         // same closed loop and target as PushBall's feed, so LT + Y/X changes this too
-                        intake.getModule(BeamBreakPosition.IntakeSide.A).runRPS(IntakeConfig.FEED_RPS);
-                        intake.getModule(BeamBreakPosition.IntakeSide.B).runRPS(IntakeConfig.FEED_RPS);
+                        intake.getModule(IntakeSide.FRONT).runRPS(IntakeConfig.FEED_RPS);
+                        intake.getModule(IntakeSide.BACK).runRPS(IntakeConfig.FEED_RPS);
                     } else {
                         intake.run(1.0); // closed loop off in IntakeConfig
                     }
@@ -364,7 +364,7 @@ public class RPSPredictionDataCollector extends KOpMode {
                 KLog.d(TAG, () -> String.format("event=shooter rps=%.2f targetRps=%.2f on=%b power=%.3f voltage=%.2f hood=%.4f distanceMm=%.0f shooterInRange=%b aligned=%b shooting=%b rpsA=%.2f rpsB=%.2f balls=%d",
                         shooter.getRPS(), tr, on, shooter.getShooterMotor().getPower(), SharedData.getVoltage(), h, distanceMM,
                         rpsLoop.isWithinRange(), turretAutoAlignTeleOp.isWithinRange(), shootingNow,
-                        intake.getModule(BeamBreakPosition.IntakeSide.A).getRPS(), intake.getModule(BeamBreakPosition.IntakeSide.B).getRPS(), intake.getBallCount()));
+                        intake.getModule(IntakeSide.FRONT).getRPS(), intake.getModule(IntakeSide.BACK).getRPS(), intake.getBallCount()));
             }
 
             if (!trimTurret && buttonY) {
@@ -405,11 +405,11 @@ public class RPSPredictionDataCollector extends KOpMode {
             telemetry.addData("Transfer set RPS / tol", "%.1f / %.1f   timeout %.0f ms", IntakeConfig.FEED_RPS,
                     IntakeConfig.FEED_RPS_TOLERANCE, IntakeConfig.FEED_GATE_TIMEOUT_MS);
             telemetry.addData("Transfer in tol A / B", "%s / %s",
-                    intake.getModule(BeamBreakPosition.IntakeSide.A).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out",
-                    intake.getModule(BeamBreakPosition.IntakeSide.B).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out");
+                    intake.getModule(IntakeSide.FRONT).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out",
+                    intake.getModule(IntakeSide.BACK).isAtRPS(IntakeConfig.FEED_RPS, IntakeConfig.FEED_RPS_TOLERANCE) ? "IN TOL" : "out");
             telemetry.addData("Last shot transfer gate", lastTransferGate);
-            IntakeModule transferA = intake.getModule(BeamBreakPosition.IntakeSide.A);
-            IntakeModule transferB = intake.getModule(BeamBreakPosition.IntakeSide.B);
+            IntakeModule transferA = intake.getModule(IntakeSide.FRONT);
+            IntakeModule transferB = intake.getModule(IntakeSide.BACK);
             telemetry.addData("Transfer actual RPS A / B", "%.2f / %.2f", transferA.getRPS(), transferB.getRPS());
             telemetry.addData("Transfer power A / B", "%.2f / %.2f%s", transferA.getPower(), transferB.getPower(),
                     Math.max(transferA.getPower(), transferB.getPower()) >= 0.99 ? "  MAXED: target above top speed, lower it" : "");

@@ -82,8 +82,8 @@ public class TurretAutoAlignTest {
     /** RPSPredictionDataCollector and ShooterRun: the Cell on the robot's end, distance from the turret pivot. */
     @Test
     public void shotDistance_isFromThePivotToTheCellOnTheRobotsEnd() {
-        checkDistance(FieldConfig.CORNER_ZERO_POSE, ShooterConfig.TARGET_POINT_2);
-        checkDistance(FieldConfig.FAR_CORNER_ZERO_POSE, ShooterConfig.TARGET_POINT_2);
+        checkDistance(FieldConfig.CORNER_ZERO_POSITION, ShooterConfig.TARGET_POINT_2);
+        checkDistance(FieldConfig.FAR_CORNER_ZERO_POSITION, ShooterConfig.TARGET_POINT_2);
         checkDistance(new Position(193, 3315, Math.PI / 2), ShooterConfig.TARGET_POINT_1);
         checkDistance(new Position(3349, 182, Math.toRadians(-1.3)), ShooterConfig.TARGET_POINT_2); // logged shot, 2026-11-23
         assertEquals(2242.0, ShooterRun.getDistanceToTargetFromCurrentPos(SharedData.getTargetPoint()), 1); // was 2237.56 from the centre

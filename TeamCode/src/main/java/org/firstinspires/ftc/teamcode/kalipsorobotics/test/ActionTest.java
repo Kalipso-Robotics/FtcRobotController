@@ -19,9 +19,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretSetAn
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
@@ -52,8 +52,8 @@ public class ActionTest extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
         intake = new Intake(opModeUtilities);
-        sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
-        sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
+        sideA = intake.getModule(IntakeSide.FRONT);
+        sideB = intake.getModule(IntakeSide.BACK);
         stopper = new Stopper(opModeUtilities);
         shooter = new Shooter(opModeUtilities);
         Turret.setInstanceNull();

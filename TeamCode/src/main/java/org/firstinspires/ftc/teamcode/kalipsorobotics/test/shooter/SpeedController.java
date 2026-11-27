@@ -106,12 +106,12 @@ public class SpeedController extends KOpMode {
                 KLog.d(TAG, () -> "event=autoAlign on=" + on);
             }
             if (kGamePad2.isRightBumperFirstPressed()) {
-                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.CORNER_ZERO_POSE)));
-                KLog.d(TAG, () -> "event=rezero to=" + FieldConfig.CORNER_ZERO_POSE);
+                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.CORNER_ZERO_POSITION)));
+                KLog.d(TAG, () -> "event=rezero to=" + FieldConfig.CORNER_ZERO_POSITION);
             }
             if (kGamePad2.isBackButtonFirstPressed()) {
-                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.FAR_CORNER_ZERO_POSE)));
-                KLog.d(TAG, () -> "event=rezero to=" + FieldConfig.FAR_CORNER_ZERO_POSE);
+                setLastZeroAction(new ResetOdometryToPos(new Position(FieldConfig.FAR_CORNER_ZERO_POSITION)));
+                KLog.d(TAG, () -> "event=rezero to=" + FieldConfig.FAR_CORNER_ZERO_POSITION);
             }
             updateActions();
 

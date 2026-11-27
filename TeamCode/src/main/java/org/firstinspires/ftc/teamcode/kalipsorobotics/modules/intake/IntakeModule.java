@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.PID.PIDFController;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KMotor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
@@ -25,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 public class IntakeModule {
     public static final String TAG = "Robot_Intake";
 
-    private final BeamBreakPosition.IntakeSide side;
+    private final IntakeSide side;
     private final DcMotor motor;
     private final KServo pivot;
     private final IntakeModuleConfig intakeModuleConfig;
@@ -36,7 +35,7 @@ public class IntakeModule {
     private double power = 0;
     private final PIDFController feedController;
 
-    public IntakeModule(OpModeUtilities opModeUtilities, BeamBreakPosition.IntakeSide side, IntakeModuleConfig intakeModuleConfig) {
+    public IntakeModule(OpModeUtilities opModeUtilities, IntakeSide side, IntakeModuleConfig intakeModuleConfig) {
         this(side,
                 opModeUtilities.getHardwareMap().dcMotor.get(intakeModuleConfig.motorName),
                 new KServo(opModeUtilities.getHardwareMap().servo.get(intakeModuleConfig.pivotName),
@@ -45,7 +44,7 @@ public class IntakeModule {
     }
 
     /** Direct-injection constructor, for hardware you have already pulled out of the hardware map (unit tests). */
-    public IntakeModule(BeamBreakPosition.IntakeSide side, DcMotor motor, KServo pivot, IntakeModuleConfig intakeModuleConfig) {
+    public IntakeModule(IntakeSide side, DcMotor motor, KServo pivot, IntakeModuleConfig intakeModuleConfig) {
         this.side = side;
         this.motor = motor;
         this.pivot = pivot;
@@ -54,7 +53,9 @@ public class IntakeModule {
         motor.setDirection(intakeModuleConfig.direction);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Start raised: the side is spring loaded to the ground, so lowered would stick out past the starting size.
-        pivot.setTargetPosition(intakeModuleConfig.initPivotPos);
+        pivot.setPosition(intakeModuleConfig.pivotDownPos);
+        pivot.setPosition(intakeModuleConfig.initPivotPos);
+        KLog.d(TAG, () -> "pivotPosition: " + pivot.getPosition());
         KLog.d(TAG, () -> "side=" + side + " event=init pivot=up");
     }
 
@@ -179,7 +180,7 @@ public class IntakeModule {
         return true;
     }
 
-    public BeamBreakPosition.IntakeSide getSide() {
+    public IntakeSide getSide() {
         return side;
     }
 

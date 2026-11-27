@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.After;
 import org.junit.Test;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.A;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.B;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide.FRONT;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide.BACK;
 
 public class PushBallTest {
     private final double preFeedMs = IntakeConfig.PRE_FEED_MS;
@@ -221,8 +221,8 @@ public class PushBallTest {
         }
 
         Rig(java.util.function.DoubleSupplier shooterRpsError) {
-            IntakeModule sideA = new IntakeModule(A, motorA, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false), IntakeConfig.SIDE_A);
-            IntakeModule sideB = new IntakeModule(B, motorB, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false), IntakeConfig.SIDE_B);
+            IntakeModule sideA = new IntakeModule(FRONT, motorA, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false), IntakeConfig.SIDE_A);
+            IntakeModule sideB = new IntakeModule(BACK, motorB, new KServo(FlowerMechInterlockTest.fakeServo(), 1e6, 255, 0, false), IntakeConfig.SIDE_B);
             FlowerMech flowerMech = new FlowerMech(new KCRServo(FlowerMechInterlockTest.fakeCRServo(), false), sideA);
             Intake intake = new Intake(sideA, sideB, flowerMech);
             Stopper stopper = new Stopper(new KServo(stopperServo, 1e6, 255, 0, false));

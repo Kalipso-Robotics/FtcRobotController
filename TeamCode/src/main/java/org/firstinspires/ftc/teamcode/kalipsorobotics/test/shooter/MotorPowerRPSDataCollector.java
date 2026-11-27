@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.test.shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KFileWriter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KGamePad;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -371,8 +371,8 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         opModeUtilities = new OpModeUtilities(hardwareMap, this, telemetry);
         shooter = new ShooterTuned(initializeShooter());
         stopper = new Stopper(opModeUtilities); // constructor closes it; never opened here, so the balls stay in
-        IntakeModule sideA = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.A, IntakeConfig.SIDE_A);
-        IntakeModule sideB = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.B, IntakeConfig.SIDE_B);
+        IntakeModule sideA = new IntakeModule(opModeUtilities, IntakeSide.FRONT, IntakeConfig.SIDE_A);
+        IntakeModule sideB = new IntakeModule(opModeUtilities, IntakeSide.BACK, IntakeConfig.SIDE_B);
         // IntakeModule inits raised (starting size); tuning runs with both sides down, like intaking / feeding.
         sideA.lower();
         sideB.lower();

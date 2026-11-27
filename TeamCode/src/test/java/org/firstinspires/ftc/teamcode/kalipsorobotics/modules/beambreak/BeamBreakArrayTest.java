@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.AnalogInputController;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.BeamBreakConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 import org.junit.Test;
 
@@ -42,8 +43,8 @@ public class BeamBreakArrayTest {
                 });
         for (int i = 0; i < pattern.length(); i++) {
             volts[i] = pattern.charAt(i) == 'X' ? BLOCKED_V : CLEAR_V;
-            BeamBreakPosition.IntakeSide side = i < pattern.length() / 2
-                    ? BeamBreakPosition.IntakeSide.A : BeamBreakPosition.IntakeSide.B;
+            IntakeSide side = i < pattern.length() / 2
+                    ? IntakeSide.FRONT : IntakeSide.BACK;
             sensors.add(new BeamBreakSensor(new BeamBreakPosition("beam" + i, side, 1.6),
                     new AnalogInput(controller, i)));
         }

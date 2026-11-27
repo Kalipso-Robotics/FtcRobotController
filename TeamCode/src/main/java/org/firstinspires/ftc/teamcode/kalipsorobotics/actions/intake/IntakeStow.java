@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 /**
@@ -25,12 +25,12 @@ public class IntakeStow extends KActionSet {
         flowerRaise.setDependentActions(stop);
         this.addAction(flowerRaise);
 
-        IntakeModuleRaise raiseA = new IntakeModuleRaise(intake.getModule(BeamBreakPosition.IntakeSide.A));
+        IntakeModuleRaise raiseA = new IntakeModuleRaise(intake.getModule(IntakeSide.FRONT));
         raiseA.setName("stowRaiseA");
         raiseA.setDependentActions(flowerRaise);
         this.addAction(raiseA);
 
-        IntakeModuleRaise raiseB = new IntakeModuleRaise(intake.getModule(BeamBreakPosition.IntakeSide.B));
+        IntakeModuleRaise raiseB = new IntakeModuleRaise(intake.getModule(IntakeSide.BACK));
         raiseB.setName("stowRaiseB");
         raiseB.setDependentActions(flowerRaise);
         this.addAction(raiseB);

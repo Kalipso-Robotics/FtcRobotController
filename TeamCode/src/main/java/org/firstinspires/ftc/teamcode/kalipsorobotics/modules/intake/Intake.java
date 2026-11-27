@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.Shoo
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.IShooterPredictor;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterInterpolationDataLookup;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -27,8 +26,8 @@ public class Intake {
 
 
     public Intake(OpModeUtilities opModeUtilities) {
-        intakeSideA = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.A, IntakeConfig.SIDE_A);
-        intakeSideB = new IntakeModule(opModeUtilities, BeamBreakPosition.IntakeSide.B, IntakeConfig.SIDE_B);
+        intakeSideA = new IntakeModule(opModeUtilities, IntakeSide.FRONT, IntakeConfig.SIDE_A);
+        intakeSideB = new IntakeModule(opModeUtilities, IntakeSide.BACK, IntakeConfig.SIDE_B);
         flowerMech = new FlowerMech(opModeUtilities, getModule(ModuleConfig.FLOWER_SIDE));
 
         predictor = new ShooterInterpolationDataLookup();
@@ -42,8 +41,8 @@ public class Intake {
         this.predictor = null;
     }
 
-    public IntakeModule getModule(BeamBreakPosition.IntakeSide side) {
-        return side == BeamBreakPosition.IntakeSide.A ? intakeSideA : intakeSideB;
+    public IntakeModule getModule(IntakeSide side) {
+        return side == IntakeSide.FRONT ? intakeSideA : intakeSideB;
     }
 
     /** The module facing a robot-frame forward (+X) direction or velocity: A for forward or zero, B for backward. */

@@ -94,7 +94,7 @@ public class OpModeUtilities {
             OctoQuadOdo.setInstanceNull();
         }
         // null = keep the pose from auto if there is one; a fresh instance starts at the corner, not (0,0,0).
-        Position fresh = (start == null) ? new Position(FieldConfig.CORNER_ZERO_POSE) : start;
+        Position fresh = (start == null) ? new Position(FieldConfig.CORNER_ZERO_POSITION) : start;
         boolean octo = OdometryConfig.USE_OCTOQUAD;
         if (octo) {
             runOdometryExecutorService(executorService, OctoQuadOdo.getInstance(opModeUtilities, fresh));

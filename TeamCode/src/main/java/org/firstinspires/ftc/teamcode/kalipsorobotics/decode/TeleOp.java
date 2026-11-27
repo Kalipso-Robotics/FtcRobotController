@@ -567,7 +567,7 @@ public class TeleOp extends KOpMode {
                     turnOnTurret();
                 }
 
-                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp, true);
+                shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp);
                 intakeController.clearFull(); // the shot empties the robot
                 shootAllAction.setEnableLimelightZeroing(enableLimelightZeroing);
                 setLastShooterAction(shootAllAction);
@@ -615,7 +615,7 @@ public class TeleOp extends KOpMode {
         if (toggleTurretAlign) {
             turnOnTurret();
         }
-        passAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp, PASS_RPS, PASS_HOOD, true);
+        passAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp);
         intakeController.clearFull(); // the pass empties the robot
         passAction.setName("Pass_" + shootCount);
         setLastShooterAction(passAction);
@@ -649,7 +649,7 @@ public class TeleOp extends KOpMode {
         if (zeroCornerPressed || zeroFarCornerPressed) {
             if (!isPending(resetOdometryToPos)) {
                 resetOdometryToPos = new ResetOdometryToPos(zeroFarCornerPressed
-                        ? FieldConfig.FAR_CORNER_ZERO_POSE : FieldConfig.CORNER_ZERO_POSE);
+                        ? FieldConfig.FAR_CORNER_ZERO_POSITION : FieldConfig.CORNER_ZERO_POSITION);
                 setLastZeroAction(resetOdometryToPos);
                 KLog.d("TeleOp_Zeroing", () -> "Corner zero started - Position: " + SharedData.getOdometryWheelIMUPosition());
             }

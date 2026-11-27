@@ -42,7 +42,7 @@ public class IntakeConfig {
     // FEED_RPS) and lets the shot go on, flagged timedOut(). Logged as Shooting_TransferReady event=timeout.
     public static double FEED_GATE_TIMEOUT_MS = 1500; // TODO-measure
     // ShootAllAction: how long the stopper stays open (IntakeRun feeding) before it closes and the intake stops.
-    public static double shootTime = 1000; // TODO-measure: ms
+    public static double shootTimeMS = 500; // TODO-measure: ms
 
     // Shooter RPS compensation (PushBall callers that pass a shooter error: ShootAllAction, so TeleOp too when on): during
     // the feed the transfer target becomes FEED_RPS + FEED_RPS_COMP_GAIN * (shooter target - actual RPS), so a sagging
@@ -56,6 +56,8 @@ public class IntakeConfig {
 
     // Flower arm: Axon Max in CR mode, no position feedback. It runs at the power for the time, then power is cut.
     // Retune the times whenever a power changes. Tune with FlowerCRTuner.
+
+    public static final double FLOWER_TIMEOUT_MS = 300; //TODO Tune
     public static double FLOWER_LOWER_MS = 1800; // TODO-measure: up -> down at FLOWER_DOWN_POWER
     public static double FLOWER_RAISE_MS = 1800; // TODO-measure: down -> up at FLOWER_UP_POWER
     public static double FLOWER_DOWN_POWER = 1; // TODO-measure

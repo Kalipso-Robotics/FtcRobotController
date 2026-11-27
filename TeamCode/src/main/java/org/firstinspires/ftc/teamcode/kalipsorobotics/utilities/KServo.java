@@ -64,7 +64,7 @@ public class KServo {
     public void setTargetPosition(double position) {
         lastPosition = servo.getPosition();
         targetPosition = MathFunctions.clamp(position, minPos, maxPos);
-        if (Math.abs(lastPosition - targetPosition) > 0.000001) {
+        if (Math.abs(lastPosition - targetPosition) >= 0.000001) {
             estimatedFinishTime = estimateFinishTimeMs(lastPosition, targetPosition);
             startTime = System.currentTimeMillis();
             servo.setPosition(targetPosition);

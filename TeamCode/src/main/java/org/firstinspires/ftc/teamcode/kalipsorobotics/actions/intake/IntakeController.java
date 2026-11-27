@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 
 // Pattern: DriveController (actions/drivetrain)
 public interface IntakeController {
@@ -14,5 +14,5 @@ public interface IntakeController {
     void clearFull();
 
     /** The side currently chosen to intake, for telemetry and logs. */
-    BeamBreakPosition.IntakeSide getSelectedSide();
+    IntakeSide getSelectedSide();
 }

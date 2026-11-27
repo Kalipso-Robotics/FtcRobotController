@@ -10,9 +10,9 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PathPlanning;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PickupPlan;
@@ -294,8 +294,8 @@ public class AutoToBallsPathingAction extends Action {
     /** The chosen side lowers (its run comes from intakeFullAction); the other side stops and raises. */
     private void startIntake() {
         pickupSide.lower();
-        BeamBreakPosition.IntakeSide other = pickupSide.getSide() == BeamBreakPosition.IntakeSide.A
-                ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A;
+        IntakeSide other = pickupSide.getSide() == IntakeSide.FRONT
+                ? IntakeSide.BACK : IntakeSide.FRONT;
         intake.getModule(other).stop();
         intake.getModule(other).raise();
         KLog.d(TAG, () -> "name=" + getName() + " event=intakeOn side=" + pickupSide.getSide());
@@ -364,7 +364,7 @@ public class AutoToBallsPathingAction extends Action {
         // It gives back a route, where the robot should stop, which way its front should point there,
         // and which intake (front or back) picks the ball up.
         // A Flower pile can only be picked up by the side the Flower arm is on.
-        Boolean forceBack = useFlower ? ModuleConfig.FLOWER_SIDE == BeamBreakPosition.IntakeSide.B : null;
+        Boolean forceBack = useFlower ? ModuleConfig.FLOWER_SIDE == IntakeSide.BACK : null;
         plan = planner.planPickup(robot, pose.getTheta(), target, forceBack);
         if (forceBack != null && !plan.isOk()) {
             // The flower's side cannot reach this pile: pick it up with whichever side can, without the arm.
@@ -411,7 +411,7 @@ public class AutoToBallsPathingAction extends Action {
 
         // Step 6: the intake on the end the planner chose (it runs from INTAKE_START_DISTANCE_MM on).
         if (intake != null) {
-            pickupSide = intake.getModule(plan.useBackIntake ? BeamBreakPosition.IntakeSide.B : BeamBreakPosition.IntakeSide.A);
+            pickupSide = intake.getModule(plan.useBackIntake ? IntakeSide.BACK : IntakeSide.FRONT);
             // From the start, the run must last the whole drive; setIsDone stops it when we finish.
             double runMs = intakeFromStart ? Double.MAX_VALUE : INTAKE_RUN_MS;
             intakeFullAction = new IntakeFullAction(stopper, pickupSide, runMs, IntakeConfig.intakePower);

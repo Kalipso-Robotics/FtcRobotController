@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 
 import com.acmerobotics.dashboard.config.Config;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 
 @Config
 public class ModuleConfig {
@@ -21,7 +21,7 @@ public class ModuleConfig {
 
     //========FLOWER========
     // Which intake side carries the flower arm. Changing sides is this one line.
-    public static final BeamBreakPosition.IntakeSide FLOWER_SIDE = BeamBreakPosition.IntakeSide.B; // back (non-odometry side)
+    public static final IntakeSide FLOWER_SIDE = IntakeSide.BACK; // back (non-odometry side)
 
 
     //========BASIC TELEOP (test/BasicTeleop, manual control)========

@@ -26,6 +26,7 @@ public class IntakeFullAction extends KActionSet {
         this(stopper, null, side, new RunIntakeTime(side, timeMS, power, true));
     }
 
+
     private IntakeFullAction(Stopper stopper, Intake intake, IntakeModule side, RunIntakeTime runIntakeTime) {
         this.intake = intake;
         this.side = side;

@@ -7,12 +7,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullDetector;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 
@@ -37,7 +37,7 @@ public class IntakeMotorTest extends KOpMode {
         Intake intake = new Intake(opModeUtilities);
         FlowerMech flowerMech = intake.getFlower();
         Stopper stopper = new Stopper(opModeUtilities);
-        BeamBreakPosition.IntakeSide selected = BeamBreakPosition.IntakeSide.A;
+        IntakeSide selected = IntakeSide.FRONT;
         IntakeFullDetector fullDetector = new IntakeFullDetector();
         boolean wasRunning = false;
         double peakFilteredMA = 0;
@@ -47,15 +47,15 @@ public class IntakeMotorTest extends KOpMode {
 
         while (opModeIsActive()) {
             opModeUtilities.clearBulkCache();
-            BeamBreakPosition.IntakeSide previous = selected;
+            IntakeSide previous = selected;
             if (kGamePad2.isDpadUpFirstPressed()) {
-                selected = BeamBreakPosition.IntakeSide.A;
+                selected = IntakeSide.FRONT;
             } else if (kGamePad2.isDpadDownFirstPressed()) {
-                selected = BeamBreakPosition.IntakeSide.B;
+                selected = IntakeSide.BACK;
             }
             if (selected != previous) {
                 intake.getModule(previous).stop();
-                BeamBreakPosition.IntakeSide now = selected;
+                IntakeSide now = selected;
                 KLog.d(TAG, () -> "event=selectSide side=" + now);
             }
             IntakeModule side = intake.getModule(selected);

@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.A;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.B;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide.FRONT;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide.BACK;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -14,12 +14,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterInterpolationConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
@@ -63,8 +63,8 @@ public class IntakeActionsTest {
         IntakeConfig.SIDE_B.kF = 0.08;
         IntakeConfig.SIDE_A.kP = 0;
         IntakeConfig.SIDE_B.kP = 0;
-        sideA = new IntakeModule(A, motorA, new KServo(pivotServoA, 1e6, 255, 0, false), IntakeConfig.SIDE_A);
-        sideB = new IntakeModule(B, motorB, new KServo(pivotServoB, 1e6, 255, 0, false), IntakeConfig.SIDE_B);
+        sideA = new IntakeModule(FRONT, motorA, new KServo(pivotServoA, 1e6, 255, 0, false), IntakeConfig.SIDE_A);
+        sideB = new IntakeModule(BACK, motorB, new KServo(pivotServoB, 1e6, 255, 0, false), IntakeConfig.SIDE_B);
         flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         intake = new Intake(sideA, sideB, flowerMech);
     }
@@ -87,8 +87,8 @@ public class IntakeActionsTest {
 
     @Test
     public void atTarget_powerIsKfTimesTarget_perSide() {
-        VelocityRig a = new VelocityRig(BeamBreakPosition.IntakeSide.A, 10);
-        VelocityRig b = new VelocityRig(BeamBreakPosition.IntakeSide.B, 10);
+        VelocityRig a = new VelocityRig(IntakeSide.FRONT, 10);
+        VelocityRig b = new VelocityRig(IntakeSide.BACK, 10);
         a.side.runRPS(10);
         b.side.runRPS(10);
         assertEquals(0.5, a.power(), 1e-9);
@@ -98,8 +98,8 @@ public class IntakeActionsTest {
     @Test
     public void slowedByLoad_kpAddsPower_onlyOnThatSide() {
         IntakeConfig.SIDE_A.kP = 0.1;
-        VelocityRig a = new VelocityRig(BeamBreakPosition.IntakeSide.A, 8); // 2 RPS under target
-        VelocityRig b = new VelocityRig(BeamBreakPosition.IntakeSide.B, 8);
+        VelocityRig a = new VelocityRig(IntakeSide.FRONT, 8); // 2 RPS under target
+        VelocityRig b = new VelocityRig(IntakeSide.BACK, 8);
         a.side.runRPS(10);
         b.side.runRPS(10);
         assertEquals("A: kF*target + kP*error", 0.5 + 0.2, a.power(), 1e-9);
@@ -109,7 +109,7 @@ public class IntakeActionsTest {
     @Test
     public void lowBattery_scalesPowerUp() {
         SharedData.setVoltage(ShooterInterpolationConfig.DEFAULT_VOLTAGE * 0.9);
-        VelocityRig a = new VelocityRig(BeamBreakPosition.IntakeSide.A, 10);
+        VelocityRig a = new VelocityRig(IntakeSide.FRONT, 10);
         a.side.runRPS(10);
         assertTrue("sagging battery needs more power", a.power() > 0.5);
     }
@@ -117,7 +117,7 @@ public class IntakeActionsTest {
     @Test
     public void powerClampedToOne_andRunGoesBackToOpenLoop() {
         IntakeConfig.SIDE_B.kP = 1;
-        VelocityRig b = new VelocityRig(BeamBreakPosition.IntakeSide.B, 0); // stalled
+        VelocityRig b = new VelocityRig(IntakeSide.BACK, 0); // stalled
         b.side.runRPS(10);
         assertEquals(1, b.power(), 1e-9);
         b.side.run(0.3);
@@ -126,13 +126,13 @@ public class IntakeActionsTest {
 
     @Test
     public void estimateKf_isPowerOverSpeed_perSide() {
-        VelocityRig a = new VelocityRig(BeamBreakPosition.IntakeSide.A, 18);
-        VelocityRig b = new VelocityRig(BeamBreakPosition.IntakeSide.B, 15);
+        VelocityRig a = new VelocityRig(IntakeSide.FRONT, 18);
+        VelocityRig b = new VelocityRig(IntakeSide.BACK, 15);
         a.side.run(0.9);
         b.side.run(0.9);
         assertEquals(0.05, a.side.estimateKf(), 1e-9);
         assertEquals(0.06, b.side.estimateKf(), 1e-9);
-        assertTrue("not moving = no estimate", Double.isNaN(new VelocityRig(BeamBreakPosition.IntakeSide.A, 0).side.estimateKf()));
+        assertTrue("not moving = no estimate", Double.isNaN(new VelocityRig(IntakeSide.FRONT, 0).side.estimateKf()));
     }
 
     @Test
@@ -141,15 +141,15 @@ public class IntakeActionsTest {
         try {
             IntakeConfig.FEED_RPS_TOLERANCE = 1.5;
             IntakeConfig.FEED_GATE_TIMEOUT_MS = 100;
-            IntakeRun run = new IntakeRun(new Intake(new VelocityRig(A, 10).side, new VelocityRig(B, 21.4).side, null), 20);
+            IntakeRun run = new IntakeRun(new Intake(new VelocityRig(FRONT, 10).side, new VelocityRig(BACK, 21.4).side, null), 20);
             IntakeReady ready = new IntakeReady(run);
             run.updateCheckDone();
             ready.updateCheckDone();
             assertTrue("B in tolerance is enough", ready.getIsDone());
             assertFalse(ready.timedOut());
 
-            VelocityRig slowB = new VelocityRig(B, 17);
-            IntakeRun stuckRun = new IntakeRun(new Intake(new VelocityRig(A, 17).side, slowB.side, null), 20);
+            VelocityRig slowB = new VelocityRig(BACK, 17);
+            IntakeRun stuckRun = new IntakeRun(new Intake(new VelocityRig(FRONT, 17).side, slowB.side, null), 20);
             IntakeReady stuck = new IntakeReady(stuckRun);
             stuckRun.updateCheckDone();
             stuck.updateCheckDone();
@@ -175,7 +175,7 @@ public class IntakeActionsTest {
         final double[] power = {0};
         final IntakeModule side;
 
-        VelocityRig(BeamBreakPosition.IntakeSide which, double rps) {
+        VelocityRig(IntakeSide which, double rps) {
             double ticksPerSec = rps * ModuleConfig.INTAKE_TICKS_PER_REV;
             DcMotorEx motor = (DcMotorEx) Proxy.newProxyInstance(DcMotorEx.class.getClassLoader(), new Class<?>[]{DcMotorEx.class},
                     (proxy, method, args) -> {
@@ -191,7 +191,7 @@ public class IntakeActionsTest {
                                 return null;
                         }
                     });
-            side = new IntakeModule(which, motor, new KServo(FlowerMechInterlockTest.fakeServo()), (which == BeamBreakPosition.IntakeSide.A ? IntakeConfig.SIDE_A : IntakeConfig.SIDE_B));
+            side = new IntakeModule(which, motor, new KServo(FlowerMechInterlockTest.fakeServo()), (which == IntakeSide.FRONT ? IntakeConfig.SIDE_A : IntakeConfig.SIDE_B));
         }
 
         double power() {

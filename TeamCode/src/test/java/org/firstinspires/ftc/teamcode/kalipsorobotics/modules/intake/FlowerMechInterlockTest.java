@@ -9,8 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.After;
@@ -48,7 +46,7 @@ public class FlowerMechInterlockTest {
         IntakeConfig.FLOWER_UP_POWER = 0.5;
         flowerServo = fakeCRServo();
         motorA = fakeMotor();
-        sideA = new IntakeModule(BeamBreakPosition.IntakeSide.A, motorA, new KServo(pivotServoA, FAST_DEG_PER_SEC, 255, 0, false), IntakeConfig.SIDE_A);
+        sideA = new IntakeModule(IntakeSide.FRONT, motorA, new KServo(pivotServoA, FAST_DEG_PER_SEC, 255, 0, false), IntakeConfig.SIDE_A);
         flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         waitUntil(flowerMech::isUp);
     }
@@ -101,7 +99,7 @@ public class FlowerMechInterlockTest {
     @Test
     public void sideWithoutFlower_raisesImmediately() throws InterruptedException {
         Servo pivotServoB = fakeServo();
-        IntakeModule sideB = new IntakeModule(BeamBreakPosition.IntakeSide.B, fakeMotor(), new KServo(pivotServoB, FAST_DEG_PER_SEC, 255, 0, false), IntakeConfig.SIDE_B);
+        IntakeModule sideB = new IntakeModule(IntakeSide.BACK, fakeMotor(), new KServo(pivotServoB, FAST_DEG_PER_SEC, 255, 0, false), IntakeConfig.SIDE_B);
         sideB.lower();
         waitUntil(sideB::isDown);
 

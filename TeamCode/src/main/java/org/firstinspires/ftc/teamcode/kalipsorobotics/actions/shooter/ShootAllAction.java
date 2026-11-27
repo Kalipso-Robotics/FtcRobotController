@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
@@ -50,15 +52,9 @@ public class ShootAllAction extends KActionSet {
     }
 
     private boolean enableLimelightZeroing = ShooterConfig.REZERO_AFTER_EACH_SHOT;
-    private final boolean abortOnTimeout;
+
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlign turretAutoAlign, double targetRPS, double targetHoodPos) {
-        this(turret, stopper, intake, shooter, shooterRun, turretAutoAlign, targetRPS, targetHoodPos, false);
-    }
-
-    /** abortOnTimeout: TeleOp gate. If RPS or turret is not ready in TELEOP_READY_TIMEOUT_MS, finish without feeding. */
-    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlign turretAutoAlign, double targetRPS, double targetHoodPos, boolean abortOnTimeout) {
-        this.abortOnTimeout = abortOnTimeout;
         this.stopper = stopper;
         this.intake = intake;
         this.shooter = shooter;
@@ -75,11 +71,6 @@ public class ShootAllAction extends KActionSet {
     }
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlign turretAutoAlign) {
-        this(turret, stopper, intake, shooter, shooterRun, turretAutoAlign, false);
-    }
-
-    public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlign turretAutoAlign, boolean abortOnTimeout) {
-        this.abortOnTimeout = abortOnTimeout;
         this.stopper = stopper;
         this.intake = intake;
         this.shooter = shooter;
@@ -90,12 +81,12 @@ public class ShootAllAction extends KActionSet {
         shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
 
         // Intake RPS from the distance to the shooter's goal (Intake.getIntakeRPSPrediction); FEED_RPS if there is no goal.
-        IntakeRun run = shooterRun.getTargetPoint() != null
+        IntakeRun intakeRun = shooterRun.getTargetPoint() != null
                 ? new IntakeRun(intake, shooterRun.getTargetPoint())
                 : new IntakeRun(intake, IntakeConfig.FEED_RPS);
-        generateBasicAction(shooterRun, stopper, intake, turretAutoAlign, run);
+        generateBasicAction(shooterRun, stopper, intake, turretAutoAlign, intakeRun);
 
-        KLog.d("Intake Target RPS", () -> String.format("%.2f", intakeRun.getTargetRPS()));
+        KLog.d("Intake Target RPS", () -> String.format("%.2f", this.intakeRun.getTargetRPS()));
     }
 
     public ShooterRun getShooterRun() {
@@ -137,15 +128,11 @@ public class ShootAllAction extends KActionSet {
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlign turretAutoAlign, IntakeRun intakeRun) {
 
-        shooterReady = abortOnTimeout
-                ? new ShooterReady(shooterRun, ShooterConfig.TELEOP_READY_TIMEOUT_MS)
-                : new ShooterReady(shooterRun);
+        shooterReady = new ShooterReady(shooterRun);
         shooterReady.setName("shooterReady");
         this.addAction(shooterReady);
 
-        turretReady = abortOnTimeout
-                ? new TurretReady(turretAutoAlign, ShooterConfig.TELEOP_READY_TIMEOUT_MS, true)
-                : new TurretReady(turretAutoAlign);
+        turretReady = new TurretReady(turretAutoAlign);
         turretReady.setName("turretReady");
         this.addAction(turretReady);
 
@@ -166,8 +153,8 @@ public class ShootAllAction extends KActionSet {
         this.addAction(openStopper);
 
         // Same dependencies as openStopper so it starts the same loop the stopper starts opening: the feed time.
-        shootTimeWait = new WaitAction(IntakeConfig.shootTime);
-        shootTimeWait.setName("openStopperWait");
+        shootTimeWait = new WaitAction(IntakeConfig.shootTimeMS);
+        shootTimeWait.setName("shootTimeWait");
         shootTimeWait.setDependentActions(openStopper);
         this.addAction(shootTimeWait);
 
@@ -185,25 +172,6 @@ public class ShootAllAction extends KActionSet {
         resetOdometryToPosition.setName("resetOdometryToPosition");
         resetOdometryToPosition.setDependentActions(closeStopper, intakeStop);
         this.addAction(resetOdometryToPosition);
-    }
-
-    /** Abort only when a gate timed out and the two gates are not both ready (both ready = a legit feed). */
-    public static boolean shouldAbortOnTimeout(boolean abortOnTimeout, boolean shooterTimedOut, boolean turretTimedOut,
-                                               boolean shooterDone, boolean turretDone) {
-        return abortOnTimeout && (shooterTimedOut || turretTimedOut) && !(shooterDone && turretDone);
-    }
-
-    @Override
-    public void update() {
-        // Checked before super.update(): KActionSet runs openStopper in the same pass as beforeUpdate(), so aborting there can leak a feed.
-        if (!isDone && shouldAbortOnTimeout(abortOnTimeout, shooterReady.timedOut(), turretReady.timedOut(),
-                shooterReady.getIsDone(), turretReady.getIsDone())) {
-            KLog.e(TAG, "event=abort reason=timeout name=" + getName() + " shooterTimedOut=" + shooterReady.timedOut()
-                    + " turretTimedOut=" + turretReady.timedOut());
-            setIsDone(true);
-            return;
-        }
-        super.update();
     }
 
     @Override

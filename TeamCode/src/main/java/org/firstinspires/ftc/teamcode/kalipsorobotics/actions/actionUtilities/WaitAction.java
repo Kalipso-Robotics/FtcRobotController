@@ -19,7 +19,7 @@ public class WaitAction extends Action {
         if (hasStarted) {
 //            boolean done = elapsedTime.seconds() >= waitTimeSeconds;
             KLog.d("waitaction", () -> "elapsed time " + elapsedTime.seconds());
-            isDone = elapsedTime.milliseconds() >= waitTimeMS;
+            isDone = elapsedTime.milliseconds() > waitTimeMS;
             return isDone;
         }
 

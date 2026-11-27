@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KCRServo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 import org.junit.Before;
@@ -26,8 +24,8 @@ public class IntakeRunLowersPivotsTest {
     public void setUp() {
         pivotA = FlowerMechInterlockTest.fakeServo();
         pivotB = FlowerMechInterlockTest.fakeServo();
-        IntakeModule sideA = new IntakeModule(BeamBreakPosition.IntakeSide.A, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotA), IntakeConfig.SIDE_A);
-        IntakeModule sideB = new IntakeModule(BeamBreakPosition.IntakeSide.B, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotB), IntakeConfig.SIDE_B);
+        IntakeModule sideA = new IntakeModule(IntakeSide.FRONT, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotA), IntakeConfig.SIDE_A);
+        IntakeModule sideB = new IntakeModule(IntakeSide.BACK, FlowerMechInterlockTest.fakeMotor(), new KServo(pivotB), IntakeConfig.SIDE_B);
         intake = new Intake(sideA, sideB, new FlowerMech(new KCRServo(FlowerMechInterlockTest.fakeCRServo(), false), sideA));
     }
 

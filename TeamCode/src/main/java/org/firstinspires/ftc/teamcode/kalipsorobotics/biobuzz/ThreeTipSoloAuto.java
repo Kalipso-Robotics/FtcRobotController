@@ -8,16 +8,16 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KA
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.SetAutoDelayAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath.VisionPickupAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FlowerLower;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeFullAction;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeModuleLower;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterReady;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootAllAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterStop;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.pusher.PushBall;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
@@ -55,16 +56,16 @@ public class ThreeTipSoloAuto extends KOpMode {
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
 
-    final Position ROBOT_START_POS = new Position(996, 3360, Math.toRadians(-90)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
+    final Position ROBOT_START_POS = new Position(932, 3428, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
     final Point PARK_POINT = new Point(392, 1371);
     final double AUTO_LENGTH_MS = 30000;
     static final boolean USE_LIMELIGHT = false; // nothing in this auto reads the Limelight yet; true = start it anyway
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
-    static public final Position FLOWER_INTAKE_POSITION_A = new Position(FieldConfig.FLOWER_1_POINT.getX()-406.4, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
-    final static public Position FLOWER_EXIT_POSITION_A = new Position(FieldConfig.FLOWER_1_POINT.getX()-500, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
-    static public final Position FLOWER_INTAKE_POSITION_B = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()-406.4, Math.toRadians(0));
-    public final static Position FLOWER_EXIT_POSITION_B = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()-500, Math.toRadians(0));
+    static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()-406.4, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
+    final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()-500, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
+    static public final Position FLOWER_INTAKE_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()-406.4, Math.toRadians(0));
+    public final static Position FLOWER_EXIT_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()-500, Math.toRadians(0));
 
 
     @Override
@@ -83,6 +84,7 @@ public class ThreeTipSoloAuto extends KOpMode {
         sleep(1000);
         OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, ROBOT_START_POS);
         redThreeTipSoloAuto = new KActionSet();
+        redThreeTipSoloAuto.setName("redThreeTipSoloAuto");
         intake = new Intake(opModeUtilities);
         flowerMech = intake.getFlower();
         shooter = new Shooter(opModeUtilities);
@@ -103,7 +105,7 @@ public class ThreeTipSoloAuto extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
 
-        // TRIP 0
+        //============================TRIP 0==========================
         SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
         setAutoDelayAction.setName("setAutoDelayAction");
         while (!setAutoDelayAction.getIsDone() && opModeInInit()) {
@@ -115,40 +117,36 @@ public class ThreeTipSoloAuto extends KOpMode {
         delayBeforeStart.setName("delayBeforeStart");
         redThreeTipSoloAuto.addAction(delayBeforeStart);
 
-        WaitAction trip0WaitUntilShooterRun = new WaitAction(waitForShooterRunMS);
-        trip0WaitUntilShooterRun.setName("trip0WaitUntilShooterRun");
-        trip0WaitUntilShooterRun.setDependentActions(delayBeforeStart);
-        redThreeTipSoloAuto.addAction(trip0WaitUntilShooterRun);
 
         // Preload goes into the up Cell, the one with the 3 nectar (Cell A). From the start pose the turret also picks Cell A (SharedData.getTargetPoint).
-        ShooterRun trip0ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, ROBOT_START_POS.toPoint());
-        trip0ShooterRun.setName("trip0ShooterRun");
-        trip0ShooterRun.setDependentActions(trip0WaitUntilShooterRun);
-        redThreeTipSoloAuto.addAction(trip0ShooterRun);
+        ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, ROBOT_START_POS.toPoint());
+        shooterRun.setName("shooterRun");
+        shooterRun.setDependentActions(delayBeforeStart);
+        redThreeTipSoloAuto.addAction(shooterRun);
 
-        ShooterReady trip0ShooterReady = new ShooterReady(trip0ShooterRun);
-        trip0ShooterReady.setName("trip0ShooterReady");
-        trip0ShooterReady.setDependentActions(trip0WaitUntilShooterRun);
-        redThreeTipSoloAuto.addAction(trip0ShooterReady);
-
-        TurretReady trip0TurretReady = new TurretReady(turretAutoAlign);
-        trip0TurretReady.setName("trip0TurretReady");
-        trip0TurretReady.setDependentActions(delayBeforeStart);
-        redThreeTipSoloAuto.addAction(trip0TurretReady);
-
-        PushBall trip0Shoot = new PushBall(stopper, intake);
+        ShootAllAction trip0Shoot = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlign);
         trip0Shoot.setName("trip0Shoot");
-        trip0Shoot.setDependentActions(trip0ShooterReady, trip0TurretReady);
+        trip0Shoot.setDependentActions(delayBeforeStart);
         redThreeTipSoloAuto.addAction(trip0Shoot);
 
-        ShooterStop trip0ShooterStop = new ShooterStop(trip0ShooterRun);
-        trip0ShooterStop.setName("trip0ShooterStop");
-        trip0ShooterStop.setDependentActions(trip0Shoot);
-        redThreeTipSoloAuto.addAction(trip0ShooterStop);
+        FlowerLower flowerLower = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
+        flowerLower.setName("flowerLower");
+        flowerLower.setDependentActions(delayBeforeStart);
+        redThreeTipSoloAuto.addAction(flowerLower);
+
+        IntakeModuleLower intakeModuleLowerFront = new IntakeModuleLower(intake.getModule(IntakeSide.FRONT));
+        intakeModuleLowerFront.setName("intakeModuleLowerFront");
+        intakeModuleLowerFront.setDependentActions(delayBeforeStart);
+        redThreeTipSoloAuto.addAction(intakeModuleLowerFront);
+
+        IntakeModuleLower intakeModuleLowerBack = new IntakeModuleLower(intake.getModule(IntakeSide.BACK));
+        intakeModuleLowerBack.setName("intakeModuleLowerBack");
+        intakeModuleLowerBack.setDependentActions(delayBeforeStart);
+        redThreeTipSoloAuto.addAction(intakeModuleLowerBack);
         //END OF TRIP 0
 
-        //TRIP 1
-        FullFlowerAction trip1FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_B,FLOWER_EXIT_POSITION_B);
+        //====================================TRIP 1=====================================
+        FullFlowerAction trip1FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_2, FLOWER_EXIT_POSITION_2);
         trip1FlowerIntake.setName("trip1FlowerIntake");
         trip1FlowerIntake.setDependentActions(trip0Shoot);
         trip1FlowerIntake.getFlowerLower().setIsDone(true);
@@ -157,38 +155,19 @@ public class ThreeTipSoloAuto extends KOpMode {
         IPurePursuitAction trip1GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip1GoToShoot.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip1GoToShoot.setName("trip1GoToShoot");
-        trip1GoToShoot.addPosition(1172, 621, 289.1);
+        trip1GoToShoot.addPosition(1172, 621, 100);
         trip1GoToShoot.setDependentActions(trip1FlowerIntake);
         redThreeTipSoloAuto.addAction(trip1GoToShoot);
 
-        ShooterRun trip1ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_2, new Point(1052, 543));
-        trip1ShooterRun.setName("trip1ShooterRun");
-        trip1ShooterRun.setDependentActions(trip1GoToShoot);
-        redThreeTipSoloAuto.addAction(trip1ShooterRun);
-
-        ShooterReady trip1ShooterReady = new ShooterReady(trip1ShooterRun);
-        trip1ShooterReady.setName("trip1ShooterReady");
-        trip1ShooterReady.setDependentActions(trip1GoToShoot);
-        redThreeTipSoloAuto.addAction(trip1ShooterReady);
-
-        TurretReady trip1TurretReady = new TurretReady(turretAutoAlign);
-        trip1TurretReady.setName("trip1TurretReady");
-        trip1TurretReady.setDependentActions(trip1GoToShoot);
-        redThreeTipSoloAuto.addAction(trip1TurretReady);
-
-        PushBall trip1Shoot = new PushBall(stopper, intake);
+        ShootAllAction trip1Shoot = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlign);
         trip1Shoot.setName("trip1Shoot");
-        trip1Shoot.setDependentActions(trip1ShooterReady, trip1TurretReady);
+        trip1Shoot.setDependentActions(trip1GoToShoot);
         redThreeTipSoloAuto.addAction(trip1Shoot);
 
-        ShooterStop trip1ShooterStop = new ShooterStop(trip1ShooterRun);
-        trip1ShooterStop.setName("trip1ShooterStop");
-        trip1ShooterStop.setDependentActions(trip1Shoot);
-        redThreeTipSoloAuto.addAction(trip1ShooterStop);
         //END OF TRIP 1
 
-        //TRIP 2
-        FullFlowerAction trip2FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_A,FLOWER_EXIT_POSITION_A);
+        //===============================TRIP 2===============================
+        FullFlowerAction trip2FlowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_1, FLOWER_EXIT_POSITION_1);
         trip2FlowerIntake.setName("trip2FlowerIntake");
         trip2FlowerIntake.setDependentActions(trip1Shoot);
         redThreeTipSoloAuto.addAction(trip2FlowerIntake);
@@ -197,44 +176,25 @@ public class ThreeTipSoloAuto extends KOpMode {
         IPurePursuitAction trip2GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip2GoToShoot.setMaxTimeOutMS(1500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip2GoToShoot.setName("trip2GoToShoot");
-        trip2GoToShoot.addPosition(1052, 543, 289.1);
+        trip2GoToShoot.addPosition(1052, 543, 100);
         trip2GoToShoot.setDependentActions(trip2FlowerIntake);
         redThreeTipSoloAuto.addAction(trip2GoToShoot);
 
-        ShooterRun trip2ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_2, new Point(1052, 543));
-        trip2ShooterRun.setName("trip2ShooterRun");
-        trip2ShooterRun.setDependentActions(trip2GoToShoot);
-        redThreeTipSoloAuto.addAction(trip2ShooterRun);
-
-        ShooterReady trip2ShooterReady = new ShooterReady(trip2ShooterRun);
-        trip2ShooterReady.setName("trip2ShooterReady");
-        trip2ShooterReady.setDependentActions(trip2GoToShoot);
-        redThreeTipSoloAuto.addAction(trip2ShooterReady);
-
-        TurretReady trip2TurretReady = new TurretReady(turretAutoAlign);
-        trip2TurretReady.setName("trip2TurretReady");
-        trip2TurretReady.setDependentActions(trip2GoToShoot);
-        redThreeTipSoloAuto.addAction(trip2TurretReady);
-
-        PushBall trip2Shoot = new PushBall(stopper, intake);
+        ShootAllAction trip2Shoot = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlign);
         trip2Shoot.setName("trip2Shoot");
-        trip2Shoot.setDependentActions(trip2ShooterReady, trip2TurretReady);
+        trip2Shoot.setDependentActions(trip2GoToShoot);
         redThreeTipSoloAuto.addAction(trip2Shoot);
 
-        ShooterStop trip2ShooterStop = new ShooterStop(trip2ShooterRun);
-        trip2ShooterStop.setName("trip2ShooterStop");
-        trip2ShooterStop.setDependentActions(trip2Shoot);
-        redThreeTipSoloAuto.addAction(trip2ShooterStop);
         //END OF TRIP 2
 
-        //TRIP 3
+        //===============================TRIP 3===============================
 
         IPurePursuitAction trip3GoToGarden = new AdaptivePurePursuitAction(driveTrain);
         trip3GoToGarden.setMaxTimeOutMS(4500); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip3GoToGarden.setName("trip3GoToGarden");
         trip3GoToGarden.addPosition(800, 543, 102.6);
         trip3GoToGarden.addPosition(300, 2949, 102.6);
-        trip3GoToGarden.setDependentActions(trip2ShooterStop);
+        trip3GoToGarden.setDependentActions(trip2Shoot);
         redThreeTipSoloAuto.addAction(trip3GoToGarden);
 
         IntakeFullAction trip3IntakeFullAction = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
@@ -264,33 +224,15 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip3GoToShoot.setDependentActions(trip3IntakeSweepGarden);
         redThreeTipSoloAuto.addAction(trip3GoToShoot);
 
-        ShooterRun trip3GardenShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, new Point(941, 3089));
-        trip3GardenShooterRun.setName("trip3GardenShooterRun");
-        trip3GardenShooterRun.setDependentActions(trip3GoToShoot);
-        redThreeTipSoloAuto.addAction(trip3GardenShooterRun);
 
-        ShooterReady trip3GardenShooterReady = new ShooterReady(trip3GardenShooterRun);
-        trip3GardenShooterReady.setName("trip3GardenShooterReady");
-        trip3GardenShooterReady.setDependentActions(trip3GoToShoot);
-        redThreeTipSoloAuto.addAction(trip3GardenShooterReady);
-
-        TurretReady trip3GardenTurretReady = new TurretReady(turretAutoAlign);
-        trip3GardenTurretReady.setName("trip3GardenTurretReady");
-        trip3GardenTurretReady.setDependentActions(trip3GoToShoot);
-        redThreeTipSoloAuto.addAction(trip3GardenTurretReady);
-
-        PushBall trip3GardenShoot = new PushBall(stopper, intake);
+        ShootAllAction trip3GardenShoot = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlign);
         trip3GardenShoot.setName("trip3GardenShoot");
-        trip3GardenShoot.setDependentActions(trip3GardenShooterReady, trip3GardenTurretReady);
+        trip3GardenShoot.setDependentActions(trip3GoToShoot);
         redThreeTipSoloAuto.addAction(trip3GardenShoot);
 
-        ShooterStop trip3GardenShooterStop = new ShooterStop(trip3GardenShooterRun);
-        trip3GardenShooterStop.setName("trip3GardenShooterStop");
-        trip3GardenShooterStop.setDependentActions(trip3GardenShoot);
-        redThreeTipSoloAuto.addAction(trip3GardenShooterStop);
         //END OF TRIP 3
 
-        //TRIP 4
+        //===============================TRIP 4===============================
         IPurePursuitAction trip4LookAtBalls = new AdaptivePurePursuitAction(driveTrain);
         trip4LookAtBalls.setMaxTimeOutMS(2000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip4LookAtBalls.setName("trip4LookAtBalls");
@@ -312,30 +254,16 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip4GoToShoot.setDependentActions(trip4GrabBalls);
         redThreeTipSoloAuto.addAction(trip4GoToShoot);
 
-        ShooterRun trip4ShooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, new Point(714, 2952));
-        trip4ShooterRun.setName("trip4ShooterRun");
-        trip4ShooterRun.setDependentActions(trip4GoToShoot);
-        redThreeTipSoloAuto.addAction(trip4ShooterRun);
 
-        ShooterReady trip4ShooterReady = new ShooterReady(trip4ShooterRun);
-        trip4ShooterReady.setName("trip4ShooterReady");
-        trip4ShooterReady.setDependentActions(trip4GoToShoot);
-        redThreeTipSoloAuto.addAction(trip4ShooterReady);
+        ShootAllAction trip4VisionShoot = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlign);
+        trip4VisionShoot.setName("trip4VisionShoot");
+        trip4VisionShoot.setDependentActions(trip4GoToShoot);
+        redThreeTipSoloAuto.addAction(trip4VisionShoot);
 
-        TurretReady trip4TurretReady = new TurretReady(turretAutoAlign);
-        trip4TurretReady.setName("trip4TurretReady");
-        trip4TurretReady.setDependentActions(trip4GoToShoot);
-        redThreeTipSoloAuto.addAction(trip4TurretReady);
-
-        PushBall trip4Shoot = new PushBall(stopper, intake);
-        trip4Shoot.setName("trip4Shoot");
-        trip4Shoot.setDependentActions(trip4ShooterReady, trip4TurretReady);
-        redThreeTipSoloAuto.addAction(trip4Shoot);
-
-        ShooterStop trip4ShooterStop = new ShooterStop(trip4ShooterRun);
-        trip4ShooterStop.setName("trip4ShooterStop");
-        trip4ShooterStop.setDependentActions(trip4Shoot);
-        redThreeTipSoloAuto.addAction(trip4ShooterStop);
+        ShooterStop shooterStop = new ShooterStop(shooterRun);
+        shooterStop.setName("shooterStop");
+        shooterStop.setDependentActions(trip4VisionShoot);
+        redThreeTipSoloAuto.addAction(shooterStop);
 
         // Before parking: stop everything except the drivetrain.
         Action trip4StopEverything = new Action() {
@@ -346,7 +274,7 @@ public class ThreeTipSoloAuto extends KOpMode {
             }
         };
         trip4StopEverything.setName("trip4StopEverything");
-        trip4StopEverything.setDependentActions(trip4Shoot);
+        trip4StopEverything.setDependentActions(trip4VisionShoot);
         redThreeTipSoloAuto.addAction(trip4StopEverything);
 
         IPurePursuitAction trip4Park = new AdaptivePurePursuitAction(driveTrain);

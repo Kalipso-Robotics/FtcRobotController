@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -17,7 +17,7 @@ public class DriveDirectionIntakeController implements IntakeController {
 
     private final Intake intake;
     private final IntakeFullDetector fullDetector;
-    private IntakeSide selected = IntakeSide.A; // A is the default
+    private IntakeSide selected = IntakeSide.FRONT; // A is the default
     private boolean wasFull = false;
     private long switchSinceMs = -1; // when vx first crossed toward the other side; -1 = not crossing
 
@@ -34,10 +34,10 @@ public class DriveDirectionIntakeController implements IntakeController {
     /** One threshold with keep-last is the deadband: inside +/-threshold the last side stays. */
     public static IntakeSide pickSide(double vxRobotMmPerS, IntakeSide last, double threshold) {
         if (vxRobotMmPerS > threshold) {
-            return IntakeSide.A;
+            return IntakeSide.FRONT;
         }
         if (vxRobotMmPerS < -threshold) {
-            return IntakeSide.B;
+            return IntakeSide.BACK;
         }
         return last;
     }

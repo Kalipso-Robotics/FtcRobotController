@@ -50,9 +50,9 @@ public class ShooterConfig {
     /** Flywheel motor direction; Shooter and MotorPowerRPSDataCollector both use it. */
     public static DcMotorSimple.Direction SHOOTER_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD; // TODO-measure
 
-    public static double AUTO_SHOOTER_READY_TIMEOUT_MS = 3500; // TODO-measure
+    public static double SHOOTER_READY_TIMEOUT_MS = 3500; // TODO-measure
     // TeleOp never fires on timeout: RPS or turret not ready by then aborts the shot (flywheel keeps spinning).
-    public static double TELEOP_READY_TIMEOUT_MS = 3000; // TODO-measure
+    public static double SHOOT_ALL_ACTION_TIMEOUT_MS = 3000; // TODO-measure
     /** Re-zero odometry x/y to the Limelight after every shot; false turns it off everywhere. */
     public static boolean REZERO_AFTER_EACH_SHOT = true;
 

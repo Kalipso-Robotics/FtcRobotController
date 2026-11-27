@@ -472,7 +472,7 @@ public final class RapierWorld implements SimWorld {
         double hiveCentreX = (FieldConfig.HIVE_MIN_X + FieldConfig.HIVE_MAX_X) / 2;
         double hiveCentreY = (FieldConfig.HIVE_MIN_Y + FieldConfig.HIVE_MAX_Y) / 2;
         double hiveOffset = 25.5 * 25.4 / 2; // the two Hives are 25.5 in apart (Figure 9-10)
-        Point[] flowers = {FieldConfig.aFlowerPoint, FieldConfig.bFlowerPoint, FieldConfig.cFlowerPoint, FieldConfig.dFlowerPoint};
+        Point[] flowers = {FieldConfig.FLOWER_1_POINT, FieldConfig.FLOWER_2_POINT, FieldConfig.FLOWER_3_POINT, FieldConfig.FLOWER_4_POINT};
         String[] names = {"A", "B", "C", "D"};
         StringBuilder flowerJson = new StringBuilder();
         for (int i = 0; i < flowers.length; i++) {
@@ -506,7 +506,7 @@ public final class RapierWorld implements SimWorld {
     static List<double[]> obstacleBounds() {
         double flowerHalf = FieldConfig.FLOWER_SIZE_MM / 2;
         List<double[]> bounds = new ArrayList<>();
-        for (Point flower : new Point[]{FieldConfig.aFlowerPoint, FieldConfig.bFlowerPoint, FieldConfig.cFlowerPoint, FieldConfig.dFlowerPoint}) {
+        for (Point flower : new Point[]{FieldConfig.FLOWER_1_POINT, FieldConfig.FLOWER_2_POINT, FieldConfig.FLOWER_3_POINT, FieldConfig.FLOWER_4_POINT}) {
             bounds.add(new double[]{flower.getX() - flowerHalf, flower.getY() - flowerHalf, flower.getX() + flowerHalf, flower.getY() + flowerHalf});
         }
         bounds.add(FieldConfig.HIVE_LEG_LOW_X);

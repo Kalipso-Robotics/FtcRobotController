@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs;
 import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,12 +30,12 @@ public class BeamBreakConfig {
      */
     // TODO-measure: device names, sides, count, order and thresholds are placeholders until the array is built.
     public static final List<BeamBreakPosition> SENSORS = Collections.unmodifiableList(Arrays.asList(
-            new BeamBreakPosition("beamBreak0", BeamBreakPosition.IntakeSide.A, 1.6),
-            new BeamBreakPosition("beamBreak1", BeamBreakPosition.IntakeSide.A, 1.6),
-            new BeamBreakPosition("beamBreak2", BeamBreakPosition.IntakeSide.A, 1.6),
-            new BeamBreakPosition("beamBreak3", BeamBreakPosition.IntakeSide.B, 1.6),
-            new BeamBreakPosition("beamBreak4", BeamBreakPosition.IntakeSide.B, 1.6),
-            new BeamBreakPosition("beamBreak5", BeamBreakPosition.IntakeSide.B, 1.6)));
+            new BeamBreakPosition("beamBreak0", IntakeSide.FRONT, 1.6),
+            new BeamBreakPosition("beamBreak1", IntakeSide.FRONT, 1.6),
+            new BeamBreakPosition("beamBreak2", IntakeSide.FRONT, 1.6),
+            new BeamBreakPosition("beamBreak3", IntakeSide.BACK, 1.6),
+            new BeamBreakPosition("beamBreak4", IntakeSide.BACK, 1.6),
+            new BeamBreakPosition("beamBreak5", IntakeSide.BACK, 1.6)));
 
     /**
      * True when an interrupted beam pulls the analog output LOW (the common case: output is near

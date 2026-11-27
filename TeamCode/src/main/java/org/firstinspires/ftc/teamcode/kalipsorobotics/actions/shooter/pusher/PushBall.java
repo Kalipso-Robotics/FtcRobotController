@@ -8,10 +8,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfi
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.RunIntakeTime;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
@@ -71,8 +71,8 @@ public class PushBall extends KActionSet {
         stopperOpen.setDependentActions(openStopper);
         this.addAction(stopperOpen);
 
-        sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
-        sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
+        sideA = intake.getModule(IntakeSide.FRONT);
+        sideB = intake.getModule(IntakeSide.BACK);
         preFeedA = IntakeConfig.FEED_A_DELAY_MS <= 0;
         preFeedB = IntakeConfig.FEED_B_DELAY_MS <= 0;
         DoubleSupplier feedRps = shooterRpsError == null || !IntakeConfig.FEED_RPS_COMP_ON

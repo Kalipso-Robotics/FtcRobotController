@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.ThreeTipSoloAuto.FLOWER_EXIT_POSITION_A;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.ThreeTipSoloAuto.FLOWER_INTAKE_POSITION_A;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.ThreeTipSoloAuto.FLOWER_EXIT_POSITION_1;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.ThreeTipSoloAuto.FLOWER_INTAKE_POSITION_1;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
@@ -108,7 +108,7 @@ public class DecisionRoundTripAction extends KActionSet {
     //TODO FIX logic. ONLY FLOWER A CURRENTLY
     private void addFlowerIntake(KActionSet intakeBalls) {
         // A straight line from the start to Flower 1 hits the Hive leg, so this drive is planned.
-        List<Point> route = planner.plan(robot, FLOWER_INTAKE_POSITION_A.toPoint());   // null = no route found
+        List<Point> route = planner.plan(robot, FLOWER_INTAKE_POSITION_1.toPoint());   // null = no route found
 
         IPurePursuitAction goToFlowerSetup = new AdaptivePurePursuitAction(driveTrain);
         goToFlowerSetup.setName("goToFlowerSetup");
@@ -116,13 +116,13 @@ public class DecisionRoundTripAction extends KActionSet {
         if (route != null) {
             for (int i = 0; i < route.size() - 1; i++) {
                 Point corner = route.get(i);
-                goToFlowerSetup.addPosition(corner.getX(), corner.getY(), FLOWER_INTAKE_POSITION_A.getTheta());
+                goToFlowerSetup.addPosition(corner.getX(), corner.getY(), FLOWER_INTAKE_POSITION_1.getTheta());
             }
         }
-        goToFlowerSetup.addPosition(FLOWER_INTAKE_POSITION_A);
+        goToFlowerSetup.addPosition(FLOWER_INTAKE_POSITION_1);
         intakeBalls.addAction(goToFlowerSetup);
 
-        FullFlowerAction flowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_A, FLOWER_EXIT_POSITION_A);
+        FullFlowerAction flowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_1, FLOWER_EXIT_POSITION_1);
         flowerIntake.setName("flowerIntake");
         flowerIntake.setDependentActions(goToFlowerSetup);   // its own setup move is now a tiny move
         intakeBalls.addAction(flowerIntake);

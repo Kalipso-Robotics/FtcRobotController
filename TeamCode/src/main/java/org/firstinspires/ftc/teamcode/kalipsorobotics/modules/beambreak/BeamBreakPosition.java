@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak;
 
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
+
 /**
  * One beam break sensor's place in the robot: its hardware-map name, which intake side feeds it,
  * and its switching voltage. The list in BeamBreakConfig.SENSORS is ordered from the A end to the
@@ -9,11 +11,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak;
  * The intake is double sided, so balls enter at either end and stack from the outside in.
  */
 public final class BeamBreakPosition {
-
-    /** Which end of the robot this position is fed from. */
-    public enum IntakeSide {
-        A, B
-    }
 
     private final String deviceName;
     private final IntakeSide side;

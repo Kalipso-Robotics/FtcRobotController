@@ -3,9 +3,9 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeRunMode;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 /**
@@ -71,8 +71,8 @@ public class IntakeRun extends Action {
         }
 
         intake.runRPS(targetRPS);
-        isWithinRange = intake.getModule(BeamBreakPosition.IntakeSide.A).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE)
-                || intake.getModule(BeamBreakPosition.IntakeSide.B).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE);
+        isWithinRange = intake.getModule(IntakeSide.FRONT).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE)
+                || intake.getModule(IntakeSide.BACK).isAtRPS(targetRPS, IntakeConfig.FEED_RPS_TOLERANCE);
 
         if (KLog.isDebug()) {
             KLog.d(TAG, () -> "mode=" + intakeRunMode + " targetRps=" + targetRPS + " distanceMm=" + distanceMM

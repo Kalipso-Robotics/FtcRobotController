@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Velocity;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMechInterlockTest;
@@ -25,8 +24,8 @@ import org.junit.Test;
 import java.util.function.BooleanSupplier;
 
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.DriveDirectionIntakeController.pickSide;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.A;
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition.IntakeSide.B;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide.FRONT;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide.BACK;
 
 public class DriveDirectionIntakeControllerTest {
 
@@ -52,8 +51,8 @@ public class DriveDirectionIntakeControllerTest {
         flowerServo = FlowerMechInterlockTest.fakeCRServo();
         motorA = FlowerMechInterlockTest.fakeMotor();
         motorB = FlowerMechInterlockTest.fakeMotor();
-        sideA = new IntakeModule(A, motorA, new KServo(pivotA, FAST, 255, 0, false), IntakeConfig.SIDE_A);
-        sideB = new IntakeModule(B, motorB, new KServo(pivotB, FAST, 255, 0, false), IntakeConfig.SIDE_B);
+        sideA = new IntakeModule(FRONT, motorA, new KServo(pivotA, FAST, 255, 0, false), IntakeConfig.SIDE_A);
+        sideB = new IntakeModule(BACK, motorB, new KServo(pivotB, FAST, 255, 0, false), IntakeConfig.SIDE_B);
         flowerMech = new FlowerMech(new KCRServo(flowerServo, false), sideA);
         waitUntil(flowerMech::isUp);
         detector = new ForcedDetector();
@@ -69,13 +68,13 @@ public class DriveDirectionIntakeControllerTest {
 
     @Test
     public void pickSide_table() {
-        assertEquals(A, pickSide(0, A, T));      // default A at rest
-        assertEquals(A, pickSide(T + 1, B, T));  // forward flips to A
-        assertEquals(B, pickSide(-T - 1, A, T)); // backward flips to B
-        assertEquals(B, pickSide(50, B, T));     // inside the band keeps last
-        assertEquals(A, pickSide(-50, A, T));
-        assertEquals(A, pickSide(T, A, T));      // exactly at threshold is inside the band
-        assertEquals(B, pickSide(-T, B, T));
+        assertEquals(FRONT, pickSide(0, FRONT, T));      // default A at rest
+        assertEquals(FRONT, pickSide(T + 1, BACK, T));  // forward flips to A
+        assertEquals(BACK, pickSide(-T - 1, FRONT, T)); // backward flips to B
+        assertEquals(BACK, pickSide(50, BACK, T));     // inside the band keeps last
+        assertEquals(FRONT, pickSide(-50, FRONT, T));
+        assertEquals(FRONT, pickSide(T, FRONT, T));      // exactly at threshold is inside the band
+        assertEquals(BACK, pickSide(-T, BACK, T));
     }
 
     @Test
@@ -83,7 +82,7 @@ public class DriveDirectionIntakeControllerTest {
         drive(1000, 0, 0); // mm/s forward
         controller.update();
         waitUntil(sideA::isDown);
-        assertEquals(A, controller.getSelectedSide());
+        assertEquals(FRONT, controller.getSelectedSide());
         assertEquals(IntakeConfig.intakePower, motorA.getPower(), 1e-9);
         assertEquals(0, motorB.getPower(), 1e-9);
         assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotB.getPosition(), 1e-9);
@@ -94,7 +93,7 @@ public class DriveDirectionIntakeControllerTest {
         // Facing +Y (theta 90 deg), moving toward -Y field = backward in the robot frame.
         drive(0, -1000, Math.PI / 2);
         controller.update();
-        assertEquals(B, controller.getSelectedSide());
+        assertEquals(BACK, controller.getSelectedSide());
         assertEquals(IntakeConfig.intakePower, motorB.getPower(), 1e-9);
     }
 
@@ -113,7 +112,7 @@ public class DriveDirectionIntakeControllerTest {
 
         drive(-1000, 0, 0); // driving backward must not lower B while full
         controller.update();
-        assertEquals(A, controller.getSelectedSide());
+        assertEquals(FRONT, controller.getSelectedSide());
         assertEquals(0, motorB.getPower(), 1e-9);
         assertEquals(IntakeConfig.SIDE_B.pivotUpPos, pivotB.getPosition(), 1e-9);
     }
@@ -157,7 +156,7 @@ public class DriveDirectionIntakeControllerTest {
 
         drive(-1000, 0, 0);
         controller.update();
-        assertEquals(B, controller.getSelectedSide());
+        assertEquals(BACK, controller.getSelectedSide());
         assertEquals(IntakeConfig.FLOWER_UP_POWER, flowerServo.getPower(), 1e-9);
         assertEquals(IntakeConfig.SIDE_A.pivotDownPos, pivotA.getPosition(), 1e-9);
         waitUntil(() -> {
@@ -171,21 +170,21 @@ public class DriveDirectionIntakeControllerTest {
         IntakeConfig.SIDE_SWITCH_CONFIRM_MS = 100;
         drive(1000, 0, 0);
         controller.update();
-        assertEquals(A, controller.getSelectedSide());
+        assertEquals(FRONT, controller.getSelectedSide());
 
         drive(-1000, 0, 0); // bounce off the balls
         controller.update();
-        assertEquals(A, controller.getSelectedSide());
+        assertEquals(FRONT, controller.getSelectedSide());
         drive(1000, 0, 0); // back to pushing forward: the timer restarts
         controller.update();
         Thread.sleep(150);
         drive(-1000, 0, 0);
         controller.update();
-        assertEquals(A, controller.getSelectedSide()); // old crossing must not count
+        assertEquals(FRONT, controller.getSelectedSide()); // old crossing must not count
 
         Thread.sleep(150); // held backward past the confirm time
         controller.update();
-        assertEquals(B, controller.getSelectedSide());
+        assertEquals(BACK, controller.getSelectedSide());
     }
 
     private static void drive(double vxFieldMmPerS, double vyFieldMmPerS, double theta) {

@@ -8,10 +8,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeModuleConfig;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
@@ -58,8 +58,8 @@ public class IntakeTest extends KOpMode {
     public void runOpMode() throws InterruptedException {
         initializeRobot();
         Intake intake = new Intake(opModeUtilities);
-        IntakeModule sideA = intake.getModule(BeamBreakPosition.IntakeSide.A);
-        IntakeModule sideB = intake.getModule(BeamBreakPosition.IntakeSide.B);
+        IntakeModule sideA = intake.getModule(IntakeSide.FRONT);
+        IntakeModule sideB = intake.getModule(IntakeSide.BACK);
         intake.lower(); // init at ModuleConfig DOWN
         Stopper stopper = new Stopper(opModeUtilities); // constructor closes it; never opened here, so the 4 balls stay in
         boolean selectedA = true;

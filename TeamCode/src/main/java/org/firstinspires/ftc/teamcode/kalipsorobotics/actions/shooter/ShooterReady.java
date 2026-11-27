@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
-import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.AUTO_SHOOTER_READY_TIMEOUT_MS;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig.SHOOTER_READY_TIMEOUT_MS;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,23 +12,14 @@ public class ShooterReady extends Action {
     ShooterRun shooterRun;
     ElapsedTime actionTime;
     private final double timeoutMS;
-    private final boolean holdOnTimeout;
     private boolean timedOut = false;
 
     public ShooterReady(ShooterRun shooterRun) {
         this.shooterRun = shooterRun;
         this.actionTime = new ElapsedTime();
-        this.timeoutMS = AUTO_SHOOTER_READY_TIMEOUT_MS;
-        this.holdOnTimeout = false;
+        this.timeoutMS = SHOOTER_READY_TIMEOUT_MS;
     }
 
-    /** TeleOp gate: on timeout it only sets timedOut() and stays not-done, so ShootAllAction can abort before feeding. */
-    public ShooterReady(ShooterRun shooterRun, double timeoutMS) {
-        this.shooterRun = shooterRun;
-        this.actionTime = new ElapsedTime();
-        this.timeoutMS = timeoutMS;
-        this.holdOnTimeout = true;
-    }
 
     public boolean timedOut() {
         return timedOut;
@@ -64,9 +54,7 @@ public class ShooterReady extends Action {
         // Not when it just became ready: that is not a timeout.
         if (!isDone && actionTime.milliseconds() > timeoutMS) {
             timedOut = true;
-            if (!holdOnTimeout) {
-                isDone = true;
-            }
+            isDone = true;
         }
 
     }

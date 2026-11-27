@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.beambreak.BeamBreakPosition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 
 /**
@@ -41,7 +41,7 @@ public class DriveDirectionIntakeAction extends Action {
         if (!isDone || wasDone) {
             return;
         }
-        for (BeamBreakPosition.IntakeSide s : BeamBreakPosition.IntakeSide.values()) {
+        for (IntakeSide s : IntakeSide.values()) {
             intake.getModule(s).stop();
             intake.getModule(s).raise();
         }
