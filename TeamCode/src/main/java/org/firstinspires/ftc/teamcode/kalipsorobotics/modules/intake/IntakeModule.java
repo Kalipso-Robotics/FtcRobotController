@@ -53,7 +53,7 @@ public class IntakeModule {
         motor.setDirection(intakeModuleConfig.direction);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Start raised: the side is spring loaded to the ground, so lowered would stick out past the starting size.
-        pivot.setPosition(intakeModuleConfig.pivotDownPos);
+        pivot.setPosition(intakeModuleConfig.pivotDownPos); //dont remove, weirf bug, needs to be here
         pivot.setPosition(intakeModuleConfig.initPivotPos);
         KLog.d(TAG, () -> "pivotPosition: " + pivot.getPosition());
         KLog.d(TAG, () -> "side=" + side + " event=init pivot=up");

@@ -30,6 +30,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.FlowerMech;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeSide;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.Shooter;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
@@ -62,10 +63,11 @@ public class ThreeTipSoloAuto extends KOpMode {
     static final boolean USE_LIMELIGHT = false; // nothing in this auto reads the Limelight yet; true = start it anyway
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
-    static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()-406.4, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
-    final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()-500, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
-    static public final Position FLOWER_INTAKE_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()-406.4, Math.toRadians(0));
-    public final static Position FLOWER_EXIT_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()-500, Math.toRadians(0));
+    // Flowers sit 63.5 mm off the wall, so the robot stops on the field side (+), not past the wall (-).
+    static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()+406.4, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
+    final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()+500, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
+    static public final Position FLOWER_INTAKE_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()+406.4, Math.toRadians(0));
+    public final static Position FLOWER_EXIT_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()+500, Math.toRadians(0));
 
 
     @Override
@@ -106,20 +108,15 @@ public class ThreeTipSoloAuto extends KOpMode {
         initializeRobot();
 
         //============================TRIP 0==========================
-        SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
-        setAutoDelayAction.setName("setAutoDelayAction");
-        while (!setAutoDelayAction.getIsDone() && opModeInInit()) {
-            setAutoDelayAction.updateCheckDone();
-            initLoop();
-        }
-
-        WaitAction delayBeforeStart = new WaitAction(setAutoDelayAction.getTimeMS());
+        // The delay is picked below, after every path is built, so the paths can plan while the driver picks it.
+        WaitAction delayBeforeStart = new WaitAction(0);
         delayBeforeStart.setName("delayBeforeStart");
         redThreeTipSoloAuto.addAction(delayBeforeStart);
 
 
         // Preload goes into the up Cell, the one with the 3 nectar (Cell A). From the start pose the turret also picks Cell A (SharedData.getTargetPoint).
         ShooterRun shooterRun = new ShooterRun(opModeUtilities, shooter, ShooterConfig.TARGET_POINT_1, ROBOT_START_POS.toPoint());
+        shooterRun.setShooterRunMode(ShooterRunMode.STOP);
         shooterRun.setName("shooterRun");
         shooterRun.setDependentActions(delayBeforeStart);
         redThreeTipSoloAuto.addAction(shooterRun);
@@ -290,6 +287,19 @@ public class ThreeTipSoloAuto extends KOpMode {
         forcePark.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         forcePark.setName("forcePark");
         forcePark.addPosition(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
+
+        // Pick the start delay. Plan the paths meanwhile: if START is pressed here, a path left unplanned
+        // gets planned during the match, and the robot sits still until it is done.
+        SetAutoDelayAction setAutoDelayAction = new SetAutoDelayAction(opModeUtilities, gamepad1);
+        setAutoDelayAction.setName("setAutoDelayAction");
+        while (!setAutoDelayAction.getIsDone() && opModeInInit()) {
+            AdaptivePurePursuitAction.runPrecomputeStepForAll();
+            // Added before setAutoDelayAction, which sends the telemetry.
+            telemetry.addLine(AdaptivePurePursuitAction.precomputeStatus());
+            setAutoDelayAction.updateCheckDone();
+            initLoop();
+        }
+        delayBeforeStart.setWaitTimeMS(setAutoDelayAction.getTimeMS());
 
         waitForStartPrecomputingPaths();
         ElapsedTime matchTimer = new ElapsedTime();   // starts when the match starts

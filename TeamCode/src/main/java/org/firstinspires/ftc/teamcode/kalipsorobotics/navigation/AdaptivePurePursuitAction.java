@@ -57,7 +57,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
     int maxCheckDoneCounter = 1;
     int checkDoneCounter = 0;
 
-    private double startTimeMS = System.currentTimeMillis();
+    private double startTimeMS = System.currentTimeMillis(); // when driving started; the timeout counts from here
+    private boolean driveStarted = false;
+    private double actionStartTimeMS = -1; // first update(), for logging how long match-time planning took
     private double maxTimeOutMS = 1000000000;
 
     private Position lastPosition;
@@ -226,6 +228,30 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
     }
 
+    /**
+     * One telemetry line for init: how many paths are planned, and whether it is safe to press START.
+     * A path that is not planned by START gets planned during the match, and the robot waits for it.
+     */
+    public static String precomputeStatus() {
+        int total = 0;
+        int done = 0;
+        synchronized (INSTANCES) {
+            for (WeakReference<AdaptivePurePursuitAction> ref : INSTANCES) {
+                AdaptivePurePursuitAction action = ref.get();
+                if (action == null || action.getPathPoints().isEmpty()) {
+                    continue;
+                }
+                total++;
+                if (action.isPrecomputeDone()) {
+                    done++;
+                }
+            }
+        }
+        return done >= total
+                ? "PATHS PLANNED " + done + "/" + total + " - READY, PRESS START"
+                : "PLANNING PATHS " + done + "/" + total + " - WAIT, DO NOT PRESS START";
+    }
+
     /** True when every registered action with a real path has finished precomputing. */
     public static boolean allPrecomputeDone() {
         synchronized (INSTANCES) {
@@ -269,6 +295,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         // Reset all boolean flags
         isDone = false;
         hasStarted = false;
+        driveStarted = false;
         injectDone = false;
         smootherDone = false;
         calcDistanceDone = false;
@@ -534,7 +561,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         }
 
         if (!hasStarted) {
-            startTimeMS = System.currentTimeMillis();
+            if (actionStartTimeMS < 0) {
+                actionStartTimeMS = System.currentTimeMillis();
+            }
             hasStarted = true;
             lastPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             timeoutTimer.reset();
@@ -566,6 +595,18 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
             currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
             KLog.d("ppDebug", () -> "currentPosition: " + currentPosition);
+
+            // Start the timeout clock on the first loop that actually drives, not the first update().
+            // If the path is still being planned when the action starts, planning can take seconds,
+            // and counting that would time out the move before the robot ever drives.
+            if (!driveStarted) {
+                driveStarted = true;
+                startTimeMS = System.currentTimeMillis();
+                lastMilli = 0;
+                lastPosition = currentPosition;
+                KLog.d("ppDebug", () -> getName() + " path ready, driving (planning took "
+                        + (System.currentTimeMillis() - actionStartTimeMS) + " ms)");
+            }
 
 //            int lastIdx = path.numPoints() - 1;
 //            int closestIdx = findClosestNextPointIndex(path, currentPosition);

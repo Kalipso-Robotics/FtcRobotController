@@ -14,6 +14,11 @@ public class WaitAction extends Action {
         this.waitTimeMS = targetWaitTimeMS;
     }
 
+    /** Change the wait before it starts, e.g. once a delay picked during init is known. */
+    public void setWaitTimeMS(double waitTimeMS) {
+        this.waitTimeMS = waitTimeMS;
+    }
+
     @Override
     protected boolean isUpdateDone() {
         if (hasStarted) {

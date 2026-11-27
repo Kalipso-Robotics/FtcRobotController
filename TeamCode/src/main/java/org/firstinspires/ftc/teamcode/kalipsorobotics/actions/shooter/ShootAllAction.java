@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode.SHOOT_USING_CURRENT_POINT;
 import static org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.shooter.SOTM;
@@ -34,6 +35,7 @@ public class ShootAllAction extends KActionSet {
     private final TurretAutoAlign turretAutoAlign;
 
     private ShooterReady shooterReady;
+    private ShooterRunMode shooterRunMode;
 
     private TurretReady turretReady;
 
@@ -62,7 +64,7 @@ public class ShootAllAction extends KActionSet {
         this.turretAutoAlign = turretAutoAlign;
         this.turret = turret;
 
-        shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_TARGET_RPS_HOOD);
+        shooterRunMode = SHOOT_USING_TARGET_RPS_HOOD;
         shooterRun.setTargetRPS(targetRPS);
         shooterRun.setTargetHoodPosition(targetHoodPos);
 
@@ -78,7 +80,7 @@ public class ShootAllAction extends KActionSet {
         this.turretAutoAlign = turretAutoAlign;
         this.turret = turret;
 
-        shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
+        shooterRunMode = SHOOT_USING_CURRENT_POINT;
 
         // Intake RPS from the distance to the shooter's goal (Intake.getIntakeRPSPrediction); FEED_RPS if there is no goal.
         IntakeRun intakeRun = shooterRun.getTargetPoint() != null
@@ -181,6 +183,7 @@ public class ShootAllAction extends KActionSet {
         }
         if (!hasStarted) {
             //Refresh targetRPS
+            shooterRun.setShooterRunMode(shooterRunMode);
             shooterRun.update();
             hasStarted = true;
             stopper.close(); // IntakeRun spins the intake from the start: an open stopper would feed early
@@ -197,10 +200,10 @@ public class ShootAllAction extends KActionSet {
     @Override
     public void afterUpdate() {
         // Once only: setShooterRunMode also runs update(), so calling it every loop doubles the shooter update.
-        if (closeStopper.getIsDone() && shooterRun.getShooterRunMode() != ShooterRunMode.SHOOT_USING_CURRENT_POINT) {
+        if (closeStopper.getIsDone() && shooterRun.getShooterRunMode() != SHOOT_USING_CURRENT_POINT) {
 //            double maintainRPSValue = shooterRun.getTargetRPS() * 0.925;
 //            shooterRun.setTargetRPS(maintainRPSValue);
-            shooterRun.setShooterRunMode(ShooterRunMode.SHOOT_USING_CURRENT_POINT);
+            shooterRun.setShooterRunMode(SHOOT_USING_CURRENT_POINT);
             //KLog.d("ShooterRun", "Maintaining " + maintainRPSValue + " RPS after Running ShootAllAction");
         }
         KLog.d(TAG, () -> String.format("event=update stopperOpen=%s turretDeltaDeg=%.2f turretWithinRange=%s deltaRps=%.2f",
