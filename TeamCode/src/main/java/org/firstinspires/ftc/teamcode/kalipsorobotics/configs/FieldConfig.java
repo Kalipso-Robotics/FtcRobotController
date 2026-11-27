@@ -83,12 +83,12 @@ public class FieldConfig {
     public final static Position FAR_CORNER_ZERO_POSITION = new Position(3315, 193, 0);
 
 
-    public final static Point FLOWER_1_POINT = new Point(63.5,2311.4);
+    public final static Point FLOWER_1_POINT = new Point(1200.15, 63.5);
 
      // same as FLOWER_A_X
-    public static Point FLOWER_2_POINT =  new Point(1130.3,63.5);
+    public static Point FLOWER_2_POINT =  new Point(63.5, 2400.3);
 
-    public final static Point FLOWER_3_POINT = new Point(0,0);//TODO measure the actual flower points
+    public final static Point FLOWER_3_POINT = new Point(0, 0);//TODO measure the actual flower points
 
     // same as FLOWER_A_X
     public static Point FLOWER_4_POINT =  new Point(0,0);//TODO same as above

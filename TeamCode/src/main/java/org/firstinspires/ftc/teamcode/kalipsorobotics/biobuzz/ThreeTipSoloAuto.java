@@ -64,10 +64,10 @@ public class ThreeTipSoloAuto extends KOpMode {
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
     // Flowers sit 63.5 mm off the wall, so the robot stops on the field side (+), not past the wall (-).
-    static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()+406.4, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
-    final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX()+500, FieldConfig.FLOWER_1_POINT.getY(), Math.toRadians(90));
-    static public final Position FLOWER_INTAKE_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()+406.4, Math.toRadians(0));
-    public final static Position FLOWER_EXIT_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX(), FieldConfig.FLOWER_2_POINT.getY()+500, Math.toRadians(0));
+    static public final Position FLOWER_INTAKE_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + 482.6, Math.toRadians(90));
+    final static public Position FLOWER_EXIT_POSITION_1 = new Position(FieldConfig.FLOWER_1_POINT.getX(), FieldConfig.FLOWER_1_POINT.getY() + 700, Math.toRadians(90));
+    static public final Position FLOWER_INTAKE_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX() + 482.6, FieldConfig.FLOWER_2_POINT.getY(), Math.toRadians(0));
+    public final static Position FLOWER_EXIT_POSITION_2 = new Position(FieldConfig.FLOWER_2_POINT.getX() + 700, FieldConfig.FLOWER_2_POINT.getY(), Math.toRadians(0));
 
 
     @Override

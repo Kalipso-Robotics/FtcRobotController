@@ -248,14 +248,23 @@ public class Position {
         return this.getX() == position.getX() && this.getY() == position.getY() && this.getTheta() == position.getTheta();
     }
 
+    /**
+     * In mm and rad
+     * Also in inches and deg
+     * @return
+     */
     @Override
     public String toString() {
         return  String.format("x=%.2f (%.2f in), y=%.2f (%.2f in), theta=%.4f (%.1f deg)", x, x/25.4, y, y/25.4,
                 theta, Math.toDegrees(theta));
     }
 
+    /**
+     * In mm and deg
+     * @return
+     */
     public String toCompactString() {
-        return  String.format("x=%.2f y=%.2f theta=%.1f", x/25.4, y/25.4, Math.toDegrees(theta));
+        return  String.format("x (mm) =%.2f y (mm) =%.2f theta (deg) =%.1f", x, y, Math.toDegrees(theta));
     }
 
     public boolean isEmpty() {

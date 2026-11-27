@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeStop;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootAllAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShooterRun;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretAutoAlign;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToPos;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ModuleConfig;
@@ -53,6 +54,7 @@ public class TeleOp extends KOpMode {
 
     private boolean hasClosedStopperInnit = false;
     private DriveTrain driveTrain;
+    private OctoQuadOdo octoQuadOdo;
 
     private Shooter shooter = null;
     private Intake intake = null;
@@ -136,7 +138,7 @@ public class TeleOp extends KOpMode {
 
 
         // ============== LONG RUNNING ACTIONS =================
-
+        octoQuadOdo = OctoQuadOdo.getInstance(opModeUtilities);
         OpModeUtilities.startOdometry(opModeUtilities, odoExecutorService, driveTrain, imuModule, null);
 //        odometry.setShouldFallbackToWheelTheta(true);
         if (USE_LIMELIGHT) {
