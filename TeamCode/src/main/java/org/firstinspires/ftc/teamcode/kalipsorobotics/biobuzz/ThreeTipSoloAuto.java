@@ -163,7 +163,7 @@ public class ThreeTipSoloAuto extends KOpMode {
 //        redThreeTipSoloAuto.addAction(waitAfterRaisingFlower);
 
         IPurePursuitAction trip1GoToShoot = new AdaptivePurePursuitAction(driveTrain);
-        trip1GoToShoot.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
+        trip1GoToShoot.setMaxTimeOutMS(4001); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip1GoToShoot.setName("trip1GoToShoot");
         trip1GoToShoot.addPosition(812.8, 914.4, 90);
         trip1GoToShoot.addPosition(FLOWER_INTAKE_POSITION_1.getX(), 621, 90);
