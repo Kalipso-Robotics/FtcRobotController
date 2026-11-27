@@ -519,8 +519,8 @@ public class RedDecideAuto extends KOpMode {
         } else if (sweepRunningFor != null) {
             currentAction = sweepMove(sweepRunningFor); // currentMove is WAIT, but it is really a sweep
         } else if (currentPile != null) {
-            Point flower = currentPile == Pile.FLOWER_A ? FieldConfig.aFlowerPoint
-                    : currentPile == Pile.FLOWER_B ? FieldConfig.bFlowerPoint : null;
+            Point flower = currentPile == Pile.FLOWER_A ? FieldConfig.FLOWER_1_POINT
+                    : currentPile == Pile.FLOWER_B ? FieldConfig.FLOWER_2_POINT : null;
             currentAction = pickupMove(pilePointOf(currentPile), "pickup" + currentPile, flower);
         } else if (move == Move.SHOOT_A) {
             currentAction = shootMove(Cell.A);
@@ -1231,7 +1231,7 @@ public class RedDecideAuto extends KOpMode {
                 heading = Math.toDegrees(Math.atan2(p.getY() - from.getY(), p.getX() - from.getX()));
             }
             double headingHere = (last && faceToward != null) ? frontToward(p, faceToward) : heading;
-            drive.addPoint(p.getX(), p.getY(), headingHere);
+            drive.addPosition(p.getX(), p.getY(), headingHere);
             from = p;
         }
         return drive;
@@ -1274,9 +1274,9 @@ public class RedDecideAuto extends KOpMode {
             case GARDEN:   // the middle of its 4 balls, which lie along the wall
                 return new Point(GARDEN_BALLS_CENTER_X_MM, FieldConfig.gardenPoint.getY());
             case FLOWER_A: // the open side of Flower A is +x (away from the wall)
-                return FieldConfig.flowerPilePoint(FieldConfig.aFlowerPoint);
+                return FieldConfig.flowerPilePoint(FieldConfig.FLOWER_1_POINT);
             default:       // the open side of Flower B is +y (away from the wall)
-                return FieldConfig.flowerPilePoint(FieldConfig.bFlowerPoint);
+                return FieldConfig.flowerPilePoint(FieldConfig.FLOWER_2_POINT);
         }
     }
 

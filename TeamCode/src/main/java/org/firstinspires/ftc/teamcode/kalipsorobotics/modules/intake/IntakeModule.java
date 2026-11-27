@@ -28,7 +28,7 @@ public class IntakeModule {
     private final BeamBreakPosition.IntakeSide side;
     private final DcMotor motor;
     private final KServo pivot;
-    private final IntakeModuleConfig cfg;
+    private final IntakeModuleConfig intakeModuleConfig;
 
     private FlowerMech flowerMech = null;
     private boolean isCommandedDown = false;
@@ -36,25 +36,25 @@ public class IntakeModule {
     private double power = 0;
     private final PIDFController feedController;
 
-    public IntakeModule(OpModeUtilities opModeUtilities, BeamBreakPosition.IntakeSide side, IntakeModuleConfig cfg) {
+    public IntakeModule(OpModeUtilities opModeUtilities, BeamBreakPosition.IntakeSide side, IntakeModuleConfig intakeModuleConfig) {
         this(side,
-                opModeUtilities.getHardwareMap().dcMotor.get(cfg.motorName),
-                new KServo(opModeUtilities.getHardwareMap().servo.get(cfg.pivotName),
+                opModeUtilities.getHardwareMap().dcMotor.get(intakeModuleConfig.motorName),
+                new KServo(opModeUtilities.getHardwareMap().servo.get(intakeModuleConfig.pivotName),
                         KServo.AXON_MAX_SPEED_DEG_PER_SEC, 255, 0, false), // TODO-measure: servo model, speed and range
-                cfg);
+                intakeModuleConfig);
     }
 
     /** Direct-injection constructor, for hardware you have already pulled out of the hardware map (unit tests). */
-    public IntakeModule(BeamBreakPosition.IntakeSide side, DcMotor motor, KServo pivot, IntakeModuleConfig cfg) {
+    public IntakeModule(BeamBreakPosition.IntakeSide side, DcMotor motor, KServo pivot, IntakeModuleConfig intakeModuleConfig) {
         this.side = side;
         this.motor = motor;
         this.pivot = pivot;
-        this.cfg = cfg;
+        this.intakeModuleConfig = intakeModuleConfig;
         this.feedController = PIDFController.flywheel("Intake_" + side, 0, 0, 0, 0).build(); // gains read per call in runRPS
-        motor.setDirection(cfg.direction);
+        motor.setDirection(intakeModuleConfig.direction);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Start raised: the side is spring loaded to the ground, so lowered would stick out past the starting size.
-        pivot.setTargetPosition(cfg.pivotUpPos);
+        pivot.setTargetPosition(intakeModuleConfig.initPivotPos);
         KLog.d(TAG, () -> "side=" + side + " event=init pivot=up");
     }
 
@@ -75,7 +75,7 @@ public class IntakeModule {
             return;
         }
         isCommandedDown = true;
-        pivot.setTargetPosition(cfg.pivotDownPos);
+        pivot.setTargetPosition(intakeModuleConfig.pivotDownPos);
         KLog.d(TAG, () -> "side=" + side + " event=lower");
     }
 
@@ -94,7 +94,7 @@ public class IntakeModule {
         }
         isRaisePending = false;
         isCommandedDown = false;
-        pivot.setTargetPosition(cfg.pivotUpPos);
+        pivot.setTargetPosition(intakeModuleConfig.pivotUpPos);
         KLog.d(TAG, () -> "side=" + side + " event=raise");
     }
 
@@ -128,7 +128,7 @@ public class IntakeModule {
      * (power per RPS), read every call so Dashboard edits apply live. Call every loop; run() ends it.
      */
     public void runRPS(double targetRPS) {
-        runRPS(targetRPS, cfg.kF, cfg.kP);
+        runRPS(targetRPS, intakeModuleConfig.kF, intakeModuleConfig.kP);
     }
 
     /** runRPS with these gains instead of the config's (gain tuning: MotorPowerRPSDataCollector). Returns the RPS it read. */
@@ -167,7 +167,7 @@ public class IntakeModule {
      * Flower is not up (logs event=blocked, returns false). Any position other than DOWN counts as "not down".
      */
     public boolean setPivotPosition(double position) {
-        boolean toDown = Math.abs(position - cfg.pivotDownPos) < 1e-6; // stepped values miss DOWN by ~1e-16
+        boolean toDown = Math.abs(position - intakeModuleConfig.pivotDownPos) < 1e-6; // stepped values miss DOWN by ~1e-16
         if (isCommandedDown && !toDown && flowerMech != null && !flowerMech.isUp()) {
             KLog.e(TAG, "side=" + side + " event=blocked reason=flowerNotUp pos=" + position);
             return false;
@@ -184,7 +184,7 @@ public class IntakeModule {
     }
 
     public IntakeModuleConfig getConfig() {
-        return cfg;
+        return intakeModuleConfig;
     }
 
     /** Last commanded pivot servo position, for telemetry. */

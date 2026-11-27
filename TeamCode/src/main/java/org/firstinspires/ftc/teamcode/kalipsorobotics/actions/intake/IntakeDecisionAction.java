@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
+import static java.lang.Math.toRadians;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.Action;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.shooter.ShootDecisionAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.configs.FieldConfig;
@@ -25,8 +27,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 public class IntakeDecisionAction extends Action {
 
     // Where we stand to intake each tip zone. Position angles are in radians.
-    public static final Position TIP_ZONE_1_POSITION = new Position(424, 2224, Math.toRadians(45));
-    public static final Position TIP_ZONE_2_POSITION = new Position(424, 1404, Math.toRadians(305));
+    public static final Position TIP_ZONE_1_POSITION = new Position(424, 2224, toRadians(45));
+    public static final Position TIP_ZONE_2_POSITION = new Position(424, 1404, toRadians(305));
 
     private final ShootDecisionAction shootDecision;   // tells us where we shoot from
     private IntakeSources chosenSource = null;         // the answer (null = nothing left to intake)
@@ -126,8 +128,8 @@ public class IntakeDecisionAction extends Action {
     /** Where each place is on the field. */
     public static Point pointOf(IntakeSources source) {
         switch (source) {
-            case FLOWER_1:   return Flower.FLOWER_1.getSetupPoint();
-            case FLOWER_2:   return Flower.FLOWER_2.getSetupPoint();
+            case FLOWER_1:   return FieldConfig.FLOWER_2_POINT;
+            case FLOWER_2:   return FieldConfig.FLOWER_1_POINT;
             case GARDEN:     return FieldConfig.gardenPoint;
             case TIP_ZONE_1: return TIP_ZONE_1_POSITION.toPoint();
             case TIP_ZONE_2: return TIP_ZONE_2_POSITION.toPoint();
@@ -138,8 +140,8 @@ public class IntakeDecisionAction extends Action {
     /** Which way the robot faces (degrees) when it intakes at each place. */
     public static double headingDegOf(IntakeSources source) {
         switch (source) {
-            case FLOWER_1:   return Flower.FLOWER_1.getFlowerHeadingDeg();
-            case FLOWER_2:   return Flower.FLOWER_2.getFlowerHeadingDeg();
+            case FLOWER_1:   return toRadians(90);
+            case FLOWER_2:   return toRadians(0);
             case TIP_ZONE_1: return Math.toDegrees(TIP_ZONE_1_POSITION.getTheta());
             case TIP_ZONE_2: return Math.toDegrees(TIP_ZONE_2_POSITION.getTheta());
             default:         return 0;   // TODO: measure GARDEN heading

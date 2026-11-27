@@ -405,8 +405,8 @@ public class DecideSimulation extends LinearOpMode {
     private Point pilePointOf(Pile pile) {
         switch (pile) {
             case GARDEN:   return FieldConfig.gardenPoint;
-            case FLOWER_A: return standOffFromFlower(FieldConfig.aFlowerPoint, +1, 0);
-            default:       return standOffFromFlower(FieldConfig.bFlowerPoint, 0, +1);
+            case FLOWER_A: return standOffFromFlower(FieldConfig.FLOWER_1_POINT, +1, 0);
+            default:       return standOffFromFlower(FieldConfig.FLOWER_2_POINT, 0, +1);
         }
     }
 

@@ -30,8 +30,8 @@ public class FieldConfig {
 
     /** The closest of the four Flowers (A-D) to the robot. */
     public static Point nearestFlower(Point robot) {
-        Point best = aFlowerPoint;
-        for (Point f : new Point[]{bFlowerPoint, cFlowerPoint, dFlowerPoint}) {
+        Point best = FLOWER_1_POINT;
+        for (Point f : new Point[]{FLOWER_2_POINT, FLOWER_3_POINT, FLOWER_4_POINT}) {
             if (MathFunctions.distance(robot, f) < MathFunctions.distance(robot, best)) best = f;
         }
         return best;
@@ -82,20 +82,21 @@ public class FieldConfig {
     // (3349, 182, -1 deg after driving there from CORNER_ZERO_POSE).
     public final static Position FAR_CORNER_ZERO_POSE = new Position(3315, 193, 0);
 
-    public final static double FLOWER_A_X = 100;  // nearly against the wall. The real center is 63.5 (half the 127 mm base), but the sim stack of 4 balls falls apart closer than about 80 mm
-    private final static double FLOWER_A_Y = 2500;
-    public static Point aFlowerPoint =  new Point(FLOWER_A_X, FLOWER_A_Y);
 
-    public final static double FLOWER_B_X = 1219;
-    private final static double FLOWER_B_Y = 100;   // same as FLOWER_A_X
-    public static Point bFlowerPoint =  new Point(FLOWER_B_X, FLOWER_B_Y);
+    public final static Point FLOWER_1_POINT = new Point(63.5,2311.4);
 
+     // same as FLOWER_A_X
+    public static Point FLOWER_2_POINT =  new Point(1130.3,63.5);
+
+    public final static Point FLOWER_3_POINT = new Point(0,0);//TODO measure the actual flower points
+
+    // same as FLOWER_A_X
+    public static Point FLOWER_4_POINT =  new Point(0,0);//TODO same as above
     // The other two flowers. The manual's top view (Figure 9-4) puts each flower 48 in from a corner,
     // going around the field like a pinwheel, so the field is symmetric under a 180 degree rotation,
     // not a mirror. C and D are A and B rotated 180 degrees about the field center.
     // VERIFY on the real field: the manual puts A at y = 96 in (2438.4 mm) from the audience wall.
-    public static Point cFlowerPoint =  new Point(FIELD_MM - FLOWER_A_X, FIELD_MM - FLOWER_A_Y);
-    public static Point dFlowerPoint =  new Point(FIELD_MM - FLOWER_B_X, FIELD_MM - FLOWER_B_Y);
+
 
     // Flower obstacle footprint for path planning: a square centered on each flower point.
     // The flower base is about 5 in by 4.5 in (measured by the team), so the square uses the longer

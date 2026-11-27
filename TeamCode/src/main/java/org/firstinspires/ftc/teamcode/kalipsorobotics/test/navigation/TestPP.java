@@ -4,13 +4,10 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 import android.util.Log;
 
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.OctoQuadOdo;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KOpMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.OpModeUtilities;
@@ -45,14 +42,14 @@ public class TestPP extends KOpMode {
         OpModeUtilities.startOdometry(opModeUtilities, executorService, driveTrain, imuModule, new Position(0, 0, 0));
 
         IPurePursuitAction test = new AdaptivePurePursuitAction(driveTrain);
-        test.addPoint(0,0,0);
-        test.addPoint(609.6,0,0);
-        test.addPoint(0,0,0);
-        test.addPoint(609.6,0,0);
-        test.addPoint(609.6,0,180);
-        test.addPoint(0,0,0);
-        test.addPoint(400,800,180);
-        test.addPoint(0,800,0);
+        test.addPosition(0,0,0);
+        test.addPosition(609.6,0,0);
+        test.addPosition(0,0,0);
+        test.addPosition(609.6,0,0);
+        test.addPosition(609.6,0,180);
+        test.addPosition(0,0,0);
+        test.addPosition(400,800,180);
+        test.addPosition(0,800,0);
 
         // Same idle-until-START behavior as waitForStart(), but any AdaptivePurePursuitAction
         // built above gets its path planning done during init instead of on match time.

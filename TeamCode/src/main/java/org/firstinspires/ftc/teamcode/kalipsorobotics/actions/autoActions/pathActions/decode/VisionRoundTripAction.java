@@ -227,8 +227,8 @@ public class VisionRoundTripAction extends RoundTripAction {
                 launchPoint.getX(), launchPoint.getY(), launchHeading));
 
         moveToBall.clearPoints();
-        moveToBall.addPoint(grabPoint.getX(), grabPoint.getY(), Math.toDegrees(robotPos.getTheta()));
-        moveToBall.addPoint(launchPoint.getX(), launchPoint.getY(), launchHeading);
+        moveToBall.addPosition(grabPoint.getX(), grabPoint.getY(), Math.toDegrees(robotPos.getTheta()));
+        moveToBall.addPosition(launchPoint.getX(), launchPoint.getY(), launchHeading);
         moveToBall.rebuildPath();
         logPlannedPath(moveToBall);
     }

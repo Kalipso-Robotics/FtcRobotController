@@ -53,15 +53,15 @@ public class AutoWithCheckStuck extends LinearOpMode {
 
         // Create movement actions - similar to AutoBasketFunnel structure
         PurePursuitAction moveForward1 = new PurePursuitAction(driveTrain);
-        moveForward1.addPoint(0, 500, 0); // Move forward 500mm
+        moveForward1.addPosition(0, 500, 0); // Move forward 500mm
         moveForward1.setMaxTimeOutMS(8000);
 
         PurePursuitAction moveForward2 = new PurePursuitAction(driveTrain);
-        moveForward2.addPoint(0, 1000, 0); // Move forward to 1000mm total
+        moveForward2.addPosition(0, 1000, 0); // Move forward to 1000mm total
         moveForward2.setMaxTimeOutMS(8000);
 
         PurePursuitAction moveBack = new PurePursuitAction(driveTrain);
-        moveBack.addPoint(0, 0, 0); // Move back to start
+        moveBack.addPosition(0, 0, 0); // Move back to start
         moveBack.setMaxTimeOutMS(8000);
 
         telemetry.addLine("init finished");
@@ -130,12 +130,12 @@ public class AutoWithCheckStuck extends LinearOpMode {
                         
                         if (safePosition != null) {
                             KLog.d("unstuck", () -> "Moving to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
-                            unstuckAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
+                            unstuckAction.addPosition(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
                         } else {
                             // Fallback: move backward 100mm
                             double backupX = currentPosition.getX() - 100 * Math.cos(currentPosition.getTheta());
                             double backupY = currentPosition.getY() - 100 * Math.sin(currentPosition.getTheta());
-                            unstuckAction.addPoint(backupX, backupY, currentPosition.getTheta());
+                            unstuckAction.addPosition(backupX, backupY, currentPosition.getTheta());
                         }
                         unstuckAction.setMaxTimeOutMS(3000);
                         isExecutingUnstuckAction = true;

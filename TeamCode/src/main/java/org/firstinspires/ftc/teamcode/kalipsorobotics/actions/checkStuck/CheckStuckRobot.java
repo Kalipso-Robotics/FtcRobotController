@@ -231,7 +231,7 @@ public class CheckStuckRobot {
         if (safePosition != null) {
             // Use pure pursuit to reverse to the safe position
             KLog.d("unstuck", () -> "Reversing to safe position: (" + safePosition.getX() + ", " + safePosition.getY() + ")");
-            purePursuitAction.addPoint(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
+            purePursuitAction.addPosition(safePosition.getX(), safePosition.getY(), safePosition.getTheta());
 
             // Add a few intermediate points for smoother navigation
             double dx = safePosition.getX() - currentPos.getX();
@@ -242,7 +242,7 @@ public class CheckStuckRobot {
                 // Add midpoint
                 double midX = currentPos.getX() + dx * 0.5;
                 double midY = currentPos.getY() + dy * 0.5;
-                purePursuitAction.addPoint(midX, midY, safePosition.getTheta());
+                purePursuitAction.addPosition(midX, midY, safePosition.getTheta());
             }
         } else {
             // Fallback to original escape strategy if no safe position found
@@ -258,7 +258,7 @@ public class CheckStuckRobot {
 
             // Add all directions to path (could refine this to pick based on space later)
             for (Position escapePos : escapePositions) {
-                purePursuitAction.addPoint(escapePos.getX(), escapePos.getY(), escapePos.getTheta());
+                purePursuitAction.addPosition(escapePos.getX(), escapePos.getY(), escapePos.getTheta());
             }
         }
 

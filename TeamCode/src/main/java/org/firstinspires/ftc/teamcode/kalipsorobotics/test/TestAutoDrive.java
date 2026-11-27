@@ -4,7 +4,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.PurePursuitAction;
@@ -58,9 +57,9 @@ public class TestAutoDrive extends KOpMode {
         initializeRobot();
 
         PurePursuitAction testDrive = new PurePursuitAction(driveTrain);
-        testDrive.addPoint(0, 0, 0);
-        testDrive.addPoint(600, 0, 0);
-        testDrive.addPoint(0, 300, 90);
+        testDrive.addPosition(0, 0, 0);
+        testDrive.addPosition(600, 0, 0);
+        testDrive.addPosition(0, 300, 90);
 
 
         waitForStart();

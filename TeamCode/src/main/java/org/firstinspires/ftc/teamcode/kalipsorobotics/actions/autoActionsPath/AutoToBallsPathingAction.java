@@ -406,7 +406,7 @@ public class AutoToBallsPathingAction extends Action {
             double x = point[0];
             double y = point[1];
             double headingDegrees = point[2];
-            movement.addPoint(x, y, headingDegrees);
+            movement.addPosition(x, y, headingDegrees);
         }
 
         // Step 6: the intake on the end the planner chose (it runs from INTAKE_START_DISTANCE_MM on).

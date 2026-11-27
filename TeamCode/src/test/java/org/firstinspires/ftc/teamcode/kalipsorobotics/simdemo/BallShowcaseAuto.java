@@ -91,7 +91,7 @@ public class BallShowcaseAuto extends KOpMode {
         trip.setName(name);
         trip.getMoveToBall().clearPoints();
         for (double[] p : points) {
-            trip.getMoveToBall().addPoint(p[0], p[1], p[2]);
+            trip.getMoveToBall().addPosition(p[0], p[1], p[2]);
         }
         trip.setShouldShooterStop(false);
         trip.getPurePursuitReadyShooting().setDistanceThresholdMM(250);

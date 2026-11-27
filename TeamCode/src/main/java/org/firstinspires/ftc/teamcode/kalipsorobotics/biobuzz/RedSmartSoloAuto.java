@@ -227,10 +227,10 @@ public class RedSmartSoloAuto extends KOpMode {
         if (parkRoute != null) {
             for (int i = 0; i < parkRoute.size() - 1; i++) {
                 Point corner = parkRoute.get(i);
-                forcePark.addPoint(corner.getX(), corner.getY(), 90);
+                forcePark.addPosition(corner.getX(), corner.getY(), 90);
             }
         }
-        forcePark.addPoint(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
+        forcePark.addPosition(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
         return forcePark;
     }
 

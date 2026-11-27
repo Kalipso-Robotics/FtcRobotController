@@ -67,7 +67,7 @@ public class TestPathPlanning extends KOpMode {
                 Point p = waypoints.get(i);
                 telemetry.addData("wp" + i, "(%.0f, %.0f)", p.getX(), p.getY());
                 KLog.d("TestPathPlanning", () -> "waypoint " + p);
-                follow.addPoint(p.getX(), p.getY(), 0);
+                follow.addPosition(p.getX(), p.getY(), 0);
             }
         }
         telemetry.addData("start", "(%.0f, %.0f)", START_X, START_Y);

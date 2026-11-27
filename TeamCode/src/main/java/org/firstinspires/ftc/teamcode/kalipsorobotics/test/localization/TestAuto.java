@@ -33,7 +33,7 @@ public class TestAuto extends KOpMode {
         initializeRobot();
 
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain);
-        purePursuitAction.addPoint(400, 400, 90);
+        purePursuitAction.addPosition(400, 400, 90);
 
         waitForStart();
         while (opModeIsActive()) {

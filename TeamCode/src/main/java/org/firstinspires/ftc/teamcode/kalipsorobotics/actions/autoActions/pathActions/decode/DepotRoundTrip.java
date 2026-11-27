@@ -48,8 +48,8 @@ public class DepotRoundTrip extends KActionSet {
         moveToDepot.setFinalSearchRadiusMM(150);
         moveToDepot.setFinalAngleLockingThresholdDeg(40);
         moveToDepot.setPathAngleToleranceDeg(40);
-        moveToDepot.addPoint(100, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        moveToDepot.addPoint(100, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        moveToDepot.addPosition(100, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
+        moveToDepot.addPosition(100, 1100 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         this.addAction(moveToDepot);
 
         intakeBalls = new IntakeFullAction(stopper, intake, intakeTimeMS, 1);
@@ -71,7 +71,7 @@ public class DepotRoundTrip extends KActionSet {
         //trip.getMoveToBall().addPoint(15, 600 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip.getMoveToBall().addPoint(15, 900 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
         //trip.getMoveToBall().addPoint(15,  1168 * allianceColor.getPolarity(), 90 * allianceColor.getPolarity());
-        moveToShoot.getMoveToBall().addPoint(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
+        moveToShoot.getMoveToBall().addPosition(SHOOT_FAR_X, SHOOT_FAR_Y * allianceColor.getPolarity() , 90 * allianceColor.getPolarity());
         this.addAction(moveToShoot);
     }
 

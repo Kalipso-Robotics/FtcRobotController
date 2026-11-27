@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.autoActionsPath;
 
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.ThreeTipSoloAuto.FLOWER_EXIT_POSITION_A;
+import static org.firstinspires.ftc.teamcode.kalipsorobotics.biobuzz.ThreeTipSoloAuto.FLOWER_INTAKE_POSITION_A;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.Flower;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.FullFlowerAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake.IntakeDecisionAction;
@@ -87,9 +89,9 @@ public class DecisionRoundTripAction extends KActionSet {
         planner = PathPlanning.forFieldAuto(AutoToBallsPathingAction.BUFFER_MM,
                 RobotFootprint.WIDTH_MM / 2 + AutoToBallsPathingAction.AUTO_MIDLINE_MARGIN_MM);
         if (whereToIntake == IntakeSources.FLOWER_1) {
-            addFlowerIntake(intakeBalls, Flower.FLOWER_1);
+            addFlowerIntake(intakeBalls);
         } else if (whereToIntake == IntakeSources.FLOWER_2) {
-            addFlowerIntake(intakeBalls, Flower.FLOWER_2);
+            addFlowerIntake(intakeBalls);
         } else if (whereToIntake == IntakeSources.GARDEN) {
             addGardenIntake(intakeBalls);
         } else {
@@ -102,9 +104,11 @@ public class DecisionRoundTripAction extends KActionSet {
     }
 
     /** Flowers: a planned drive to the setup point, then FullFlowerAction drives in, intakes and backs out by itself. */
-    private void addFlowerIntake(KActionSet intakeBalls, Flower flower) {
+
+    //TODO FIX logic. ONLY FLOWER A CURRENTLY
+    private void addFlowerIntake(KActionSet intakeBalls) {
         // A straight line from the start to Flower 1 hits the Hive leg, so this drive is planned.
-        List<Point> route = planner.plan(robot, flower.getSetupPoint());   // null = no route found
+        List<Point> route = planner.plan(robot, FLOWER_INTAKE_POSITION_A.toPoint());   // null = no route found
 
         IPurePursuitAction goToFlowerSetup = new AdaptivePurePursuitAction(driveTrain);
         goToFlowerSetup.setName("goToFlowerSetup");
@@ -112,13 +116,13 @@ public class DecisionRoundTripAction extends KActionSet {
         if (route != null) {
             for (int i = 0; i < route.size() - 1; i++) {
                 Point corner = route.get(i);
-                goToFlowerSetup.addPoint(corner.getX(), corner.getY(), flower.getSetupHeadingDeg());
+                goToFlowerSetup.addPosition(corner.getX(), corner.getY(), FLOWER_INTAKE_POSITION_A.getTheta());
             }
         }
-        goToFlowerSetup.addPoint(flower.getSetupPoint().getX(), flower.getSetupPoint().getY(), flower.getSetupHeadingDeg());
+        goToFlowerSetup.addPosition(FLOWER_INTAKE_POSITION_A);
         intakeBalls.addAction(goToFlowerSetup);
 
-        FullFlowerAction flowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, flower);
+        FullFlowerAction flowerIntake = new FullFlowerAction(stopper, intake, flowerIntakeMS, IntakeConfig.intakePower, flowerMech, driveTrain, FLOWER_INTAKE_POSITION_A, FLOWER_EXIT_POSITION_A);
         flowerIntake.setName("flowerIntake");
         flowerIntake.setDependentActions(goToFlowerSetup);   // its own setup move is now a tiny move
         intakeBalls.addAction(flowerIntake);
@@ -135,10 +139,10 @@ public class DecisionRoundTripAction extends KActionSet {
         if (gardenRoute != null) {
             for (int i = 0; i < gardenRoute.size() - 1; i++) {
                 Point corner = gardenRoute.get(i);
-                goToGarden.addPoint(corner.getX(), corner.getY(), 102.6);
+                goToGarden.addPosition(corner.getX(), corner.getY(), 102.6);
             }
         }
-        goToGarden.addPoint(gardenEntry.getX(), gardenEntry.getY(), 102.6);
+        goToGarden.addPosition(gardenEntry.getX(), gardenEntry.getY(), 102.6);
         intakeBalls.addAction(goToGarden);
 
         IntakeFullAction runIntake = new IntakeFullAction(stopper, intake, IntakeConfig.intakeBallTimeMS, IntakeConfig.intakePower);
@@ -150,9 +154,9 @@ public class DecisionRoundTripAction extends KActionSet {
         IPurePursuitAction sweepGarden = new AdaptivePurePursuitAction(driveTrain);
         sweepGarden.setName("sweepGarden");
         sweepGarden.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
-        sweepGarden.addPoint(188, 3309, 90.0);
-        sweepGarden.addPoint(289, 2949, 102.6);
-        sweepGarden.addPoint(188, 3309, 90.0);
+        sweepGarden.addPosition(188, 3309, 90.0);
+        sweepGarden.addPosition(289, 2949, 102.6);
+        sweepGarden.addPosition(188, 3309, 90.0);
         sweepGarden.setDependentActions(goToGarden);
         intakeBalls.addAction(sweepGarden);
 
@@ -175,10 +179,10 @@ public class DecisionRoundTripAction extends KActionSet {
         if (tipRoute != null) {
             for (int i = 0; i < tipRoute.size() - 1; i++) {
                 Point corner = tipRoute.get(i);
-                goToIntake.addPoint(corner.getX(), corner.getY(), headingDeg);
+                goToIntake.addPosition(corner.getX(), corner.getY(), headingDeg);
             }
         }
-        goToIntake.addPoint(intakePoint.getX(), intakePoint.getY(), headingDeg);
+        goToIntake.addPosition(intakePoint.getX(), intakePoint.getY(), headingDeg);
         intakeBalls.addAction(goToIntake);
 
         VisionPickupAction lookAndGrabBalls = new VisionPickupAction(driveTrain, stopper, intake, AllianceColor.RED);
@@ -194,7 +198,7 @@ public class DecisionRoundTripAction extends KActionSet {
         IPurePursuitAction goToShoot = new AdaptivePurePursuitAction(driveTrain);
         goToShoot.setName("goToShoot");
         goToShoot.setMaxTimeOutMS(4000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
-        goToShoot.addPoint(shootPosition.getX(), shootPosition.getY(), Math.toDegrees(shootPosition.getTheta()));
+        goToShoot.addPosition(shootPosition.getX(), shootPosition.getY(), Math.toDegrees(shootPosition.getTheta()));
         goToShoot.setDependentActions(intakeBalls);
         this.addAction(goToShoot);
 

@@ -113,8 +113,8 @@ public class PathPlanning {
      */
     private static double[][] fieldRaw(boolean hiveTipping) {
         double half = FieldConfig.FLOWER_SIZE_MM / 2;
-        Point[] flowers = {FieldConfig.aFlowerPoint, FieldConfig.bFlowerPoint,
-                FieldConfig.cFlowerPoint, FieldConfig.dFlowerPoint};
+        Point[] flowers = {FieldConfig.FLOWER_1_POINT, FieldConfig.FLOWER_2_POINT,
+                FieldConfig.FLOWER_3_POINT, FieldConfig.FLOWER_4_POINT};
         int extraBoxes = hiveTipping ? 1 : 0;
         double[][] result = new double[2 + flowers.length + extraBoxes][];
         result[0] = FieldConfig.HIVE_LEG_LOW_X;

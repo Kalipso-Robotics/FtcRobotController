@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.kalipsorobotics.test.navigation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Position;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.drivetrain.DriveAction;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.DriveTrain;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.GoBildaOdoModule;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.IMUModule;
@@ -33,14 +32,14 @@ public class PurePursuitDataCollection extends LinearOpMode {
         GoBildaOdoModule.setInstanceNull();
         GoBildaOdoModule goBildaOdoModule = GoBildaOdoModule.getInstance(opModeUtilities);
         PurePursuitAction purePursuitAction = new PurePursuitAction(driveTrain);
-        purePursuitAction.addPoint(0, 0, 0);
-        purePursuitAction.addPoint(600, 600, 0);
-        purePursuitAction.addPoint(1200, -600, 90);
-        purePursuitAction.addPoint(1800, -1200, 180);
-        purePursuitAction.addPoint(1200, 1200, 0);
-        purePursuitAction.addPoint(-600, 0, 90);
-        purePursuitAction.addPoint(1800, -600, 180);
-        purePursuitAction.addPoint(0, 0, 0);
+        purePursuitAction.addPosition(0, 0, 0);
+        purePursuitAction.addPosition(600, 600, 0);
+        purePursuitAction.addPosition(1200, -600, 90);
+        purePursuitAction.addPosition(1800, -1200, 180);
+        purePursuitAction.addPosition(1200, 1200, 0);
+        purePursuitAction.addPosition(-600, 0, 90);
+        purePursuitAction.addPosition(1800, -600, 180);
+        purePursuitAction.addPosition(0, 0, 0);
 
         PurePursuitFileWriter purePursuitFileWriter = new PurePursuitFileWriter("datafordabigduong", opModeUtilities);
 

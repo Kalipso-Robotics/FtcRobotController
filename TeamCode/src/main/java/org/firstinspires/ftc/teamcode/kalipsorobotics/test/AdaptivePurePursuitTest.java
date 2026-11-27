@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.Odometry;
@@ -55,17 +54,17 @@ public class AdaptivePurePursuitTest extends KOpMode {
         adaptivePP.setName("AdaptivePP_Test");
 
         // Blue path - all waypoints from RedAutoNearRampThirdSpike
-        adaptivePP.addPoint(2400, -128, 138.29);  // First shoot
+        adaptivePP.addPosition(2400, -128, 138.29);  // First shoot
         // 2nd spike
-        adaptivePP.addPoint(1400, -225, -90);
-        adaptivePP.addPoint(1400, -1025, -90);
-        adaptivePP.addPoint(1500, 0, -150);
-        adaptivePP.addPoint(1850, 0, -150);
+        adaptivePP.addPosition(1400, -225, -90);
+        adaptivePP.addPosition(1400, -1025, -90);
+        adaptivePP.addPosition(1500, 0, -150);
+        adaptivePP.addPosition(1850, 0, -150);
         // ramp
-        adaptivePP.addPoint(1340, -825, -53);
-        adaptivePP.addPoint(1350, -1045, -77);
-        adaptivePP.addPoint(1509, -942, -90);
-        adaptivePP.addPoint(1850, 0, -150);
+        adaptivePP.addPosition(1340, -825, -53);
+        adaptivePP.addPosition(1350, -1045, -77);
+        adaptivePP.addPosition(1509, -942, -90);
+        adaptivePP.addPosition(1850, 0, -150);
 
         targetPosition = new Position(1850, 0, Math.toRadians(-150));
 
