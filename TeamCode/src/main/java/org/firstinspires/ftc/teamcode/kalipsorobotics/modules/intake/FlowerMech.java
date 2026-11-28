@@ -36,7 +36,7 @@ public class FlowerMech {
 //    private boolean isBlocked = false;
 
     public static final double UP_POS = 0.518;
-
+    public static final double LIFT_POS = 0.72;
     public static final double DOWN_POS = 0.779;
 
 

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.actions.intake;
 
+import org.checkerframework.checker.units.qual.K;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KServoAutoAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.KActionSet;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.actionUtilities.WaitAction;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.AdaptivePurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.navigation.IPurePursuitAction;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KServo;
 
 /**
  * One Flower pile: drive to the setup point, intake on and Flower arm down, drive onto the flower, back out to
@@ -72,11 +74,21 @@ public class FullFlowerAction extends KActionSet {
         backUp.setDependentActions(moveStraightToIntake);
         this.addAction(backUp);
 
-        MoveStraightPIDAction tryAgain = new MoveStraightPIDAction(driveTrain, -70); // negative = backward: at 90 deg the flower is behind the robot (lower y)
+        KServoAutoAction lift = new KServoAutoAction(flowerMech.getServo(), FlowerMech.LIFT_POS);
+        backUp.setName("lift");
+        lift.setDependentActions(moveStraightToIntake);
+        this.addAction(lift);
+
+        MoveStraightPIDAction tryAgain = new MoveStraightPIDAction(driveTrain, -80); // negative = backward: at 90 deg the flower is behind the robot (lower y)
         tryAgain.setTimeoutMS(900);
         tryAgain.setName("tryAgain");
         tryAgain.setDependentActions(backUp);
         this.addAction(tryAgain);
+
+        KServoAutoAction down = new KServoAutoAction(flowerMech.getServo(), FlowerMech.DOWN_POS);
+        down.setName("down");
+        down.setDependentActions(backUp);
+        this.addAction(down);
 
         IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, 1_000_000, power);
         intakeFullAction.setName("intakeFullAction");
