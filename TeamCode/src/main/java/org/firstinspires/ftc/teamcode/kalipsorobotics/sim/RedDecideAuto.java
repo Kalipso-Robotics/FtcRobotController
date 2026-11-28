@@ -25,7 +25,6 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto.Pile;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.AprilTagConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.TurretConfig;
-import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallCluster;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallVision;
@@ -984,17 +983,10 @@ public class RedDecideAuto extends KOpMode {
         shooterStop.setName("shooterStop");
         shooterStop.setDependentActions(pushBall);
 
-        // Same as ShootAllAction: once the balls are gone, re-zero x/y to the Limelight (a stale or missing fix just ends it).
-        ResetOdometryToLimelight rezero = new ResetOdometryToLimelight(turret);
-        rezero.setName("resetOdometryToLimelight");
-        rezero.setDependentActions(pushBall);
-
+        // No Limelight rezero here: autos never rezero (the fix can be off by hundreds of mm). The Limelight only tracks goal state.
         KActionSet set = new KActionSet();
         set.setName("shoot" + cell);
         set.addAction(drive, shooterRun, shooterReady, turretReady, closeEnough, pushBall, endDrive, shooterStop);
-        if (ShooterConfig.REZERO_AFTER_EACH_SHOT) {
-            set.addAction(rezero);
-        }
         return set;
     }
 

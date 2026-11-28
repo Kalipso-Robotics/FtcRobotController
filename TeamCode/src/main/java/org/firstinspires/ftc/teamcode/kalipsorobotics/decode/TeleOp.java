@@ -105,7 +105,9 @@ public class TeleOp extends KOpMode {
     private boolean setTurretOffset0Pressed;
     private boolean flowerAssistPressed;
     private boolean passButtonPressed;
-    private final boolean enableLimelightZeroing = USE_LIMELIGHT;
+    // GP2 right-stick click: re-zero x/y to the Limelight after every shot. Manual rezero (GP2 left-stick click) works either way.
+    private boolean autoRezeroEnabled = TELEOP_AUTO_REZERO_DEFAULT;
+    private boolean toggleAutoRezeroPressed = false;
 
     private Point hiveTarget = null; // the Hive Cell we aim at, see updateHiveTarget()
     private int shootCount = 0;
@@ -234,6 +236,7 @@ public class TeleOp extends KOpMode {
 
 
             zeroLimelightPressed = kGamePad2.isLeftStickButtonFirstPressed();
+            toggleAutoRezeroPressed = kGamePad2.isRightStickButtonFirstPressed();
             // Robot parked in the loading-zone corner, facing +x. Not while Start is held: Start+B pairs a controller.
             zeroCornerPressed = kGamePad2.isButtonBFirstPressed() && !kGamePad2.isStartButtonPressed();
             zeroFarCornerPressed = kGamePad2.isBackButtonFirstPressed();
@@ -282,6 +285,9 @@ public class TeleOp extends KOpMode {
             telemetry.addData("Intake Current Rps B ", "%.2f",intake.getRPSSideB());
             telemetry.addData("Hive Cell ", hiveTarget == TARGET_POINT_1 ? "A" : "B");
             telemetry.addData("Up CELL (seen) ", upCellText());
+            telemetry.addData("Hive tipping ", SharedData.isHiveTipping());
+            telemetry.addData("Auto rezero ", (autoRezeroEnabled ? "ON" : "OFF") + " (GP2 R-stick)  manual: GP2 L-stick");
+            telemetry.addData("Limelight fix ", limelightFixText());
             telemetry.addData("Distance ", "%.0f", shooterRun.getDistanceMM());
             telemetry.addData("Rps Offset ", "%.2f", ShooterInterpolationConfig.rpsOffset);
             telemetry.addData("Hood Offset ", "%.2f", ShooterInterpolationConfig.hoodOffset);
@@ -565,7 +571,7 @@ public class TeleOp extends KOpMode {
 
                 shootAllAction = new ShootAllAction(turret, stopper, intake, shooter, shooterRun, turretAutoAlignTeleOp);
                 intakeController.clearFull(); // the shot empties the robot
-                shootAllAction.setEnableLimelightZeroing(enableLimelightZeroing);
+                shootAllAction.setEnableLimelightZeroing(USE_LIMELIGHT && autoRezeroEnabled);
                 setLastShooterAction(shootAllAction);
                 setLastStopperAction(null);  // Clear stopper - shoot action controls it
                 shootCount++;
@@ -629,7 +635,20 @@ public class TeleOp extends KOpMode {
         KLog.d("TeleOp_Shooting", "event=passEnd");
     }
 
+    /** Fix age and how far the Limelight says odometry is off: a rezero would move the robot by this much. */
+    private String limelightFixText() {
+        if (!USE_LIMELIGHT) return "Limelight off";
+        double ageMs = SharedData.getLimelightFixAgeMs();
+        if (Double.isInfinite(ageMs)) return "no fix";
+        double[] offset = SharedData.getLimelightOffset();
+        return String.format(java.util.Locale.US, "off x=%.0f y=%.0f mm (%.0f ms ago)", offset[0], offset[1], ageMs);
+    }
+
     private void handleZeroing() {
+        if (toggleAutoRezeroPressed) {
+            autoRezeroEnabled = !autoRezeroEnabled;
+            KLog.d("TeleOp_Zeroing", () -> "event=autoRezeroToggle on=" + autoRezeroEnabled);
+        }
         if (zeroLimelightPressed && USE_LIMELIGHT) {
             if (!isPending(resetToLimelight)) {
                 // Skips on its own with no detection or a moving turret, so it never snaps odometry to the origin.

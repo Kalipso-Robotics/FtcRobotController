@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.KLog;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData;
 
-/** Re-zero odometry x/y to the Limelight fix (the window-averaged one AprilTagDetectionAction publishes). */
+/** Re-zero odometry x/y by the Limelight offset (the window-averaged one AprilTagDetectionAction publishes). */
 public class ResetOdometryToLimelight extends Action {
     public static final String TAG = "Vision_OdoReset";
 
@@ -32,13 +32,17 @@ public class ResetOdometryToLimelight extends Action {
             isDone = true;
             return;
         }
-        // Heading stays from the IMU; the fix only corrects x and y.
+        // Heading stays from the IMU; the fix only corrects x and y. The offset goes onto the pose NOW (the fix can be
+        // up to MAX_FIX_AGE_MS old, and the robot may have moved since).
         Position odometry = SharedData.getOdometryWheelIMUPosition();
-        Position fix = SharedData.getLimelightGlobalPosition();
-        Position limelightGlobalPosition = new Position(fix.getX(), fix.getY(), odometry.getTheta());
-        KLog.d(TAG, () -> "event=reset from=" + SharedData.getOdometryWheelIMUPosition() + " to=" + limelightGlobalPosition);
+        double[] offset = SharedData.getLimelightOffset();
+        Position limelightGlobalPosition = new Position(odometry.getX() + offset[0], odometry.getY() + offset[1], odometry.getTheta());
+        KLog.d(TAG, () -> String.format(java.util.Locale.US, "event=reset from=%s to=%s offX=%.0f offY=%.0f fixAgeMs=%.0f",
+                odometry, limelightGlobalPosition, offset[0], offset[1], fixAgeMs));
         SharedData.setOdometryWheelPosition(limelightGlobalPosition);
         SharedData.setOdometryWheelIMUPosition(limelightGlobalPosition);
+        SharedData.noteOdometryJump();
+        SharedData.clearLimelightFix(); // the old offset is now applied; the next rezero waits for fresh frames
         isDone = true;
     }
 }

@@ -68,6 +68,19 @@ public abstract class KOpMode extends LinearOpMode {
     protected void initializeRobotConfig() {
     }
 
+    /** Goal state the Limelight tracks (up Cell, tipping) as telemetry lines; the caller sends the telemetry. */
+    protected void addGoalStateTelemetry() {
+        if (aprilTagDetectionAction == null) {
+            telemetry.addLine("Goal state: Limelight off");
+            return;
+        }
+        double ageMs = SharedData.getHiveUpCellAgeMs();
+        String upCell = Double.isInfinite(ageMs) ? "never seen"
+                : String.format(java.util.Locale.US, "%s (%.1fs ago)", SharedData.getHiveUpCell(), ageMs / 1000);
+        telemetry.addData("Up CELL (seen) ", upCell);
+        telemetry.addData("Hive tipping ", SharedData.isHiveTipping());
+    }
+
     /** Starts the Limelight on its own thread (hive state, tipping, re-zero fixes). Call after the turret exists; cleanupRobot() stops it. */
     protected void startAprilTagDetection(Turret turret) {
         aprilTagDetectionAction = new AprilTagDetectionAction(opModeUtilities, turret, allianceColor);
@@ -86,9 +99,15 @@ public abstract class KOpMode extends LinearOpMode {
             AdaptivePurePursuitAction.runPrecomputeStepForAll();
             initLoop();
             telemetry.addLine(AdaptivePurePursuitAction.precomputeStatus()); // first line: says whether it is safe to press START
+            addOdometryTelemetry();
             telemetry.update();
             idle();
         }
+    }
+
+    /** Live odometry pose as a telemetry line, so a wrong start pose or a bumped robot shows before START; the caller sends the telemetry. */
+    protected void addOdometryTelemetry() {
+        telemetry.addData("Odometry ", SharedData.getOdometryWheelIMUPosition().toCompactString());
     }
 
     /** Runs every loop of waitForStartPrecomputingPaths(), before START. Override for init-time work (e.g. turret aim). */

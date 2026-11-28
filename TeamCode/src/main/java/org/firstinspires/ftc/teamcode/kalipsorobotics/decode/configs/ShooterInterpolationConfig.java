@@ -49,8 +49,10 @@ public class ShooterInterpolationConfig {
 
     //Distance, ShooterRPS, HoodPos, IntakeRPS
     public static double[] shooterData = {
-            950,  34.5 + adjustShooterRPS, 0.425, FEED_RPS,
-            1100, 37 + adjustShooterRPS, 0.420, FEED_RPS,
+            // 2026-11-28 ShotLog, kf 0.0158: 38 RPS at 992-996 mm, hood 0.301 made 4,3,3,3,0 of 4 (0.296-0.300 all 0).
+            // Replaces 950 (34.5 / 0.425) and 1100 (37 / 0.420): their hood was too low in the close zone and made a
+            // 0.420 -> 0.305 jump before 1250. Closer than 993 mm uses this row.
+            993,  38 + adjustShooterRPS, 0.301, FEED_RPS,
             1250, 39 + adjustShooterRPS, 0.305, FEED_RPS,
             1400, 39.5 + adjustShooterRPS, 0.295,  FEED_RPS,
             1540, 39.5 + adjustShooterRPS, 0.29, FEED_RPS,

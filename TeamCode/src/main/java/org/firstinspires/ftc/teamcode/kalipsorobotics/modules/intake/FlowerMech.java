@@ -37,7 +37,7 @@ public class FlowerMech {
 
     public static final double UP_POS = 0.518;
     public static final double LIFT_POS = 0.72;
-    public static final double DOWN_POS = 0.779;
+    public static final double DOWN_POS = 0.74; //0.779
 
 
     public FlowerMech(OpModeUtilities opModeUtilities, IntakeModule side) {

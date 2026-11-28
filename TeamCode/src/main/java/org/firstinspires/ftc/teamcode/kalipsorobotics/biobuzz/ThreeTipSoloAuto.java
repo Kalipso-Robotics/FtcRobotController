@@ -57,10 +57,10 @@ public class ThreeTipSoloAuto extends KOpMode {
     final double flowerIntakeMS = 2500;            // TODO-measure: longest the intake runs on a flower trip (it also stops once backed out)
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
-    final Position ROBOT_START_POS = new Position(1006, 3426, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
+    final Position ROBOT_START_POS = new Position(784, 3426, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
     final Point PARK_POINT = new Point(275, 1275);
     final double AUTO_LENGTH_MS = 30000;
-    static final boolean USE_LIMELIGHT = false; // nothing in this auto reads the Limelight yet; true = start it anyway
+    static final boolean USE_LIMELIGHT = true; // goal-state tracking only (up Cell / tipping); autos never rezero odometry
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
 
     // Flowers sit 63.5 mm off the wall, so the robot stops on the field side (+), not past the wall (-).
@@ -129,6 +129,7 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip0Shoot.setName("trip0Shoot");
         trip0Shoot.setTargetPoint(ShooterConfig.TARGET_POINT_1); // Cell A
         trip0Shoot.setDependentActions(delayBeforeStart);
+        trip0Shoot.setShooterReadyTimeoutMs(3500);
         redThreeTipSoloAuto.addAction(trip0Shoot);
 
 //        FlowerLower flowerLowerTrip1 = new FlowerLower(flowerMech, IntakeConfig.FLOWER_TIMEOUT_MS);
@@ -222,7 +223,7 @@ public class ThreeTipSoloAuto extends KOpMode {
         IPurePursuitAction trip2GoToShoot = new AdaptivePurePursuitAction(driveTrain);
         trip2GoToShoot.setMaxTimeOutMS(4001); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip2GoToShoot.setName("trip2GoToShoot");
-        trip2GoToShoot.addPosition(812.8, 914.4, 90);
+        trip2GoToShoot.addPosition(812.8, 2100, 90);
         trip2GoToShoot.addPosition(FLOWER_INTAKE_POSITION_1.getX(), 621, 90);
 //        trip2GoToShoot.setPlanStartPosition(new Position(FLOWER_INTAKE_POSITION_2.getX() - FullFlowerAction.PUSH_IN_MM * Math.cos(FLOWER_INTAKE_POSITION_2.getTheta()),
 //                FLOWER_INTAKE_POSITION_2.getY() - FullFlowerAction.PUSH_IN_MM * Math.sin(FLOWER_INTAKE_POSITION_2.getTheta()), FLOWER_INTAKE_POSITION_2.getTheta()));
@@ -351,6 +352,8 @@ public class ThreeTipSoloAuto extends KOpMode {
             AdaptivePurePursuitAction.runPrecomputeStepForAll();
             // Added before setAutoDelayAction, which sends the telemetry.
             telemetry.addLine(AdaptivePurePursuitAction.precomputeStatus());
+            addGoalStateTelemetry(); // test the goal-state tracking before the match starts
+            addOdometryTelemetry();
             setAutoDelayAction.updateCheckDone();
             initLoop();
         }
@@ -378,6 +381,8 @@ public class ThreeTipSoloAuto extends KOpMode {
                 redThreeTipSoloAuto.updateCheckDone();
             }
             KLog.d("Odometry", () -> "Position: " + SharedData.getOdometryWheelIMUPosition());
+            addGoalStateTelemetry(); // up Cell changes also log as Vision_Limelight event=goalState
+            telemetry.update();
         }
         shooter.stop();
         ballVision.close();

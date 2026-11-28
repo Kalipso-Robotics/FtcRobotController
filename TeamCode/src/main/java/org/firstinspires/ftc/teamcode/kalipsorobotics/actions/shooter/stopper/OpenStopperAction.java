@@ -20,4 +20,12 @@ public class OpenStopperAction extends KActionSet {
         openStopper.setName("openStopper");
         this.addAction(openStopper);
     }
+
+    // KActionSet never sets hasStarted; callers (ShootAllAction.getOpenStopper().getHasStarted() in the data
+    // collectors) use it as "the feed has begun", so set it the first loop this set runs.
+    @Override
+    public void update() {
+        super.update();
+        hasStarted = true;
+    }
 }

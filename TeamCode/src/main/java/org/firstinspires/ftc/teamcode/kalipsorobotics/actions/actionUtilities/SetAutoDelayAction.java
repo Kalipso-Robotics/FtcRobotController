@@ -35,6 +35,11 @@ public class SetAutoDelayAction extends Action {
         this.opModeUtilities = opModeUtilities;
     }
 
+    public SetAutoDelayAction(OpModeUtilities opModeUtilities, Gamepad gamepad, int defaultDelayMS) {
+        this(opModeUtilities, gamepad);
+        this.delayMS = defaultDelayMS;
+    }
+
     public int getTimeMS() {
         return delayMS;
     }

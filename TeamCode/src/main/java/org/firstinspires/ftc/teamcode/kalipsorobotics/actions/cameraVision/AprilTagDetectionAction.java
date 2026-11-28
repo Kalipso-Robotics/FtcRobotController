@@ -55,6 +55,7 @@ public class AprilTagDetectionAction extends Action {
     private final long[] windowNanos = new long[AprilTagConfig.HIVE_WINDOW_FRAMES]; // when the frame was handled
     private int nextSlot = 0;
     private int framesInWindow = 0;
+    private int seenOdometryJumpCount = SharedData.getOdometryJumpCount();
 
     public AprilTagDetectionAction(OpModeUtilities opModeUtilities, Turret turret, AllianceColor allianceColor) {
         this(opModeUtilities, turret, allianceColor, new LimelightAprilTagCamera(opModeUtilities, allianceColor));
@@ -102,6 +103,15 @@ public class AprilTagDetectionAction extends Action {
     protected synchronized void update() {
         if (!enabled) return;
 
+        // Odometry was reset: offsets measured before the jump would count the correction twice.
+        int jumpCount = SharedData.getOdometryJumpCount();
+        if (jumpCount != seenOdometryJumpCount) {
+            seenOdometryJumpCount = jumpCount;
+            clearWindow();
+            SharedData.clearLimelightFix();
+            KLog.d(TAG, "event=windowCleared reason=odometryJump");
+        }
+
         // The thread polls every 10 ms but the Limelight is slower: skip a frame we already handled.
         long frameId = camera.getLatestFrameId();
         boolean cameraKnowsFrames = frameId != -1;
@@ -118,7 +128,7 @@ public class AprilTagDetectionAction extends Action {
                 // No turret encoder: mid-swing, the commanded angle is not where the camera points, so that position is not kept.
                 boolean positionUsable = fix.robot != null && !turret.isMoving();
                 addToWindow(fix, positionUsable, now, odometry);
-                if (positionUsable) publishPosition(now);
+                if (positionUsable) publishPosition(now, fix, odometry);
             }
         }
         // Every new frame, even one without our tags, so old frames (and an old "tipping") age out.
@@ -207,12 +217,20 @@ public class AprilTagDetectionAction extends Action {
         }
     }
 
-    private void publishPosition(long nowNanos) {
-        Position fix = windowPosition(nowNanos, SharedData.getOdometryWheelIMUPosition());
+    private void publishPosition(long nowNanos, HiveTagLocalizer.Fix frameFix, Position odometryAtFrame) {
+        Position odometryNow = SharedData.getOdometryWheelIMUPosition();
+        Position fix = windowPosition(nowNanos, odometryNow);
         if (fix == null) return;
-        SharedData.setLimelightGlobalPosition(fix);
+        double offX = fix.getX() - odometryNow.getX();
+        double offY = fix.getY() - odometryNow.getY();
+        SharedData.setLimelightFix(fix, offX, offY);
         if (KLog.isDebug()) {
-            KLog.d(TAG, () -> String.format(Locale.US, "event=fix x=%.0f y=%.0f", fix.getX(), fix.getY()));
+            // Frame vs odometry side by side, to find why the fix error changes with heading / turret angle.
+            KLog.d(TAG, () -> String.format(Locale.US,
+                    "event=fix x=%.0f y=%.0f offX=%.0f offY=%.0f frameX=%.0f frameY=%.0f odoX=%.0f odoY=%.0f odoDeg=%.1f turretDeg=%.1f tags=%d",
+                    fix.getX(), fix.getY(), offX, offY, frameFix.robot.getX(), frameFix.robot.getY(),
+                    odometryAtFrame.getX(), odometryAtFrame.getY(), Math.toDegrees(odometryAtFrame.getTheta()),
+                    Math.toDegrees(turret.getAngleRad()), frameFix.tagsUsed));
         }
     }
 }

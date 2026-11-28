@@ -76,4 +76,18 @@ public class AprilTagDetectionActionWindowTest {
         assertEquals(2000, published.getY(), 0.001);
         assertEquals(0.5, published.getTheta(), 0.001); // heading stays from odometry
     }
+
+    @Test
+    public void odometryJump_clearsTheWindow() {
+        AprilTagDetectionAction action = newAction();
+        Position odometry = new Position(0, 0, 0);
+        long now = System.nanoTime();
+        for (int i = 0; i < 3; i++) action.addToWindow(fix(300, 0, null, false), true, now, odometry);
+        assertNotNull(action.windowPosition(now, odometry));
+
+        // A rezero applied the 300 mm offset: those frames would now count it a second time.
+        org.firstinspires.ftc.teamcode.kalipsorobotics.utilities.SharedData.noteOdometryJump();
+        action.update();
+        assertNull(action.windowPosition(now, new Position(300, 0, 0)));
+    }
 }

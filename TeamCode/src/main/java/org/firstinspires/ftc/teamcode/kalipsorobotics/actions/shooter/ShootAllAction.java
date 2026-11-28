@@ -65,7 +65,7 @@ public class ShootAllAction extends KActionSet {
         this.enableLimelightZeroing = enableLimelightZeroing;
     }
 
-    private boolean enableLimelightZeroing = ShooterConfig.REZERO_AFTER_EACH_SHOT;
+    private boolean enableLimelightZeroing = false; // TeleOp's auto-rezero toggle sets this; autos never rezero
 
 
     public ShootAllAction(Turret turret, Stopper stopper, Intake intake, Shooter shooter, ShooterRun shooterRun, TurretAutoAlign turretAutoAlign, double targetRPS, double targetHoodPos) {
@@ -155,6 +155,10 @@ public class ShootAllAction extends KActionSet {
         super.setIsDone(isDone);
     }
 
+    public void setShooterReadyTimeoutMs(double ms) {
+        shooterReady.setTimeOutMs(ms);
+    }
+
 
 
     private void generateBasicAction(ShooterRun shooterRun, Stopper stopper, Intake intake, TurretAutoAlign turretAutoAlign, IntakeRun intakeRun) {
@@ -199,10 +203,11 @@ public class ShootAllAction extends KActionSet {
         intakeStop.setDependentActions(shootTimeWait);
         this.addAction(intakeStop);
 
-//        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
-//        resetOdometryToPosition.setName("resetOdometryToPosition");
-//        resetOdometryToPosition.setDependentActions(closeStopper, intakeStop);
-//        this.addAction(resetOdometryToPosition);
+        // Re-zero x/y to the Limelight once the balls are gone (turret still). Off unless TeleOp turns it on; autos never do.
+        resetOdometryToPosition = new ResetOdometryToLimelight(turret);
+        resetOdometryToPosition.setName("resetOdometryToPosition");
+        resetOdometryToPosition.setDependentActions(closeStopper, intakeStop);
+        this.addAction(resetOdometryToPosition);
     }
 
     @Override

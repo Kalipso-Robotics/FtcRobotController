@@ -39,6 +39,7 @@ public class ResetOdometryToPos extends Action {
                 " Odometry Wheel, " + SharedData.getOdometryWheelPosition() + " to position, " + zeroPos);
         SharedData.setOdometryWheelPosition(zeroPos);
         SharedData.setOdometryWheelIMUPosition(zeroPos);
+        SharedData.noteOdometryJump();
     }
 
     static boolean landed(Position pose, Position target) {

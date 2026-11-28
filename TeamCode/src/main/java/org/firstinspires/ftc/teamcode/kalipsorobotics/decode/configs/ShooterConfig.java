@@ -30,7 +30,7 @@ public class ShooterConfig {
     public static double ki = 0;
     public static double kd = 0;
     // kf = steady power / steady RPS at about 0.8 power on a full battery, measured with MotorPowerRPSDataCollector.
-    public static double kf = 0.01828; // TODO-measure
+    public static double kf = 0.0158; // 2026-11-27 logs: 0.01828 held every target +0.65 RPS fast (steady power/RPS = 0.0152-0.0160), so ShooterReady missed tolerance and timed out
 
     public static double kp = 0.14250; //TODO tune until going from depot to near is fast enough
 
@@ -50,11 +50,11 @@ public class ShooterConfig {
     /** Flywheel motor direction; Shooter and MotorPowerRPSDataCollector both use it. */
     public static DcMotorSimple.Direction SHOOTER_MOTOR_DIRECTION = DcMotorSimple.Direction.FORWARD; // TODO-measure
 
-    public static double SHOOTER_READY_TIMEOUT_MS = 3500; // TODO-measure
+    public static double SHOOTER_READY_TIMEOUT_MS = 1000; // TODO-measure
     // TeleOp never fires on timeout: RPS or turret not ready by then aborts the shot (flywheel keeps spinning).
     public static double SHOOT_ALL_ACTION_TIMEOUT_MS = 3000; // TODO-measure
-    /** Re-zero odometry x/y to the Limelight after every shot; false turns it off everywhere. */
-    public static boolean REZERO_AFTER_EACH_SHOT = true;
+    /** TeleOp's auto-rezero toggle (GP2 right-stick click) starts here: true = re-zero x/y to the Limelight after each shot. Autos never rezero. */
+    public static boolean TELEOP_AUTO_REZERO_DEFAULT = false;
 
     // Weak pass shot, GP1 Y. Placeholders below the shortest distance-table shot.
     public static double PASS_RPS = 25; // TODO-measure

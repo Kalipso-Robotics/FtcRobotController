@@ -11,7 +11,7 @@ public class ShooterReady extends Action {
 
     ShooterRun shooterRun;
     ElapsedTime actionTime;
-    private final double timeoutMS;
+    private double timeoutMS;
     private boolean timedOut = false;
 
     public ShooterReady(ShooterRun shooterRun) {
@@ -61,5 +61,9 @@ public class ShooterReady extends Action {
 
     public ShooterRun getShooterRun() {
         return shooterRun;
+    }
+
+    public void setTimeOutMs(double ms) {
+        this.timeoutMS = ms;
     }
 }

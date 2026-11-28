@@ -154,6 +154,36 @@ public class SharedData {
         limelightGlobalPosition.reset(position);
         limelightFixNanos = System.nanoTime();
     }
+
+    // How far odometry was off when the last fix was published (fix minus odometry, x/y). A rezero adds this to the
+    // pose NOW, so a fix published while driving does not snap the robot back to where it was.
+    private static double limelightOffsetX = 0;
+    private static double limelightOffsetY = 0;
+    /** Publishes the fix and its offset from odometry together (same timestamp). */
+    public static synchronized void setLimelightFix(Position fix, double offsetX, double offsetY) {
+        setLimelightGlobalPosition(fix);
+        limelightOffsetX = offsetX;
+        limelightOffsetY = offsetY;
+    }
+    /** {offsetX, offsetY} of the last fix; check getLimelightFixAgeMs() first. */
+    public static synchronized double[] getLimelightOffset() {
+        return new double[]{limelightOffsetX, limelightOffsetY};
+    }
+    /** Forget the last fix (after odometry jumps its offset is wrong): the fix age goes back to +Infinity. */
+    public static synchronized void clearLimelightFix() {
+        limelightFixNanos = 0;
+        limelightOffsetX = 0;
+        limelightOffsetY = 0;
+    }
+
+    // Bumped by every odometry reset (Limelight or corner), so the vision window drops offsets measured before the jump.
+    private static volatile int odometryJumpCount = 0;
+    public static void noteOdometryJump() {
+        odometryJumpCount++;
+    }
+    public static int getOdometryJumpCount() {
+        return odometryJumpCount;
+    }
     /** Age of the last HIVE-tag fix in ms, or infinity if there never was one. */
     public static double getLimelightFixAgeMs() {
         return limelightFixNanos == 0 ? Double.POSITIVE_INFINITY : (System.nanoTime() - limelightFixNanos) / 1e6;
