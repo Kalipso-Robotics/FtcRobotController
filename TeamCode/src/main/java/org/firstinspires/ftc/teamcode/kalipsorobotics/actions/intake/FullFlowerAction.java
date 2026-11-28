@@ -22,7 +22,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto;
  */
 public class FullFlowerAction extends KActionSet {
     // How far the straight move pushes into the flower after goToFlower (backward: the flower is behind the robot).
-    public static final double PUSH_IN_MM = 275; // TODO-measure
+    public static final double PUSH_IN_MM = 250;
+    private double intakeTimeMS = 1250;
 
 
     public IPurePursuitAction getGoToFlower() {
@@ -42,6 +43,10 @@ public class FullFlowerAction extends KActionSet {
     public void setFlowerLower(KServoAutoAction flowerLower) {
 
         this.flowerLower = flowerLower;
+    }
+
+    public void setIntakeTime(double ms) {
+        this.intakeTimeMS = ms;
     }
 
     private KServoAutoAction flowerLower;
@@ -66,12 +71,12 @@ public class FullFlowerAction extends KActionSet {
         intakeFullAction.setDependentActions();
         this.addAction(intakeFullAction);
 
-        flowerLower = new KServoAutoAction(flowerMech.getServo(), FlowerMech.DOWN_POS);
-        flowerLower.setName("flowerLower");
-        this.addAction(flowerLower);
+//        flowerLower = new KServoAutoAction(flowerMech.getServo(), FlowerMech.DOWN_POS);
+//        flowerLower.setName("flowerLower");
+//        this.addAction(flowerLower);
 
 
-        WaitAction waitAction = new WaitAction(1500);
+        WaitAction waitAction = new WaitAction(this.intakeTimeMS);
         waitAction.setName("waitForFlower");
         waitAction.setDependentActions(moveStraightToIntake); // not goToFlower: exitFlower must not drive while the straight move still is
         this.addAction(waitAction);
