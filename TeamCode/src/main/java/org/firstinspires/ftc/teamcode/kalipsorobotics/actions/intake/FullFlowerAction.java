@@ -77,22 +77,22 @@ public class FullFlowerAction extends KActionSet {
         this.addAction(waitAction);
 
         // Back out only once the arm is down (or gave up), so the robot never leaves before the arm swept the pile.
-        AdaptivePurePursuitAction exitFlower = new AdaptivePurePursuitAction(driveTrain);
-        // The straight move moved the robot PUSH_IN_MM back from goToFlower's end: plan from there, so this path is
-        // planned during init instead of replanned (robot sitting still) during the match.
-        double h = flowerIntakePosition.getTheta();
-        exitFlower.setPlanStartPosition(new Position(flowerIntakePosition.getX() - PUSH_IN_MM * Math.cos(h),
-                flowerIntakePosition.getY() - PUSH_IN_MM * Math.sin(h), h));
-        exitFlower.setMaxTimeOutMS(1500); // give up if blocked (e.g. against the flower base) (TODO-measure)
-        exitFlower.addPosition(flowerExitPosition);
-        exitFlower.setName("exitFlower");
-        exitFlower.setDependentActions(waitAction);
-        this.addAction(exitFlower);
+//        AdaptivePurePursuitAction exitFlower = new AdaptivePurePursuitAction(driveTrain);
+//        // The straight move moved the robot PUSH_IN_MM back from goToFlower's end: plan from there, so this path is
+//        // planned during init instead of replanned (robot sitting still) during the match.
+//        double h = flowerIntakePosition.getTheta();
+//        exitFlower.setPlanStartPosition(new Position(flowerIntakePosition.getX() - PUSH_IN_MM * Math.cos(h),
+//                flowerIntakePosition.getY() - PUSH_IN_MM * Math.sin(h), h));
+//        exitFlower.setMaxTimeOutMS(1500); // give up if blocked (e.g. against the flower base) (TODO-measure)
+//        exitFlower.addPosition(flowerExitPosition);
+//        exitFlower.setName("exitFlower");
+//        exitFlower.setDependentActions(waitAction);
+//        this.addAction(exitFlower);
 
         // Out of the flower: stop the intake now instead of letting its timer run into the next shot.
         IntakeStop stopIntake = new IntakeStop(intakeFullAction);
         stopIntake.setName("stopIntake");
-        stopIntake.setDependentActions(exitFlower);
+        stopIntake.setDependentActions(waitAction);
         this.addAction(stopIntake);
 
 
