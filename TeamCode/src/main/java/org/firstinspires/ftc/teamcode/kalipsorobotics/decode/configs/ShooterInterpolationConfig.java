@@ -52,11 +52,20 @@ public class ShooterInterpolationConfig {
             // 2026-11-28 ShotLog, kf 0.0158: 38 RPS at 992-996 mm, hood 0.301 made 4,3,3,3,0 of 4 (0.296-0.300 all 0).
             // Replaces 950 (34.5 / 0.425) and 1100 (37 / 0.420): their hood was too low in the close zone and made a
             // 0.420 -> 0.305 jump before 1250. Closer than 993 mm uses this row.
-            993,  38 + adjustShooterRPS, 0.301, FEED_RPS,
-            1250, 39 + adjustShooterRPS, 0.305, FEED_RPS,
-            1400, 39.5 + adjustShooterRPS, 0.295,  FEED_RPS,
-            1540, 39.5 + adjustShooterRPS, 0.29, FEED_RPS,
-            1702, 40.5 + adjustShooterRPS, 0.280,  FEED_RPS,
+            // 2026-11-28 01:27 LUT-mode session (vs the 0.301/0.297/0.286/0.282 it ran): most misses went OVER the goal
+            // -> 1218-1394 lowered ~0.002; only 1056 mm @ 0.2999 hit the HIVE bottom -> 993 nudged up (1081 @ 0.2994 made 4,
+            // so kept small). 1540+ untouched so far-corner shots stay as before.
+            // 2026-11-28 01:39 session: 45/80, most misses "a little high" -> 993 -0.001, 1218-1702 -0.0015.
+            // 2251 untouched (far corner, not shot this session).
+            993,  38 + adjustShooterRPS, 0.302, FEED_RPS,
+            // 2026-11-28 01:05 ShotLog (~10.3 V loaded; shots under 9.5 V ignored). Old 1250 (0.305) / 1400 (0.295)
+            // rows read ~0.008-0.013 high. 1218: 0.2955-0.2975 made 3,2,3,2,2. 1340: 0.2855-0.2866 made 20/24.
+            // 1394 (target B): 0.2819 made 4,2,4; 0.2814+ above missed.
+            1218, 38.88 + adjustShooterRPS, 0.2935, FEED_RPS,
+            1340, 39.3 + adjustShooterRPS, 0.2825, FEED_RPS,
+            1394, 39.48 + adjustShooterRPS, 0.279, FEED_RPS,
+            1540, 39.5 + adjustShooterRPS, 0.2885, FEED_RPS,
+            1702, 40.5 + adjustShooterRPS, 0.2785,  FEED_RPS,
 //            1862, 39 + adjustShooterRPS, 0.285, FEED_RPS
             2251, 39 + adjustShooterRPS, 0.285, FEED_RPS
     };

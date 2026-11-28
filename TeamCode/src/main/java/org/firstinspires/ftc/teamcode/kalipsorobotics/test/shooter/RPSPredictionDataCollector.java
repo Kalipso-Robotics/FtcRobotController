@@ -184,7 +184,7 @@ public class RPSPredictionDataCollector extends KOpMode {
         // Every shot, automatically (no Y): one line when it ends, one per LT + RB / Back mark (the last line per n wins).
         // Survives logcat rotation, unlike the KLog lines.
         KFileWriter shotLogWriter = new KFileWriter("ShotLog", opModeUtilities);
-        shotLogWriter.writeLine("n,event,ShooterTimedOut,CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM,TargetX,TargetY,TurretOffsetDeg,AimX,AimY,FeedRPS,TargetRPS,FeedRpsComp,TransferTimedOut,LutMode,LutRPS,LutHood,RpsTrim,HoodTrim,BallsLoaded,Made,LutRow");
+        shotLogWriter.writeLine("n,event,ShooterTimedOut,CurrentRPS,CurrentPower,CurrentVoltage,HoodPosition,DistanceToTargetMM,TargetX,TargetY,TurretOffsetDeg,AimX,AimY,FeedRPS,TargetRPS,FeedRpsComp,TransferTimedOut,LutMode,LutRPS,LutHood,RpsTrim,HoodTrim,RobotX,RobotY,HeadingDeg,TurretDeg,BallsLoaded,Made,LutRow");
         flush(shotLogWriter);
         boolean lastShooterTimedOut = false;
 
@@ -205,7 +205,7 @@ public class RPSPredictionDataCollector extends KOpMode {
         ShootAllAction shot = null;
         boolean wasShooting = false;
         // LUT tune mode
-        boolean lutMode = false;
+        boolean lutMode = true; // start on the table; manual 0.25 hood shot low into the HIVE bottom everywhere (2026-11-28)
         double rpsTrim = 0;
         double hoodTrim = 0;
         // snapshot at LB: what the shot was fired with (the live values keep tracking the LUT during the shot)
@@ -457,7 +457,9 @@ public class RPSPredictionDataCollector extends KOpMode {
                         shooter.getRPS(), shooter.getShooterMotor().getPower(), getBatteryVoltage(), shotHood, distanceMM,
                         hiveTarget.getX(), hiveTarget.getY(), TurretConfig.TURRET_OFFSET_DEG, aim.getX(), aim.getY(), IntakeConfig.FEED_RPS, shotTargetRPS,
                         IntakeConfig.FEED_RPS_COMP_ON ? 1 : 0);
-                pendingLutCols = String.format("%d,%.2f,%.4f,%.2f,%.4f", shotLutMode ? 1 : 0, shotLutRPS, shotLutHood, shotRpsTrim, shotHoodTrim);
+                Position pose = SharedData.getOdometryWheelIMUPosition(); // pose + turret: separate odometry drift from turret calibration on aim misses
+                pendingLutCols = String.format("%d,%.2f,%.4f,%.2f,%.4f,%.0f,%.0f,%.1f,%.1f", shotLutMode ? 1 : 0, shotLutRPS, shotLutHood, shotRpsTrim, shotHoodTrim,
+                        pose.getX(), pose.getY(), Math.toDegrees(pose.getTheta()), turretAutoAlignTeleOp.getTurret().getAngleDeg());
                 // shooterData row that reproduces this shot: Shooter.getPrediction adds these offsets back on
                 lastLutRow = String.format("%.0f, %.2f, %.4f, FEED_RPS,", distanceMM,
                         shotTargetRPS - ShooterInterpolationConfig.rpsOffset,
