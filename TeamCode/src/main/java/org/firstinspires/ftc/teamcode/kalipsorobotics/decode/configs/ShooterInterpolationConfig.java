@@ -18,7 +18,7 @@ public class ShooterInterpolationConfig {
     public final static double MAX_HOOD = 0.5; // TODO-measure // 0.3 old hood 37.38mm space by caliper from bottom
     public static double FAR_SHOOT_RPS = 66.5; // TODO-measure
     // One motor now spins 6 flywheels + 4 weights: the ceiling is about 1/kf (~87 RPS loaded), and the
-    // PIDF needs headroom to recover between balls and under NECTAR voltage sag. Shooter clamps every target to this.
+    // PIDF needs headroom to recover between balls ando under NECTAR voltage sag. Shooter clamps every target to this.
     public static final double MAX_RPS = 70; // TODO-measure
     // Used when shooterData is empty so the shooter still spins to something sane.
     public static final double DEFAULT_RPS = 40; // TODO-measure
@@ -37,7 +37,7 @@ public class ShooterInterpolationConfig {
 
     public static double hoodCompensateCoefficient = maxHoodCompensate; // TODO-measure // 0.2
 
-    public static  double DEFAULT_VOLTAGE = 12.5;
+    public static  double DEFAULT_VOLTAGE = 12;
 
     static double compensatedMaxHood = MAX_HOOD - maxHoodCompensate; //0.31754;
     public static final int BETWEEN_FAR_NEAR_TIP = 3240; // TODO-measure

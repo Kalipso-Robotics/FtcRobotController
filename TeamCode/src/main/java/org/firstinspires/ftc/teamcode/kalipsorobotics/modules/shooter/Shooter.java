@@ -50,7 +50,7 @@ public class Shooter {
         this.opModeUtilities = opModeUtilities;
         DcMotor motor = opModeUtilities.getHardwareMap().dcMotor.get("shooter");
         motor.setDirection(ShooterConfig.SHOOTER_MOTOR_DIRECTION);
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // raw power: our kF/kP + voltage comp are the only velocity loop
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         shooterMotor = new KMotor(motor, ShooterConfig.kp, ShooterConfig.ki, ShooterConfig.kd, ShooterConfig.kf);
@@ -155,6 +155,7 @@ public class Shooter {
      */
     public void goToRPS(double targetRPS) {
         this.targetRPS = clampRPS(targetRPS);
+        SharedData.refreshVoltage(opModeUtilities.getHardwareMap()); // autos never call KOpMode.updateActions
         currentRPS = shooterMotor.goToRPS(this.targetRPS);
         if (KLog.isDebug()) {
             KLog.d(TAG, () -> "event=goToRps targetRps=" + this.targetRPS + " currentRps=" + currentRPS);

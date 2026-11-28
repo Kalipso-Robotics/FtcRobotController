@@ -744,7 +744,7 @@ public class MotorPowerRPSDataCollector extends LinearOpMode {
         motor.setDirection(ShooterConfig.SHOOTER_MOTOR_DIRECTION); // same constant Shooter uses
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); // raw power: our kF/kP + voltage comp are the only velocity loop
 
         KLog.d(TAG, "event=motorsInit");
         return new KMotor(motor,

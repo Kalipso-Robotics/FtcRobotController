@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.kalipsorobotics.utilities;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.BallInformation;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.VisionRecognition;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.vision.apriltag.AllianceColor;
@@ -227,6 +230,24 @@ public class SharedData {
     }
     public static void setVoltage(double newVoltage) {
         voltage = newVoltage;
+    }
+
+    private static long lastVoltageReadMs = 0;
+    /**
+     * Re-reads the battery voltage at most every 500 ms (an I2C/Lynx read is slow). Called from both
+     * KOpMode.updateActions (TeleOp) and Shooter.goToRPS (every flywheel loop, so autos that never call
+     * updateActions still get KMotor.voltageScale compensation).
+     */
+    public static void refreshVoltage(HardwareMap hardwareMap) {
+        long now = System.currentTimeMillis();
+        if (now - lastVoltageReadMs < 500) {
+            return;
+        }
+        lastVoltageReadMs = now;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            voltage = sensor.getVoltage();
+            return;
+        }
     }
 
 
