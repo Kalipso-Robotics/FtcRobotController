@@ -58,7 +58,7 @@ public class ThreeTipSoloAuto extends KOpMode {
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
     final Position ROBOT_START_POS = new Position(1006, 3426, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
-    final Point PARK_POINT = new Point(188, 1300);
+    final Point PARK_POINT = new Point(275, 1275);
     final double AUTO_LENGTH_MS = 30000;
     static final boolean USE_LIMELIGHT = false; // nothing in this auto reads the Limelight yet; true = start it anyway
     final double FORCE_PARK_MS_LEFT = 3000;   // TODO-check: enough time to drive to PARK_POINT from anywhere?
@@ -154,7 +154,7 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip1GoToGarden.setName("trip3GoToGarden");
 //        trip1GoToGarden.addPosition(800, 543, 102.6);
 //        trip1GoToGarden.addPosition(300, 2949, 102.6);
-        trip1GoToGarden.addPosition(200,3426,0);
+        trip1GoToGarden.addPosition(270,3426,0);
         trip1GoToGarden.setDependentActions(trip0Shoot);
         redThreeTipSoloAuto.addAction(trip1GoToGarden);
 //
@@ -247,7 +247,7 @@ public class ThreeTipSoloAuto extends KOpMode {
         trip3FlowerIntake.setName("trip2FlowerIntake");
 //        trip3FlowerIntake.getFlowerLower().setIsDone(true);
         trip3FlowerIntake.setDependentActions(trip2Shoot);
-        trip3FlowerIntake.setIntakeTime(2000);
+        trip3FlowerIntake.setIntakeTime(800);
         redThreeTipSoloAuto.addAction(trip3FlowerIntake);
 
 //        // TODO-check: added so the robot is at (1037, 397) for this shot, same as trip 1

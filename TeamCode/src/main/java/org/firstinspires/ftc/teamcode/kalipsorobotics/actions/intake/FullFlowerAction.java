@@ -22,8 +22,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto;
  */
 public class FullFlowerAction extends KActionSet {
     // How far the straight move pushes into the flower after goToFlower (backward: the flower is behind the robot).
-    public static final double PUSH_IN_MM = 260;
-    private double intakeTimeMS = 1250;
+    public static final double PUSH_IN_MM = 275;
+    private double intakeTimeMS = 500;
 
 
     public IPurePursuitAction getGoToFlower() {
@@ -61,10 +61,22 @@ public class FullFlowerAction extends KActionSet {
         this.addAction(goToFlower);
 
         MoveStraightPIDAction moveStraightToIntake = new MoveStraightPIDAction(driveTrain, -PUSH_IN_MM); // negative = backward: at 90 deg the flower is behind the robot (lower y)
-        moveStraightToIntake.setTimeoutMS(1500);
+        moveStraightToIntake.setTimeoutMS(900);
         moveStraightToIntake.setName("moveStraightToIntake");
         moveStraightToIntake.setDependentActions(goToFlower);
         this.addAction(moveStraightToIntake);
+
+        MoveStraightPIDAction backUp = new MoveStraightPIDAction(driveTrain, 80); // negative = backward: at 90 deg the flower is behind the robot (lower y)
+        backUp.setTimeoutMS(500);
+        backUp.setName("backUp");
+        backUp.setDependentActions(moveStraightToIntake);
+        this.addAction(backUp);
+
+        MoveStraightPIDAction tryAgain = new MoveStraightPIDAction(driveTrain, -70); // negative = backward: at 90 deg the flower is behind the robot (lower y)
+        tryAgain.setTimeoutMS(900);
+        tryAgain.setName("tryAgain");
+        tryAgain.setDependentActions(backUp);
+        this.addAction(tryAgain);
 
         IntakeFullAction intakeFullAction = new IntakeFullAction(stopper, intake, 1_000_000, power);
         intakeFullAction.setName("intakeFullAction");
@@ -78,7 +90,7 @@ public class FullFlowerAction extends KActionSet {
 
         WaitAction waitAction = new WaitAction(this.intakeTimeMS);
         waitAction.setName("waitForFlower");
-        waitAction.setDependentActions(moveStraightToIntake); // not goToFlower: exitFlower must not drive while the straight move still is
+        waitAction.setDependentActions(tryAgain); // not goToFlower: exitFlower must not drive while the straight move still is
         this.addAction(waitAction);
 
         // Back out only once the arm is down (or gave up), so the robot never leaves before the arm swept the pile.
