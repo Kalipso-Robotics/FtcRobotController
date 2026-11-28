@@ -30,9 +30,9 @@ public class ShooterConfig {
     public static double ki = 0;
     public static double kd = 0;
     // kf = steady power / steady RPS at about 0.8 power on a full battery, measured with MotorPowerRPSDataCollector.
-    public static double kf = 0.01128; // TODO-measure
+    public static double kf = 0.01828; // TODO-measure
 
-    public static double kp = 0.04930; //TODO tune until going from depot to near is fast enough
+    public static double kp = 0.14250; //TODO tune until going from depot to near is fast enough
 
     public static double kA = 0;
     public static boolean shouldBangBangCompensate = false;

@@ -56,8 +56,7 @@ public class ThreeTipSoloAuto extends KOpMode {
     final double flowerIntakeMS = 2500;            // TODO-measure: longest the intake runs on a flower trip (it also stops once backed out)
     final double visionPickupTimeoutMS = 6000;     // TODO-measure: trip 4 gives up picking up after this, to leave time to shoot and park
     final BallVision.Detector ballDetector = BallVision.Detector.TFLITE; // or COLOR_BLOB (tune its HSV first)
-
-    final Position ROBOT_START_POS = new Position(1006, 3416, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
+    final Position ROBOT_START_POS = new Position(1006, 3426, Math.toRadians(0)); // faces -y (into the field); theta is RADIANS. -90 confirmed from 2026-11-26 TeleOp drive log
     final Point PARK_POINT = new Point(188, 1200);
     final double AUTO_LENGTH_MS = 30000;
     static final boolean USE_LIMELIGHT = false; // nothing in this auto reads the Limelight yet; true = start it anyway

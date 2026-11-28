@@ -38,8 +38,6 @@ public abstract class KOpMode extends LinearOpMode {
     protected AprilTagDetectionAction aprilTagDetectionAction = null;
     protected ResetOdometryToLimelight resetOdometryToPosition = null;
 
-    private long lastVoltageReadMs = 0;
-
 
     /**
      * Initialize hardware and utilities before waitForStart()
@@ -155,11 +153,7 @@ public abstract class KOpMode extends LinearOpMode {
      * Automatically prevents duplicate updates if the same action is referenced in multiple slots
      */
     protected void updateActions() {
-        long now = System.currentTimeMillis();
-        if (now - lastVoltageReadMs > 500) {
-            SharedData.setVoltage(opModeUtilities.getHardwareMap().voltageSensor.iterator().next().getVoltage());
-            lastVoltageReadMs = now;
-        }
+        SharedData.refreshVoltage(opModeUtilities.getHardwareMap());
 
         if (lastIntakeAction != null) {
             lastIntakeAction.updateCheckDone();
