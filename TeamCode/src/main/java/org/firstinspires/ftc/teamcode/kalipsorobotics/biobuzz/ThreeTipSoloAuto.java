@@ -332,7 +332,7 @@ public class ThreeTipSoloAuto extends KOpMode {
         IPurePursuitAction trip4Park = new AdaptivePurePursuitAction(driveTrain);
         trip4Park.setMaxTimeOutMS(3000); // give up if blocked, so the robot never keeps pushing (TODO-measure)
         trip4Park.setName("trip4Park");
-        trip4Park.addPosition(PARK_POINT.getX(), PARK_POINT.getY(), 90); // TODO-check: park heading
+        trip4Park.addPosition(PARK_POINT.getX(), PARK_POINT.getY(), 180); // TODO-check: park heading
         trip4Park.setDependentActions(flowerRaiseTrip3);
         redThreeTipSoloAuto.addAction(trip4Park);
         //END OF TRIP 4

@@ -42,7 +42,7 @@ public class IntakeConfig {
     // FEED_RPS) and lets the shot go on, flagged timedOut(). Logged as Shooting_TransferReady event=timeout.
     public static double FEED_GATE_TIMEOUT_MS = 1500; // TODO-measure
     // ShootAllAction: how long the stopper stays open (IntakeRun feeding) before it closes and the intake stops.
-    public static double shootTimeMS = 500; // TODO-measure: ms
+    public static double shootTimeMS = 800; // TODO-measure: ms 500
     // IntakeRun (ShootAllAction's feed): side B's target RPS = side A's target * this. 1 = both sides the same speed.
     // < 1 slows side B relative to A, > 1 speeds it up. Changes shot consistency; tune with IntakeRatioShotTest.
     public static double FEED_SIDE_B_RATIO = 1.0; // TODO-measure

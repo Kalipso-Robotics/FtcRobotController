@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.sim.RedTippingAuto;
  */
 public class FullFlowerAction extends KActionSet {
     // How far the straight move pushes into the flower after goToFlower (backward: the flower is behind the robot).
-    public static final double PUSH_IN_MM = 250;
+    public static final double PUSH_IN_MM = 260;
     private double intakeTimeMS = 1250;
 
 

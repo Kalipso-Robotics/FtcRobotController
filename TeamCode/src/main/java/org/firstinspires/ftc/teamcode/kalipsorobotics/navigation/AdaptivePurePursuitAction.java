@@ -536,7 +536,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
         if (injectDone && smootherDone && !calcDistanceDone) {
             calculateDistanceAlongPath(path);
-            KLog.d("ppDebug", "calc distance done");
+            KLog.d("ppDebug", () -> "calc distance done");
             return;
         }
 
@@ -558,9 +558,9 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                             continue;
                         }
                         lookaheadBarrierIndex = i;
-                        KLog.d("ppDebug", "calc velo accel done");
-                        KLog.d("PPTest", "pp calc done at " + timer.milliseconds());
-                        KLog.d("PPTest", "pp calc done at loop # " + loops);
+                        KLog.d("ppDebug", () -> "calc velo accel done");
+                        KLog.d("PPTest", () -> "pp calc done at " + timer.milliseconds());
+                        KLog.d("PPTest", () -> "pp calc done at loop # " + loops);
                         break;
                     }
                 }
@@ -667,7 +667,8 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             currentLookAheadRadius = LOOK_AHEAD_RADIUS_MM;
 
             int closestIdx = updateProgressIndex(path, currentPosition);
-            KLog.d("ppDebug", "closest index " + closestIdx);
+            int loggedClosestIdx = closestIdx; // closestIdx is reassigned below; the lambda needs an effectively final copy
+            KLog.d("ppDebug", () -> "closest index " + loggedClosestIdx);
 
             int startSegment = Math.max(0, closestIdx - 1);
 
@@ -705,7 +706,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                         // Move progress onto the barrier so targetPosition() steps past it.
                         progressIndex = Math.max(progressIndex, lookaheadBarrierIndex);
                         closestIdx = progressIndex;
-                        KLog.d("ppDebug", "barrier waypoint satisfied at index " + lookaheadBarrierIndex);
+                        KLog.d("ppDebug", () -> "barrier waypoint satisfied at index " + lookaheadBarrierIndex);
                     } else {
                         KLog.d("ppDebugFollow", () -> String.format(
                                 "Driving to barrier waypoint: dist=%.1fmm angleErr=%.1f°",
@@ -729,14 +730,14 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             // trivially true before the robot has moved at all. Require actual progress along
             // the path (closestIdx near lastIdx) too.
             boolean hasReachedEndOfPath = closestIdx >= lastIdx - 1;
-            KLog.d("ppDebug", "has reached end of path " + hasReachedEndOfPath);
+            KLog.d("ppDebug", () -> "has reached end of path " + hasReachedEndOfPath);
 
             boolean atFinalPosition = dError < lastSearchRadius;
-            KLog.e("ppDebug", "at final position " + atFinalPosition);
+            KLog.e("ppDebug", () -> "at final position " + atFinalPosition);
 
             boolean atFinalAngle =
                     Math.abs(aError) <= Math.toRadians(finalAngleLockingThreshholdDeg);
-            KLog.e("ppDebug", "at final angle " + atFinalAngle);
+            KLog.e("ppDebug", () -> "at final angle " + atFinalAngle);
 
 
             boolean slowEnough = Math.abs(filteredVelocityMmPerS) < FINISH_MAX_VELOCITY_MM_PER_S;
@@ -770,7 +771,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             // it means we should shrink our search radius for the next iteration.
             // This is a more robust way to handle the end of the path.
             if (follow.isPresent() && Vector.between(follow.get(), path.getLastPoint()).getLength() < 1e-6) {
-                KLog.d("ppDebugFollow", "Follow point is last point, shrinking radius");
+                KLog.d("ppDebugFollow", () -> "Follow point is last point, shrinking radius");
                 currentLookAheadRadius = LAST_RADIUS_MM;
                 follow = path.searchFrom(currentPosition, currentLookAheadRadius, startSegment);
                 KLog.d("ppDebugFollow", () -> String.format("After shrink: radius=%.1f, found=%s",
@@ -796,7 +797,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                         && Vector.between(currentPosition, path.getPoint(lookaheadBarrierIndex)).getLength() >= lastSearchRadius;
 
                 if (barrierActive) {
-                    KLog.d("ppDebugFollow", "Driving to barrier waypoint");
+                    KLog.d("ppDebugFollow", () -> "Driving to barrier waypoint");
                     targetPosition(path.getPoint(lookaheadBarrierIndex), currentPosition, closestIdx);
                 } else {
                     double angleError = MathFunctions.angleWrapRad(
@@ -813,10 +814,10 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
                     if (Math.abs(angleError) <= Math.toRadians(finalAngleLockingThreshholdDeg) &&
                             distanceToEnd < lastSearchRadius
                             && Math.abs(filteredVelocityMmPerS) < FINISH_MAX_VELOCITY_MM_PER_S) {
-                        KLog.d("ppDebugFollow", "FINISHING MOVEMENT - within thresholds");
+                        KLog.d("ppDebugFollow", () -> "FINISHING MOVEMENT - within thresholds");
                         finishedMoving();
                     } else {
-                        KLog.d("ppDebugFollow", "Driving to final point");
+                        KLog.d("ppDebugFollow", () -> "Driving to final point");
                         targetPosition(path.getLastPoint(), currentPosition, closestIdx);
                     }
                 }
@@ -841,7 +842,10 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
         } else {
             // Wait for points (e.g. after replan() but before addPoint()) before precomputing.
             if (!getPathPoints().isEmpty()) {
-                precomputeWhileBlocked(); //finish precompute
+                long deadline = System.nanoTime() + 3_000_000; // 3 ms budget
+                while (!isPrecomputeDone() && System.nanoTime() < deadline) {
+                    precomputeWhileBlocked(); // same step function, unchanged
+                } //finish precompute
             }
         }
 
@@ -1162,7 +1166,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
             }
 
         } else {
-            KLog.d("PPTest", "smoother loops" + smootherLoops);
+            KLog.d("PPTest", () -> "smoother loops" + smootherLoops);
             smootherDone = true;
         }
     }

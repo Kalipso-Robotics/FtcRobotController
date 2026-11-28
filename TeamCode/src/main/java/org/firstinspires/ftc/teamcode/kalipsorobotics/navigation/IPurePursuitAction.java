@@ -15,25 +15,25 @@ public abstract class IPurePursuitAction extends Action {
         getPathPoints().add(
                 new Position(x, y, Math.toRadians(headingDeg), DEFAULT_P_XY, DEFAULT_P_ANGLE)
         );
-        KLog.d("ppDebugFollow", this.getName() + " added point: " + x + ", " + y);
+        KLog.d("ppDebugFollow", () -> this.getName() + " added point: " + x + ", " + y);
     }
 
     public void addPosition(double x, double y, double headingDeg, double pXY, double pAngle) {
         getPathPoints().add(
                 new Position(x, y, Math.toRadians(headingDeg), pXY, pAngle)
         );
-        KLog.d("ppDebugFollow", this.getName() + " added point: " + x + ", " + y);
+        KLog.d("ppDebugFollow", () -> this.getName() + " added point: " + x + ", " + y);
 
     }
 
     public void addPosition(Position position) {
         getPathPoints().add(position);
-        KLog.d("ppDebugFollow", this.getName() + " added point: " + position);
+        KLog.d("ppDebugFollow", () -> this.getName() + " added point: " + position);
     }
 
     public void clearPoints() {
         getPathPoints().clear();
-        KLog.d("ppDebugFollow", this.getName() + " cleared points, remaining: " + getPathPoints().toString());
+        KLog.d("ppDebugFollow", () -> this.getName() + " cleared points, remaining: " + getPathPoints().toString());
     }
 
     public int getLastPointIndex() {

@@ -41,6 +41,13 @@ public class KLog {
         }
     }
 
+    /** Lambda form of e(tag, message): the message is only built when DEBUG is on. */
+    public static void e(String tag, Supplier<String> message) {
+        if (DEBUG) {
+            Log.e("KLog_" + tag, message.get());
+        }
+    }
+
     public static void e(String tag, String message) {
         if (DEBUG) {
             Log.e("KLog_" + tag, message);
