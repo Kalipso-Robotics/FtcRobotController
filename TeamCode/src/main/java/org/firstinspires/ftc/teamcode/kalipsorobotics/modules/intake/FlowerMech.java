@@ -48,6 +48,8 @@ public class FlowerMech {
     public FlowerMech(KServo servo, IntakeModule side) {
         this.servo = servo;
         this.side = side;
+        // Start up, like the intake pivot. setPosition, not setTargetPosition: before the first command the servo's
+        // getPosition() may not be a real number, so setTargetPosition could skip the move.
 //        servo.setPower(0); // no timed move here: nothing calls update() until the OpMode starts
 //        sinceCommand.reset();
         side.attachFlower(this);

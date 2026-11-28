@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class  PurePursuitAction extends IPurePursuitAction {
+public class PurePursuitAction extends IPurePursuitAction {
     public static final double P_XY = 1.0/350.0;
     public static final double P_ANGLE = (1.0 / Math.toRadians(90));
     public static final double D_XY = 1.0/200;
@@ -461,6 +461,11 @@ public class  PurePursuitAction extends IPurePursuitAction {
     @Override
     public void setEnablePowerScalingForPath(boolean enablePowerScalingForPath) {
         this.enablePowerScalingForPath = enablePowerScalingForPath;
+    }
+
+    @Override
+    public void setPlanStartPosition(Position start) {
+
     }
 
     public void setSleep(long sleepTimeMS) {

@@ -49,6 +49,7 @@ public abstract class IPurePursuitAction extends Action {
     public abstract boolean isWithinDistancePoint(int index, double distanceThreshold);
     public abstract void setPathAngleToleranceDeg(double pathAngleToleranceDeg);
     public abstract void setEnablePowerScalingForPath(boolean enablePowerScalingForPath);
+    public abstract void setPlanStartPosition(Position start);
 
     public abstract List<Position> getPathPoints();
 

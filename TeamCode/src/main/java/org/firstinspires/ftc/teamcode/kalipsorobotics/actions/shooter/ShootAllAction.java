@@ -17,6 +17,8 @@ import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretReady
 import org.firstinspires.ftc.teamcode.kalipsorobotics.actions.turret.TurretRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.decode.configs.ShooterConfig;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.localization.ResetOdometryToLimelight;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.math.Point;
+import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.IntakeRunMode;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.intake.Intake;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Stopper;
 import org.firstinspires.ftc.teamcode.kalipsorobotics.modules.Turret;
@@ -54,6 +56,10 @@ public class ShootAllAction extends KActionSet {
     // stopper closes (or the shot is cancelled), so callers that never turn it back on (autos) keep aiming.
     private TurretRunMode turretModeBeforeShot = null;
     private boolean turretRestored = false;
+
+    // Hive Cell this shot aims at (e.g. ShooterConfig.TARGET_POINT_1 = Cell A, TARGET_POINT_2 = Cell B); null = leave
+    // the shooter's / turret's targets as they are.
+    private Point targetPoint = null;
 
     public void setEnableLimelightZeroing(boolean enableLimelightZeroing) {
         this.enableLimelightZeroing = enableLimelightZeroing;
@@ -95,6 +101,20 @@ public class ShootAllAction extends KActionSet {
         generateBasicAction(shooterRun, stopper, intake, turretAutoAlign, intakeRun);
 
         KLog.d("Intake Target RPS", () -> String.format("%.2f", this.intakeRun.getTargetRPS()));
+    }
+
+    /**
+     * Picks the Hive Cell this shot aims at (ShooterConfig.TARGET_POINT_1 = Cell A, TARGET_POINT_2 = Cell B).
+     * When the shot starts, the shared ShooterRun (RPS / hood), the TurretAutoAlign and this shot's IntakeRun all
+     * switch to it, and they keep it after the shot until another shot picks a different one.
+     * Not set (null) = the shooter keeps its own target and the turret keeps whatever it was following.
+     */
+    public void setTargetPoint(Point targetPoint) {
+        this.targetPoint = targetPoint;
+    }
+
+    public Point getTargetPoint() {
+        return targetPoint;
     }
 
     public ShooterRun getShooterRun() {
@@ -191,6 +211,14 @@ public class ShootAllAction extends KActionSet {
             return;
         }
         if (!hasStarted) {
+            if (targetPoint != null) {
+                shooterRun.setTargetPoint(targetPoint);
+                turretAutoAlign.setTargetPoint(targetPoint);
+                if (intakeRun.getIntakeRunMode() == IntakeRunMode.RUN_USING_CURRENT_POINT) {
+                    intakeRun.setTargetPoint(targetPoint); // fixed-RPS shots keep FEED_RPS
+                }
+                KLog.d(TAG, () -> "event=target name=" + getName() + " target=" + targetPoint);
+            }
             //Refresh targetRPS
             shooterRun.setShooterRunMode(shooterRunMode);
             shooterRun.update();

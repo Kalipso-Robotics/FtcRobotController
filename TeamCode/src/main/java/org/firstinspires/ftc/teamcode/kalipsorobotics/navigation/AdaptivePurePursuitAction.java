@@ -41,7 +41,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
 
     private double currentLookAheadRadius;
     static final private double LAST_RADIUS_MM = 25;
-    static final private double REPLAN_DISTANCE_MM = 50;
+    static final private double REPLAN_DISTANCE_MM = 300;
 
     private Position currentPosition = new Position(SharedData.getOdometryWheelIMUPosition());
 
@@ -1611,6 +1611,7 @@ public class AdaptivePurePursuitAction extends IPurePursuitAction {
      * planned right during init. Call before init precompute starts. If the robot isn't within REPLAN_DISTANCE_MM
      * of it when this move starts, it still replans from the live position.
      */
+    @Override
     public void setPlanStartPosition(Position start) {
         this.planStartPosition = start == null ? null : new Position(start);
     }
